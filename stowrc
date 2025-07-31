@@ -1,0 +1,7 @@
+
+--target=~
+
+--ignore=.stowrc
+--ignore=.jj
+--ignore=DS_Store
+--ignore=.luarc.json
