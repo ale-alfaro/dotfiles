@@ -1,4 +1,4 @@
-#files: 1284	version: 5.9
+#files: 1305	version: 5.9
 
 _comps=(
 '_arguments' '__arguments'
@@ -110,6 +110,7 @@ _comps=(
 'add-zle-hook-widget' '_add-zle-hook-widget'
 'add-zsh-hook' '_add-zsh-hook'
 'admin' '_sccs'
+'aerospace' '_aerospace'
 'afew' '_afew'
 'age' '_age'
 'ali' '_mh'
@@ -164,6 +165,7 @@ _comps=(
 'atq' '_at'
 'atrm' '_at'
 'attr' '_attr'
+'atuin' '_atuin'
 'augtool' '_augeas'
 'auto-apt' '_auto-apt'
 'autoload' '_typeset'
@@ -175,6 +177,7 @@ _comps=(
 'avdmanager' '_avdmanager'
 'awk' '_awk'
 'axi-cache' '_axi-cache'
+'az' '_az'
 'b2sum' '_md5sum'
 'barbican' '_openstack'
 'base32' '_base64'
@@ -182,6 +185,7 @@ _comps=(
 'basename' '_basename'
 'basenc' '_basenc'
 'bash' '_bash'
+'bat' '_bat'
 'batch' '_at'
 'baz' '_baz'
 'beadm' '_beadm'
@@ -206,6 +210,7 @@ _comps=(
 'bpython3-gtk' '_bpython'
 'bpython3-urwid' '_bpython'
 'brctl' '_brctl'
+'brew' '_brew'
 'bsdconfig' '_bsdconfig'
 'bsdgrep' '_grep'
 'bsdinstall' '_bsdinstall'
@@ -296,6 +301,7 @@ _comps=(
 'cmp' '_cmp'
 'co' '_rcs'
 'code' '_code'
+'codex' '_codex'
 'coffee' '_coffee'
 'column' '_column'
 'comb' '_sccs'
@@ -384,7 +390,8 @@ _comps=(
 'debuild' '_debuild'
 'declare' '_typeset'
 'defaults' '_defaults'
-'delta' '_sccs'
+'delta' '_delta'
+'depot' '_depot'
 'designate' '_openstack'
 'devtodo' '_devtodo'
 'df' '_df'
@@ -420,6 +427,8 @@ _comps=(
 'dnf-3' '_dnf'
 'do-release-upgrade' '_do-release-upgrade'
 'doas' '_doas'
+'docker' '_docker'
+'dockerd' '_docker'
 'docpad' '_docpad'
 'domainname' '_yp'
 'dos2unix' '_dos2unix'
@@ -502,6 +511,7 @@ _comps=(
 'express' '_webbrowser'
 'extcheck' '_java'
 'extractres' '_psutils'
+'eza' '_eza'
 'fab' '_fab'
 'fail2ban-client' '_fail2ban-client'
 'fail2ban-regex' '_fail2ban-regex'
@@ -510,6 +520,7 @@ _comps=(
 'fc' '_fc'
 'fc-list' '_xft_fonts'
 'fc-match' '_xft_fonts'
+'fd' '_fd'
 'feh' '_feh'
 'fetch' '_fetch'
 'fetchmail' '_fetchmail'
@@ -624,11 +635,13 @@ _comps=(
 'ggetopt' '_getopt'
 'ggrep' '_grep'
 'ggv' '_gnome-gv'
+'gh' '_gh'
 'ghc' '_ghc'
 'ghc-pkg' '_ghc'
 'ghci' '_ghc'
 'ghead' '_head'
 'ghostscript' '_ghostscript'
+'ghostty' '_ghostty'
 'ghostview' '_pspdf'
 'gid' '_id'
 'ginstall' '_install'
@@ -637,6 +650,7 @@ _comps=(
 'git-buildpackage' '_git-buildpackage'
 'git-cvsserver' '_git'
 'git-flow' '_git-flow'
+'git-lfs' '_git-lfs'
 'git-pulls' '_git-pulls'
 'git-receive-pack' '_git'
 'git-revise' '_git-revise'
@@ -868,6 +882,7 @@ _comps=(
 'jest' '_jest'
 'jest.js' '_jest'
 'jexec' '_jexec'
+'jj' '_jj'
 'jls' '_jls'
 'jmeter' '_jmeter'
 'jmeter-plugins' '_jmeter-plugins'
@@ -1123,6 +1138,7 @@ _comps=(
 'nginx' '_nginx'
 'ngrep' '_ngrep'
 'nice' '_nice'
+'ninja' '_ninja'
 'nkf' '_nkf'
 'nl' '_nl'
 'nm' '_nm'
@@ -1371,6 +1387,7 @@ _comps=(
 'restart' '_initctl'
 'retawq' '_webbrowser'
 'rfkill' '_rfkill'
+'rg' '_rg'
 'rgrep' '_grep'
 'rgview' '_vim'
 'rgvim' '_vim'
@@ -1641,6 +1658,7 @@ _comps=(
 'trap' '_trap'
 'trash' '_trash'
 'tree' '_tree'
+'tree-sitter' '_tree-sitter'
 'trial' '_twisted'
 'trove' '_openstack'
 'true' '_nothing'
@@ -1859,6 +1877,7 @@ _comps=(
 'zeal' '_zeal'
 'zed' '_zed'
 'zegrep' '_grep'
+'zellij' '_zellij'
 'zen' '_webbrowser'
 'zf_chgrp' '_chown'
 'zf_chmod' '_chmod'
@@ -1884,6 +1903,7 @@ _comps=(
 'zmv' '_zmv'
 'zone' '_hosts'
 'zoneadm' '_zoneadm'
+'zoxide' '_zoxide'
 'zparseopts' '_zparseopts'
 'zpool' '_zfs'
 'zpty' '_zpty'
@@ -2053,7 +2073,11 @@ autoload -Uz _afew _age _android _archlinux-java _artisan \
             _svm _teamocil _thor _tmuxinator _tmuxp \
             _tox _ts-node _tsc _udisksctl _ufw \
             _uuidgen _virtualbox _vnstat _wemux _wg-quick \
-            _xsel _yarn _zcash-cli _zinit __arguments \
+            _xsel _yarn _zcash-cli _zinit _aerospace \
+            _atuin _az _bat _brew _codex \
+            _delta _depot _docker _eza _fd \
+            _gh _ghostty _git-lfs _jj _ninja \
+            _rg _tree-sitter _zellij _zoxide __arguments \
             _a2ps _a2utils _aap _abcde _absolute_command_paths \
             _ack _acpi _acpitool _acroread _adb \
             _add-zle-hook-widget _add-zsh-hook _alias _aliases _all_labels \
