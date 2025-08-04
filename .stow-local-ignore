@@ -1,0 +1,5 @@
+.gitignore
+.git
+.jj
+.DS_Store
+README.md
