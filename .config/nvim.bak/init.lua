@@ -1,3 +1,4 @@
+local vim = vim
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -150,3 +151,13 @@ require 'lazyplugins'
 require 'floatterminal'
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+--[[ 
+--Options disabled to improve performance of the terminal emulator. From the docs:
+  "If you have a slow terminal you can switch off the status messages to speed up editing:"
+    :set nosc noru nosm
+
+  See more at https://neovim.io/doc/user/intro.html#Terminal-mode
+--]]
+vim.o.ruler = false
+vim.o.showmatch = false
+vim.o.showcmd = false

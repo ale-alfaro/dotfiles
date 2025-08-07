@@ -73,14 +73,6 @@ require('lazy').setup({
   -- Gitsigns for showing git diff in the gutter and git aliases
   require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
-  -- Detect tabstop and shiftwidth automatically
-  -- 'NMAC427/guess-indent.nvim',
-
-  -- Unix helper commands such as :Mkdir and :Move
-  -- Vim shiftwidth and tabstop automatically
-  -- 'tpope/vim-eunuch',
-  --'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
-  --
   -- File tree explorer (neo-tree) in the sidebar
   -- require 'kickstart.plugins.neo-tree',
   --

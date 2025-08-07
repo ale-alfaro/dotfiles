@@ -1,6 +1,7 @@
 .DS_Store
 tmux/plugins/
 raycast
+.zcompdump
 fzf
 history.txt
 .luarc.json

@@ -1,3 +1,4 @@
+local vim = vim
 local state = {
   floating = {
     buf = -1,
@@ -36,7 +37,7 @@ local function create_floating_window(opts)
   return { buf = buf, win = win_config }
 end
 
-local open_floatterm = function()
+local toggle_floatterm = function()
   if not vim.api.nvim_win_is_valid(state.floating.win) then
     state.floating = create_floating_window { buf = state.floating.buf }
     if vim.bo[state.floating.buf].buftype ~= 'terminal' then
@@ -46,20 +47,51 @@ local open_floatterm = function()
     vim.api.nvim_win_hide(state.floating.win)
   end
 end
-vim.api.nvim_create_user_command('FloatTermOpen', open_floatterm, {})
+vim.api.nvim_create_user_command('FloatTermOpen', toggle_floatterm, {})
 
-vim.keymap.set('t', '<esc><esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 vim.keymap.set({ 'n', 't' }, '<leader>ft', '<cmd>FloatTermOpen<CR>', { desc = 'Open terminal' })
 
--- -- Open a small terminal
--- vim.api.nvim_create_autocmd('TermOpen', {
---   desc = 'Open term window',
---   group = vim.api.nvim_create_augroup('custom-term-open', { clear = true }),
---   callback = function()
---     vim.opt.number = false
---     vim.opt.relativenumber = false
---   end,
--- })
+vim.keymap.set('t', '<esc><esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+
+-- Terminal autocommands
+local vim_term = vim.api.nvim_create_augroup('vim_term', { clear = true })
+vim.api.nvim_create_autocmd('TermOpen', {
+  callback = function()
+    -- disable line numbering in terminal mode
+    vim.opt_local.relativenumber = false
+    vim.opt_local.number = false
+  end,
+  group = vim_term,
+})
+-- start insert mode when moving to a terminal window
+vim.api.nvim_create_autocmd({ 'BufWinEnter', 'WinEnter' }, {
+  callback = function()
+    if vim.bo.buftype == 'terminal' then
+      vim.cmd 'startinsert'
+    end
+  end,
+  group = vim_term,
+})
+-- prevents insert mode when the terminal process has exited
+vim.api.nvim_create_autocmd('TermClose', {
+  callback = function(ctx)
+    vim.cmd 'stopinsert'
+    vim.api.nvim_create_autocmd('TermEnter', {
+      command = 'stopinsert',
+      buffer = ctx.buf,
+    })
+  end,
+  nested = true,
+  group = vim_term,
+})
+
+vim.api.nvim_create_autocmd('TermLeave', {
+  --desc = 'Close floating window when exiting terminal mode within a floating window',
+  callback = function()
+    vim.api.nvim_win_hide(state.floating.win)
+  end,
+  group = vim_term,
+})
 --
 -- local job_id = 0
 -- vim.keymap.set('n', '<leader>st', function()
