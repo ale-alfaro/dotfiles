@@ -163,7 +163,10 @@ fi
 # ---- Zellij (better terminal) -----
 export ZELLIJ_CONFIG_DIR="$XDG_CONFIG_HOME/zellij"
 eval "$(zellij setup --generate-completion zsh)"
-eval "$(zellij setup --generate-auto-start zsh)"
+
+if [ "$TERM_PROGRAM" != "vscode" ]; then
+    eval "$(zellij setup --generate-auto-start zsh)"
+fi
 # ---- Navi (CLI cheatsheets) -----
 eval "$(navi widget zsh)"
 export NAVI_CONFIG="$HOME/.config/navi/config.yaml"

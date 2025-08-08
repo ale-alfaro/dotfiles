@@ -1,10 +1,14 @@
 theme = catppuccin-mocha
-font-size = 19
+font-size = 12
 background-blur-radius = 20
-mouse-hide-while-typing = true
-window-decoration = true
-keybind = global:cmd+shift+/=toggle_quick_terminal
-keybind = shift+enter=text:\n
-macos-option-as-alt = true
 background-opacity = 0.7
-background-blur-radius = 20 
+
+
+shell-integration-features = cursor,sudo,title
+cursor-style = block
+
+mouse-hide-while-typing = true
+mouse-scroll-multiplier = 2
+
+window-decoration = true
+macos-option-as-alt = true
