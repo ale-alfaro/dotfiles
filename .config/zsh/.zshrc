@@ -75,7 +75,7 @@ alias cl='clear'
 eval "$(atuin init zsh)"
 
 # ---- Brew service start Sketchybar ----
-alias sbrld='brew services reload sketchybar' 
+alias sbrld='brew services reload sketchybar'
 
 # ---- JJ (Git alternative) -----
 source <(jj util completion zsh)
@@ -159,6 +159,15 @@ eval "$(direnv hook zsh)"
 if [[ "$CLAUDECODE" != "1" ]]; then
     eval "$(zoxide init --cmd cd zsh)"
 fi
+
+# ---- Zellij (better terminal) -----
+export ZELLIJ_CONFIG_DIR="$XDG_CONFIG_HOME/zellij"
+eval "$(zellij setup --generate-completion zsh)"
+eval "$(zellij setup --generate-auto-start zsh)"
+# ---- Navi (CLI cheatsheets) -----
+eval "$(navi widget zsh)"
+export NAVI_CONFIG="$HOME/.config/navi/config.yaml"
+export NAVI_PATH="$HOME/.config/navi/cheats"
 
 # -- Completions --
 

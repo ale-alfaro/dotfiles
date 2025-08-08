@@ -130,13 +130,6 @@ vim.keymap.set('n', '<leader>r', '<cmd>echo "Sourcing current file..."<CR><cmd>s
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
---vim.api.nvim_create_autocmd('SourceCmd', {
---  desc = 'Print success message when sourcing a file',
---  group = vim.api.nvim_create_augroup('kickstart-source-cmd', { clear = true }),
---  callback = function()
---    vim.notify('Sourced ' .. vim.fn.expand '%:p', vim.log.levels.INFO)
---  end,
---})
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
 --  See `:help vim.hl.on_yank()`
@@ -148,7 +141,9 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 require 'lazyplugins'
-require 'floatterminal'
+
+require 'utils.floatterminal'
+require 'utils.health'
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
 --[[ 

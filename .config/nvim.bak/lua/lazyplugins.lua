@@ -1,3 +1,4 @@
+local vim = vim
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -13,23 +14,7 @@ end
 local rtp = vim.opt.rtp
 rtp:prepend(lazypath)
 
--- [[ Configure and install plugins ]]
---
---  To check the current status of your plugins, run
---    :Lazy
---
---  You can press `?` in this menu for help. Use `:q` to close the window
---
---  To update plugins you can run
---    :Lazy update
---
--- NOTE: Here is where you install your plugins.
 require('lazy').setup({
-
-  -- Colorscheme
-  require 'colorscheme',
-  require 'custom.plugins.lualine',
-  require 'custom.plugins.noice',
 
   -- Essential plugins
   --[[ MiniVim (Group of plugins) Includes:
@@ -39,20 +24,34 @@ require('lazy').setup({
       * mini.files (file explorer with buffers) 
   ]]
   --
-  require 'kickstart.plugins.minivim',
-  -- Treesitter for syntax highlighting and AST parsing
-  require 'kickstart.plugins.treesitter',
+  require 'core.plugins.minivim',
+  require 'core.plugins.minifiles',
   -- DAP debugger for Go out of the box but can be extended to other languages
-  require 'kickstart.plugins.debug',
+  require 'core.plugins.debug',
   -- Whickey for UI bottom bar to look at keymaps
-  require 'kickstart.plugins.whichkey',
   -- Fuzzy finder for files and buffers
-  require 'kickstart.plugins.telescope',
+  require 'core.plugins.telescope',
+
+  -- Multiplexer for managing multiple windows with Zellij
+  require 'multiplexer.plugins.smart-splits',
 
   -- LSP Plugins
   require 'lsp.lsp',
-  require 'kickstart.plugins.autoformat',
-  require 'lsp.plugins.completions',
+  { import = 'lsp.plugins' },
+  -- require 'kickstart.plugins.autoformat',
+  -- require 'lsp.plugins.completions',
+  -- -- Treesitter for syntax highlighting and AST parsing
+  -- require 'kickstart.plugins.treesitter',
+  -- -- Linting for Lua, Python, etc
+  -- require 'kickstart.plugins.lint',
+
+  -- Git Plugins
+  -- Neogit is the main git client plugin for Neovim
+  require 'git.plugins.neogit',
+  -- Diffview is a plugin for viewing and comparing git diffs
+  require 'git.plugins.diffview',
+  -- Gitsigns for showing git diff in the gutter and git aliases
+  require 'git.plugins.gitsigns',
 
   -- AI Plugins
   -- SuperMaven for AI completions
@@ -61,31 +60,22 @@ require('lazy').setup({
   -- Avante.nvim for AI chat and agentic features
   -- require 'ai.plugins.avante',
   --
+  -- Aesthetics Plugins
+  require 'aesthetics.colorscheme',
+  { import = 'aesthetics.plugins' },
+  -- Noice for general UI improvements
+  -- require 'custom.plugins.noice',
+  -- -- Highlight todo, notes, etc in comments
+  -- require 'kickstart.plugins.todo-comment',
+  -- -- Indentation guides (i.e vertical lines that go from the top to bottom bracket)
+  -- require 'kickstart.plugins.indent_line',
+  -- -- Auto generated pairs of brackets
+  -- require 'kickstart.plugins.autopairs',
+  -- -- Statusline i.e bottom bar
+  -- require 'custom.plugins.lualine',
+
   -- Other Plugins
-  -- Highlight todo, notes, etc in comments
-  require 'kickstart.plugins.todo-comment',
-  -- Indentation guides (i.e vertical lines that go from the top to bottom bracket)
-  require 'kickstart.plugins.indent_line',
-  -- Linting for Lua, Python, etc
-  require 'kickstart.plugins.lint',
-  -- Auto generated pairs of brackets
-  require 'kickstart.plugins.autopairs',
-  -- Gitsigns for showing git diff in the gutter and git aliases
-  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
-
-  -- File tree explorer (neo-tree) in the sidebar
-  -- require 'kickstart.plugins.neo-tree',
-  --
-  -- Harpoon for managing bookmarks
-  --require 'custom.plugins.harpoon',
-  --
-  -- Vim game for practicing Vim skills
-  'theprimeagen/vim-be-good',
-
-  -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
-  --    This is the easiest way to modularize your config.
-  --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  --  { import = 'custom.plugins' },
+  { import = 'utils.plugins' },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
