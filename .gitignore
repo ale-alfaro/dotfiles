@@ -7,3 +7,4 @@ history.txt
 .luarc.json
 ssh/
 .config/zsh/.zsh_sessions/
+.envrc
