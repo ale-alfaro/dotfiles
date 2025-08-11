@@ -1,4 +1,3 @@
-local vim = vim
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -124,7 +123,8 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- Keymap for netrw directory
 vim.keymap.set('n', '<leader>pv', vim.cmd.Ex, { desc = 'Move to netrw directory' })
 vim.keymap.set('x', '<leader>p', '"_dP')
-
+-- Use wildcards to expand the path. % gets the current file name. Modifiers can be used to get the full path (%:p) or the directory (%:h) or both (%:p:h)
+-- :h expand for more information
 vim.keymap.set('n', '<leader>r', '<cmd>echo "Sourcing current file..."<CR><cmd>source %<CR>', { desc = 'Reload current Lua file' })
 
 -- [[ Basic Autocommands ]]
@@ -140,9 +140,9 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.hl.on_yank()
   end,
 })
+
 require 'lazyplugins'
 
-require 'utils.floatterminal'
 require 'utils.health'
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
@@ -153,6 +153,34 @@ require 'utils.health'
 
   See more at https://neovim.io/doc/user/intro.html#Terminal-mode
 --]]
-vim.o.ruler = false
-vim.o.showmatch = false
-vim.o.showcmd = false
+-- require 'utils.floatterminal'
+-- vim.o.ruler = false
+-- vim.o.showmatch = false
+-- vim.o.showcmd = false
+
+-- local vim_version = vim.version()
+-- Vim package manager is only available in Neovim >= 0.12
+-- if vim_version.minor >= 12 then
+--   vim.pack.add {
+--     -- Install "plugin1" and use default branch (usually `main` or `master`)
+--     -- 'https://github.com/fatih/vim-go',
+--     -- Same as above, but using a table (allows setting other options)
+--     -- { src = 'https://github.com/user/plugin1' },
+--     -- -- Specify plugin's name (here the plugin will be called "plugin2"
+--     -- -- instead of "generic-name")
+--     -- { src = 'https://github.com/user/generic-name', name = 'plugin2' },
+--     -- -- Specify version to follow during install and update
+--     -- {
+--     --   src = 'https://github.com/user/plugin3',
+--     --   -- Version constraint, see |vim.version.range()|
+--     --   version = vim.version.range('1.0'),
+--     -- },
+--     {
+--       src = 'https://github.com/faith/vim-go.git',
+--       -- Git branch, tag, or commit hash
+--       version = 'master',
+--     },
+--   }
+--   -- Plugin's code can be used directly after `add()`
+--   require 'go.vim'
+-- en

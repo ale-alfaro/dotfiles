@@ -36,7 +36,7 @@ on-focus-changed = 'move-mouse window-lazy-center'
 # You can effectively turn off macOS "Hide application" (cmd-h) feature by toggling this flag
 # Useful if you don't use this macOS feature, but accidentally hit cmd-h or cmd-alt-h key
 # Also see: https://nikitabobko.github.io/AeroSpace/goodness#disable-hide-app
-automatically-unhide-macos-hidden-apps = false
+automatically-unhide-macos-hidden-apps = true
 
 # Possible values: (qwerty|dvorak)
 # See https://nikitabobko.github.io/AeroSpace/guide#key-mapping
@@ -84,12 +84,6 @@ cmd-ctrl-shift-space = ['mode alt']
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#exec-and-forget
 # You can uncomment the following lines to open up terminal with alt + enter shortcut (like in i3)
- alt-enter = '''exec-and-forget osascript -e '
- tell application "Ghostty"
-     do script
-     activate
- end tell'
- '''
 
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
@@ -127,7 +121,7 @@ alt-shift-5 = 'move-node-to-workspace 5 --focus-follows-window'
 alt-b = 'exec-and-forget open -a /Applications/Arc.app'
 alt-o = 'exec-and-forget open -a /Applications/Obsidian.app'
 alt-s = 'exec-and-forget open -a /Applications/Slack.app'
-alt-t = 'exec-and-forget open -a /Applications/Ghostty.app'
+alt-t = 'exec-and-forget open -a /Applications/WezTerm.app'
 
 
 # 'service' binding mode declaration.

@@ -56,7 +56,7 @@ return { -- Autoformat
     formatters_by_ft = {
       lua = { 'stylua' },
       -- Conform will run multiple formatters sequentially
-      go = { 'goimports', 'gofmt' },
+      -- go = { 'goimports', 'gofmt' },
       -- You can also customize some of the format options for the filetype
       rust = { 'rustfmt', lsp_format = 'fallback' },
       -- Conform can also run multiple formatters sequentially

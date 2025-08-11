@@ -170,7 +170,7 @@ keybinds clear-defaults=true {
 
     // Help menu for keybinds
     shared {
-        bind "Ctrl H" {
+        bind "Ctrl ?" {
             LaunchOrFocusPlugin "keybinds-help" {
                 "Change mode to custom plugins"      "ctrl + m"
                 "sessionizer open"      "ctrl + m + s"
@@ -272,8 +272,9 @@ keybinds clear-defaults=true {
                 floating true
                 move_to_focused_tab true
                 cwd "/"
-                root_dirs "/Users/alealfaro/Sibel/Engineering/Firmware/bengal-tiger;/Users/alealfaro/Sibel/Engineering/Firmware/dragonfly;/Users/alealfaro/Sibel/Engineering/tools/kconfig_ls;/Users/alealfaro/dotfiles/.config"
-                session_layout "default"
+                root_dirs "/Users/alealfaro/Sibel/Engineering/Firmware;/Users/alealfaro/Sibel/Engineering/tools;/Users/alealfaro/dotfiles/.config"
+                // session_layout ":default"
+                session_layout "threepanes"
             };
             SwitchToMode "Normal"
         }
@@ -434,7 +435,7 @@ default_layout "default"
 //   - system (default)
 //   - primary
 //
-// copy_clipboard "primary"
+copy_clipboard "primary"
 
 // Enable or disable automatic copy (and clear) of selection when releasing mouse
 // Default: true
