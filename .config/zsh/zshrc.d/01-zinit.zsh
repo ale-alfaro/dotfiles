@@ -39,6 +39,8 @@ zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
 zinit light Aloxaf/fzf-tab
+zinit ice lucid wait'0'
+zinit light joshskidmore/zsh-fzf-history-search
 zinit light jeffreytse/zsh-vi-mode
 
 # Add in snippets
@@ -54,7 +56,3 @@ ZVM_INSERT_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BEAM
 ZVM_NORMAL_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BLOCK
 ZVM_OPPEND_MODE_CURSOR=$ZVM_CURSOR_BLINKING_UNDERLINE
 
-# Load completions
-autoload -Uz compinit && compinit
-
-zinit cdreplay -q

@@ -1,9 +1,6 @@
 return { -- Collection of various small independent plugins/modules
   'echasnovski/mini.nvim',
 
-  keys = {
-    { '\\', ':lua MiniFiles.open()<CR>', desc = 'Open mini-files file navigator', silent = true },
-  },
   config = function()
     -- Better Around/Inside textobjects
     --

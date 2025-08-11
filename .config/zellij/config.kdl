@@ -9,25 +9,6 @@ keybinds clear-defaults=true {
         bind "Ctrl g" { SwitchToMode "normal"; }
     }
 
-    resize {
-        bind "left" { Resize "Increase left"; }
-        bind "down" { Resize "Increase down"; }
-        bind "up" { Resize "Increase up"; }
-        bind "right" { Resize "Increase right"; }
-        bind "+" { Resize "Increase"; }
-        bind "-" { Resize "Decrease"; }
-        bind "=" { Resize "Increase"; }
-        bind "H" { Resize "Decrease left"; }
-        bind "J" { Resize "Decrease down"; }
-        bind "K" { Resize "Decrease up"; }
-        bind "L" { Resize "Decrease right"; }
-        bind "h" { Resize "Increase left"; }
-        bind "j" { Resize "Increase down"; }
-        bind "k" { Resize "Increase up"; }
-        bind "l" { Resize "Increase right"; }
-        bind "Ctrl n" { SwitchToMode "normal"; }
-    }
-
     pane {
         bind "Ctrl p" { SwitchToMode "Normal"; }
         bind "h" "Left" { MoveFocus "Left"; }
@@ -124,7 +105,7 @@ keybinds clear-defaults=true {
             }
             SwitchToMode "normal"
         }
-        bind "Ctrl o" { SwitchToMode "normal"; }
+        bind "Ctrl x" { SwitchToMode "normal"; }
         bind "p" {
             LaunchOrFocusPlugin "plugin-manager" {
                 floating true
@@ -152,41 +133,87 @@ keybinds clear-defaults=true {
     shared_except "pane" "locked" {
         bind "Ctrl p" { SwitchToMode "Pane"; }
     }
-    shared_except "resize" "locked" {
-        bind "Ctrl n" { SwitchToMode "Resize"; }
-    }
     shared_except "scroll" "locked" {
         bind "Ctrl s" { SwitchToMode "Scroll"; }
     }
     shared_except "session" "locked" {
-        bind "Ctrl o" { SwitchToMode "Session"; }
+        bind "Ctrl x" { SwitchToMode "Session"; }
     }
     shared_except "tab" "locked" {
         bind "Ctrl t" { SwitchToMode "Tab"; }
-    }
-    shared_except "move" "locked" {
-        bind "Ctrl m" { SwitchToMode "Move"; }
-    }
-
-    // Help menu for keybinds
+    }    // Help menu for keybinds
     shared {
-        bind "Ctrl ?" {
+        bind "Super k" {
             LaunchOrFocusPlugin "keybinds-help" {
-                "Change mode to custom plugins"      "ctrl + m"
-                "sessionizer open"      "ctrl + m + s"
-                "session-picker open"      "ctrl + m + p"
-                "fuzzy-find floating"      "ctrl + m + f"
-                "fuzzy-find in place"      "ctrl + m + F"
-                "bookmarker"      "ctrl + m + b"
+                "Change mode to custom plugins"      "cmd+ m"
+                "sessionizer open"      "cmd + s"
+                "session-picker open"      "cmd + p"
+                "fuzzy-find floating"      "cmd + f"
+                "fuzzy-find in place"      "cmd + F"
+                "bookmarker"      "cmd + b"
+                "File picker"      "cmd + e"
                 floating true
             }
         }
+     // bind f to open monocle in a new floating pane and open any results in a new tiled/floating pane
+        // bind "Super f" {
+        //     LaunchOrFocusPlugin "fuzzy-finder" {
+        //         floating true
+        //     };
+        //     SwitchToMode "Normal"
+        // }
+        // // bind "F" to open monocle on top of the current pane and open any results on top of itself
+        // bind "Super F" {
+        //     LaunchPlugin "fuzzy-finder" {
+        //         in_place true
+        //         kiosk true
+        //     };
+        //     SwitchToMode "Normal"
+        // }
+
+        bind "Super h" {
+            LaunchOrFocusPlugin "keybinds-help" {
+                floating true
+            }
+        }
+        bind "Super e" {
+            LaunchPlugin "filepicker" {
+                // floating true // uncomment this to have the filepicker opened in a floating window
+                close_on_selection true // comment this out to have the filepicker remain open even after selecting a file
+            };}
+
+        bind "Super b" {
+            LaunchOrFocusPlugin "bookmarker" {
+                floating true
+                move_to_focused_tab true
+            }
+        }
+
+        bind "Super s" {
+
+            LaunchOrFocusPlugin "sessionizer" {
+                floating true
+                move_to_focused_tab true
+                cwd "/"
+                root_dirs "/Users/alealfaro/Sibel/Engineering/Firmware;/Users/alealfaro/Sibel/Engineering/tools;/Users/alealfaro/dotfiles/.config"
+                session_layout ":strider"
+                // session_layout "threepanes"
+            };
+            SwitchToMode "Normal"
+        }
+        bind "Super P" {
+
+            LaunchOrFocusPlugin "sessionpicker" {
+                floating true
+                move_to_focused_tab true
+                show_plugins false
+            }
+            SwitchToMode "normal"
+        }
 
     }
-
-
     //Zellij Neovim Navigator Keybinds
-    shared_except "locked" {
+    shared{
         bind "Ctrl h" {
             MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
                 name "move_focus_or_tab";
@@ -228,7 +255,7 @@ keybinds clear-defaults=true {
             };
         }
 
-        bind "Alt h" {
+        bind "Ctrl Super h" {
             MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
                 name "resize";
                 payload "left";
@@ -237,7 +264,7 @@ keybinds clear-defaults=true {
             };
         }
 
-        bind "Alt j" {
+        bind "Ctrl Super j" {
             MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
                 name "resize";
                 payload "down";
@@ -246,7 +273,7 @@ keybinds clear-defaults=true {
             };
         }
 
-        bind "Alt k" {
+        bind "Ctrl Super k" {
             MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
                 name "resize";
                 payload "up";
@@ -255,7 +282,7 @@ keybinds clear-defaults=true {
             };
         }
 
-        bind "Alt l" {
+        bind "Ctrl Super l" {
             MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
                 name "resize";
                 payload "right";
@@ -266,49 +293,6 @@ keybinds clear-defaults=true {
     }
 
 
-    move {
-        bind "s" {
-            LaunchOrFocusPlugin "sessionizer" {
-                floating true
-                move_to_focused_tab true
-                cwd "/"
-                root_dirs "/Users/alealfaro/Sibel/Engineering/Firmware;/Users/alealfaro/Sibel/Engineering/tools;/Users/alealfaro/dotfiles/.config"
-                // session_layout ":default"
-                session_layout "threepanes"
-            };
-            SwitchToMode "Normal"
-        }
-        bind "p" {
-            LaunchOrFocusPlugin "sessionpicker" {
-                floating true
-                move_to_focused_tab true
-                show_plugins false
-            };
-            SwitchToMode "Normal"
-        }
-        // bind f to open monocle in a new floating pane and open any results in a new tiled/floating pane
-        bind "f" {
-            LaunchOrFocusPlugin "fuzzy-finder" {
-                floating true
-            };
-            SwitchToMode "Normal"
-        }
-        // bind "F" to open monocle on top of the current pane and open any results on top of itself
-        bind "F" {
-            LaunchPlugin "fuzzy-finder" {
-                in_place true
-                kiosk true
-            };
-            SwitchToMode "Normal"
-        }
-        bind "b" {
-            LaunchOrFocusPlugin "bookmarker" {
-                floating true;
-                move_to_focused_tab true;
-            }
-        }
-
-    }
 }
 
 // Plugin aliases - can be used to change the implementation of Zellij
@@ -317,9 +301,6 @@ plugins {
     tab-bar location="zellij:tab-bar"
     status-bar location="zellij:status-bar"
     strider location="zellij:strider"
-    // compact-bar location="zellij:compact-bar" {
-    //     tooltip "?"
-    // }
     session-manager location="zellij:session-manager"
     welcome-screen location="zellij:session-manager" {
         welcome_screen true
@@ -331,7 +312,6 @@ plugins {
 
 
     fuzzy-finder location="https://github.com/imsnif/monocle/releases/latest/download/monocle.wasm"
-    // run-cmd location="https://github.com/nim65s/jbz/releases/download/v0.39.0/jbz.wasm"
     bookmarker location="https://github.com/Nacho114/harpoon/releases/download/v0.1.0/harpoon.wasm"
     vim-navigator location="https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm"
     sessionizer location="https://github.com/laperlej/zellij-sessionizer/releases/download/v0.4.3/zellij-sessionizer.wasm"
@@ -352,9 +332,6 @@ load_plugins {
     keybinds-help
 }
 
-keybinds {
-
-}
 // Choose what to do when zellij receives SIGTERM, SIGINT, SIGQUIT or SIGHUP
 // eg. when terminal window with an active zellij session is closed
 // Options:
