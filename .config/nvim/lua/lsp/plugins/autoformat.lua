@@ -55,6 +55,7 @@ return { -- Autoformat
     -- end,
     formatters_by_ft = {
       lua = { 'stylua' },
+      go = { 'goimports', 'gofumpt' },
       -- Conform will run multiple formatters sequentially
       -- go = { 'goimports', 'gofmt' },
       -- You can also customize some of the format options for the filetype

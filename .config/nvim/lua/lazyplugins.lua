@@ -22,14 +22,15 @@ require('lazy').setup({
       * mini.statusline (Statusline i.e bottom bar)
       * mini.files (file explorer with buffers) 
   ]]
+  { import = 'core.plugins' },
   --
-  require 'core.plugins.minivim',
-  require 'core.plugins.minifiles',
+  -- require 'core.plugins.minivim',
+  -- require 'core.plugins.minifiles',
   -- DAP debugger for Go out of the box but can be extended to other languages
-  require 'core.plugins.debug',
+  -- require 'core.plugins.debug',
   -- Whickey for UI bottom bar to look at keymaps
   -- Fuzzy finder for files and buffers
-  require 'core.plugins.telescope',
+  -- require 'core.plugins.telescope',
 
   -- Multiplexer for managing multiple windows with Zellij
   require 'multiplexer.plugins.smart-splits',

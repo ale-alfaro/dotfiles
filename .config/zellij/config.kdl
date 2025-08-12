@@ -311,7 +311,6 @@ plugins {
     about location="zellij:about"
 
 
-    fuzzy-finder location="https://github.com/imsnif/monocle/releases/latest/download/monocle.wasm"
     bookmarker location="https://github.com/Nacho114/harpoon/releases/download/v0.1.0/harpoon.wasm"
     vim-navigator location="https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm"
     sessionizer location="https://github.com/laperlej/zellij-sessionizer/releases/download/v0.4.3/zellij-sessionizer.wasm"
@@ -323,8 +322,6 @@ plugins {
 // eg. "file:/path/to/my-plugin.wasm"
 // eg. "https://example.com/my-plugin.wasm"
 load_plugins {
-    fuzzy-finder
-    // run-cmd
     bookmarker
     vim-navigator
     sessionizer
@@ -375,7 +372,7 @@ theme "catppuccin-frappe"
 // The name of the default layout to load on startup
 // Default: "default"
 //
-default_layout "default"
+default_layout "strider"
 
 
 // Toggle enabling the mouse mode.

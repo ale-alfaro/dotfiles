@@ -66,7 +66,6 @@ outer.right =      5
 
 # Hyper: alt-cmd-ctrl
 # Hyper+Shift: alt-cmd-ctrl-shift
-cmd-ctrl-shift-space = ['mode alt']
 # All possible keys:
 # - Letters.        a, b, c, ..., z
 # - Numbers.        0, 1, 2, ..., 9
@@ -87,20 +86,18 @@ cmd-ctrl-shift-space = ['mode alt']
 
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
-alt-h = 'focus left'
-alt-j = 'focus down'
-alt-k = 'focus up'
-alt-l = 'focus right'
+alt-left = 'focus left'
+alt-down = 'focus down'
+alt-up = 'focus up'
+alt-right = 'focus right'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move
-alt-shift-h = 'move left'
-alt-shift-j = 'move down'
-alt-shift-k = 'move up'
-alt-shift-l = 'move right'
+alt-shift-left = 'move left'
+alt-shift-down = 'move down'
+alt-shift-up  = 'move up'
+alt-shift-right= 'move right'
 
-# See: https://nikitabobko.github.io/AeroSpace/commands#resize
-alt-shift-minus = 'resize smart -50'
-alt-shift-equal = 'resize smart +50'
+
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#workspace
 alt-1 = 'workspace 1'
@@ -121,7 +118,7 @@ alt-shift-5 = 'move-node-to-workspace 5 --focus-follows-window'
 alt-b = 'exec-and-forget open -a /Applications/Arc.app'
 alt-o = 'exec-and-forget open -a /Applications/Obsidian.app'
 alt-s = 'exec-and-forget open -a /Applications/Slack.app'
-alt-t = 'exec-and-forget open -a /Applications/WezTerm.app'
+alt-t = 'exec-and-forget open -a /Applications/Ghostty.app'
 
 
 # 'service' binding mode declaration.
@@ -133,7 +130,7 @@ r = ['flatten-workspace-tree', 'mode main'] # reset layout
 f = ['layout floating tiling', 'mode main'] # Toggle between floating and tiling layout
 backspace = ['close-all-windows-but-current', 'mode main']
 
-
+cmd-ctrl-shift-space = ['mode alt']
 [mode.alt.binding]
 esc = ['mode main']
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
@@ -142,6 +139,9 @@ h = 'focus left'
 j = 'focus down'
 k = 'focus up'
 l = 'focus right'
+# See: https://nikitabobko.github.io/AeroSpace/commands#resize
+shift-minus = 'resize smart -50'
+shift-equal = 'resize smart +50'
 
 shift-h = 'workspace prev'
 shift-j = 'move-node-to-workspace prev --focus-follows-window'

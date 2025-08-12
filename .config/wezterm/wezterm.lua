@@ -3,11 +3,14 @@ local wezterm = require("wezterm")
 
 -- This will hold the configuration.
 local config = wezterm.config_builder()
-
+config.set_environment_variables = {
+	-- prepend the path to your utility and include the rest of the PATH
+	PATH = "/opt/homebrew/bin:" .. os.getenv("PATH"),
+}
 --- Spawn a fish shell in login mode
 -- config.default_prog = { "/opt/homebrew/bin/nu" }
-config.default_prog = { "zsh", "-l" }
-
+-- config.default_prog = { "zsh", "-l" }
+config.default_prog = { "zellij", "-l", "welcome" }
 -- For example, changing the initial geometry for new windows:
 config.initial_cols = 120
 config.initial_rows = 28

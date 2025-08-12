@@ -218,6 +218,9 @@ return {
         staticcheck = true,
         usePlaceholders = true,
         gofumpt = true,
+        codelenses = {
+          test = true,
+        },
       },
       pyright = {},
       rust_analyzer = {},
@@ -277,6 +280,9 @@ return {
     local ensure_installed = vim.tbl_keys(servers or {})
     vim.list_extend(ensure_installed, {
       'stylua', -- Used to format Lua code
+      'goimports',
+      'gofumpt',
+      'gotestsum',
     })
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
