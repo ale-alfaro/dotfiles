@@ -38,8 +38,6 @@ fi
 
 # ---- Zellij (better terminal) -----
 export ZELLIJ_CONFIG_DIR="$XDG_CONFIG_HOME/zellij"
-# Init pyenv
-source ~/.pyenv-init
 
 if [[ -z "$ZELLIJ" ]]; then
     if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
@@ -52,3 +50,11 @@ if [[ -z "$ZELLIJ" ]]; then
         exit
     fi
 fi
+
+
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init - zsh)"
+
+
+

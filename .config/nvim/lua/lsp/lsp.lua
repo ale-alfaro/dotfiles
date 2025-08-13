@@ -222,9 +222,7 @@ return {
           test = true,
         },
       },
-      pyright = {},
       rust_analyzer = {},
-      ts_ls = {},
       lua_ls = {
         cmd = { 'lua-language-server', '--force-accept-workspace' },
 

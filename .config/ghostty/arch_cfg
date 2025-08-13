@@ -1,0 +1,13 @@
+###############################################################################
+# Arch Linux ghostty config
+###############################################################################
+
+# Unbind CMD+... keys so they will be forwarded to Zellij
+keybind = cmd+s=unbind
+keybind = cmd+S=unbind
+keybind = cmd+E=unbind
+keybind = cmd+f=unbind
+keybind = cmd+F=unbind
+keybind = cmd+left=unbind
+keybind = cmd+right=unbind
+keybind = cmd+k=unbind
