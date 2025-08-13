@@ -28,5 +28,6 @@ if [[ $OS == "Darwin" ]]; then
     export PATH="/opt/homebrew/bin:$PATH"
     eval "$(/opt/homebrew/bin/brew shellenv)"
 else
+    export PATH="/usr/local/bin:$PATH"
     # source<(keychain --eval --quiet id_ed25519 id_rsa ~/.ssh/id_ed25519)
 fi
