@@ -1,24 +1,7 @@
 theme = catppuccin-mocha
-font-size = 12
+font-size = 10
 background-blur-radius = 20
 background-opacity = 0.7
-
-keybind = global:ctrl+shift+cmd+t=toggle_quick_terminal
-keybind = global:ctrl+shift+cmd+a=select_all
-# Unbind CMD+... keys so they will be forwarded to Zellij
-keybind = cmd+s=unbind
-keybind = cmd+S=unbind
-keybind = cmd+E=unbind
-keybind = cmd+f=unbind
-keybind = cmd+F=unbind
-keybind = cmd+left=unbind
-keybind = cmd+right=unbind
-keybind = ctrl+shift+c=unbind
-keybind = ctrl+shift+v=unbind
-keybind = cmd+v=paste_from_clipboard
-keybind = cmd+c=copy_to_clipboard
-keybind = cmd+k=unbind
-
 
 shell-integration-features = cursor,sudo,title
 cursor-style = block
@@ -27,4 +10,10 @@ mouse-hide-while-typing = true
 mouse-scroll-multiplier = 2
 
 window-decoration = true
-macos-option-as-alt = true
+
+config-file = ?arch_cfg
+config-file = ?mac_cfg
+
+link-url=true
+
+

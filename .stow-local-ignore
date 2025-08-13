@@ -1,6 +1,8 @@
-.gitignore
-.git
-.jj
-.DS_Store
-README.md
-install/arch.sh
+\.gitignore
+\.git
+\.jj
+\.DS_Store
+^/README.*
+
+install
+themes

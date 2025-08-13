@@ -8,3 +8,5 @@ history.txt
 ssh/
 .config/zsh/.zsh_sessions/
 .envrc
+themes/
+.config/hypr/current/
