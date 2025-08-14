@@ -2,20 +2,15 @@
 # Environment Variables
 #######################################################
 #
-export XDG_CONFIG_HOME="$HOME/.config"
-export GOROOT=/usr/local/go
-export GOPATH=$HOME/go
-export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 #>>> Added by Toolbox App
-export PATH="$PATH:/usr/local/bin"
 export EDITOR=nvim
 export VISUAL=nvim
 export SUDO_EDITOR=nvim
 export FCEDIT=nvim
-export TERMINAL=wezterm
-export BROWSER=/Applications/Arc.app # Not sure if this works
-export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+export TERMINAL=ghostty
+export BROWSER=zen-browser # Not sure if this works
+export MANPAGER="sh -c 'awk '\''{ gsub(/\x1B\[[0-9;]*m/, \"\", \$0); gsub(/.\x08/, \"\", \$0); print }'\'' | bat -p -lman'"
 export PAGER=bat
 
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \

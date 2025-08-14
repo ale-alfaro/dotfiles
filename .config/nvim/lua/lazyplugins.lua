@@ -23,15 +23,6 @@ require('lazy').setup({
       * mini.files (file explorer with buffers) 
   ]]
   { import = 'core.plugins' },
-  --
-  -- require 'core.plugins.minivim',
-  -- require 'core.plugins.minifiles',
-  -- DAP debugger for Go out of the box but can be extended to other languages
-  -- require 'core.plugins.debug',
-  -- Whickey for UI bottom bar to look at keymaps
-  -- Fuzzy finder for files and buffers
-  -- require 'core.plugins.telescope',
-
   -- Multiplexer for managing multiple windows with Zellij
   require 'multiplexer.plugins.smart-splits',
 
@@ -39,24 +30,12 @@ require('lazy').setup({
   require 'lsp.lsp',
   require 'lsp.go',
   { import = 'lsp.plugins' },
-  -- require 'kickstart.plugins.autoformat',
-  -- require 'lsp.plugins.completions',
-  -- -- Treesitter for syntax highlighting and AST parsing
-  -- require 'kickstart.plugins.treesitter',
-  -- -- Linting for Lua, Python, etc
-  -- require 'kickstart.plugins.lint',
 
   -- Git Plugins
-  -- Neogit is the main git client plugin for Neovim
-  require 'git.plugins.neogit',
-  -- Diffview is a plugin for viewing and comparing git diffs
-  require 'git.plugins.diffview',
-  -- Gitsigns for showing git diff in the gutter and git aliases
-  require 'git.plugins.gitsigns',
-
+  { import = 'git.plugins' },
   -- AI Plugins
+  { import = 'ai.plugins' },
   -- SuperMaven for AI completions
-  require 'ai.plugins.supermaven',
 
   -- Avante.nvim for AI chat and agentic features
   -- require 'ai.plugins.avante',
@@ -64,16 +43,6 @@ require('lazy').setup({
   -- Aesthetics Plugins
   require 'aesthetics.colorscheme',
   { import = 'aesthetics.plugins' },
-  -- Noice for general UI improvements
-  -- require 'custom.plugins.noice',
-  -- -- Highlight todo, notes, etc in comments
-  -- require 'kickstart.plugins.todo-comment',
-  -- -- Indentation guides (i.e vertical lines that go from the top to bottom bracket)
-  -- require 'kickstart.plugins.indent_line',
-  -- -- Auto generated pairs of brackets
-  -- require 'kickstart.plugins.autopairs',
-  -- -- Statusline i.e bottom bar
-  -- require 'custom.plugins.lualine',
 
   -- Other Plugins
   { import = 'utils.plugins' },

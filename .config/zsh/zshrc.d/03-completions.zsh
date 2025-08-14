@@ -1,6 +1,8 @@
 source <(jj util completion zsh)
 source <(zellij setup --generate-completion zsh)
 [[ -r "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh" ]] && . "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh"
+curl https://cheat.sh/:zsh > $ZDOTDIR/completions/src/_cht
+    # Open a new shell to load the plugin
 # --- Completion generator setup ---
 MY_COMPLETIONS_DIR=$ZDOTDIR/completions
 GENCOMPL_FPATH=$MY_COMPLETIONS_DIR/src

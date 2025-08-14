@@ -39,7 +39,16 @@ fi
 # ---- Zellij (better terminal) -----
 export ZELLIJ_CONFIG_DIR="$XDG_CONFIG_HOME/zellij"
 
-if [[ -z "$ZELLIJ" ]]; then
+##### TODO: sed to uncomment copy_command for different OS. For now do it manually
+# OS="$(uname -s)"
+# if [[ "$OS" == "Linux" ]]; then
+#     sed -i '#// copy_command "wl-copy"#copy_command "wl_copy"' $XDG_CONFIG_HOME/zellij/config.kdl
+# elif [[ "$OS" == "Darwin" ]]; then
+#     sed -i '' '#// copy_command "pbcopy"#copy_command "pb_copy"' $XDG_CONFIG_HOME/zellij/config.kdl
+# fi
+#
+
+if [[  "$ZELLIJ_AUTO_START" ]]; then
     if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
         zellij attach -c
     else
@@ -50,7 +59,7 @@ if [[ -z "$ZELLIJ" ]]; then
         exit
     fi
 fi
-
+#
 
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"

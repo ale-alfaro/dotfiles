@@ -372,7 +372,7 @@ theme "catppuccin-frappe"
 // The name of the default layout to load on startup
 // Default: "default"
 //
-default_layout "strider"
+default_layout "default"
 
 
 // Toggle enabling the mouse mode.
@@ -382,7 +382,7 @@ default_layout "strider"
 //   - true (default)
 //   - false
 //
-// mouse_mode false
+ mouse_mode false
 
 // Configure the scroll back buffer size
 // This is the number of lines zellij stores for each pane in the scroll back
@@ -392,15 +392,6 @@ default_layout "strider"
 //
 // scroll_buffer_size 10000
 
-// Provide a command to execute when copying text. The text will be piped to
-// the stdin of the program to perform the copy. This can be used with
-// terminal emulators which do not support the OSC 52 ANSI control sequence
-// that will be used by default if this option is not set.
-// Examples:
-//
-// copy_command "xclip -selection clipboard" // x11
-// copy_command "wl-copy"                    // wayland
-// copy_command "pbcopy"                     // osx
 
 // Choose the destination for copied text
 // Allows using the primary selection buffer (on x11/wayland) instead of the system clipboard.
@@ -477,12 +468,12 @@ copy_on_select true
 //
 // stacked_resize false
 
-// Whether to show tips on startup
-// Default: true
+// Provide a command to execute when copying text. The text will be piped to
+// the stdin of the program to perform the copy. This can be used with
+// terminal emulators which do not support the OSC 52 ANSI control sequence
+// that will be used by default if this option is not set.
+// Examples:
 //
-show_startup_tips false
-
-// Whether to show release notes on first version run
-// Default: true
-//
-// show_release_notes false
+// copy_command "xclip -selection clipboard" // x11
+// copy_command "wl-copy"                    // wayland
+// copy_command "pbcopy"                     // osx

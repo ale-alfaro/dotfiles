@@ -21,7 +21,8 @@ vim.o.number = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
-
+vim.o.mousemodel = 'extend'
+vim.o.mousescroll = 'ver:6,hor:3'
 -- Don't show the mode, since it's already in the status line
 vim.o.showmode = false
 
@@ -106,10 +107,10 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
 -- TIP: Disable arrow keys in normal mode
-vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
-vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
-vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
-vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+-- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
+-- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
+-- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
+-- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -121,9 +122,6 @@ vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower win
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- Keymap for netrw directory
-vim.keymap.set('n', '<leader>pv', vim.cmd.Ex, { desc = 'Move to netrw directory' })
-vim.keymap.set('x', '<leader>p', '"_dP')
--- Use wildcards to expand the path. % gets the current file name. Modifiers can be used to get the full path (%:p) or the directory (%:h) or both (%:p:h)
 -- :h expand for more information
 vim.keymap.set('n', '<leader>r', '<cmd>echo "Sourcing current file..."<CR><cmd>source %<CR>', { desc = 'Reload current Lua file' })
 
