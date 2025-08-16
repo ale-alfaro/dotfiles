@@ -1,0 +1,60 @@
+<h1>uv sync</h1>
+
+<blockquote><p>Update the project&rsquo;s environment to match the lockfile.
+More information: <a href="https://docs.astral.sh/uv/reference/cli/#uv-sync">https://docs.astral.sh/uv/reference/cli/#uv-sync</a>.</p></blockquote>
+
+<ul>
+<li>Sync the project environment with the lockfile:</li>
+</ul>
+
+
+<p><code>uv sync</code></p>
+
+<ul>
+<li>Sync and include all optional dependencies:</li>
+</ul>
+
+
+<p><code>uv sync --all-extras</code></p>
+
+<ul>
+<li>Sync with specific optional dependencies:</li>
+</ul>
+
+
+<p><code>uv sync --extra {{extra_name}}</code></p>
+
+<ul>
+<li>Sync only development dependencies:</li>
+</ul>
+
+
+<p><code>uv sync --only-dev</code></p>
+
+<ul>
+<li>Sync excluding development dependencies:</li>
+</ul>
+
+
+<p><code>uv sync --no-dev</code></p>
+
+<ul>
+<li>Sync specific dependency groups:</li>
+</ul>
+
+
+<p><code>uv sync --group {{group_name}}</code></p>
+
+<ul>
+<li>Check if environment is already synchronized (no changes):</li>
+</ul>
+
+
+<p><code>uv sync --check</code></p>
+
+<ul>
+<li>Preview what would be synced without making changes:</li>
+</ul>
+
+
+<p><code>uv sync --dry-run</code></p>

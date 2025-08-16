@@ -1,0 +1,40 @@
+<h1>setarch</h1>
+
+<blockquote><p>Change the reported architecture for a program&rsquo;s execution, primarily used to modify how programs behave based on system architecture.
+Useful for compatibility testing or running legacy applications.
+More information: <a href="https://manned.org/setarch.8">https://manned.org/setarch.8</a>.</p></blockquote>
+
+<ul>
+<li>Run a command as if the machine architecture is <code>i686</code> (useful for running 32-bit apps on a 64-bit kernel):</li>
+</ul>
+
+
+<p><code>setarch i686 {{command}}</code></p>
+
+<ul>
+<li>Run a shell with the <code>x86_64</code> architecture:</li>
+</ul>
+
+
+<p><code>setarch x86_64 {{bash}}</code></p>
+
+<ul>
+<li>Disable randomization of the virtual address space:</li>
+</ul>
+
+
+<p><code>setarch {{linux32}} {{[-R|--addr-no-randomize]}} {{command}}</code></p>
+
+<ul>
+<li>List supported architectures:</li>
+</ul>
+
+
+<p><code>setarch --list</code></p>
+
+<ul>
+<li>Display help:</li>
+</ul>
+
+
+<p><code>setarch {{[-h|--help]}}</code></p>

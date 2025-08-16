@@ -1,0 +1,60 @@
+<h1>filen</h1>
+
+<blockquote><p>Interface with Filen, an end-to-end encrypted cloud storage service.
+More information: <a href="https://github.com/FilenCloudDienste/filen-cli">https://github.com/FilenCloudDienste/filen-cli</a>.</p></blockquote>
+
+<ul>
+<li>Enter interactive mode:</li>
+</ul>
+
+
+<p><code>filen</code></p>
+
+<ul>
+<li>Upload a local file to a specific remote folder:</li>
+</ul>
+
+
+<p><code>filen upload {{path/to/local_file}} {{remote_folder_id}}</code></p>
+
+<ul>
+<li>Download a file or folder using its remote ID:</li>
+</ul>
+
+
+<p><code>filen download {{remote_id}} {{path/to/local_destination}}</code></p>
+
+<ul>
+<li>List files and folders inside a remote folder:</li>
+</ul>
+
+
+<p><code>filen ls {{remote_folder}}</code></p>
+
+<ul>
+<li>Delete a remote file or folder (move it to trash):</li>
+</ul>
+
+
+<p><code>filen rm {{remote_id}}</code></p>
+
+<ul>
+<li>Restore a trashed item:</li>
+</ul>
+
+
+<p><code>filen trash restore {{remote_id}}</code></p>
+
+<ul>
+<li>Synchronize a local folder with a remote folder (two-way sync):</li>
+</ul>
+
+
+<p><code>filen sync {{path/to/local_folder}}:/{{remote_folder}} --continuous</code></p>
+
+<ul>
+<li>Download changes from the cloud to a local folder (one-way sync):</li>
+</ul>
+
+
+<p><code>filen sync {{path/to/local_folder}}:ctl:/{{remote_folder}}</code></p>

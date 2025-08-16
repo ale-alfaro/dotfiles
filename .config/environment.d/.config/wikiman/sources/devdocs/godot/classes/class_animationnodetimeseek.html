@@ -1,0 +1,43 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>AnimationNodeTimeSeek</title>
+    
+    <link rel="preload" href="../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../application.css" />
+    <link rel="stylesheet" type="text/css" href="../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="classes/class_animationnodetimeseek" prefix="../" listing-src="../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _godot"><section id="animationnodetimeseek"> <h1 id="class-animationnodetimeseek">AnimationNodeTimeSeek</h1> <p><strong>Inherits:</strong> <a href="class_animationnode#class-animationnode"><span class="std std-ref">AnimationNode</span></a> <strong>&lt;</strong> <a href="class_resource#class-resource"><span class="std std-ref">Resource</span></a> <strong>&lt;</strong> <a href="class_refcounted#class-refcounted"><span class="std std-ref">RefCounted</span></a> <strong>&lt;</strong> <a href="class_object#class-object"><span class="std std-ref">Object</span></a></p> <p>A time-seeking animation node used in <a href="class_animationtree#class-animationtree"><span class="std std-ref">AnimationTree</span></a>.</p> <section class="classref-introduction-group" id="description"> <h2>Description</h2> <p>This animation node can be used to cause a seek command to happen to any sub-children of the animation graph. Use to play an <a href="class_animation#class-animation"><span class="std std-ref">Animation</span></a> from the start or a certain playback position inside the <a href="class_animationnodeblendtree#class-animationnodeblendtree"><span class="std std-ref">AnimationNodeBlendTree</span></a>.</p> <p>After setting the time and changing the animation playback, the time seek node automatically goes into sleep mode on the next process frame by setting its <code>seek_request</code> value to <code>-1.0</code>.</p> <div class="sphinx-tabs docutils container"> <strong>GDScript</strong><pre data-language="gdscript"># Play child animation from the start.
+animation_tree.set("parameters/TimeSeek/seek_request", 0.0)
+# Alternative syntax (same result as above).
+animation_tree["parameters/TimeSeek/seek_request"] = 0.0
+
+# Play child animation from 12 second timestamp.
+animation_tree.set("parameters/TimeSeek/seek_request", 12.0)
+# Alternative syntax (same result as above).
+animation_tree["parameters/TimeSeek/seek_request"] = 12.0
+</pre> <strong>C#</strong><pre data-language="csharp">// Play child animation from the start.
+animationTree.Set("parameters/TimeSeek/seek_request", 0.0);
+
+// Play child animation from 12 second timestamp.
+animationTree.Set("parameters/TimeSeek/seek_request", 12.0);
+</pre> </div> </section> <section class="classref-introduction-group" id="tutorials"> <h2>Tutorials</h2> <ul class="simple"> <li><a href="https://docs.godotengine.org/en/4.2/tutorials/animation/animation_tree.html"><span class="doc">Using AnimationTree</span></a></li> </ul> </section> </section><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2014&ndash;present Juan Linietsky, Ariel Manzur and the Godot community<br>Licensed under the Creative Commons Attribution Unported License v3.0.<br>
+    <a href="https://docs.godotengine.org/en/4.2/classes/class_animationnodetimeseek.html" class="_attribution-link">https://docs.godotengine.org/en/4.2/classes/class_animationnodetimeseek.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../assets/index.js"></script>
+</body>
+
+</html>

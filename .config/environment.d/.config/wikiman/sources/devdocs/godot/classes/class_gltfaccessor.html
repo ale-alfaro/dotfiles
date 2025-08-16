@@ -1,0 +1,113 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>GLTFAccessor</title>
+    
+    <link rel="preload" href="../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../application.css" />
+    <link rel="stylesheet" type="text/css" href="../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="classes/class_gltfaccessor" prefix="../" listing-src="../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _godot"><section id="gltfaccessor"> <h1 id="class-gltfaccessor">GLTFAccessor</h1> <p><strong>Inherits:</strong> <a href="class_resource#class-resource"><span class="std std-ref">Resource</span></a> <strong>&lt;</strong> <a href="class_refcounted#class-refcounted"><span class="std std-ref">RefCounted</span></a> <strong>&lt;</strong> <a href="class_object#class-object"><span class="std std-ref">Object</span></a></p> <div class="contribute docutils container"> <p>There is currently no description for this class. Please help us by <a href="https://docs.godotengine.org/en/4.2/contributing/documentation/updating_the_class_reference.html#doc-updating-the-class-reference"><span class="std std-ref">contributing one</span></a>!</p> </div> <section class="classref-introduction-group" id="tutorials"> <h2>Tutorials</h2> <ul class="simple"> <li><a href="https://docs.godotengine.org/en/4.2/tutorials/io/runtime_file_loading_and_saving.html"><span class="doc">Runtime file loading and saving</span></a></li> </ul> </section> <section class="classref-reftable-group" id="properties"> <h2>Properties</h2> <table class="colwidths-auto docutils align-default">  <tr>
+<td><p><a href="class_int#class-int"><span class="std std-ref">int</span></a></p></td> <td><p><a href="#class-gltfaccessor-property-buffer-view"><span class="std std-ref">buffer_view</span></a></p></td> <td><p><code>-1</code></p></td> </tr> <tr>
+<td><p><a href="class_int#class-int"><span class="std std-ref">int</span></a></p></td> <td><p><a href="#class-gltfaccessor-property-byte-offset"><span class="std std-ref">byte_offset</span></a></p></td> <td><p><code>0</code></p></td> </tr> <tr>
+<td><p><a href="class_int#class-int"><span class="std std-ref">int</span></a></p></td> <td><p><a href="#class-gltfaccessor-property-component-type"><span class="std std-ref">component_type</span></a></p></td> <td><p><code>0</code></p></td> </tr> <tr>
+<td><p><a href="class_int#class-int"><span class="std std-ref">int</span></a></p></td> <td><p><a href="#class-gltfaccessor-property-count"><span class="std std-ref">count</span></a></p></td> <td><p><code>0</code></p></td> </tr> <tr>
+<td><p><a href="class_packedfloat64array#class-packedfloat64array"><span class="std std-ref">PackedFloat64Array</span></a></p></td> <td><p><a href="#class-gltfaccessor-property-max"><span class="std std-ref">max</span></a></p></td> <td><p><code>PackedFloat64Array()</code></p></td> </tr> <tr>
+<td><p><a href="class_packedfloat64array#class-packedfloat64array"><span class="std std-ref">PackedFloat64Array</span></a></p></td> <td><p><a href="#class-gltfaccessor-property-min"><span class="std std-ref">min</span></a></p></td> <td><p><code>PackedFloat64Array()</code></p></td> </tr> <tr>
+<td><p><a href="class_bool#class-bool"><span class="std std-ref">bool</span></a></p></td> <td><p><a href="#class-gltfaccessor-property-normalized"><span class="std std-ref">normalized</span></a></p></td> <td><p><code>false</code></p></td> </tr> <tr>
+<td><p><a href="class_int#class-int"><span class="std std-ref">int</span></a></p></td> <td><p><a href="#class-gltfaccessor-property-sparse-count"><span class="std std-ref">sparse_count</span></a></p></td> <td><p><code>0</code></p></td> </tr> <tr>
+<td><p><a href="class_int#class-int"><span class="std std-ref">int</span></a></p></td> <td><p><a href="#class-gltfaccessor-property-sparse-indices-buffer-view"><span class="std std-ref">sparse_indices_buffer_view</span></a></p></td> <td><p><code>0</code></p></td> </tr> <tr>
+<td><p><a href="class_int#class-int"><span class="std std-ref">int</span></a></p></td> <td><p><a href="#class-gltfaccessor-property-sparse-indices-byte-offset"><span class="std std-ref">sparse_indices_byte_offset</span></a></p></td> <td><p><code>0</code></p></td> </tr> <tr>
+<td><p><a href="class_int#class-int"><span class="std std-ref">int</span></a></p></td> <td><p><a href="#class-gltfaccessor-property-sparse-indices-component-type"><span class="std std-ref">sparse_indices_component_type</span></a></p></td> <td><p><code>0</code></p></td> </tr> <tr>
+<td><p><a href="class_int#class-int"><span class="std std-ref">int</span></a></p></td> <td><p><a href="#class-gltfaccessor-property-sparse-values-buffer-view"><span class="std std-ref">sparse_values_buffer_view</span></a></p></td> <td><p><code>0</code></p></td> </tr> <tr>
+<td><p><a href="class_int#class-int"><span class="std std-ref">int</span></a></p></td> <td><p><a href="#class-gltfaccessor-property-sparse-values-byte-offset"><span class="std std-ref">sparse_values_byte_offset</span></a></p></td> <td><p><code>0</code></p></td> </tr> <tr>
+<td><p><a href="class_int#class-int"><span class="std std-ref">int</span></a></p></td> <td><p><a href="#class-gltfaccessor-property-type"><span class="std std-ref">type</span></a></p></td> <td><p><code>0</code></p></td> </tr>  </table> </section>  <section class="classref-descriptions-group" id="property-descriptions"> <h2>Property Descriptions</h2> <h3 id="class-gltfaccessor-property-buffer-view">
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> buffer_view = <code>-1</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_buffer_view</strong> <strong>(</strong> <a href="class_int#class-int"><span class="std std-ref">int</span></a> value <strong>)</strong>
+</li> <li>
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> <strong>get_buffer_view</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <div class="contribute docutils container"> <p>There is currently no description for this property. Please help us by <a href="https://docs.godotengine.org/en/4.2/contributing/documentation/updating_the_class_reference.html#doc-updating-the-class-reference"><span class="std std-ref">contributing one</span></a>!</p> </div>  <h3 id="class-gltfaccessor-property-byte-offset">
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> byte_offset = <code>0</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_byte_offset</strong> <strong>(</strong> <a href="class_int#class-int"><span class="std std-ref">int</span></a> value <strong>)</strong>
+</li> <li>
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> <strong>get_byte_offset</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <div class="contribute docutils container"> <p>There is currently no description for this property. Please help us by <a href="https://docs.godotengine.org/en/4.2/contributing/documentation/updating_the_class_reference.html#doc-updating-the-class-reference"><span class="std std-ref">contributing one</span></a>!</p> </div>  <h3 id="class-gltfaccessor-property-component-type">
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> component_type = <code>0</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_component_type</strong> <strong>(</strong> <a href="class_int#class-int"><span class="std std-ref">int</span></a> value <strong>)</strong>
+</li> <li>
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> <strong>get_component_type</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <div class="contribute docutils container"> <p>There is currently no description for this property. Please help us by <a href="https://docs.godotengine.org/en/4.2/contributing/documentation/updating_the_class_reference.html#doc-updating-the-class-reference"><span class="std std-ref">contributing one</span></a>!</p> </div>  <h3 id="class-gltfaccessor-property-count">
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> count = <code>0</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_count</strong> <strong>(</strong> <a href="class_int#class-int"><span class="std std-ref">int</span></a> value <strong>)</strong>
+</li> <li>
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> <strong>get_count</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <div class="contribute docutils container"> <p>There is currently no description for this property. Please help us by <a href="https://docs.godotengine.org/en/4.2/contributing/documentation/updating_the_class_reference.html#doc-updating-the-class-reference"><span class="std std-ref">contributing one</span></a>!</p> </div>  <h3 id="class-gltfaccessor-property-max">
+<a href="class_packedfloat64array#class-packedfloat64array"><span class="std std-ref">PackedFloat64Array</span></a> max = <code>PackedFloat64Array()</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_max</strong> <strong>(</strong> <a href="class_packedfloat64array#class-packedfloat64array"><span class="std std-ref">PackedFloat64Array</span></a> value <strong>)</strong>
+</li> <li>
+<a href="class_packedfloat64array#class-packedfloat64array"><span class="std std-ref">PackedFloat64Array</span></a> <strong>get_max</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <div class="contribute docutils container"> <p>There is currently no description for this property. Please help us by <a href="https://docs.godotengine.org/en/4.2/contributing/documentation/updating_the_class_reference.html#doc-updating-the-class-reference"><span class="std std-ref">contributing one</span></a>!</p> </div>  <h3 id="class-gltfaccessor-property-min">
+<a href="class_packedfloat64array#class-packedfloat64array"><span class="std std-ref">PackedFloat64Array</span></a> min = <code>PackedFloat64Array()</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_min</strong> <strong>(</strong> <a href="class_packedfloat64array#class-packedfloat64array"><span class="std std-ref">PackedFloat64Array</span></a> value <strong>)</strong>
+</li> <li>
+<a href="class_packedfloat64array#class-packedfloat64array"><span class="std std-ref">PackedFloat64Array</span></a> <strong>get_min</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <div class="contribute docutils container"> <p>There is currently no description for this property. Please help us by <a href="https://docs.godotengine.org/en/4.2/contributing/documentation/updating_the_class_reference.html#doc-updating-the-class-reference"><span class="std std-ref">contributing one</span></a>!</p> </div>  <h3 id="class-gltfaccessor-property-normalized">
+<a href="class_bool#class-bool"><span class="std std-ref">bool</span></a> normalized = <code>false</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_normalized</strong> <strong>(</strong> <a href="class_bool#class-bool"><span class="std std-ref">bool</span></a> value <strong>)</strong>
+</li> <li>
+<a href="class_bool#class-bool"><span class="std std-ref">bool</span></a> <strong>get_normalized</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <div class="contribute docutils container"> <p>There is currently no description for this property. Please help us by <a href="https://docs.godotengine.org/en/4.2/contributing/documentation/updating_the_class_reference.html#doc-updating-the-class-reference"><span class="std std-ref">contributing one</span></a>!</p> </div>  <h3 id="class-gltfaccessor-property-sparse-count">
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> sparse_count = <code>0</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_sparse_count</strong> <strong>(</strong> <a href="class_int#class-int"><span class="std std-ref">int</span></a> value <strong>)</strong>
+</li> <li>
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> <strong>get_sparse_count</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <div class="contribute docutils container"> <p>There is currently no description for this property. Please help us by <a href="https://docs.godotengine.org/en/4.2/contributing/documentation/updating_the_class_reference.html#doc-updating-the-class-reference"><span class="std std-ref">contributing one</span></a>!</p> </div>  <h3 id="class-gltfaccessor-property-sparse-indices-buffer-view">
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> sparse_indices_buffer_view = <code>0</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_sparse_indices_buffer_view</strong> <strong>(</strong> <a href="class_int#class-int"><span class="std std-ref">int</span></a> value <strong>)</strong>
+</li> <li>
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> <strong>get_sparse_indices_buffer_view</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <div class="contribute docutils container"> <p>There is currently no description for this property. Please help us by <a href="https://docs.godotengine.org/en/4.2/contributing/documentation/updating_the_class_reference.html#doc-updating-the-class-reference"><span class="std std-ref">contributing one</span></a>!</p> </div>  <h3 id="class-gltfaccessor-property-sparse-indices-byte-offset">
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> sparse_indices_byte_offset = <code>0</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_sparse_indices_byte_offset</strong> <strong>(</strong> <a href="class_int#class-int"><span class="std std-ref">int</span></a> value <strong>)</strong>
+</li> <li>
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> <strong>get_sparse_indices_byte_offset</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <div class="contribute docutils container"> <p>There is currently no description for this property. Please help us by <a href="https://docs.godotengine.org/en/4.2/contributing/documentation/updating_the_class_reference.html#doc-updating-the-class-reference"><span class="std std-ref">contributing one</span></a>!</p> </div>  <h3 id="class-gltfaccessor-property-sparse-indices-component-type">
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> sparse_indices_component_type = <code>0</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_sparse_indices_component_type</strong> <strong>(</strong> <a href="class_int#class-int"><span class="std std-ref">int</span></a> value <strong>)</strong>
+</li> <li>
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> <strong>get_sparse_indices_component_type</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <div class="contribute docutils container"> <p>There is currently no description for this property. Please help us by <a href="https://docs.godotengine.org/en/4.2/contributing/documentation/updating_the_class_reference.html#doc-updating-the-class-reference"><span class="std std-ref">contributing one</span></a>!</p> </div>  <h3 id="class-gltfaccessor-property-sparse-values-buffer-view">
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> sparse_values_buffer_view = <code>0</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_sparse_values_buffer_view</strong> <strong>(</strong> <a href="class_int#class-int"><span class="std std-ref">int</span></a> value <strong>)</strong>
+</li> <li>
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> <strong>get_sparse_values_buffer_view</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <div class="contribute docutils container"> <p>There is currently no description for this property. Please help us by <a href="https://docs.godotengine.org/en/4.2/contributing/documentation/updating_the_class_reference.html#doc-updating-the-class-reference"><span class="std std-ref">contributing one</span></a>!</p> </div>  <h3 id="class-gltfaccessor-property-sparse-values-byte-offset">
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> sparse_values_byte_offset = <code>0</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_sparse_values_byte_offset</strong> <strong>(</strong> <a href="class_int#class-int"><span class="std std-ref">int</span></a> value <strong>)</strong>
+</li> <li>
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> <strong>get_sparse_values_byte_offset</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <div class="contribute docutils container"> <p>There is currently no description for this property. Please help us by <a href="https://docs.godotengine.org/en/4.2/contributing/documentation/updating_the_class_reference.html#doc-updating-the-class-reference"><span class="std std-ref">contributing one</span></a>!</p> </div>  <h3 id="class-gltfaccessor-property-type">
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> type = <code>0</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_type</strong> <strong>(</strong> <a href="class_int#class-int"><span class="std std-ref">int</span></a> value <strong>)</strong>
+</li> <li>
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> <strong>get_type</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <div class="contribute docutils container"> <p>There is currently no description for this property. Please help us by <a href="https://docs.godotengine.org/en/4.2/contributing/documentation/updating_the_class_reference.html#doc-updating-the-class-reference"><span class="std std-ref">contributing one</span></a>!</p> </div> </section> </section><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2014&ndash;present Juan Linietsky, Ariel Manzur and the Godot community<br>Licensed under the Creative Commons Attribution Unported License v3.0.<br>
+    <a href="https://docs.godotengine.org/en/4.2/classes/class_gltfaccessor.html" class="_attribution-link">https://docs.godotengine.org/en/4.2/classes/class_gltfaccessor.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../assets/index.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,60 @@
+<h1>exo compute sks</h1>
+
+<blockquote><p>Manage the Exoscale Scalable Kubernetes Service (SKS).
+More information: <a href="https://community.exoscale.com/product/compute/containers/">https://community.exoscale.com/product/compute/containers/</a>.</p></blockquote>
+
+<ul>
+<li>List the supported SKS cluster versions:</li>
+</ul>
+
+
+<p><code>exo compute sks versions</code></p>
+
+<ul>
+<li>Create a new SKS cluster:</li>
+</ul>
+
+
+<p><code>exo compute sks create {{cluster_name}} {{[-z|--zone]}} {{zone}}</code></p>
+
+<ul>
+<li>List all SKS clusters:</li>
+</ul>
+
+
+<p><code>exo compute sks list</code></p>
+
+<ul>
+<li>Generate a Kubernetes kubeconfig file for an SKS cluster that expires in 1800 seconds:</li>
+</ul>
+
+
+<p><code>exo compute sks kubeconfig {{cluster_name|id}} {{user}} --ttl 1800 {{[-z|--zone]}} {{zone}}</code></p>
+
+<ul>
+<li>Create and add a Nodepool containing 3 nodes to an SKS cluster:</li>
+</ul>
+
+
+<p><code>exo compute sks nodepool add {{cluster_name|id}} {{nodepool_name}} --size 3 {{[-z|--zone]}} {{zone}}</code></p>
+
+<ul>
+<li>Remove a Nodepool from an SKS cluster:</li>
+</ul>
+
+
+<p><code>exo compute sks nodepool delete {{cluster_name|id}} {{nodepool_name|id}}</code></p>
+
+<ul>
+<li>Evict a Node from a Nodepool in an SKS cluster:</li>
+</ul>
+
+
+<p><code>exo compute sks nodepool evict {{cluster_name|id}} {{nodepool_name|id}} {{node_name|id}}</code></p>
+
+<ul>
+<li>Enable the Exoscale CSI driver for an existing SKS cluster:</li>
+</ul>
+
+
+<p><code>exo compute sks update {{cluster_name|id}} --enable-csi-addon {{[-z|--zone]}} {{zone}}</code></p>

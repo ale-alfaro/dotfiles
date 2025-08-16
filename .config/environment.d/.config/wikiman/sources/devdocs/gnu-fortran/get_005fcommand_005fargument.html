@@ -1,0 +1,62 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>9.123. GET_COMMAND_ARGUMENT</title>
+    
+    <link rel="preload" href="assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="application.css" />
+    <link rel="stylesheet" type="text/css" href="assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="get_005fcommand_005fargument" prefix="" listing-src="navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _gnu_fortran"><h1 class="section" id="GET_005fCOMMAND_005fARGUMENT-_002d_002d_002d-Get-command-line-arguments">9.123 GET_COMMAND_ARGUMENT — Get command line arguments</h1>    <dl compact id="index-arguments_002c-to-program-3"> <dt>Description:</dt> <dd>
+<p>Retrieve the <var>NUMBER</var>-th argument that was passed on the command line when the containing program was invoked. </p> </dd> <dt>Standard:</dt> <dd>
+<p>Fortran 2003 and later </p> </dd> <dt>Class:</dt> <dd>
+<p>Subroutine </p> </dd> <dt>Syntax:</dt> <dd>
+<p><code>CALL GET_COMMAND_ARGUMENT(NUMBER [, VALUE, LENGTH, STATUS])</code> </p> </dd> <dt>Arguments:</dt> <dd>
+<table> <tr>
+<td width="15%"><var>NUMBER</var></td>
+<td width="70%">Shall be a scalar of type <code>INTEGER</code> and of default kind, <em><var>NUMBER</var> \geq 0</em>
+</td>
+</tr> <tr>
+<td width="15%"><var>VALUE</var></td>
+<td width="70%">(Optional) Shall be a scalar of type <code>CHARACTER</code> and of default kind.</td>
+</tr> <tr>
+<td width="15%"><var>LENGTH</var></td>
+<td width="70%">(Optional) Shall be a scalar of type <code>INTEGER</code> and of default kind.</td>
+</tr> <tr>
+<td width="15%"><var>STATUS</var></td>
+<td width="70%">(Optional) Shall be a scalar of type <code>INTEGER</code> and of default kind.</td>
+</tr> </table> </dd> <dt>Return value:</dt> <dd>
+<p>After <code>GET_COMMAND_ARGUMENT</code> returns, the <var>VALUE</var> argument holds the <var>NUMBER</var>-th command line argument. If <var>VALUE</var> cannot hold the argument, it is truncated to fit the length of <var>VALUE</var>. If there are less than <var>NUMBER</var> arguments specified at the command line, <var>VALUE</var> will be filled with blanks. If <em><var>NUMBER</var> = 0</em>, <var>VALUE</var> is set to the name of the program (on systems that support this feature). The <var>LENGTH</var> argument contains the length of the <var>NUMBER</var>-th command line argument. If the argument retrieval fails, <var>STATUS</var> is a positive number; if <var>VALUE</var> contains a truncated command line argument, <var>STATUS</var> is -1; and otherwise the <var>STATUS</var> is zero. </p> </dd> <dt>Example:</dt> <dd>
+<div class="smallexample"> <pre class="smallexample">PROGRAM test_get_command_argument
+  INTEGER :: i
+  CHARACTER(len=32) :: arg
+
+  i = 0
+  DO
+    CALL get_command_argument(i, arg)
+    IF (LEN_TRIM(arg) == 0) EXIT
+
+    WRITE (*,*) TRIM(arg)
+    i = i+1
+  END DO
+END PROGRAM</pre>
+</div> </dd> <dt>See also:</dt> <dd><p><a href="get_005fcommand#GET_005fCOMMAND">GET_COMMAND</a>, <a href="command_005fargument_005fcount#COMMAND_005fARGUMENT_005fCOUNT">COMMAND_ARGUMENT_COUNT</a> </p></dd> </dl><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; Free Software Foundation<br>Licensed under the GNU Free Documentation License, Version 1.3.<br>
+    <a href="https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/GET_005fCOMMAND_005fARGUMENT.html" class="_attribution-link">https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/GET_005fCOMMAND_005fARGUMENT.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/index.js"></script>
+</body>
+
+</html>

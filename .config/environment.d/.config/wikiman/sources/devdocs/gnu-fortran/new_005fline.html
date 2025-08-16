@@ -1,0 +1,43 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>9.206. NEW_LINE</title>
+    
+    <link rel="preload" href="assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="application.css" />
+    <link rel="stylesheet" type="text/css" href="assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="new_005fline" prefix="" listing-src="navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _gnu_fortran"><h1 class="section" id="NEW_005fLINE-_002d_002d_002d-New-line-character">9.206 NEW_LINE — New line character</h1>    <dl compact id="index-output_002c-newline"> <dt>Description:</dt> <dd>
+<p><code>NEW_LINE(C)</code> returns the new-line character. </p> </dd> <dt>Standard:</dt> <dd>
+<p>Fortran 2003 and later </p> </dd> <dt>Class:</dt> <dd>
+<p>Inquiry function </p> </dd> <dt>Syntax:</dt> <dd>
+<p><code>RESULT = NEW_LINE(C)</code> </p> </dd> <dt>Arguments:</dt> <dd>
+<table> <tr>
+<td width="15%"><var>C</var></td>
+<td width="70%">The argument shall be a scalar or array of the type <code>CHARACTER</code>.</td>
+</tr> </table> </dd> <dt>Return value:</dt> <dd>
+<p>Returns a <var>CHARACTER</var> scalar of length one with the new-line character of the same kind as parameter <var>C</var>. </p> </dd> <dt>Example:</dt> <dd>
+<div class="smallexample"> <pre class="smallexample">program newline
+  implicit none
+  write(*,'(A)') 'This is record 1.'//NEW_LINE('A')//'This is record 2.'
+end program newline</pre>
+</div> </dd> </dl><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; Free Software Foundation<br>Licensed under the GNU Free Documentation License, Version 1.3.<br>
+    <a href="https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/NEW_005fLINE.html" class="_attribution-link">https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/NEW_005fLINE.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/index.js"></script>
+</body>
+
+</html>

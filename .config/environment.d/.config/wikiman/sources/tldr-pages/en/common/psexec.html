@@ -1,0 +1,54 @@
+<h1>psexec.py</h1>
+
+<blockquote><p>Execute commands on a remote Windows machine using <code>RemComSvc</code>, providing PsExec-like functionality.
+Part of the Impacket suite.
+More information: <a href="https://github.com/fortra/impacket">https://github.com/fortra/impacket</a>.</p></blockquote>
+
+<ul>
+<li>Spawn an interactive shell on a remote target:</li>
+</ul>
+
+
+<p><code>psexec.py {{domain}}/{{username}}:{{password}}@{{target}}</code></p>
+
+<ul>
+<li>Execute a specific command on a remote target:</li>
+</ul>
+
+
+<p><code>psexec.py {{domain}}/{{username}}:{{password}}@{{target}} {{command}}</code></p>
+
+<ul>
+<li>Copy the filename for later execution, arguments are passed in the command:</li>
+</ul>
+
+
+<p><code>psexec.py -c {{filename}} {{domain}}/{{username}}:{{password}}@{{target}} {{command}}</code></p>
+
+<ul>
+<li>Execute a command from a specific path on a remote target:</li>
+</ul>
+
+
+<p><code>psexec.py -path {{path}} {{domain}}/{{username}}:{{password}}@{{target}} {{command}}</code></p>
+
+<ul>
+<li>Authenticate using pass-the-hash authentication instead of a password:</li>
+</ul>
+
+
+<p><code>psexec.py -hashes {{LM_Hash}}:{{NT_Hash}} {{domain}}/{{username}}@{{target}}</code></p>
+
+<ul>
+<li>Use Kerberos authentication for the target:</li>
+</ul>
+
+
+<p><code>psexec.py -k -no-pass {{domain}}/{{username}}@{{target}}</code></p>
+
+<ul>
+<li>Specify the IP address of the domain controller:</li>
+</ul>
+
+
+<p><code>psexec.py -dc-ip {{domain_controller_ip}} {{domain}}/{{username}}:{{password}}@{{target}}</code></p>

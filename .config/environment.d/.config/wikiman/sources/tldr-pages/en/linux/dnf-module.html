@@ -1,0 +1,32 @@
+<h1>dnf module</h1>
+
+<blockquote><p>Manage package modularity.
+More information: <a href="https://dnf.readthedocs.io/en/latest/command_ref.html#module-command">https://dnf.readthedocs.io/en/latest/command_ref.html#module-command</a>.</p></blockquote>
+
+<ul>
+<li>View the modularity overview:</li>
+</ul>
+
+
+<p><code>dnf module list</code></p>
+
+<ul>
+<li>View modularity of a specific program:</li>
+</ul>
+
+
+<p><code>dnf module list {{package_name}}</code></p>
+
+<ul>
+<li>Set a package to be enabled:</li>
+</ul>
+
+
+<p><code>sudo dnf module enable {{package_name}}:{{stream}}</code></p>
+
+<ul>
+<li>Enable and install a specific version:</li>
+</ul>
+
+
+<p><code>dnf module install {{package_name}}:{{stream}}</code></p>

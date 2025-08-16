@@ -1,0 +1,40 @@
+<h1>hexdump</h1>
+
+<blockquote><p>Display file contents in hexadecimal, decimal, octal, or ASCII.
+Useful for inspecting dump file, binary data, or debug output.
+More information: <a href="https://manned.org/man/freebsd/hexdump.1">https://manned.org/man/freebsd/hexdump.1</a>.</p></blockquote>
+
+<ul>
+<li>Print the hexadecimal representation of a file, replacing duplicate lines by <code>*</code>:</li>
+</ul>
+
+
+<p><code>hexdump {{path/to/file}}</code></p>
+
+<ul>
+<li>Display the input offset in hexadecimal and its ASCII representation in two columns:</li>
+</ul>
+
+
+<p><code>hexdump -C {{path/to/file}}</code></p>
+
+<ul>
+<li>Display the hexadecimal representation of a file, but interpret only a specific number of bytes of the input:</li>
+</ul>
+
+
+<p><code>hexdump -C -n {{number_of_bytes}} {{path/to/file}}</code></p>
+
+<ul>
+<li>Verbose - no suppression by <code>*</code> on duplicate lines:</li>
+</ul>
+
+
+<p><code>hexdump -v {{path/to/file}}</code></p>
+
+<ul>
+<li>Format output using printf-like format string:</li>
+</ul>
+
+
+<p><code>hexdump -e '{{element_format .. end_format}}' {{path/to/file}}</code></p>

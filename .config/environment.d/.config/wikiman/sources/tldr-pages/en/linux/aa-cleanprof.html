@@ -1,0 +1,46 @@
+<h1>aa-cleanprof</h1>
+
+<blockquote><p>Clean AppArmor security profiles by removing unused rules.
+More information: <a href="https://gitlab.com/apparmor/apparmor/-/wikis/manpage_aa-cleanprof.8">https://gitlab.com/apparmor/apparmor/-/wikis/manpage_aa-cleanprof.8</a>.</p></blockquote>
+
+<ul>
+<li>Clean a profile to remove unused rules:</li>
+</ul>
+
+
+<p><code>sudo aa-cleanprof {{profile_name}}</code></p>
+
+<ul>
+<li>Clean multiple profiles at once:</li>
+</ul>
+
+
+<p><code>sudo aa-cleanprof {{profile1 profile2 ...}}</code></p>
+
+<ul>
+<li>Specify the directory containing profiles:</li>
+</ul>
+
+
+<p><code>sudo aa-cleanprof {{[-d|--dir]}} {{/path/to/profiles}} {{profile_name}}</code></p>
+
+<ul>
+<li>Run silently without prompts:</li>
+</ul>
+
+
+<p><code>sudo aa-cleanprof {{[-s|--silent]}} {{profile_name}}</code></p>
+
+<ul>
+<li>Prevent profile reload after cleaning:</li>
+</ul>
+
+
+<p><code>sudo aa-cleanprof --no-reload {{profile_name}}</code></p>
+
+<ul>
+<li>Display help:</li>
+</ul>
+
+
+<p><code>aa-cleanprof {{[-h|--help]}}</code></p>

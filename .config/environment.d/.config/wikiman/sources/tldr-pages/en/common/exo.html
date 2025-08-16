@@ -1,0 +1,47 @@
+<h1>exo</h1>
+
+<blockquote><p>Manage the Exoscale services.
+Some subcommands such as <code>exo compute</code> have their own usage documentation.
+More information: <a href="https://community.exoscale.com/tools/command-line-interface/">https://community.exoscale.com/tools/command-line-interface/</a>.</p></blockquote>
+
+<ul>
+<li>Configure the exo command-line:</li>
+</ul>
+
+
+<p><code>exo config</code></p>
+
+<ul>
+<li>Generate the exo autocompletion script for a specified shell:</li>
+</ul>
+
+
+<p><code>exo completion {{zsh}}</code></p>
+
+<ul>
+<li>List all of the available zones and output them as json:</li>
+</ul>
+
+
+<p><code>exo zone {{[-O|--output-format]}} {{json}}</code></p>
+
+<ul>
+<li>Quietly create a Compute instance in a specific zone (disables the non-essential command output):</li>
+</ul>
+
+
+<p><code>exo compute instance create {{instance_name}} --zone {{zone}} {{[-Q|--quiet]}}</code></p>
+
+<ul>
+<li>List just the name of all of the buckets in the Organization:</li>
+</ul>
+
+
+<p><code>exo storage list {{[-O|--output-template]}} '\{\{ .Name \}\}</code></p>
+
+<ul>
+<li>Display help for a specific sub-command:</li>
+</ul>
+
+
+<p><code>exo {{iam}} {{[-h|--help]}}</code></p>

@@ -1,0 +1,36 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>std::pattern_type</title>
+    
+    <link rel="preload" href="../../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../../application.css" />
+    <link rel="stylesheet" type="text/css" href="../../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="std/pat/macro.pattern_type" prefix="../../" listing-src="../../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _rust"><h1 class="main-heading">Macro pattern_type</h1>
+<pre class="rust item-decl" data-language="rust">macro_rules! pattern_type {
+    ($($arg:tt)*) =&gt; { ... };
+}</pre>
+<span class="item-info"><div class="stab unstable">
+<span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>pattern_type_macro</code> <a href="https://github.com/rust-lang/rust/issues/123646">#123646</a>)</span>
+</div></span><p>Creates a pattern type.</p> <div class="example-wrap ignore">ⓘ<pre class="rust rust-example-rendered" data-language="rust">type Positive = std::pat::pattern_type!(i32 is 1..);</pre>
+</div><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2010 The Rust Project Developers<br>Licensed under the Apache License, Version 2.0 or the MIT license, at your option.<br>
+    <a href="https://doc.rust-lang.org/std/pat/macro.pattern_type.html" class="_attribution-link">https://doc.rust-lang.org/std/pat/macro.pattern_type.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../../assets/index.js"></script>
+</body>
+
+</html>

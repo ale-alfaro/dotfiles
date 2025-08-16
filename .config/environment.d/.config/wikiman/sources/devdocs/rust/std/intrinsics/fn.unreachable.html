@@ -1,0 +1,33 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>std::unreachable</title>
+    
+    <link rel="preload" href="../../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../../application.css" />
+    <link rel="stylesheet" type="text/css" href="../../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="std/intrinsics/fn.unreachable" prefix="../../" listing-src="../../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _rust"><h1 class="main-heading">Function unreachable</h1>
+<pre class="rust item-decl" data-language="rust">pub const unsafe fn unreachable() -&gt; !</pre>
+<span class="item-info"><div class="stab unstable">
+<span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>core_intrinsics</code>)</span>
+</div></span><p>Informs the optimizer that this point in the code is not reachable, enabling further optimizations.</p> <p>N.B., this is very different from the <code>unreachable!()</code> macro: Unlike the macro, which panics when it is executed, it is <em>undefined behavior</em> to reach code marked with this function.</p> <p>The stabilized version of this intrinsic is <a href="../hint/fn.unreachable_unchecked" title="fn std::hint::unreachable_unchecked"><code>core::hint::unreachable_unchecked</code></a>.</p><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2010 The Rust Project Developers<br>Licensed under the Apache License, Version 2.0 or the MIT license, at your option.<br>
+    <a href="https://doc.rust-lang.org/std/intrinsics/fn.unreachable.html" class="_attribution-link">https://doc.rust-lang.org/std/intrinsics/fn.unreachable.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../../assets/index.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,60 @@
+<h1>haveged</h1>
+
+<blockquote><p>Hardware-based random number generator.
+More information: <a href="https://manned.org/haveged">https://manned.org/haveged</a>.</p></blockquote>
+
+<ul>
+<li>Generate a random number:</li>
+</ul>
+
+
+<p><code>sudo haveged</code></p>
+
+<ul>
+<li>Run <code>haveged</code> in foreground:</li>
+</ul>
+
+
+<p><code>sudo haveged {{[-F|--Foreground]}}</code></p>
+
+<ul>
+<li>Set file path for output of <code>haveged</code>:</li>
+</ul>
+
+
+<p><code>sudo haveged {{[-f|--file]}} {{path/to/file}}</code></p>
+
+<ul>
+<li>Set run level for daemon:</li>
+</ul>
+
+
+<p><code>sudo haveged {{[-r|--run]}} {{runlevel}}</code></p>
+
+<ul>
+<li>Set collection buffer size in kibibyte words:</li>
+</ul>
+
+
+<p><code>sudo haveged {{[-b|--buffer]}} {{buffersizeinKW}}</code></p>
+
+<ul>
+<li>Insert a command to an already running <code>haveged</code> process or daemon:</li>
+</ul>
+
+
+<p><code>sudo haveged {{[-c|--command]}} {{command}}</code></p>
+
+<ul>
+<li>Set cache size in kibibyte words:</li>
+</ul>
+
+
+<p><code>sudo haveged {{[-d|--data]}} {{cachesizeinKW}}</code></p>
+
+<ul>
+<li>Set number of bytes to write to the output file:</li>
+</ul>
+
+
+<p><code>sudo haveged {{[-n|--number]}} {{byteamount}}</code></p>

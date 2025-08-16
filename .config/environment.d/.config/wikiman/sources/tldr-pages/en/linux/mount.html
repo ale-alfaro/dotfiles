@@ -1,0 +1,26 @@
+<h1>mount.cifs</h1>
+
+<blockquote><p>Mount SMB (Server Message Block) or CIFS (Common Internet File System) shares.
+Note: You can also do the same thing by passing the <code>-t cifs</code> option to <code>mount</code>.
+More information: <a href="https://manned.org/mount.cifs">https://manned.org/mount.cifs</a>.</p></blockquote>
+
+<ul>
+<li>Connect using the specified username or <code>$USER</code> by default (you will be prompted for a password):</li>
+</ul>
+
+
+<p><code>mount.cifs -o user={{username}} //{{server}}/{{share_name}} {{mountpoint}}</code></p>
+
+<ul>
+<li>Connect as the guest user (without a password):</li>
+</ul>
+
+
+<p><code>mount.cifs -o guest //{{server}}/{{share_name}} {{mountpoint}}</code></p>
+
+<ul>
+<li>Set ownership information for the mounted directory:</li>
+</ul>
+
+
+<p><code>mount.cifs -o uid={{user_id|username}},gid={{group_id|groupname}} //{{server}}/{{share_name}} {{mountpoint}}</code></p>

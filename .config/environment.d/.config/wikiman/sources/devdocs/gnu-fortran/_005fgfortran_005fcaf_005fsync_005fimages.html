@@ -1,0 +1,48 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>8.2.23. _gfortran_caf_sync_images</title>
+    
+    <link rel="preload" href="assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="application.css" />
+    <link rel="stylesheet" type="text/css" href="assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="_005fgfortran_005fcaf_005fsync_005fimages" prefix="" listing-src="navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _gnu_fortran"><h1 class="subsection" id="g_t_005fgfortran_005fcaf_005fsync_005fimages-_002d_002d_002d-Barrier-for-selected-images">8.2.23 _gfortran_caf_sync_images — Barrier for selected images</h1>  <dl compact id="index-Coarray_002c-_005fgfortran_005fcaf_005fsync_005fimages"> <dt>Description:</dt> <dd>
+<p>Synchronization between the specified images; the program only continues on a given image after this function has been called on all images specified for that image. Note that one image can wait for all other images in the current team (e.g. via <code>sync images(*)</code>) while those only wait for that specific image. Additionally, <code>sync images</code> ensures that all pending data transfers of previous segments have completed. </p> </dd> <dt>Syntax:</dt> <dd>
+<p><code>void _gfortran_caf_sync_images (int count, int images[], int *stat,
+char *errmsg, size_t errmsg_len)</code> </p> </dd> <dt>Arguments:</dt> <dd>
+<table> <tr>
+<td width="15%"><var>count</var></td>
+<td width="70%">intent(in) The number of images which are provided in the next argument. For a zero-sized array, the value is zero. For <code>sync images (*)</code>, the value is <em>-1</em>.</td>
+</tr> <tr>
+<td width="15%"><var>images</var></td>
+<td width="70%">intent(in) An array with the images provided by the user. If <var>count</var> is zero, a NULL pointer is passed.</td>
+</tr> <tr>
+<td width="15%"><var>stat</var></td>
+<td width="70%">intent(out) Stores the status STAT= and may be NULL.</td>
+</tr> <tr>
+<td width="15%"><var>errmsg</var></td>
+<td width="70%">intent(out) When an error occurs, this will be set to an error message; may be NULL.</td>
+</tr> <tr>
+<td width="15%"><var>errmsg_len</var></td>
+<td width="70%">intent(in) the buffer size of errmsg</td>
+</tr> </table> </dd> </dl><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; Free Software Foundation<br>Licensed under the GNU Free Documentation License, Version 1.3.<br>
+    <a href="https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/_005fgfortran_005fcaf_005fsync_005fimages.html" class="_attribution-link">https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/_005fgfortran_005fcaf_005fsync_005fimages.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/index.js"></script>
+</body>
+
+</html>

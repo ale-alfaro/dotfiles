@@ -1,0 +1,25 @@
+<h1>uinput</h1>
+
+<blockquote><p>Intercept and write input events to a virtual keyboard device using /dev/uinput.
+More information: <a href="https://gitlab.com/interception/linux/tools/-/tree/master#uinput">https://gitlab.com/interception/linux/tools/-/tree/master#uinput</a>.</p></blockquote>
+
+<ul>
+<li>Show resulting YAML device description merge and exit (dry-run):</li>
+</ul>
+
+
+<p><code>uinput -p</code></p>
+
+<ul>
+<li>Merge YAML device description(s) to resulting virtual device:</li>
+</ul>
+
+
+<p><code>sudo uinput -c {{path/to/device1.yaml path/to/device2.yaml ...}}</code></p>
+
+<ul>
+<li>Merge reference device description from device node(s) to resulting virtual device:</li>
+</ul>
+
+
+<p><code>sudo uinput -d {{/dev/input/eventX /dev/input/eventY ...}}</code></p>

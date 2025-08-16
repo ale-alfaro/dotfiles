@@ -1,0 +1,32 @@
+<h1>aa-genprof</h1>
+
+<blockquote><p>Generate AppArmor security profiles by monitoring program behavior.
+More information: <a href="https://gitlab.com/apparmor/apparmor/-/wikis/manpage_aa-genprof.8">https://gitlab.com/apparmor/apparmor/-/wikis/manpage_aa-genprof.8</a>.</p></blockquote>
+
+<ul>
+<li>Start generating a profile for a program:</li>
+</ul>
+
+
+<p><code>sudo aa-genprof {{program_path}}</code></p>
+
+<ul>
+<li>Specify a custom directory for profiles:</li>
+</ul>
+
+
+<p><code>sudo aa-genprof {{[-d|--dir]}} {{/path/to/profiles}} {{program_path}}</code></p>
+
+<ul>
+<li>Specify a custom logfile for profiling:</li>
+</ul>
+
+
+<p><code>sudo aa-genprof {{[-f|--file]}} {{/path/to/logfile}} {{program_path}}</code></p>
+
+<ul>
+<li>Display help:</li>
+</ul>
+
+
+<p><code>aa-genprof {{[-h|--help]}}</code></p>

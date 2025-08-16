@@ -1,0 +1,40 @@
+<h1>prowler aws</h1>
+
+<blockquote><p>Assess AWS security best practices, perform audits, compliance checks, and generate reports.
+See also: <code>prowler</code>, <code>prowler-azure</code>, <code>prowler-gcp</code>, <code>prowler-kubernetes</code>, <code>prowler-m365</code>, <code>prowler-github</code>.
+More information: <a href="https://docs.prowler.com/projects/prowler-open-source/en/latest/">https://docs.prowler.com/projects/prowler-open-source/en/latest/</a>.</p></blockquote>
+
+<ul>
+<li>Run the default set of checks on the AWS account:</li>
+</ul>
+
+
+<p><code>prowler aws</code></p>
+
+<ul>
+<li>Use a custom AWS profile and filter audited regions:</li>
+</ul>
+
+
+<p><code>prowler aws {{[-p|--profile]}} {{custom-profile}} {{[-f|--filter-region]}} {{us-east-1 eu-south-2 ...}}</code></p>
+
+<ul>
+<li>Run checks for selected AWS services:</li>
+</ul>
+
+
+<p><code>prowler aws {{[-s|--services]}} {{s3 ec2 ...}}</code></p>
+
+<ul>
+<li>Run a specific AWS check:</li>
+</ul>
+
+
+<p><code>prowler aws {{[-c|--checks]}} {{s3_bucket_public_access}}</code></p>
+
+<ul>
+<li>Exclude specific checks or services:</li>
+</ul>
+
+
+<p><code>prowler aws {{[-e|--excluded-checks]}} {{s3_bucket_public_access}} --exclude-services {{s3 ec2 ...}}</code></p>

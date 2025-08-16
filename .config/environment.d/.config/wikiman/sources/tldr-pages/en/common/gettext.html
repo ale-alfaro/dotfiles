@@ -1,0 +1,27 @@
+<h1>gettext</h1>
+
+<blockquote><p>Translates a string using stored translations in a compiled <code>.mo</code> file.
+Translations are stored in <code>/usr/share/locale/&lt;locale_name&gt;/LC_MESSAGES/</code> with <code>domain</code> being the filename without its extension.
+See also: <code>msgfmt</code>, <code>msgunfmt</code>.
+More information: <a href="https://www.gnu.org/software/gettext/manual/html_node/gettext-Invocation.html">https://www.gnu.org/software/gettext/manual/html_node/gettext-Invocation.html</a>.</p></blockquote>
+
+<ul>
+<li>Get the translation of a string as specified in the domain file (falls back to given <code>msgid</code> if no translation exists):</li>
+</ul>
+
+
+<p><code>LANGUAGE={{locale}} gettext {{[-d|--domain]}} {{domain}} "{{msgid}}"</code></p>
+
+<ul>
+<li>Display help:</li>
+</ul>
+
+
+<p><code>gettext {{[-h|--help]}}</code></p>
+
+<ul>
+<li>Display gettext version:</li>
+</ul>
+
+
+<p><code>gettext {{[-V|--version]}}</code></p>

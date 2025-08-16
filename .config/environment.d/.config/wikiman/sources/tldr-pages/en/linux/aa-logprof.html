@@ -1,0 +1,39 @@
+<h1>aa-logprof</h1>
+
+<blockquote><p>Interactively update AppArmor security profiles based on logged violations.
+More information: <a href="https://gitlab.com/apparmor/apparmor/-/wikis/manpage_aa-logprof.8">https://gitlab.com/apparmor/apparmor/-/wikis/manpage_aa-logprof.8</a>.</p></blockquote>
+
+<ul>
+<li>Interactively review and update profiles based on system logs:</li>
+</ul>
+
+
+<p><code>sudo aa-logprof</code></p>
+
+<ul>
+<li>Use a specific directory for AppArmor profiles:</li>
+</ul>
+
+
+<p><code>sudo aa-logprof {{[-d|--dir]}} {{/path/to/profiles}}</code></p>
+
+<ul>
+<li>Use a specific log file instead of the default:</li>
+</ul>
+
+
+<p><code>sudo aa-logprof {{[-f|--file]}} {{/path/to/logfile}}</code></p>
+
+<ul>
+<li>Ignore all log entries before the specified mark:</li>
+</ul>
+
+
+<p><code>sudo aa-logprof {{[-m|--logmark]}} "{{log_marker_text}}"</code></p>
+
+<ul>
+<li>Display help:</li>
+</ul>
+
+
+<p><code>aa-logprof {{[-h|--help]}}</code></p>

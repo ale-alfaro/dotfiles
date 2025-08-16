@@ -1,0 +1,32 @@
+<h1>aa-decode</h1>
+
+<blockquote><p>Decode AppArmor audit logs into a human-readable format.
+More information: <a href="https://gitlab.com/apparmor/apparmor/-/wikis/manpage_aa-decode.8">https://gitlab.com/apparmor/apparmor/-/wikis/manpage_aa-decode.8</a>.</p></blockquote>
+
+<ul>
+<li>Decode a hex string:</li>
+</ul>
+
+
+<p><code>aa-decode {{hexstring}}</code></p>
+
+<ul>
+<li>Decode a log file:</li>
+</ul>
+
+
+<p><code>sudo aa-decode {{logfile}}</code></p>
+
+<ul>
+<li>Decode logs from standard input (e.g., redirected file):</li>
+</ul>
+
+
+<p><code>sudo aa-decode - &lt; {{logfile}}</code></p>
+
+<ul>
+<li>Display help:</li>
+</ul>
+
+
+<p><code>aa-decode {{[-h|--help]}}</code></p>

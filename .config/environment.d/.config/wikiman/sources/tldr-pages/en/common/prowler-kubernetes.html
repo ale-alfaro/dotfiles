@@ -1,0 +1,54 @@
+<h1>prowler kubernetes</h1>
+
+<blockquote><p>Assess Kubernetes cluster security best practices and configurations.
+See also: <code>prowler</code>, <code>prowler-aws</code>, <code>prowler-azure</code>, <code>prowler-gcp</code>, <code>prowler-m365</code>, <code>prowler-github</code>.
+More information: <a href="https://docs.prowler.com/projects/prowler-open-source/en/latest/">https://docs.prowler.com/projects/prowler-open-source/en/latest/</a>.</p></blockquote>
+
+<ul>
+<li>Run the default checks using the default kubeconfig location:</li>
+</ul>
+
+
+<p><code>prowler kubernetes</code></p>
+
+<ul>
+<li>Specify a custom kubeconfig file for scanning:</li>
+</ul>
+
+
+<p><code>prowler kubernetes --kubeconfig-file {{path/to/kubeconfig}}</code></p>
+
+<ul>
+<li>Specify a specific Kubernetes context to scan:</li>
+</ul>
+
+
+<p><code>prowler kubernetes --context {{my-context}}</code></p>
+
+<ul>
+<li>Scan specific namespaces only:</li>
+</ul>
+
+
+<p><code>prowler kubernetes --namespaces {{default}} {{kube-system}}</code></p>
+
+<ul>
+<li>Run checks for selected Kubernetes services:</li>
+</ul>
+
+
+<p><code>prowler kubernetes {{[-s|--services]}} {{ietcd apiserver ...}}</code></p>
+
+<ul>
+<li>Run a specific Kubernetes check:</li>
+</ul>
+
+
+<p><code>prowler kubernetes {{[-c|--checks]}} {{etcd_encryption}}</code></p>
+
+<ul>
+<li>Exclude specific checks or services:</li>
+</ul>
+
+
+<p><code>prowler kubernetes {{[-e|--excluded-checks]}} {{etcd_encryption}} --exclude-services {{ietcd apiserver ...}}</code></p>

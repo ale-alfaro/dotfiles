@@ -1,0 +1,60 @@
+<h1>vcluster</h1>
+
+<blockquote><p>Create and manage lightweight virtual Kubernetes clusters in namespaces.
+More information: <a href="https://www.vcluster.com/docs/vcluster">https://www.vcluster.com/docs/vcluster</a>.</p></blockquote>
+
+<ul>
+<li>Create a virtual cluster in a specific namespace:</li>
+</ul>
+
+
+<p><code>vcluster create {{vcluster_name}} {{[-n|--namespace]}} {{namespace}}</code></p>
+
+<ul>
+<li>Connect to a virtual cluster with a local port and insecure mode:</li>
+</ul>
+
+
+<p><code>vcluster connect {{vcluster_name}} {{[-n|--namespace]}} {{namespace}} --local-port {{port}} --insecure</code></p>
+
+<ul>
+<li>List all virtual clusters:</li>
+</ul>
+
+
+<p><code>vcluster list</code></p>
+
+<ul>
+<li>Delete a virtual cluster:</li>
+</ul>
+
+
+<p><code>vcluster delete {{vcluster_name}}</code></p>
+
+<ul>
+<li>List platform-managed virtual clusters:</li>
+</ul>
+
+
+<p><code>vcluster platform list</code></p>
+
+<ul>
+<li>Create a platform-managed virtual cluster:</li>
+</ul>
+
+
+<p><code>vcluster platform create {{vcluster_name}} {{[-n|--namespace]}} {{namespace}}</code></p>
+
+<ul>
+<li>Connect to a platform-managed virtual cluster:</li>
+</ul>
+
+
+<p><code>vcluster platform connect {{vcluster_name}} {{[-n|--namespace]}} {{namespace}}</code></p>
+
+<ul>
+<li>Delete a platform-managed virtual cluster:</li>
+</ul>
+
+
+<p><code>vcluster platform delete {{vcluster_name}} {{[-n|--namespace]}} {{namespace}}</code></p>

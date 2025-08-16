@@ -1,0 +1,46 @@
+<h1>qemu-system-x86_64</h1>
+
+<blockquote><p>Emulate the <code>x86_64</code> architecture.
+More information: <a href="https://www.qemu.org/docs/master/system/target-i386.html">https://www.qemu.org/docs/master/system/target-i386.html</a>.</p></blockquote>
+
+<ul>
+<li>Boot from an image emulating the <code>x86_64</code> architecture:</li>
+</ul>
+
+
+<p><code>qemu-system-x86_64 -hda {{image_name.img}} -m {{4096}}</code></p>
+
+<ul>
+<li>Boot a QEMU instance from a live ISO image:</li>
+</ul>
+
+
+<p><code>qemu-system-x86_64 -hda {{image_name.img}} -cdrom {{os_image.iso}} -boot d -m {{4096}}</code></p>
+
+<ul>
+<li>Boot from a physical device (e.g. from USB to test a bootable medium):</li>
+</ul>
+
+
+<p><code>qemu-system-x86_64 -hda {{/dev/storage_device}} -m {{4096}}</code></p>
+
+<ul>
+<li>Do not launch a VNC server:</li>
+</ul>
+
+
+<p><code>qemu-system-i386 -hda {{image_name.img}} -m {{4096}} -nographic</code></p>
+
+<ul>
+<li>Exit non-graphical QEMU:</li>
+</ul>
+
+
+<p><code>&lt;Ctrl a&gt;&lt;x&gt;</code></p>
+
+<ul>
+<li>List the supported machine types:</li>
+</ul>
+
+
+<p><code>qemu-system-x86_64 {{[-M|-machine]}} help</code></p>

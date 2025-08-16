@@ -1,0 +1,60 @@
+<h1>az quantum</h1>
+
+<blockquote><p>Manage Azure Quantum workspaces and submit quantum jobs to providers (preview, requires quantum extension).
+More information: <a href="https://learn.microsoft.com/cli/azure/quantum">https://learn.microsoft.com/cli/azure/quantum</a>.</p></blockquote>
+
+<ul>
+<li>Create a new Azure Quantum workspace:</li>
+</ul>
+
+
+<p><code>az quantum workspace create {{[-g|--resource-group]}} {{ResourceGroup}} {{[-l|--location]}} {{Location}} {{[-w|--workspace-name]}} {{Workspace}} {{[-a|--storage-account]}} {{MyStorageAccountName}}</code></p>
+
+<ul>
+<li>List all Azure Quantum workspaces:</li>
+</ul>
+
+
+<p><code>az quantum workspace list</code></p>
+
+<ul>
+<li>Set a default Azure Quantum workspace:</li>
+</ul>
+
+
+<p><code>az quantum workspace set {{[-g|--resource-group]}} {{ResourceGroup}} {{[-w|--workspace-name]}} {{Workspace}}</code></p>
+
+<ul>
+<li>Submit a QIR quantum job to a target:</li>
+</ul>
+
+
+<p><code>az quantum job submit {{[-g|--resource-group]}} {{ResourceGroup}} {{[-w|--workspace-name]}} {{Workspace}} {{[-l|--location]}} {{Location}} {{[-t|--target-id]}} {{Id}} --job-name {{Job}} --job-input-file {{QirBitcode.bc}} --job-input-format {{qir.v1}}</code></p>
+
+<ul>
+<li>List all jobs in a Quantum Workspace:</li>
+</ul>
+
+
+<p><code>az quantum job list {{[-g|--resource-group]}} {{ResourceGroup}} {{[-l|--location]}} {{Location}} {{[-w|--workspace-name]}} {{Workspace}}</code></p>
+
+<ul>
+<li>Get the output of a quantum job:</li>
+</ul>
+
+
+<p><code>az quantum job output {{[-g|--resource-group]}} {{ResourceGroup}} {{[-w|--workspace-name]}} {{Workspace}} --job-id {{Job}}</code></p>
+
+<ul>
+<li>List available provider offerings in a location:</li>
+</ul>
+
+
+<p><code>az quantum offerings list {{[-l|--location]}} {{Location}}</code></p>
+
+<ul>
+<li>Set a default target for job submissions:</li>
+</ul>
+
+
+<p><code>az quantum target set {{[-t|--target-id]}} {{Id}}</code></p>

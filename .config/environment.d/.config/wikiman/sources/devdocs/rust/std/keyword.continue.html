@@ -1,0 +1,47 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>std::continue</title>
+    
+    <link rel="preload" href="../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../application.css" />
+    <link rel="stylesheet" type="text/css" href="../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="std/keyword.continue" prefix="../" listing-src="../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _rust"><h1 class="main-heading">Keyword continue</h1>
+<p>Skip to the next iteration of a loop.</p> <p>When <code>continue</code> is encountered, the current iteration is terminated, returning control to the loop head, typically continuing with the next iteration.</p> <div class="example-wrap"><pre class="rust rust-example-rendered" data-language="rust">// Printing odd numbers by skipping even ones
+for number in 1..=10 {
+    if number % 2 == 0 {
+        continue;
+    }
+    println!("{number}");
+}</pre></div> <p>Like <code>break</code>, <code>continue</code> is normally associated with the innermost enclosing loop, but labels may be used to specify the affected loop.</p> <div class="example-wrap"><pre class="rust rust-example-rendered" data-language="rust">// Print Odd numbers under 30 with unit &lt;= 5
+'tens: for ten in 0..3 {
+    '_units: for unit in 0..=9 {
+        if unit % 2 == 0 {
+            continue;
+        }
+        if unit &gt; 5 {
+            continue 'tens;
+        }
+        println!("{}", ten * 10 + unit);
+    }
+}</pre></div> <p>See <a href="../reference/expressions/loop-expr#continue-expressions">continue expressions</a> from the reference for more details.</p><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2010 The Rust Project Developers<br>Licensed under the Apache License, Version 2.0 or the MIT license, at your option.<br>
+    <a href="https://doc.rust-lang.org/std/keyword.continue.html" class="_attribution-link">https://doc.rust-lang.org/std/keyword.continue.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../assets/index.js"></script>
+</body>
+
+</html>

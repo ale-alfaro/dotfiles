@@ -1,0 +1,39 @@
+<h1>k3s</h1>
+
+<blockquote><p>Install and manage lightweight Kubernetes clusters.
+More information: <a href="https://docs.k3s.io/cli">https://docs.k3s.io/cli</a>.</p></blockquote>
+
+<ul>
+<li>Run the embedded <code>kubectl</code> command:</li>
+</ul>
+
+
+<p><code>k3s kubectl get nodes</code></p>
+
+<ul>
+<li>Take an etcd snapshot of the cluster:</li>
+</ul>
+
+
+<p><code>k3s etcd-snapshot save</code></p>
+
+<ul>
+<li>Rotate the CA certificate:</li>
+</ul>
+
+
+<p><code>k3s certificate rotate-ca</code></p>
+
+<ul>
+<li>Manage bootstrap tokens:</li>
+</ul>
+
+
+<p><code>k3s token list</code></p>
+
+<ul>
+<li>Uninstall K3s and remove all components:</li>
+</ul>
+
+
+<p><code>k3s-uninstall.sh</code></p>

@@ -1,0 +1,53 @@
+<h1>jj git push</h1>
+
+<blockquote><p>Push to a Git remote.
+More information: <a href="https://jj-vcs.github.io/jj/latest/cli-reference/#jj-git-push">https://jj-vcs.github.io/jj/latest/cli-reference/#jj-git-push</a>.</p></blockquote>
+
+<ul>
+<li>Push a bookmark to the given remote (defaults to <code>git.push</code> setting):</li>
+</ul>
+
+
+<p><code>jj git push {{[-b|--bookmark]}} {{bookmark}} --remote {{remote}}</code></p>
+
+<ul>
+<li>Push a new bookmark:</li>
+</ul>
+
+
+<p><code>jj git push {{[-b|--bookmark]}} {{bookmark}} {{[-N|--allow-new]}}</code></p>
+
+<ul>
+<li>Push all tracked bookmarks:</li>
+</ul>
+
+
+<p><code>jj git push --tracked</code></p>
+
+<ul>
+<li>Push all bookmarks (including new bookmarks):</li>
+</ul>
+
+
+<p><code>jj git push --all</code></p>
+
+<ul>
+<li>Push all bookmarks pointing to given revisions:</li>
+</ul>
+
+
+<p><code>jj git push {{[-r|--revisions]}} {{revset}}</code></p>
+
+<ul>
+<li>Push changes/commits by creating new bookmarks (Name format is as per <code>templates.git_push_bookmark</code> setting, defaults to <code>"push-" ++ change_id.short()</code>):</li>
+</ul>
+
+
+<p><code>jj git push {{[-c|--change]}} {{revset}}</code></p>
+
+<ul>
+<li>Push a revision with the given name:</li>
+</ul>
+
+
+<p><code>jj git push --named {{name}}={{revision}}</code></p>

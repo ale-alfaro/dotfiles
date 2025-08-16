@@ -1,0 +1,53 @@
+<h1>scrcpy</h1>
+
+<blockquote><p>Display and control your Android device on a desktop.
+More information: <a href="https://github.com/Genymobile/scrcpy">https://github.com/Genymobile/scrcpy</a>.</p></blockquote>
+
+<ul>
+<li>Display a mirror of a connected device:</li>
+</ul>
+
+
+<p><code>scrcpy</code></p>
+
+<ul>
+<li>Turn the device screen off and prevent it from sleeping while mirroring:</li>
+</ul>
+
+
+<p><code>scrcpy {{[-S|--turn-screen-off]}} {{[-w|--stay-awake]}}</code></p>
+
+<ul>
+<li>Display a mirror of a specific device based on its ID or IP address (find it under the <code>adb devices</code> command):</li>
+</ul>
+
+
+<p><code>scrcpy {{[-s|--serial]}} {{0123456789abcdef|192.168.0.1:5555}}</code></p>
+
+<ul>
+<li>Start display in fullscreen mode:</li>
+</ul>
+
+
+<p><code>scrcpy {{[-f|--fullscreen]}}</code></p>
+
+<ul>
+<li>Show touches on physical device:</li>
+</ul>
+
+
+<p><code>scrcpy {{[-t|--show-touches]}}</code></p>
+
+<ul>
+<li>Record display screen:</li>
+</ul>
+
+
+<p><code>scrcpy {{[-r|--record]}} {{path/to/file.mp4}}</code></p>
+
+<ul>
+<li>Specify the target directory for pushing files to device by drag and drop (non-APK):</li>
+</ul>
+
+
+<p><code>scrcpy --push-target {{path/to/directory}}</code></p>

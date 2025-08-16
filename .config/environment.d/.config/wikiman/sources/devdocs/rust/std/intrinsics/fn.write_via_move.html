@@ -1,0 +1,33 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>std::write_via_move</title>
+    
+    <link rel="preload" href="../../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../../application.css" />
+    <link rel="stylesheet" type="text/css" href="../../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="std/intrinsics/fn.write_via_move" prefix="../../" listing-src="../../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _rust"><h1 class="main-heading">Function write_via_move</h1>
+<pre class="rust item-decl" data-language="rust">pub const unsafe fn write_via_move&lt;T&gt;(ptr: *mut T, value: T)</pre>
+<span class="item-info"><div class="stab unstable">
+<span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>core_intrinsics</code>)</span>
+</div></span><p>This is an implementation detail of <a href="../ptr/fn.write" title="fn std::ptr::write"><code>crate::ptr::write</code></a> and should not be used anywhere else. See its comments for why this exists.</p> <p>This intrinsic can <em>only</em> be called where the pointer is a local without projections (<code>write_via_move(ptr, x)</code>, not <code>write_via_move(*ptr, x)</code>) so that it trivially obeys runtime-MIR rules about derefs in operands.</p><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2010 The Rust Project Developers<br>Licensed under the Apache License, Version 2.0 or the MIT license, at your option.<br>
+    <a href="https://doc.rust-lang.org/std/intrinsics/fn.write_via_move.html" class="_attribution-link">https://doc.rust-lang.org/std/intrinsics/fn.write_via_move.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../../assets/index.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,60 @@
+<h1>sg_raw</h1>
+
+<blockquote><p>Send arbitrary SCSI command to a connected device.
+More information: <a href="https://manned.org/sg_raw">https://manned.org/sg_raw</a>.</p></blockquote>
+
+<ul>
+<li>Send a command to an optical SCSI device assigned to <code>sr0</code> to load the media in its tray:</li>
+</ul>
+
+
+<p><code>sg_raw /dev/sr0 EA 00 00 00 00 01</code></p>
+
+<ul>
+<li>Read data from <code>IFILE</code> instead of <code>stdin</code>:</li>
+</ul>
+
+
+<p><code>sg_raw {{[-i|--infile]}} {{path/to/IFILE}} {{/dev/sgX}} {{SCSI_command}}</code></p>
+
+<ul>
+<li>Skip the first <code>LEN</code> bytes of input data:</li>
+</ul>
+
+
+<p><code>sg_raw {{[-k|--skip]}} {{LEN}} {{/dev/sgX}} {{SCSI_command}}</code></p>
+
+<ul>
+<li>Read <code>SLEN</code> bytes of data and send to the device:</li>
+</ul>
+
+
+<p><code>sg_raw {{[-s|--send]}} {{SLEN}} {{/dev/sgX}} {{SCSI_command}}</code></p>
+
+<ul>
+<li>Wait up to <code>SEC</code> seconds for <code>sg_raw</code> to finish processing:</li>
+</ul>
+
+
+<p><code>sg_raw {{[-t|--timeout]}} {{SEC}} {{/dev/sgX}} {{SCSI_command}}</code></p>
+
+<ul>
+<li>Increase verbosity level by 1:</li>
+</ul>
+
+
+<p><code>sg_raw {{[-v|--verbose]}} {{/dev/sgX}} {{SCSI_command}}</code></p>
+
+<ul>
+<li>Dump returned data in binary form:</li>
+</ul>
+
+
+<p><code>sg_raw {{[-b|--binary]}} {{/dev/sgX}} {{SCSI_command}}</code></p>
+
+<ul>
+<li>Write data received from the specified device to an <code>OFILE</code>:</li>
+</ul>
+
+
+<p><code>sg_raw {{[-o|--outfile]}} {{path/to/OFILE}} {{/dev/sgX}} {{SCSI_command}}</code></p>

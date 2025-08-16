@@ -1,0 +1,61 @@
+<h1>ndc</h1>
+
+<blockquote><p>Name daemon control service for name servers.
+If a command isn&rsquo;t provided, NDC will prompt for one until EOF.
+More information: <a href="https://manned.org/ndc">https://manned.org/ndc</a>.</p></blockquote>
+
+<ul>
+<li>Set the [c]ontrol channel rendezvous point:</li>
+</ul>
+
+
+<p><code>ndc -c {{channel}} {{command}}</code></p>
+
+<ul>
+<li>Bind the client side to a specific [l]ocalsock address:</li>
+</ul>
+
+
+<p><code>ndc -l {{localsock}} {{command}}</code></p>
+
+<ul>
+<li>Set path to [p]idfile for UNIX signal control:</li>
+</ul>
+
+
+<p><code>ndc -p {{path/to/pidfile}} {{command}}</code></p>
+
+<ul>
+<li>Enable [d]ebugging:</li>
+</ul>
+
+
+<p><code>ndc -d {{command}}</code></p>
+
+<ul>
+<li>Enable [q]uiet mode:</li>
+</ul>
+
+
+<p><code>ndc -q {{command}}</code></p>
+
+<ul>
+<li>Enable nonfatal error [s]uppression:</li>
+</ul>
+
+
+<p><code>ndc -s {{command}}</code></p>
+
+<ul>
+<li>Enable [t]racing for protocol and system debugging:</li>
+</ul>
+
+
+<p><code>ndc -t {{command}}</code></p>
+
+<ul>
+<li>List built-in commands:</li>
+</ul>
+
+
+<p><code>ndc /help</code></p>

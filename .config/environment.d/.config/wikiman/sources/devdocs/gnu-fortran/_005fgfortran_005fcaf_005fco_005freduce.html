@@ -1,0 +1,61 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>8.2.36. _gfortran_caf_co_reduce</title>
+    
+    <link rel="preload" href="assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="application.css" />
+    <link rel="stylesheet" type="text/css" href="assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="_005fgfortran_005fcaf_005fco_005freduce" prefix="" listing-src="navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _gnu_fortran"><h1 class="subsection" id="g_t_005fgfortran_005fcaf_005fco_005freduce-_002d_002d_002d-Generic-collective-reduction">8.2.36 _gfortran_caf_co_reduce — Generic collective reduction</h1>  <dl compact id="index-Coarray_002c-_005fgfortran_005fcaf_005fco_005freduce"> <dt>Description:</dt> <dd>
+<p>Calculates for each array element of the variable <var>a</var> the reduction value for that element in the current team; if <var>result_image</var> has the value 0, the result shall be stored on all images, otherwise, only on the specified image. The <var>opr</var> is a pure function doing a mathematically commutative and associative operation. </p> <p>The <var>opr_flags</var> denote the following; the values are bitwise ored. <code>GFC_CAF_BYREF</code> (1) if the result should be returned by reference; <code>GFC_CAF_HIDDENLEN</code> (2) whether the result and argument string lengths shall be specified as hidden arguments; <code>GFC_CAF_ARG_VALUE</code> (4) whether the arguments shall be passed by value, <code>GFC_CAF_ARG_DESC</code> (8) whether the arguments shall be passed by descriptor. </p> </dd> <dt>Syntax:</dt> <dd>
+<p><code>void _gfortran_caf_co_reduce (gfc_descriptor_t *a,
+void * (*opr) (void *, void *), int opr_flags, int result_image,
+int *stat, char *errmsg, int a_len, size_t errmsg_len)</code> </p> </dd> <dt>Arguments:</dt> <dd>
+<table> <tr>
+<td width="15%"><var>a</var></td>
+<td width="70%">intent(inout) An array descriptor with the data to be processed. On the destination image(s) the result overwrites the old content.</td>
+</tr> <tr>
+<td width="15%"><var>opr</var></td>
+<td width="70%">intent(in) Function pointer to the reduction function</td>
+</tr> <tr>
+<td width="15%"><var>opr_flags</var></td>
+<td width="70%">intent(in) Flags regarding the reduction function</td>
+</tr> <tr>
+<td width="15%"><var>result_image</var></td>
+<td width="70%">intent(in) The ID of the image to which the reduced value should be copied to; if zero, it has to be copied to all images.</td>
+</tr> <tr>
+<td width="15%"><var>stat</var></td>
+<td width="70%">intent(out) Stores the status STAT= and may be NULL.</td>
+</tr> <tr>
+<td width="15%"><var>errmsg</var></td>
+<td width="70%">intent(out) When an error occurs, this will be set to an error message; may be NULL.</td>
+</tr> <tr>
+<td width="15%"><var>a_len</var></td>
+<td width="70%">intent(in) the string length of argument <var>a</var>
+</td>
+</tr> <tr>
+<td width="15%"><var>errmsg_len</var></td>
+<td width="70%">intent(in) the buffer size of errmsg</td>
+</tr> </table> </dd> <dt>NOTES</dt> <dd>
+<p>If <var>result_image</var> is nonzero, the data in the array descriptor <var>a</var> on all images except of the specified one become undefined; hence, the library may make use of this. </p> <p>For character arguments, the result is passed as first argument, followed by the result string length, next come the two string arguments, followed by the two hidden string length arguments. With C binding, there are no hidden arguments and by-reference passing and either only a single character is passed or an array descriptor. </p>
+</dd> </dl>  <p class="header"> <p> Previous: <a href="_005fgfortran_005fcaf_005fco_005fsum#g_t_005fgfortran_005fcaf_005fco_005fsum" accesskey="p" rel="prev">_gfortran_caf_co_sum</a>, Up: <a href="function-abi-documentation#Function-ABI-Documentation" accesskey="u" rel="up">Function ABI Documentation</a> [<a href="index#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/Option-Index.html#Option-Index" title="Index" rel="index">Index</a>]</p> </p><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; Free Software Foundation<br>Licensed under the GNU Free Documentation License, Version 1.3.<br>
+    <a href="https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/_005fgfortran_005fcaf_005fco_005freduce.html" class="_attribution-link">https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/_005fgfortran_005fcaf_005fco_005freduce.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/index.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,53 @@
+<h1>devpod</h1>
+
+<blockquote><p>Launch reproducible development environments using Docker, Kubernetes, or SSH.
+More information: <a href="https://devpod.sh/docs/quickstart/devpod-cli/">https://devpod.sh/docs/quickstart/devpod-cli/</a>.</p></blockquote>
+
+<ul>
+<li>Add a provider such as Docker or Kubernetes:</li>
+</ul>
+
+
+<p><code>devpod provider add {{provider_name}}</code></p>
+
+<ul>
+<li>List all available providers:</li>
+</ul>
+
+
+<p><code>devpod provider list-available</code></p>
+
+<ul>
+<li>Start a workspace from a GitHub repository with a specific IDE:</li>
+</ul>
+
+
+<p><code>devpod up {{github.com/user/repo}} {{[-i|--ide]}} {{vscode}}</code></p>
+
+<ul>
+<li>Start a workspace from a local directory:</li>
+</ul>
+
+
+<p><code>devpod up {{path/to/project}}</code></p>
+
+<ul>
+<li>Recreate an existing workspace:</li>
+</ul>
+
+
+<p><code>devpod up {{workspace_name}} {{[-r|--recreate]}}</code></p>
+
+<ul>
+<li>Reset a workspace to a clean state:</li>
+</ul>
+
+
+<p><code>devpod up {{workspace_name}} {{[-x|--reset]}}</code></p>
+
+<ul>
+<li>Add a custom provider from a GitHub repository:</li>
+</ul>
+
+
+<p><code>devpod provider add {{org/provider-repo}}</code></p>

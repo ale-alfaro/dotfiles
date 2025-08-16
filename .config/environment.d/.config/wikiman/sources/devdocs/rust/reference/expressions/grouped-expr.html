@@ -1,0 +1,56 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>.. The Rust Reference</title>
+    
+    <link rel="preload" href="../../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../../application.css" />
+    <link rel="stylesheet" type="text/css" href="../../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="reference/expressions/grouped-expr" prefix="../../" listing-src="../../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _rust"><h1 class="rule" id="r-expr.paren">
+<a class="rule-link" href="#r-expr.paren" title="expr.paren"><span>[expr<wbr>.paren]</wbr></span></a> </h1> <h1 id="grouped-expressions">Grouped expressions</h1> <div class="rule" id="r-expr.paren.syntax">
+<a class="rule-link" href="#r-expr.paren.syntax" title="expr.paren.syntax"><span>[expr<wbr>.paren<wbr>.syntax]</wbr></wbr></span></a> </div> <div class="grammar-container"> <p><strong><sup>Syntax</sup></strong> <br> <span class="grammar-text grammar-production" id="grammar-GroupedExpression" onclick="show_railroad()"><a href="grouped-expr#railroad-GroupedExpression">GroupedExpression</a></span> → <span class="grammar-literal">(</span> <span class="grammar-text"><a href="../expressions#grammar-Expression">Expression</a></span> <span class="grammar-literal">)</span></p> <p><button class="grammar-toggle-railroad" type="button" title="Toggle railroad display" onclick="toggle_railroad()">Show Railroad</button></p> </div> <div class="grammar-railroad grammar-hidden"> <div style="width: 246px; height: auto; max-width: 100%; max-height: 100%" class="railroad-production" id="railroad-GroupedExpression">
+<svg class="railroad" viewbox="0 0 246 74" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">  <g class="verticalgrid"> <a class="link" xlink:href="grouped-expr.html#grammar-GroupedExpression"> <text class="comment" x="74" y="25"> GroupedExpression</text> </a> <g class="sequence">  <g class="sequence"> <g class="terminal">  <text x="49" y="58"> (</text> </g> <a class="link" xlink:href="../expressions.html#railroad-Expression"> <g class="nonterminal">  <text x="123" y="58"> Expression</text> </g> </a> <g class="terminal">  <text x="197" y="58"> )</text> </g>   </g>    </g> </g> </svg> </div> </div> <div class="rule" id="r-expr.paren.intro">
+<a class="rule-link" href="#r-expr.paren.intro" title="expr.paren.intro"><span>[expr<wbr>.paren<wbr>.intro]</wbr></wbr></span></a> </div> <p>A <em>parenthesized expression</em> wraps a single expression, evaluating to that expression. The syntax for a parenthesized expression is a <code>(</code>, then an expression, called the <em>enclosed operand</em>, and then a <code>)</code>.</p> <div class="rule" id="r-expr.paren.evaluation">
+<a class="rule-link" href="#r-expr.paren.evaluation" title="expr.paren.evaluation"><span>[expr<wbr>.paren<wbr>.evaluation]</wbr></wbr></span></a> </div> <p>Parenthesized expressions evaluate to the value of the enclosed operand.</p> <div class="rule" id="r-expr.paren.place-or-value">
+<a class="rule-link" href="#r-expr.paren.place-or-value" title="expr.paren.place-or-value"><span>[expr<wbr>.paren<wbr>.place-or-value]</wbr></wbr></span></a> </div> <p>Unlike other expressions, parenthesized expressions are both <a href="../expressions#place-expressions-and-value-expressions">place expressions and value expressions</a>. When the enclosed operand is a place expression, it is a place expression and when the enclosed operand is a value expression, it is a value expression.</p> <div class="rule" id="r-expr.paren.override-precedence">
+<a class="rule-link" href="#r-expr.paren.override-precedence" title="expr.paren.override-precedence"><span>[expr<wbr>.paren<wbr>.override-precedence]</wbr></wbr></span></a> </div> <p>Parentheses can be used to explicitly modify the precedence order of subexpressions within an expression.</p> <p>An example of a parenthesized expression:</p> <pre data-language="rust">#![allow(unused)]
+fn main() {
+let x: i32 = 2 + 3 * 4; // not parenthesized
+let y: i32 = (2 + 3) * 4; // parenthesized
+assert_eq!(x, 14);
+assert_eq!(y, 20);
+}</pre> <p>An example of a necessary use of parentheses is when calling a function pointer that is a member of a struct:</p> <pre data-language="rust">#![allow(unused)]
+fn main() {
+struct A {
+   f: fn() -&gt; &amp;'static str
+}
+impl A {
+   fn f(&amp;self) -&gt; &amp;'static str {
+       "The method f"
+   }
+}
+let a = A{f: || "The field f"};
+
+assert_eq!( a.f (), "The method f");
+assert_eq!((a.f)(), "The field f");
+}</pre><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2010 The Rust Project Developers<br>Licensed under the Apache License, Version 2.0 or the MIT license, at your option.<br>
+    <a href="https://doc.rust-lang.org/reference/expressions/grouped-expr.html" class="_attribution-link">https://doc.rust-lang.org/reference/expressions/grouped-expr.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../../assets/index.js"></script>
+</body>
+
+</html>

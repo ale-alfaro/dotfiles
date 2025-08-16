@@ -1,0 +1,75 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>9.141. IBITS</title>
+    
+    <link rel="preload" href="assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="application.css" />
+    <link rel="stylesheet" type="text/css" href="assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="ibits" prefix="" listing-src="navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _gnu_fortran"><h1 class="section" id="IBITS-_002d_002d_002d-Bit-extraction">9.141 IBITS — Bit extraction</h1>        <dl compact id="index-bits_002c-extract"> <dt>Description:</dt> <dd>
+<p><code>IBITS</code> extracts a field of length <var>LEN</var> from <var>I</var>, starting from bit position <var>POS</var> and extending left for <var>LEN</var> bits. The result is right-justified and the remaining bits are zeroed. The value of <code>POS+LEN</code> must be less than or equal to the value <code>BIT_SIZE(I)</code>. </p> </dd> <dt>Standard:</dt> <dd>
+<p>Fortran 95 and later, has overloads that are GNU extensions </p> </dd> <dt>Class:</dt> <dd>
+<p>Elemental function </p> </dd> <dt>Syntax:</dt> <dd>
+<p><code>RESULT = IBITS(I, POS, LEN)</code> </p> </dd> <dt>Arguments:</dt> <dd>
+<table> <tr>
+<td width="15%"><var>I</var></td>
+<td width="70%">The type shall be <code>INTEGER</code>.</td>
+</tr> <tr>
+<td width="15%"><var>POS</var></td>
+<td width="70%">The type shall be <code>INTEGER</code>.</td>
+</tr> <tr>
+<td width="15%"><var>LEN</var></td>
+<td width="70%">The type shall be <code>INTEGER</code>.</td>
+</tr> </table> </dd> <dt>Return value:</dt> <dd>
+<p>The return value is of type <code>INTEGER</code> and of the same kind as <var>I</var>. </p> </dd> <dt>Specific names:</dt> <dd>
+<table> <tr>
+<td width="20%">Name</td>
+<td width="20%">Argument</td>
+<td width="20%">Return type</td>
+<td width="25%">Standard</td>
+</tr> <tr>
+<td width="20%"><code>IBITS(A)</code></td>
+<td width="20%"><code>INTEGER A</code></td>
+<td width="20%"><code>INTEGER</code></td>
+<td width="25%">Fortran 95 and later</td>
+</tr> <tr>
+<td width="20%"><code>BBITS(A)</code></td>
+<td width="20%"><code>INTEGER(1) A</code></td>
+<td width="20%"><code>INTEGER(1)</code></td>
+<td width="25%">GNU extension</td>
+</tr> <tr>
+<td width="20%"><code>IIBITS(A)</code></td>
+<td width="20%"><code>INTEGER(2) A</code></td>
+<td width="20%"><code>INTEGER(2)</code></td>
+<td width="25%">GNU extension</td>
+</tr> <tr>
+<td width="20%"><code>JIBITS(A)</code></td>
+<td width="20%"><code>INTEGER(4) A</code></td>
+<td width="20%"><code>INTEGER(4)</code></td>
+<td width="25%">GNU extension</td>
+</tr> <tr>
+<td width="20%"><code>KIBITS(A)</code></td>
+<td width="20%"><code>INTEGER(8) A</code></td>
+<td width="20%"><code>INTEGER(8)</code></td>
+<td width="25%">GNU extension</td>
+</tr> </table> </dd> <dt>See also:</dt> <dd><p><a href="bit_005fsize#BIT_005fSIZE">BIT_SIZE</a>, <a href="ibclr#IBCLR">IBCLR</a>, <a href="ibset#IBSET">IBSET</a>, <a href="iand#IAND">IAND</a>, <a href="ior#IOR">IOR</a>, <a href="ieor#IEOR">IEOR</a> </p></dd> </dl><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; Free Software Foundation<br>Licensed under the GNU Free Documentation License, Version 1.3.<br>
+    <a href="https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/IBITS.html" class="_attribution-link">https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/IBITS.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/index.js"></script>
+</body>
+
+</html>

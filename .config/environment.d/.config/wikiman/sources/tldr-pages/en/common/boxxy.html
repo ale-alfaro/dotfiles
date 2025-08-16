@@ -1,0 +1,46 @@
+<h1>boxxy</h1>
+
+<blockquote><p>Redirect file locations for programs that don&rsquo;t respect the XDG standards.
+More information: <a href="https://github.com/queer/boxxy">https://github.com/queer/boxxy</a>.</p></blockquote>
+
+<ul>
+<li>Run a program with file redirections defined in <code>~/.config/boxxy/boxxy.yaml</code>:</li>
+</ul>
+
+
+<p><code>boxxy {{program}}</code></p>
+
+<ul>
+<li>Scan your home directory for rule suggestions:</li>
+</ul>
+
+
+<p><code>boxxy scan</code></p>
+
+<ul>
+<li>Trace what files a program touches and save a report in <code>boxxy-report.txt</code> in the current directory:</li>
+</ul>
+
+
+<p><code>boxxy {{[-t|--trace]}} {{program}}</code></p>
+
+<ul>
+<li>Pass a redirection rule directly on the terminal:</li>
+</ul>
+
+
+<p><code>boxxy {{[-r|--rule]}} {{path/to/file_or_directory}}:{{path/to/redirection}}:{{file|directory}} {{program}}</code></p>
+
+<ul>
+<li>View the config file:</li>
+</ul>
+
+
+<p><code>boxxy config</code></p>
+
+<ul>
+<li>Display help:</li>
+</ul>
+
+
+<p><code>boxxy -h</code></p>

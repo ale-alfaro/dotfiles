@@ -1,0 +1,18 @@
+<h1>modutil</h1>
+
+<blockquote><p>Manage PKCS #11 module information within the NSS security module database.
+More information: <a href="https://manned.org/modutil">https://manned.org/modutil</a>.</p></blockquote>
+
+<ul>
+<li>Add a PKCS #11 module to a NSS database (e.g. a Firefox profile: <code>$HOME/.mozilla/firefox/default-release</code>):</li>
+</ul>
+
+
+<p><code>modutil -dbdir sql:{{path/to/nss/db/dir}} -add "{{module_label}}" -libfile {{path/to/pkcs11_mod.so}}</code></p>
+
+<ul>
+<li>List PKCS #11 modules in a NSS database:</li>
+</ul>
+
+
+<p><code>modutil -dbdir sql:{{path/to/nss/db/dir}} -list</code></p>

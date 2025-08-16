@@ -1,0 +1,40 @@
+<h1>aa-update-browser</h1>
+
+<blockquote><p>Update AppArmor browser profiles to use supported abstractions.
+Part of the AppArmor suite.
+More information: <a href="https://manned.org/aa-update-browser">https://manned.org/aa-update-browser</a>.</p></blockquote>
+
+<ul>
+<li>List available browser abstraction profiles:</li>
+</ul>
+
+
+<p><code>sudo aa-update-browser -l</code></p>
+
+<ul>
+<li>Show what changes would be made to a profile without applying them ([d]ry-run):</li>
+</ul>
+
+
+<p><code>sudo aa-update-browser -d {{path/to/profile}}</code></p>
+
+<ul>
+<li>Update a profile with specific abstractions:</li>
+</ul>
+
+
+<p><code>sudo aa-update-browser -u {{abstraction1,abstraction2,...}} {{path/to/profile}}</code></p>
+
+<ul>
+<li>Remove all abstractions from a profile:</li>
+</ul>
+
+
+<p><code>sudo aa-update-browser -u '' {{path/to/profile}}</code></p>
+
+<ul>
+<li>Display help:</li>
+</ul>
+
+
+<p><code>aa-update-browser -h</code></p>

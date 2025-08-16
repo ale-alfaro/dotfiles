@@ -1,0 +1,61 @@
+<h1>prowler azure</h1>
+
+<blockquote><p>Assess Azure security best practices, perform audits, compliance checks, and generate reports.
+See also: <code>prowler</code>, <code>prowler-aws</code>, <code>prowler-gcp</code>, <code>prowler-kubernetes</code>, <code>prowler-m365</code>, <code>prowler-github</code>.
+More information: <a href="https://docs.prowler.com/projects/prowler-open-source/en/latest/">https://docs.prowler.com/projects/prowler-open-source/en/latest/</a>.</p></blockquote>
+
+<ul>
+<li>Run the default set of checks on the current Azure account using Azure CLI authentication:</li>
+</ul>
+
+
+<p><code>prowler azure --az-cli-auth</code></p>
+
+<ul>
+<li>Run checks for specific Azure subscriptions:</li>
+</ul>
+
+
+<p><code>prowler azure --az-cli-auth --subscription-ids {{subscription_id1 subscription_id2 ...}}</code></p>
+
+<ul>
+<li>Authenticate using a service principal via environment variables:</li>
+</ul>
+
+
+<p><code>prowler azure --sp-env-auth</code></p>
+
+<ul>
+<li>Authenticate using browser login and specify a tenant ID:</li>
+</ul>
+
+
+<p><code>prowler azure --browser-auth --tenant-id "{{XXXXXXXX}}"</code></p>
+
+<ul>
+<li>Authenticate using a managed identity (e.g. for Azure VM):</li>
+</ul>
+
+
+<p><code>prowler azure --managed-identity-auth</code></p>
+
+<ul>
+<li>Run checks for selected Azure services:</li>
+</ul>
+
+
+<p><code>prowler azure {{[-s|--services]}} {{defender iam ...}}</code></p>
+
+<ul>
+<li>Run a specific Azure check:</li>
+</ul>
+
+
+<p><code>prowler azure {{[-c|--checks]}} {{storage_blob_public_access_level_is_disabled}}</code></p>
+
+<ul>
+<li>Exclude specific checks or services:</li>
+</ul>
+
+
+<p><code>prowler azure {{[-e|--excluded-checks]}} {{storage_blob_public_access_level_is_disabled}} --exclude-services {{defender iam ...}}</code></p>

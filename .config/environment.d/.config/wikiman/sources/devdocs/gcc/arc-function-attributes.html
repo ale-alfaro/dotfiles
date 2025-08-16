@@ -1,0 +1,30 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>6.33.4. ARC Function Attributes</title>
+    
+    <link rel="preload" href="assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="application.css" />
+    <link rel="stylesheet" type="text/css" href="assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="arc-function-attributes" prefix="" listing-src="navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _gcc"><h1 class="subsection" id="ARC-Function-Attributes-1">6.33.4 ARC Function Attributes</h1> <p>These function attributes are supported by the ARC back end: </p> <dl compact> <dt><code>interrupt</code></dt> <dd> <p id="index-interrupt-function-attribute_002c-ARC">Use this attribute to indicate that the specified function is an interrupt handler. The compiler generates function entry and exit sequences suitable for use in an interrupt handler when this attribute is present. </p> <p>On the ARC, you must specify the kind of interrupt to be handled in a parameter to the interrupt attribute like this: </p> <div class="smallexample"> <pre class="smallexample" data-language="cpp">void f () __attribute__ ((interrupt ("ilink1")));</pre>
+</div> <p>Permissible values for this parameter are: <code>ilink1</code> and <code>ilink2</code>. </p> </dd> <dt><code>long_call</code></dt> <dt><code>medium_call</code></dt> <dt><code>short_call</code></dt> <dd>    <p id="index-indirect-calls_002c-ARC">These attributes specify how a particular function is called. These attributes override the <samp>-mlong-calls</samp> and <samp>-mmedium-calls</samp> (see <a href="arc-options#ARC-Options">ARC Options</a>) command-line switches and <code>#pragma long_calls</code> settings. </p> <p>For ARC, a function marked with the <code>long_call</code> attribute is always called using register-indirect jump-and-link instructions, thereby enabling the called function to be placed anywhere within the 32-bit address space. A function marked with the <code>medium_call</code> attribute will always be close enough to be called with an unconditional branch-and-link instruction, which has a 25-bit offset from the call site. A function marked with the <code>short_call</code> attribute will always be close enough to be called with a conditional branch-and-link instruction, which has a 21-bit offset from the call site. </p> </dd> <dt><code>jli_always</code></dt> <dd> <p id="index-jli_005falways-function-attribute_002c-ARC">Forces a particular function to be called using <code>jli</code> instruction. The <code>jli</code> instruction makes use of a table stored into <code>.jlitab</code> section, which holds the location of the functions which are addressed using this instruction. </p> </dd> <dt><code>jli_fixed</code></dt> <dd> <p id="index-jli_005ffixed-function-attribute_002c-ARC">Identical like the above one, but the location of the function in the <code>jli</code> table is known and given as an attribute parameter. </p> </dd> <dt><code>secure_call</code></dt> <dd> <p id="index-secure_005fcall-function-attribute_002c-ARC">This attribute allows one to mark secure-code functions that are callable from normal mode. The location of the secure call function into the <code>sjli</code> table needs to be passed as argument. </p> </dd> </dl>  <p class="header"> <p> Next: <a href="arm-function-attributes#ARM-Function-Attributes" accesskey="n" rel="next">ARM Function Attributes</a>, Previous: <a href="amd-gcn-function-attributes#AMD-GCN-Function-Attributes" accesskey="p" rel="prev">AMD GCN Function Attributes</a>, Up: <a href="function-attributes#Function-Attributes" accesskey="u" rel="up">Function Attributes</a> [<a href="index#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="https://gcc.gnu.org/onlinedocs/gcc-9.5.0/gcc/Option-Index.html#Option-Index" title="Index" rel="index">Index</a>]</p> </p><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; Free Software Foundation<br>Licensed under the GNU Free Documentation License, Version 1.3.<br>
+    <a href="https://gcc.gnu.org/onlinedocs/gcc-9.5.0/gcc/ARC-Function-Attributes.html" class="_attribution-link">https://gcc.gnu.org/onlinedocs/gcc-9.5.0/gcc/ARC-Function-Attributes.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/index.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,93 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>.. Explicitly declared entities</title>
+    
+    <link rel="preload" href="../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../application.css" />
+    <link rel="stylesheet" type="text/css" href="../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="reference/names" prefix="../" listing-src="../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _rust"><h1 class="rule" id="r-names">
+<a class="rule-link" href="#r-names" title="names"><span>[names]</span></a> </h1> <h1 id="names">Names</h1> <div class="rule" id="r-names.intro">
+<a class="rule-link" href="#r-names.intro" title="names.intro"><span>[names<wbr>.intro]</wbr></span></a> </div> <p>An <em>entity</em> is a language construct that can be referred to in some way within the source program, usually via a <a href="paths">path</a>. Entities include <a href="types">types</a>, <a href="items">items</a>, <a href="items/generics">generic parameters</a>, <a href="patterns">variable bindings</a>, <a href="expressions/loop-expr#loop-labels">loop labels</a>, <a href="tokens#lifetimes-and-loop-labels">lifetimes</a>, <a href="expressions/field-expr">fields</a>, <a href="attributes">attributes</a>, and <a href="attributes/diagnostics#lint-check-attributes">lints</a>.</p> <div class="rule" id="r-names.decl">
+<a class="rule-link" href="#r-names.decl" title="names.decl"><span>[names<wbr>.decl]</wbr></span></a> </div> <p>A <em>declaration</em> is a syntactical construct that can introduce a <em>name</em> to refer to an entity. Entity names are valid within a <a href="names/scopes"><em>scope</em></a> — a region of source text where that name may be referenced.</p> <div class="rule" id="r-names.explicit-decl">
+<a class="rule-link" href="#r-names.explicit-decl" title="names.explicit-decl"><span>[names<wbr>.explicit-decl]</wbr></span></a> </div> <p>Some entities are <a href="#explicitly-declared-entities">explicitly declared</a> in the source code, and some are <a href="#implicitly-declared-entities">implicitly declared</a> as part of the language or compiler extensions.</p> <div class="rule" id="r-names.path">
+<a class="rule-link" href="#r-names.path" title="names.path"><span>[names<wbr>.path]</wbr></span></a> </div> <p><a href="paths"><em>Paths</em></a> are used to refer to an entity, possibly in another module or type.</p> <div class="rule" id="r-names.lifetime">
+<a class="rule-link" href="#r-names.lifetime" title="names.lifetime"><span>[names<wbr>.lifetime]</wbr></span></a> </div> <p>Lifetimes and loop labels use a <a href="tokens#lifetimes-and-loop-labels">dedicated syntax</a> using a leading quote.</p> <div class="rule" id="r-names.namespace">
+<a class="rule-link" href="#r-names.namespace" title="names.namespace"><span>[names<wbr>.namespace]</wbr></span></a> </div> <p>Names are segregated into different <a href="names/namespaces"><em>namespaces</em></a>, allowing entities in different namespaces to share the same name without conflict.</p> <div class="rule" id="r-names.resolution">
+<a class="rule-link" href="#r-names.resolution" title="names.resolution"><span>[names<wbr>.resolution]</wbr></span></a> </div> <p><a href="names/name-resolution"><em>Name resolution</em></a> is the compile-time process of tying paths, identifiers, and labels to entity declarations.</p> <div class="rule" id="r-names.visibility">
+<a class="rule-link" href="#r-names.visibility" title="names.visibility"><span>[names<wbr>.visibility]</wbr></span></a> </div> <p>Access to certain names may be restricted based on their <a href="visibility-and-privacy"><em>visibility</em></a>.</p> <div class="rule" id="r-names.explicit">
+<a class="rule-link" href="#r-names.explicit" title="names.explicit"><span>[names<wbr>.explicit]</wbr></span></a> </div> <h2 id="explicitly-declared-entities">Explicitly declared entities</h2> <div class="rule" id="r-names.explicit.list">
+<a class="rule-link" href="#r-names.explicit.list" title="names.explicit.list"><span>[names<wbr>.explicit<wbr>.list]</wbr></wbr></span></a> </div> <p>Entities that explicitly introduce a name in the source code are:</p> <div class="rule" id="r-names.explicit.item-decl">
+<a class="rule-link" href="#r-names.explicit.item-decl" title="names.explicit.item-decl"><span>[names<wbr>.explicit<wbr>.item-decl]</wbr></wbr></span></a> </div> <ul> <li>
+<a href="items">Items</a>: <ul> <li><a href="items/modules">Module declarations</a></li> <li><a href="items/extern-crates">External crate declarations</a></li> <li><a href="items/use-declarations">Use declarations</a></li> <li>
+<a href="items/functions">Function declarations</a> and <a href="items/functions#function-parameters">function parameters</a>
+</li> <li><a href="items/type-aliases">Type aliases</a></li> <li>
+<a href="items/structs">struct</a>, <a href="items/unions">union</a>, <a href="items/enumerations">enum</a>, enum variant declarations, and their named fields</li> <li><a href="items/constant-items">Constant item declarations</a></li> <li><a href="items/static-items">Static item declarations</a></li> <li>
+<a href="items/traits">Trait item declarations</a> and their <a href="items/associated-items">associated items</a>
+</li> <li><a href="items/external-blocks">External block items</a></li> <li>
+<a href="macros-by-example"><code>macro_rules</code> declarations</a> and <a href="macros-by-example#metavariables">matcher metavariables</a>
+</li> <li>
+<a href="items/implementations">Implementation</a> associated items</li> </ul> </li> </ul> <div class="rule" id="r-names.explicit.expr">
+<a class="rule-link" href="#r-names.explicit.expr" title="names.explicit.expr"><span>[names<wbr>.explicit<wbr>.expr]</wbr></wbr></span></a> </div> <ul> <li>
+<a href="expressions">Expressions</a>: <ul> <li>
+<a href="expressions/closure-expr">Closure</a> parameters</li> <li>
+<a href="expressions/loop-expr#while-let-patterns"><code>while let</code></a> pattern bindings</li> <li>
+<a href="expressions/loop-expr#iterator-loops"><code>for</code></a> pattern bindings</li> <li>
+<a href="expressions/if-expr#if-let-patterns"><code>if let</code></a> pattern bindings</li> <li>
+<a href="expressions/match-expr"><code>match</code></a> pattern bindings</li> <li><a href="expressions/loop-expr#loop-labels">Loop labels</a></li> </ul> </li> </ul> <div class="rule" id="r-names.explicit.generics">
+<a class="rule-link" href="#r-names.explicit.generics" title="names.explicit.generics"><span>[names<wbr>.explicit<wbr>.generics]</wbr></wbr></span></a> </div> <ul> <li><a href="items/generics">Generic parameters</a></li> </ul> <div class="rule" id="r-names.explicit.higher-ranked-bounds">
+<a class="rule-link" href="#r-names.explicit.higher-ranked-bounds" title="names.explicit.higher-ranked-bounds"><span>[names<wbr>.explicit<wbr>.higher-ranked-bounds]</wbr></wbr></span></a> </div> <ul> <li><a href="trait-bounds#higher-ranked-trait-bounds">Higher ranked trait bounds</a></li> </ul> <div class="rule" id="r-names.explicit.binding">
+<a class="rule-link" href="#r-names.explicit.binding" title="names.explicit.binding"><span>[names<wbr>.explicit<wbr>.binding]</wbr></wbr></span></a> </div> <ul> <li>
+<a href="statements#let-statements"><code>let</code> statement</a> pattern bindings</li> </ul> <div class="rule" id="r-names.explicit.macro_use">
+<a class="rule-link" href="#r-names.explicit.macro_use" title="names.explicit.macro_use"><span>[names<wbr>.explicit<wbr>.macro_use]</wbr></wbr></span></a> </div> <ul> <li>The <a href="macros-by-example#the-macro_use-attribute"><code>macro_use</code> attribute</a> can introduce macro names from another crate</li> </ul> <div class="rule" id="r-names.explicit.macro_export">
+<a class="rule-link" href="#r-names.explicit.macro_export" title="names.explicit.macro_export"><span>[names<wbr>.explicit<wbr>.macro_export]</wbr></wbr></span></a> </div> <ul> <li>The <a href="macros-by-example#path-based-scope"><code>macro_export</code> attribute</a> can introduce an alias for the macro into the crate root</li> </ul> <div class="rule" id="r-names.explicit.macro-invocation">
+<a class="rule-link" href="#r-names.explicit.macro-invocation" title="names.explicit.macro-invocation"><span>[names<wbr>.explicit<wbr>.macro-invocation]</wbr></wbr></span></a> </div> <p>Additionally, <a href="macros#macro-invocation">macro invocations</a> and <a href="attributes">attributes</a> can introduce names by expanding to one of the above items.</p> <div class="rule" id="r-names.implicit">
+<a class="rule-link" href="#r-names.implicit" title="names.implicit"><span>[names<wbr>.implicit]</wbr></span></a> </div> <h2 id="implicitly-declared-entities">Implicitly declared entities</h2> <div class="rule" id="r-names.implicit.list">
+<a class="rule-link" href="#r-names.implicit.list" title="names.implicit.list"><span>[names<wbr>.implicit<wbr>.list]</wbr></wbr></span></a> </div> <p>The following entities are implicitly defined by the language, or are introduced by compiler options and extensions:</p> <div class="rule" id="r-names.implicit.primitive-types">
+<a class="rule-link" href="#r-names.implicit.primitive-types" title="names.implicit.primitive-types"><span>[names<wbr>.implicit<wbr>.primitive-types]</wbr></wbr></span></a> </div> <ul> <li>
+<a href="names/preludes#language-prelude">Language prelude</a>: <ul> <li>
+<a href="types/boolean">Boolean type</a> — <code>bool</code>
+</li> <li>
+<a href="types/textual">Textual types</a> — <code>char</code> and <code>str</code>
+</li> <li>
+<a href="types/numeric#integer-types">Integer types</a> — <code>i8</code>, <code>i16</code>, <code>i32</code>, <code>i64</code>, <code>i128</code>, <code>u8</code>, <code>u16</code>, <code>u32</code>, <code>u64</code>, <code>u128</code>
+</li> <li>
+<a href="types/numeric#machine-dependent-integer-types">Machine-dependent integer types</a> — <code>usize</code> and <code>isize</code>
+</li> <li>
+<a href="types/numeric#floating-point-types">floating-point types</a> — <code>f32</code> and <code>f64</code>
+</li> </ul> </li> </ul> <div class="rule" id="r-names.implicit.builtin-attributes">
+<a class="rule-link" href="#r-names.implicit.builtin-attributes" title="names.implicit.builtin-attributes"><span>[names<wbr>.implicit<wbr>.builtin-attributes]</wbr></wbr></span></a> </div> <ul> <li><a href="attributes#built-in-attributes-index">Built-in attributes</a></li> </ul> <div class="rule" id="r-names.implicit.prelude">
+<a class="rule-link" href="#r-names.implicit.prelude" title="names.implicit.prelude"><span>[names<wbr>.implicit<wbr>.prelude]</wbr></wbr></span></a> </div> <ul> <li>
+<a href="names/preludes#standard-library-prelude">Standard library prelude</a> items, attributes, and macros</li> </ul> <div class="rule" id="r-names.implicit.stdlib">
+<a class="rule-link" href="#r-names.implicit.stdlib" title="names.implicit.stdlib"><span>[names<wbr>.implicit<wbr>.stdlib]</wbr></wbr></span></a> </div> <ul> <li>
+<a href="names/preludes#extern-prelude">Standard library</a> crates in the root module</li> </ul> <div class="rule" id="r-names.implicit.extern-prelude">
+<a class="rule-link" href="#r-names.implicit.extern-prelude" title="names.implicit.extern-prelude"><span>[names<wbr>.implicit<wbr>.extern-prelude]</wbr></wbr></span></a> </div> <ul> <li>
+<a href="names/preludes#extern-prelude">External crates</a> linked by the compiler</li> </ul> <div class="rule" id="r-names.implicit.tool-attributes">
+<a class="rule-link" href="#r-names.implicit.tool-attributes" title="names.implicit.tool-attributes"><span>[names<wbr>.implicit<wbr>.tool-attributes]</wbr></wbr></span></a> </div> <ul> <li><a href="attributes#tool-attributes">Tool attributes</a></li> </ul> <div class="rule" id="r-names.implicit.lints">
+<a class="rule-link" href="#r-names.implicit.lints" title="names.implicit.lints"><span>[names<wbr>.implicit<wbr>.lints]</wbr></wbr></span></a> </div> <ul> <li>
+<a href="attributes/diagnostics#lint-check-attributes">Lints</a> and <a href="attributes/diagnostics#tool-lint-attributes">tool lint attributes</a>
+</li> </ul> <div class="rule" id="r-names.implicit.derive-helpers">
+<a class="rule-link" href="#r-names.implicit.derive-helpers" title="names.implicit.derive-helpers"><span>[names<wbr>.implicit<wbr>.derive-helpers]</wbr></wbr></span></a> </div> <ul> <li>
+<a href="procedural-macros#derive-macro-helper-attributes">Derive helper attributes</a> are valid within an item without being explicitly imported</li> </ul> <div class="rule" id="r-names.implicit.lifetime-static">
+<a class="rule-link" href="#r-names.implicit.lifetime-static" title="names.implicit.lifetime-static"><span>[names<wbr>.implicit<wbr>.lifetime-static]</wbr></wbr></span></a> </div> <ul> <li>The <a href="keywords#weak-keywords"><code>'static</code></a> lifetime</li> </ul> <div class="rule" id="r-names.implicit.root">
+<a class="rule-link" href="#r-names.implicit.root" title="names.implicit.root"><span>[names<wbr>.implicit<wbr>.root]</wbr></wbr></span></a> </div> <p>Additionally, the crate root module does not have a name, but can be referred to with certain <a href="paths#path-qualifiers">path qualifiers</a> or aliases.</p><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2010 The Rust Project Developers<br>Licensed under the Apache License, Version 2.0 or the MIT license, at your option.<br>
+    <a href="https://doc.rust-lang.org/reference/names.html" class="_attribution-link">https://doc.rust-lang.org/reference/names.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../assets/index.js"></script>
+</body>
+
+</html>

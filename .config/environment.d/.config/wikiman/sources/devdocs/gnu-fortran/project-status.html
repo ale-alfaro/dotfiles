@@ -1,0 +1,30 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>1.5. Project Status</title>
+    
+    <link rel="preload" href="assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="application.css" />
+    <link rel="stylesheet" type="text/css" href="assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="project-status" prefix="" listing-src="navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _gnu_fortran"><h1 class="section" id="Project-Status-1">1.5 Project Status</h1> <blockquote> <p>As soon as <code>gfortran</code> can parse all of the statements correctly, it will be in the “larva” state. When we generate code, the “puppa” state. When <code>gfortran</code> is done, we’ll see if it will be a beautiful butterfly, or just a big bug.... </p> <p>–Andy Vaught, April 2000 </p>
+</blockquote> <p>The start of the GNU Fortran 95 project was announced on the GCC homepage in March 18, 2000 (even though Andy had already been working on it for a while, of course). </p> <p>The GNU Fortran compiler is able to compile nearly all standard-compliant Fortran 95, Fortran 90, and Fortran 77 programs, including a number of standard and non-standard extensions, and can be used on real-world programs. In particular, the supported extensions include OpenMP, Cray-style pointers, some old vendor extensions, and several Fortran 2003 and Fortran 2008 features, including TR 15581. However, it is still under development and has a few remaining rough edges. There also is initial support for OpenACC. Note that this is an experimental feature, incomplete, and subject to change in future versions of GCC. See <a href="https://gcc.gnu.org/wiki/OpenACC">https://gcc.gnu.org/wiki/OpenACC</a> for more information. </p> <p>At present, the GNU Fortran compiler passes the <a href="http://www.fortran-2000.com/ArnaudRecipes/fcvs21_f95.html">NIST Fortran 77 Test Suite</a>, and produces acceptable results on the <a href="http://www.netlib.org/lapack/faq.html#1.21">LAPACK Test Suite</a>. It also provides respectable performance on the <a href="http://www.polyhedron.com/fortran-compiler-comparisons/polyhedron-benchmark-suite">Polyhedron Fortran compiler benchmarks</a> and the <a href="http://www.netlib.org/benchmark/livermore">Livermore Fortran Kernels test</a>. It has been used to compile a number of large real-world programs, including <a href="http://hirlam.org/">the HARMONIE and HIRLAM weather forecasting code</a> and <a href="http://physical-chemistry.scb.uwa.edu.au/tonto/wiki/index.php/Main_Page">the Tonto quantum chemistry package</a>; see <a href="https://gcc.gnu.org/wiki/GfortranApps">https://gcc.gnu.org/wiki/GfortranApps</a> for an extended list. </p> <p>Among other things, the GNU Fortran compiler is intended as a replacement for G77. At this point, nearly all programs that could be compiled with G77 can be compiled with GNU Fortran, although there are a few minor known regressions. </p> <p>The primary work remaining to be done on GNU Fortran falls into three categories: bug fixing (primarily regarding the treatment of invalid code and providing useful error messages), improving the compiler optimizations and the performance of compiled code, and extending the compiler to support future standards—in particular, Fortran 2003, Fortran 2008 and Fortran 2018. </p>  <p class="header"> <p> Next: <a href="standards#Standards" accesskey="n" rel="next">Standards</a>, Previous: <a href="gnu-fortran-and-g77#GNU-Fortran-and-G77" accesskey="p" rel="prev">GNU Fortran and G77</a>, Up: <a href="introduction#Introduction" accesskey="u" rel="up">Introduction</a> [<a href="index#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/Option-Index.html#Option-Index" title="Index" rel="index">Index</a>]</p> </p><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; Free Software Foundation<br>Licensed under the GNU Free Documentation License, Version 1.3.<br>
+    <a href="https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/Project-Status.html" class="_attribution-link">https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/Project-Status.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/index.js"></script>
+</body>
+
+</html>

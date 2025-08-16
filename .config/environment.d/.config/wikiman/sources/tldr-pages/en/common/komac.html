@@ -1,0 +1,60 @@
+<h1>komac</h1>
+
+<blockquote><p>Create WinGet manifests for the <code>winget-pkgs</code> repository.
+More information: <a href="https://github.com/russellbanks/Komac">https://github.com/russellbanks/Komac</a>.</p></blockquote>
+
+<ul>
+<li>Create a new package from scratch:</li>
+</ul>
+
+
+<p><code>komac new {{Package.Identifier}} --version {{1.2.3}} --urls {{https://example.com/app.exe}}</code></p>
+
+<ul>
+<li>Update an existing package with a new version:</li>
+</ul>
+
+
+<p><code>komac update {{Package.Identifier}} --version {{1.2.3}} --urls {{https://example.com/app.exe}}</code></p>
+
+<ul>
+<li>Update a package with multiple URLs and automatically submit:</li>
+</ul>
+
+
+<p><code>komac update {{Package.Identifier}} --version {{1.2.3}} --urls {{https://example.com/app.exe https://example.com/app.msi ...}} --submit</code></p>
+
+<ul>
+<li>Remove a version from winget-pkgs:</li>
+</ul>
+
+
+<p><code>komac remove {{Package.Identifier}} --version {{1.2.3}}</code></p>
+
+<ul>
+<li>List all versions for a package:</li>
+</ul>
+
+
+<p><code>komac list-versions {{Package.Identifier}}</code></p>
+
+<ul>
+<li>Sync your fork of winget-pkgs with the upstream repository:</li>
+</ul>
+
+
+<p><code>komac sync-fork</code></p>
+
+<ul>
+<li>Update the stored GitHub token:</li>
+</ul>
+
+
+<p><code>komac token update --token {{your_github_token}}</code></p>
+
+<ul>
+<li>Generate shell autocompletion script:</li>
+</ul>
+
+
+<p><code>komac complete {{bash|zsh|fish|powershell}}</code></p>

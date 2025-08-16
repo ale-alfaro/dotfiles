@@ -1,0 +1,33 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>std::offset</title>
+    
+    <link rel="preload" href="../../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../../application.css" />
+    <link rel="stylesheet" type="text/css" href="../../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="std/intrinsics/fn.offset" prefix="../../" listing-src="../../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _rust"><h1 class="main-heading">Function offset</h1>
+<pre class="rust item-decl" data-language="rust">pub const unsafe fn offset&lt;Ptr, Delta&gt;(dst: Ptr, offset: Delta) -&gt; Ptr</pre>
+<span class="item-info"><div class="stab unstable">
+<span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>core_intrinsics</code>)</span>
+</div></span><p>Calculates the offset from a pointer.</p> <p>This is implemented as an intrinsic to avoid converting to and from an integer, since the conversion would throw away aliasing information.</p> <p>This can only be used with <code>Ptr</code> as a raw pointer type (<code>*mut</code> or <code>*const</code>) to a <code>Sized</code> pointee and with <code>Delta</code> as <code>usize</code> or <code>isize</code>. Any other instantiations may arbitrarily misbehave, and that’s <em>not</em> a compiler bug.</p> <h2 id="safety">Safety</h2> <p>If the computed offset is non-zero, then both the starting and resulting pointer must be either in bounds or at the end of an allocated object. If either pointer is out of bounds or arithmetic overflow occurs then this operation is undefined behavior.</p> <p>The stabilized version of this intrinsic is <a href="../primitive.pointer#method.offset" title="method pointer::offset"><code>pointer::offset</code></a>.</p><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2010 The Rust Project Developers<br>Licensed under the Apache License, Version 2.0 or the MIT license, at your option.<br>
+    <a href="https://doc.rust-lang.org/std/intrinsics/fn.offset.html" class="_attribution-link">https://doc.rust-lang.org/std/intrinsics/fn.offset.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../../assets/index.js"></script>
+</body>
+
+</html>

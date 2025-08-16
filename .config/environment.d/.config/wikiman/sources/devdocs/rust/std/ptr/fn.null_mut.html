@@ -1,0 +1,36 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>std::null_mut</title>
+    
+    <link rel="preload" href="../../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../../application.css" />
+    <link rel="stylesheet" type="text/css" href="../../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="std/ptr/fn.null_mut" prefix="../../" listing-src="../../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _rust"><h1 class="main-heading">Function null_mut</h1>
+<pre class="rust item-decl" data-language="rust">pub const fn null_mut&lt;T&gt;() -&gt; *mut Twhere
+    T: Thin + ?Sized,</pre>
+<p>Creates a null mutable raw pointer.</p> <p>This function is equivalent to zero-initializing the pointer: <code>MaybeUninit::&lt;*mut T&gt;::zeroed().assume_init()</code>. The resulting pointer has the address 0.</p> <h2 id="examples">Examples</h2> <div class="example-wrap"><pre class="rust rust-example-rendered" data-language="rust">use std::ptr;
+
+let p: *mut i32 = ptr::null_mut();
+assert!(p.is_null());
+assert_eq!(p as usize, 0); // this pointer has the address 0</pre></div><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2010 The Rust Project Developers<br>Licensed under the Apache License, Version 2.0 or the MIT license, at your option.<br>
+    <a href="https://doc.rust-lang.org/std/ptr/fn.null_mut.html" class="_attribution-link">https://doc.rust-lang.org/std/ptr/fn.null_mut.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../../assets/index.js"></script>
+</body>
+
+</html>

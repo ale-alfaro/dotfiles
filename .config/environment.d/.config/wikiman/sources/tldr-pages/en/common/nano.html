@@ -1,0 +1,61 @@
+<h1>nano</h1>
+
+<blockquote><p>Text editor. An enhanced <code>pico</code> clone.
+See also: <code>pico</code>, <code>rnano</code>.
+More information: <a href="https://nano-editor.org/dist/latest/nano.html">https://nano-editor.org/dist/latest/nano.html</a>.</p></blockquote>
+
+<ul>
+<li>Open specific files, moving to the next file after closing the previous one:</li>
+</ul>
+
+
+<p><code>nano {{path/to/file1 path/to/file2 ...}}</code></p>
+
+<ul>
+<li>Start the editor without using configuration files:</li>
+</ul>
+
+
+<p><code>nano {{[-I|--ignorercfiles]}}</code></p>
+
+<ul>
+<li>Open a file and position the cursor at a specific line and column:</li>
+</ul>
+
+
+<p><code>nano +{{line}},{{column}} {{path/to/file}}</code></p>
+
+<ul>
+<li>Open a file and enable soft wrapping:</li>
+</ul>
+
+
+<p><code>nano {{[-S|--softwrap]}} {{path/to/file}}</code></p>
+
+<ul>
+<li>Open a file and indent new lines to the previous line&rsquo;s indentation:</li>
+</ul>
+
+
+<p><code>nano {{[-i|--autoindent]}} {{path/to/file}}</code></p>
+
+<ul>
+<li>Open a file and create a backup file (<code>path/to/file~</code>) on save:</li>
+</ul>
+
+
+<p><code>nano {{[-B|--backup]}} {{path/to/file}}</code></p>
+
+<ul>
+<li>Open a file in restricted mode (i.e. don&rsquo;t read/write to files not specified on the command-line):</li>
+</ul>
+
+
+<p><code>nano {{[-R|--restricted]}} {{path/to/file}}</code></p>
+
+<ul>
+<li>Exit nano:</li>
+</ul>
+
+
+<p><code>&lt;Ctrl x&gt;</code></p>

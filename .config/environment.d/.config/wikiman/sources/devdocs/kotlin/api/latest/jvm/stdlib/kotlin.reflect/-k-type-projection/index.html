@@ -1,0 +1,67 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>kotlin.reflect.KTypeProjection</title>
+    
+    <link rel="preload" href="../../../../../../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../../../application.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="api/latest/jvm/stdlib/kotlin.reflect/-k-type-projection/index" prefix="../../../../../../" listing-src="../../../../../../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _kotlin"><h1 id="ktypeprojection">KTypeProjection</h1>
+<div class="api-docs-breadcrumbs">
+<a href="../../../../../../index">kotlin-stdlib</a> / <a href="../index">kotlin.reflect</a> / <a href="index">KTypeProjection</a>
+</div> <div class="node-page-main" data-kotlin-version="1.1, 1.1, 1.1, 1.1" data-platform="Common, JVM, JS, Native">
+<div data-kotlin-version="1.1, 1.1, 1.1, 1.1" data-platform="Common, JVM, JS, Native">
+<b>Platform and version requirements:</b> JVM (1.1), JS (1.1), Native (1.1) </div>
+<div data-kotlin-version="1.1, 1.1, 1.1, 1.1" data-platform="Common, JVM, JS, Native">
+<pre class="signature" data-language="kotlin">data class KTypeProjection</pre> </div>
+<div data-kotlin-version="1.1, 1.1, 1.1, 1.1" data-platform="Common, JVM, JS, Native"> <p>Represents a type projection. Type projection is usually the argument to another type in a type usage. For example, in the type <code>Array&lt;out Number&gt;</code>, <code>out Number</code> is the covariant projection of the type represented by the class <code>Number</code>.</p> <p>Type projection is either the star projection, or an entity consisting of a specific type plus optional variance.</p> <p>See the <a href="../../../../../../docs/generics#type-projections">Kotlin language documentation</a> for more information.</p> </div>
+</div> <h2 id="constructors">Constructors</h2> <div class="api-declarations-list">
+<div class="declarations" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<b>Platform and version requirements:</b> JVM (1.0), JS (1.0), Native (1.0) <h4><a href="-init-">&lt;init&gt;</a></h4> <div class="summary-group" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native"> <p>Represents a type projection. Type projection is usually the argument to another type in a type usage. For example, in the type <code>Array&lt;out Number&gt;</code>, <code>out Number</code> is the covariant projection of the type represented by the class <code>Number</code>.</p> <div data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<pre class="signature" data-language="kotlin">KTypeProjection(variance: KVariance?, type: KType?)</pre> </div>
+</div> </div> </div> <h2 id="properties">Properties</h2> <div class="api-declarations-list">
+<div class="declarations" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<b>Platform and version requirements:</b> JVM (1.0), JS (1.0), Native (1.0) <h4><a href="type">type</a></h4> <div class="summary-group" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native"> <p>The type specified in the projection, or <code>null</code> if this is a star projection.</p> <div data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<pre class="signature" data-language="kotlin">val type: KType?</pre> </div>
+</div> </div> <div class="declarations" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<b>Platform and version requirements:</b> JVM (1.0), JS (1.0), Native (1.0) <h4><a href="variance">variance</a></h4> <div class="summary-group" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native"> <p>The use-site variance specified in the projection, or <code>null</code> if this is a star projection.</p> <div data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<pre class="signature" data-language="kotlin">val variance: KVariance?</pre> </div>
+</div> </div> </div> <h2 id="functions">Functions</h2> <div class="api-declarations-list">
+<div class="declarations" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<b>Platform and version requirements:</b> JVM (1.0), JS (1.0), Native (1.0) <h4><a href="to-string">toString</a></h4> <div class="summary-group" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native"> <p>Returns a string representation of the object.</p> <div data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<pre class="signature" data-language="kotlin">fun toString(): String</pre> </div>
+</div> </div> </div> <h2 id="companion-object-properties">Companion Object Properties</h2> <div class="api-declarations-list">
+<div class="declarations" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<b>Platform and version requirements:</b> JVM (1.0), JS (1.0), Native (1.0) <h4><a href="-s-t-a-r">STAR</a></h4> <div class="summary-group" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native"> <p>Star projection, denoted by the <code>*</code> character. For example, in the type <code>KClass&lt;*&gt;</code>, <code>*</code> is the star projection. See the <a href="../../../../../../docs/generics#star-projections">Kotlin language documentation</a> for more information.</p> <div data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<pre class="signature" data-language="kotlin">val STAR: KTypeProjection</pre> </div>
+</div> </div> </div> <h2 id="companion-object-functions">Companion Object Functions</h2> <div class="api-declarations-list">
+<div class="declarations" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<b>Platform and version requirements:</b> JVM (1.0), JS (1.0), Native (1.0) <h4><a href="contravariant">contravariant</a></h4> <div class="summary-group" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native"> <p>Creates a contravariant projection of a given type, denoted by the <code>in</code> modifier applied to a type. For example, in the type <code>MutableList&lt;in Number&gt;</code>, <code>in Number</code> is a contravariant projection of the type of class <code>Number</code>.</p> <div data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<pre class="signature" data-language="kotlin">fun contravariant(type: KType): KTypeProjection</pre> </div>
+</div> </div> <div class="declarations" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<b>Platform and version requirements:</b> JVM (1.0), JS (1.0), Native (1.0) <h4><a href="covariant">covariant</a></h4> <div class="summary-group" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native"> <p>Creates a covariant projection of a given type, denoted by the <code>out</code> modifier applied to a type. For example, in the type <code>Array&lt;out Number&gt;</code>, <code>out Number</code> is a covariant projection of the type of class <code>Number</code>.</p> <div data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<pre class="signature" data-language="kotlin">fun covariant(type: KType): KTypeProjection</pre> </div>
+</div> </div> <div class="declarations" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<b>Platform and version requirements:</b> JVM (1.0), JS (1.0), Native (1.0) <h4><a href="invariant">invariant</a></h4> <div class="summary-group" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native"> <p>Creates an invariant projection of a given type. Invariant projection is just the type itself, without any use-site variance modifiers applied to it. For example, in the type <code>Set&lt;String&gt;</code>, <code>String</code> is an invariant projection of the type represented by the class <code>String</code>.</p> <div data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<pre class="signature" data-language="kotlin">fun invariant(type: KType): KTypeProjection</pre> </div>
+</div> </div> </div><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2010&ndash;2023 JetBrains s.r.o. and Kotlin Programming Language contributors<br>Licensed under the Apache License, Version 2.0.<br>
+    <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-type-projection/index.html" class="_attribution-link">https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-type-projection/index.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../../../../../../assets/index.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,27 @@
+<h1>i2cget</h1>
+
+<blockquote><p>Read from an register of an I2C device.
+See also: <code>i2cdetect</code>, <code>i2cdump</code>, <code>i2cset</code>.
+Note: All addresses should be specified in hexadecimal.
+More information: <a href="https://manned.org/i2cget">https://manned.org/i2cget</a>.</p></blockquote>
+
+<ul>
+<li>Read from a register of an I2C device:</li>
+</ul>
+
+
+<p><code>i2cget {{i2cbus}} {{device_address}} {{register_address}}</code></p>
+
+<ul>
+<li>Read from a register of an I2C device without asking for confirmation:</li>
+</ul>
+
+
+<p><code>i2cget -y {{i2cbus}} {{device_address}} {{register_address}}</code></p>
+
+<ul>
+<li>Read from a register of an I2C device using a specific mode:</li>
+</ul>
+
+
+<p><code>i2cget {{i2cbus}} {{device_address}} {{register_address}} {{b|w|c|s|i}}</code></p>

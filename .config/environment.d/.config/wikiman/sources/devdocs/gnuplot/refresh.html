@@ -1,0 +1,38 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>Refresh</title>
+    
+    <link rel="preload" href="assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="application.css" />
+    <link rel="stylesheet" type="text/css" href="assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="refresh" prefix="" listing-src="navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _gnuplot"><h1 id="SECTION040240000000000000000">Refresh</h1>  The <b>refresh</b> command is similar to <b>replot</b>, with two major differences. <b>refresh</b> reformats and redraws the current plot using the data already read in. This means that you can use <b>refresh</b> for plots with inline data (pseudo-device '-') and for plots from datafiles whose contents are volatile. You cannot use the <b>refresh</b> command to add new data to an existing plot. <p> Mousing operations, in particular zoom and unzoom, will use <b>refresh</b> rather than <b>replot</b> if appropriate. Example: </p>
+<pre>
+plot 'datafile' volatile with lines, '-' with labels
+100 200 "Special point"
+e
+# Various mousing operations go here
+set title "Zoomed in view"
+set term post
+set output 'zoom.ps'
+refresh</pre><div class="_attribution">
+  <p class="_attribution-p">
+    Copyright 1986 - 1993, 1998, 2004   Thomas Williams, Colin Kelley<br>Distributed under the <a href="https://sourceforge.net/p/gnuplot/gnuplot-main/ci/master/tree/Copyright">gnuplot license</a> (rights to distribute modified versions are withheld).<br>
+    
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/index.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,100 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>9.201. MOD</title>
+    
+    <link rel="preload" href="assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="application.css" />
+    <link rel="stylesheet" type="text/css" href="assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="mod" prefix="" listing-src="navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _gnu_fortran"><h1 class="section" id="MOD-_002d_002d_002d-Remainder-function">9.201 MOD — Remainder function</h1>          <dl compact id="index-division_002c-remainder"> <dt>Description:</dt> <dd>
+<p><code>MOD(A,P)</code> computes the remainder of the division of A by P. </p> </dd> <dt>Standard:</dt> <dd>
+<p>Fortran 77 and later, has overloads that are GNU extensions </p> </dd> <dt>Class:</dt> <dd>
+<p>Elemental function </p> </dd> <dt>Syntax:</dt> <dd>
+<p><code>RESULT = MOD(A, P)</code> </p> </dd> <dt>Arguments:</dt> <dd>
+<table> <tr>
+<td width="15%"><var>A</var></td>
+<td width="70%">Shall be a scalar of type <code>INTEGER</code> or <code>REAL</code>.</td>
+</tr> <tr>
+<td width="15%"><var>P</var></td>
+<td width="70%">Shall be a scalar of the same type and kind as <var>A</var> and not equal to zero.</td>
+</tr> </table> </dd> <dt>Return value:</dt> <dd>
+<p>The return value is the result of <code>A - (INT(A/P) * P)</code>. The type and kind of the return value is the same as that of the arguments. The returned value has the same sign as A and a magnitude less than the magnitude of P. </p> </dd> <dt>Example:</dt> <dd>
+<div class="smallexample"> <pre class="smallexample">program test_mod
+  print *, mod(17,3)
+  print *, mod(17.5,5.5)
+  print *, mod(17.5d0,5.5)
+  print *, mod(17.5,5.5d0)
+
+  print *, mod(-17,3)
+  print *, mod(-17.5,5.5)
+  print *, mod(-17.5d0,5.5)
+  print *, mod(-17.5,5.5d0)
+
+  print *, mod(17,-3)
+  print *, mod(17.5,-5.5)
+  print *, mod(17.5d0,-5.5)
+  print *, mod(17.5,-5.5d0)
+end program test_mod</pre>
+</div> </dd> <dt>Specific names:</dt> <dd>
+<table> <tr>
+<td width="20%">Name</td>
+<td width="20%">Arguments</td>
+<td width="20%">Return type</td>
+<td width="25%">Standard</td>
+</tr> <tr>
+<td width="20%"><code>MOD(A,P)</code></td>
+<td width="20%"><code>INTEGER A,P</code></td>
+<td width="20%"><code>INTEGER</code></td>
+<td width="25%">Fortran 95 and later</td>
+</tr> <tr>
+<td width="20%"><code>AMOD(A,P)</code></td>
+<td width="20%"><code>REAL(4) A,P</code></td>
+<td width="20%"><code>REAL(4)</code></td>
+<td width="25%">Fortran 95 and later</td>
+</tr> <tr>
+<td width="20%"><code>DMOD(A,P)</code></td>
+<td width="20%"><code>REAL(8) A,P</code></td>
+<td width="20%"><code>REAL(8)</code></td>
+<td width="25%">Fortran 95 and later</td>
+</tr> <tr>
+<td width="20%"><code>BMOD(A,P)</code></td>
+<td width="20%"><code>INTEGER(1) A,P</code></td>
+<td width="20%"><code>INTEGER(1)</code></td>
+<td width="25%">GNU extension</td>
+</tr> <tr>
+<td width="20%"><code>IMOD(A,P)</code></td>
+<td width="20%"><code>INTEGER(2) A,P</code></td>
+<td width="20%"><code>INTEGER(2)</code></td>
+<td width="25%">GNU extension</td>
+</tr> <tr>
+<td width="20%"><code>JMOD(A,P)</code></td>
+<td width="20%"><code>INTEGER(4) A,P</code></td>
+<td width="20%"><code>INTEGER(4)</code></td>
+<td width="25%">GNU extension</td>
+</tr> <tr>
+<td width="20%"><code>KMOD(A,P)</code></td>
+<td width="20%"><code>INTEGER(8) A,P</code></td>
+<td width="20%"><code>INTEGER(8)</code></td>
+<td width="25%">GNU extension</td>
+</tr> </table> </dd> <dt>See also:</dt> <dd>
+<p><a href="modulo#MODULO">MODULO</a> </p> </dd> </dl><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; Free Software Foundation<br>Licensed under the GNU Free Documentation License, Version 1.3.<br>
+    <a href="https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/MOD.html" class="_attribution-link">https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/MOD.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/index.js"></script>
+</body>
+
+</html>

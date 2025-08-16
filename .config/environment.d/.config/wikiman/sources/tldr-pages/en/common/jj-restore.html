@@ -1,0 +1,25 @@
+<h1>jj restore</h1>
+
+<blockquote><p>Restore files from another revision.
+More information: <a href="https://jj-vcs.github.io/jj/latest/cli-reference/#jj-restore">https://jj-vcs.github.io/jj/latest/cli-reference/#jj-restore</a>.</p></blockquote>
+
+<ul>
+<li>Restore files from a revision into another revision:</li>
+</ul>
+
+
+<p><code>jj restore {{[-f|--from]}} {{revset}} {{[-t|--into]}} {{revset}} {{filesets}}</code></p>
+
+<ul>
+<li>Undo the changes in a revision as compared to the merge of its parents:</li>
+</ul>
+
+
+<p><code>jj restore {{[-c|--changes-in]}} {{revset}} {{filesets}}</code></p>
+
+<ul>
+<li>Interactively choose what parts to restore:</li>
+</ul>
+
+
+<p><code>jj restore {{[-f|--from]}} {{revset}} {{[-t|--into]}} {{revset}} {{[-i|--interactive]}}</code></p>

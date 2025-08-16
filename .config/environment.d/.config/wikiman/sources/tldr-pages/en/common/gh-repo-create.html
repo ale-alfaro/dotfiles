@@ -1,0 +1,39 @@
+<h1>gh repo create</h1>
+
+<blockquote><p>Create a new GitHub repository.
+More information: <a href="https://cli.github.com/manual/gh_repo_create">https://cli.github.com/manual/gh_repo_create</a>.</p></blockquote>
+
+<ul>
+<li>Create a new repository interactively:</li>
+</ul>
+
+
+<p><code>gh repo create</code></p>
+
+<ul>
+<li>Create a new repository with a specified name and description:</li>
+</ul>
+
+
+<p><code>gh repo create {{repo_name}} {{[-d|--description]}} "{{repo_description}}"</code></p>
+
+<ul>
+<li>Create a private repository from the current directory:</li>
+</ul>
+
+
+<p><code>gh repo create {{[-s|--source]}} . --private</code></p>
+
+<ul>
+<li>Clone the new repository locally after creation:</li>
+</ul>
+
+
+<p><code>gh repo create {{repo_name}} {{[-c|--clone]}}</code></p>
+
+<ul>
+<li>Push the current directory to a new GitHub repository:</li>
+</ul>
+
+
+<p><code>gh repo create {{[-s|--source]}} . --public</code></p>

@@ -1,0 +1,192 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>.. Inherent Implementations</title>
+    
+    <link rel="preload" href="../../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../../application.css" />
+    <link rel="stylesheet" type="text/css" href="../../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="reference/items/implementations" prefix="../../" listing-src="../../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _rust"><h1 class="rule" id="r-items.impl">
+<a class="rule-link" href="#r-items.impl" title="items.impl"><span>[items<wbr>.impl]</wbr></span></a> </h1> <h1 id="implementations">Implementations</h1> <div class="rule" id="r-items.impl.syntax">
+<a class="rule-link" href="#r-items.impl.syntax" title="items.impl.syntax"><span>[items<wbr>.impl<wbr>.syntax]</wbr></wbr></span></a> </div> <div class="grammar-container"> <p><strong><sup>Syntax</sup></strong> <br> <span class="grammar-text grammar-production" id="grammar-Implementation" onclick="show_railroad()"><a href="implementations#railroad-Implementation">Implementation</a></span> → <span class="grammar-text"><a href="implementations#grammar-InherentImpl">InherentImpl</a></span> | <span class="grammar-text"><a href="implementations#grammar-TraitImpl">TraitImpl</a></span></p> <p><span class="grammar-text grammar-production" id="grammar-InherentImpl" onclick="show_railroad()"><a href="implementations#railroad-InherentImpl">InherentImpl</a></span> → <br> <span class="grammar-literal">impl</span> <span class="grammar-text"><a href="generics#grammar-GenericParams">GenericParams</a></span><sup>?</sup> <span class="grammar-text"><a href="../types#grammar-Type">Type</a></span> <span class="grammar-text"><a href="generics#grammar-WhereClause">WhereClause</a></span><sup>?</sup> <span class="grammar-literal">{</span> <br> <span class="grammar-text"><a href="../attributes#grammar-InnerAttribute">InnerAttribute</a></span><sup>*</sup> <br> <span class="grammar-text"><a href="associated-items#grammar-AssociatedItem">AssociatedItem</a></span><sup>*</sup> <br> <span class="grammar-literal">}</span></p> <p><span class="grammar-text grammar-production" id="grammar-TraitImpl" onclick="show_railroad()"><a href="implementations#railroad-TraitImpl">TraitImpl</a></span> → <br> <span class="grammar-literal">unsafe</span><sup>?</sup> <span class="grammar-literal">impl</span> <span class="grammar-text"><a href="generics#grammar-GenericParams">GenericParams</a></span><sup>?</sup> <span class="grammar-literal">!</span><sup>?</sup> <span class="grammar-text"><a href="../paths#grammar-TypePath">TypePath</a></span> <span class="grammar-literal">for</span> <span class="grammar-text"><a href="../types#grammar-Type">Type</a></span> <br> <span class="grammar-text"><a href="generics#grammar-WhereClause">WhereClause</a></span><sup>?</sup> <br> <span class="grammar-literal">{</span> <br> <span class="grammar-text"><a href="../attributes#grammar-InnerAttribute">InnerAttribute</a></span><sup>*</sup> <br> <span class="grammar-text"><a href="associated-items#grammar-AssociatedItem">AssociatedItem</a></span><sup>*</sup> <br> <span class="grammar-literal">}</span></p> <p><button class="grammar-toggle-railroad" type="button" title="Toggle railroad display" onclick="toggle_railroad()">Show Railroad</button></p> </div> <div class="grammar-railroad grammar-hidden"> <div style="width: 234px; height: auto; max-width: 100%; max-height: 100%" class="railroad-production" id="railroad-Implementation">
+<svg class="railroad" viewbox="0 0 234 107" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">  <g class="verticalgrid"> <a class="link" xlink:href="implementations.html#grammar-Implementation"> <text class="comment" x="64" y="25"> Implementation</text> </a> <g class="sequence">  <g class="choice">  <a class="link" xlink:href="implementations.html#railroad-InherentImpl"> <g class="nonterminal">  <text x="117" y="58"> InherentImpl</text> </g> </a>   <a class="link" xlink:href="implementations.html#railroad-TraitImpl"> <g class="nonterminal">  <text x="105" y="91"> TraitImpl</text> </g> </a> </g>    </g> </g> </svg> </div> <div style="width: 618px; height: auto; max-width: 100%; max-height: 100%" class="railroad-production" id="railroad-InherentImpl">
+<svg class="railroad" viewbox="0 0 618 279" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">  <g class="verticalgrid"> <a class="link" xlink:href="implementations.html#grammar-InherentImpl"> <text class="comment" x="57" y="25"> InherentImpl</text> </a> <g class="sequence">  <g class="stack">   <g class="sequence"> <g class="terminal">  <text x="73" y="71"> impl</text> </g> <g class="optional">  <a class="link" xlink:href="generics.html#railroad-GenericParams"> <g class="nonterminal">  <text x="195" y="71"> GenericParams</text> </g> </a> </g> <a class="link" xlink:href="../types.html#railroad-Type"> <g class="nonterminal">  <text x="317" y="71"> Type</text> </g> </a> <g class="optional">  <a class="link" xlink:href="generics.html#railroad-WhereClause"> <g class="nonterminal">  <text x="431" y="71"> WhereClause</text> </g> </a> </g> <g class="terminal">  <text x="533" y="71"> {</text> </g>     </g>  <g class="sequence"> <g class="optional">  <g class="repeat">   <a class="link" xlink:href="../attributes.html#railroad-InnerAttribute"> <g class="nonterminal">  <text x="149" y="131"> InnerAttribute</text> </g> </a> </g> </g> </g>  <g class="sequence"> <g class="optional">  <g class="repeat">   <a class="link" xlink:href="associated-items.html#railroad-AssociatedItem"> <g class="nonterminal">  <text x="149" y="203"> AssociatedItem</text> </g> </a> </g> </g> </g>  <g class="sequence"> <g class="terminal">  <text x="61" y="263"> }</text> </g> </g> </g>    </g> </g> </svg> </div> <div style="width: 774px; height: auto; max-width: 100%; max-height: 100%" class="railroad-production" id="railroad-TraitImpl">
+<svg class="railroad" viewbox="0 0 774 387" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">  <g class="verticalgrid"> <a class="link" xlink:href="implementations.html#grammar-TraitImpl"> <text class="comment" x="46" y="25"> TraitImpl</text> </a> <g class="sequence">  <g class="stack">   <g class="sequence"> <g class="optional">  <g class="terminal">  <text x="105" y="71"> unsafe</text> </g> </g> <g class="terminal">  <text x="199" y="71"> impl</text> </g> <g class="optional">  <a class="link" xlink:href="generics.html#railroad-GenericParams"> <g class="nonterminal">  <text x="321" y="71"> GenericParams</text> </g> </a> </g> <g class="optional">  <g class="terminal">  <text x="455" y="71"> !</text> </g> </g> <a class="link" xlink:href="../paths.html#railroad-TypePath"> <g class="nonterminal">  <text x="545" y="71"> TypePath</text> </g> </a> <g class="terminal">  <text x="619" y="71"> for</text> </g> <a class="link" xlink:href="../types.html#railroad-Type"> <g class="nonterminal">  <text x="677" y="71"> Type</text> </g> </a>       </g>  <g class="sequence"> <g class="optional">  <a class="link" xlink:href="generics.html#railroad-WhereClause"> <g class="nonterminal">  <text x="125" y="131"> WhereClause</text> </g> </a> </g> </g>  <g class="sequence"> <g class="terminal">  <text x="61" y="179"> {</text> </g> </g>  <g class="sequence"> <g class="optional">  <g class="repeat">   <a class="link" xlink:href="../attributes.html#railroad-InnerAttribute"> <g class="nonterminal">  <text x="149" y="239"> InnerAttribute</text> </g> </a> </g> </g> </g>  <g class="sequence"> <g class="optional">  <g class="repeat">   <a class="link" xlink:href="associated-items.html#railroad-AssociatedItem"> <g class="nonterminal">  <text x="149" y="311"> AssociatedItem</text> </g> </a> </g> </g> </g>  <g class="sequence"> <g class="terminal">  <text x="61" y="371"> }</text> </g> </g> </g>    </g> </g> </svg> </div> </div> <div class="rule" id="r-items.impl.intro">
+<a class="rule-link" href="#r-items.impl.intro" title="items.impl.intro"><span>[items<wbr>.impl<wbr>.intro]</wbr></wbr></span></a> </div> <p>An <em>implementation</em> is an item that associates items with an <em>implementing type</em>. Implementations are defined with the keyword <code>impl</code> and contain functions that belong to an instance of the type that is being implemented or to the type statically.</p> <div class="rule" id="r-items.impl.kinds">
+<a class="rule-link" href="#r-items.impl.kinds" title="items.impl.kinds"><span>[items<wbr>.impl<wbr>.kinds]</wbr></wbr></span></a> </div> <p>There are two types of implementations:</p> <ul> <li>inherent implementations</li> <li>
+<a href="traits">trait</a> implementations</li> </ul> <div class="rule" id="r-items.impl.inherent">
+<a class="rule-link" href="#r-items.impl.inherent" title="items.impl.inherent"><span>[items<wbr>.impl<wbr>.inherent]</wbr></wbr></span></a> </div> <h2 id="inherent-implementations">Inherent Implementations</h2> <div class="rule" id="r-items.impl.inherent.intro">
+<a class="rule-link" href="#r-items.impl.inherent.intro" title="items.impl.inherent.intro"><span>[items<wbr>.impl<wbr>.inherent<wbr>.intro]</wbr></wbr></wbr></span></a> </div> <p>An inherent implementation is defined as the sequence of the <code>impl</code> keyword, generic type declarations, a path to a nominal type, a where clause, and a bracketed set of associable items.</p> <div class="rule" id="r-items.impl.inherent.implementing-type">
+<a class="rule-link" href="#r-items.impl.inherent.implementing-type" title="items.impl.inherent.implementing-type"><span>[items<wbr>.impl<wbr>.inherent<wbr>.implementing-type]</wbr></wbr></wbr></span></a> </div> <p>The nominal type is called the <em>implementing type</em> and the associable items are the <em>associated items</em> to the implementing type.</p> <div class="rule" id="r-items.impl.inherent.associated-items">
+<a class="rule-link" href="#r-items.impl.inherent.associated-items" title="items.impl.inherent.associated-items"><span>[items<wbr>.impl<wbr>.inherent<wbr>.associated-items]</wbr></wbr></wbr></span></a> </div> <p>Inherent implementations associate the contained items to the implementing type.</p> <div class="rule" id="r-items.impl.inherent.associated-items.allowed-items">
+<a class="rule-link" href="#r-items.impl.inherent.associated-items.allowed-items" title="items.impl.inherent.associated-items.allowed-items"><span>[items<wbr>.impl<wbr>.inherent<wbr>.associated-items<wbr>.allowed-items]</wbr></wbr></wbr></wbr></span></a> </div> <p>Inherent implementations can contain <a href="associated-items#associated-functions-and-methods">associated functions</a> (including <a href="associated-items#methods">methods</a>) and <a href="associated-items#associated-constants">associated constants</a>.</p> <div class="rule" id="r-items.impl.inherent.type-alias">
+<a class="rule-link" href="#r-items.impl.inherent.type-alias" title="items.impl.inherent.type-alias"><span>[items<wbr>.impl<wbr>.inherent<wbr>.type-alias]</wbr></wbr></wbr></span></a> </div> <p>They cannot contain associated type aliases.</p> <div class="rule" id="r-items.impl.inherent.associated-item-path">
+<a class="rule-link" href="#r-items.impl.inherent.associated-item-path" title="items.impl.inherent.associated-item-path"><span>[items<wbr>.impl<wbr>.inherent<wbr>.associated-item-path]</wbr></wbr></wbr></span></a> </div> <p>The <a href="../paths">path</a> to an associated item is any path to the implementing type, followed by the associated item’s identifier as the final path component.</p> <div class="rule" id="r-items.impl.inherent.coherence">
+<a class="rule-link" href="#r-items.impl.inherent.coherence" title="items.impl.inherent.coherence"><span>[items<wbr>.impl<wbr>.inherent<wbr>.coherence]</wbr></wbr></wbr></span></a> </div> <p>A type can also have multiple inherent implementations. An implementing type must be defined within the same crate as the original type definition.</p> <pre data-language="rust">pub mod color {
+    pub struct Color(pub u8, pub u8, pub u8);
+
+    impl Color {
+        pub const WHITE: Color = Color(255, 255, 255);
+    }
+}
+
+mod values {
+    use super::color::Color;
+    impl Color {
+        pub fn red() -&gt; Color {
+            Color(255, 0, 0)
+        }
+    }
+}
+
+pub use self::color::Color;
+fn main() {
+    // Actual path to the implementing type and impl in the same module.
+    color::Color::WHITE;
+
+    // Impl blocks in different modules are still accessed through a path to the type.
+    color::Color::red();
+
+    // Re-exported paths to the implementing type also work.
+    Color::red();
+
+    // Does not work, because use in `values` is not pub.
+    // values::Color::red();
+}</pre> <div class="rule" id="r-items.impl.trait">
+<a class="rule-link" href="#r-items.impl.trait" title="items.impl.trait"><span>[items<wbr>.impl<wbr>.trait]</wbr></wbr></span></a> </div> <h2 id="trait-implementations">Trait Implementations</h2> <div class="rule" id="r-items.impl.trait.intro">
+<a class="rule-link" href="#r-items.impl.trait.intro" title="items.impl.trait.intro"><span>[items<wbr>.impl<wbr>.trait<wbr>.intro]</wbr></wbr></wbr></span></a> </div> <p>A <em>trait implementation</em> is defined like an inherent implementation except that the optional generic type declarations are followed by a <a href="traits">trait</a>, followed by the keyword <code>for</code>, followed by a path to a nominal type.</p>  <div class="rule" id="r-items.impl.trait.implemented-trait">
+<a class="rule-link" href="#r-items.impl.trait.implemented-trait" title="items.impl.trait.implemented-trait"><span>[items<wbr>.impl<wbr>.trait<wbr>.implemented-trait]</wbr></wbr></wbr></span></a> </div> <p>The trait is known as the <em>implemented trait</em>. The implementing type implements the implemented trait.</p> <div class="rule" id="r-items.impl.trait.def-requirement">
+<a class="rule-link" href="#r-items.impl.trait.def-requirement" title="items.impl.trait.def-requirement"><span>[items<wbr>.impl<wbr>.trait<wbr>.def-requirement]</wbr></wbr></wbr></span></a> </div> <p>A trait implementation must define all non-default associated items declared by the implemented trait, may redefine default associated items defined by the implemented trait, and cannot define any other items.</p> <div class="rule" id="r-items.impl.trait.associated-item-path">
+<a class="rule-link" href="#r-items.impl.trait.associated-item-path" title="items.impl.trait.associated-item-path"><span>[items<wbr>.impl<wbr>.trait<wbr>.associated-item-path]</wbr></wbr></wbr></span></a> </div> <p>The path to the associated items is <code>&lt;</code> followed by a path to the implementing type followed by <code>as</code> followed by a path to the trait followed by <code>&gt;</code> as a path component followed by the associated item’s path component.</p> <div class="rule" id="r-items.impl.trait.safety">
+<a class="rule-link" href="#r-items.impl.trait.safety" title="items.impl.trait.safety"><span>[items<wbr>.impl<wbr>.trait<wbr>.safety]</wbr></wbr></wbr></span></a> </div> <p><a href="traits#unsafe-traits">Unsafe traits</a> require the trait implementation to begin with the <code>unsafe</code> keyword.</p> <pre data-language="rust">#![allow(unused)]
+fn main() {
+#[derive(Copy, Clone)]
+struct Point {x: f64, y: f64};
+type Surface = i32;
+struct BoundingBox {x: f64, y: f64, width: f64, height: f64};
+trait Shape { fn draw(&amp;self, s: Surface); fn bounding_box(&amp;self) -&gt; BoundingBox; }
+fn do_draw_circle(s: Surface, c: Circle) { }
+struct Circle {
+    radius: f64,
+    center: Point,
+}
+
+impl Copy for Circle {}
+
+impl Clone for Circle {
+    fn clone(&amp;self) -&gt; Circle { *self }
+}
+
+impl Shape for Circle {
+    fn draw(&amp;self, s: Surface) { do_draw_circle(s, *self); }
+    fn bounding_box(&amp;self) -&gt; BoundingBox {
+        let r = self.radius;
+        BoundingBox {
+            x: self.center.x - r,
+            y: self.center.y - r,
+            width: 2.0 * r,
+            height: 2.0 * r,
+        }
+    }
+}
+}</pre> <div class="rule" id="r-items.impl.trait.coherence">
+<a class="rule-link" href="#r-items.impl.trait.coherence" title="items.impl.trait.coherence"><span>[items<wbr>.impl<wbr>.trait<wbr>.coherence]</wbr></wbr></wbr></span></a> </div> <h3 id="trait-implementation-coherence">Trait Implementation Coherence</h3> <div class="rule" id="r-items.impl.trait.coherence.intro">
+<a class="rule-link" href="#r-items.impl.trait.coherence.intro" title="items.impl.trait.coherence.intro"><span>[items<wbr>.impl<wbr>.trait<wbr>.coherence<wbr>.intro]</wbr></wbr></wbr></wbr></span></a> </div> <p>A trait implementation is considered incoherent if either the orphan rules check fails or there are overlapping implementation instances.</p> <div class="rule" id="r-items.impl.trait.coherence.overlapping">
+<a class="rule-link" href="#r-items.impl.trait.coherence.overlapping" title="items.impl.trait.coherence.overlapping"><span>[items<wbr>.impl<wbr>.trait<wbr>.coherence<wbr>.overlapping]</wbr></wbr></wbr></wbr></span></a> </div> <p>Two trait implementations overlap when there is a non-empty intersection of the traits the implementation is for, the implementations can be instantiated with the same type. </p> <div class="rule" id="r-items.impl.trait.orphan-rule">
+<a class="rule-link" href="#r-items.impl.trait.orphan-rule" title="items.impl.trait.orphan-rule"><span>[items<wbr>.impl<wbr>.trait<wbr>.orphan-rule]</wbr></wbr></wbr></span></a> </div> <h4 id="orphan-rules">Orphan rules</h4> <div class="rule" id="r-items.impl.trait.orphan-rule.intro">
+<a class="rule-link" href="#r-items.impl.trait.orphan-rule.intro" title="items.impl.trait.orphan-rule.intro"><span>[items<wbr>.impl<wbr>.trait<wbr>.orphan-rule<wbr>.intro]</wbr></wbr></wbr></wbr></span></a> </div> <p>The <em>orphan rule</em> states that a trait implementation is only allowed if either the trait or at least one of the types in the implementation is defined in the current crate. It prevents conflicting trait implementations across different crates and is key to ensuring coherence.</p> <p>An orphan implementation is one that implements a foreign trait for a foreign type. If these were freely allowed, two crates could implement the same trait for the same type in incompatible ways, creating a situation where adding or updating a dependency could break compilation due to conflicting implementations.</p> <p>The orphan rule enables library authors to add new implementations to their traits without fear that they’ll break downstream code. Without these restrictions, a library couldn’t add an implementation like <code>impl&lt;T: Display&gt; MyTrait for T</code> without potentially conflicting with downstream implementations.</p> <div class="rule" id="r-items.impl.trait.orphan-rule.general">
+<a class="rule-link" href="#r-items.impl.trait.orphan-rule.general" title="items.impl.trait.orphan-rule.general"><span>[items<wbr>.impl<wbr>.trait<wbr>.orphan-rule<wbr>.general]</wbr></wbr></wbr></wbr></span></a> </div> <p>Given <code>impl&lt;P1..=Pn&gt; Trait&lt;T1..=Tn&gt; for T0</code>, an <code>impl</code> is valid only if at least one of the following is true:</p> <ul> <li>
+<code>Trait</code> is a <a href="../glossary#local-trait">local trait</a>
+</li> <li>All of <ul> <li>At least one of the types <code>T0..=Tn</code> must be a <a href="../glossary#local-type">local type</a>. Let <code>Ti</code> be the first such type.</li> <li>No <a href="../glossary#uncovered-type">uncovered type</a> parameters <code>P1..=Pn</code> may appear in <code>T0..Ti</code> (excluding <code>Ti</code>)</li> </ul> </li> </ul> <div class="rule" id="r-items.impl.trait.uncovered-param">
+<a class="rule-link" href="#r-items.impl.trait.uncovered-param" title="items.impl.trait.uncovered-param"><span>[items<wbr>.impl<wbr>.trait<wbr>.uncovered-param]</wbr></wbr></wbr></span></a> </div> <p>Only the appearance of <em>uncovered</em> type parameters is restricted.</p> <div class="rule" id="r-items.impl.trait.fundamental">
+<a class="rule-link" href="#r-items.impl.trait.fundamental" title="items.impl.trait.fundamental"><span>[items<wbr>.impl<wbr>.trait<wbr>.fundamental]</wbr></wbr></wbr></span></a> </div> <p>Note that for the purposes of coherence, <a href="../glossary#fundamental-type-constructors">fundamental types</a> are special. The <code>T</code> in <code>Box&lt;T&gt;</code> is not considered covered, and <code>Box&lt;LocalType&gt;</code> is considered local.</p> <div class="rule" id="r-items.impl.generics">
+<a class="rule-link" href="#r-items.impl.generics" title="items.impl.generics"><span>[items<wbr>.impl<wbr>.generics]</wbr></wbr></span></a> </div> <h2 id="generic-implementations">Generic Implementations</h2> <div class="rule" id="r-items.impl.generics.intro">
+<a class="rule-link" href="#r-items.impl.generics.intro" title="items.impl.generics.intro"><span>[items<wbr>.impl<wbr>.generics<wbr>.intro]</wbr></wbr></wbr></span></a> </div> <p>An implementation can take <a href="generics">generic parameters</a>, which can be used in the rest of the implementation. Implementation parameters are written directly after the <code>impl</code> keyword.</p> <pre data-language="rust">#![allow(unused)]
+fn main() {
+trait Seq&lt;T&gt; { fn dummy(&amp;self, _: T) { } }
+impl&lt;T&gt; Seq&lt;T&gt; for Vec&lt;T&gt; {
+    /* ... */
+}
+impl Seq&lt;bool&gt; for u32 {
+    /* Treat the integer as a sequence of bits */
+}
+}</pre> <div class="rule" id="r-items.impl.generics.usage">
+<a class="rule-link" href="#r-items.impl.generics.usage" title="items.impl.generics.usage"><span>[items<wbr>.impl<wbr>.generics<wbr>.usage]</wbr></wbr></wbr></span></a> </div> <p>Generic parameters <em>constrain</em> an implementation if the parameter appears at least once in one of:</p> <ul> <li>The implemented trait, if it has one</li> <li>The implementing type</li> <li>As an <a href="associated-items#associated-types">associated type</a> in the <a href="../trait-bounds">bounds</a> of a type that contains another parameter that constrains the implementation</li> </ul> <div class="rule" id="r-items.impl.generics.constrain">
+<a class="rule-link" href="#r-items.impl.generics.constrain" title="items.impl.generics.constrain"><span>[items<wbr>.impl<wbr>.generics<wbr>.constrain]</wbr></wbr></wbr></span></a> </div> <p>Type and const parameters must always constrain the implementation. Lifetimes must constrain the implementation if the lifetime is used in an associated type.</p> <p>Examples of constraining situations:</p> <pre data-language="rust">#![allow(unused)]
+fn main() {
+trait Trait{}
+trait GenericTrait&lt;T&gt; {}
+trait HasAssocType { type Ty; }
+struct Struct;
+struct GenericStruct&lt;T&gt;(T);
+struct ConstGenericStruct&lt;const N: usize&gt;([(); N]);
+// T constrains by being an argument to GenericTrait.
+impl&lt;T&gt; GenericTrait&lt;T&gt; for i32 { /* ... */ }
+
+// T constrains by being an argument to GenericStruct
+impl&lt;T&gt; Trait for GenericStruct&lt;T&gt; { /* ... */ }
+
+// Likewise, N constrains by being an argument to ConstGenericStruct
+impl&lt;const N: usize&gt; Trait for ConstGenericStruct&lt;N&gt; { /* ... */ }
+
+// T constrains by being in an associated type in a bound for type `U` which is
+// itself a generic parameter constraining the trait.
+impl&lt;T, U&gt; GenericTrait&lt;U&gt; for u32 where U: HasAssocType&lt;Ty = T&gt; { /* ... */ }
+
+// Like previous, except the type is `(U, isize)`. `U` appears inside the type
+// that includes `T`, and is not the type itself.
+impl&lt;T, U&gt; GenericStruct&lt;U&gt; where (U, isize): HasAssocType&lt;Ty = T&gt; { /* ... */ }
+}</pre> <p>Examples of non-constraining situations:</p> <pre data-language="rust">#![allow(unused)]
+fn main() {
+// The rest of these are errors, since they have type or const parameters that
+// do not constrain.
+
+// T does not constrain since it does not appear at all.
+impl&lt;T&gt; Struct { /* ... */ }
+
+// N does not constrain for the same reason.
+impl&lt;const N: usize&gt; Struct { /* ... */ }
+
+// Usage of T inside the implementation does not constrain the impl.
+impl&lt;T&gt; Struct {
+    fn uses_t(t: &amp;T) { /* ... */ }
+}
+
+// T is used as an associated type in the bounds for U, but U does not constrain.
+impl&lt;T, U&gt; Struct where U: HasAssocType&lt;Ty = T&gt; { /* ... */ }
+
+// T is used in the bounds, but not as an associated type, so it does not constrain.
+impl&lt;T, U&gt; GenericTrait&lt;U&gt; for u32 where U: GenericTrait&lt;T&gt; {}
+}</pre> <p>Example of an allowed unconstraining lifetime parameter:</p> <pre data-language="rust">#![allow(unused)]
+fn main() {
+struct Struct;
+impl&lt;'a&gt; Struct {}
+}</pre> <p>Example of a disallowed unconstraining lifetime parameter:</p> <pre data-language="rust">#![allow(unused)]
+fn main() {
+struct Struct;
+trait HasAssocType { type Ty; }
+impl&lt;'a&gt; HasAssocType for Struct {
+    type Ty = &amp;'a Struct;
+}
+}</pre> <div class="rule" id="r-items.impl.attributes">
+<a class="rule-link" href="#r-items.impl.attributes" title="items.impl.attributes"><span>[items<wbr>.impl<wbr>.attributes]</wbr></wbr></span></a> </div> <h2 id="attributes-on-implementations">Attributes on Implementations</h2> <p>Implementations may contain outer <a href="../attributes">attributes</a> before the <code>impl</code> keyword and inner <a href="../attributes">attributes</a> inside the brackets that contain the associated items. Inner attributes must come before any associated items. The attributes that have meaning here are <a href="../conditional-compilation"><code>cfg</code></a>, <a href="../attributes/diagnostics#the-deprecated-attribute"><code>deprecated</code></a>, <a href="https://doc.rust-lang.org/rustdoc/the-doc-attribute.html"><code>doc</code></a>, and <a href="../attributes/diagnostics#lint-check-attributes">the lint check attributes</a>.</p><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2010 The Rust Project Developers<br>Licensed under the Apache License, Version 2.0 or the MIT license, at your option.<br>
+    <a href="https://doc.rust-lang.org/reference/items/implementations.html" class="_attribution-link">https://doc.rust-lang.org/reference/items/implementations.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../../assets/index.js"></script>
+</body>
+
+</html>

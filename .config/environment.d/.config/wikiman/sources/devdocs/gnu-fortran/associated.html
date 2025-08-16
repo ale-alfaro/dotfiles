@@ -1,0 +1,52 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>9.22. ASSOCIATED</title>
+    
+    <link rel="preload" href="assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="application.css" />
+    <link rel="stylesheet" type="text/css" href="assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="associated" prefix="" listing-src="navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _gnu_fortran"><h1 class="section" id="ASSOCIATED-_002d_002d_002d-Status-of-a-pointer-or-pointer_002ftarget-pair">9.22 ASSOCIATED — Status of a pointer or pointer/target pair</h1>    <dl compact id="index-association-status"> <dt>Description:</dt> <dd>
+<p><code>ASSOCIATED(POINTER [, TARGET])</code> determines the status of the pointer <var>POINTER</var> or if <var>POINTER</var> is associated with the target <var>TARGET</var>. </p> </dd> <dt>Standard:</dt> <dd>
+<p>Fortran 95 and later </p> </dd> <dt>Class:</dt> <dd>
+<p>Inquiry function </p> </dd> <dt>Syntax:</dt> <dd>
+<p><code>RESULT = ASSOCIATED(POINTER [, TARGET])</code> </p> </dd> <dt>Arguments:</dt> <dd>
+<table> <tr>
+<td width="15%"><var>POINTER</var></td>
+<td width="70%">
+<var>POINTER</var> shall have the <code>POINTER</code> attribute and it can be of any type.</td>
+</tr> <tr>
+<td width="15%"><var>TARGET</var></td>
+<td width="70%">(Optional) <var>TARGET</var> shall be a pointer or a target. It must have the same type, kind type parameter, and array rank as <var>POINTER</var>.</td>
+</tr> </table> <p>The association status of neither <var>POINTER</var> nor <var>TARGET</var> shall be undefined. </p> </dd> <dt>Return value:</dt> <dd>
+<p><code>ASSOCIATED(POINTER)</code> returns a scalar value of type <code>LOGICAL(4)</code>. There are several cases: </p>
+<dl compact> <dt>(A) When the optional <var>TARGET</var> is not present then</dt> <dd><p><code>ASSOCIATED(POINTER)</code> is true if <var>POINTER</var> is associated with a target; otherwise, it returns false. </p></dd> <dt>(B) If <var>TARGET</var> is present and a scalar target, the result is true if</dt> <dd><p><var>TARGET</var> is not a zero-sized storage sequence and the target associated with <var>POINTER</var> occupies the same storage units. If <var>POINTER</var> is disassociated, the result is false. </p></dd> <dt>(C) If <var>TARGET</var> is present and an array target, the result is true if</dt> <dd><p><var>TARGET</var> and <var>POINTER</var> have the same shape, are not zero-sized arrays, are arrays whose elements are not zero-sized storage sequences, and <var>TARGET</var> and <var>POINTER</var> occupy the same storage units in array element order. As in case(B), the result is false, if <var>POINTER</var> is disassociated. </p></dd> <dt>(D) If <var>TARGET</var> is present and an scalar pointer, the result is true</dt> <dd><p>if <var>TARGET</var> is associated with <var>POINTER</var>, the target associated with <var>TARGET</var> are not zero-sized storage sequences and occupy the same storage units. The result is false, if either <var>TARGET</var> or <var>POINTER</var> is disassociated. </p></dd> <dt>(E) If <var>TARGET</var> is present and an array pointer, the result is true if</dt> <dd><p>target associated with <var>POINTER</var> and the target associated with <var>TARGET</var> have the same shape, are not zero-sized arrays, are arrays whose elements are not zero-sized storage sequences, and <var>TARGET</var> and <var>POINTER</var> occupy the same storage units in array element order. The result is false, if either <var>TARGET</var> or <var>POINTER</var> is disassociated. </p></dd> </dl> </dd> <dt>Example:</dt> <dd>
+<div class="smallexample"> <pre class="smallexample">program test_associated
+   implicit none
+   real, target  :: tgt(2) = (/1., 2./)
+   real, pointer :: ptr(:)
+   ptr =&gt; tgt
+   if (associated(ptr)     .eqv. .false.) call abort
+   if (associated(ptr,tgt) .eqv. .false.) call abort
+end program test_associated</pre>
+</div> </dd> <dt>See also:</dt> <dd><p><a href="null#NULL">NULL</a> </p></dd> </dl>  <p class="header"> <p> Next: <a href="atan#ATAN" accesskey="n" rel="next">ATAN</a>, Previous: <a href="asinh#ASINH" accesskey="p" rel="prev">ASINH</a>, Up: <a href="intrinsic-procedures#Intrinsic-Procedures" accesskey="u" rel="up">Intrinsic Procedures</a> [<a href="index#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/Option-Index.html#Option-Index" title="Index" rel="index">Index</a>]</p> </p><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; Free Software Foundation<br>Licensed under the GNU Free Documentation License, Version 1.3.<br>
+    <a href="https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/ASSOCIATED.html" class="_attribution-link">https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/ASSOCIATED.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/index.js"></script>
+</body>
+
+</html>

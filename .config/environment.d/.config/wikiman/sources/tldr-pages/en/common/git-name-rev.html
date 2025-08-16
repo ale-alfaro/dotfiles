@@ -1,0 +1,60 @@
+<h1>git name-rev</h1>
+
+<blockquote><p>Describe a commit using existing ref names.
+More information: <a href="https://git-scm.com/docs/git-name-rev">https://git-scm.com/docs/git-name-rev</a>.</p></blockquote>
+
+<ul>
+<li>Show the name for HEAD:</li>
+</ul>
+
+
+<p><code>git name-rev HEAD</code></p>
+
+<ul>
+<li>Show only the name:</li>
+</ul>
+
+
+<p><code>git name-rev --name-only HEAD</code></p>
+
+<ul>
+<li>Enumerate all matching ref names:</li>
+</ul>
+
+
+<p><code>git name-rev --all</code></p>
+
+<ul>
+<li>Use only tags to name the commit:</li>
+</ul>
+
+
+<p><code>git name-rev --tags HEAD</code></p>
+
+<ul>
+<li>Exit with a non-zero status code instead of printing <code>undefined</code> for unknown commits:</li>
+</ul>
+
+
+<p><code>git name-rev --no-undefined {{commit-ish}}</code></p>
+
+<ul>
+<li>Show names for multiple commits:</li>
+</ul>
+
+
+<p><code>git name-rev HEAD~1 HEAD~2 main</code></p>
+
+<ul>
+<li>Restrict names to branch refs:</li>
+</ul>
+
+
+<p><code>git name-rev --refs refs/heads/ {{commit-ish}}</code></p>
+
+<ul>
+<li>Read commit IDs from <code>stdin</code>:</li>
+</ul>
+
+
+<p><code>echo "{{commit-ish}}" | git name-rev --annotate-stdin</code></p>

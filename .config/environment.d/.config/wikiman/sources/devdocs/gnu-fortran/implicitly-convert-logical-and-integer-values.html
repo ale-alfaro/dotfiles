@@ -1,0 +1,33 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>6.1.12. Implicitly convert LOGICAL and INTEGER values</title>
+    
+    <link rel="preload" href="assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="application.css" />
+    <link rel="stylesheet" type="text/css" href="assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="implicitly-convert-logical-and-integer-values" prefix="" listing-src="navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _gnu_fortran"><h1 class="subsection" id="Implicitly-convert-LOGICAL-and-INTEGER-values-1">6.1.12 Implicitly convert LOGICAL and INTEGER values</h1>   <p id="index-conversion_002c-to-logical">As an extension for backwards compatibility with other compilers, GNU Fortran allows the implicit conversion of <code>LOGICAL</code> values to <code>INTEGER</code> values and vice versa. When converting from a <code>LOGICAL</code> to an <code>INTEGER</code>, <code>.FALSE.</code> is interpreted as zero, and <code>.TRUE.</code> is interpreted as one. When converting from <code>INTEGER</code> to <code>LOGICAL</code>, the value zero is interpreted as <code>.FALSE.</code> and any nonzero value is interpreted as <code>.TRUE.</code>. </p> <div class="smallexample"> <pre class="smallexample">LOGICAL :: l
+l = 1</pre>
+</div> <div class="smallexample"> <pre class="smallexample">INTEGER :: i
+i = .TRUE.</pre>
+</div> <p>However, there is no implicit conversion of <code>INTEGER</code> values in <code>if</code>-statements, nor of <code>LOGICAL</code> or <code>INTEGER</code> values in I/O operations. </p><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; Free Software Foundation<br>Licensed under the GNU Free Documentation License, Version 1.3.<br>
+    <a href="https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/Implicitly-convert-LOGICAL-and-INTEGER-values.html" class="_attribution-link">https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/Implicitly-convert-LOGICAL-and-INTEGER-values.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/index.js"></script>
+</body>
+
+</html>

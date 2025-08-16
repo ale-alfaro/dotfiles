@@ -1,0 +1,31 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>Xerrorlines</title>
+    
+    <link rel="preload" href="assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="application.css" />
+    <link rel="stylesheet" type="text/css" href="assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="xerrorlines" prefix="" listing-src="navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _gnuplot"><h1 id="SECTION030340000000000000000">Xerrorlines</h1>  The <b>xerrorlines</b> style is only relevant to 2D data plots. <b>xerrorlines</b> is like <b>linespoints</b>, except that a horizontal error line is also drawn. At each point (x,y), a line is drawn from (xlow,y) to (xhigh,y) or from (x-xdelta,y) to (x+xdelta,y), depending on how many data columns are provided. The appearance of the tic mark at the ends of the bar is controlled by <b>set errorbars</b>. The basic style requires either 3 or 4 columns: <pre>
+3 columns:  x  y  xdelta
+4 columns:  x  y  xlow  xhigh</pre>  <p> An additional input column (4th or 5th) may be used to provide information such as variable point color. </p><div class="_attribution">
+  <p class="_attribution-p">
+    Copyright 1986 - 1993, 1998, 2004   Thomas Williams, Colin Kelley<br>Distributed under the <a href="https://sourceforge.net/p/gnuplot/gnuplot-main/ci/master/tree/Copyright">gnuplot license</a> (rights to distribute modified versions are withheld).<br>
+    
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/index.js"></script>
+</body>
+
+</html>

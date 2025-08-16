@@ -1,0 +1,47 @@
+<h1>jj bookmark</h1>
+
+<blockquote><p>Manage bookmarks in a <code>jj</code> repository.
+When using a Git backend, bookmarks correspond to Git branches.
+More information: <a href="https://jj-vcs.github.io/jj/latest/cli-reference/#jj-bookmark">https://jj-vcs.github.io/jj/latest/cli-reference/#jj-bookmark</a>.</p></blockquote>
+
+<ul>
+<li>Create a new bookmark at the given revision:</li>
+</ul>
+
+
+<p><code>jj {{[b|bookmark]}} {{[c|create]}} {{[-r|--revision]}} {{revision}} {{name}}</code></p>
+
+<ul>
+<li>List all existing bookmarks and their targets:</li>
+</ul>
+
+
+<p><code>jj {{[b|bookmark]}} {{[l|list]}}</code></p>
+
+<ul>
+<li>Move an existing bookmark to another revision:</li>
+</ul>
+
+
+<p><code>jj {{[b|bookmark]}} {{[m|move]}} {{[-t|--to]}} {{revision}} {{name}}</code></p>
+
+<ul>
+<li>Track given remote bookmarks:</li>
+</ul>
+
+
+<p><code>jj {{[b|bookmark]}} {{[t|track]}} {{name}}@{{remote}}</code></p>
+
+<ul>
+<li>Delete a bookmark, and propagate the deletion to remotes on the next push:</li>
+</ul>
+
+
+<p><code>jj {{[b|bookmark]}} {{[d|delete]}} {{name}}</code></p>
+
+<ul>
+<li>Forget a bookmark locally, without marking its deletion to be pushed:</li>
+</ul>
+
+
+<p><code>jj {{[b|bookmark]}} {{[f|forget]}} {{name}}</code></p>

@@ -1,0 +1,25 @@
+<h1>qemu-system-riscv64</h1>
+
+<blockquote><p>Emulate <code>riscv64</code> architecture.
+More information: <a href="https://www.qemu.org/docs/master/system/target-riscv.html">https://www.qemu.org/docs/master/system/target-riscv.html</a>.</p></blockquote>
+
+<ul>
+<li>Boot a kernel emulating <code>riscv64</code> architecture:</li>
+</ul>
+
+
+<p><code>qemu-system-riscv64 {{[-M|-machine]}} virt -bios none -kernel {{kernel.elf}} -nographic</code></p>
+
+<ul>
+<li>List supported machine types:</li>
+</ul>
+
+
+<p><code>qemu-system-riscv64 {{[-M|-machine]}} help</code></p>
+
+<ul>
+<li>Exit non-graphical QEMU:</li>
+</ul>
+
+
+<p><code>&lt;Ctrl a&gt;&lt;x&gt;</code></p>

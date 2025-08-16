@@ -1,0 +1,60 @@
+<h1>uv build</h1>
+
+<blockquote><p>Build Python packages into source distributions and wheels.
+More information: <a href="https://docs.astral.sh/uv/reference/cli/#uv-build">https://docs.astral.sh/uv/reference/cli/#uv-build</a>.</p></blockquote>
+
+<ul>
+<li>Build a package in the current directory:</li>
+</ul>
+
+
+<p><code>uv build</code></p>
+
+<ul>
+<li>Build a package from a specific directory:</li>
+</ul>
+
+
+<p><code>uv build {{path/to/directory}}</code></p>
+
+<ul>
+<li>Build only a wheel (skip source distribution):</li>
+</ul>
+
+
+<p><code>uv build --wheel</code></p>
+
+<ul>
+<li>Build only a source distribution (skip wheel):</li>
+</ul>
+
+
+<p><code>uv build --sdist</code></p>
+
+<ul>
+<li>Build and output to a specific directory:</li>
+</ul>
+
+
+<p><code>uv build {{[-o|--out-dir]}} {{path/to/output}}</code></p>
+
+<ul>
+<li>Build a specific package in a workspace:</li>
+</ul>
+
+
+<p><code>uv build --package {{package_name}}</code></p>
+
+<ul>
+<li>Build all packages in the workspace:</li>
+</ul>
+
+
+<p><code>uv build {{[--all|--all-packages]}}</code></p>
+
+<ul>
+<li>Build with a specific Python interpreter:</li>
+</ul>
+
+
+<p><code>uv build {{[-p|--python]}} {{python3.11}}</code></p>

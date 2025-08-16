@@ -1,0 +1,60 @@
+<h1>smbserver.py</h1>
+
+<blockquote><p>A Python-based SMB server for hosting shares (requires root for port 445).
+More information: <a href="https://github.com/fortra/impacket">https://github.com/fortra/impacket</a>.</p></blockquote>
+
+<ul>
+<li>Set up a basic SMB share:</li>
+</ul>
+
+
+<p><code>smbserver.py {{sharename}} {{path/to/share}}</code></p>
+
+<ul>
+<li>Set up a share with a custom comment:</li>
+</ul>
+
+
+<p><code>smbserver.py -comment {{my_share}} {{sharename}} {{path/to/share}}</code></p>
+
+<ul>
+<li>Set up a share with username and password authentication:</li>
+</ul>
+
+
+<p><code>smbserver.py -username {{username}} -password {{password}} {{sharename}} {{path/to/share}}</code></p>
+
+<ul>
+<li>Set up a share with NTLM hash authentication:</li>
+</ul>
+
+
+<p><code>smbserver.py -hashes {{LMHASH}}:{{NTHASH}} {{sharename}} {{path/to/share}}</code></p>
+
+<ul>
+<li>Set up a share on a specific interface:</li>
+</ul>
+
+
+<p><code>smbserver.py {{[-ip|--interface-address]}} {{interface_ip_address}} {{sharename}} {{path/to/share}}</code></p>
+
+<ul>
+<li>Set up a share on a non-standard SMB port:</li>
+</ul>
+
+
+<p><code>smbserver.py -port {{port}} {{sharename}} {{path/to/share}}</code></p>
+
+<ul>
+<li>Set up a share with SMB2 support:</li>
+</ul>
+
+
+<p><code>smbserver.py -smb2support {{sharename}} {{path/to/share}}</code></p>
+
+<ul>
+<li>Set up a share and log commands to an output file:</li>
+</ul>
+
+
+<p><code>smbserver.py -outputfile {{path/to/output_file}} {{sharename}} {{path/to/share}}</code></p>

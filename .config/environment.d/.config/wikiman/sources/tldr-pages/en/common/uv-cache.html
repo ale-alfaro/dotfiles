@@ -1,0 +1,53 @@
+<h1>uv cache</h1>
+
+<blockquote><p>Manage <code>uv</code>&rsquo;s global cache directory.
+More information: <a href="https://docs.astral.sh/uv/reference/cli/#uv-cache">https://docs.astral.sh/uv/reference/cli/#uv-cache</a>.</p></blockquote>
+
+<ul>
+<li>Show the cache directory path:</li>
+</ul>
+
+
+<p><code>uv cache dir</code></p>
+
+<ul>
+<li>Clean the entire cache (removes all cached packages and environments):</li>
+</ul>
+
+
+<p><code>uv cache clean</code></p>
+
+<ul>
+<li>Clean the cache for specific packages:</li>
+</ul>
+
+
+<p><code>uv cache clean {{package1 package2 ...}}</code></p>
+
+<ul>
+<li>Prune all unreachable objects from the cache:</li>
+</ul>
+
+
+<p><code>uv cache prune</code></p>
+
+<ul>
+<li>Prune cache optimized for CI environments like GitHub Actions:</li>
+</ul>
+
+
+<p><code>uv cache prune --ci</code></p>
+
+<ul>
+<li>Use a specific cache directory:</li>
+</ul>
+
+
+<p><code>uv cache clean --cache-dir {{path/to/cache}}</code></p>
+
+<ul>
+<li>Clean cache with verbose output:</li>
+</ul>
+
+
+<p><code>uv cache clean {{[-v|--verbose]}}</code></p>

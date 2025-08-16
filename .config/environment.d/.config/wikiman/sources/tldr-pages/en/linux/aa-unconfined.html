@@ -1,0 +1,32 @@
+<h1>aa-unconfined</h1>
+
+<blockquote><p>List processes with open TCP/UDP ports that do not have AppArmor profiles loaded.
+More information: <a href="https://gitlab.com/apparmor/apparmor/-/wikis/manpage_aa-unconfined.8">https://gitlab.com/apparmor/apparmor/-/wikis/manpage_aa-unconfined.8</a>.</p></blockquote>
+
+<ul>
+<li>List unconfined processes using the <code>ss</code> command (default):</li>
+</ul>
+
+
+<p><code>sudo aa-unconfined</code></p>
+
+<ul>
+<li>Use <code>netstat</code> instead of <code>ss</code> to detect open network sockets:</li>
+</ul>
+
+
+<p><code>sudo aa-unconfined --with-netstat</code></p>
+
+<ul>
+<li>Show all processes from /proc with TCP/UDP ports and no AppArmor profiles (more detailed):</li>
+</ul>
+
+
+<p><code>sudo aa-unconfined --paranoid</code></p>
+
+<ul>
+<li>Display help:</li>
+</ul>
+
+
+<p><code>aa-unconfined {{[-h|--help]}}</code></p>

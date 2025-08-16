@@ -1,0 +1,35 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>std::discriminant_value</title>
+    
+    <link rel="preload" href="../../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../../application.css" />
+    <link rel="stylesheet" type="text/css" href="../../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="std/intrinsics/fn.discriminant_value" prefix="../../" listing-src="../../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _rust"><h1 class="main-heading">Function discriminant_value</h1>
+<pre class="rust item-decl" data-language="rust">pub const fn discriminant_value&lt;T&gt;(
+    v: &amp;T,
+) -&gt; &lt;T as DiscriminantKind&gt;::Discriminant</pre>
+<span class="item-info"><div class="stab unstable">
+<span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>core_intrinsics</code>)</span>
+</div></span><p>Returns the value of the discriminant for the variant in ‘v’; if <code>T</code> has no discriminant, returns <code>0</code>.</p> <p>Note that, unlike most intrinsics, this is safe to call; it does not require an <code>unsafe</code> block. Therefore, implementations must not require the user to uphold any safety invariants.</p> <p>The stabilized version of this intrinsic is <a href="../mem/fn.discriminant" title="fn std::mem::discriminant"><code>core::mem::discriminant</code></a>.</p><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2010 The Rust Project Developers<br>Licensed under the Apache License, Version 2.0 or the MIT license, at your option.<br>
+    <a href="https://doc.rust-lang.org/std/intrinsics/fn.discriminant_value.html" class="_attribution-link">https://doc.rust-lang.org/std/intrinsics/fn.discriminant_value.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../../assets/index.js"></script>
+</body>
+
+</html>

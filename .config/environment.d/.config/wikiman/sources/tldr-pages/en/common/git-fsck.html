@@ -1,0 +1,41 @@
+<h1>git fsck</h1>
+
+<blockquote><p>Verify the validity and connectivity of nodes in a Git repository index.
+Does not make any modifications.
+See also: <code>git gc</code> for cleaning up dangling blobs.
+More information: <a href="https://git-scm.com/docs/git-fsck">https://git-scm.com/docs/git-fsck</a>.</p></blockquote>
+
+<ul>
+<li>Check the current repository:</li>
+</ul>
+
+
+<p><code>git fsck</code></p>
+
+<ul>
+<li>List all tags found:</li>
+</ul>
+
+
+<p><code>git fsck --tags</code></p>
+
+<ul>
+<li>List all root nodes found:</li>
+</ul>
+
+
+<p><code>git fsck --root</code></p>
+
+<ul>
+<li>Show all unreachable and dangling objects, ignore reflogs, and perform a full integrity check:</li>
+</ul>
+
+
+<p><code>git fsck --dangling --no-reflogs --unreachable --full</code></p>
+
+<ul>
+<li>Check connectivity only (skip object integrity verification):</li>
+</ul>
+
+
+<p><code>git fsck --connectivity-only</code></p>

@@ -1,0 +1,78 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>6.60.24. PowerPC Atomic Memory Operation Functions</title>
+    
+    <link rel="preload" href="assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="application.css" />
+    <link rel="stylesheet" type="text/css" href="assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="powerpc-atomic-memory-operation-functions" prefix="" listing-src="navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _gcc"><h1 class="subsection" id="PowerPC-Atomic-Memory-Operation-Functions-1">6.60.24 PowerPC Atomic Memory Operation Functions</h1> <p>ISA 3.0 of the PowerPC added new atomic memory operation (amo) instructions. GCC provides support for these instructions in 64-bit environments. All of the functions are declared in the include file <code>amo.h</code>. </p> <p>The functions supported are: </p> <div class="smallexample"> <pre class="smallexample" data-language="cpp">#include &lt;amo.h&gt;
+
+uint32_t amo_lwat_add (uint32_t *, uint32_t);
+uint32_t amo_lwat_xor (uint32_t *, uint32_t);
+uint32_t amo_lwat_ior (uint32_t *, uint32_t);
+uint32_t amo_lwat_and (uint32_t *, uint32_t);
+uint32_t amo_lwat_umax (uint32_t *, uint32_t);
+uint32_t amo_lwat_umin (uint32_t *, uint32_t);
+uint32_t amo_lwat_swap (uint32_t *, uint32_t);
+
+int32_t amo_lwat_sadd (int32_t *, int32_t);
+int32_t amo_lwat_smax (int32_t *, int32_t);
+int32_t amo_lwat_smin (int32_t *, int32_t);
+int32_t amo_lwat_sswap (int32_t *, int32_t);
+
+uint64_t amo_ldat_add (uint64_t *, uint64_t);
+uint64_t amo_ldat_xor (uint64_t *, uint64_t);
+uint64_t amo_ldat_ior (uint64_t *, uint64_t);
+uint64_t amo_ldat_and (uint64_t *, uint64_t);
+uint64_t amo_ldat_umax (uint64_t *, uint64_t);
+uint64_t amo_ldat_umin (uint64_t *, uint64_t);
+uint64_t amo_ldat_swap (uint64_t *, uint64_t);
+
+int64_t amo_ldat_sadd (int64_t *, int64_t);
+int64_t amo_ldat_smax (int64_t *, int64_t);
+int64_t amo_ldat_smin (int64_t *, int64_t);
+int64_t amo_ldat_sswap (int64_t *, int64_t);
+
+void amo_stwat_add (uint32_t *, uint32_t);
+void amo_stwat_xor (uint32_t *, uint32_t);
+void amo_stwat_ior (uint32_t *, uint32_t);
+void amo_stwat_and (uint32_t *, uint32_t);
+void amo_stwat_umax (uint32_t *, uint32_t);
+void amo_stwat_umin (uint32_t *, uint32_t);
+
+void amo_stwat_sadd (int32_t *, int32_t);
+void amo_stwat_smax (int32_t *, int32_t);
+void amo_stwat_smin (int32_t *, int32_t);
+
+void amo_stdat_add (uint64_t *, uint64_t);
+void amo_stdat_xor (uint64_t *, uint64_t);
+void amo_stdat_ior (uint64_t *, uint64_t);
+void amo_stdat_and (uint64_t *, uint64_t);
+void amo_stdat_umax (uint64_t *, uint64_t);
+void amo_stdat_umin (uint64_t *, uint64_t);
+
+void amo_stdat_sadd (int64_t *, int64_t);
+void amo_stdat_smax (int64_t *, int64_t);
+void amo_stdat_smin (int64_t *, int64_t);</pre>
+</div><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; Free Software Foundation<br>Licensed under the GNU Free Documentation License, Version 1.3.<br>
+    <a href="https://gcc.gnu.org/onlinedocs/gcc-9.5.0/gcc/PowerPC-Atomic-Memory-Operation-Functions.html" class="_attribution-link">https://gcc.gnu.org/onlinedocs/gcc-9.5.0/gcc/PowerPC-Atomic-Memory-Operation-Functions.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/index.js"></script>
+</body>
+
+</html>

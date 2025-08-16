@@ -1,0 +1,85 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>VisualShaderNodeCompare</title>
+    
+    <link rel="preload" href="../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../application.css" />
+    <link rel="stylesheet" type="text/css" href="../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="classes/class_visualshadernodecompare" prefix="../" listing-src="../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _godot"><section id="visualshadernodecompare"> <h1 id="class-visualshadernodecompare">VisualShaderNodeCompare</h1> <p><strong>Inherits:</strong> <a href="class_visualshadernode#class-visualshadernode"><span class="std std-ref">VisualShaderNode</span></a> <strong>&lt;</strong> <a href="class_resource#class-resource"><span class="std std-ref">Resource</span></a> <strong>&lt;</strong> <a href="class_refcounted#class-refcounted"><span class="std std-ref">RefCounted</span></a> <strong>&lt;</strong> <a href="class_object#class-object"><span class="std std-ref">Object</span></a></p> <p>A comparison function for common types within the visual shader graph.</p> <section class="classref-introduction-group" id="description"> <h2>Description</h2> <p>Compares <code>a</code> and <code>b</code> of <a href="#class-visualshadernodecompare-property-type"><span class="std std-ref">type</span></a> by <a href="#class-visualshadernodecompare-property-function"><span class="std std-ref">function</span></a>. Returns a boolean scalar. Translates to <code>if</code> instruction in shader code.</p> </section> <section class="classref-reftable-group" id="properties"> <h2>Properties</h2> <table class="colwidths-auto docutils align-default">  <tr>
+<td><p><a href="#enum-visualshadernodecompare-condition"><span class="std std-ref">Condition</span></a></p></td> <td><p><a href="#class-visualshadernodecompare-property-condition"><span class="std std-ref">condition</span></a></p></td> <td><p><code>0</code></p></td> </tr> <tr>
+<td><p><a href="#enum-visualshadernodecompare-function"><span class="std std-ref">Function</span></a></p></td> <td><p><a href="#class-visualshadernodecompare-property-function"><span class="std std-ref">function</span></a></p></td> <td><p><code>0</code></p></td> </tr> <tr>
+<td><p><a href="#enum-visualshadernodecompare-comparisontype"><span class="std std-ref">ComparisonType</span></a></p></td> <td><p><a href="#class-visualshadernodecompare-property-type"><span class="std std-ref">type</span></a></p></td> <td><p><code>0</code></p></td> </tr>  </table> </section>  <section class="classref-descriptions-group" id="enumerations"> <h2>Enumerations</h2> <h3 id="enum-visualshadernodecompare-comparisontype">enum ComparisonType:</h3> <h3 id="class-visualshadernodecompare-constant-ctype-scalar">
+<a href="#enum-visualshadernodecompare-comparisontype"><span class="std std-ref">ComparisonType</span></a> CTYPE_SCALAR = <code>0</code>
+</h3> <p>A floating-point scalar.</p> <h3 id="class-visualshadernodecompare-constant-ctype-scalar-int">
+<a href="#enum-visualshadernodecompare-comparisontype"><span class="std std-ref">ComparisonType</span></a> CTYPE_SCALAR_INT = <code>1</code>
+</h3> <p>An integer scalar.</p> <h3 id="class-visualshadernodecompare-constant-ctype-scalar-uint">
+<a href="#enum-visualshadernodecompare-comparisontype"><span class="std std-ref">ComparisonType</span></a> CTYPE_SCALAR_UINT = <code>2</code>
+</h3> <p>An unsigned integer scalar.</p> <h3 id="class-visualshadernodecompare-constant-ctype-vector-2d">
+<a href="#enum-visualshadernodecompare-comparisontype"><span class="std std-ref">ComparisonType</span></a> CTYPE_VECTOR_2D = <code>3</code>
+</h3> <p>A 2D vector type.</p> <h3 id="class-visualshadernodecompare-constant-ctype-vector-3d">
+<a href="#enum-visualshadernodecompare-comparisontype"><span class="std std-ref">ComparisonType</span></a> CTYPE_VECTOR_3D = <code>4</code>
+</h3> <p>A 3D vector type.</p> <h3 id="class-visualshadernodecompare-constant-ctype-vector-4d">
+<a href="#enum-visualshadernodecompare-comparisontype"><span class="std std-ref">ComparisonType</span></a> CTYPE_VECTOR_4D = <code>5</code>
+</h3> <p>A 4D vector type.</p> <h3 id="class-visualshadernodecompare-constant-ctype-boolean">
+<a href="#enum-visualshadernodecompare-comparisontype"><span class="std std-ref">ComparisonType</span></a> CTYPE_BOOLEAN = <code>6</code>
+</h3> <p>A boolean type.</p> <h3 id="class-visualshadernodecompare-constant-ctype-transform">
+<a href="#enum-visualshadernodecompare-comparisontype"><span class="std std-ref">ComparisonType</span></a> CTYPE_TRANSFORM = <code>7</code>
+</h3> <p>A transform (<code>mat4</code>) type.</p> <h3 id="class-visualshadernodecompare-constant-ctype-max">
+<a href="#enum-visualshadernodecompare-comparisontype"><span class="std std-ref">ComparisonType</span></a> CTYPE_MAX = <code>8</code>
+</h3> <p>Represents the size of the <a href="#enum-visualshadernodecompare-comparisontype"><span class="std std-ref">ComparisonType</span></a> enum.</p>  <h3 id="enum-visualshadernodecompare-function">enum Function:</h3> <h3 id="class-visualshadernodecompare-constant-func-equal">
+<a href="#enum-visualshadernodecompare-function"><span class="std std-ref">Function</span></a> FUNC_EQUAL = <code>0</code>
+</h3> <p>Comparison for equality (<code>a == b</code>).</p> <h3 id="class-visualshadernodecompare-constant-func-not-equal">
+<a href="#enum-visualshadernodecompare-function"><span class="std std-ref">Function</span></a> FUNC_NOT_EQUAL = <code>1</code>
+</h3> <p>Comparison for inequality (<code>a != b</code>).</p> <h3 id="class-visualshadernodecompare-constant-func-greater-than">
+<a href="#enum-visualshadernodecompare-function"><span class="std std-ref">Function</span></a> FUNC_GREATER_THAN = <code>2</code>
+</h3> <p>Comparison for greater than (<code>a &gt; b</code>). Cannot be used if <a href="#class-visualshadernodecompare-property-type"><span class="std std-ref">type</span></a> set to <a href="#class-visualshadernodecompare-constant-ctype-boolean"><span class="std std-ref">CTYPE_BOOLEAN</span></a> or <a href="#class-visualshadernodecompare-constant-ctype-transform"><span class="std std-ref">CTYPE_TRANSFORM</span></a>.</p> <h3 id="class-visualshadernodecompare-constant-func-greater-than-equal">
+<a href="#enum-visualshadernodecompare-function"><span class="std std-ref">Function</span></a> FUNC_GREATER_THAN_EQUAL = <code>3</code>
+</h3> <p>Comparison for greater than or equal (<code>a &gt;= b</code>). Cannot be used if <a href="#class-visualshadernodecompare-property-type"><span class="std std-ref">type</span></a> set to <a href="#class-visualshadernodecompare-constant-ctype-boolean"><span class="std std-ref">CTYPE_BOOLEAN</span></a> or <a href="#class-visualshadernodecompare-constant-ctype-transform"><span class="std std-ref">CTYPE_TRANSFORM</span></a>.</p> <h3 id="class-visualshadernodecompare-constant-func-less-than">
+<a href="#enum-visualshadernodecompare-function"><span class="std std-ref">Function</span></a> FUNC_LESS_THAN = <code>4</code>
+</h3> <p>Comparison for less than (<code>a &lt; b</code>). Cannot be used if <a href="#class-visualshadernodecompare-property-type"><span class="std std-ref">type</span></a> set to <a href="#class-visualshadernodecompare-constant-ctype-boolean"><span class="std std-ref">CTYPE_BOOLEAN</span></a> or <a href="#class-visualshadernodecompare-constant-ctype-transform"><span class="std std-ref">CTYPE_TRANSFORM</span></a>.</p> <h3 id="class-visualshadernodecompare-constant-func-less-than-equal">
+<a href="#enum-visualshadernodecompare-function"><span class="std std-ref">Function</span></a> FUNC_LESS_THAN_EQUAL = <code>5</code>
+</h3> <p>Comparison for less than or equal (<code>a &lt;= b</code>). Cannot be used if <a href="#class-visualshadernodecompare-property-type"><span class="std std-ref">type</span></a> set to <a href="#class-visualshadernodecompare-constant-ctype-boolean"><span class="std std-ref">CTYPE_BOOLEAN</span></a> or <a href="#class-visualshadernodecompare-constant-ctype-transform"><span class="std std-ref">CTYPE_TRANSFORM</span></a>.</p> <h3 id="class-visualshadernodecompare-constant-func-max">
+<a href="#enum-visualshadernodecompare-function"><span class="std std-ref">Function</span></a> FUNC_MAX = <code>6</code>
+</h3> <p>Represents the size of the <a href="#enum-visualshadernodecompare-function"><span class="std std-ref">Function</span></a> enum.</p>  <h3 id="enum-visualshadernodecompare-condition">enum Condition:</h3> <h3 id="class-visualshadernodecompare-constant-cond-all">
+<a href="#enum-visualshadernodecompare-condition"><span class="std std-ref">Condition</span></a> COND_ALL = <code>0</code>
+</h3> <p>The result will be true if all of component in vector satisfy the comparison condition.</p> <h3 id="class-visualshadernodecompare-constant-cond-any">
+<a href="#enum-visualshadernodecompare-condition"><span class="std std-ref">Condition</span></a> COND_ANY = <code>1</code>
+</h3> <p>The result will be true if any of component in vector satisfy the comparison condition.</p> <h3 id="class-visualshadernodecompare-constant-cond-max">
+<a href="#enum-visualshadernodecompare-condition"><span class="std std-ref">Condition</span></a> COND_MAX = <code>2</code>
+</h3> <p>Represents the size of the <a href="#enum-visualshadernodecompare-condition"><span class="std std-ref">Condition</span></a> enum.</p> </section>  <section class="classref-descriptions-group" id="property-descriptions"> <h2>Property Descriptions</h2> <h3 id="class-visualshadernodecompare-property-condition">
+<a href="#enum-visualshadernodecompare-condition"><span class="std std-ref">Condition</span></a> condition = <code>0</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_condition</strong> <strong>(</strong> <a href="#enum-visualshadernodecompare-condition"><span class="std std-ref">Condition</span></a> value <strong>)</strong>
+</li> <li>
+<a href="#enum-visualshadernodecompare-condition"><span class="std std-ref">Condition</span></a> <strong>get_condition</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <p>Extra condition which is applied if <a href="#class-visualshadernodecompare-property-type"><span class="std std-ref">type</span></a> is set to <a href="#class-visualshadernodecompare-constant-ctype-vector-3d"><span class="std std-ref">CTYPE_VECTOR_3D</span></a>.</p>  <h3 id="class-visualshadernodecompare-property-function">
+<a href="#enum-visualshadernodecompare-function"><span class="std std-ref">Function</span></a> function = <code>0</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_function</strong> <strong>(</strong> <a href="#enum-visualshadernodecompare-function"><span class="std std-ref">Function</span></a> value <strong>)</strong>
+</li> <li>
+<a href="#enum-visualshadernodecompare-function"><span class="std std-ref">Function</span></a> <strong>get_function</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <p>A comparison function. See <a href="#enum-visualshadernodecompare-function"><span class="std std-ref">Function</span></a> for options.</p>  <h3 id="class-visualshadernodecompare-property-type">
+<a href="#enum-visualshadernodecompare-comparisontype"><span class="std std-ref">ComparisonType</span></a> type = <code>0</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_comparison_type</strong> <strong>(</strong> <a href="#enum-visualshadernodecompare-comparisontype"><span class="std std-ref">ComparisonType</span></a> value <strong>)</strong>
+</li> <li>
+<a href="#enum-visualshadernodecompare-comparisontype"><span class="std std-ref">ComparisonType</span></a> <strong>get_comparison_type</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <p>The type to be used in the comparison. See <a href="#enum-visualshadernodecompare-comparisontype"><span class="std std-ref">ComparisonType</span></a> for options.</p> </section> </section><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2014&ndash;present Juan Linietsky, Ariel Manzur and the Godot community<br>Licensed under the Creative Commons Attribution Unported License v3.0.<br>
+    <a href="https://docs.godotengine.org/en/4.2/classes/class_visualshadernodecompare.html" class="_attribution-link">https://docs.godotengine.org/en/4.2/classes/class_visualshadernodecompare.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../assets/index.js"></script>
+</body>
+
+</html>

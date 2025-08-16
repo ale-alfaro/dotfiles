@@ -1,0 +1,43 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>.. The Rust Reference</title>
+    
+    <link rel="preload" href="../../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../../application.css" />
+    <link rel="stylesheet" type="text/css" href="../../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="reference/expressions/return-expr" prefix="../../" listing-src="../../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _rust"><h1 class="rule" id="r-expr.return">
+<a class="rule-link" href="#r-expr.return" title="expr.return"><span>[expr<wbr>.return]</wbr></span></a> </h1> <h1 id="return-expressions">
+<code id="">return</code> expressions</h1> <div class="rule" id="r-expr.return.syntax">
+<a class="rule-link" href="#r-expr.return.syntax" title="expr.return.syntax"><span>[expr<wbr>.return<wbr>.syntax]</wbr></wbr></span></a> </div> <div class="grammar-container"> <p><strong><sup>Syntax</sup></strong> <br> <span class="grammar-text grammar-production" id="grammar-ReturnExpression" onclick="show_railroad()"><a href="return-expr#railroad-ReturnExpression">ReturnExpression</a></span> → <span class="grammar-literal">return</span> <span class="grammar-text"><a href="../expressions#grammar-Expression">Expression</a></span><sup>?</sup></p> <p><button class="grammar-toggle-railroad" type="button" title="Toggle railroad display" onclick="toggle_railroad()">Show Railroad</button></p> </div> <div class="grammar-railroad grammar-hidden"> <div style="width: 296px; height: auto; max-width: 100%; max-height: 100%" class="railroad-production" id="railroad-ReturnExpression">
+<svg class="railroad" viewbox="0 0 296 87" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">  <g class="verticalgrid"> <a class="link" xlink:href="return-expr.html#grammar-ReturnExpression"> <text class="comment" x="71" y="25"> ReturnExpression</text> </a> <g class="sequence">  <g class="sequence"> <g class="terminal">  <text x="69" y="71"> return</text> </g> <g class="optional">  <a class="link" xlink:href="../expressions.html#railroad-Expression"> <g class="nonterminal">  <text x="187" y="71"> Expression</text> </g> </a> </g>  </g>    </g> </g> </svg> </div> </div> <div class="rule" id="r-expr.return.intro">
+<a class="rule-link" href="#r-expr.return.intro" title="expr.return.intro"><span>[expr<wbr>.return<wbr>.intro]</wbr></wbr></span></a> </div> <p>Return expressions are denoted with the keyword <code>return</code>.</p> <div class="rule" id="r-expr.return.behavior">
+<a class="rule-link" href="#r-expr.return.behavior" title="expr.return.behavior"><span>[expr<wbr>.return<wbr>.behavior]</wbr></wbr></span></a> </div> <p>Evaluating a <code>return</code> expression moves its argument into the designated output location for the current function call, destroys the current function activation frame, and transfers control to the caller frame.</p> <p>An example of a <code>return</code> expression:</p> <pre data-language="rust">#![allow(unused)]
+fn main() {
+fn max(a: i32, b: i32) -&gt; i32 {
+    if a &gt; b {
+        return a;
+    }
+    return b;
+}
+}</pre><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2010 The Rust Project Developers<br>Licensed under the Apache License, Version 2.0 or the MIT license, at your option.<br>
+    <a href="https://doc.rust-lang.org/reference/expressions/return-expr.html" class="_attribution-link">https://doc.rust-lang.org/reference/expressions/return-expr.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../../assets/index.js"></script>
+</body>
+
+</html>

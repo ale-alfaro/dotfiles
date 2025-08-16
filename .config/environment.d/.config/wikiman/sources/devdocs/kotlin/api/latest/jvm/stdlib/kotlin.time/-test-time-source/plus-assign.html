@@ -1,0 +1,38 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>kotlin.time.TestTimeSource.plusAssign</title>
+    
+    <link rel="preload" href="../../../../../../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../../../application.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="api/latest/jvm/stdlib/kotlin.time/-test-time-source/plus-assign" prefix="../../../../../../" listing-src="../../../../../../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _kotlin"><h1 id="plusassign">plusAssign</h1>
+<div class="api-docs-breadcrumbs">
+<a href="../../../../../../index">kotlin-stdlib</a> / <a href="../index">kotlin.time</a> / <a href="index">TestTimeSource</a> / <a href="plus-assign">plusAssign</a>
+</div> <div class="node-page-main" data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<div data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+<b>Platform and version requirements:</b> JVM (1.0), JS (1.0), Native (1.0) </div>
+<div data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native">
+ <pre class="signature" data-language="kotlin">operator fun plusAssign(duration: Duration)</pre> </div>
+<div data-kotlin-version="1.0, 1.0, 1.0, 1.0" data-platform="Common, JVM, JS, Native"> <p>Advances the current reading value of this time source by the specified <a href="plus-assign#kotlin.time.TestTimeSource$plusAssign(kotlin.time.Duration)/duration">duration</a>.</p> <p><a href="plus-assign#kotlin.time.TestTimeSource$plusAssign(kotlin.time.Duration)/duration">duration</a> value is rounded down towards zero when converting it to a <a href="../../kotlin/-long/index#kotlin.Long">Long</a> number of nanoseconds. For example, if the duration being added is <code>0.6.nanoseconds</code>, the reading doesn't advance because the duration value is rounded to zero nanoseconds.</p> <h2 id="exceptions">Exceptions</h2> <p> <code>IllegalStateException</code> - when the reading value overflows as the result of this operation.</p> </div>
+</div><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2010&ndash;2023 JetBrains s.r.o. and Kotlin Programming Language contributors<br>Licensed under the Apache License, Version 2.0.<br>
+    <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.time/-test-time-source/plus-assign.html" class="_attribution-link">https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.time/-test-time-source/plus-assign.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../../../../../../assets/index.js"></script>
+</body>
+
+</html>

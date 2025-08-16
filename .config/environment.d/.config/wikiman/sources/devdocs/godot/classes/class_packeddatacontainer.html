@@ -1,0 +1,46 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>PackedDataContainer</title>
+    
+    <link rel="preload" href="../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../application.css" />
+    <link rel="stylesheet" type="text/css" href="../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="classes/class_packeddatacontainer" prefix="../" listing-src="../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _godot"><section id="packeddatacontainer"> <h1 id="class-packeddatacontainer">PackedDataContainer</h1> <p><strong>Inherits:</strong> <a href="class_resource#class-resource"><span class="std std-ref">Resource</span></a> <strong>&lt;</strong> <a href="class_refcounted#class-refcounted"><span class="std std-ref">RefCounted</span></a> <strong>&lt;</strong> <a href="class_object#class-object"><span class="std std-ref">Object</span></a></p> <p>Efficiently packs and serializes <a href="class_array#class-array"><span class="std std-ref">Array</span></a> or <a href="class_dictionary#class-dictionary"><span class="std std-ref">Dictionary</span></a>.</p> <section class="classref-introduction-group" id="description"> <h2>Description</h2> <p><strong>PackedDataContainer</strong> can be used to efficiently store data from untyped containers. The data is packed into raw bytes and can be saved to file. Only <a href="class_array#class-array"><span class="std std-ref">Array</span></a> and <a href="class_dictionary#class-dictionary"><span class="std std-ref">Dictionary</span></a> can be stored this way.</p> <p>You can retrieve the data by iterating on the container, which will work as if iterating on the packed data itself. If the packed container is a <a href="class_dictionary#class-dictionary"><span class="std std-ref">Dictionary</span></a>, the data can be retrieved by key names (<a href="class_string#class-string"><span class="std std-ref">String</span></a>/<a href="class_stringname#class-stringname"><span class="std std-ref">StringName</span></a> only).</p> <pre data-language="gdscript">var data = { "key": "value", "another_key": 123, "lock": Vector2() }
+var packed = PackedDataContainer.new()
+packed.pack(data)
+ResourceSaver.save(packed, "packed_data.res")
+</pre> <pre data-language="gdscript">var container = load("packed_data.res")
+for key in container:
+    prints(key, container[key])
+
+# Prints:
+# key value
+# lock (0, 0)
+# another_key 123
+</pre> <p>Nested containers will be packed recursively. While iterating, they will be returned as <a href="class_packeddatacontainerref#class-packeddatacontainerref"><span class="std std-ref">PackedDataContainerRef</span></a>.</p> </section> <section class="classref-reftable-group" id="methods"> <h2>Methods</h2> <table class="colwidths-auto docutils align-default">  <tr>
+<td><p><a href="class_%40globalscope#enum-globalscope-error"><span class="std std-ref">Error</span></a></p></td> <td><p><a href="#class-packeddatacontainer-method-pack"><span class="std std-ref">pack</span></a> <strong>(</strong> <a href="class_variant#class-variant"><span class="std std-ref">Variant</span></a> value <strong>)</strong></p></td> </tr> <tr>
+<td><p><a href="class_int#class-int"><span class="std std-ref">int</span></a></p></td> <td><p><a href="#class-packeddatacontainer-method-size"><span class="std std-ref">size</span></a> <strong>(</strong> <strong>)</strong> <abbr title="This method has no side effects. It doesn't modify any of the instance's member variables.">const</abbr></p></td> </tr>  </table> </section>  <section class="classref-descriptions-group" id="method-descriptions"> <h2>Method Descriptions</h2> <h3 id="class-packeddatacontainer-method-pack">
+<a href="class_%40globalscope#enum-globalscope-error"><span class="std std-ref">Error</span></a> pack ( <a href="class_variant#class-variant"><span class="std std-ref">Variant</span></a> value )</h3> <p>Packs the given container into a binary representation. The <code>value</code> must be either <a href="class_array#class-array"><span class="std std-ref">Array</span></a> or <a href="class_dictionary#class-dictionary"><span class="std std-ref">Dictionary</span></a>, any other type will result in invalid data error.</p> <p><strong>Note:</strong> Subsequent calls to this method will overwrite the existing data.</p>  <h3 id="class-packeddatacontainer-method-size">
+<a href="class_int#class-int"><span class="std std-ref">int</span></a> size ( ) <abbr title="This method has no side effects. It doesn't modify any of the instance's member variables.">const</abbr>
+</h3> <p>Returns the size of the packed container (see <a href="class_array#class-array-method-size"><span class="std std-ref">Array.size</span></a> and <a href="class_dictionary#class-dictionary-method-size"><span class="std std-ref">Dictionary.size</span></a>).</p> </section> </section><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2014&ndash;present Juan Linietsky, Ariel Manzur and the Godot community<br>Licensed under the Creative Commons Attribution Unported License v3.0.<br>
+    <a href="https://docs.godotengine.org/en/4.2/classes/class_packeddatacontainer.html" class="_attribution-link">https://docs.godotengine.org/en/4.2/classes/class_packeddatacontainer.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../assets/index.js"></script>
+</body>
+
+</html>

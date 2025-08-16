@@ -1,0 +1,35 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>PolygonOccluder3D</title>
+    
+    <link rel="preload" href="../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../application.css" />
+    <link rel="stylesheet" type="text/css" href="../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="classes/class_polygonoccluder3d" prefix="../" listing-src="../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _godot"><section id="polygonoccluder3d"> <h1 id="class-polygonoccluder3d">PolygonOccluder3D</h1> <p><strong>Inherits:</strong> <a href="class_occluder3d#class-occluder3d"><span class="std std-ref">Occluder3D</span></a> <strong>&lt;</strong> <a href="class_resource#class-resource"><span class="std std-ref">Resource</span></a> <strong>&lt;</strong> <a href="class_refcounted#class-refcounted"><span class="std std-ref">RefCounted</span></a> <strong>&lt;</strong> <a href="class_object#class-object"><span class="std std-ref">Object</span></a></p> <p>Flat 2D polygon shape for use with occlusion culling in <a href="class_occluderinstance3d#class-occluderinstance3d"><span class="std std-ref">OccluderInstance3D</span></a>.</p> <section class="classref-introduction-group" id="description"> <h2>Description</h2> <p><strong>PolygonOccluder3D</strong> stores a polygon shape that can be used by the engine's occlusion culling system. When an <a href="class_occluderinstance3d#class-occluderinstance3d"><span class="std std-ref">OccluderInstance3D</span></a> with a <strong>PolygonOccluder3D</strong> is selected in the editor, an editor will appear at the top of the 3D viewport so you can add/remove points. All points must be placed on the same 2D plane, which means it is not possible to create arbitrary 3D shapes with a single <strong>PolygonOccluder3D</strong>. To use arbitrary 3D shapes as occluders, use <a href="class_arrayoccluder3d#class-arrayoccluder3d"><span class="std std-ref">ArrayOccluder3D</span></a> or <a href="class_occluderinstance3d#class-occluderinstance3d"><span class="std std-ref">OccluderInstance3D</span></a>'s baking feature instead.</p> <p>See <a href="class_occluderinstance3d#class-occluderinstance3d"><span class="std std-ref">OccluderInstance3D</span></a>'s documentation for instructions on setting up occlusion culling.</p> </section> <section class="classref-introduction-group" id="tutorials"> <h2>Tutorials</h2> <ul class="simple"> <li><a href="https://docs.godotengine.org/en/4.2/tutorials/3d/occlusion_culling.html"><span class="doc">Occlusion culling</span></a></li> </ul> </section> <section class="classref-reftable-group" id="properties"> <h2>Properties</h2> <table class="colwidths-auto docutils align-default">  <tr>
+<td><p><a href="class_packedvector2array#class-packedvector2array"><span class="std std-ref">PackedVector2Array</span></a></p></td> <td><p><a href="#class-polygonoccluder3d-property-polygon"><span class="std std-ref">polygon</span></a></p></td> <td><p><code>PackedVector2Array()</code></p></td> </tr>  </table> </section>  <section class="classref-descriptions-group" id="property-descriptions"> <h2>Property Descriptions</h2> <h3 id="class-polygonoccluder3d-property-polygon">
+<a href="class_packedvector2array#class-packedvector2array"><span class="std std-ref">PackedVector2Array</span></a> polygon = <code>PackedVector2Array()</code>
+</h3> <ul class="classref-property-setget simple"> <li>void <strong>set_polygon</strong> <strong>(</strong> <a href="class_packedvector2array#class-packedvector2array"><span class="std std-ref">PackedVector2Array</span></a> value <strong>)</strong>
+</li> <li>
+<a href="class_packedvector2array#class-packedvector2array"><span class="std std-ref">PackedVector2Array</span></a> <strong>get_polygon</strong> <strong>(</strong> <strong>)</strong>
+</li> </ul> <p>The polygon to use for occlusion culling. The polygon can be convex or concave, but it should have as few points as possible to maximize performance.</p> <p>The polygon must <em>not</em> have intersecting lines. Otherwise, triangulation will fail (with an error message printed).</p> </section> </section><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2014&ndash;present Juan Linietsky, Ariel Manzur and the Godot community<br>Licensed under the Creative Commons Attribution Unported License v3.0.<br>
+    <a href="https://docs.godotengine.org/en/4.2/classes/class_polygonoccluder3d.html" class="_attribution-link">https://docs.godotengine.org/en/4.2/classes/class_polygonoccluder3d.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../assets/index.js"></script>
+</body>
+
+</html>

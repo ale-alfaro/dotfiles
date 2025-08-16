@@ -1,0 +1,61 @@
+<h1>micromamba</h1>
+
+<blockquote><p>A fast, minimal, standalone package and environment manager for <code>conda</code> packages.
+Drop-in replacement for <code>conda</code>, ideal for CI, Docker, and lightweight setups.
+More information: <a href="https://manned.org/micromamba">https://manned.org/micromamba</a>.</p></blockquote>
+
+<ul>
+<li>Create a new environment at a specific path, installing named packages into it:</li>
+</ul>
+
+
+<p><code>micromamba create {{[-p|--prefix]}} {{/path/to/env}} {{python=3.11 numpy}}</code></p>
+
+<ul>
+<li>Activate an environment by name or path:</li>
+</ul>
+
+
+<p><code>micromamba activate {{[-p|--prefix]}} {{/path/to/env}}</code></p>
+
+<ul>
+<li>Run a command inside an environment without activating it in the shell:</li>
+</ul>
+
+
+<p><code>micromamba run {{[-p|--prefix]}} {{/path/to/env}} {{pytest tests/}}</code></p>
+
+<ul>
+<li>Install packages into the currently active environment:</li>
+</ul>
+
+
+<p><code>micromamba install {{scipy pandas}}</code></p>
+
+<ul>
+<li>List all installed packages in the current environment:</li>
+</ul>
+
+
+<p><code>micromamba list</code></p>
+
+<ul>
+<li>Search for packages in channels or current environment:</li>
+</ul>
+
+
+<p><code>micromamba search {{package_name}}</code></p>
+
+<ul>
+<li>Query tree-like dependencies of a package:</li>
+</ul>
+
+
+<p><code>micromamba repoquery depends {{[-t|--tree]}} {{package_name}}</code></p>
+
+<ul>
+<li>Show information about the current <code>micromamba</code> setup:</li>
+</ul>
+
+
+<p><code>micromamba info</code></p>

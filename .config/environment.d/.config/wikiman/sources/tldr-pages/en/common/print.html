@@ -1,0 +1,40 @@
+<h1>print</h1>
+
+<blockquote><p>Z Shell (<code>zsh</code>) builtin. Prints arguments, similar to <code>echo</code>.
+See also: <code>echo</code>, <code>printf</code>, <code>zsh</code>.
+More information: <a href="https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html">https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html</a>.</p></blockquote>
+
+<ul>
+<li>Print input:</li>
+</ul>
+
+
+<p><code>print "Hello" "World"</code></p>
+
+<ul>
+<li>Print separated by newline(s):</li>
+</ul>
+
+
+<p><code>print -l "Line1" "Line 2" "Line3"</code></p>
+
+<ul>
+<li>Print without trailing newline:</li>
+</ul>
+
+
+<p><code>print -n "Hello"; print "World"</code></p>
+
+<ul>
+<li>Enable backslash escapes:</li>
+</ul>
+
+
+<p><code>print -e "Line 1\nLine2"</code></p>
+
+<ul>
+<li>Print arguments as described by <code>printf</code> (for greater portability across shells, consider using the <code>printf</code> command instead):</li>
+</ul>
+
+
+<p><code>print -f "%s is %d years old.\n" "Alice" 30</code></p>

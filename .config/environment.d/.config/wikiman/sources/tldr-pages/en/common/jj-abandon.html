@@ -1,0 +1,26 @@
+<h1>jj abandon</h1>
+
+<blockquote><p>Abandon a revision, rebasing descendants onto its parent(s).
+Abandoning a revision removes its associated change ID.
+More information: <a href="https://jj-vcs.github.io/jj/latest/cli-reference/#jj-abandon">https://jj-vcs.github.io/jj/latest/cli-reference/#jj-abandon</a>.</p></blockquote>
+
+<ul>
+<li>Abandon revisions specified by given revsets (e.g. <code>B::D</code>, <code>A..D</code>, <code>B|C|D</code>, etc.):</li>
+</ul>
+
+
+<p><code>jj abandon {{revsets}}</code></p>
+
+<ul>
+<li>Abandon revisions, without deleting their bookmarks and moving them to the parent revisions instead:</li>
+</ul>
+
+
+<p><code>jj abandon --retain-bookmarks {{revsets}}</code></p>
+
+<ul>
+<li>Abandon revisions, without modifying the contents of their children:</li>
+</ul>
+
+
+<p><code>jj abandon --restore-descendants {{revsets}}</code></p>

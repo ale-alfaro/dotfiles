@@ -1,0 +1,80 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>.. Array expressions</title>
+    
+    <link rel="preload" href="../../assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="../../application.css" />
+    <link rel="stylesheet" type="text/css" href="../../assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="reference/expressions/array-expr" prefix="../../" listing-src="../../navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _rust"><h1 class="rule" id="r-expr.array">
+<a class="rule-link" href="#r-expr.array" title="expr.array"><span>[expr<wbr>.array]</wbr></span></a> </h1> <h1 id="array-and-array-index-expressions">Array and array index expressions</h1> <h2 id="array-expressions">Array expressions</h2> <div class="rule" id="r-expr.array.syntax">
+<a class="rule-link" href="#r-expr.array.syntax" title="expr.array.syntax"><span>[expr<wbr>.array<wbr>.syntax]</wbr></wbr></span></a> </div> <div class="grammar-container"> <p><strong><sup>Syntax</sup></strong> <br> <span class="grammar-text grammar-production" id="grammar-ArrayExpression" onclick="show_railroad()"><a href="array-expr#railroad-ArrayExpression">ArrayExpression</a></span> → <span class="grammar-literal">[</span> <span class="grammar-text"><a href="array-expr#grammar-ArrayElements">ArrayElements</a></span><sup>?</sup> <span class="grammar-literal">]</span></p> <p><span class="grammar-text grammar-production" id="grammar-ArrayElements" onclick="show_railroad()"><a href="array-expr#railroad-ArrayElements">ArrayElements</a></span> → <br> <span class="grammar-text"><a href="../expressions#grammar-Expression">Expression</a></span> ( <span class="grammar-literal">,</span> <span class="grammar-text"><a href="../expressions#grammar-Expression">Expression</a></span> )<sup>*</sup> <span class="grammar-literal">,</span><sup>?</sup> <br> | <span class="grammar-text"><a href="../expressions#grammar-Expression">Expression</a></span> <span class="grammar-literal">;</span> <span class="grammar-text"><a href="../expressions#grammar-Expression">Expression</a></span></p> <p><button class="grammar-toggle-railroad" type="button" title="Toggle railroad display" onclick="toggle_railroad()">Show Railroad</button></p> </div> <div class="grammar-railroad grammar-hidden"> <div style="width: 318px; height: auto; max-width: 100%; max-height: 100%" class="railroad-production" id="railroad-ArrayExpression">
+<svg class="railroad" viewbox="0 0 318 87" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">  <g class="verticalgrid"> <a class="link" xlink:href="array-expr.html#grammar-ArrayExpression"> <text class="comment" x="67" y="25"> ArrayExpression</text> </a> <g class="sequence">  <g class="sequence"> <g class="terminal">  <text x="49" y="71"> [</text> </g> <g class="optional">  <a class="link" xlink:href="array-expr.html#railroad-ArrayElements"> <g class="nonterminal">  <text x="159" y="71"> ArrayElements</text> </g> </a> </g> <g class="terminal">  <text x="269" y="71"> ]</text> </g>   </g>    </g> </g> </svg> </div> <div style="width: 524px; height: auto; max-width: 100%; max-height: 100%" class="railroad-production" id="railroad-ArrayElements">
+<svg class="railroad" viewbox="0 0 524 133" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">  <g class="verticalgrid"> <a class="link" xlink:href="array-expr.html#grammar-ArrayElements"> <text class="comment" x="60" y="25"> ArrayElements</text> </a> <g class="sequence">  <g class="choice">  <g class="sequence"> <a class="link" xlink:href="../expressions.html#railroad-Expression"> <g class="nonterminal">  <text x="109" y="71"> Expression</text> </g> </a> <g class="optional">  <g class="repeat">   <g class="sequence"> <g class="terminal">  <text x="219" y="71"> ,</text> </g> <a class="link" xlink:href="../expressions.html#railroad-Expression"> <g class="nonterminal">  <text x="293" y="71"> Expression</text> </g> </a>  </g> </g> </g> <g class="optional">  <g class="terminal">  <text x="427" y="71"> ,</text> </g> </g>   </g>   <g class="sequence"> <a class="link" xlink:href="../expressions.html#railroad-Expression"> <g class="nonterminal">  <text x="109" y="117"> Expression</text> </g> </a> <g class="terminal">  <text x="183" y="117"> ;</text> </g> <a class="link" xlink:href="../expressions.html#railroad-Expression"> <g class="nonterminal">  <text x="257" y="117"> Expression</text> </g> </a>   </g> </g>    </g> </g> </svg> </div> </div> <div class="rule" id="r-expr.array.constructor">
+<a class="rule-link" href="#r-expr.array.constructor" title="expr.array.constructor"><span>[expr<wbr>.array<wbr>.constructor]</wbr></wbr></span></a> </div> <p><em>Array expressions</em> construct <a href="../types/array">arrays</a>. Array expressions come in two forms.</p> <div class="rule" id="r-expr.array.array">
+<a class="rule-link" href="#r-expr.array.array" title="expr.array.array"><span>[expr<wbr>.array<wbr>.array]</wbr></wbr></span></a> </div> <p>The first form lists out every value in the array.</p> <div class="rule" id="r-expr.array.array-syntax">
+<a class="rule-link" href="#r-expr.array.array-syntax" title="expr.array.array-syntax"><span>[expr<wbr>.array<wbr>.array-syntax]</wbr></wbr></span></a> </div> <p>The syntax for this form is a comma-separated list of expressions of uniform type enclosed in square brackets.</p> <div class="rule" id="r-expr.array.array-behavior">
+<a class="rule-link" href="#r-expr.array.array-behavior" title="expr.array.array-behavior"><span>[expr<wbr>.array<wbr>.array-behavior]</wbr></wbr></span></a> </div> <p>This produces an array containing each of these values in the order they are written.</p> <div class="rule" id="r-expr.array.repeat">
+<a class="rule-link" href="#r-expr.array.repeat" title="expr.array.repeat"><span>[expr<wbr>.array<wbr>.repeat]</wbr></wbr></span></a> </div> <p>The syntax for the second form is two expressions separated by a semicolon (<code>;</code>) enclosed in square brackets.</p> <div class="rule" id="r-expr.array.repeat-operand">
+<a class="rule-link" href="#r-expr.array.repeat-operand" title="expr.array.repeat-operand"><span>[expr<wbr>.array<wbr>.repeat-operand]</wbr></wbr></span></a> </div> <p>The expression before the <code>;</code> is called the <em>repeat operand</em>.</p> <div class="rule" id="r-expr.array.length-operand">
+<a class="rule-link" href="#r-expr.array.length-operand" title="expr.array.length-operand"><span>[expr<wbr>.array<wbr>.length-operand]</wbr></wbr></span></a> </div> <p>The expression after the <code>;</code> is called the <em>length operand</em>.</p> <div class="rule" id="r-expr.array.length-restriction">
+<a class="rule-link" href="#r-expr.array.length-restriction" title="expr.array.length-restriction"><span>[expr<wbr>.array<wbr>.length-restriction]</wbr></wbr></span></a> </div> <p>It must have type <code>usize</code> and be a <a href="../const_eval#constant-expressions">constant expression</a>, such as a <a href="../tokens#literals">literal</a> or a <a href="../items/constant-items">constant item</a>.</p> <div class="rule" id="r-expr.array.repeat-behavior">
+<a class="rule-link" href="#r-expr.array.repeat-behavior" title="expr.array.repeat-behavior"><span>[expr<wbr>.array<wbr>.repeat-behavior]</wbr></wbr></span></a> </div> <p>An array expression of this form creates an array with the length of the value of the length operand with each element being a copy of the repeat operand. That is, <code>[a; b]</code> creates an array containing <code>b</code> copies of the value of <code>a</code>.</p> <div class="rule" id="r-expr.array.repeat-copy">
+<a class="rule-link" href="#r-expr.array.repeat-copy" title="expr.array.repeat-copy"><span>[expr<wbr>.array<wbr>.repeat-copy]</wbr></wbr></span></a> </div> <p>If the length operand has a value greater than 1 then this requires that the type of the repeat operand is <a href="../special-types-and-traits#copy"><code>Copy</code></a> or that it must be a <a href="path-expr">path</a> to a constant item.</p> <div class="rule" id="r-expr.array.repeat-const-item">
+<a class="rule-link" href="#r-expr.array.repeat-const-item" title="expr.array.repeat-const-item"><span>[expr<wbr>.array<wbr>.repeat-const-item]</wbr></wbr></span></a> </div> <p>When the repeat operand is a constant item, it is evaluated the length operand’s value times.</p> <div class="rule" id="r-expr.array.repeat-evaluation-zero">
+<a class="rule-link" href="#r-expr.array.repeat-evaluation-zero" title="expr.array.repeat-evaluation-zero"><span>[expr<wbr>.array<wbr>.repeat-evaluation-zero]</wbr></wbr></span></a> </div> <p>If that value is <code>0</code>, then the constant item is not evaluated at all.</p> <div class="rule" id="r-expr.array.repeat-non-const">
+<a class="rule-link" href="#r-expr.array.repeat-non-const" title="expr.array.repeat-non-const"><span>[expr<wbr>.array<wbr>.repeat-non-const]</wbr></wbr></span></a> </div> <p>For expressions that are not a constant item, it is evaluated exactly once, and then the result is copied the length operand’s value times.</p> <pre data-language="rust">#![allow(unused)]
+fn main() {
+[1, 2, 3, 4];
+["a", "b", "c", "d"];
+[0; 128];              // array with 128 zeros
+[0u8, 0u8, 0u8, 0u8,];
+[[1, 0, 0], [0, 1, 0], [0, 0, 1]]; // 2D array
+const EMPTY: Vec&lt;i32&gt; = Vec::new();
+[EMPTY; 2];
+}</pre> <div class="rule" id="r-expr.array.index">
+<a class="rule-link" href="#r-expr.array.index" title="expr.array.index"><span>[expr<wbr>.array<wbr>.index]</wbr></wbr></span></a> </div> <h2 id="array-and-slice-indexing-expressions">Array and slice indexing expressions</h2> <div class="rule" id="r-expr.array.index.syntax">
+<a class="rule-link" href="#r-expr.array.index.syntax" title="expr.array.index.syntax"><span>[expr<wbr>.array<wbr>.index<wbr>.syntax]</wbr></wbr></wbr></span></a> </div> <div class="grammar-container"> <p><strong><sup>Syntax</sup></strong> <br> <span class="grammar-text grammar-production" id="grammar-IndexExpression" onclick="show_railroad()"><a href="array-expr#railroad-IndexExpression">IndexExpression</a></span> → <span class="grammar-text"><a href="../expressions#grammar-Expression">Expression</a></span> <span class="grammar-literal">[</span> <span class="grammar-text"><a href="../expressions#grammar-Expression">Expression</a></span> <span class="grammar-literal">]</span></p> <p><button class="grammar-toggle-railroad" type="button" title="Toggle railroad display" onclick="toggle_railroad()">Show Railroad</button></p> </div> <div class="grammar-railroad grammar-hidden"> <div style="width: 356px; height: auto; max-width: 100%; max-height: 100%" class="railroad-production" id="railroad-IndexExpression">
+<svg class="railroad" viewbox="0 0 356 74" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">  <g class="verticalgrid"> <a class="link" xlink:href="array-expr.html#grammar-IndexExpression"> <text class="comment" x="67" y="25"> IndexExpression</text> </a> <g class="sequence">  <g class="sequence"> <a class="link" xlink:href="../expressions.html#railroad-Expression"> <g class="nonterminal">  <text x="85" y="58"> Expression</text> </g> </a> <g class="terminal">  <text x="159" y="58"> [</text> </g> <a class="link" xlink:href="../expressions.html#railroad-Expression"> <g class="nonterminal">  <text x="233" y="58"> Expression</text> </g> </a> <g class="terminal">  <text x="307" y="58"> ]</text> </g>    </g>    </g> </g> </svg> </div> </div> <div class="rule" id="r-expr.array.index.array">
+<a class="rule-link" href="#r-expr.array.index.array" title="expr.array.index.array"><span>[expr<wbr>.array<wbr>.index<wbr>.array]</wbr></wbr></wbr></span></a> </div> <p><a href="../types/array">Array</a> and <a href="../types/slice">slice</a>-typed values can be indexed by writing a square-bracket-enclosed expression of type <code>usize</code> (the index) after them. When the array is mutable, the resulting <a href="../expressions#place-expressions-and-value-expressions">memory location</a> can be assigned to.</p> <div class="rule" id="r-expr.array.index.trait">
+<a class="rule-link" href="#r-expr.array.index.trait" title="expr.array.index.trait"><span>[expr<wbr>.array<wbr>.index<wbr>.trait]</wbr></wbr></wbr></span></a> </div> <p>For other types an index expression <code>a[b]</code> is equivalent to <code>*std::ops::Index::index(&amp;a, b)</code>, or <code>*std::ops::IndexMut::index_mut(&amp;mut a, b)</code> in a mutable place expression context. Just as with methods, Rust will also insert dereference operations on <code>a</code> repeatedly to find an implementation.</p> <div class="rule" id="r-expr.array.index.zero-index">
+<a class="rule-link" href="#r-expr.array.index.zero-index" title="expr.array.index.zero-index"><span>[expr<wbr>.array<wbr>.index<wbr>.zero-index]</wbr></wbr></wbr></span></a> </div> <p>Indices are zero-based for arrays and slices.</p> <div class="rule" id="r-expr.array.index.const">
+<a class="rule-link" href="#r-expr.array.index.const" title="expr.array.index.const"><span>[expr<wbr>.array<wbr>.index<wbr>.const]</wbr></wbr></wbr></span></a> </div> <p>Array access is a <a href="../const_eval#constant-expressions">constant expression</a>, so bounds can be checked at compile-time with a constant index value. Otherwise a check will be performed at run-time that will put the thread in a <a href="../panic"><em>panicked state</em></a> if it fails.</p> <pre data-language="rust">#![allow(unused)]
+fn main() {
+// lint is deny by default.
+#![warn(unconditional_panic)]
+
+([1, 2, 3, 4])[2];        // Evaluates to 3
+
+let b = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+b[1][2];                  // multidimensional array indexing
+
+let x = (["a", "b"])[10]; // warning: index out of bounds
+
+let n = 10;
+let y = (["a", "b"])[n];  // panics
+
+let arr = ["a", "b"];
+arr[10];                  // warning: index out of bounds
+}</pre> <div class="rule" id="r-expr.array.index.trait-impl">
+<a class="rule-link" href="#r-expr.array.index.trait-impl" title="expr.array.index.trait-impl"><span>[expr<wbr>.array<wbr>.index<wbr>.trait-impl]</wbr></wbr></wbr></span></a> </div> <p>The array index expression can be implemented for types other than arrays and slices by implementing the <a href="https://doc.rust-lang.org/core/ops/index/trait.Index.html">Index</a> and <a href="https://doc.rust-lang.org/core/ops/index/trait.IndexMut.html">IndexMut</a> traits.</p><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; 2010 The Rust Project Developers<br>Licensed under the Apache License, Version 2.0 or the MIT license, at your option.<br>
+    <a href="https://doc.rust-lang.org/reference/expressions/array-expr.html" class="_attribution-link">https://doc.rust-lang.org/reference/expressions/array-expr.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="../../assets/index.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,29 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>3.18.36. OpenRISC Options</title>
+    
+    <link rel="preload" href="assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="application.css" />
+    <link rel="stylesheet" type="text/css" href="assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="openrisc-options" prefix="" listing-src="navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _gcc"><h1 class="subsection" id="OpenRISC-Options-1">3.18.36 OpenRISC Options</h1>  <p id="index-OpenRISC-Options">These options are defined for OpenRISC: </p> <dl compact> <dt><code>-mboard=<var>name</var></code></dt> <dd> <p id="index-mboard">Configure a board specific runtime. This will be passed to the linker for newlib board library linking. The default is <code>or1ksim</code>. </p> </dd> <dt><code>-mnewlib</code></dt> <dd> <p id="index-mnewlib">For compatibility, it’s always newlib for elf now. </p> </dd> <dt><code>-mhard-div</code></dt> <dd> <p id="index-mhard-div">Generate code for hardware which supports divide instructions. This is the default. </p> </dd> <dt><code>-mhard-mul</code></dt> <dd> <p id="index-mhard-mul">Generate code for hardware which supports multiply instructions. This is the default. </p> </dd> <dt><code>-mcmov</code></dt> <dd> <p id="index-mcmov-1">Generate code for hardware which supports the conditional move (<code>l.cmov</code>) instruction. </p> </dd> <dt><code>-mror</code></dt> <dd> <p id="index-mror">Generate code for hardware which supports rotate right instructions. </p> </dd> <dt><code>-msext</code></dt> <dd> <p id="index-msext">Generate code for hardware which supports sign-extension instructions. </p> </dd> <dt><code>-msfimm</code></dt> <dd> <p id="index-msfimm">Generate code for hardware which supports set flag immediate (<code>l.sf*i</code>) instructions. </p> </dd> <dt><code>-mshftimm</code></dt> <dd> <p id="index-mshftimm">Generate code for hardware which supports shift immediate related instructions (i.e. <code>l.srai</code>, <code>l.srli</code>, <code>l.slli</code>, <code>1.rori</code>). Note, to enable generation of the <code>l.rori</code> instruction the <samp>-mror</samp> flag must also be specified. </p> </dd> <dt><code>-msoft-div</code></dt> <dd> <p id="index-msoft-div">Generate code for hardware which requires divide instruction emulation. </p> </dd> <dt><code>-msoft-mul</code></dt> <dd> <p id="index-msoft-mul">Generate code for hardware which requires multiply instruction emulation. </p> </dd> </dl><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; Free Software Foundation<br>Licensed under the GNU Free Documentation License, Version 1.3.<br>
+    <a href="https://gcc.gnu.org/onlinedocs/gcc-9.5.0/gcc/OpenRISC-Options.html" class="_attribution-link">https://gcc.gnu.org/onlinedocs/gcc-9.5.0/gcc/OpenRISC-Options.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/index.js"></script>
+</body>
+
+</html>

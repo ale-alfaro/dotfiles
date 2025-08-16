@@ -1,0 +1,157 @@
+<html class="_theme-default">
+<head>
+    <meta charset="utf-8">
+    <title>6.1. Extensions implemented in GNU Fortran</title>
+    
+    <link rel="preload" href="assets/index.js" as="script" type="text/javascript" />
+
+    <link rel="stylesheet" type="text/css" href="application.css" />
+    <link rel="stylesheet" type="text/css" href="assets/index.css" />
+</head>
+<body>
+    <div class="_app">
+        <devdocs-navbar current="extensions-implemented-in-gnu-fortran" prefix="" listing-src="navbar.json"></devdocs-navbar>
+        <div class="_container">
+            <main class="_content">
+                <div class="_page _gnu_fortran"><h1 class="section" id="Extensions-implemented-in-GNU-Fortran-1">6.1 Extensions implemented in GNU Fortran</h1>  <p id="index-extensions_002c-implemented">GNU Fortran implements a number of extensions over standard Fortran. This chapter contains information on their syntax and meaning. There are currently two categories of GNU Fortran extensions, those that provide functionality beyond that provided by any standard, and those that are supported by GNU Fortran purely for backward compatibility with legacy compilers. By default, <samp>-std=gnu</samp> allows the compiler to accept both types of extensions, but to warn about the use of the latter. Specifying either <samp>-std=f95</samp>, <samp>-std=f2003</samp>, <samp>-std=f2008</samp>, or <samp>-std=f2018</samp> disables both types of extensions, and <samp>-std=legacy</samp> allows both without warning. The special compile flag <samp>-fdec</samp> enables additional compatibility extensions along with those enabled by <samp>-std=legacy</samp>. </p> <table class="menu" border="0" cellspacing="0"> <tr>
+<td align="left">• <a href="old_002dstyle-kind-specifications#Old_002dstyle-kind-specifications" accesskey="1">Old-style kind specifications</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="old_002dstyle-variable-initialization#Old_002dstyle-variable-initialization" accesskey="2">Old-style variable initialization</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="extensions-to-namelist#Extensions-to-namelist" accesskey="3">Extensions to namelist</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="x-format-descriptor-without-count-field#X-format-descriptor-without-count-field" accesskey="4">X format descriptor without count field</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="commas-in-format-specifications#Commas-in-FORMAT-specifications" accesskey="5">Commas in FORMAT specifications</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="missing-period-in-format-specifications#Missing-period-in-FORMAT-specifications" accesskey="6">Missing period in FORMAT specifications</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="i_002fo-item-lists#I_002fO-item-lists" accesskey="7">I/O item lists</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="q-exponent_002dletter#Q-exponent_002dletter" accesskey="8"><code>Q</code> exponent-letter</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="boz-literal-constants#BOZ-literal-constants" accesskey="9">BOZ literal constants</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="real-array-indices#Real-array-indices">Real array indices</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="unary-operators#Unary-operators">Unary operators</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="implicitly-convert-logical-and-integer-values#Implicitly-convert-LOGICAL-and-INTEGER-values">Implicitly convert LOGICAL and INTEGER values</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="hollerith-constants-support#Hollerith-constants-support">Hollerith constants support</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="cray-pointers#Cray-pointers">Cray pointers</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="convert-specifier#CONVERT-specifier">CONVERT specifier</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="openmp#OpenMP">OpenMP</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="openacc#OpenACC">OpenACC</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="argument-list-functions#Argument-list-functions">Argument list functions</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="read_002fwrite-after-eof-marker#Read_002fWrite-after-EOF-marker">Read/Write after EOF marker</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="structure-and-record#STRUCTURE-and-RECORD">STRUCTURE and RECORD</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="union-and-map#UNION-and-MAP">UNION and MAP</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="type-variants-for-integer-intrinsics#Type-variants-for-integer-intrinsics">Type variants for integer intrinsics</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="automatic-and-static-attributes#AUTOMATIC-and-STATIC-attributes">AUTOMATIC and STATIC attributes</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="extended-math-intrinsics#Extended-math-intrinsics">Extended math intrinsics</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="form-feed-as-whitespace#Form-feed-as-whitespace">Form feed as whitespace</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="type-as-an-alias-for-print#TYPE-as-an-alias-for-PRINT">TYPE as an alias for PRINT</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="_0025loc-as-an-rvalue#g_t_0025LOC-as-an-rvalue">%LOC as an rvalue</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="_002exor_002e-operator#g_t_002eXOR_002e-operator">.XOR. operator</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="bitwise-logical-operators#Bitwise-logical-operators">Bitwise logical operators</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="extended-i_002fo-specifiers#Extended-I_002fO-specifiers">Extended I/O specifiers</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="legacy-parameter-statements#Legacy-PARAMETER-statements">Legacy PARAMETER statements</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> <tr>
+<td align="left">• <a href="default-exponents#Default-exponents">Default exponents</a>:</td>
+<td> </td>
+<td align="left"> </td>
+</tr> </table>  <p class="header"> <p> Next: <a href="extensions-not-implemented-in-gnu-fortran#Extensions-not-implemented-in-GNU-Fortran" accesskey="n" rel="next">Extensions not implemented in GNU Fortran</a>, Up: <a href="extensions#Extensions" accesskey="u" rel="up">Extensions</a> [<a href="index#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/Option-Index.html#Option-Index" title="Index" rel="index">Index</a>]</p> </p><div class="_attribution">
+  <p class="_attribution-p">
+    &copy; Free Software Foundation<br>Licensed under the GNU Free Documentation License, Version 1.3.<br>
+    <a href="https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/Extensions-implemented-in-GNU-Fortran.html" class="_attribution-link">https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gfortran/Extensions-implemented-in-GNU-Fortran.html</a>
+  </p>
+</div>
+</div>
+            </main>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/index.js"></script>
+</body>
+
+</html>

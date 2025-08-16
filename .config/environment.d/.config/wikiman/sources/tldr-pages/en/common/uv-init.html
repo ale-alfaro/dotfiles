@@ -1,0 +1,53 @@
+<h1>uv init</h1>
+
+<blockquote><p>Create a new Python project.
+More information: <a href="https://docs.astral.sh/uv/reference/cli/#uv-init">https://docs.astral.sh/uv/reference/cli/#uv-init</a>.</p></blockquote>
+
+<ul>
+<li>Initialize a project in the current directory:</li>
+</ul>
+
+
+<p><code>uv init</code></p>
+
+<ul>
+<li>Initialize a project with a certain name:</li>
+</ul>
+
+
+<p><code>uv init {{project_name}}</code></p>
+
+<ul>
+<li>Create a project in a given directory:</li>
+</ul>
+
+
+<p><code>uv init --directory {{path/to/directory}} {{project_name}}</code></p>
+
+<ul>
+<li>Create a project for a Python library:</li>
+</ul>
+
+
+<p><code>uv init {{[--lib|--library]}} {{project_name}}</code></p>
+
+<ul>
+<li>Specify the build system:</li>
+</ul>
+
+
+<p><code>uv init --build-backend {{build_backend}} {{project_name}}</code></p>
+
+<ul>
+<li>Only create a <code>pyproject.toml</code>:</li>
+</ul>
+
+
+<p><code>uv init --bare {{project_name}}</code></p>
+
+<ul>
+<li>Set the project description:</li>
+</ul>
+
+
+<p><code>uv init --description "{{description}}" {{project_name}}</code></p>

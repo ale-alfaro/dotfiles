@@ -1,0 +1,54 @@
+<h1>codex</h1>
+
+<blockquote><p>Natural language code assistant for the terminal, powered by OpenAI.
+Reads and edits files in your current directory to fulfill requests.
+More information: <a href="https://github.com/openai/codex">https://github.com/openai/codex</a>.</p></blockquote>
+
+<ul>
+<li>Start an interactive Codex session in the current directory:</li>
+</ul>
+
+
+<p><code>codex</code></p>
+
+<ul>
+<li>Run a single Codex command using a prompt:</li>
+</ul>
+
+
+<p><code>codex "{{your prompt}}"</code></p>
+
+<ul>
+<li>Run a prompt with automatic approval of all file edits and commands:</li>
+</ul>
+
+
+<p><code>codex {{[-a|--approval-mode]}} full-auto "{{your prompt}}"</code></p>
+
+<ul>
+<li>Use a specific provider and model:</li>
+</ul>
+
+
+<p><code>codex --provider {{provider_name}} {{[-m|--model]}} {{model_name}} "{{your prompt}}"</code></p>
+
+<ul>
+<li>Load the entire repository as context (experimental):</li>
+</ul>
+
+
+<p><code>codex --full-context "{{your prompt}}"</code></p>
+
+<ul>
+<li>Show the resource usage for the current session (run this command inside a session):</li>
+</ul>
+
+
+<p><code>/cost</code></p>
+
+<ul>
+<li>Display help:</li>
+</ul>
+
+
+<p><code>codex --help</code></p>

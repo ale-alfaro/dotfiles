@@ -1,0 +1,53 @@
+<h1>rsql</h1>
+
+<blockquote><p>SQL client to interface with databases and other data sources inside the terminal.
+More information: <a href="https://github.com/theseus-rs/rsql">https://github.com/theseus-rs/rsql</a>.</p></blockquote>
+
+<ul>
+<li>Enter interactive mode:</li>
+</ul>
+
+
+<p><code>rsql</code></p>
+
+<ul>
+<li>Connect to a database (e.g. PostgreSQL):</li>
+</ul>
+
+
+<p><code>rsql --url {{"postgresql://user:pass@localhost/mydb"}}</code></p>
+
+<ul>
+<li>Connect to a PostgreSQL database with SSL:</li>
+</ul>
+
+
+<p><code>rsql --url {{"postgresql://user:pass@localhost/db?sslmode=require"}}</code></p>
+
+<ul>
+<li>Connect to a MySQL database with a specified charset:</li>
+</ul>
+
+
+<p><code>rsql --url {{"mysql://user:pass@localhost/db?charset=utf8mb4"}}</code></p>
+
+<ul>
+<li>Run a query and exit:</li>
+</ul>
+
+
+<p><code>rsql --url {{"sqlite://database.db"}} -- "SELECT * FROM users LIMIT 10"</code></p>
+
+<ul>
+<li>Set default format:</li>
+</ul>
+
+
+<p><code>rsql --url {{"sqlite://db.sqlite"}} --format json</code></p>
+
+<ul>
+<li>Connect to file and use custom line separator:</li>
+</ul>
+
+
+<p><code>rsql --url {{"delimited://data.txt?separator=|&amp;has_header=true"}}</code></p>
