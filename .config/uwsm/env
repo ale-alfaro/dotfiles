@@ -1,3 +1,38 @@
-
-export OMARCHY_PATH=${XDG_CONFIG_HOME:-$HOME/.config}/omarchy
+export OMARCHY_PATH=$HOME/.local/share/omarchy
 export PATH=$OMARCHY_PATH/bin/:$PATH
+
+
+if [[ -z "$ZDOTDIR" ]]; then
+    export ZDOTDIR=$HOME/.config/zsh
+    source $ZDOTDIR/.zshenv
+    source $ZDOTDIR/.zprofile
+    source $ZDOTDIR/.zshrc
+fi
+
+#echo "Running from /home/alealfaro/.config/uwsm/env"
+#MY_COMPOSITOR=sway
+#if [ "${0}" != "${0#-}" ] &&
+#   ! systemctl --user is-active -q wayland-wm@*.service &&
+#   [ "$XDG_VTNR" = "1" ] &&
+#   {
+#       # wait while graphical.target is in startup queue
+#       while case "$(systemctl list-jobs --plain --no-legend --full graphical.target)" in
+#       *start*) true ;; *) false ;; esac; do
+#         sleep 1
+#       done
+#       systemctl is-active -q graphical.target
+#   }
+#then
+#    # generate units
+#    uwsm start -o ${MY_COMPOSITOR}
+#
+#    # save login environment
+#    mkdir -p "$XDG_RUNTIME_DIR/uwsm"
+#    env -0 > "$XDG_RUNTIME_DIR/uwsm/env_login"
+#
+#    # bind wayland session to login shell PID $$ and start compositor
+#    echo Starting ${MY_COMPOSITOR} compositor
+#    systemctl --user start wayland-session-bindpid@$$.service &&
+#    exec systemctl --user start --wait wayland-wm@${MY_COMPOSITOR}.service
+#fi
+

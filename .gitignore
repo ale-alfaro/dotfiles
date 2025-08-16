@@ -10,3 +10,5 @@ ssh/
 .envrc
 themes/
 .config/hypr/current/
+.config/wikiman/sources
+.config/omarchy/current
