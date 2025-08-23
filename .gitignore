@@ -8,6 +8,8 @@ history.txt
 ssh/
 .config/zsh/.zsh_sessions/
 .envrc
+.env
+atuin_key
 themes/
 .config/hypr/current/
 .config/wikiman/sources
