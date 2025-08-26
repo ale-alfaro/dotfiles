@@ -1,0 +1,12 @@
+--dir=$HOME/dotfiles
+--target=$XDG_CONFIG_HOME
+--ignore='install'
+--ignore='themes'
+--ignore='\.git'
+--ignore='\.DS_Store'
+--ignore='^/README.*'
+--ignore='.envrc'
+--ignore='\.gitignore'
+--ignore='\.jj'
+--ignore='\.stow-local-ignore'
+--ignore='.stowrc'

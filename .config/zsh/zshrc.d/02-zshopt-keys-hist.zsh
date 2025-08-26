@@ -8,7 +8,11 @@
 bindkey -v
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
-bindkey '^e' edit-command-line
+autoload -z edit-command-line
+zle -N edit-command-line
+bindkey "^e" edit-command-line
+# Use ESC v in Vi mode to edit the command line
+bindkey -M vicmd "v" edit-command-line
 # bindkey '^[w' kill-regin
 # bindkey ' ' magic-space                           # do history expansion on space
 # bindkey "^[[A" history-beginning-search-backward  # search history with up key

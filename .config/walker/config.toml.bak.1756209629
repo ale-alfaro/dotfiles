@@ -4,14 +4,12 @@ theme_base = []
 theme_location = ["~/.local/share/omarchy/default/walker/themes/"]
 hotreload_theme = true
 force_keyboard_focus = true
-timeout = 60
 
 [keys.ai]
 run_last_response = ["ctrl e"]
 
 [list]
 max_entries = 200
-cycle = true
 
 [search]
 placeholder = " Search..."
@@ -38,20 +36,9 @@ hide_category = true
 hidden = true
 
 [[builtins.bookmarks.entries]]
-label = "Omarchy - Github"
-url = "https://github.com/basecamp/omarchy"
-keywords = ["omarchy", "github"]
-
-[[builtins.bookmarks.entries]]
-label = "Omarchy Manual"
-url = "https://manuals.omamix.org/2/the-omarchy-manual"
-keywords = ["omarchy"]
-
-[builtins.calc]
-name = "Calculator"
-icon = ""
-min_chars = 3
-prefix = "="
+label = "Dotfiles - Github"
+url = "https://github.com/alealfaro/dotfiles"
+keywords = ["dotfiles", "github"]
 
 [builtins.windows]
 switcher_only = true
@@ -65,11 +52,6 @@ hidden = true
 
 [builtins.custom_commands]
 hidden = true
-
-[builtins.emojis]
-name = "Emojis"
-icon = ""
-prefix = ":"
 
 [builtins.symbols]
 after_copy = ""
@@ -90,11 +72,9 @@ switcher_only = true
 hidden = true
 
 [builtins.ssh]
-hidden = true
+hidden = false
 
 [builtins.websearch]
 switcher_only = true
 hidden = true
 
-[builtins.translation]
-hidden = true

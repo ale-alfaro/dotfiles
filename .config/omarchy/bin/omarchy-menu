@@ -338,12 +338,13 @@ show_system_menu() {
 }
 
 show_main_menu() {
-  go_to_menu "$(menu "Go" "󰀻  Apps\n󰧑  Learn\n  Capture\n󰔎  Toggle\n  Style\n  Setup\n󰉉  Install\n󰭌  Remove\n  Update\n  About\n  System")"
+  go_to_menu "$(menu \"Go\" \"󰀻  Apps\n󰌾  Passwords\n󰧑  Learn\n  Capture\n󰔎  Toggle\n  Style\n  Setup\n󰉉  Install\n󰭌  Remove\n  Update\n  About\n  System\")"
 }
 
 go_to_menu() {
   case "${1,,}" in
-  *apps*) walker -p "Launch…" ;;
+  *apps*) walker -p \"Launch…\" ;;
+  *passwords*) omarchy-bw-menu ;;
   *learn*) show_learn_menu ;;
   *style*) show_style_menu ;;
   *theme*) show_theme_menu ;;

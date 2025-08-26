@@ -3,6 +3,7 @@
 \.jj
 \.DS_Store
 ^/README.*
+\.envrc
 
 install
 themes

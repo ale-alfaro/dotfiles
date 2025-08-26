@@ -120,7 +120,8 @@ return {
     {
       '<leader>/',
       function()
-        Snacks.picker.grep(GrepCommonOpts)
+        -- Snacks.picker.grep(GrepCommonOpts)
+        Snacks.picker.grep {}
       end,
       desc = 'Grep',
     },
@@ -260,9 +261,22 @@ return {
     {
       '<leader>sg',
       function()
+        Snacks.picker.grep {
+          hidden = true,
+          show_empty = true,
+          live = true,
+          cwd = vim.fn.expand '%:p:h',
+        }
+      end,
+      desc = 'Grep in directory of open buffer',
+    },
+
+    {
+      '<leader>sG',
+      function()
         Snacks.picker.grep(GrepCommonOpts)
       end,
-      desc = 'Grep',
+      desc = 'Grep in cwd only',
     },
     {
       '<leader>sw',

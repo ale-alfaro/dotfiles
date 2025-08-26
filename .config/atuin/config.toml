@@ -165,7 +165,8 @@ ignored_commands = [
     "ls",
     "nvim",
     "vim",
-    "v"
+    "v",
+    "fg"
 ]
 
 [keys]

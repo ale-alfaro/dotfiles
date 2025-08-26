@@ -38,3 +38,8 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
 if [[ -z "${SSH_CONNECTION}" ]]; then
     export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 fi
+export PICO_HOME=$HOME/GeekieStuff/pico
+export PICO_SDK_PATH=$PICO_HOME/pico-sdk
+export PICO_EXAMPLES_PATH=$PICO_HOME/pico-examples
+export PICO_EXTRAS_PATH=$PICO_HOME/pico-extras
+export PICO_PLAYGROUND_PATH=$PICO_HOME/pico-playground
