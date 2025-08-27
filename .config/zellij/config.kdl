@@ -316,6 +316,13 @@ plugins {
     sessionizer location="https://github.com/laperlej/zellij-sessionizer/releases/download/v0.4.3/zellij-sessionizer.wasm"
     sessionpicker location="https://github.com/laperlej/zellij-choose-tree/releases/download/v0.4.2/zellij-choose-tree.wasm"
     keybinds-help location="https://github.com/karimould/zellij-forgot/releases/download/0.4.2/zellij_forgot.wasm"
+    // just-cmd-launcher location="https://github.com/nim65s/jbz/releases/download/v0.39.0/jbz.wasm"
+    autolock location="https://github.com/fresh2dev/zellij-autolock/releases/download/0.2.2/zellij-autolock.wasm" {
+        is_enabled true
+        triggers "nvim|vim|git|fzf|zoxide|atuin"
+        reaction_seconds "0.3"
+        print_to_log true
+    }
 }
 
 // Plugins to load in the background when a new session starts
@@ -327,6 +334,8 @@ load_plugins {
     sessionizer
     sessionpicker
     keybinds-help
+    autolock
+    // just-cmd-launcher
 }
 
 // Choose what to do when zellij receives SIGTERM, SIGINT, SIGQUIT or SIGHUP
@@ -475,5 +484,5 @@ copy_on_select true
 // Examples:
 //
 // copy_command "xclip -selection clipboard" // x11
-// copy_command "wl-copy"                    // wayland
+ copy_command "wl-copy"                    // wayland
 // copy_command "pbcopy"                     // osx

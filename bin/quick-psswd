@@ -3,17 +3,6 @@
 # This script requires bw, walker, jq, and wl-copy to be installed.
 
 # Function to check if a command exists
-command_exists() {
-    command -v "$1" >/dev/null 2>&1
-}
-
-# Check for dependencies
-for cmd in bw walker jq wl-copy; do
-    if ! command_exists "$cmd"; then
-        echo "Error: $cmd is not installed. Please install it and try again."
-        exit 1
-    fi
-done
 
 menu() {
   local prompt="$1"
@@ -21,14 +10,19 @@ menu() {
   echo -e "$options" | walker --dmenu --theme dmenu_250 -p "$prompt…" -w 350
 }
 
-# Check if the vault is locked, and if so, unlock it.
-if ! bw unlock --check >/dev/null 2>&1; then
-    export BW_SESSION=$(bw unlock --raw)
-    if [ -z "$BW_SESSION" ]; then
-        echo "Failed to unlock the vault."
-        exit 1
-    fi
+if [[ -z "$BW_SESSION" ]]; then
+    echo "Vault is not locked."
+    exit 1
 fi
+
+# Check if the vault is locked, and if so, unlock it.
+# if ! bw unlock --check >/dev/null 2>&1; then
+#     export BW_SESSION=$(bw unlock --raw)
+#     if [ -z "$BW_SESSION" ]; then
+#         echo "Failed to unlock the vault."
+#         exit 1
+#     fi
+# fi
 
 # Get the folder ID for "Most Used"
 FOLDER_ID=$(bw list folders --search "Most Used" | jq -r '.[0].id')
@@ -60,9 +54,9 @@ bw get password "$SELECTED_ITEM" | wl-copy
 echo "Password for '$SELECTED_ITEM' copied to clipboard."
 
 # Ask the user if they want to lock the vault
-if [[ "$(menu "Lock vault?" "Yes\nNo")" == "Yes" ]]; then
-    bw lock
-    echo "Vault locked."
-else
-    echo "Vault remains unlocked."
-fi
+# if [[ "$(menu "Lock vault?" "Yes\nNo")" == "Yes" ]]; then
+#     bw lock
+#     echo "Vault locked."
+# else
+#     echo "Vault remains unlocked."
+# fi

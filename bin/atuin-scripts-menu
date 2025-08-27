@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# A script to select and run atuin scripts with fzf.
+
+# Get the script name from the user's selection.
+# `atuin scripts ls` lists the scripts.
+# `grep -- '^- '` filters for script lines.
+# `awk '{print $2}'` extracts the script name.
+# `fzf` provides the interactive fuzzy finder.
+# `--preview` shows the script content.
+script_to_run=$(atuin script ls | grep -- '^- ' | awk '{print $2}' | fzf --preview 'atuin script get {}' --preview-window=right:60%:wrap)
+
+# If a script was selected, run it.
+if [[ -n "$script_to_run" ]]; then
+  atuin script run "$script_to_run"
+fi
