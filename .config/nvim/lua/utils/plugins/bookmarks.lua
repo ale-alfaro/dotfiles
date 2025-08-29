@@ -14,16 +14,29 @@ return {
     local opts = {
 
       treeview = {
+        -- Look at the default-config.lua file for all the options and keymaps: https://github.com/LintaoAmons/bookmarks.nvim/blob/main/lua/bookmarks/default-config.lua
         keymaps = {
 
           ['<CR>'] = {
             action = 'toggle',
             desc = 'Toggle list expansion or go to bookmark location',
           },
-          -- ["o"] = {
-          --   action = "goto",
-          --   desc = "Go to bookmark location in previous window"
-          -- },
+          ['d'] = {
+            action = 'cut',
+            desc = 'Cut node',
+          },
+          ['D'] = {
+            action = 'delete',
+            desc = 'Delete current node',
+          },
+          ['y'] = {
+            action = 'copy',
+            desc = 'Copy node',
+          },
+          ['p'] = {
+            action = 'preview',
+            desc = 'Preview bookmark content',
+          },
           ['<C-o>'] = {
             action = function(node, info)
               if info.type == 'bookmark' then

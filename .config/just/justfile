@@ -1,0 +1,15 @@
+#!/usr/bin/env just --justfile
+
+set unstable := true
+set shell := ["bash", "-euo", "pipefail", "-c"]
+openocd_search_path := "/home/alealfaro/.pico-sdk/openocd/0.12.0+dev/scripts"
+
+flash-rp2350 hex_file interface="jlink":
+    @echo "Flashing corne left for rpi_pico2"
+    openocd -s {{openocd_search_path}} -f interface/{{interface}} -c "program {{hex_file}} verify reset exit"
+
+
+
+reset-rp2350 interface="jlink":
+    @echo "Flashing corne left for rpi_pico2"
+    openocd -s {{openocd_search_path}} -f interface/{{interface}} -c "init; reset; exit"

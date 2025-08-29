@@ -23,8 +23,6 @@ require('lazy').setup({
       * mini.files (file explorer with buffers) 
   ]]
   { import = 'core.plugins' },
-  -- Multiplexer for managing multiple windows with Zellij
-  require 'multiplexer.plugins.smart-splits',
 
   -- LSP Plugins
   require 'lsp.lsp',

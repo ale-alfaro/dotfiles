@@ -20,6 +20,7 @@ return { -- Fuzzy Finder (files, lsp, etc)
 
     -- Useful for getting pretty icons, but requires a Nerd Font.
     { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
+    { 'jvgrootveld/telescope-zoxide' },
   },
   config = function()
     -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -43,6 +44,8 @@ return { -- Fuzzy Finder (files, lsp, etc)
 
     -- [[ Configure Telescope ]]
     -- See `:help telescope` and `:help telescope.setup()`
+    --
+    local z_utils = require 'telescope._extensions.zoxide.utils'
     require('telescope').setup {
       -- You can put your default mappings / updates / etc. in here
       --  All the info you're looking for is in `:help telescope.setup()`
@@ -57,15 +60,38 @@ return { -- Fuzzy Finder (files, lsp, etc)
         ['ui-select'] = {
           require('telescope.themes').get_dropdown(),
         },
+        ['zoxide'] = {
+
+          prompt_title = '[ Walking on the shoulders of TJ ]',
+          mappings = {
+            default = {
+              after_action = function(selection)
+                print('Update to (' .. selection.z_score .. ') ' .. selection.path)
+              end,
+            },
+            ['<C-s>'] = {
+              before_action = function(selection)
+                print 'before C-s'
+              end,
+              action = function(selection)
+                vim.cmd.edit(selection.path)
+              end,
+            },
+            -- Opens the selected entry in a new split
+            ['<C-q>'] = { action = z_utils.create_basic_command 'split' },
+          },
+        },
       },
     }
 
     -- Enable Telescope extensions if they are installed
     pcall(require('telescope').load_extension, 'fzf')
     pcall(require('telescope').load_extension, 'ui-select')
+    pcall(require('telescope').load_extension, 'zoxide')
 
     -- See `:help telescope.builtin`
     local builtin = require 'telescope.builtin'
+    vim.keymap.set('n', '<leader>cd', require('telescope').extensions.zoxide.list)
     vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
     vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
     vim.keymap.set('n', '<leader>sf', function()
