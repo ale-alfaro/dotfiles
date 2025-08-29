@@ -10,7 +10,7 @@ alias .....="cd ../../../.."
 alias ......="cd ../../../../.."
 alias cl='clear'
 # ---- Eza (better ls) -----
-alias la="eza --icons=always --all --tree --no-git"
+alias la="eza --icons=always --all --tree -L 5 --no-git"
 alias ls="eza --icons=always --all --oneline --no-git"
 # Alias For bat
 # Link: https://github.com/sharkdp/bat
@@ -18,6 +18,11 @@ if [[ -x "$(command -v bat)" ]]; then
     alias cat='bat'
 fi
 
+# Alias for zellij
+# Link: https://github.com/jesseduffield/lazygit
+if [[ -x "$(command -v zellij)" ]]; then
+    alias zellij='zellij -l welcome'
+fi
 # Alias for lazygit
 # Link: https://github.com/jesseduffield/lazygit
 if [[ -x "$(command -v lazygit)" ]]; then
@@ -35,4 +40,5 @@ if [[ -x "$(command -v fzf)" ]]; then
 		alias preview='edit $(fzf --info=inline --query="${@}")'
 	fi
 fi
+A
 

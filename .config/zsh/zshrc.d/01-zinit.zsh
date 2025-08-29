@@ -43,16 +43,15 @@ zinit ice lucid wait'0'
 zinit light joshskidmore/zsh-fzf-history-search
 zinit light jeffreytse/zsh-vi-mode
 
+#Set option for clipboard zsh plugin
+# ZSH_SYSTEM_CLIPBOARD_METHOD="wlc" # wayland clipboard (CLIPBOARD)
+ZSH_SYSTEM_CLIPBOARD_METHOD="wlp" # wayland clipboard (PRIMARY)
+zinit light kutsan/zsh-system-clipboard
+
 # Add in snippets
 zinit snippet OMZP::git
 zinit snippet OMZP::sudo
 # zinit snippet OMZP::tmuxinator
 zinit snippet OMZP::docker
 zinit snippet OMZP::command-not-found
-
-# Disable the cursor style feature
-# ZVM_CURSOR_STYLE_ENABLED=false
-ZVM_INSERT_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BEAM
-ZVM_NORMAL_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BLOCK
-ZVM_OPPEND_MODE_CURSOR=$ZVM_CURSOR_BLINKING_UNDERLINE
 

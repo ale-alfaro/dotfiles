@@ -46,14 +46,39 @@ return { -- Collection of various small independent plugins/modules
     -- - sd'   - [S]urround [D]elete [']quotes
     -- - sr)'  - [S]urround [R]eplace [)] [']
     require('mini.surround').setup {
+      -- Add custom surroundings to be used on top of builtin ones. For more
+      -- information with examples, see `:h MiniSurround.config`.
+      custom_surroundings = nil,
+
+      -- Duration (in ms) of highlight when calling `MiniSurround.highlight()`
+      highlight_duration = 500,
       mappings = {
-        add = '<leader>sa',
-        delete = '<leader>sd',
-        find = 'gsf',
-        find_left = 'gsF',
-        highlight = 'gsh',
-        replace = 'gsr',
-        update_n_lines = 'gsn',
+        add = 'sa',
+        delete = 'sd',
+        find = 'sf',
+        find_left = 'sF',
+        highlight = 'sh',
+        replace = 'sr',
+        update_n_lines = 'sn',
+
+        -- Number of lines within which surrounding is searched
+        n_lines = 20,
+
+        -- Whether to respect selection type:
+        -- - Place surroundings on separate lines in linewise mode.
+        -- - Place surroundings on each line in blockwise mode.
+        respect_selection_type = false,
+
+        -- How to search for surrounding (first inside current line, then inside
+        -- neighborhood). One of 'cover', 'cover_or_next', 'cover_or_prev',
+        -- 'cover_or_nearest', 'next', 'prev', 'nearest'. For more details,
+        -- see `:h MiniSurround.config`.
+        search_method = 'cover',
+
+        -- Whether to disable showing non-error feedback
+        -- This also affects (purely informational) helper messages shown after
+        -- idle time if user input is required.
+        silent = true,
       },
     }
     -- Comment Lines!

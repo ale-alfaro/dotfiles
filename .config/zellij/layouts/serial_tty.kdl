@@ -1,20 +1,16 @@
 layout {
-    pane size=1 borderless=true {
-        plugin location="zellij:tab-bar"
+    pane_template name="serial-tty" command="minicom" {
+        start_suspended true
     }
-    // pane split_direction="vertical" size="60%" {
-    //     pane edit="src/main.rs"
-    //     pane edit="Cargo.toml"
-    // }
     pane split_direction="vertical" size="100%" {
-        pane command="minicom" {
-            args "-D /dev/ttyACM1"
-        }
-        pane command="minicom" {
+        serial-tty {
             args "-D /dev/ttyACM0"
         }
+        serial-tty {
+            args "-D /dev/ttyACM1"
+        }
     }
-    pane size=2 borderless=true {
+    pane size=1 borderless=true {
         plugin location="zellij:status-bar"
     }
 }

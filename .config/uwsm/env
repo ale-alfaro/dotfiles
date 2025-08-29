@@ -10,3 +10,4 @@ if [[ -z "$ZDOTDIR" ]]; then
     source $ZDOTDIR/.zshrc
 fi
 
+hyprpm reload -n
