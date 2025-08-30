@@ -4,7 +4,6 @@
 
 # Set up fzf key bindings and fuzzy completion
 source <(fzf --zsh)
-source $XDG_CONFIG_HOME/fzf/fzf-git.sh
 
 # ---- Atuin (better shell command history) -----
 eval "$(atuin init zsh)"

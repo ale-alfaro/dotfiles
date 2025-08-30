@@ -15,7 +15,7 @@ source $ZDOTDIR/completions/zsh-completion-generator/zsh-completion-generator.pl
 
 # --- Initialize completion system ---
 autoload -Uz compinit
-compinit -i
+compinit -i -d ~/.cache/zsh/zcompdump-$ZSH_VERSION
 
 # --- Replay intercepted compdefs from plugins ---
 zinit cdreplay -q

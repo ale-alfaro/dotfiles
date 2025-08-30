@@ -1,3 +1,10 @@
+# Functions
+
+
+# fpath=("$ZDOTDIR" $fpath)
+#
+# # Autoload the functions
+# autoload -Uz nvimf
 
 # ---- Editor -----
 alias v="nvim"
@@ -40,5 +47,4 @@ if [[ -x "$(command -v fzf)" ]]; then
 		alias preview='edit $(fzf --info=inline --query="${@}")'
 	fi
 fi
-A
 
