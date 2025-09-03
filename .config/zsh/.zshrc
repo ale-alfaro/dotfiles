@@ -5,4 +5,4 @@ for file in ${XDG_CONFIG_HOME:-$HOME/.config}/zsh/zshrc.d/*.zsh; do
   source "$file"
 done
 
-source $ZDOTDIR/.zsh_functions
+

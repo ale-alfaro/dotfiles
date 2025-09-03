@@ -2,28 +2,22 @@
 
 set unstable := true
 set shell := ["bash", "-eou", "pipefail", "-c"]
-openocd_search_path := "/home/alealfaro/.pico-sdk/openocd/0.12.0+dev/scripts"
 
+default:
+    @just -g --list
 
+bat-files-with-extension extension search_base_directory=".":
+    @fd --extension {{extension}} --base-directory {{search_base_directory}} -X bat --style=header --paging=never
 
-# default_target_mcu := env(PICO_TARGET_MCU, "rp2350")
-# default_interface := env(PICO_DEBUG_INTERFACE, "jlink")
-# default_hex_file := env(PICO_HEX_FILE, "build/zephyr/zephyr.hex")
+bat-files-with-glob glob search_base_directory=".":
+    @fd --glob {{glob}} --base-directory {{search_base_directory}} -X bat --style=header --paging=never
 
-default_target_mcu := "rp2350"
-default_interface := "jlink"
-default_hex_file := "build/zephyr/zephyr.hex"
-# openocd_program_command :=  "program {{hex_file}} verify reset exit"
-openocd_setup_commands := "adapter speed 5000; init; targets; reset init; "
+systemd-diagnostics:
+    @systemctl status --full --no-pager > systemd-status.log
+    @systemctl --failed --no-pager > systemd-failed.log
+    @awk 'NR==2 {print $2}' systemd-status.log | xargs systemctl status --full --no-pager
+    @awk 'NR==2 {print $2}' systemd-status.log | xargs journalctl --no-pager
 
-openocd_shutdown_commands := "reset run; shutdown"
-
-flash-rpico target=default_target_mcu interface=default_interface hex_file=default_hex_file:
-    @echo "Flashing {{hex_file}} to {{target}} with {{interface}}"
-    openocd -s {{openocd_search_path}} -f interface/{{interface}}.cfg -f target/{{target}}.cfg -c '{{openocd_setup_commands}}' -c 'flash write_image erase {{hex_file}}' -c '{{openocd_shutdown_commands}}'
-
-
-
-reset-rpico target=default_target_mcu interface=default_interface:
-    @echo "Resetting {{target}} with {{interface}}"
-    openocd -s {{openocd_search_path}} -f interface/{{interface}}.cfg -f target/{{target}}.cfg -c "init; reset; exit"
+addr2line-bat elf addr:
+    @arm-none-eabi-addr2line -p -e {{elf} {{addr} | awk '{ file_line=$NF; if (match(file_line, /:[0-9]+$/)) { line=substr(file_line,
+     RSTART+1); file=substr(file_line, 1, RSTART-1); start=line-10; if (start < 1) start = 1; end=line+10; system("bat --line-range " start ":" end " --highlight-line " line " " file) } }'

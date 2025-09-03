@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+fd --type file |
+  fzf --prompt 'Files> ' \
+      --header 'CTRL-D: Switch between Files/Directories' \
+      --bind 'ctrl-d:transform:[[ ! $FZF_PROMPT =~ Files ]] &&
+              echo "change-prompt(Files> )+reload(fd --type file)" ||
+              echo "change-prompt(Directories> )+reload(fd --type directory)"' \
+      --preview '[[ $FZF_PROMPT =~ Files ]] && bat --color=always {} || tree -C {}' \
+      | xargs realpath  #Return absolute path
+
+# Following command can be used like below:
+#fzfind | xargs -I {} nvim {}

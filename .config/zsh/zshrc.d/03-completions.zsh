@@ -1,7 +1,9 @@
 source <(jj util completion zsh)
 source <(zellij setup --generate-completion zsh)
 [[ -r "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh" ]] && . "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh"
-curl https://cheat.sh/:zsh > $ZDOTDIR/completions/src/_cht
+# if [[! -f $ZDOTDIR/completions/src/_cht ]]; then
+#     curl https://cheat.sh/:zsh > $ZDOTDIR/completions/src/_cht
+# fi
     # Open a new shell to load the plugin
 # --- Completion generator setup ---
 MY_COMPLETIONS_DIR=$ZDOTDIR/completions
@@ -11,8 +13,7 @@ fpath+=("$ZSH_GEN_COMPLETIONS_FROM_MANPAGES_PATH" $fpath)
 
 # zstyle :plugin:zsh-completion-generator programs bat
 fpath=($ZDOTDIR/completions/src $fpath)
-source $ZDOTDIR/completions/zsh-completion-generator/zsh-completion-generator.plugin.zsh
-
+source /home/alealfaro/.zsh/zsh-completion-generator/zsh-completion-generator.plugin.zsh
 # --- Initialize completion system ---
 autoload -Uz compinit
 compinit -i -d ~/.cache/zsh/zcompdump-$ZSH_VERSION

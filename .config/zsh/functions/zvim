@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+zoxide query -l $1 |  fzf --bind 'enter:become(nvim {})'
