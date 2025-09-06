@@ -1,0 +1,134 @@
+openocd_path := env('PICO_OPENOCD_PATH', "$HOME/.pico-sdk/openocd")
+openocd_search_path := join(openocd_path, "0.12.0+dev/scripts")
+
+openocd_default_target_mcu := "rp2350" #Options are rp2040, rp2350
+openocd_default_interface := "jlink" #options are "cmsis-dap" or "jlink"
+openocd_setup_commands := "adapter speed 5000; init; targets; reset init; "
+openocd_shutdown_commands := "reset run; shutdown"
+
+flash-openocd target=openocd_default_target_mcu interface=openocd_default_interface hex_file=default_hex_file:
+    @echo "Flashing {{hex_file}} to {{target}} with {{interface}}"
+    openocd -s {{openocd_search_path}} -f interface/{{interface}}.cfg -f target/{{target}}.cfg -c '{{openocd_setup_commands}}' -c 'flash write_image erase {{hex_file}}' -c '{{openocd_shutdown_commands}}'
+
+reset-openocd target=openocd_default_target_mcu interface=openocd_default_interface:
+    @echo "Resetting {{target}} with {{interface}}"
+    openocd -s {{openocd_search_path}} -f interface/{{interface}}.cfg -f target/{{target}}.cfg -c "init; reset; exit"
+
+##### JLink Common #####
+# Hidden recipe to run JLinkExe with common options
+_jlink-run device script iface='swd' speed='4000' *extra_opts:
+    @JLinkExe \
+        -device "{{device}}" \
+        -if "{{iface}}" \
+        -speed "{{speed}}" \
+        -CommanderScript "{{script}}" \
+        -nogui 1 \
+        -ExitOnError 1 \
+        {{extra_opts}}
+
+##### JLink flashing #####
+jlink_flash_script_tmp_path := join(cache_directory(), "jlink.flash.tmp")
+jlink_reset_script := join(proj_root, "utils", "JLink", "reset.jlink")
+
+# Flash a hex file using J-Link.
+# Adds `erase` and `loadfile` commands to the script.
+# The `reset` command is included by default.
+flash-jlink device hex_file erase='true' reset='true' *extra_opts:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    script_path="{{jlink_flash_script_tmp_path}}"
+    echo "" > "$script_path" # Clear/create the file
+    if [[ "{{reset}}" == "true" ]]; then
+        echo "r" >> "$script_path"
+    fi
+    if [[ "{{erase}}" == "true" ]]; then
+        echo "erase" >> "$script_path"
+    fi
+    echo "loadfile \"{{hex_file}}\"" >> "$script_path"
+    echo "q" >> "$script_path"
+    
+    @echo "INFO: Flashing {{hex_file}} to {{device}}..."
+    @just _jlink-run "{{device}}" "$script_path" extra_opts="{{extra_opts}}"
+
+# Reset the target using J-Link
+reset-jlink device:
+    @echo "INFO: Resetting {{device}}..."
+    @just _jlink-run "{{device}}" "{{jlink_reset_script}}"
+
+
+##### Debugging #####
+gdb_executable := "gdb-multiarch" # or arm-none-eabi-gdb, etc.
+
+# Hidden recipe for GDB client
+_debug-client-gdb artifact_name port remote_cmd='target remote' *extra_opts:
+    @echo "Starting GDB client for {{artifact_name}}, connecting to localhost:{{port}}"
+    @{{gdb_executable}} \
+        "{{app_dir}}/build_{{artifact_name}}/zephyr/zmk.elf" \
+        -ex "{{remote_cmd}} localhost:{{port}}" \
+        -ex "monitor halt" \
+        -ex "monitor reset" \
+        -ex "load" \
+        {{extra_opts}}
+
+
+##### J-Link Debugging #####
+jlink_gdb_port := "2331"
+jlink_verify_script_tmp_path := join(cache_directory(), "jlink.verify.tmp")
+
+# Verify flash content by reading memory with J-Link
+verify-flash-jlink device:
+    @echo "r\nh\nmem32 0x10000200 4\nq" > {{jlink_verify_script_tmp_path}}
+    @echo "INFO: Verifying flash on {{device}}..."
+    @just _jlink-run "{{device}}" "{{jlink_verify_script_tmp_path}}"
+
+# Start J-Link GDB server
+debug-server-jlink device iface="swd" speed="auto" port=jlink_gdb_port *extra_opts:
+    @echo "Starting J-Link GDB server on port {{port}} for device {{device}}"
+    @JLinkGDBServer \
+        -device "{{device}}" \
+        -if "{{iface}}" \
+        -speed "{{speed}}" \
+        -port "{{port}}" \
+        -silent \
+        -singlerun \
+        {{extra_opts}}
+
+# Start GDB client and connect to J-Link GDB server
+debug-client-jlink artifact_name port=jlink_gdb_port *extra_opts:
+    @just _debug-client-gdb "{{artifact_name}}" "{{port}}" extra_opts="{{extra_opts}}"
+
+# Helper to show debug commands
+debug-jlink device artifact_name:
+    @echo "To debug with J-Link, run the following commands in two separate terminals:"
+    @echo "Terminal 1: just debug-server-jlink {{device}}"
+    @echo "Terminal 2: just debug-client-jlink {{artifact_name}}"
+
+
+##### OpenOCD Debugging #####
+openocd_gdb_port := "3333"
+openocd_tcl_port := "6333"
+openocd_telnet_port := "4444"
+
+# Start OpenOCD GDB server
+debug-server-openocd target=openocd_default_target_mcu interface=openocd_default_interface gdb_port=openocd_gdb_port tcl_port=openocd_tcl_port telnet_port=openocd_telnet_port *extra_opts:
+    @echo "Starting OpenOCD GDB server on port {{gdb_port}} for target {{target}} with interface {{interface}}"
+    @openocd \
+        -s {{openocd_search_path}} \
+        -f interface/{{interface}}.cfg \
+        -f target/{{target}}.cfg \
+        -c "gdb_port {{gdb_port}}" \
+        -c "tcl_port {{tcl_port}}" \
+        -c "telnet_port {{telnet_port}}" \
+        -c "init" \
+        -c "reset halt" \
+        {{extra_opts}}
+
+# Start GDB client and connect to OpenOCD
+debug-client-openocd artifact_name port=openocd_gdb_port *extra_opts:
+    @just _debug-client-gdb "{{artifact_name}}" "{{port}}" "target extended-remote" extra_opts="{{extra_opts}}"
+
+# Helper to show debug commands
+debug-openocd artifact_name target=openocd_default_target_mcu interface=openocd_default_interface:
+    @echo "To debug with OpenOCD, run the following commands in two separate terminals:"
+    @echo "Terminal 1: just debug-server-openocd --target {{target}} --interface {{interface}}"
+    @echo "Terminal 2: just debug-client-openocd {{artifact_name}}"

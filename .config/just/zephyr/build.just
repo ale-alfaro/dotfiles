@@ -1,13 +1,15 @@
 
-full_board_name_cmd := 'west boards --board-root ' + zmk_module_dir +  ' -f "{name}/{qualifiers}" ' + ' --name "$1"'
+# full_board_name_cmd := 'west boards -f "{name}/{qualifiers}" --name "$1"'
 
-_build-full app_dir board artifact_name  *west_args="" *cmake_args="":
-    @echo "Building zmk for {{board}}"
+build-base app_dir board artifact_name *extra_args:
+    @echo "West Build for {{board}} in directory build_{{artifact_name}}"
     # --- Execute the command ---
-    west build -s {{app_dir}} -d "{{app_dir}}/build_{{artifact_name}}" -b "{{ shell(full_board_name_cmd, board) }}" {{west_args}} -p -- {{cmake_args}}
+    west build -s {{app_dir}} -d "{{app_dir}}/build_{{artifact_name}}" -b {{board}} --pristine=always {{extra_args}}
 
-    @echo "Creating artifacts directory"
-    @mkdir -p "{{app_dir}}/artifacts/{{artifact_name}}_{{datetime('%H:%M:%S')}}"
-    @echo "Copying hex and uf2 files to artifacts directory"
-    cp {{app_dir}}/build_{{artifact_name}}/zephyr/{zephyr.hex,zephyr.bin,zephyr.elf} {{app_dir}}/artifacts/{{artifact_name}}_{{datetime('%H:%M:%S')}}
+    # @echo "Creating artifacts directory"
+    # @mkdir -p "artifacts/{{artifact_name}}_{{datetime('%H:%M:%S')}}"
+    # @echo "Copying artifacts"
+    # cp build_{{artifact_name}}/zephyr/{zephyr.hex,zephyr.bin,zephyr.elf} artifacts/{{artifact_name}}_{{datetime('%H:%M:%S')}}
 
+build-full board artifact shield snippets app_dir=invocation_directory() *extra_args:
+    just build-base {{app_dir}} {{board}} {{artifact}} "--shield {{shield}} -S {{snippets}} {{extra_args}}"

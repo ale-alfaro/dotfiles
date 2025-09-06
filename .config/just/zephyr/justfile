@@ -1,0 +1,56 @@
+#!/usr/bin/env just --justfile --working-directory `pwd`
+# zephyr_base:= ```
+#     topdir=$(west topdir)
+#     zephyr_base=$(realpath $topdir/$(west config zephyr.base))
+#     echo $zephyr_base
+#     ```
+
+set shell := ["bash", "-c"]
+
+# full_board_name_cmd := 'west boards -f "{name}/{qualifiers}"  --name "$1"'
+
+set unstable := true
+
+west-topdir := env('WEST_TOPDIR')
+zephyr_base := env('ZEPHYR_BASE')
+default_hex_file := "build/zephyr/zephyr.hex"
+
+import 'dtsh.just'
+import 'build.just'
+
+default:
+    @just --list
+
+# initialize west
+init:
+    @west init -l config
+    @west update --fetch-opt=--filter=blob:none
+    @west zephyr-export
+
+# update west
+update:
+    @west update --fetch-opt=--filter=blob:none
+
+setup-nrfutil:
+    #!/usr/bin/env bash
+    echo "Setting up nrfutil"
+    echo "Checking if nrfutil is installed"
+    if command -v nrfutil &> /dev/null 2>&1; then
+        echo "nrfutil already exists"
+    else
+        echo "Downloading nrfutil"
+        curl https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil -o nrfutil
+        chmod +x nrfutil
+        mv nrfutil /usr/local/bin
+    fi
+    nrfutil install completion device nrf5sdk-tools toolchain-manager sdk-manager
+
+install-tooling:
+    pip install -U dtsh #DTS viewer in terminal
+
+west-boards *filter:
+    @echo "Getting all boards available"
+    @west boards -f "{name}#_#_#{dir}#_#_{qualifiers}" | awk -v cwd="$(pwd)/" -F '#_#_#' 'BEGIN {print "| Board | Path | Qualifiers |"; print "|---|---|---|" } {{ filter }} { sub(cwd, "", $2); gsub(/^[ \t]+|[ \t]+$/, "", $1); gsub(/^[ \t]+|[ \t]+$/, "", $2); gsub(/^[ \t]+|[ \t]+$/, "", $3); print "| " $1 " | " $2 " | " $3 " |"}'
+
+west-boards-filter-by-path path="app":
+    just west-boards '$2 ~ /\/{{ path }}\// '

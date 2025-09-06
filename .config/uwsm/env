@@ -2,12 +2,6 @@ export OMARCHY_PATH=$HOME/.local/share/omarchy
 export PATH=$OMARCHY_PATH/bin/:$PATH
 export TERMINAL=alacritty
 
-
-if [[ -z "$ZDOTDIR" ]]; then
-    export ZDOTDIR=$HOME/.config/zsh
-    source $ZDOTDIR/.zshenv
-    source $ZDOTDIR/.zprofile
-    source $ZDOTDIR/.zshrc
+if command -v mise &> /dev/null; then
+  eval "$(mise activate bash)"
 fi
-
-hyprpm reload -n

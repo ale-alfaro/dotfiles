@@ -31,9 +31,6 @@ require('lazy').setup({
 
   -- Git Plugins
   { import = 'git.plugins' },
-  -- AI Plugins
-  { import = 'ai.plugins' },
-  -- SuperMaven for AI completions
 
   -- Avante.nvim for AI chat and agentic features
   -- require 'ai.plugins.avante',

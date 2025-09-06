@@ -1,0 +1,3 @@
+
+tree &flash_controller --format NLrd
+find --also-known-as ram -i --format NLrd

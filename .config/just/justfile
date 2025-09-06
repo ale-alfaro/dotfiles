@@ -1,16 +1,21 @@
-#!/usr/bin/env just --justfile
+#!/usr/bin/env just --working-directory . --justfile
 
 set unstable := true
-set shell := ["bash", "-eou", "pipefail", "-c"]
+
+# set shell := ["bash", "-eou", "pipefail", "-c"]
+
+set shell := ["bash", "-c"]
+
+default_hex_file := "build/zephyr/zephyr.hex"
 
 default:
     @just -g --list
 
 bat-files-with-extension extension search_base_directory=".":
-    @fd --extension {{extension}} --base-directory {{search_base_directory}} -X bat --style=header --paging=never
+    @fd --extension {{ extension }} --base-directory {{ search_base_directory }} -X bat --style=header --paging=never
 
 bat-files-with-glob glob search_base_directory=".":
-    @fd --glob {{glob}} --base-directory {{search_base_directory}} -X bat --style=header --paging=never
+    @fd --glob {{ glob }} --base-directory {{ search_base_directory }} -X bat --style=header --paging=never
 
 systemd-diagnostics:
     @systemctl status --full --no-pager > systemd-status.log
@@ -18,6 +23,8 @@ systemd-diagnostics:
     @awk 'NR==2 {print $2}' systemd-status.log | xargs systemctl status --full --no-pager
     @awk 'NR==2 {print $2}' systemd-status.log | xargs journalctl --no-pager
 
-addr2line-bat elf addr:
-    @arm-none-eabi-addr2line -p -e {{elf} {{addr} | awk '{ file_line=$NF; if (match(file_line, /:[0-9]+$/)) { line=substr(file_line,
-     RSTART+1); file=substr(file_line, 1, RSTART-1); start=line-10; if (start < 1) start = 1; end=line+10; system("bat --line-range " start ":" end " --highlight-line " line " " file) } }'
+install-udev-rules rules_file:
+    @sudo cp {{ rules_file }} /etc/udev/rules.d/
+    @sudo udevadm control --reload
+
+mod JLink

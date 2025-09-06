@@ -1,0 +1,19 @@
+[global]
+bash_path = "/bin/bash"
+# Load .env files in addition to .envrc files
+load_dotenv = true
+
+# Enable strict mode, which will cause the .envrc to be loaded with
+# set -euo pipefail. This will make your .envrc files more robust and
+# prevent them from failing silently.
+# strict_env = true
+
+# Set a timeout for how long to wait before warning that the .envrc
+# is taking too long to execute.
+warn_timeout = "10s"
+
+[whitelist]
+# Whitelist specific directory hierarchies or specific directories to
+# avoid having to run `direnv allow` every time. This is useful for
+# directories that you trust, such as your own projects.
+prefix = [ "/home/alealfaro/GeekieStuff" , "/home/alealfaro/dotfiles", "/home/alealfaro/sibel/eng" ]

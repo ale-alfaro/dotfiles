@@ -2,8 +2,8 @@
 
 fd --type file |
   fzf --prompt 'Files> ' \
-      --header 'CTRL-D: Switch between Files/Directories' \
-      --bind 'ctrl-d:transform:[[ ! $FZF_PROMPT =~ Files ]] &&
+      --header 'ALT-D: Switch between Files/Directories' \
+      --bind 'alt-d:transform:[[ ! $FZF_PROMPT =~ Files ]] &&
               echo "change-prompt(Files> )+reload(fd --type file)" ||
               echo "change-prompt(Directories> )+reload(fd --type directory)"' \
       --preview '[[ $FZF_PROMPT =~ Files ]] && bat --color=always {} || tree -C {}' \

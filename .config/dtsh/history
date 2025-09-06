@@ -1,0 +1,71 @@
+ls -l
+tree --format NKYC
+exit
+find --with-dts-ord 39 --format psTd
+exit
+q
+ls -l
+ls pin-controller
+ls chosen
+tree
+tree --format NKYC
+tree --format NKYC --pager
+find -E --also-known-as (image|storage).* --format NLrd > memory.txt
+find -E --also-known-as (image|storage).* --format NLrd
+find --also-known-as ram -i --format NLrd
+find --also-known-as ram -i --format NLrd >> memory.txt
+chosen
+q
+ls
+tree
+tree --format NYKC
+cd soc/gpio@40028000
+ls
+cat gpio-port@
+cat gpio-port@0
+cd gpio-port@0
+ls
+tree
+q
+ls
+tree --format NYKC
+cd pin-controller
+ls
+cd ..
+chosen
+cd connector
+ls
+exit
+tree --format NYKC
+q
+tree
+tree --format NYKC
+q
+tree --format NYKC
+exit
+ls
+tree --format NYKC
+q
+tree
+q
+tree --format NYKC
+cd pin-controller
+ls
+tree --format NYKC
+cat uart0_default
+cd uart0_default
+ls
+cat group1
+cat &group1
+cd ..
+cat &uart0_default
+cd uart0_default -B
+cat -B  uart0_default
+cat -A uart0_default
+q
+tree 
+tree --format NYKC
+q
+tree --format NYKC
+chosen
+q

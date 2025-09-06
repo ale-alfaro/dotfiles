@@ -22,8 +22,8 @@ eval "$(starship init zsh)"
 # ---- TheFuck -----
 
 # thefuck alias
-eval $(thefuck --alias)
-eval $(thefuck --alias fk)
+# eval $(thefuck --alias)
+# eval $(thefuck --alias fk)
 
 
 # ---- Direnv (.envrc auto-loading) -----
