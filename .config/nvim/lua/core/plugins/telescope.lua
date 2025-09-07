@@ -130,5 +130,26 @@ return { -- Fuzzy Finder (files, lsp, etc)
     vim.keymap.set('n', '<leader>sn', function()
       builtin.find_files { cwd = vim.fn.stdpath 'config' }
     end, { desc = '[S]earch [N]eovim files' })
+
+    -- Additional useful pickers from snacks migration
+    vim.keymap.set('n', '<leader>fg', builtin.git_files, { desc = 'Find Git Files' })
+    vim.keymap.set('n', '<leader>fr', builtin.oldfiles, { desc = 'Recent Files' })
+    vim.keymap.set('n', '<leader>sb', builtin.current_buffer_fuzzy_find, { desc = 'Buffer Lines' })
+    vim.keymap.set('n', '<leader>sB', function()
+      builtin.live_grep { grep_open_files = true, prompt_title = 'Grep Open Buffers' }
+    end, { desc = 'Grep Open Buffers' })
+    vim.keymap.set('n', '<leader>sg', function()
+      builtin.live_grep { cwd = vim.fn.expand '%:p:h' }
+    end, { desc = 'Grep in directory of open buffer' })
+    vim.keymap.set('n', '<leader>sG', builtin.live_grep, { desc = 'Grep in cwd' })
+    vim.keymap.set('n', '<leader>sH', builtin.highlights, { desc = 'Highlights' })
+    vim.keymap.set('n', '<leader>si', builtin.symbols, { desc = 'Symbols' })
+    vim.keymap.set('n', '<leader>sl', builtin.loclist, { desc = 'Location List' })
+    vim.keymap.set('n', '<leader>sm', builtin.marks, { desc = 'Marks' })
+    vim.keymap.set('n', '<leader>sM', builtin.man_pages, { desc = 'Man Pages' })
+    vim.keymap.set('n', '<leader>sq', builtin.quickfix, { desc = 'Quickfix List' })
+    -- Note: undo and colorscheme pickers may require additional plugins/extensions
+    -- vim.keymap.set('n', '<leader>su', builtin.undo, { desc = 'Undo History' })
+    -- vim.keymap.set('n', '<leader>uC', builtin.colorscheme, { desc = 'Colorschemes' })
   end,
 }

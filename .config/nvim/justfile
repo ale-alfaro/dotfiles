@@ -1,0 +1,24 @@
+# Neovim Configuration Commands
+# Run with: just <recipe-name>
+
+# Check configuration for build errors
+check-config:
+    nvim --headless -c ':q' .
+
+
+# nvim --headless -c "lua require('lazyplugins')" -c "qall" && echo "✅ Configuration loaded successfully"
+
+# Run Neovim health check
+check-health:
+    nvim --headless -c "checkhealth" -c "qall"
+
+# Format all Lua files with stylua
+
+# Run both configuration check and health check
+check-all: check-config check-health
+
+# Open Neovim with this configuration
+
+# Show available recipes
+default:
+    just --list

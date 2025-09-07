@@ -51,48 +51,68 @@ vim.api.nvim_create_user_command('FloatTermOpen', toggle_floatterm, {})
 
 vim.keymap.set({ 'n', 't' }, '<leader>ft', '<cmd>FloatTermOpen<CR>', { desc = 'Open terminal' })
 
-vim.keymap.set('t', '<esc><esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+-- vim.keymap.set('t', '<esc><esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+function _G.set_terminal_keymaps()
+  local opts = { buffer = 0 }
+  vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
+  vim.keymap.set('t', 'jk', [[<C-\><C-n>]], opts)
+  vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
+  vim.keymap.set('t', '<C-j>', [[<Cmd>wincmd j<CR>]], opts)
+  vim.keymap.set('t', '<C-k>', [[<Cmd>wincmd k<CR>]], opts)
+  vim.keymap.set('t', '<C-l>', [[<Cmd>wincmd l<CR>]], opts)
+  vim.keymap.set('t', '<C-w>', [[<C-\><C-n><C-w>]], opts)
+end
 
+local Terminal = require('toggleterm.terminal').Terminal
+local lazygit = Terminal:new { cmd = 'lazygit', hidden = true }
+
+function _G._lazygit_toggle()
+  lazygit:toggle()
+end
+
+vim.api.nvim_set_keymap('n', '<leader>lg', '<cmd>lua _lazygit_toggle()<CR>', { desc = '[L]azy[G]it', noremap = true })
+-- if you only want these mappings for toggle term use term://*toggleterm#* instead
+-- vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
 -- Terminal autocommands
-local vim_term = vim.api.nvim_create_augroup('vim_term', { clear = true })
-vim.api.nvim_create_autocmd('TermOpen', {
-  callback = function()
-    -- disable line numbering in terminal mode
-    vim.opt_local.relativenumber = false
-    vim.opt_local.number = false
-  end,
-  group = vim_term,
-})
--- start insert mode when moving to a terminal window
-vim.api.nvim_create_autocmd({ 'BufWinEnter', 'WinEnter' }, {
-  callback = function()
-    if vim.bo.buftype == 'terminal' then
-      vim.cmd 'startinsert'
-    end
-  end,
-  group = vim_term,
-})
--- prevents insert mode when the terminal process has exited
-vim.api.nvim_create_autocmd('TermClose', {
-  callback = function(ctx)
-    vim.cmd 'stopinsert'
-    vim.api.nvim_create_autocmd('TermEnter', {
-      command = 'stopinsert',
-      buffer = ctx.buf,
-    })
-  end,
-  nested = true,
-  group = vim_term,
-})
-
-vim.api.nvim_create_autocmd('TermLeave', {
-  --desc = 'Close floating window when exiting terminal mode within a floating window',
-  callback = function()
-    vim.api.nvim_win_hide(state.floating.win)
-  end,
-  group = vim_term,
-})
+-- local vim_term = vim.api.nvim_create_augroup('vim_term', { clear = true })
+-- vim.api.nvim_create_autocmd('TermOpen', {
+--   callback = function()
+--     -- disable line numbering in terminal mode
+--     vim.opt_local.relativenumber = false
+--     vim.opt_local.number = false
+--   end,
+--   group = vim_term,
+-- })
+-- -- start insert mode when moving to a terminal window
+-- vim.api.nvim_create_autocmd({ 'BufWinEnter', 'WinEnter' }, {
+--   callback = function()
+--     if vim.bo.buftype == 'terminal' then
+--       vim.cmd 'startinsert'
+--     end
+--   end,
+--   group = vim_term,
+-- })
+-- -- prevents insert mode when the terminal process has exited
+-- vim.api.nvim_create_autocmd('TermClose', {
+--   callback = function(ctx)
+--     vim.cmd 'stopinsert'
+--     vim.api.nvim_create_autocmd('TermEnter', {
+--       command = 'stopinsert',
+--       buffer = ctx.buf,
+--     })
+--   end,
+--   nested = true,
+--   group = vim_term,
+-- })
 --
+-- vim.api.nvim_create_autocmd('TermLeave', {
+--   --desc = 'Close floating window when exiting terminal mode within a floating window',
+--   callback = function()
+--     vim.api.nvim_win_hide(state.floating.win)
+--   end,
+--   group = vim_term,
+-- })
+-- --
 -- local job_id = 0
 -- vim.keymap.set('n', '<leader>st', function()
 --   vim.cmd.vnew()

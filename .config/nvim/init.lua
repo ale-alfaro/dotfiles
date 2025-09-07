@@ -151,7 +151,7 @@ require 'utils.health'
 
   See more at https://neovim.io/doc/user/intro.html#Terminal-mode
 --]]
--- require 'utils.floatterminal'
+require 'utils.floatterminal'
 -- vim.o.ruler = false
 -- vim.o.showmatch = false
 -- vim.o.showcmd = false

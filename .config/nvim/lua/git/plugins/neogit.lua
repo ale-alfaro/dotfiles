@@ -8,6 +8,5 @@ return {
     'nvim-telescope/telescope.nvim', -- optional
     'ibhagwan/fzf-lua', -- optional
     'echasnovski/mini.pick', -- optional
-    'folke/snacks.nvim', -- optional
   },
 }
