@@ -1,0 +1,27 @@
+
+
+
+Breakpoint=/home/alealfaro/GeekieStuff/dyi-keyboard/fw/zmk/zephyr/arch/arm/core/cortex_m/reset.S:102, State=BP_STATE_ON
+OpenDocument="pro_micro_rp2350.jdebug", FilePath="/home/alealfaro/GeekieStuff/dyi-keyboard/fw/zmk/pro_micro_rp2350.jdebug", Line=0
+OpenDocument="log_msg.h", FilePath="/home/alealfaro/GeekieStuff/dyi-keyboard/fw/zmk/app/build_pro_micro_rp2350_corne_right/zephyr/include/generated/zephyr/syscalls/log_msg.h", Line=14
+OpenDocument="cortex_m_systick.c", FilePath="/home/alealfaro/GeekieStuff/dyi-keyboard/fw/zmk/zephyr/drivers/timer/cortex_m_systick.c", Line=178
+OpenDocument="kscan_gpio_matrix.c", FilePath="/home/alealfaro/GeekieStuff/dyi-keyboard/fw/zmk/app/module/drivers/kscan/kscan_gpio_matrix.c", Line=199
+OpenDocument="reset.S", FilePath="/home/alealfaro/GeekieStuff/dyi-keyboard/fw/zmk/zephyr/arch/arm/core/cortex_m/reset.S", Line=81
+OpenDocument="cmsis_gcc.h", FilePath="/home/alealfaro/GeekieStuff/dyi-keyboard/fw/zmk/modules/hal/cmsis/CMSIS/Core/Include/cmsis_gcc.h", Line=1294
+OpenDocument="main.c", FilePath="/home/alealfaro/GeekieStuff/dyi-keyboard/fw/zmk/app/src/main.c", Line=0
+OpenToolbar="Debug", Floating=0, x=0, y=0
+OpenWindow="Call Stack", DockArea=RIGHT, x=0, y=1, w=535, h=439, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Source Files", DockArea=LEFT, x=0, y=0, w=267, h=1326, FilterBarShown=1, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Disassembly", DockArea=RIGHT, x=0, y=2, w=535, h=362, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Terminal", DockArea=BOTTOM, x=0, y=0, w=1466, h=692, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Console", DockArea=BOTTOM, x=1, y=0, w=2338, h=692, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Zephyr", DockArea=RIGHT, x=0, y=0, w=535, h=513, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, Showing="Task List"
+SmartViewPlugin="", Page="", Toolbar="Hidden", Window="SmartView 1"
+TableHeader="Call Stack", SortCol="Function", SortOrder="ASCENDING", VisibleCols=["Function";"Stack Frame";"Source";"PC";"Return Address";"Stack Used"], ColWidths=[176;119;119;100;168;100]
+TableHeader="Source Files", SortCol="File", SortOrder="DESCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[267;100;100;100;1001]
+TableHeader="Power Sampling", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time";"Ch 0"], ColWidths=[100;100;100]
+TableHeader="...", SortCol="None", SortOrder="ASCENDING", VisibleCols=["..."], ColWidths=[535]
+TableHeader="Task List", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Threads";"TID";"Entry";"Priority";"Status";"Stack"], ColWidths=[110;110;110;110;110;110]
+TableHeader="RegisterSelectionDialog", SortCol="None", SortOrder="ASCENDING", VisibleCols=[], ColWidths=[]
+TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[200;100;100;758]
+Tracepoint=0xF000003A, Type=Stop, State=On

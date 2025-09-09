@@ -1,0 +1,4 @@
+mod binutils
+
+addr2line-bat elf addr:
+    @arm-none-eabi-addr2line -p -e {{elf}} {{addr}} | awk -f addr2line-bat.awk

@@ -8,3 +8,4 @@ history.txt
 ssh/
 .config/zsh/.zsh_sessions/
 .envrc
+*cache*
