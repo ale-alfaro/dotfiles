@@ -25,10 +25,9 @@ fpath+=("$ZSH_GEN_COMPLETIONS_FROM_MANPAGES_PATH" $fpath)
 
 # zstyle :plugin:zsh-completion-generator programs bat
 fpath=($ZDOTDIR/completions/src $fpath)
-source /home/alealfaro/.zsh/zsh-completion-generator/zsh-completion-generator.plugin.zsh
 # --- Initialize completion system ---
 autoload -Uz compinit
-compinit -i -d ~/.cache/zsh/zcompdump-$ZSH_VERSION
+compinit -i -d ${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump
 
 # --- Replay intercepted compdefs from plugins ---
 zinit cdreplay -q

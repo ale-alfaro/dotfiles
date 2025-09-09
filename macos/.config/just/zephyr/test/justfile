@@ -1,0 +1,34 @@
+
+
+serial_port := env('PORT_VAR','/dev/ttyACM0')
+
+#Not using snr, needed for multiple jlinks
+# serial_number := env('SNR_VAR') || '728343547'
+#--west-flash="--dev-id=${SNR_VAR}"
+
+test_dir := invocation_directory()
+
+default:
+    @just --list
+
+prep-test board cwd=test_dir:
+    @echo "Preparing test for {{board}}"
+    @echo "cwd={{cwd}}"
+    @echo "test_dir={{test_dir}}"
+    @mkdir -p {{test_dir}}/twister
+    west twister \
+    --platform {{board}} \
+    -T {{cwd}} \
+    --prep-artifacts-for-testing \
+    -O "{{test_dir}}/twister/out-{{datetime('%m-%d-%H-%M-%S')}}"
+
+run-hw-test board cwd=test_dir port=serial_port:
+    west twister \
+        -vv \
+        --platform {{board}} \
+        -T {{cwd}} \
+        --device-testing \
+        --device-serial {{port}} --test-only \
+        --west-flash="--skip-rebuild" \
+        -O "{{test_dir}}/twister/out-{{datetime('%m-%d-%H-%M-%S')}}"
+

@@ -1,0 +1,17 @@
+
+# presentation.dtsh: DTSh sample script
+
+# Start with the tree of buses and connected devices: speaker will
+# press "q" when done
+find --with-bus * --OR --on-bus * --format NYcd -T --pager
+
+# Let's look at the Flash partitions.
+#
+# 1st, the controller: : speaker will press "q" when done
+cat &flash_controller -A --pager
+# Then partitions with addresses and sizes: speaker will press "q"
+# when done
+tree &flash_controller --format NrC --pager
+
+# Lets talk about DTS labels: speaker will press "q" when done
+find --with-label * -l --pager

@@ -9,3 +9,10 @@ ssh/
 .config/zsh/.zsh_sessions/
 .envrc
 *cache*
+.env
+atuin_key
+themes/
+.config/hypr/current/
+.config/wikiman/sources
+.config/omarchy/current
+.zsh_history

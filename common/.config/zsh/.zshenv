@@ -16,7 +16,12 @@ export PATH
 if [[ $OS == "Darwin" ]]; then
     export TERMINAL=wezterm
     export BROWSER=Arc.app
-else [[ "$OS" == "Linux" ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+
+    export SDKROOT="`xcrun --show-sdk-path`"
+    export ZDOTDIR="$HOME/.config/zsh"
+    export XDG_CONFIG_HOME="$HOME/.config"
+else
     export TERMINAL=alacritty
     export BROWSER=zen-browser
 fi
