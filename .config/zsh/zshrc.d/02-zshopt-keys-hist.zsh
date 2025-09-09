@@ -15,8 +15,11 @@ bindkey "^v" edit-command-line
 bindkey -M vicmd "v" edit-command-line
 
 # Remove some default bindkeys
+bindkey -r '^c'
 bindkey -r '^l' # Clear screen
 bindkey -r '^h'
+
+bindkey -s '^Z' 'fg\n'
 #######################################################
 # History Configuration
 #######################################################

@@ -20,6 +20,8 @@ alias lg='lazygit'
 # Alias for FZF
 # Link: https://github.com/junegunn/fzf
 alias fzfprev='fzf --preview "bat --style=numbers --color=always --line-range :500 {}"'
+
+alias cdf='cd $(fd --type directory | fzf --prompt 'Directories --tree -a {}')' >' --preview 'eza
 # Alias to fuzzy find files in the current folder(s), preview them, and launch in an editor
 if [[ -x "$(command -v xdg-open)" ]]; then
     alias preview='open $(fzf --info=inline --query="${@}")'

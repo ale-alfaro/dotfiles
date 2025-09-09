@@ -11,12 +11,14 @@ set shell := ["bash", "-c"]
 
 set unstable := true
 
-west-topdir := env('WEST_TOPDIR')
-zephyr_base := env('ZEPHYR_BASE')
-default_hex_file := "build/zephyr/zephyr.hex"
+# west-topdir := env('WEST_TOPDIR')
+# zephyr_base := env('ZEPHYR_BASE')
+# default_hex_file := "build/zephyr/zephyr.hex"
 
-import 'dtsh.just'
-import 'build.just'
+# import 'dtsh.just'
+# import 'build.just'
+# import 'test.just'
+
 
 default:
     @just --list

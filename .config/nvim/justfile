@@ -5,9 +5,6 @@
 check-config:
     nvim --headless -c ':q' .
 
-
-# nvim --headless -c "lua require('lazyplugins')" -c "qall" && echo "✅ Configuration loaded successfully"
-
 # Run Neovim health check
 check-health:
     nvim --headless -c "checkhealth" -c "qall"

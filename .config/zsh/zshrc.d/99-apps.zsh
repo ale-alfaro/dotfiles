@@ -25,14 +25,12 @@ eval "$(starship init zsh)"
 # eval $(thefuck --alias)
 # eval $(thefuck --alias fk)
 
-
 # ---- Direnv (.envrc auto-loading) -----
 eval "$(direnv hook zsh)"
 
-
 # ---- zoxide (better cd) -----
 if [[ "$CLAUDECODE" != "1" ]]; then
-    eval "$(zoxide init --cmd cd zsh)"
+    eval "$(zoxide init --cmd zd zsh)"
 fi
 
 # ---- Zellij (better terminal) -----
@@ -47,7 +45,7 @@ export ZELLIJ_CONFIG_DIR="$XDG_CONFIG_HOME/zellij"
 # fi
 #
 
-if [[  "$ZELLIJ_AUTO_START" ]]; then
+if [[ "$ZELLIJ_AUTO_START" ]]; then
     if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
         zellij attach -c
     else
@@ -63,6 +61,3 @@ fi
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init - zsh)"
-
-
-
