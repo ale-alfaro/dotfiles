@@ -55,7 +55,7 @@ return {
     local Sign = require 'bookmarks.sign'
     local Tree = require 'bookmarks.tree'
 
-    -- Toggle boomark
+    -- Toggle bookmark
     ---@param input string
     local function toggle_mark(input)
       Service.toggle_mark(input)

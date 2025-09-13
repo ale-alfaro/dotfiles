@@ -243,20 +243,6 @@ keybinds clear-defaults=true {
             };
             SwitchToMode "Normal"
         }
-        bind "Alt f" {
-            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/monocle.wasm"  {
-                floating true
-            };
-            SwitchToMode "Normal"
-        }
-        // // bind "F" to open monocle on top of the current pane and open any results on top of itself
-        bind "Alt Shift f" {
-            LaunchPlugin "fuzzy-finder" {
-                in_place true
-                kiosk true
-            };
-            SwitchToMode "Normal"
-        }
 
         bind "Alt \\" {
             LaunchPlugin "filepicker" {
@@ -439,7 +425,8 @@ theme "tokyo-night-dark"
 // Examples:
 //
 // copy_command "xclip -selection clipboard" // x11
-copy_command "pbcopy"                     // osx
+copy_command "wl-copy"                    // wayland
+// copy_command "pbcopy"                     // osx
 
 // Choose the destination for copied text
 // Allows using the primary selection buffer (on x11/wayland) instead of the system clipboard.

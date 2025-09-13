@@ -5,14 +5,6 @@
 # ---- Atuin (better shell command history) -----
 eval "$(atuin init zsh)"
 
-# ----- Bat (better cat) -----
-
-export BAT_THEME="Visual Studio Dark+"
-
-# ---- Eza (better ls) -----
-alias la="eza --icons=always --all --tree --no-git"
-alias ls="eza --icons=always --all --oneline --no-git"
-
 # ---- Starship (better prompt) -----
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
 eval "$(starship init zsh)"
@@ -24,6 +16,11 @@ if [[ "$CLAUDECODE" != "1" ]]; then
     eval "$(zoxide init --cmd zd zsh)"
 fi
 
+# ---- Zellij (better terminal) -----
+export ZELLIJ_CONFIG_DIR="$XDG_CONFIG_HOME/zellij"
+
+# Initialize Node Version manager
+. /usr/share/nvm/init-nvm.sh
 # export PYENV_ROOT="$HOME/.pyenv"
 # [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 # eval "$(pyenv init - zsh)"
