@@ -18,8 +18,6 @@ fi
 # fi
     # Open a new shell to load the plugin
 # --- Completion generator setup ---
-MY_COMPLETIONS_DIR=$ZDOTDIR/completions
-GENCOMPL_FPATH=$MY_COMPLETIONS_DIR/src
 ZSH_GEN_COMPLETIONS_FROM_MANPAGES_PATH="$HOME/.local/share/zsh/site"
 fpath+=("$ZSH_GEN_COMPLETIONS_FROM_MANPAGES_PATH" $fpath)
 

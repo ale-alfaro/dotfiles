@@ -32,7 +32,7 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
     --color=spinner:#ff007c \
     "
 
-if [[$OS == "Linux"]]; then
+if [[ $OS == "Linux" ]]; then
     # SSH agent started by systemd automatically. Only need to set the socket
     if [[ -z "${SSH_CONNECTION}" ]]; then
         export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"

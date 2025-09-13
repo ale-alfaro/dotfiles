@@ -44,11 +44,9 @@ zinit light joshskidmore/zsh-fzf-history-search
 zinit light jeffreytse/zsh-vi-mode
 
 #Set option for clipboard zsh plugin
-if [[ $OS == "Darwin" ]]; then
-    ZSH_SYSTEM_CLIPBOARD_METHOD="pbcopy" # macOS clipboard
-else
-    # ZSH_SYSTEM_CLIPBOARD_METHOD="wlc" # wayland clipboard (CLIPBOARD)
-    ZSH_SYSTEM_CLIPBOARD_METHOD="wlp" # wayland clipboard (PRIMARY)
+if [[ $OS == "Linux" ]]; then
+    ZSH_SYSTEM_CLIPBOARD_METHOD="wlc" # wayland clipboard (CLIPBOARD)
+    # ZSH_SYSTEM_CLIPBOARD_METHOD="wlp" # wayland clipboard (PRIMARY)
 fi
 zinit light kutsan/zsh-system-clipboard
 
