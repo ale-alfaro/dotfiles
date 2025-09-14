@@ -54,11 +54,34 @@ return {
     keys = {
       { '<leader>e', '<cmd>vs +Oil<cr>', desc = 'Open oil in sidebar' },
     },
-    opts = {
-      options = {
+    config = function(_, opts)
+      local oil = require 'oil'
+      opts.keymaps = {
+        ['?'] = { 'actions.show_help', mode = 'n' },
+        ['<CR>'] = 'actions.select',
+        ['L'] = { 'actions.select', mode = 'n' },
+        ['<C-p>'] = 'actions.preview',
+        ['q'] = { 'actions.close', mode = 'n' },
+        ['s'] = { oil.save, mode = 'n' },
+        ['H'] = { 'actions.parent', mode = 'n' },
+        ['<leader>:'] = {
+          'actions.open_terminal',
+          desc = 'Open the terminal with the current directory as an argument',
+        },
+        ['<leader>e'] = {
+          'actions.open_external',
+          desc = 'Open the current directory with external program',
+        },
+      }
+
+      opts.options = {
         permanent_delete = false,
-        use_as_default_explorer = false,
-      },
-    },
+        use_as_default_explorer = true,
+      }
+
+      opts.skip_confirm_for_simple_edits = true
+      opts.use_default_keymaps = false
+      oil.setup(opts)
+    end,
   },
 }

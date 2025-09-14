@@ -9,18 +9,18 @@ normal = { family = "Adwaita Mono" }
 bold = { family = "Adwaita Mono" }
 italic = { family = "Adwaita Mono" }
 
-# size = 9
-size = 18
+size = 9
+# size = 18
 
-# [window]
-# padding.x = 14
-# padding.y = 14
-# decorations = "None"
-#
-# [keyboard]
-# bindings = [
-# { key = "F11", action = "ToggleFullscreen" }
-# ]
+[window]
+padding.x = 14
+padding.y = 14
+decorations = "None"
+
+[keyboard]
+bindings = [
+{ key = "F11", action = "ToggleFullscreen" }
+]
 
 [terminal]
 # shell = { program = "/bin/zellij" }

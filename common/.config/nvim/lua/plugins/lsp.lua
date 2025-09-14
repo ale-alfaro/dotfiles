@@ -1,3 +1,9 @@
+-- LSP Server to use for Python.
+-- Set to "basedpyright" to use basedpyright instead of pyright.
+vim.g.lazyvim_python_lsp = 'basedpyright'
+-- Set to "ruff_lsp" to use the old LSP implementation version.
+vim.g.lazyvim_python_ruff = 'ruff'
+
 return {
   {
     'williamboman/mason.nvim',
@@ -39,8 +45,8 @@ return {
     },
     opts = {
       servers = {
-        clangd = {
-        },
+        pyright = false,
+        clangd = {},
         basedpyright = {
           analysis = {
             autoImportCompletions = true,
@@ -49,13 +55,17 @@ return {
             typeCheckingMode = 'basic',
           },
         },
-        ruff_lsp = {
+        ruff = {
+          cmd_env = { RUFF_TRACE = 'messages' },
+          init_options = {
+            settings = {
+              logLevel = 'error',
+            },
+          },
           keys = {
             {
               '<leader>co',
-              function()
-                require('lazyvim.plugins.lsp.actions').organize_imports()
-              end,
+              LazyVim.lsp.action['source.organizeImports'],
               desc = 'Organize Imports',
             },
           },
@@ -81,4 +91,3 @@ return {
     },
   },
 }
-

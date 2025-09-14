@@ -5,7 +5,7 @@ n() {
   if [[ "$#" -eq 0 ]]; then nvim .; fi
   if [[ "$#" -eq 1 ]]; then
     if [[ -d "$1" ]]; then
-      zd "$1"
+      zd "$1" && nvim .
     else
       nvim "$1"
     fi

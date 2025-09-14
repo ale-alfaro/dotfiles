@@ -10,3 +10,4 @@ return {
     require('direnv').setup(opts)
   end,
 }
+
