@@ -4,7 +4,39 @@
             "complex_modifications": {
                 "rules": [
                     {
-                        "description": "Hyper Key: Caps Lock → ctrl left + left shift + left option + left command (⌃⇧⌥⌘)",
+                        "description": "Hyper Key: Right Option → left shift + left option + left command (⌃⇧⌥⌘)",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "right_option",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "set_variable": {
+                                            "name": "hyper_right_option",
+                                            "value": 1
+                                        }
+                                    },
+                                    {
+                                        "key_code": "left_control",
+                                        "modifiers": ["left_shift", "left_option", "left_command"]
+                                    }
+                                ],
+                                "to_after_key_up": [
+                                    {
+                                        "set_variable": {
+                                            "name": "hyper_right_option",
+                                            "value": 0
+                                        }
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "Hyper Key: Caps Lock → left control + left shift + right command (⌃⇧⌘)",
                         "manipulators": [
                             {
                                 "from": {
@@ -20,7 +52,7 @@
                                     },
                                     {
                                         "key_code": "left_control",
-                                        "modifiers": ["left_shift", "left_option", "left_command"]
+                                        "modifiers": ["left_shift", "right_command"]
                                     }
                                 ],
                                 "to_after_key_up": [
@@ -36,31 +68,29 @@
                         ]
                     },
                     {
-                        "description": "Hyper Key: Right Ctrl → left control + left shift + right command (⌃⇧⌘)",
+                        "description": "Hyper Key: Tab (held down) → left control + left command (⌃⌘)",
                         "manipulators": [
                             {
-                                "from": {
-                                    "key_code": "right_control",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
+                                "from": { "key_code": "tab" },
+                                "to_after_key_up": [
                                     {
                                         "set_variable": {
-                                            "name": "hyper_right_control",
+                                            "name": "hyper_tab_held_down",
+                                            "value": 0
+                                        }
+                                    }
+                                ],
+                                "to_if_alone": [{ "key_code": "tab" }],
+                                "to_if_held_down": [
+                                    {
+                                        "set_variable": {
+                                            "name": "hyper_tab_held_down",
                                             "value": 1
                                         }
                                     },
                                     {
                                         "key_code": "left_control",
-                                        "modifiers": ["left_shift", "right_command"]
-                                    }
-                                ],
-                                "to_after_key_up": [
-                                    {
-                                        "set_variable": {
-                                            "name": "hyper_right_control",
-                                            "value": 0
-                                        }
+                                        "modifiers": ["left_command"]
                                     }
                                 ],
                                 "type": "basic"

@@ -65,8 +65,8 @@ return { -- Autoformat
       yaml = { 'yamlfmt' },
       just = { 'justfmt' },
       xml = { 'xmllint' },
-      ['*'] = { 'codespell' },
-      ['_'] = { 'trim_whitespace' },
+      -- ['*'] = { 'codespell' },
+      -- ['_'] = { 'trim_whitespace' },
     },
   },
 }

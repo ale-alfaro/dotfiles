@@ -20,7 +20,10 @@ fi
 export ZELLIJ_CONFIG_DIR="$XDG_CONFIG_HOME/zellij"
 
 # Initialize Node Version manager
-. /usr/share/nvm/init-nvm.sh
-# export PYENV_ROOT="$HOME/.pyenv"
-# [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-# eval "$(pyenv init - zsh)"
+if [[ $OS == "Darwin" ]]; then
+  export NVM_DIR=/Users/alealfaro/.nvm
+  [ -s /opt/homebrew/opt/nvm/nvm.sh ] && \. /opt/homebrew/opt/nvm/nvm.sh  # This loads nvm
+  [ -s /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm ] && \. /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm  # This loads nvm bash_completion
+else
+  . /usr/share/nvm/init-nvm.sh
+fi
