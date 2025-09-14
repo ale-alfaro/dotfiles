@@ -29,7 +29,7 @@ prepare-stow:
 # stow: Restow all configurations managed by stow
 stow-cmd cmd_flag *extra_args:
     stow -d "{{dotfiles_repo_location}}/common/" -t {{dotfiles_target_location}} --verbose=2 {{extra_args}} {{cmd_flag}}  .config
-    stow -d "{{dotfiles_repo_location}}/{{os()}}/" -t {{dotfiles_target_location}} --verbose=2 {{extra_args}} {{cmd_flag}}  --ignore='zellij' .config
+    stow -d "{{dotfiles_repo_location}}/{{os()}}/" -t {{dotfiles_target_location}} --verbose=2 {{extra_args}} {{cmd_flag}}  --ignore='.*bak' .config
 
 stow: (stow-cmd "-S")
     @echo "✅ Stow complete."
