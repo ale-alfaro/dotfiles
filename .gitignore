@@ -10,3 +10,4 @@ atuin_key
 **/current/
 .zsh_history
 **/envs/
+common/.config/nvim/lua/plugins/theme.lua

@@ -10,16 +10,6 @@ fi
 # Source/Load zinit
 source "${ZINIT_HOME}/zinit.zsh"
 
-# Disable the cursor style feature
-# function zvm_config() {
-#     ZVM_CURSOR_STYLE_ENABLED=false
-#     # ZVM_LINE_INIT_MODE=$ZVM_MODE_INSERT
-#     # ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
-#
-#     ZVM_INSERT_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BEAM
-#     ZVM_NORMAL_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BLOCK
-#     ZVM_OPPEND_MODE_CURSOR=$ZVM_CURSOR_BLINKING_UNDERLINE
-# }
 ############# Using TURBO MODE #############
 # Add in zsh plugins
 zinit light zsh-users/zsh-syntax-highlighting

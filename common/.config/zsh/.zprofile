@@ -1,6 +1,8 @@
 #!/usr/bin/env zsh
 # $ZDOTDIR/.zprofile: Gets loaded for login shells.
 # ------------------------------------------------------------------------------
+#
+print "Zsh login shell"
 
 # PATH extensions
 # ------------------------------------------------------------------------------

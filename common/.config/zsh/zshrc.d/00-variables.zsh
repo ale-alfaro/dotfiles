@@ -1,9 +1,12 @@
 #######################################################
 # Environment Variables
 #######################################################
-#
-
-#>>> Added by Toolbox App
+# Set up default editor
+# ------------------------------------------------------------------------------
+export EDITOR=nvim
+export VISUAL=nvim
+export SUDO_EDITOR="$EDITOR"
+export FCEDIT=nvim
 #
 if [[ "$OSTYPE" == "darwin"* ]]; then
   export BROWSER=arc
