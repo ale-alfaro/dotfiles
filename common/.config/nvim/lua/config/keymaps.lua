@@ -238,8 +238,12 @@ map('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 map('t', '<Esc><Esc>', '<cmd>close<cr>', { desc = 'Hide Terminal' })
 delmap('t', '<C-/>')
 delmap('t', '<c-_>')
-
+-- delmap({ 'n', 'v' }, 's')
 -- windows
+delmap('n', '<C-h>')
+delmap('n', '<C-j>')
+delmap('n', '<C-k>')
+delmap('n', '<C-l>')
 -- map('n', '<leader>-', '<C-W>s', { desc = 'Split Window Below', remap = true })
 -- map('n', '<leader>|', '<C-W>v', { desc = 'Split Window Right', remap = true })
 -- map('n', '<leader>wd', '<C-W>c', { desc = 'Delete Window', remap = true })

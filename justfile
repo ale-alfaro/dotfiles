@@ -2,34 +2,29 @@
 
 set shell := ["bash", "-c"]
 set unstable := true
+
 # ==============================================================================
 # Stow Management
 # ==============================================================================
 
 export dotfiles_repo_location := absolute_path(justfile_directory())
 export dotfiles_target_location := if env('XDG_CONFIG_HOME', '') =~ '^/' { absolute_path(env('XDG_CONFIG_HOME')) } else { home_directory() / '.config' }
-# stow_common_args :=
-    
 
-# Helper function to get OS (Darwin or Linux)
 
-zellij_config_path := justfile_directory() / "common/.config/zellij/config.kdl"
-zellij_os_config_path := justfile_directory() / os() / ".config/zellij/config.kdl"
-zellij_config_file_pre_cmd := if path_exists(zellij_config_path) != "true" { "cp " + zellij_os_config_path } else { "echo " + "Zellij config already exists" }
+zshenv_path := justfile_directory() / "common" / ".zshenv"
+zshenv_home := home_directory() / ".zshenv"
 
 # By default, show the list of available recipes
 default:
     @just --list
     @echo "Running on OS: {{ os() }}"
 
-
-prepare-stow:
-    @{{zellij_config_file_pre_cmd}} {{zellij_config_path}}
-
 # stow: Restow all configurations managed by stow
 stow-cmd cmd_flag *extra_args:
-    stow -d "{{dotfiles_repo_location}}/common/" -t {{dotfiles_target_location}} --verbose=2 {{extra_args}} {{cmd_flag}}  .config
-    stow -d "{{dotfiles_repo_location}}/{{os()}}/" -t {{dotfiles_target_location}} --verbose=2 {{extra_args}} {{cmd_flag}}  --ignore='.*bak' .config
+    {{ if path_exists(zshenv_home) == "true" { shell('rm $1', zshenv_home) } else { '' } }} 
+    ln -sf  {{ zshenv_path }}  {{ zshenv_home }}
+    stow -d "{{ dotfiles_repo_location }}/common/" -t {{ dotfiles_target_location }} --verbose=2 {{ extra_args }} {{ cmd_flag }} --ignore='\.zshenv'  .config
+    stow -d "{{ dotfiles_repo_location }}/{{ os() }}/" -t {{ dotfiles_target_location }} --verbose=2 {{ extra_args }} {{ cmd_flag }}  .config
 
 stow: (stow-cmd "-S")
     @echo "✅ Stow complete."

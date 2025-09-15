@@ -12,7 +12,36 @@ end
 return {
   {
     'stevearc/oil.nvim',
-
+    lazy = false,
+    -- config = function(_, opts)
+    --   local oil = require 'oil'
+    --   opts.keymaps = {
+    --     ['?'] = { 'actions.show_help', mode = 'n' },
+    --     ['<CR>'] = 'actions.select',
+    --     ['L'] = { 'actions.select', mode = 'n' },
+    --     ['<C-p>'] = 'actions.preview',
+    --     ['q'] = { 'actions.close', mode = 'n' },
+    --     ['s'] = { oil.save, mode = 'n' },
+    --     ['H'] = { 'actions.parent', mode = 'n' },
+    --     ['<leader>:'] = {
+    --       'actions.open_terminal',
+    --       desc = 'Open the terminal with the current directory as an argument',
+    --     },
+    --     ['<leader>e'] = {
+    --       'actions.open_external',
+    --       desc = 'Open the current directory with external program',
+    --     },
+    --   }
+    --
+    --   opts.options = {
+    --     permanent_delete = false,
+    --     use_as_default_explorer = true,
+    --   }
+    --
+    --   opts.skip_confirm_for_simple_edits = true
+    --   opts.use_default_keymaps = false
+    --   oil.setup(opts)
+    -- end,
     config = function()
       local oil = require 'oil'
 
@@ -63,55 +92,61 @@ return {
       --[[
     -- Opens current directory of oil in a new zellij pane
     --]]
-      local zellij = require 'core.zellij-nvim'
-      local open_in_zellij_pane = function(direction)
-        local bufnr = vim.api.nvim_get_current_buf()
-        local entry = require('oil').get_cursor_entry()
-        if not entry then
-          vim.notify('Could not retrieve the file under cursor from oil.nvim', vim.log.levels.ERROR)
-          return
-        end
-
-        local cwd = oil.get_current_dir(bufnr)
-        print(vim.inspect(entry))
-        if entry.type == 'file' then
-          local args = { '--direction', direction, '--cwd', cwd }
-          zellij.zellij_edit_command(entry.name, args)
-        else
-          local new_cwd = oil.get_current_dir(bufnr) .. entry.name
-          zellij.zellij_new_pane(direction, new_cwd)
-        end
-      end
+      -- local zellij = require 'core.zellij-nvim'
+      -- local open_in_zellij_pane = function(direction)
+      --   local bufnr = vim.api.nvim_get_current_buf()
+      --   local entry = require('oil').get_cursor_entry()
+      --   if not entry then
+      --     vim.notify('Could not retrieve the file under cursor from oil.nvim', vim.log.levels.ERROR)
+      --     return
+      --   end
+      --
+      --   local cwd = oil.get_current_dir(bufnr)
+      --   print(vim.inspect(entry))
+      --   if entry.type == 'file' then
+      --     local args = { '--direction', direction, '--cwd', cwd }
+      --     zellij.zellij_edit_command(entry.name, args)
+      --   else
+      --     local new_cwd = oil.get_current_dir(bufnr) .. entry.name
+      --     zellij.zellij_new_pane(direction, new_cwd)
+      --   end
+      -- end
 
       local open_left = function()
-        open_in_zellij_pane 'left'
+        -- open_in_zellij_pane 'left'
+        vim.notify('Not implemented!', 'error')
       end
 
       local open_down = function()
-        open_in_zellij_pane 'down'
+        -- open_in_zellij_pane 'down'
+        vim.notify('Not implemented!', 'error')
       end
-      oil.setup {
+      local opts = {
         columns = { 'icon' },
         default_file_explorer = true,
 
         view_options = {
           show_hidden = false,
-          -- Hide gitignoere files
+          -- Hide gitignoere files ONLY
           is_hidden_file = function(name, bufnr)
             local dir = require('oil').get_current_dir(bufnr)
-            local is_dotfile = vim.startswith(name, '.') and name ~= '..'
-            -- if no local directory (e.g. for ssh connections), just hide dotfiles
-            if not dir then
-              return is_dotfile
-            end
-            -- dotfiles are considered hidden unless tracked
-            if is_dotfile then
-              return not git_status[dir].tracked[name]
-            else
-              -- Check if file is gitignored
-              return git_status[dir].ignored[name]
-            end
+            return git_status[dir].ignored[name]
           end,
+          -- is_hidden_file = function(name, bufnr)
+          --   local dir = require('oil').get_current_dir(bufnr)
+          --   local is_dotfile = vim.startswith(name, '.') and name ~= '..'
+          --   -- if no local directory (e.g. for ssh connections), just hide dotfiles
+          --   if not dir then
+          --     return is_dotfile
+          --   end
+          --   -- dotfiles are considered hidden unless tracked
+          --   if is_dotfile then
+          --     return not git_status[dir].tracked[name]
+          --   else
+          --     -- Check if file is gitignored
+          --     return git_status[dir].ignored[name]
+          --   end
+          -- end,
         },
         win_options = {
           signcolumn = 'yes:2',
@@ -168,22 +203,12 @@ return {
           },
         },
       }
+      return opts
     end,
+    -- stylua: ignore
     keys = {
-      {
-        '\\',
-        '<CMD>Oil<CR>',
-        desc = 'Open oil file navigator',
-        silent = true,
+      { '<leader>e', '<cmd>vs +Oil<cr>', desc = 'Open oil in sidebar' },
       },
-
-      {
-        '|',
-        '<CMD>vs +Oil<CR>',
-        desc = 'Open oil file  navigator on the sidebar',
-        silent = true,
-      },
-    },
   }, -- end of Oil.nvim
   {
     'refractalize/oil-git-status.nvim',

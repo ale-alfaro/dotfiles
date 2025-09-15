@@ -1,8 +1,0 @@
-\.gitignore
-\.git
-\.jj
-\.DS_Store
-^/README.*
-\.envrc
-linux
-macos
