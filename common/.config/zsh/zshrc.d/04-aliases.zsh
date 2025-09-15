@@ -35,7 +35,7 @@ open() {
 # ---- Eza (better ls) -----
 alias lt='eza --tree --level=2 --long --icons --git'
 alias lta='lt -a'
-alias ls="eza --icons=always --oneline --no-git"
+alias ls="eza --icons=always --oneline --no-git --all"
 # Alias For bat
 # Link: https://github.com/sharkdp/bat
 if [[ -x "$(command -v bat)" ]]; then
