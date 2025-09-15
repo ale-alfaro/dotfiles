@@ -1,0 +1,1 @@
+/home/alealfaro/.config/omarchy/current/theme/neovim.lua

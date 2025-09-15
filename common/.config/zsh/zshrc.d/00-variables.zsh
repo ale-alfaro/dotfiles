@@ -4,10 +4,23 @@
 #
 
 #>>> Added by Toolbox App
-export EDITOR=nvim
-export VISUAL=nvim
-export FCEDIT=nvim
-export SUDO_EDITOR="$EDITOR"
+#
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  export BROWSER=arc
+  export SDKROOT="$(xcrun --show-sdk-path)"
+else
+  export BROWSER=zen-browser
+  # SSH agent started by systemd automatically. Only need to set the socket
+  if [[ -z "${SSH_CONNECTION}" ]]; then
+    export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+  fi
+  export PICO_HOME=$HOME/.pico-sdk
+  export PICO_SDK_PATH=$PICO_HOME/sdk
+  export PICO_EXAMPLES_PATH=$PICO_HOME/examples
+  export PICO_OPENOCD_PATH=$PICO_HOME/openocd
+fi
+
+export TERMINAL=wezterm
 export BAT_THEME=ansi
 export MANPAGER="sh -c 'awk '\''{ gsub(/\x1B\[[0-9;]*m/, \"\", \$0); gsub(/.\x08/, \"\", \$0); print }'\'' | bat -p -lman'"
 export PAGER=bat
@@ -32,17 +45,3 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
     --color=separator:#ff9e64 \
     --color=spinner:#ff007c \
     "
-
-if [[ $OS == "Linux" ]]; then
-    # SSH agent started by systemd automatically. Only need to set the socket
-    if [[ -z "${SSH_CONNECTION}" ]]; then
-        export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
-    fi
-    export PICO_HOME=$HOME/.pico-sdk
-    export PICO_SDK_PATH=$PICO_HOME/sdk
-    export PICO_EXAMPLES_PATH=$PICO_HOME/examples
-    export PICO_OPENOCD_PATH=$PICO_HOME/openocd
-fi
-
-export JUSTFILES_HOME=$XDG_CONFIG_HOME/just
-export PATH="$PATH:$JUSTFILES_HOME"

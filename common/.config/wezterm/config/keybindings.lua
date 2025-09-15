@@ -8,14 +8,19 @@ local M = {}
 -- Configuration
 local TIMEOUT = { key = 3000, leader = 1500 }
 
-function M.apply(config)
+---@param config table
+---@param alt_modifier string
+function M.apply(config, alt_modifier)
 	config.disable_default_key_bindings = true
 	config.leader = { key = "a", mods = "CTRL", timeout_milliseconds = TIMEOUT.leader }
-	config.keys = M.get_keys()
+
+	config.keys = M.get_keys(alt_modifier)
 	config.key_tables = M.get_key_tables()
 end
 
-function M.get_keys()
+---@param alt_modifier string
+---@return table
+function M.get_keys(alt_modifier)
 	local keys = {
 		-- Key table modes
 		-- { key = "o", mods = "LEADER", action = M.activate_table("open") },
@@ -24,13 +29,14 @@ function M.get_keys()
 		{ key = "y", mods = "LEADER", action = M.activate_table("copy") },
 
 		-- Application
-		{ key = "q", mods = "CMD", action = action.QuitApplication },
+		{ key = "q", mods = alt_modifier, action = action.QuitApplication },
 
 		-- Clipboard
-		{ key = "v", mods = "CMD", action = action.PasteFrom("Clipboard") },
+		{ key = "v", mods = alt_modifier, action = action.PasteFrom("Clipboard") },
+
 		{
 			key = "c",
-			mods = "CMD",
+			mods = alt_modifier,
 			action = action.Multiple({
 				action.CopyTo("ClipboardAndPrimarySelection"),
 				action.ClearSelection,
@@ -38,9 +44,9 @@ function M.get_keys()
 		},
 
 		-- Tab management
-		{ key = "t", mods = "CMD|SHIFT", action = action.SpawnTab("DefaultDomain") },
-		{ key = "w", mods = "CMD", action = action.CloseCurrentPane({ confirm = false }) },
-		{ key = "w", mods = "CMD|SHIFT", action = action.CloseCurrentTab({ confirm = false }) },
+		{ key = "n", mods = alt_modifier .. "|SHIFT", action = action.SpawnTab("DefaultDomain") },
+		{ key = "w", mods = alt_modifier, action = action.CloseCurrentPane({ confirm = false }) },
+		{ key = "w", mods = alt_modifier .. "|SHIFT", action = action.CloseCurrentTab({ confirm = false }) },
 		{ key = "t", mods = "LEADER", action = action.ShowLauncherArgs({ flags = "TABS" }) },
 
 		-- Workspace
@@ -62,15 +68,15 @@ function M.get_keys()
 		},
 
 		-- Pane operations
-		{ key = "d", mods = "CMD", action = action.SplitVertical({ domain = "CurrentPaneDomain" }) },
-		{ key = "n", mods = "CMD", action = action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
+		{ key = "s", mods = alt_modifier, action = action.SplitVertical({ domain = "CurrentPaneDomain" }) },
+		{ key = "n", mods = alt_modifier, action = action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
 		{ key = "z", mods = "LEADER", action = action.TogglePaneZoomState },
 
 		-- Navigation
-		-- { key = "h", mods = "CMD", action = action.ActivatePaneDirection("Left") },
-		-- { key = "l", mods = "CMD", action = action.ActivatePaneDirection("Right") },
-		-- { key = "k", mods = "CMD", action = action.ActivatePaneDirection("Up") },
-		-- { key = "j", mods = "CMD", action = action.ActivatePaneDirection("Down") },
+		-- { key = "h", mods = alt_modifier, action = action.ActivatePaneDirection("Left") },
+		-- { key = "l", mods = alt_modifier, action = action.ActivatePaneDirection("Right") },
+		-- { key = "k", mods = alt_modifier, action = action.ActivatePaneDirection("Up") },
+		-- { key = "j", mods = alt_modifier, action = action.ActivatePaneDirection("Down") },
 
 		-- Vim-style scrolling
 		{ key = "u", mods = "OPT", action = action.ScrollByPage(-0.5) }, -- Scroll up half page
@@ -81,18 +87,18 @@ function M.get_keys()
 		{ key = "g", mods = "OPT|SHIFT", action = action.ScrollToBottom }, -- Jump to bottom
 
 		-- Font size
-		{ key = "0", mods = "CMD", action = action.ResetFontSize },
-		{ key = "-", mods = "CMD", action = action.DecreaseFontSize },
-		{ key = "=", mods = "CMD", action = action.IncreaseFontSize },
+		{ key = "0", mods = alt_modifier, action = action.ResetFontSize },
+		{ key = "-", mods = alt_modifier, action = action.DecreaseFontSize },
+		{ key = "=", mods = alt_modifier, action = action.IncreaseFontSize },
 
 		-- Tab navigation
-		{ key = "h", mods = "CMD|SHIFT", action = action.ActivateTabRelative(-1) },
-		{ key = "l", mods = "CMD|SHIFT", action = action.ActivateTabRelative(1) },
+		{ key = "h", mods = alt_modifier .. "|SHIFT", action = action.ActivateTabRelative(-1) },
+		{ key = "l", mods = alt_modifier .. "|SHIFT", action = action.ActivateTabRelative(1) },
 
 		-- Workspace navigation
 		{
 			key = "[",
-			mods = "CMD|OPT",
+			mods = alt_modifier .. "|SHIFT",
 			action = action.Multiple({
 				action.SwitchWorkspaceRelative(-1),
 				action.EmitEvent("set-previous-workspace"),
@@ -100,7 +106,7 @@ function M.get_keys()
 		},
 		{
 			key = "]",
-			mods = "CMD|OPT",
+			mods = alt_modifier .. "|SHIFT",
 			action = action.Multiple({
 				action.SwitchWorkspaceRelative(1),
 				action.EmitEvent("set-previous-workspace"),
@@ -108,7 +114,7 @@ function M.get_keys()
 		},
 
 		-- Utility
-		{ key = "/", mods = "CMD", action = action.Search({ CaseInSensitiveString = "" }) },
+		{ key = "/", mods = alt_modifier, action = action.Search({ CaseInSensitiveString = "" }) },
 		{ key = "c", mods = "LEADER", action = action.ShowLauncherArgs({ flags = "FUZZY|LAUNCH_MENU_ITEMS" }) },
 		-- { key = "d", mods = "LEADER", action = action.ShowDebugOverlay },
 		{ key = "p", mods = "LEADER", action = action.ActivateCommandPalette },
@@ -166,7 +172,7 @@ function M.get_keys()
 
 	-- Number keys for tab activation
 	for i = 1, 9 do
-		table.insert(keys, { key = tostring(i), mods = "CMD", action = action.ActivateTab(i - 1) })
+		table.insert(keys, { key = tostring(i), mods = alt_modifier, action = action.ActivateTab(i - 1) })
 	end
 
 	return keys

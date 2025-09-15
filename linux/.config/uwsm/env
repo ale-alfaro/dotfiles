@@ -1,6 +1,6 @@
-export OMARCHY_PATH=$HOME/.local/share/omarchy
-export PATH=$OMARCHY_PATH/bin/:$PATH
-export TERMINAL=alacritty
+export OMARCHY_PATH="$HOME/.local/share/omarchy"
+export PATH="$OMARCHY_PATH/bin/:$PATH"
+export TERMINAL=wezterm
 
 if [[ -z "$ZDOTDIR" ]]; then
     export ZDOTDIR=$HOME/.config/zsh
