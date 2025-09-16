@@ -1,6 +1,6 @@
 {
   "LazyVim": { "branch": "main", "commit": "53a2de1c8b928655b50a6ecbbe28f53e42b14f82" },
-  "SchemaStore.nvim": { "branch": "main", "commit": "3146720ee3a0c6e2446eedd492fb519d16f2e467" },
+  "SchemaStore.nvim": { "branch": "main", "commit": "0fccf9234acfd981867cbd42c4101829e6808790" },
   "VectorCode": { "branch": "main", "commit": "4232d9cf9762f4cf4fedcceedf351a0b358a0f31" },
   "blink.cmp": { "branch": "main", "commit": "327fff91fe6af358e990be7be1ec8b78037d2138" },
   "bookmarks.nvim": { "branch": "main", "commit": "df3ff61bd1feb978a14e0591b53a126d5360a011" },
@@ -48,7 +48,7 @@
   "smart-splits.nvim": { "branch": "master", "commit": "e4f0c09277ca18d035ebb5da39fb14df0e2743f8" },
   "snacks.nvim": { "branch": "main", "commit": "da230e3ca8146da4b73752daaf0a1d07d343c12d" },
   "sqlite.lua": { "branch": "master", "commit": "50092d60feb242602d7578398c6eb53b4a8ffe7b" },
-  "telescope.nvim": { "branch": "master", "commit": "b4da76be54691e854d3e0e02c36b0245f945c2c7" },
+  "telescope.nvim": { "branch": "0.1.x", "commit": "a0bbec21143c7bc5f8bb02e0005fa0b982edc026" },
   "todo-comments.nvim": { "branch": "main", "commit": "304a8d204ee787d2544d8bc23cd38d2f929e7cc5" },
   "tokyonight.nvim": { "branch": "main", "commit": "057ef5d260c1931f1dffd0f052c685dcd14100a3" },
   "trouble.nvim": { "branch": "main", "commit": "3fb3bd737be8866e5f3a170abc70b4da8b5dd45a" },

@@ -2,6 +2,7 @@ local wezterm = require("wezterm")
 local action = wezterm.action
 local functions = require("utils.functions")
 local colors = require("utils.colors")
+local projects = require("utils.workspaces")
 
 local M = {}
 
@@ -98,7 +99,7 @@ function M.get_keys(alt_modifier)
 		-- Workspace navigation
 		{
 			key = "[",
-			mods = alt_modifier .. "|SHIFT",
+			mods = "LEADER",
 			action = action.Multiple({
 				action.SwitchWorkspaceRelative(-1),
 				action.EmitEvent("set-previous-workspace"),
@@ -106,18 +107,30 @@ function M.get_keys(alt_modifier)
 		},
 		{
 			key = "]",
-			mods = alt_modifier .. "|SHIFT",
+			mods = "LEADER",
 			action = action.Multiple({
 				action.SwitchWorkspaceRelative(1),
 				action.EmitEvent("set-previous-workspace"),
 			}),
 		},
+		{
+			key = "p",
+			mods = "LEADER",
+			-- Present in to our project picker
+			action = projects.choose_project(),
+		},
+		{
+			key = "f",
+			mods = "LEADER",
+			-- Present a list of existing workspaces
+			action = wezterm.action.ShowLauncherArgs({ flags = "FUZZY|WORKSPACES" }),
+		},
 
 		-- Utility
 		{ key = "/", mods = alt_modifier, action = action.Search({ CaseInSensitiveString = "" }) },
 		{ key = "c", mods = "LEADER", action = action.ShowLauncherArgs({ flags = "FUZZY|LAUNCH_MENU_ITEMS" }) },
-		-- { key = "d", mods = "LEADER", action = action.ShowDebugOverlay },
-		{ key = "p", mods = "LEADER", action = action.ActivateCommandPalette },
+		{ key = "d", mods = "LEADER", action = action.ShowDebugOverlay },
+		{ key = "p", mods = alt_modifier, action = action.ActivateCommandPalette },
 		{ key = "v", mods = "LEADER", action = action.ActivateCopyMode },
 
 		-- Rename

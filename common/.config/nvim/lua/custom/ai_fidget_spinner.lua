@@ -105,6 +105,37 @@ function M:init()
       end
     end,
   })
+
+  vim.api.nvim_create_autocmd({ 'User' }, {
+    pattern = 'CodeCompanionInlineFinished',
+    group = group,
+    callback = function(request)
+      require('conform').format { bufnr = request.buf }
+    end,
+  })
+
+  vim.api.nvim_create_autocmd({ 'User' }, {
+    pattern = 'CodeCompanionTools*',
+    group = group,
+    callback = function(request)
+      vim.notify('Received CC tools event' .. vim.inspect(request), vim.log.levels.INFO)
+    end,
+  })
+
+  vim.api.nvim_create_autocmd({ 'User' }, {
+    pattern = 'CodeCompanionChatOpened',
+    group = group,
+    callback = function(request)
+      vim.notify('Disabling g keymaps for CodeCompanion', vim.log.levels.INFO)
+      local buffer_keymaps = vim.api.nvim_buf_get_keymap(request.buf, 'n')
+      local keymaps_to_disable = vim.tbl_filter(function(key)
+        return key.lhs:sub(1, 1) == 'g'
+      end, buffer_keymaps)
+      for _, mapping in ipairs(keymaps_to_disable) do
+        vim.api.nvim_buf_del_keymap(request.buf, 'n', mapping.lhs)
+      end
+    end,
+  })
 end
 
 return M

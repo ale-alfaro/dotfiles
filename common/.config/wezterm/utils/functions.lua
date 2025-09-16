@@ -1,7 +1,3 @@
-local wezterm = require("wezterm")
-local action = wezterm.action
-local colors = require("utils.colors")
-
 local M = {}
 -- General utilities
 --- Merge all the given tables into a single one and return it.
@@ -103,25 +99,6 @@ function M.get_cwd(pane, max_width)
 	end
 
 	return cwd
-end
-
--- Workspace management
-function M.switch_workspace(window, pane, workspace)
-	local current = window:active_workspace()
-	if current == workspace then
-		return
-	end
-
-	window:perform_action(action.SwitchToWorkspace({ name = workspace }), pane)
-	wezterm.GLOBAL.previous_workspace = current
-end
-
-function M.switch_previous_workspace(window, pane)
-	local previous = wezterm.GLOBAL.previous_workspace
-	if not previous or previous == window:active_workspace() then
-		return
-	end
-	M.switch_workspace(window, pane, previous)
 end
 
 -- Visual effects
