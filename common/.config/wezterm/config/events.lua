@@ -5,6 +5,9 @@ local workspaces = require("utils.workspaces")
 local statusbar = require("utils.statusbar")
 local colors = require("utils.colors")
 
+-- Quick terminal imports
+local mux = wezterm.mux
+-- local act = wezterm.action
 local M = {}
 
 -- Program icons mapping
@@ -35,6 +38,10 @@ function M.setup()
 	-- Workspace management
 	wezterm.on("set-previous-workspace", M.set_previous_workspace)
 	wezterm.on("window-focus-changed", M.window_focus_changed)
+
+	-- Quick terminal
+	-- wezterm.on("gui-attached", M.quick_terminal)
+	-- wezterm.on("format-window-title", M.format_window_title)
 end
 
 function M.update_status(window, pane)
@@ -135,8 +142,6 @@ function M.format_tab_title(tab)
 end
 
 function M.gui_startup()
-	local mux = wezterm.mux
-
 	for _, space in pairs(workspaces.config.spaces) do
 		local _, _, window = mux.spawn_window({
 			workspace = space.name,
@@ -154,6 +159,45 @@ function M.gui_startup()
 
 	mux.set_active_workspace(workspaces.config.default)
 end
+
+-- Scratch quick terminal
+--[[
+-- Mac Monitor has this specs
+-- Height: 2880
+-- Width: 5120
+--]]
+--
+-- local width_max = 5120
+-- local scratch = "_scratch" -- Keep this consistent with Hammerspoon
+-- function M.quick_terminal(_)
+-- 	local workspace = mux.get_active_workspace()
+-- 	if workspace ~= scratch then
+-- 		return
+-- 	end
+--
+-- 	-- Compute width: 66% of screen width, up to 1000 px
+-- 	local width_ratio = 0.66
+-- 	local aspect_ratio = 16 / 9
+-- 	local screen = wezterm.gui.screens().active
+-- 	local width = math.min(screen.width * width_ratio, width_max)
+-- 	local height = width / aspect_ratio
+--
+-- 	for _, window in ipairs(mux.all_windows()) do
+-- 		local gwin = window:gui_window()
+-- 		if gwin ~= nil then
+-- 			gwin:perform_action(act.SetWindowLevel("AlwaysOnTop"), gwin:active_pane())
+-- 			gwin:set_inner_size(width, height)
+-- 		end
+-- 	end
+-- end
+
+-- function M.format_window_title()
+-- 	local workspace = wezterm.mux.get_active_workspace()
+-- 	if workspace ~= scratch then
+-- 		return
+-- 	end
+-- 	return scratch
+-- end
 
 function M.copy_buffer(window, pane)
 	local text = pane:get_lines_as_text(pane:get_dimensions().scrollback_rows)

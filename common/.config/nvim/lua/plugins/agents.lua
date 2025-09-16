@@ -53,31 +53,7 @@ return {
           chat = {
             adapter = 'gemini_cli',
             model = 'gemini-2.5-flash',
-            tools = {
-
-              -- Tools
-              -- ['cmd_runner'] = {
-              --   callback = 'strategies.chat.tools.catalog.cmd_runner',
-              --   description = 'Run shell commands initiated by the LLM',
-              --   opts = {
-              --     requires_approval = true,
-              --   },
-              -- },
-              -- ['create_file'] = {
-              --   callback = 'strategies.chat.tools.catalog.create_file',
-              --   description = 'Create a file in the current working directory',
-              --   opts = {
-              --     requires_approval = true,
-              --   },
-              -- },
-              -- ['fetch_webpage'] = {
-              --   callback = 'strategies.chat.tools.catalog.fetch_webpage',
-              --   description = 'Fetches content from a webpage',
-              --   opts = {
-              --     adapter = 'jina',
-              --   },
-              -- },
-            }, -- tools
+            tools = {}, -- tools
             keymaps = {
               close = {
                 modes = { n = 'q', i = '<C-q>' },

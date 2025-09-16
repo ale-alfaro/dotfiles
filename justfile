@@ -9,8 +9,6 @@ set unstable := true
 
 export dotfiles_repo_location := absolute_path(justfile_directory())
 export dotfiles_target_location := if env('XDG_CONFIG_HOME', '') =~ '^/' { absolute_path(env('XDG_CONFIG_HOME')) } else { home_directory() / '.config' }
-
-
 zshenv_path := justfile_directory() / "common" / ".zshenv"
 zshenv_home := home_directory() / ".zshenv"
 
@@ -45,7 +43,7 @@ check: (stow-cmd "-R" "--simulate")
 
 # update: Pull latest changes and apply them with stow
 update:
-    @just pull
+    @git pull
     @just stow
 
 # ==============================================================================
@@ -74,3 +72,31 @@ clean-aliens-interactive:
     @echo "WARNING: This is a dangerous operation."
     @echo "You will be prompted to delete every file not managed by stow."
     @chkstow -a -t {{ dotfiles_target_location }} | awk -F': ' '{print $2}' | xargs -r -p rm -rf
+
+vectorcode := require("vectorcode")
+
+# common_dotfiles_dir := "nvim zsh wezterm just"
+# macos_dotfiles_dir := "aerospace hammerspoon sketchybar borders"
+# linux_dotfiles_dir := "hypr mako waybar swayosd "
+
+# vectorcode-includes:
+#     #!/bin/env bash 
+#     echo "Generating .vectorcode/vectorcode.include from the directory lists"
+#     local common_dir_names=$({{ common_dotfiles_dir }})
+#     echo '{{ common_dotfiles_dir }}' | awk '/\S/ {print "common/.config/"$1"/**"}' > .vectorcode/vectorcode.include
+#     # echo '{{ linux_dotfiles_dir }}' | awk '/\S/ {print "linux/.config/"$1"/**"}' > .vectorcode/vectorcode.include
+
+vectorcode_init:
+    {{ if path_exists(".vectorcode") != "true" { shell('vectorcode init') } else { "" } }}
+    @echo 'common/.config/**' > .vectorcode/vectorcode.include
+    @echo '{{ os() }}/.config/**' >> .vectorcode/vectorcode.include
+    @cp .gitignore .vectorcode/vectorcode.exclude
+    {{ vectorcode }} vectorise
+
+vectorcode_check:
+    {{ vectorcode }} check config
+    @bat --paging=never .vectorcode/vectorcode.include
+    @bat --paging=never .vectorcode/vectorcode.exclude
+    {{ vectorcode }} ls --pipe | jq '.'
+    {{ vectorcode }} files ls --pipe | jq '.'
+

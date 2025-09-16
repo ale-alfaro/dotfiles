@@ -19,8 +19,8 @@ start-at-login = true
 # Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
 # enable-normalization-flatten-containers = true
 # enable-normalization-opposite-orientation-for-nested-containers = true
-enable-normalization-flatten-containers = false
-enable-normalization-opposite-orientation-for-nested-containers = false
+enable-normalization-flatten-containers = true
+enable-normalization-opposite-orientation-for-nested-containers = true
 # See: https://nikitabobko.github.io/AeroSpace/guide#layouts
 # The 'accordion-padding' specifies the size of accordion padding
 # You can set 0 to disable the padding feature
@@ -120,7 +120,7 @@ alt-shift-cmd-ctrl-5 = 'move-node-to-workspace 5 --focus-follows-window'
 alt-shift-cmd-ctrl-b = 'exec-and-forget open -a /Applications/Arc.app'
 alt-shift-cmd-ctrl-o = 'exec-and-forget open -a /Applications/Obsidian.app'
 alt-shift-cmd-ctrl-s = 'exec-and-forget open -a /Applications/Slack.app'
-alt-shift-cmd-ctrl-enter = 'exec-and-forget open -a /Applications/WezTerm.app'
+alt-enter = ['exec-and-forget wezterm start -e']
 
 
 alt-shift-cmd-ctrl-r= ['reload-config']
@@ -141,6 +141,12 @@ alt-shift-cmd-ctrl-q = [
   'exec-and-forget sketchybar --trigger aerospace_service_mode_enabled_changed AEROSPACE_SERVICE_MODE_ENABLED=true',
 ]
 
+# [[on-window-detected]]
+# if.app-name-regex-substring = 'wezterm'
+# if.window-title-regex-substring = '_scratch'
+# run = 'layout floating'
+#
+#
 # 'service' binding mode declaration
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
 [mode.service.binding]
