@@ -76,6 +76,9 @@ return {
   },
   {
     'mrjones2014/smart-splits.nvim',
+    init = function()
+      vim.g.smart_splits_multiplexer_integration = 'wezterm'
+    end,
     opts = {
       -- Ignored buffer types (only while resizing)
       ignored_buftypes = {

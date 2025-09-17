@@ -78,9 +78,10 @@ return {
               },
               defaults = {
                 auth_method = 'gemini-api-key',
+                -- mcpServers = require('mcphub').get_hub_instance():get_servers(),
                 mcpServers = {},
                 timeout = 20000, -- 20 seconds
-                model = current_model,
+                commands = 'Gemini 2.5 Flash',
               },
               env = {
                 GEMINI_API_KEY = vim.fn.expand '$GEMINI_API_KEY',
@@ -94,45 +95,59 @@ return {
             })
           end,
         },
-        http = {
-          ['Gemini'] = function()
-            return require('codecompanion.adapters').extend('gemini', {
-              name = 'Gemini',
-              schema = { model = { default = 'gemini-2.5-flash' } },
-            })
-          end,
-          ['LlamaCPP'] = function()
-            return require('codecompanion.adapters').extend('openai_compatible', {
-              env = {
-                url = 'http://127.0.0.1:8080',
-                api_key = 'TERM',
-                chat_url = '/v1/chat/completions',
-              },
-              schema = { cache_prompt = { default = true, mapping = 'parameters' } },
-            })
-          end,
-          ['Ollama'] = function()
-            return require('codecompanion.adapters').extend('ollama', {
-              env = {
-                url = os.getenv 'OLLAMA_HOST',
-                api_key = 'TERM',
-              },
-              name = 'Ollama',
-              schema = {
-                num_ctx = { default = 64000 },
-                -- model = { default = {"qwen3:8b-q4_K_M-dynamic-thinking"} },
-                -- think = { default = true },
-              },
-            })
-          end,
-        },
+        --   http = {
+        --     ['Gemini'] = function()
+        --       return require('codecompanion.adapters').extend('gemini', {
+        --         name = 'Gemini',
+        --         schema = { model = { default = 'gemini-2.5-flash' } },
+        --       })
+        --     end,
+        --     ['LlamaCPP'] = function()
+        --       return require('codecompanion.adapters').extend('openai_compatible', {
+        --         env = {
+        --           url = 'http://127.0.0.1:8080',
+        --           api_key = 'TERM',
+        --           chat_url = '/v1/chat/completions',
+        --         },
+        --         schema = { cache_prompt = { default = true, mapping = 'parameters' } },
+        --       })
+        --     end,
+        --     ['Ollama'] = function()
+        --       return require('codecompanion.adapters').extend('ollama', {
+        --         env = {
+        --           url = os.getenv 'OLLAMA_HOST',
+        --           api_key = 'TERM',
+        --         },
+        --         name = 'Ollama',
+        --         schema = {
+        --           num_ctx = { default = 64000 },
+        --           -- model = { default = {"qwen3:8b-q4_K_M-dynamic-thinking"} },
+        --           -- think = { default = true },
+        --         },
+        --       })
+        --     end,
+        --   },
       }
       opts.extensions = {
         -- dap = {
         --   enabled = true,
         --   opts = { tool_opts = {}, interval_ms = 1 },
         -- },
-        -- mcphub = { callback = 'mcphub.extensions.codecompanion' },
+        mcphub = {
+          callback = 'mcphub.extensions.codecompanion',
+          opts = {
+            -- MCP Tools
+            make_tools = true, -- Make individual tools (@server__tool) and server groups (@server) from MCP servers
+            show_server_tools_in_chat = true, -- Show individual tools in chat completion (when make_tools=true)
+            add_mcp_prefix_to_tool_names = false, -- Add mcp__ prefix (e.g `@mcp__github`, `@mcp__neovim__list_issues`)
+            show_result_in_chat = true, -- Show tool results directly in chat buffer
+            format_tool = nil, -- function(tool_name:string, tool: CodeCompanion.Agent.Tool) : string Function to format tool names to show in the chat buffer
+            -- MCP Resources
+            make_vars = true, -- Convert MCP resources to #variables for prompts
+            -- MCP Prompts
+            make_slash_commands = true, -- Add MCP prompts as /slash commands
+          },
+        },
         history = {
           enabled = true,
           opts = {
@@ -177,10 +192,10 @@ return {
                 project_root = plugin.dir,
                 file_patterns = { 'lua/codecompanion/**.lua', 'doc/**/*.md' },
               },
-              ['Kitty Assistant'] = {
-                project_root = '/usr/share/doc/kitty/',
-                file_patterns = { '**/*.txt' },
-              },
+              -- ['Kitty Assistant'] = {
+              --   project_root = '/usr/share/doc/kitty/',
+              --   file_patterns = { '**/*.txt' },
+              -- },
             },
             tool_group = { collapse = true },
             tool_opts = {
@@ -199,7 +214,7 @@ return {
                     return s
                   end,
                   adapter = function()
-                    return require('codecompanion.adapters').extend('gemini', {
+                    return require('codecompanion.adapters').extend('gemini_cli', {
                       name = 'Summariser',
                       schema = {
                         model = { default = 'gemini-2.0-flash-lite' },
@@ -216,7 +231,7 @@ return {
       }
       opts.strategies = {
         chat = {
-          adapter = 'Gemini',
+          adapter = 'gemini_cli',
           roles = {
             ---@type string|fun(adapter: CodeCompanion.HTTPAdapter|CodeCompanion.ACPAdapter): string
             llm = function(adapter)
@@ -248,7 +263,7 @@ return {
           },
         },
         inline = {
-          adapter = 'Gemini',
+          adapter = 'Gemini 2.5 Flash',
         },
       }
 
@@ -326,20 +341,14 @@ return {
       return vim.fn.executable 'vectorcode' == 1
     end,
   }, -- vectorcode
-  -- {
-  --   'ravitemer/mcphub.nvim',
-  --   version = '*',
-  --   dependencies = {
-  --     'nvim-lua/plenary.nvim',
-  --   },
-  --   build = 'bundled_build.lua',
-  --   cmd = { 'MCPHub' },
-  --   opts = function()
-  --     return {
-  --       port = 3000,
-  --       use_bundled_binary = true,
-  --       extensions = { copilotchat = { enabled = false } },
-  --     }
-  --   end,
-  -- }, -- mcphub
+  {
+    'ravitemer/mcphub.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+    },
+    build = 'npm install -g mcp-hub@latest', -- Installs `mcp-hub` node binary globally
+    config = function()
+      require('mcphub').setup()
+    end,
+  }, -- mcphub
 }

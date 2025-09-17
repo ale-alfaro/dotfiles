@@ -6,7 +6,7 @@ vim.g.lazyvim_python_ruff = 'ruff'
 
 return {
   {
-    'williamboman/mason.nvim',
+    'mason-org/mason.nvim',
     cmd = 'Mason',
     keys = { { '<leader>cm', '<cmd>Mason<cr>', desc = 'Mason' } },
     opts = {
@@ -31,8 +31,8 @@ return {
     },
   },
   {
-    'williamboman/mason-lspconfig.nvim',
-    dependencies = { 'williamboman/mason.nvim' },
+    'mason-org/mason-lspconfig.nvim',
+    dependencies = { 'mason-org/mason.nvim' },
     opts = {
       automatic_installation = true,
     },
@@ -40,7 +40,7 @@ return {
   {
     'neovim/nvim-lspconfig',
     dependencies = {
-      'williamboman/mason-lspconfig.nvim',
+      'mason-org/mason-lspconfig.nvim',
       'WhoIsSethDaniel/mason-tool-installer.nvim',
     },
     opts = {

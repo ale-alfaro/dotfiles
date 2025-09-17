@@ -34,7 +34,6 @@ fi
 
 # --- Completion from CLI tools ---
 eval "$(jj util completion zsh)"
-# eval "$(zellij setup --generate-completion zsh)"
 if [[ -x "$(command -v bw)" ]]; then
   eval "$(bw completion --shell zsh)"
 fi
@@ -56,8 +55,12 @@ else
   echo ERROR: Could not load zoxide shell integration.
 fi
 
-# ---- Zellij (better terminal) -----
-export ZELLIJ_CONFIG_DIR="$XDG_CONFIG_HOME/zellij"
+# ---- Zellij ----- NOT IN USE
+# export ZELLIJ_CONFIG_DIR="$XDG_CONFIG_HOME/zellij"
+# eval "$(zellij setup --generate-completion zsh)"
+#
+# ---- Wezterm (terminal emulator) ---
+. $ZDOTDIR/shell_integrations/wezterm.sh
 
 # Initialize Node Version manager
 if [[ "$OSTYPE" == "darwin"* ]]; then
