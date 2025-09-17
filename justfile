@@ -86,17 +86,38 @@ vectorcode := require("vectorcode")
 #     echo '{{ common_dotfiles_dir }}' | awk '/\S/ {print "common/.config/"$1"/**"}' > .vectorcode/vectorcode.include
 #     # echo '{{ linux_dotfiles_dir }}' | awk '/\S/ {print "linux/.config/"$1"/**"}' > .vectorcode/vectorcode.include
 
-vectorcode_init:
+vectorcode-init:
     {{ if path_exists(".vectorcode") != "true" { shell('vectorcode init') } else { "" } }}
     @echo 'common/.config/**' > .vectorcode/vectorcode.include
     @echo '{{ os() }}/.config/**' >> .vectorcode/vectorcode.include
     @cp .gitignore .vectorcode/vectorcode.exclude
     {{ vectorcode }} vectorise
 
-vectorcode_check:
+vectorcode-check:
     {{ vectorcode }} check config
     @bat --paging=never .vectorcode/vectorcode.include
     @bat --paging=never .vectorcode/vectorcode.exclude
     {{ vectorcode }} ls --pipe | jq '.'
     {{ vectorcode }} files ls --pipe | jq '.'
 
+
+chromadb_root_dir := "~/.local/share/chromadb"
+systemd_chroma_service_spec := """
+  [Unit]
+  Description = Chroma Service
+  After = network.target
+
+  [Service]
+  Type = simple
+  User = root
+  Group = root
+  WorkingDirectory = {{ chromadb_root_dir }}
+  ExecStart=/usr/local/bin/chroma run --host 127.0.0.1 --port 8000 --path {{ chromadb_root_dir }}/data --log-path {{ chromadb_root_dir }}/log/chroma.log
+
+  [Install]
+  WantedBy = multi-user.target
+"""
+
+_chromadb_serice_init:
+  @sudo systemctl enable chroma
+  @sudo systemctl start chroma

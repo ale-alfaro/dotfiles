@@ -66,9 +66,9 @@ return {
           },
         }, -- ruff
 
-        vectorcode = {
-          cmd = { 'vectorcode-server' },
-          root_dir = vim.fs.root(0, { '.vectorcode', '.git', '.stylua.toml' }),
+        vectorcode_server = {
+          -- cmd = { 'vectorcode-server' },
+          -- root_dir = vim.fs.root(0, { '.vectorcode', '.git', '.stylua.toml' }),
         },
       }, -- servers
     },
