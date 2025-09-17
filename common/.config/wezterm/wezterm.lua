@@ -1,7 +1,8 @@
--- Pull in the wezterm API
+---@type Wezterm
 local wezterm = require("wezterm")
 
-local smart_splits = wezterm.plugin.require("https://github.com/mrjones2014/smart-splits.nvim")
+local smart_splits = require("smart-splits")
+---@type Config
 local config = wezterm.config_builder and wezterm.config_builder() or {}
 local colors = require("utils.colors")
 colors.init()

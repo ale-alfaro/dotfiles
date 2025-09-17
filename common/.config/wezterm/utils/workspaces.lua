@@ -114,4 +114,16 @@ function M.choose_project()
 	-- }
 end
 
+function M.show_workspace_launcher()
+	local window = wezterm.mux.get_active_window()
+	if not window then
+		return
+	end
+	local pane = window:active_pane()
+	if not pane then
+		return
+	end
+	window:perform_action(M.choose_project(), pane)
+end
+
 return M

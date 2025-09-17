@@ -18,6 +18,9 @@ return {
       -- { "<leader>fc", LazyVim.pick.config_files(), desc = "Find Config File" },
       { "<leader>ff", LazyVim.pick("files", {hidden = true}), desc = "Find Files (Root Dir)" },
       { "<leader>fF", LazyVim.pick("files", { hidden = true, root = false }), desc = "Find Files (cwd)" },
+      --Floating terminal
+      {"<leader>fT", false},
+      {"<leader>ft", false},
       -- { "<leader>fg", function() Snacks.picker.git_files() end, desc = "Find Files (git-files)" },
       -- { "<leader>fr", LazyVim.pick("oldfiles"), desc = "Recent" },
       -- { "<leader>fR", function() Snacks.picker.recent({ filter = { cwd = true }}) end, desc = "Recent (cwd)" },
@@ -103,10 +106,37 @@ return {
     opts = { use_diagnostic_signs = true },
   },
   {
-    'hrsh7th/nvim-cmp',
-    dependencies = { 'hrsh7th/cmp-emoji' },
-    opts = {
-      auto_brackets = { 'python' },
+    'folke/lazydev.nvim',
+    ft = 'lua',
+    opts = function(_, opts)
+      opts = vim.tbl_deep_extend('force', opts or {}, {
+        library = {
+          { path = 'luvit-meta/library', words = { 'vim%.uv' } },
+          { path = 'wezterm-types', mods = { 'wezterm' } },
+          { path = 'folke/snacks.nvim', words = { 'Snacks' } },
+          {
+            path = 'nvim-lua/plenary.nvim',
+            words = {
+              'describe',
+              'it',
+              'pending',
+              'before_each',
+              'after_each',
+              'clear',
+              'assert.*',
+            },
+          },
+        },
+      })
+      return opts
+    end,
+    config = function(_, opts)
+      require('lazydev').setup(opts)
+    end,
+    dependencies = {
+      { 'Bilal2453/luvit-meta' },
+      { 'justinsgithub/wezterm-types' },
+      { 'folke/snacks.nvim' },
     },
   },
 }

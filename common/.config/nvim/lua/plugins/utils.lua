@@ -76,46 +76,18 @@ return {
   },
   {
     'mrjones2014/smart-splits.nvim',
-    init = function()
-      vim.g.smart_splits_multiplexer_integration = 'wezterm'
-    end,
+    lazy = false,
+    -- init = function()
+    --   vim.g.smart_splits_multiplexer_integration = 'wezterm'
+    -- end,
     opts = {
       -- Ignored buffer types (only while resizing)
       ignored_buftypes = {
-        'nofile',
-        'quickfix',
-        'prompt',
-        'neo-tree',
-        'neo-tree-popup',
-        'notify',
+        'snacks_picker_list',
+        'codecompanion',
       },
       -- Ignored filetypes (only while resizing)
-      ignored_filetypes = { 'NvimTree' },
-      -- Desired behavior when your cursor is at an edge and you
-      -- are moving towards that same edge:
-      -- 'wrap' => Wrap to opposite side
-      -- 'split' => Create a new split in the desired direction
-      -- 'stop' => Do nothing
-      -- function => You handle the behavior yourself
-      -- NOTE: If using a function, the function will be called with
-      -- a context object with the following fields:
-      -- {
-      --    mux = {
-      --      type:'tmux'|'wezterm'|'kitty'|'zellij'
-      --      current_pane_id():number,
-      --      is_in_session(): boolean
-      --      current_pane_is_zoomed():boolean,
-      --      -- following methods return a boolean to indicate success or failure
-      --      current_pane_at_edge(direction:'left'|'right'|'up'|'down'):boolean
-      --      next_pane(direction:'left'|'right'|'up'|'down'):boolean
-      --      resize_pane(direction:'left'|'right'|'up'|'down'):boolean
-      --      split_pane(direction:'left'|'right'|'up'|'down',size:number|nil):boolean
-      --    },
-      --    direction = 'left'|'right'|'up'|'down',
-      --    split(), -- utility function to split current Neovim pane in the current direction
-      --    wrap(), -- utility function to wrap to opposite Neovim pane
-      -- }
-      at_edge = 'stop',
+      ignored_filetypes = { 'snacks_picker_list', 'codecompanion' },
       -- the default number of lines/columns to resize by at a time
       --   -- for example `10<A-h>` will `resize_left` by `(10 * config.default_amount)`
       default_amount = 3,
@@ -124,7 +96,6 @@ return {
       -- regardless of line numbers. False by default.
       -- Can be overridden via function parameter, see Usage.
       move_cursor_same_row = true,
-      log_level = 'debug',
     },
     -- stylua: ignore
     keys = {

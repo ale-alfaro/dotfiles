@@ -1,4 +1,7 @@
+---@type Wezterm
 local wezterm = require("wezterm")
+
+---@type Action
 local action = wezterm.action
 local functions = require("utils.functions")
 local colors = require("utils.colors")
@@ -24,9 +27,7 @@ end
 function M.get_keys(alt_modifier)
 	local keys = {
 		-- Key table modes
-		-- { key = "o", mods = "LEADER", action = M.activate_table("open") },
-		-- { key = "m", mods = "LEADER", action = M.activate_table("move") },
-		-- { key = "r", mods = "LEADER", action = M.activate_table("resize") },
+		{ key = "o", mods = "LEADER", action = M.activate_table("open") },
 		{ key = "y", mods = "LEADER", action = M.activate_table("copy") },
 
 		-- Application
@@ -38,10 +39,7 @@ function M.get_keys(alt_modifier)
 		{
 			key = "c",
 			mods = alt_modifier,
-			action = action.Multiple({
-				action.CopyTo("ClipboardAndPrimarySelection"),
-				action.ClearSelection,
-			}),
+			action = action.CopyTo("Clipboard"),
 		},
 
 		-- Tab management
@@ -72,12 +70,6 @@ function M.get_keys(alt_modifier)
 		{ key = "s", mods = alt_modifier, action = action.SplitVertical({ domain = "CurrentPaneDomain" }) },
 		{ key = "n", mods = alt_modifier, action = action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
 		{ key = "z", mods = "LEADER", action = action.TogglePaneZoomState },
-
-		-- Navigation
-		-- { key = "h", mods = alt_modifier, action = action.ActivatePaneDirection("Left") },
-		-- { key = "l", mods = alt_modifier, action = action.ActivatePaneDirection("Right") },
-		-- { key = "k", mods = alt_modifier, action = action.ActivatePaneDirection("Up") },
-		-- { key = "j", mods = alt_modifier, action = action.ActivatePaneDirection("Down") },
 
 		-- Vim-style scrolling
 		{ key = "u", mods = "OPT", action = action.ScrollByPage(-0.5) }, -- Scroll up half page
@@ -139,7 +131,7 @@ function M.get_keys(alt_modifier)
 
 		-- Help
 		{
-			key = "?",
+			key = "h",
 			mods = "LEADER",
 			action = wezterm.action_callback(function(window, pane)
 				local home = os.getenv("HOME")
@@ -199,30 +191,10 @@ function M.get_key_tables()
 			{ key = "l", action = M.copy_line_action() },
 			{ key = "r", action = M.copy_regex_action() },
 		},
-
-		-- move = {
-		-- 	{ key = "r", action = action.RotatePanes("CounterClockwise") },
-		-- 	{ key = "s", action = action.PaneSelect },
-		-- 	{ key = "Enter", action = "PopKeyTable" },
-		-- 	{ key = "Escape", action = "PopKeyTable" },
-		-- 	{ key = "h", mods = "SHIFT", action = action.MoveTabRelative(-1) },
-		-- 	{ key = "l", mods = "SHIFT", action = action.MoveTabRelative(1) },
-		-- },
-
-		-- resize = {
-		-- 	{ key = "j", action = action.AdjustPaneSize({ "Down", 1 }) },
-		-- 	{ key = "h", action = action.AdjustPaneSize({ "Left", 1 }) },
-		-- 	{ key = "l", action = action.AdjustPaneSize({ "Right", 1 }) },
-		-- 	{ key = "k", action = action.AdjustPaneSize({ "Up", 1 }) },
-		-- 	{ key = "Enter", action = "PopKeyTable" },
-		-- 	{ key = "Escape", action = "PopKeyTable" },
-		-- },
-
-		-- open = {
-		-- 	{ key = "p", action = M.spawn_command("Finder", { "open", "." }) },
-		-- 	{ key = "c", action = M.spawn_command("VS Code", { "zsh", "-lc", "code ." }) },
-		-- 	{ key = "u", action = M.open_url_action() },
-		-- },
+		open = {
+			{ key = "c", action = M.spawn_command("VS Code", { "zsh", "-lc", "code ." }) },
+			{ key = "u", action = M.open_url_action() },
+		},
 	}
 end
 

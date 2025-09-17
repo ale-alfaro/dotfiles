@@ -1,6 +1,13 @@
 local ft_autoclose = { 'snacks_', 'dapui_', 'dap-repl', 'qf', 'codecompanion' }
 local ft_autoclose_ignore = { 'snacks_dashboard' }
-
+-- Disable autoformat for lua files
+vim.api.nvim_create_autocmd({ 'FileType' }, {
+  pattern = { 'hyprlang' },
+  callback = function()
+    vim.notify 'Disabling autoformatting'
+    vim.b.autoformat = false
+  end,
+})
 local list_wins = function()
   local all, close, rest = vim.api.nvim_list_wins(), {}, {}
   for _, win in ipairs(all) do

@@ -227,26 +227,12 @@ end
 --
 local map = vim.keymap.set
 local delmap = vim.keymap.del
--- floating terminal
--- map("n", "<leader>fT", function() Snacks.terminal() end, { desc = "Terminal (cwd)" })
--- map("n", "<leader>ft", function() Snacks.terminal(nil, { cwd = LazyVim.root() }) end, { desc = "Terminal (Root Dir)" })
-delmap('n', '<c-/>')
-delmap('n', '<c-_>')
 
 -- Terminal Mappings
 map('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 map('t', '<Esc><Esc>', '<cmd>close<cr>', { desc = 'Hide Terminal' })
 delmap('t', '<C-/>')
 delmap('t', '<c-_>')
--- delmap({ 'n', 'v' }, 's')
--- windows
-delmap('n', '<C-h>')
-delmap('n', '<C-j>')
-delmap('n', '<C-k>')
-delmap('n', '<C-l>')
--- map('n', '<leader>-', '<C-W>s', { desc = 'Split Window Below', remap = true })
--- map('n', '<leader>|', '<C-W>v', { desc = 'Split Window Right', remap = true })
--- map('n', '<leader>wd', '<C-W>c', { desc = 'Delete Window', remap = true })
 -- Snacks.toggle.zoom():map("<leader>wm"):map("<leader>uZ")
 -- Snacks.toggle.zen():map("<leader>uz")
 
@@ -257,4 +243,5 @@ delmap('n', '<leader><tab>f')
 delmap('n', '<leader><tab><tab>')
 delmap('n', '<leader><tab>]')
 delmap('n', '<leader><tab>d')
-delmap('n', '<leader><tab>[')
+-- a more convenient way to close a buffer
+-- vim.keymap.set("n", "<leader>bc", function())

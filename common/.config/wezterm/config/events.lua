@@ -1,4 +1,6 @@
+---@type Wezterm
 local wezterm = require("wezterm")
+
 local nerdfonts = wezterm.nerdfonts
 local functions = require("utils.functions")
 local workspaces = require("utils.workspaces")
@@ -27,6 +29,9 @@ function M.setup()
 	wezterm.on("update-status", M.update_status)
 	wezterm.on("format-tab-title", M.format_tab_title)
 	wezterm.on("gui-startup", M.gui_startup)
+	wezterm.on("show-workspace-launcher", function()
+		workspaces.show_workspace_launcher()
+	end)
 
 	-- Copy operations
 	wezterm.on("copy-buffer-from-pane", M.copy_buffer)

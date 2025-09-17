@@ -81,6 +81,7 @@ local function split_nav(resize_or_move, key, direction)
 		or _smart_splits_wezterm_config.modifiers.move
 	local wezterm_modifier = type(modifier) == "table" and modifier.wezterm or modifier
 	local neovim_modifier = type(modifier) == "table" and modifier.neovim or modifier
+	logger.info("[smart-splits.nvim]: Wezterm mod: " .. wezterm_modifier .. " Nvim mod: " .. neovim_modifier)
 	return {
 		key = key,
 		mods = wezterm_modifier,
