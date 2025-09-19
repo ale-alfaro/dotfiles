@@ -7,7 +7,7 @@ return {
     },
     -- stylua: ignore
     keys = {
-      {"<leader>,", false}, -- function() Snacks.picker.buffers() end, desc = "Buffers" },
+      {"<leader>,", function() Snacks.picker.buffers() end, desc = "Buffers" },
       { "<leader>/", LazyVim.pick("grep", { hidden = true }), desc = "Grep (Root Dir)" },
       { "<leader>:",  false },--function() Snacks.picker.command_history() end, desc = "Command History" },
       { "<leader><space>", false},--LazyVim.pick("files"), desc = "Find Files (Root Dir)" },
@@ -62,13 +62,44 @@ return {
   },
   {
     'folke/flash.nvim',
-    enabled = false,
+    -- enabled = false,
+    vscode = false,
     keys = {
       { 's', mode = { 'n', 'x', 'o' }, false },
-      { 'S', mode = { 'n', 'o', 'x' }, false },
+      -- { 'S', mode = { 'n', 'o', 'x' }, false },
       { 'r', mode = 'o', false },
-      { 'R', mode = { 'o', 'x' }, false },
+
+      {
+        'S',
+        mode = { 'n', 'o', 'x' },
+        function()
+          require('flash').treesitter()
+        end,
+        desc = 'Flash Treesitter',
+      },
+      {
+        'R',
+        mode = { 'o', 'x' },
+        function()
+          require('flash').treesitter_search()
+        end,
+        desc = 'Treesitter Search',
+      },
       { '<c-s>', mode = { 'c' }, false },
+      -- Simulate nvim-treesitter incremental selection
+      {
+        '<c-space>',
+        mode = { 'n', 'o', 'x' },
+        function()
+          require('flash').treesitter {
+            actions = {
+              ['<c-space>'] = 'next',
+              ['<BS>'] = 'prev',
+            },
+          }
+        end,
+        desc = 'Treesitter Incremental Selection',
+      },
     },
   },
   {

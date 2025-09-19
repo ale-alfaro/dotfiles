@@ -30,22 +30,37 @@ parse_ncs_env() {
   done <<<"$nrf_env_output"
 }
 
-ncs_venv_setup() {
-  if [ ! $# -eq 2 ]; then
-    echo "Expects two arguments, the python interpreter and the requirements file"
-    return 1
-  fi
-  if [[ -d ".venv" ]]; then
-    VIRTUAL_ENV="$(pwd)/.venv"
-  fi
-  if [[ -z $VIRTUAL_ENV || ! -d $VIRTUAL_ENV ]]; then
-    uv venv --python "$1"
-    VIRTUAL_ENV="$(pwd)/.venv"
-  fi
-  PATH_add "$VIRTUAL_ENV/bin"
-  export UV_ACTIVE=1 # or VENV_ACTIVE=1
-  export VIRTUAL_ENV
-  pip -qq install -r "$2/pip-packages/requirements.txt"
+layout_ncs_full() {
+  local ncs_version
+  ncs_version="${1:-v3.1.0}"
+  echo "Using NCS version $ncs_version"
+  local nrf_env
+  nrf_env="$($NRFUTIL sdk-manager toolchain env --as-script --ncs-version "$ncs_version")"
+  parse_ncs_env "$nrf_env"
+
+  # --- Apply Fundamental Environment Variables FIRST ---
+  local paths_to_add
+  IFS=':' read -r -a paths_to_add <<<"${ncs_path_vars[PATH]}"
+  for ((i = ${#paths_to_add[@]} - 1; i >= 0; i--)); do
+    path_add PATH "${paths_to_add[i]}"
+  done
+  export NRFUTIL_HOME="${ncs_vars[NRFUTIL_HOME]}"
+  export ZEPHYR_TOOLCHAIN_VARIANT="${ncs_vars[ZEPHYR_TOOLCHAIN_VARIANT]}"
+  export ZEPHYR_SDK_INSTALL_DIR="${ncs_vars[ZEPHYR_SDK_INSTALL_DIR]}"
+
+  export NCS_SDK_ROOT="$HOME/ncs/sdk/$ncs_version"
+  export ZEPHYR_BASE="$NCS_SDK_ROOT/zephyr"
+
+  # --- Apply Optional Environment Variables for full NCS setup ---
+  local ld_paths_to_add
+  IFS=':' read -r -a ld_paths_to_add <<<"${ncs_path_vars[LD_LIBRARY_PATH]}"
+  for ((i = ${#ld_paths_to_add[@]} - 1; i >= 0; i--)); do
+    path_add LD_LIBRARY_PATH "${ld_paths_to_add[i]}"
+  done
+  export GIT_EXEC_PATH="${ncs_vars[GIT_EXEC_PATH]}"
+  export GIT_TEMPLATE_DIR="${ncs_vars[GIT_TEMPLATE_DIR]}"
+  export PYTHON_HOME="${ncs_vars[PYTHONHOME]}"
+  export PYTHON_PATH="${ncs_vars[PYTHONPATH]}"
 }
 
 layout_ncs() {
@@ -62,26 +77,12 @@ layout_ncs() {
   for ((i = ${#paths_to_add[@]} - 1; i >= 0; i--)); do
     path_add PATH "${paths_to_add[i]}"
   done
-  # local ld_paths_to_add
-  # IFS=':' read -r -a ld_paths_to_add <<<"${ncs_path_vars[LD_LIBRARY_PATH]}"
-  # for ((i = ${#ld_paths_to_add[@]} - 1; i >= 0; i--)); do
-  #     path_add LD_LIBRARY_PATH "${ld_paths_to_add[i]}"
-  # done
-  # export GIT_EXEC_PATH="${ncs_vars[GIT_EXEC_PATH]}"
-  # export GIT_TEMPLATE_DIR="${ncs_vars[GIT_TEMPLATE_DIR]}"
   export NRFUTIL_HOME="${ncs_vars[NRFUTIL_HOME]}"
   export ZEPHYR_TOOLCHAIN_VARIANT="${ncs_vars[ZEPHYR_TOOLCHAIN_VARIANT]}"
   export ZEPHYR_SDK_INSTALL_DIR="${ncs_vars[ZEPHYR_SDK_INSTALL_DIR]}"
 
-  # --- Now, Use the Tools ---
   export NCS_SDK_ROOT="$HOME/ncs/sdk/$ncs_version"
-  direnv_dir="$NCS_SDK_ROOT/.direnv"
-  local python_home="${ncs_vars[PYTHONHOME]}"
-  local python_exe=""
-  if [[ -n "$python_home" ]]; then
-    python_exe="$python_home/bin/python"
-  fi
-  ncs_venv_setup "$python_exe" "$direnv_dir"
+  export ZEPHYR_BASE="$NCS_SDK_ROOT/zephyr"
 }
 
 use_zephyr_main() {
@@ -97,4 +98,3 @@ use_zephyr_main() {
   . "$ZEPHYR_SDK_INSTALL_DIR/environment-setup-x86_64-pokysdk-linux"
   export ZEPHYR_BASE="$ZEPHYR_PROJECT_ROOT/zephyr"
 }
-

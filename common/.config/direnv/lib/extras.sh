@@ -60,8 +60,8 @@ alias_justfile_recipes() {
     alias "$recipe"='just --justfile "$justfile_recipes" --working-directory . "$recipe"'
   done
 }
-
-use_user_env_dir() {
+#Github, Gemini env vars
+use_developer_envs() {
   use_env_dir "$HOME/.config/direnv/envs"
 }
 
@@ -73,4 +73,3 @@ use_nvm() {
     nvm use "$node_version"
   fi
 }
-

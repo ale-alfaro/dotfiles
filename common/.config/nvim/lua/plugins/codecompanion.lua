@@ -165,9 +165,9 @@ return {
               end,
             },
             summary = {
-              create_summary_keymap = 'gcs',
-              browse_summaries_keymap = 'gbs',
-              preview_summary_keymap = 'gps',
+              create_summary_keymap = '<C-s>c',
+              browse_summaries_keymap = '<C-s>b',
+              preview_summary_keymap = '<C-s>p',
 
               generation_opts = {
                 context_size = 90000,
@@ -280,7 +280,7 @@ return {
       { '<leader>ai', mode = { 'n', 'v' }, '<cmd>CodeCompanionChat Add<cr>', desc = 'CodeCompanionChat Add' },
       { '<leader>ah', mode = { 'n', 'v' }, '<cmd>CodeCompanionHistory<cr>', desc = 'CodeCompanionHistory' },
       { '<leader>as', mode = { 'n', 'v' }, '<cmd>CodeCompanionSummaries<cr>', desc = 'Browse CodeCompanionSummaries' },
-      -- { '<leader>am', mode = { 'n', 'v' }, select_model, desc = 'Select Gemini Model' },
+      { '<leader>am', mode = { 'n', 'v' }, select_model, desc = 'Select Gemini Model' },
     },
   },
   {

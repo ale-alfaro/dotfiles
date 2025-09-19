@@ -69,7 +69,7 @@ function M.get_keys(alt_modifier)
 		-- Pane operations
 		{ key = "s", mods = alt_modifier, action = action.SplitVertical({ domain = "CurrentPaneDomain" }) },
 		{ key = "n", mods = alt_modifier, action = action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
-		{ key = "z", mods = "LEADER", action = action.TogglePaneZoomState },
+		-- { key = "Z", mods = "LEADER", action = action.TogglePaneZoomState },
 
 		-- Vim-style scrolling
 		{ key = "u", mods = "OPT", action = action.ScrollByPage(-0.5) }, -- Scroll up half page
@@ -118,10 +118,59 @@ function M.get_keys(alt_modifier)
 			action = wezterm.action.ShowLauncherArgs({ flags = "FUZZY|WORKSPACES" }),
 		},
 
+		-- ----------------------------------------------------------------
+		-- Workspaces
+		--
+		-- These are roughly equivalent to tmux sessions.
+		-- ----------------------------------------------------------------
+
+		-- Attach to muxer
+		{
+			key = "a",
+			mods = "LEADER",
+			action = action.AttachDomain("unix"),
+		},
+
+		-- Detach from muxer
+		{
+			key = "d",
+			mods = "LEADER",
+			action = action.DetachDomain({ DomainName = "unix" }),
+		},
+		-- Rename current session; analagous to command in tmux
+		{
+			key = "$",
+			mods = "LEADER|SHIFT",
+			action = action.PromptInputLine({
+				description = "Enter new name for session",
+				action = wezterm.action_callback(function(window, pane, line)
+					if line then
+						wezterm.mux.rename_workspace(window:mux_window():get_workspace(), line)
+					end
+				end),
+			}),
+		},
+
+		-- Session manager bindings
+		-- {
+		--     key = 's',
+		--     mods = 'LEADER|SHIFT',
+		--     action = act({ EmitEvent = "save_session" }),
+		-- },
+		-- {
+		--     key = 'L',
+		--     mods = 'LEADER|SHIFT',
+		--     action = act({ EmitEvent = "load_session" }),
+		-- },
+		-- {
+		--     key = 'R',
+		--     mods = 'LEADER|SHIFT',
+		--     action = act({ EmitEvent = "restore_session" }),
+		-- },
 		-- Utility
 		{ key = "/", mods = alt_modifier, action = action.Search({ CaseInSensitiveString = "" }) },
 		{ key = "c", mods = "LEADER", action = action.ShowLauncherArgs({ flags = "FUZZY|LAUNCH_MENU_ITEMS" }) },
-		{ key = "d", mods = "LEADER", action = action.ShowDebugOverlay },
+		{ key = "d", mods = "LEADER|SHIFT", action = action.ShowDebugOverlay },
 		{ key = "p", mods = alt_modifier, action = action.ActivateCommandPalette },
 		{ key = "v", mods = "LEADER", action = action.ActivateCopyMode },
 

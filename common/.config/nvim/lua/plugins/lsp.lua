@@ -1,8 +1,8 @@
 -- LSP Server to use for Python.
 -- Set to "basedpyright" to use basedpyright instead of pyright.
-vim.g.lazyvim_python_lsp = 'ruff'
+-- vim.g.lazyvim_python_lsp = 'pyright'
 -- Set to "ruff_lsp" to use the old LSP implementation version.
-vim.g.lazyvim_python_ruff = 'ruff'
+-- vim.g.lazyvim_python_ruff = 'ruff'
 
 return {
   {
@@ -35,28 +35,24 @@ return {
     dependencies = { 'mason-org/mason.nvim' },
     opts = {
       automatic_installation = true,
+      -- automatic_enable = {
+      --   exclude = {
+      --     'pyright',
+      --     'basedpyright',
+      --     'ruff',
+      --   },
+      -- },
     },
   },
   {
     'neovim/nvim-lspconfig',
     dependencies = {
       'mason-org/mason-lspconfig.nvim',
-      'WhoIsSethDaniel/mason-tool-installer.nvim',
     },
     opts = {
       servers = {
-        pyright = false,
-        clangd = {},
-        basedpyright = false,
-        ruff_lsp = false,
         ruff = {
-          cmd = { 'uvx', 'ruff', 'server' },
-          cmd_env = { RUFF_TRACE = 'messages' },
-          init_options = {
-            settings = {
-              logLevel = 'error',
-            },
-          },
+          settings = {},
           keys = {
             {
               '<leader>co',
@@ -64,24 +60,41 @@ return {
               desc = 'Organize Imports',
             },
           },
-        }, -- ruff
-
-        vectorcode_server = {
-          -- cmd = { 'vectorcode-server' },
-          -- root_dir = vim.fs.root(0, { '.vectorcode', '.git', '.stylua.toml' }),
         },
-      }, -- servers
+        pyright = {
+          settings = {
+            pyright = {
+              disableOrganizeImports = true,
+              typeCheckingMode = 'basic',
+            },
+            python = {
+              analysis = {
+                diagnosticSeverityOverrides = {
+                  reportUnusedExpression = 'none',
+                },
+                autoSearchPaths = true,
+                diagnosticMode = 'openFilesOnly',
+                useLibraryCodeForTypes = true,
+              },
+            },
+          },
+        },
+        vectorcode = {
+          -- root_dir = vim.fs.root(0, { '.vectorcode', '.git', '.stylua.toml' }),
+          root_dir = vim.fs.root(0, { '.vectorcode' }),
+        },
+      },
     },
   },
+  { import = 'lazyvim.plugins.extras.lang.python' },
   {
     'linux-cultist/venv-selector.nvim',
     branch = 'regexp',
     cmd = 'VenvSelect',
     dependencies = {
       'neovim/nvim-lspconfig',
-      { 'nvim-telescope/telescope.nvim', branch = '0.1.x', dependencies = { 'nvim-lua/plenary.nvim' } }, -- optional: you can also use fzf-lua, snacks, mini-pick instead.
     },
-    ft = 'python', -- Load when opening Python files
+    -- ft = 'python', -- Load when opening Python files
     keys = {
       { '<leader>cv', '<cmd>VenvSelect<cr>', desc = 'Select VirtualEnv', ft = 'python' },
     },

@@ -2,6 +2,23 @@
 
 ---@class SmartSplitsMultiplexer
 local mux = require('smart-splits.mux').get()
+
+local Direction = require('smart-splits.types').Direction
+--
+-- local dir_keys_wezterm = {
+--   [Direction.left] = 'Left',
+--   [Direction.right] = 'Right',
+--   [Direction.down] = 'Down',
+--   [Direction.up] = 'Up',
+-- }
+
+local dir_keys_wezterm_splits = {
+  [Direction.left] = '--left',
+  [Direction.right] = '--right',
+  [Direction.up] = '--top',
+  [Direction.down] = '--bottom',
+}
+
 -- mux matches the following type annotations
 local wezterm_cli_path = 'wezterm'
 
@@ -45,6 +62,25 @@ local function get_workspaces()
   return workspaces
 end
 
+---@class wezterm_spanw_args
+---@field cwd string
+---@field percentage number
+---@field program string
+
+function M.split_pane(direction, cwd, size, program_args)
+  local args = { 'split-pane', dir_keys_wezterm_splits[direction], '--cwd', cwd }
+  if size then
+    table.insert(args, '--percent')
+    table.insert(args, size)
+  end
+  if program_args and type(program_args) == 'table' and #program_args > 0 then
+    table.insert(args, '--')
+    vim.list_extend(args, program_args)
+  end
+  local ok, _ = pcall(wezterm_exec, args)
+  return ok
+end
+
 function M.spawn_terminal()
   local bufname = vim.api.nvim_buf_get_name(0)
   local cwd
@@ -53,8 +89,14 @@ function M.spawn_terminal()
   else
     cwd = vim.fn.expand '%:p:h'
   end
-  local args = { 'split-pane', '--bottom', '--cwd', cwd }
-  local ok, _ = pcall(wezterm_exec, args)
+  local ok = M.split_pane(Direction.down, cwd, 30)
+  return ok
+end
+
+function M.spawn_nvim_inst(direction, file)
+  local cwd = vim.fn.fnamemodify(file, ':h')
+  local program_args = { 'nvim', file }
+  local ok = M.split_pane(direction, cwd, nil, program_args)
   return ok
 end
 

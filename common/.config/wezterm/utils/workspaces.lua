@@ -1,5 +1,5 @@
 local M = {}
-
+---@type Wezterm
 local wezterm = require("wezterm")
 local action = wezterm.action
 -- Workspace management
@@ -21,10 +21,6 @@ function M.switch_previous_workspace(window, pane)
 	M.switch_workspace(window, pane, previous)
 end
 
-local other_projects = { wezterm.home_dir, "~/dotfiles", "~/ncs/sdk/v3.1.0", "~/zephyrproject/zephyr" }
-local work_project_dir = wezterm.home_dir .. "/sibel"
-local personal_project_dir = wezterm.home_dir .. "/GeekieStuff"
-
 -- Default workspaces configuration
 M.config = {
 	default = "dotfiles",
@@ -39,7 +35,7 @@ M.config = {
 			path = os.getenv("HOME") .. "/dotfiles",
 		},
 		{
-			name = "NCS v3.1.0",
+			name = "NCS",
 			path = os.getenv("HOME") .. "/ncs/sdk/v3.1.0",
 			-- tabs = { "frontend", "backend", "docs" }
 		},
@@ -62,6 +58,7 @@ function M.add_project_dirs(project_dir)
 		})
 	end
 end
+
 function M.choose_project()
 	local choices = {}
 	for _, value in ipairs(M.config.spaces) do
@@ -91,39 +88,19 @@ function M.choose_project()
 		fuzzy = true,
 		fuzzy_description = "Fuzzy find and/or make a workspace",
 	})
-	-- return wezterm.action.InputSelector {
-	--   title = "Projects",
-	--   choices = choices,
-	--   fuzzy = true,
-	--   action = wezterm.action_callback(function(child_window, child_pane, id, label)
-	--     -- "label" may be empty if nothing was selected. Don't bother doing anything
-	--     -- when that happens.
-	--     if not label then return end
-	--
-	--     -- The SwitchToWorkspace action will switch us to a workspace if it already exists,
-	--     -- otherwise it will create it for us.
-	--     child_window:perform_action(wezterm.action.SwitchToWorkspace {
-	--       -- We'll give our new workspace a nice name, like the last path segment
-	--       -- of the directory we're opening up.
-	--       name = label:match("([^/]+)$"),
-	--       -- Here's the meat. We'll spawn a new terminal with the current working
-	--       -- directory set to the directory that was picked.
-	--       spawn = { cwd = label },
-	--     }, child_pane)
-	--   end),
-	-- }
 end
 
 function M.show_workspace_launcher()
-	local window = wezterm.mux.get_active_window()
-	if not window then
-		return
-	end
-	local pane = window:active_pane()
-	if not pane then
-		return
-	end
-	window:perform_action(M.choose_project(), pane)
+	M.choose_project()
+	-- local windows = wezterm.mux.all_windows()
+	-- if not window then
+	-- 	return
+	-- end
+	-- local pane = window:active_pane()
+	-- if not pane then
+	-- 	return
+	-- end
+	-- window:perform_action(M.choose_project(), pane)
 end
 
 return M
