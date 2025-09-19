@@ -1,6 +1,6 @@
 {
   "embedding_function": "GoogleGenerativeAiEmbeddingFunction",
   "embedding_params": {
-    "api_key": "AIzaSyAfiEzXF5ya2_YVBPJ-tnac16fcO-J2yvA"
+    "api_key": "GEMINI_API_KEY"
   }
 }
