@@ -136,17 +136,19 @@ return {
         pattern = 'MiniFilesBufferCreate',
         callback = function(args)
           local buf_id = args.data.buf_id
+          local filepicker_context = require 'custom.ai.filepicker_context'
 
-          vim.keymap.set('n', opts.mappings and opts.mappings.toggle_hidden or '.', toggle_dotfiles, { buffer = buf_id, desc = 'Toggle hidden files' })
+          vim.keymap.set('n', 'ga', filepicker_context.add_context_from_explorer, { buffer = buf_id, desc = 'CodeCompanion: Add to Chat' })
+          vim.keymap.set('x', 'ga', filepicker_context.add_context_from_explorer_visual, { buffer = buf_id, desc = 'CodeCompanion: Add to Chat (Visual)' })
+          vim.keymap.set('n', '.', toggle_dotfiles, { buffer = buf_id, desc = 'Toggle hidden files' })
 
           vim.keymap.set('n', 'gy', yank_path, { buffer = buf_id, desc = 'Yank path' })
-          vim.keymap.set('n', 'gcd', files_set_cwd, { buffer = buf_id, desc = 'Set cwd' })
           vim.keymap.set('n', 'gX', ui_open, { buffer = buf_id, desc = 'OS open' })
 
-          map_split(buf_id, opts.mappings and opts.mappings.go_in_horizontal or '<C-w>s', 'horizontal', false)
-          map_split(buf_id, opts.mappings and opts.mappings.go_in_vertical or '<C-w>v', 'vertical', false)
-          map_split(buf_id, opts.mappings and opts.mappings.go_in_horizontal_plus or '<C-w>S', 'horizontal', true)
-          map_split(buf_id, opts.mappings and opts.mappings.go_in_vertical_plus or '<C-w>V', 'vertical', true)
+          map_split(buf_id, '<C-w>s', 'horizontal', false)
+          map_split(buf_id, '<C-w>v', 'vertical', false)
+          -- map_split(buf_id, opts.mappings and opts.mappings.go_in_horizontal_plus or '<C-w>S', 'horizontal', true)
+          -- map_split(buf_id, opts.mappings and opts.mappings.go_in_vertical_plus or '<C-w>V', 'vertical', true)
         end,
       })
 

@@ -61,4 +61,3 @@ return function(file)
 
   return { content = content, meta = (#included_files > 0) and { included_files = included_files } or nil }
 end
-

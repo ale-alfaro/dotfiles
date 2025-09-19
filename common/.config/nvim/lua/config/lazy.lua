@@ -21,24 +21,6 @@ require('lazy').setup {
     -- import/override with your plugins
     { import = 'plugins' },
     { import = 'custom' },
-    --
-    -- -- LSP Plugins
-    -- require 'custom.ai_chatbuffer_enhance',
-    -- require 'lsp.go',
-    -- { import = 'lsp.plugins' },
-    --
-    -- -- Git Plugins
-    -- { import = 'git.plugins' },
-    --
-    -- -- Avante.nvim for AI chat and agentic features
-    -- -- require 'ai.plugins.avante',
-    -- --
-    -- -- Aesthetics Plugins
-    -- require 'aesthetics.colorscheme',
-    -- { import = 'aesthetics.plugins' },
-    --
-    -- -- Other Plugins
-    -- { import = 'utils.plugins' },
   },
 
   -- dev = {

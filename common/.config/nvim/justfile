@@ -10,6 +10,8 @@ check-health:
     nvim --headless -c "checkhealth" -c "qall"
 
 # Format all Lua files with stylua
+format:
+    stylua .
 
 # Run both configuration check and health check
 check-all: check-config check-health

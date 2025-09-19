@@ -11,7 +11,7 @@ return {
       { "<leader>/", LazyVim.pick("grep", { hidden = true }), desc = "Grep (Root Dir)" },
       { "<leader>:",  false },--function() Snacks.picker.command_history() end, desc = "Command History" },
       { "<leader><space>", false},--LazyVim.pick("files"), desc = "Find Files (Root Dir)" },
-      -- { "<leader>n", function() Snacks.picker.notifications() end, desc = "Notification History" },
+      { "<leader>snn", function() Snacks.picker.notifications() end, desc = "Notification History" },
       -- -- find
       -- { "<leader>fb", function() Snacks.picker.buffers() end, desc = "Buffers" },
       -- { "<leader>fB", function() Snacks.picker.buffers({ hidden = true, nofile = true }) end, desc = "Buffers (all)" },
@@ -107,14 +107,17 @@ return {
     enabled = false,
   },
   {
+    'folke/noice.nvim',
+  -- stylua: ignore
+  keys = {
+    -- { "<leader>snl", function() require("noice").cmd("last") end, desc = "Noice Last Message" },
+    -- { "<leader>snh", function() require("noice").cmd("history") end, desc = "Noice History" },
+    { "<leader>n", function() require("noice").cmd("all") end, desc = "Noice All" },
+  },
+  },
+  {
     'folke/persistence.nvim',
-    -- stylua: ignore
-    -- keys = {
-    --   { "<leader>qs", function() require("persistence").load() end, desc = "Restore Session" },
-    --   { "<leader>qS", function() require("persistence").select() end,desc = "Select Session" },
-    --   { "<leader>ql", function() require("persistence").load({ last = true }) end, desc = "Restore Last Session" },
-    --   { "<leader>qd", function() require("persistence").stop() end, desc = "Don't Save Current Session" },
-    -- },
+    enabled = false,
   },
   {
     'akinsho/bufferline.nvim',

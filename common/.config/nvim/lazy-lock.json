@@ -14,6 +14,7 @@
   "clangd_extensions.nvim": { "branch": "main", "commit": "b67cc417d9020fb4b83d46662351b4d16894905e" },
   "cmake-tools.nvim": { "branch": "master", "commit": "88e07c6bff838a5bda2f461e9c1122b79ff0829f" },
   "codecompanion-history.nvim": { "branch": "main", "commit": "eb99d256352144cf3b6a1c45608ec25544a0813d" },
+  "codecompanion-spinners.nvim": { "branch": "master", "commit": "674e0cdc30dcfa7babc8a24d3da8c84f5c0762f5" },
   "codecompanion.nvim": { "branch": "main", "commit": "0297731c8c0468f7172744d172e70766bfc2802c" },
   "colorful-menu.nvim": { "branch": "master", "commit": "bc3e82609f2fcf7dad7ca87c20e65e51d5d9d87c" },
   "conform.nvim": { "branch": "master", "commit": "b4aab989db276993ea5dcb78872be494ce546521" },

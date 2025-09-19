@@ -8,7 +8,7 @@ return {
   },
   config = function()
     local opts = {
-      save_file = vim.fn.stdpath('data') .. '/bookmarks.db',
+      save_file = vim.fn.stdpath 'data' .. '/bookmarks.db',
       keywords = {
         ['@t'] = '󰃅', -- mark annotation startswith @t ,signs this icon as `Todo`
         ['@w'] = '', -- mark annotation startswith @w ,signs this icon as `Warn`

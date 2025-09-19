@@ -3,23 +3,6 @@
 ---@module "vectorcode"
 ---@module "codecompanion"
 
-local available_models = {
-  'gemini-2.5-flash',
-  'gemini-2.5-pro',
-}
-local current_model = available_models[1]
-
-local function select_model()
-  Snacks.picker.select(available_models, {
-    prompt = 'Select  Model:',
-  }, function(choice)
-    if choice then
-      current_model = choice
-      vim.notify('Selected model: ' .. current_model)
-    end
-  end)
-end
-
 ---@type LazySpec[]
 return {
   {
@@ -30,15 +13,13 @@ return {
       'nvim-lua/plenary.nvim',
       'nvim-treesitter/nvim-treesitter',
       'Davidyz/VectorCode',
-      -- 'ibhagwan/fzf-lua',
-      {
-        'ravitemer/codecompanion-history.nvim',
-        -- dir = "~/git/codecompanion-history.nvim/",
-      },
-      -- {
+
+      'lalitmee/codecompanion-spinners.nvim', -- Install the spinners extension
+      -- 📦 Optional dependencies for certain spinner styles:
+      'folke/snacks.nvim',
+      'nvim-lualine/lualine.nvim',
+      'ravitemer/codecompanion-history.nvim',
       --   'Davidyz/codecompanion-dap.nvim',
-      --   -- dir = "~/git/codecompanion-dap.nvim/",
-      -- },
     },
     cmd = {
       'CodeCompanion',
@@ -48,18 +29,19 @@ return {
     },
     opts = function(plugin, opts)
       opts = opts or {}
-      opts.opts = opts.opts or {}
-      opts.opts.system_prompt = require 'custom.prompts.sysprompt'
-      -- opts.opts = { log_level = "DEBUG" }
       opts.display = {
         action_palette = { provider = 'snacks' },
         chat = {
-          show_header_separator = false,
-          window = { sticky = true },
+          show_settings = true,
+          show_header_separator = true,
+          auto_scroll = true,
+          show_token_count = true,
+          -- window = { sticky = true },
         },
       }
       opts.adapters = {
         acp = {
+          ---@type CodeCompanion.ACPAdapter
           gemini_cli = function()
             return require('codecompanion.adapters').extend('gemini_cli', {
               commands = {
@@ -69,7 +51,7 @@ return {
                   '-m',
                   'gemini-2.5-pro',
                 },
-                ['Gemini 2.5 Flash'] = {
+                ['default'] = {
                   'gemini',
                   '--experimental-acp',
                   '-m',
@@ -81,83 +63,74 @@ return {
                 -- mcpServers = require('mcphub').get_hub_instance():get_servers(),
                 mcpServers = {},
                 timeout = 20000, -- 20 seconds
-                commands = 'Gemini 2.5 Flash',
               },
               env = {
                 GEMINI_API_KEY = vim.fn.expand '$GEMINI_API_KEY',
-                PATH = vim.fn.trim(vim.fn.system 'uv tool dir') .. '/vectorcode/bin:' .. vim.fn.expand '$PATH',
+                -- PATH = vim.fn.trim(vim.fn.system 'uv tool dir') .. '/vectorcode/bin:' .. vim.fn.expand '$PATH',
               },
-              -- defaults = {
-              --   auth_method = 'oauth-personal',
-              --   mcpServers = require('mcphub').get_hub_instance():get_servers(),
-              --   timeout = 20000, -- 20 seconds
-              -- },
             })
           end,
         },
-        --   http = {
-        --     ['Gemini'] = function()
-        --       return require('codecompanion.adapters').extend('gemini', {
-        --         name = 'Gemini',
-        --         schema = { model = { default = 'gemini-2.5-flash' } },
-        --       })
-        --     end,
-        --     ['LlamaCPP'] = function()
-        --       return require('codecompanion.adapters').extend('openai_compatible', {
-        --         env = {
-        --           url = 'http://127.0.0.1:8080',
-        --           api_key = 'TERM',
-        --           chat_url = '/v1/chat/completions',
-        --         },
-        --         schema = { cache_prompt = { default = true, mapping = 'parameters' } },
-        --       })
-        --     end,
-        --     ['Ollama'] = function()
-        --       return require('codecompanion.adapters').extend('ollama', {
-        --         env = {
-        --           url = os.getenv 'OLLAMA_HOST',
-        --           api_key = 'TERM',
-        --         },
-        --         name = 'Ollama',
-        --         schema = {
-        --           num_ctx = { default = 64000 },
-        --           -- model = { default = {"qwen3:8b-q4_K_M-dynamic-thinking"} },
-        --           -- think = { default = true },
-        --         },
-        --       })
-        --     end,
-        --   },
       }
+      opts.strategies = {
+        chat = {
+          adapter = 'gemini_cli',
+          roles = {
+            ---@type string|fun(adapter: CodeCompanion.HTTPAdapter|CodeCompanion.ACPAdapter): string
+            llm = function(adapter)
+              if adapter.model then
+                return string.format('%s (%s)', adapter.formatted_name, adapter.model.name)
+              else
+                return adapter.formatted_name
+              end
+            end,
+          },
+          opts = {
+            ---@type string|fun(path: string)
+            system_prompt = require 'custom.ai.prompts.sysprompt',
+          }, -- opts
+          keymaps = {
+            close = {
+              modes = { n = 'q', i = '<C-q>' },
+            },
+            send = {
+              modes = { n = '<C-s>', i = '<C-s>' },
+            },
+            change_model = {
+              modes = { n = 'gm' },
+              name = 'Change Model',
+              callback = require('custom.ai.adapters').change_model_callback,
+              description = 'Change the model for the current chat',
+            },
+          }, -- keymaps
+        },
+        inline = {
+          adapter = 'gemini_cli',
+        },
+      }
+
+      vim.cmd [[cab cc CodeCompanion]]
       opts.extensions = {
         -- dap = {
         --   enabled = true,
         --   opts = { tool_opts = {}, interval_ms = 1 },
         -- },
-        mcphub = {
-          callback = 'mcphub.extensions.codecompanion',
-          opts = {
-            -- MCP Tools
-            make_tools = true, -- Make individual tools (@server__tool) and server groups (@server) from MCP servers
-            show_server_tools_in_chat = true, -- Show individual tools in chat completion (when make_tools=true)
-            add_mcp_prefix_to_tool_names = false, -- Add mcp__ prefix (e.g `@mcp__github`, `@mcp__neovim__list_issues`)
-            show_result_in_chat = true, -- Show tool results directly in chat buffer
-            format_tool = nil, -- function(tool_name:string, tool: CodeCompanion.Agent.Tool) : string Function to format tool names to show in the chat buffer
-            -- MCP Resources
-            make_vars = true, -- Convert MCP resources to #variables for prompts
-            -- MCP Prompts
-            make_slash_commands = true, -- Add MCP prompts as /slash commands
-          },
-        },
         history = {
           enabled = true,
           opts = {
             keymap = 'gh',
             save_chat_keymap = 'sc',
             auto_save = true,
-            expiration_days = 0,
+            expiration_days = 7,
             picker = 'snacks',
-            auto_generate_title = true,
-            continue_last_chat = false,
+            picker_keymaps = {
+              rename = { n = '<C-r>', i = '<C-r>' },
+              delete = { n = '<C-x>', i = '<C-x>' },
+              duplicate = { n = '<C-y>', i = '<C-y>' },
+            },
+            ---Automatically generate titles for new chats
+            auto_generate_title = false,
+            continue_last_chat = true,
             delete_on_clearing_chat = false,
             title_generation_opts = {
               format_title = function(s)
@@ -192,10 +165,14 @@ return {
                 project_root = plugin.dir,
                 file_patterns = { 'lua/codecompanion/**.lua', 'doc/**/*.md' },
               },
-              -- ['Kitty Assistant'] = {
-              --   project_root = '/usr/share/doc/kitty/',
-              --   file_patterns = { '**/*.txt' },
-              -- },
+              ['Zephyr Assistant'] = {
+                project_root = '/home/alealfaro/ncs/sdk/v3.1.0/zephyr',
+                file_patterns = { '**/*.c*', '**/*.yml', '**/*.dts*', '**/*.cmake', '**/*.txt', '**/*.rst', '**/*.py' },
+              },
+              ['NCS Assistant'] = {
+                project_root = '/home/alealfaro/ncs/sdk/v3.1.0/nrf',
+                file_patterns = { '**/*.c*', '**/*.yml', '**/*.dts*', '**/*.cmake', '**/*.txt', '**/*.rst', '**/*.py' },
+              },
             },
             tool_group = { collapse = true },
             tool_opts = {
@@ -208,71 +185,25 @@ return {
                 default_num = { document = 5, chunk = 10 },
                 max_num = { document = 10, chunk = 20 },
                 chunk_mode = true,
-                summarise = {
-                  enabled = false,
-                  system_prompt = function(s)
-                    return s
-                  end,
-                  adapter = function()
-                    return require('codecompanion.adapters').extend('gemini_cli', {
-                      name = 'Summariser',
-                      schema = {
-                        model = { default = 'gemini-2.0-flash-lite' },
-                      },
-                      opts = { stream = false },
-                    })
-                  end,
-                  query_augmented = true,
-                },
               },
             },
           },
-        },
-      }
-      opts.strategies = {
-        chat = {
-          adapter = 'gemini_cli',
-          roles = {
-            ---@type string|fun(adapter: CodeCompanion.HTTPAdapter|CodeCompanion.ACPAdapter): string
-            llm = function(adapter)
-              if adapter.model then
-                return string.format('%s (%s)', adapter.formatted_name, adapter.model.name)
-              else
-                return adapter.formatted_name
-              end
-            end,
-          },
-          keymaps = {
-            close = {
-              modes = { n = 'q', i = '<C-q>' },
-            },
-            send = {
-              modes = { n = '<C-s>', i = '<C-s>' },
-              callback = function(chat)
-                vim.cmd 'stopinsert'
-                chat:apply_model(current_model)
-                chat:submit()
-                chat:add_buf_message { role = 'llm', content = '' }
-              end,
-            },
-          }, -- keymaps
-          tools = {
-            opts = {
-              -- default_tools = { "vectorcode_toolbox", "file_search", "read_file" },
+        }, -- vectorcode
+        spinner = {
+          enabled = true,
+          opts = {
+            style = 'native', -- Other options: "cursor-relative", "fidget", "snacks", "lualine", "heirline", "none"
+            content = {
+              thinking = { icon = '🤖', message = 'AI is thinking...', spacing = '  ' },
+              receiving = { icon = '📨', message = 'Receiving response...', spacing = '  ' },
+              tools_started = { icon = '🔧', message = 'Running tools...', spacing = '  ' },
+              diff_attached = { icon = '📋', message = 'Review changes', spacing = '  ' },
+              -- ... many more states
             },
           },
-        },
-        inline = {
-          adapter = 'Gemini 2.5 Flash',
-        },
-      }
-
-      opts.display = { chat = { show_references = false } }
+        }, -- spinner
+      } -- extensions
     end, -- opts
-
-    -- cond = function()
-    --   return require("_utils").no_vscode()
-    -- end,
     keys = {
       { '<leader>ar', mode = { 'n', 'v' }, '<cmd>CodeCompanionChat RefreshCache<cr>', desc = 'CodeCompanion RefreshCache' },
       { '<leader>aa', mode = { 'n', 'v' }, '<cmd>CodeCompanionActions<cr>', desc = 'CodeCompanion Actions' },
@@ -280,7 +211,6 @@ return {
       { '<leader>ai', mode = { 'n', 'v' }, '<cmd>CodeCompanionChat Add<cr>', desc = 'CodeCompanionChat Add' },
       { '<leader>ah', mode = { 'n', 'v' }, '<cmd>CodeCompanionHistory<cr>', desc = 'CodeCompanionHistory' },
       { '<leader>as', mode = { 'n', 'v' }, '<cmd>CodeCompanionSummaries<cr>', desc = 'Browse CodeCompanionSummaries' },
-      { '<leader>am', mode = { 'n', 'v' }, select_model, desc = 'Select Gemini Model' },
     },
   },
   {
@@ -341,14 +271,4 @@ return {
       return vim.fn.executable 'vectorcode' == 1
     end,
   }, -- vectorcode
-  {
-    'ravitemer/mcphub.nvim',
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-    },
-    build = 'npm install -g mcp-hub@latest', -- Installs `mcp-hub` node binary globally
-    config = function()
-      require('mcphub').setup()
-    end,
-  }, -- mcphub
 }
