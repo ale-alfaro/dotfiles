@@ -11,16 +11,18 @@ export FCEDIT=nvim
 if [[ "$OSTYPE" == "darwin"* ]]; then
   export BROWSER=arc
   export SDKROOT="$(xcrun --show-sdk-path)"
+  export NCS_SDK_HOME="/opt/nordic/ncs"
 else
   export BROWSER=zen-browser
   # SSH agent started by systemd automatically. Only need to set the socket
   if [[ -z "${SSH_CONNECTION}" ]]; then
     export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
   fi
-  export PICO_HOME=$HOME/.pico-sdk
-  export PICO_SDK_PATH=$PICO_HOME/sdk
-  export PICO_EXAMPLES_PATH=$PICO_HOME/examples
-  export PICO_OPENOCD_PATH=$PICO_HOME/openocd
+  # export PICO_HOME=$HOME/.pico-sdk
+  # export PICO_SDK_PATH=$PICO_HOME/sdk
+  # export PICO_EXAMPLES_PATH=$PICO_HOME/examples
+  # export PICO_OPENOCD_PATH=$PICO_HOME/openocd
+  export NCS_SDK_HOME="$HOME/ncs/sdk"
 fi
 
 export TERMINAL=wezterm

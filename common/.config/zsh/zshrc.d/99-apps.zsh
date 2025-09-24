@@ -62,13 +62,20 @@ fi
 # ---- Wezterm (terminal emulator) ---
 . $ZDOTDIR/shell_integrations/wezterm.sh
 
-# Initialize Node Version manager
 if [[ "$OSTYPE" == "darwin"* ]]; then
+
+  # Initialize Node Version manager
   export NVM_DIR=/Users/alealfaro/.nvm
   [ -s /opt/homebrew/opt/nvm/nvm.sh ] && \. /opt/homebrew/opt/nvm/nvm.sh                                       # This loads nvm
   [ -s /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm ] && \. /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm # This loads nvm bash_completion
+
+  #Set OBSIDIAN_HOME to iCloud directory in MacOS
+  export OBSIDIAN_HOME="/Users/alealfaro/Library/Mobile Documents/iCloud~md~obsidian/Documents"
 else
+
   . /usr/share/nvm/init-nvm.sh
+
+  export OBSIDIAN_HOME="/home/alealfaro/Documents/Obsidian"
 fi
 
 eval "$(uv generate-shell-completion zsh)"

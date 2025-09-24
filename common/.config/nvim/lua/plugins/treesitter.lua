@@ -33,31 +33,35 @@ return {
   {
     'nvim-mini/mini.ai',
   },
+
   {
     'nvim-treesitter/nvim-treesitter',
-    opts = {
-      ensure_installed = {
-        'bash',
-        'c',
-        'cpp',
-        'cmake',
-        'diff',
-        'html',
-        'kconfig',
-        'lua',
-        'luadoc',
-        'markdown',
-        'markdown_inline',
-        'query',
-        'vim',
-        'vimdoc',
-        'just',
-        'json5',
-        'ninja',
-        'toml',
-        'rst',
-      },
-    },
+    opts = function(_, opts)
+      if type(opts.ensure_installed) == 'table' then
+        -- add typescript filetypes to treesitter parsers
+        vim.list_extend(opts.ensure_installed, {
+          'bash',
+          'c',
+          'cpp',
+          'cmake',
+          'diff',
+          'html',
+          'kconfig',
+          'lua',
+          'luadoc',
+          'markdown',
+          'markdown_inline',
+          'query',
+          'vim',
+          'vimdoc',
+          'just',
+          'json5',
+          'ninja',
+          'toml',
+          'rst',
+        })
+      end
+    end,
   },
   { 'nvim-treesitter/nvim-treesitter-textobjects' },
 }

@@ -42,8 +42,7 @@ layout_uv_project() {
 
   if [[ ! -f "$(pwd)/pyproject.toml" ]]; then
     log_status "No uv project exists. Executing uv init --no-readme to create one."
-    uv init --no-readme
-    rm main.py
+    uv init --bare
   fi
 
   if [[ -z $VIRTUAL_ENV || ! -d $VIRTUAL_ENV ]]; then

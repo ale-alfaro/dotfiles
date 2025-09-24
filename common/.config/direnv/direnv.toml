@@ -1,5 +1,5 @@
-[global]
-bash_path = "/bin/bash"
+# [global]
+# bash_path = "/bin/bash"
 # Load .env files in addition to .envrc files
 load_dotenv = true
 
@@ -16,4 +16,4 @@ warn_timeout = "10s"
 # Whitelist specific directory hierarchies or specific directories to
 # avoid having to run `direnv allow` every time. This is useful for
 # directories that you trust, such as your own projects.
-prefix = [ "/home/alealfaro/GeekieStuff" , "/home/alealfaro/dotfiles", "/home/alealfaro/sibel/eng" ]
+prefix = ["~/GeekieStuff", "~/dotfiles", "~/sibel/eng"]

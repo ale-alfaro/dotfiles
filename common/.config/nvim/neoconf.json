@@ -15,7 +15,7 @@
       },
       "jsonls": {
         "enabled": true
-      }
+      },
     }
   },
   "lspconfig": {
@@ -26,6 +26,6 @@
       "python.analysis.typeCheckingMode": "basic",
       "python.analysis.diagnosticMode": "openFilesOnly"
     },
-    "jsonls": {}
+    "vectorcode_server": false
   }
 }

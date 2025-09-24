@@ -4,32 +4,39 @@ vim.g.lazyvim_python_lsp = 'pyright'
 -- Set to "ruff_lsp" to use the old LSP implementation version.
 vim.g.lazyvim_python_ruff = 'ruff'
 
----@module "mason-lspconfig"
 return {
   {
+
     'mason-org/mason.nvim',
-  },
-  {
-    'mason-org/mason-lspconfig.nvim',
-    dependencies = { 'mason-org/mason.nvim' },
-    opts = {
-      automatic_installation = false,
-    },
+    cmd = 'Mason',
+    keys = { { '<leader>cm', '<cmd>Mason<cr>', desc = 'Mason' } },
+    build = ':MasonUpdate',
+    ---@param opts MasonSettings | {ensure_installed: string[]}
+    config = function(_, opts)
+      require('mason').setup(opts)
+    end,
   },
   {
     'neovim/nvim-lspconfig',
+    dependencies = {
+      {
+        'folke/neoconf.nvim',
+        cmd = 'Neoconf',
+        opts = {},
+      },
+    },
     opts = {
+      -- listing the server here will tell mason to install it, and it will be enabled for its matching filetypes
       servers = {
+        pyright = {},
         jsonls = {},
         lua_ls = {},
+        vectorcode_server = {
+          enabled = false,
+        },
       },
     },
   },
-  -- { import = 'lazyvim.plugins.extras.lang.python' },
-  -- { import = 'lazyvim.plugins.extras.lang.clangd' },
-  -- { import = 'lazyvim.plugins.extras.lang.cmake' },
-  -- { import = 'lazyvim.plugins.extras.lang.json' },
-  -- { import = 'lazyvim.plugins.extras.lang.yaml' },
   {
     'linux-cultist/venv-selector.nvim',
     branch = 'regexp',

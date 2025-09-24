@@ -2,6 +2,11 @@
 
 NRFUTIL="/usr/local/bin/nrfutil"
 
+fatal() {
+  echo '[FATAL]' "$@" >&2
+  exit 1
+}
+
 # @description Parses the output of the nrfutil toolchain env command
 # @arg $1 string The output of the nrfutil command
 # @glocal ncs_vars Associative array containing the parsed variables
@@ -80,8 +85,8 @@ use_ncs() {
   export NRFUTIL_HOME="${ncs_vars[NRFUTIL_HOME]}"
   export ZEPHYR_TOOLCHAIN_VARIANT="${ncs_vars[ZEPHYR_TOOLCHAIN_VARIANT]}"
   export ZEPHYR_SDK_INSTALL_DIR="${ncs_vars[ZEPHYR_SDK_INSTALL_DIR]}"
-
-  export NCS_SDK_ROOT="$HOME/ncs/sdk/$ncs_version"
+  if [[ ! -d "$NCS_SDK_HOME" ]]; then fatal "NCS_SDK_HOME ENV VAR MUST BE SET"; fi
+  export NCS_SDK_ROOT="$NCS_SDK_HOME/$ncs_version"
   export ZEPHYR_BASE="$NCS_SDK_ROOT/zephyr"
 }
 
@@ -93,7 +98,7 @@ use_zephyr() {
   export ZEPHYR_TOOLCHAIN_VARIANT=zephyr
   export ZEPHYR_PROJECT_ROOT=~/zephyrproject
   export ZEPHYR_SDK_INSTALL_DIR="$ZEPHYR_PROJECT_ROOT/toolchains/zephyr-sdk-$zephyr_version"
-  if [ ! -d "$ZEPHYR_SDK_INSTALL_DIR" ]; then
+  if [[ ! -d "$ZEPHYR_SDK_INSTALL_DIR" ]]; then
     echo "Zephyr SDK toolchain is not installed! Please run install_zephyr_sdk_toolchain <VERSION> first!"
     return
   fi
@@ -104,10 +109,16 @@ use_zephyr() {
 
 layout_uv_zephyr() {
   layout uv_project
-  uv add west && uv sync
-  uv run west packages pip | awk '{print $2}' | xargs uv pip compile -q -o pylock.toml
-  uv pip sync --quiet pylock.toml
-
+  if ! has west; then
+    uv add west
+  fi
+  if [[ ! -f "pylock.toml" ]]; then
+    fd "requirements.txt" "$ZEPHYR_BASE" -X uv pip compile -q -o pylock.toml
+    uv pip sync --quiet pylock.toml
+  fi
+  # uv run west packages pip | awk '{print $2}' | xargs uv pip compile -q -o pylock.toml
+  uv add ninja
+  uv add pyelftools
 }
 
 #Main Functions to use for setting up an environment:
