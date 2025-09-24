@@ -13,23 +13,11 @@ return {
     ---@module 'blink.cmp'
     ---@type blink.cmp.Config
     opts = {
-      trigger = {
-        prefetch_on_insert = true,
-        show_on_keyword = true,
-        show_on_trigger_character = true,
-        show_in_snippet = true,
-        show_on_insert_on_trigger_character = true,
-        show_on_accept_on_trigger_character = true,
-      },
-      list = {
-        selection = {
-          auto_insert = false,
-          preselect = function(ctx)
-            return ctx.mode ~= 'cmdline' and not require('blink.cmp').snippet_active { direction = 1 }
-          end,
-        },
-      },
 
+      keymap = {
+        preset = 'enter',
+        ['<C-y>'] = { 'select_and_accept' },
+      },
       appearance = {
         -- sets the fallback highlight groups to nvim-cmp's highlight groups
         -- useful for when your theme doesn't support blink.cmp
@@ -59,8 +47,24 @@ return {
         ghost_text = {
           enabled = true,
         },
-      },
 
+        trigger = {
+          prefetch_on_insert = true,
+          show_on_keyword = true,
+          show_on_trigger_character = true,
+          show_in_snippet = true,
+          show_on_insert_on_trigger_character = true,
+          show_on_accept_on_trigger_character = true,
+        },
+        list = {
+          selection = {
+            auto_insert = false,
+            preselect = function(ctx)
+              return ctx.mode ~= 'cmdline' and not require('blink.cmp').snippet_active { direction = 1 }
+            end,
+          },
+        },
+      }, -- completion
       -- experimental signature help support
       signature = { enabled = true },
 
@@ -94,7 +98,7 @@ return {
           -- },
           --           },
         },
-      },
+      }, -- sources
       cmdline = {
         enabled = true,
         keymap = { preset = 'cmdline' },
@@ -107,23 +111,18 @@ return {
           },
           ghost_text = { enabled = true },
         },
-      },
-
-      keymap = {
-        preset = 'enter',
-        ['<C-y>'] = { 'select_and_accept' },
-      },
+      }, --cmdline
     },
   },
-
-  -- {
-  --   'gbprod/yanky.nvim',
-  --   opts = {
-  --     ring = { history_length = 5 },
-  --     system_clipboard = {
-  --       sync_with_ring = true,
-  --       clipboard_register = nil,
-  --     },
-  --   },
-  -- },
 }
+
+-- {
+--   'gbprod/yanky.nvim',
+--   opts = {
+--     ring = { history_length = 5 },
+--     system_clipboard = {
+--       sync_with_ring = true,
+--       clipboard_register = nil,
+--     },
+--   },
+-- },

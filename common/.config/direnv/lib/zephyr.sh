@@ -42,7 +42,7 @@ layout_ncs_full() {
   local paths_to_add
   IFS=':' read -r -a paths_to_add <<<"${ncs_path_vars[PATH]}"
   for ((i = ${#paths_to_add[@]} - 1; i >= 0; i--)); do
-    path_add PATH "${paths_to_add[i]}"
+    PATH_add "${paths_to_add[i]}"
   done
   export NRFUTIL_HOME="${ncs_vars[NRFUTIL_HOME]}"
   export ZEPHYR_TOOLCHAIN_VARIANT="${ncs_vars[ZEPHYR_TOOLCHAIN_VARIANT]}"
@@ -63,7 +63,7 @@ layout_ncs_full() {
   export PYTHON_PATH="${ncs_vars[PYTHONPATH]}"
 }
 
-layout_ncs() {
+use_ncs() {
   local ncs_version
   ncs_version="${1:-v3.1.0}"
   echo "Using NCS version $ncs_version"
@@ -85,16 +85,43 @@ layout_ncs() {
   export ZEPHYR_BASE="$NCS_SDK_ROOT/zephyr"
 }
 
-use_zephyr_main() {
+use_zephyr() {
   local zephyr_version
   zephyr_version="${1:-v0.17.2}"
+
+  echo "Using Zephyr version $zephyr_version"
   export ZEPHYR_TOOLCHAIN_VARIANT=zephyr
-  export ZEPHYR_SDK_INSTALL_DIR="$HOME/zephyr-sdk-$zephyr_version"
   export ZEPHYR_PROJECT_ROOT=~/zephyrproject
-  layout uv
+  export ZEPHYR_SDK_INSTALL_DIR="$ZEPHYR_PROJECT_ROOT/toolchains/zephyr-sdk-$zephyr_version"
+  if [ ! -d "$ZEPHYR_SDK_INSTALL_DIR" ]; then
+    echo "Zephyr SDK toolchain is not installed! Please run install_zephyr_sdk_toolchain <VERSION> first!"
+    return
+  fi
 
-  export PATH="$PATH:$ZEPHYR_SDK_INSTALL_DIR/arm-zephyr-eabi/bin"
-
-  . "$ZEPHYR_SDK_INSTALL_DIR/environment-setup-x86_64-pokysdk-linux"
+  PATH_add "$ZEPHYR_SDK_INSTALL_DIR/arm-zephyr-eabi/bin"
   export ZEPHYR_BASE="$ZEPHYR_PROJECT_ROOT/zephyr"
+}
+
+layout_uv_zephyr() {
+  layout uv_project
+  uv add west && uv sync
+  uv run west packages pip | awk '{print $2}' | xargs uv pip compile -q -o pylock.toml
+  uv pip sync --quiet pylock.toml
+
+}
+
+#Main Functions to use for setting up an environment:
+
+layout_ncs() {
+  local ncs_version
+  ncs_version="${1:-v3.1.0}"
+  use ncs "$ncs_version"
+  layout uv_zephyr
+}
+
+layout_zephyr() {
+  local zephyr_version
+  zephyr_version="${1:-v3.1.0}"
+  use zephyr "$zephyr_version"
+  layout uv_zephyr
 }

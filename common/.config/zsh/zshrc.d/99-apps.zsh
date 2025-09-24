@@ -70,3 +70,11 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
   . /usr/share/nvm/init-nvm.sh
 fi
+
+eval "$(uv generate-shell-completion zsh)"
+
+# python_clis=("pytest" "ruff" "pylint" "mypy")
+
+# for cli in "${python_clis[@]}"; do
+#   eval "$(register-python-argcomplete "$cli")"
+# done

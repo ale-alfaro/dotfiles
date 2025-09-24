@@ -1,92 +1,35 @@
 -- LSP Server to use for Python.
 -- Set to "basedpyright" to use basedpyright instead of pyright.
--- vim.g.lazyvim_python_lsp = 'pyright'
+vim.g.lazyvim_python_lsp = 'pyright'
 -- Set to "ruff_lsp" to use the old LSP implementation version.
--- vim.g.lazyvim_python_ruff = 'ruff'
+vim.g.lazyvim_python_ruff = 'ruff'
 
+---@module "mason-lspconfig"
 return {
   {
     'mason-org/mason.nvim',
-    cmd = 'Mason',
-    keys = { { '<leader>cm', '<cmd>Mason<cr>', desc = 'Mason' } },
-    opts = {
-      ensure_installed = {
-        'clangd',
-        'gopls',
-        'rust-analyzer',
-        'lua-language-server',
-        'cmake-language-server',
-        'stylua',
-        'shfmt',
-        'clang-format',
-        'goimports',
-        'gofumpt',
-        'rustfmt',
-        'black',
-        'isort',
-        'shellcheck',
-        'ruff',
-        'vectorcode',
-      },
-    },
   },
   {
     'mason-org/mason-lspconfig.nvim',
     dependencies = { 'mason-org/mason.nvim' },
     opts = {
-      automatic_installation = true,
-      -- automatic_enable = {
-      --   exclude = {
-      --     'pyright',
-      --     'basedpyright',
-      --     'ruff',
-      --   },
-      -- },
+      automatic_installation = false,
     },
   },
   {
     'neovim/nvim-lspconfig',
-    dependencies = {
-      'mason-org/mason-lspconfig.nvim',
-    },
     opts = {
       servers = {
-        ruff = {
-          settings = {},
-          keys = {
-            {
-              '<leader>co',
-              LazyVim.lsp.action['source.organizeImports'],
-              desc = 'Organize Imports',
-            },
-          },
-        },
-        pyright = {
-          settings = {
-            pyright = {
-              disableOrganizeImports = true,
-              typeCheckingMode = 'basic',
-            },
-            python = {
-              analysis = {
-                diagnosticSeverityOverrides = {
-                  reportUnusedExpression = 'none',
-                },
-                autoSearchPaths = true,
-                diagnosticMode = 'openFilesOnly',
-                useLibraryCodeForTypes = true,
-              },
-            },
-          },
-        },
-        vectorcode = {
-          -- root_dir = vim.fs.root(0, { '.vectorcode', '.git', '.stylua.toml' }),
-          root_dir = vim.fs.root(0, { '.vectorcode' }),
-        },
+        jsonls = {},
+        lua_ls = {},
       },
     },
   },
-  { import = 'lazyvim.plugins.extras.lang.python' },
+  -- { import = 'lazyvim.plugins.extras.lang.python' },
+  -- { import = 'lazyvim.plugins.extras.lang.clangd' },
+  -- { import = 'lazyvim.plugins.extras.lang.cmake' },
+  -- { import = 'lazyvim.plugins.extras.lang.json' },
+  -- { import = 'lazyvim.plugins.extras.lang.yaml' },
   {
     'linux-cultist/venv-selector.nvim',
     branch = 'regexp',

@@ -5,6 +5,7 @@
 
 ---@type LazySpec[]
 return {
+
   {
     'olimorris/codecompanion.nvim',
     -- dir = "~/git/codecompanion.nvim/",
@@ -130,7 +131,7 @@ return {
             },
             ---Automatically generate titles for new chats
             auto_generate_title = false,
-            continue_last_chat = true,
+            continue_last_chat = false,
             delete_on_clearing_chat = false,
             title_generation_opts = {
               format_title = function(s)

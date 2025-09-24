@@ -44,6 +44,7 @@ fi
 ZSH_GEN_COMPLETIONS_FROM_MANPAGES_PATH="$HOME/.local/share/zsh/site"
 fpath+=("$ZSH_GEN_COMPLETIONS_FROM_MANPAGES_PATH" $fpath)
 
+fpath=( /home/alealfaro/.local/share/uv/tools/argcomplete/lib/python3.12/site-packages/argcomplete/bash_completion.d "${fpath[@]}" )
 ## Initialize completion system
 ### Set location for compinit's dumpfile.
 fpath=($ZDOTDIR/completions/src $fpath)

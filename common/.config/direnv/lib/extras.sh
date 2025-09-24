@@ -35,17 +35,23 @@ layout_uv() {
   export UV_PYTHON="$VIRTUAL_ENV/bin/python"
 }
 
-layout_and_init_uv() {
+layout_uv_project() {
   if [[ -d ".venv" ]]; then
     VIRTUAL_ENV="$(pwd)/.venv"
   fi
-  if [[ -z $VIRTUAL_ENV || ! -d $VIRTUAL_ENV ]]; then
+
+  if [[ ! -f "$(pwd)/pyproject.toml" ]]; then
     log_status "No uv project exists. Executing uv init --no-readme to create one."
     uv init --no-readme
-    rm hello.py
+    rm main.py
+  fi
+
+  if [[ -z $VIRTUAL_ENV || ! -d $VIRTUAL_ENV ]]; then
+    log_status "No venv detected. Creating a new one"
     uv venv
     VIRTUAL_ENV="$(pwd)/.venv"
   fi
+
   PATH_add "$VIRTUAL_ENV/bin"
   export UV_ACTIVE=1 # or VENV_ACTIVE=1
   export VIRTUAL_ENV
@@ -60,7 +66,7 @@ alias_justfile_recipes() {
     alias "$recipe"='just --justfile "$justfile_recipes" --working-directory . "$recipe"'
   done
 }
-#Github, Gemini env vars
+#Github, Gemini,
 use_developer_envs() {
   use_env_dir "$HOME/.config/direnv/envs"
 }

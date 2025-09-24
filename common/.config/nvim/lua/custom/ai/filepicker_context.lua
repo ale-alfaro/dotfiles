@@ -131,8 +131,9 @@ function M.setup(opts)
       end
 
       local rule_files = {
-        '**/GEMINI.md',
-        '**/AGENT*',
+        'GEMINI.md',
+        'AGENT*',
+        'README*',
       }
 
       local slash_commands = require 'codecompanion.strategies.chat.slash_commands'

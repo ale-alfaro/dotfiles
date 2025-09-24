@@ -52,6 +52,7 @@ return {
         'vim',
         'vimdoc',
         'just',
+        'json5',
         'ninja',
         'toml',
         'rst',

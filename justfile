@@ -9,19 +9,20 @@ set unstable := true
 
 export dotfiles_repo_location := absolute_path(justfile_directory())
 export dotfiles_target_location := if env('XDG_CONFIG_HOME', '') =~ '^/' { absolute_path(env('XDG_CONFIG_HOME')) } else { home_directory() / '.config' }
-zshenv_path := justfile_directory() / "common" / ".zshenv"
-zshenv_home := home_directory() / ".zshenv"
+home := home_directory()
+common_extra_flags := " --ignore='bin'"
 
 # By default, show the list of available recipes
 default:
     @just --list
     @echo "Running on OS: {{ os() }}"
 
+migrate-common *extra_args:
+    stow -d "{{ dotfiles_repo_location }}/common/" -t {{ home }} --verbose=2 {{ extra_args }} {{ common_extra_flags }} -D .config -S .
+
 # stow: Restow all configurations managed by stow
 stow-cmd cmd_flag *extra_args:
-    {{ if path_exists(zshenv_home) == "true" { shell('rm $1', zshenv_home) } else { '' } }} 
-    ln -sf  {{ zshenv_path }}  {{ zshenv_home }}
-    stow -d "{{ dotfiles_repo_location }}/common/" -t {{ dotfiles_target_location }} --verbose=2 {{ extra_args }} {{ cmd_flag }} --ignore='\.zshenv'  .config
+    stow -d "{{ dotfiles_repo_location }}/common/" -t {{ home }} --verbose=2 {{ extra_args }} {{ common_extra_flags }}  {{ cmd_flag }} .
     stow -d "{{ dotfiles_repo_location }}/{{ os() }}/" -t {{ dotfiles_target_location }} --verbose=2 {{ extra_args }} {{ cmd_flag }}  .config
 
 stow: (stow-cmd "-S")
@@ -78,9 +79,8 @@ vectorcode := require("vectorcode")
 # common_dotfiles_dir := "nvim zsh wezterm just"
 # macos_dotfiles_dir := "aerospace hammerspoon sketchybar borders"
 # linux_dotfiles_dir := "hypr mako waybar swayosd "
-
 # vectorcode-includes:
-#     #!/bin/env bash 
+#     #!/bin/env bash
 #     echo "Generating .vectorcode/vectorcode.include from the directory lists"
 #     local common_dir_names=$({{ common_dotfiles_dir }})
 #     echo '{{ common_dotfiles_dir }}' | awk '/\S/ {print "common/.config/"$1"/**"}' > .vectorcode/vectorcode.include
@@ -100,7 +100,6 @@ vectorcode-check:
     {{ vectorcode }} ls --pipe | jq '.'
     {{ vectorcode }} files ls --pipe | jq '.'
 
-
 chromadb_root_dir := "~/.local/share/chromadb"
 systemd_chroma_service_spec := """
   [Unit]
@@ -119,5 +118,11 @@ systemd_chroma_service_spec := """
 """
 
 _chromadb_serice_init:
-  @sudo systemctl enable chroma
-  @sudo systemctl start chroma
+    @sudo systemctl enable chroma
+    @sudo systemctl start chroma
+
+global_gitignore_path := home_directory() / ".config" / "git" / "global.gitignore"
+
+global_gitignore_set:
+    {{ if path_exists(global_gitignore_path) == "false" { error("global gitignore doesn't exist") } else { "" } }}
+    git config --global core.excludesfile {{ global_gitignore_path }}
