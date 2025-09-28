@@ -111,14 +111,13 @@ layout_uv_zephyr() {
   layout uv_project
   if ! has west; then
     uv add west
-  fi
-  if [[ ! -f "pylock.toml" ]]; then
+    #Make sure to add these too as they are essential for west build
+    uv add ninja
+    uv add pyelftools
+    #safe to assume we need to add other requirements from zephyr as well
     fd "requirements.txt" "$ZEPHYR_BASE" -X uv pip compile -q -o pylock.toml
     uv pip sync --quiet pylock.toml
   fi
-  # uv run west packages pip | awk '{print $2}' | xargs uv pip compile -q -o pylock.toml
-  uv add ninja
-  uv add pyelftools
 }
 
 #Main Functions to use for setting up an environment:

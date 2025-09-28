@@ -51,26 +51,24 @@ return { -- Autoformat
     }, -- formatters
     formatters_by_ft = {
       lua = { 'stylua' },
-      python = function(bufnr)
-        if require('conform').get_formatter_info('ruff_format', bufnr).available then
-          return { 'ruff_format' }
-        else
-          return { 'isort', 'black' }
-        end
-      end,
+      python = {
+        -- To fix auto-fixable lint errors.
+        'ruff_fix',
+        -- To run the Ruff formatter.
+        'ruff_format',
+        -- To organize the imports.
+        'ruff_organize_imports',
+      },
       sh = { 'shfmt' },
       zsh = { 'shfmt' },
       markdown = { 'mdformat' },
       go = { 'goimports', 'gofumpt' },
       gomod = { 'goimports', 'gofumpt' },
-      rust = { 'rustfmt', lsp_format = 'fallback' },
       c = { 'clang_format' },
       cpp = { 'clang_format' },
       cmake = { 'cmake_format' },
-      json = { 'jq' },
       yaml = { 'yamlfmt' },
       just = { 'justfmt' },
-      xml = { 'xmllint' },
       -- ['*'] = { 'codespell' },
       -- ['_'] = { 'trim_whitespace' },
     },

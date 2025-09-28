@@ -7,8 +7,8 @@ local workspaces = require("utils.workspaces")
 local statusbar = require("utils.statusbar")
 local colors = require("utils.colors")
 
--- Quick terminal imports
 local mux = wezterm.mux
+local notify = require("utils.notify")
 -- local act = wezterm.action
 local M = {}
 
@@ -67,6 +67,8 @@ function M.update_status(window, pane)
 	local cwd = functions.get_cwd(pane, 35)
 	local username = os.getenv("USER") or "user"
 	local hostname = wezterm.hostname() or "localhost"
+
+	notify.send("Updating status bar", "", "low")
 	local time = wezterm.strftime("%H:%M")
 
 	-- Set status bars

@@ -1,7 +1,6 @@
 ---@type Wezterm
 local wezterm = require("wezterm")
 
-local smart_splits = require("smart-splits")
 ---@type Config
 local config = wezterm.config_builder and wezterm.config_builder() or {}
 local colors = require("utils.colors")
@@ -24,6 +23,10 @@ end
 require("config.events").setup()
 
 require("config.keybindings").apply(config, alt_modifier)
+
+-- Plugins:
+-- Smart-splits for beter navigation in Wezterm and Neovim
+local smart_splits = require("plugins.smart-splits")
 smart_splits.apply_to_config(config, {
 	direction_keys = { "h", "j", "k", "l" },
 	-- modifier keys to combine with direction_keys
@@ -34,4 +37,7 @@ smart_splits.apply_to_config(config, {
 	-- log level to use: info, warn, error
 	log_level = "info",
 })
+local resurrect = require("plugins.resurrect.config")
+config.keys = require("utils.functions").merge_all(config.keys, resurrect.keys)
+
 return config
