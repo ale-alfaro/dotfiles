@@ -68,6 +68,29 @@ layout_ncs_full() {
   export PYTHON_PATH="${ncs_vars[PYTHONPATH]}"
 }
 
+prefix_path_ncs() {
+  local ncs_version
+  ncs_version="${1:-v3.1.0}"
+  echo "Using NCS version $ncs_version"
+  local nrf_env
+  nrf_env="$($NRFUTIL sdk-manager toolchain env --as-script --ncs-version "$ncs_version")"
+  parse_ncs_env "$nrf_env"
+
+  local paths_to_add
+  ##export PATH=/opt/nordic/ncs/toolchains/5c0d382932/bin:
+  ##/opt/nordic/ncs/toolchains/5c0d382932/usr/bin:
+  #/opt/nordic/ncs/toolchains/5c0d382932/usr/local/bin:
+  #/opt/nordic/ncs/toolchains/5c0d382932/opt/bin:
+  #/opt/nordic/ncs/toolchains/5c0d382932/opt/nanopb/generator-bin:
+  #/opt/nordic/ncs/toolchains/5c0d382932/nrfutil/bin:
+  #/opt/nordic/ncs/toolchains/5c0d382932/opt/zephyr-sdk/arm-zephyr-eabi/bin:
+  #/opt/nordic/ncs/toolchains/5c0d382932/opt/zephyr-sdk/riscv64-zephyr-elf/bin
+  IFS=':' read -r -a paths_to_add <<<"${ncs_path_vars[PATH]}"
+  for ((i = ${#paths_to_add[@]} - 1; i >= 0; i--)); do
+    path_add PATH "${paths_to_add[i]}"
+  done
+}
+
 use_ncs() {
   local ncs_version
   ncs_version="${1:-v3.1.0}"
@@ -76,12 +99,6 @@ use_ncs() {
   nrf_env="$($NRFUTIL sdk-manager toolchain env --as-script --ncs-version "$ncs_version")"
   parse_ncs_env "$nrf_env"
 
-  # --- Apply Environment Variables FIRST ---
-  local paths_to_add
-  IFS=':' read -r -a paths_to_add <<<"${ncs_path_vars[PATH]}"
-  for ((i = ${#paths_to_add[@]} - 1; i >= 0; i--)); do
-    path_add PATH "${paths_to_add[i]}"
-  done
   export NRFUTIL_HOME="${ncs_vars[NRFUTIL_HOME]}"
   export ZEPHYR_TOOLCHAIN_VARIANT="${ncs_vars[ZEPHYR_TOOLCHAIN_VARIANT]}"
   export ZEPHYR_SDK_INSTALL_DIR="${ncs_vars[ZEPHYR_SDK_INSTALL_DIR]}"
@@ -107,18 +124,14 @@ use_zephyr() {
   export ZEPHYR_BASE="$ZEPHYR_PROJECT_ROOT/zephyr"
 }
 
+uv_add_zephyr_python_deps() {
+  fd "requirements.txt" "$ZEPHYR_BASE" -X uv pip compile -q -o pylock.toml
+  uv pip sync --quiet pylock.toml
+}
+
 layout_uv_zephyr() {
   layout uv_project
-  if ! has west; then
-    uv add west
-  fi
-  if [[ ! -f "pylock.toml" ]]; then
-    fd "requirements.txt" "$ZEPHYR_BASE" -X uv pip compile -q -o pylock.toml
-    uv pip sync --quiet pylock.toml
-  fi
-  # uv run west packages pip | awk '{print $2}' | xargs uv pip compile -q -o pylock.toml
-  uv add ninja
-  uv add pyelftools
+  uv_check_for_deps zephyr west ninja pyelftools
 }
 
 #Main Functions to use for setting up an environment:

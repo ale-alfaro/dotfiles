@@ -20,6 +20,18 @@ use_env_dir() {
   fi
 }
 
+uv_check_for_deps() {
+  local deps_groups="$1"
+  shift
+
+  for deps in "$@"; do
+    if ret=$(uv pip show "$deps" 2>/dev/null); then
+      log_status "uv has missing dependency: $deps. Adding."
+      uv add --group "$deps_groups" "$deps"
+    fi
+  done
+}
+
 layout_uv() {
   if [[ -d ".venv" ]]; then
     VIRTUAL_ENV="$(pwd)/.venv"
@@ -65,7 +77,6 @@ alias_justfile_recipes() {
     alias "$recipe"='just --justfile "$justfile_recipes" --working-directory . "$recipe"'
   done
 }
-#Github, Gemini,
 use_developer_envs() {
   use_env_dir "$HOME/.config/direnv/envs"
 }
