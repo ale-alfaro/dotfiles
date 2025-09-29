@@ -29,9 +29,7 @@ function M.get_keys(alt_modifier)
 		-- Key table modes
 		{ key = "o", mods = "LEADER", action = M.activate_table("open") },
 		{ key = "y", mods = "LEADER", action = M.activate_table("copy") },
-
-		-- Application
-		{ key = "q", mods = alt_modifier, action = action.QuitApplication },
+		{ key = "m", mods = "LEADER", action = M.activate_table("muxer") },
 
 		-- Clipboard
 		{ key = "v", mods = alt_modifier, action = action.PasteFrom("Clipboard") },
@@ -69,7 +67,7 @@ function M.get_keys(alt_modifier)
 		-- Pane operations
 		{ key = "s", mods = alt_modifier, action = action.SplitVertical({ domain = "CurrentPaneDomain" }) },
 		{ key = "n", mods = alt_modifier, action = action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
-		-- { key = "Z", mods = "LEADER", action = action.TogglePaneZoomState },
+		{ key = "z", mods = "LEADER", action = action.TogglePaneZoomState },
 
 		-- Vim-style scrolling
 		{ key = "u", mods = "OPT", action = action.ScrollByPage(-0.5) }, -- Scroll up half page
@@ -83,10 +81,6 @@ function M.get_keys(alt_modifier)
 		{ key = "0", mods = alt_modifier, action = action.ResetFontSize },
 		{ key = "-", mods = alt_modifier, action = action.DecreaseFontSize },
 		{ key = "=", mods = alt_modifier, action = action.IncreaseFontSize },
-
-		-- Tab navigation
-		{ key = "h", mods = alt_modifier .. "|SHIFT", action = action.ActivateTabRelative(-1) },
-		{ key = "l", mods = alt_modifier .. "|SHIFT", action = action.ActivateTabRelative(1) },
 
 		-- Workspace navigation
 		{
@@ -118,55 +112,6 @@ function M.get_keys(alt_modifier)
 			action = wezterm.action.ShowLauncherArgs({ flags = "FUZZY|WORKSPACES" }),
 		},
 
-		-- ----------------------------------------------------------------
-		-- Workspaces
-		--
-		-- These are roughly equivalent to tmux sessions.
-		-- ----------------------------------------------------------------
-
-		-- Attach to muxer
-		{
-			key = "a",
-			mods = "LEADER",
-			action = action.AttachDomain("unix"),
-		},
-
-		-- Detach from muxer
-		{
-			key = "d",
-			mods = "LEADER",
-			action = action.DetachDomain({ DomainName = "unix" }),
-		},
-		-- Rename current session; analagous to command in tmux
-		{
-			key = "$",
-			mods = "LEADER|SHIFT",
-			action = action.PromptInputLine({
-				description = "Enter new name for session",
-				action = wezterm.action_callback(function(window, pane, line)
-					if line then
-						wezterm.mux.rename_workspace(window:mux_window():get_workspace(), line)
-					end
-				end),
-			}),
-		},
-
-		-- Session manager bindings
-		-- {
-		--     key = 's',
-		--     mods = 'LEADER|SHIFT',
-		--     action = act({ EmitEvent = "save_session" }),
-		-- },
-		-- {
-		--     key = 'L',
-		--     mods = 'LEADER|SHIFT',
-		--     action = act({ EmitEvent = "load_session" }),
-		-- },
-		-- {
-		--     key = 'R',
-		--     mods = 'LEADER|SHIFT',
-		--     action = act({ EmitEvent = "restore_session" }),
-		-- },
 		-- Utility
 		{ key = "/", mods = alt_modifier, action = action.Search({ CaseInSensitiveString = "" }) },
 		{ key = "c", mods = "LEADER", action = action.ShowLauncherArgs({ flags = "FUZZY|LAUNCH_MENU_ITEMS" }) },
@@ -175,8 +120,7 @@ function M.get_keys(alt_modifier)
 		{ key = "v", mods = "LEADER", action = action.ActivateCopyMode },
 
 		-- Rename
-		{ key = ",", mods = "LEADER", action = M.rename_tab_prompt() },
-		{ key = "$", mods = "LEADER|SHIFT", action = M.rename_workspace_prompt() },
+		{ key = "r", mods = "LEADER", action = M.rename_workspace_prompt() },
 
 		-- Help
 		{
@@ -243,6 +187,32 @@ function M.get_key_tables()
 		open = {
 			{ key = "c", action = M.spawn_command("VS Code", { "zsh", "-lc", "code ." }) },
 			{ key = "u", action = M.open_url_action() },
+		},
+		muxer = {
+
+			{
+				key = "a",
+				action = action.AttachDomain("unix"),
+			},
+
+			-- Detach from muxer
+			{
+				key = "d",
+				action = action.DetachDomain({ DomainName = "unix" }),
+			},
+
+			{
+				key = "$",
+				mods = "SHIFT",
+				action = action.PromptInputLine({
+					description = "Enter new name for session",
+					action = wezterm.action_callback(function(window, pane, line)
+						if line then
+							wezterm.mux.rename_workspace(window:mux_window():get_workspace(), line)
+						end
+					end),
+				}),
+			},
 		},
 	}
 end

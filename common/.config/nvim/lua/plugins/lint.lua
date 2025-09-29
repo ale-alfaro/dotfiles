@@ -5,17 +5,12 @@ return {
     linters_by_ft = {
       markdown = { 'markdownlint' },
       python = { 'ruff' },
-      fish = { 'fish' },
     },
     linters = {
-      pylint = {
-        cmd = 'uvx',
-        args = { 'pylint' },
-      },
-      ruff = {
-        cmd = 'uvx',
-        args = { 'ruff', 'check' },
-      },
+      -- ruff = {
+      --   cmd = 'uvx',
+      --   args = { 'ruff', 'check' },
+      -- },
       markdownlint = {
         args = { '--fix', '--disable', 'MD013', '--' },
       },
