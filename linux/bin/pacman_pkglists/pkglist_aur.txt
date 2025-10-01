@@ -1,0 +1,13 @@
+devcontainer-cli
+jimtcl
+jlink
+nrf5x-command-line-tools
+opencode-bin
+ratslap
+saleae-logic2
+slack-desktop
+timeshift-autosnap
+wezterm-git
+zen-browser-bin
+zsh-completion-generator-git
+zsh-manpage-completion-generator-bin

@@ -10,8 +10,8 @@
 
 local config = {}
 local wezterm = require("wezterm")
-local resurrect_plugin = wezterm.plugin.require("https://github.com/MLFlexer/resurrect.wezterm")
-local resurrect = resurrect_plugin.state_manager
+local resurrect = wezterm.plugin.require("https://github.com/MLFlexer/resurrect.wezterm")
+local state_mgr = resurrect.state_manager
 
 -- resurrect.wezterm encryption
 -- Uncomment the following to use encryption.
@@ -26,7 +26,7 @@ local resurrect = resurrect_plugin.state_manager
 -- })
 
 -- resurrect.wezterm periodic save every 15 minutes
-resurrect.periodic_save({
+state_mgr.periodic_save({
 	interval_seconds = 900,
 	save_tabs = true,
 	save_windows = true,
@@ -34,7 +34,7 @@ resurrect.periodic_save({
 })
 
 -- Save only 5000 lines per pane
-resurrect.set_max_nlines(5000)
+state_mgr.set_max_nlines(5000)
 
 -- Default keybindings
 -- These will need to be merged with the main wezterm keys.
@@ -46,9 +46,9 @@ config.keys = {
 		key = "S",
 		mods = "LEADER",
 		action = wezterm.action_callback(function(win, pane) -- luacheck: ignore 212
-			local state = resurrect.workspace_state.get_workspace_state()
-			resurrect.save_state(state)
-			resurrect.window_state.save_window_action()
+			local state = state_mgr.workspace_state.get_workspace_state()
+			state_mgr.save_state(state)
+			state_mgr.window_state.save_window_action()
 		end),
 	},
 	{
@@ -56,7 +56,7 @@ config.keys = {
 		key = "L",
 		mods = "LEADER",
 		action = wezterm.action_callback(function(win, pane)
-			resurrect.fuzzy_load(win, pane, function(id, label) -- luacheck: ignore 212
+			state_mgr.fuzzy_load(win, pane, function(id, label) -- luacheck: ignore 212
 				local type = string.match(id, "^([^/]+)") -- match before '/'
 				id = string.match(id, "([^/]+)$") -- match after '/'
 				id = string.match(id, "(.+)%..+$") -- remove file extension
@@ -65,19 +65,19 @@ config.keys = {
 					window = win:mux_window(),
 					relative = true,
 					restore_text = true,
-					on_pane_restore = resurrect.tab_state.default_on_pane_restore,
+					on_pane_restore = state_mgr.tab_state.default_on_pane_restore,
 				}
 
 				if type == "workspace" then
-					local state = resurrect.load_state(id, "workspace")
-					resurrect.workspace_state.restore_workspace(state, opts)
+					local state = state_mgr.load_state(id, "workspace")
+					state_mgr.workspace_state.restore_workspace(state, opts)
 				elseif type == "window" then
-					local state = resurrect.load_state(id, "window")
+					local state = state_mgr.load_state(id, "window")
 					-- opts.tab = win:active_tab()
-					resurrect.window_state.restore_window(pane:window(), state, opts)
+					state_mgr.window_state.restore_window(pane:window(), state, opts)
 				elseif type == "tab" then
-					local state = resurrect.load_state(id, "tab")
-					resurrect.tab_state.restore_tab(pane:tab(), state, opts)
+					local state = state_mgr.load_state(id, "tab")
+					state_mgr.tab_state.restore_tab(pane:tab(), state, opts)
 				end
 			end)
 		end),

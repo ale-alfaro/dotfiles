@@ -28,7 +28,7 @@ local __project_root__ = vim.fs.dirname(vim.fs.dirname(vim.fs.dirname(__filepath
 --   M.reload_neoconf_settings()
 -- end
 
-return {
+local neconf_config = {
   'folke/neoconf.nvim',
 
   ---@class Config
@@ -72,3 +72,4 @@ return {
     },
   },
 }
+return {}

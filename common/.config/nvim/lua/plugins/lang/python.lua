@@ -4,10 +4,18 @@
 
 local function set_python_path(command)
   local path = command.args
-  local clients = vim.lsp.get_clients {
-    bufnr = vim.api.nvim_get_current_buf(),
-    name = 'basedpyright',
+  local python_clients = {
+    {
+      bufnr = vim.api.nvim_get_current_buf(),
+      name = 'basedpyright',
+    },
+
+    {
+      bufnr = vim.api.nvim_get_current_buf(),
+      name = 'ty',
+    },
   }
+  local clients = vim.lsp.get_clients(python_clients)
   for _, client in ipairs(clients) do
     if client.settings then
       client.settings.python = vim.tbl_deep_extend('force', client.settings.python or {}, { pythonPath = path })
@@ -27,118 +35,124 @@ return {
     'neovim/nvim-lspconfig',
     opts = function(_, opts)
       -- opts.servers = python_lsp_config
-      vim.lsp.config.ruff = {
+      opts.servers = {
+        ruff = {
+          mason = false,
+          root_markers = {
+            'uv.lock',
+            'pyproject.lock',
+          },
+          cmd = { 'ruff', 'server' },
+          filetypes = { 'python' },
+          settings = {
 
-        -- enabled = true,
-        -- ft = 'python',
-        root_markers = {
-          'uv.lock',
-          'pyproject.lock',
-        },
-        cmd = { 'ruff', 'server' },
-        settings = {
-
-          ruff = {
-            init_options = {
-              settings = {
-                logLevel = 'error',
-                -- fixAll = true,
-                lint = {
-                  -- preview = true,
+            ruff = {
+              init_options = {
+                settings = {
+                  logLevel = 'error',
+                  -- fixAll = true,
+                  lint = {
+                    -- preview = true,
+                  },
+                  formatter = {
+                    -- preview = true,
+                    backend = 'uv',
+                  },
+                  exclude = { '**/build/**' },
                 },
-                formatter = {
-                  -- preview = true,
-                  backend = 'uv',
-                },
-                exclude = { '**/build/**' },
               },
             },
-            -- keys = {
-            --   {
-            --     '<leader>co',
-            --     LazyVim.lsp.action['source.organizeImports'],
-            --     desc = 'Organize Imports',
-            --   },
-            -- },
           },
+          capabilities = {
+            offsetEncoding = { 'utf-16' },
+          },
+          on_attach = function(client, bufnr)
+            -- Disable hover in favor of Pyright
+            client.server_capabilities.hoverProvider = false
+
+            vim.keymap.set('n', '<leader>co', function()
+              vim.lsp.buf.code_action {
+                apply = true,
+                context = {
+                  only = { 'source.organizeImports' },
+                  diagnostics = {},
+                },
+              }
+            end, { desc = 'Ruff Organize Imports', buffer = true })
+          end,
         },
 
-        -- on_attach = function(client, bufnr)
-        --   -- Disable hover in favor of Pyright
-        --   client.server_capabilities.hoverProvider = false
-        -- end,
-      }
-      -- vim.lsp.config.pyright = {
-      --   enabled = false,
-      --   cmd = { 'pyright-langserver', '--stdio' },
-      --   filetypes = { 'python' },
-      --   root_markers = {
-      --     'pyproject.toml',
-      --     'uv.lock',
-      --     'pyproject.lock',
-      --   },
-      --   settings = {
-      --     python = {
-      --       analysis = {
-      --         ignore = { '*' }, -- Disable for ruff lsp
-      --         autoSearchPaths = true,
-      --         useLibraryCodeForTypes = true,
-      --         diagnosticMode = 'openFilesOnly',
-      --       },
-      --     },
-      --     pyright = {
-      --       disableOrganizeImports = true,
-      --     },
-      --   },
-      --   -- on_attach = function(client, bufnr)
-      --   --   vim.api.nvim_buf_create_user_command(bufnr, 'LspPyrightSetPythonPath', set_python_path, {
-      --   --     desc = 'Reconfigure pyright with the provided python path',
-      --   --     nargs = 1,
-      --   --     complete = 'file',
-      --   --   })
-      --   -- end,
-      -- }
+        -- ty = {
+        --
+        --   mason = false,
+        --   filetypes = { 'python' },
+        --   root_markers = {
+        --     'uv.lock',
+        --     'pyproject.lock',
+        --   },
+        --   cmd = { 'ty', 'server' },
+        --   settings = {
+        --     ty = {
+        --       settings = {
+        --         disableLanguageServices = true,
+        --         diagnosticMode = 'workspace',
+        --         -- experimental = {
+        --         --   autoImport = true,
+        --         -- },
+        --       },
+        --     },
+        --   },
+        --   capabilities = {
+        --     offsetEncoding = { 'utf-16' },
+        --   },
+        -- },
 
-      vim.lsp.config.basedpyright = {
-        cmd = { 'basedpyright-langserver', '--stdio' },
-        filetypes = { 'python' },
-        root_markers = {
-          'pyproject.toml',
-          'uv.lock',
-          'pyproject.lock',
-        },
-        settings = {
-          basedpyright = {
-            analysis = {
-              autoSearchPaths = true,
-              useLibraryCodeForTypes = true,
-              diagnosticMode = 'openFilesOnly',
+        -- vim.lsp.enable 'ty'
+        basedpyright = {
+          mason = false,
+          cmd = { 'basedpyright-langserver', '--stdio' },
+          filetypes = { 'python' },
+          root_markers = {
+            'pyproject.toml',
+            'uv.lock',
+            'pyproject.lock',
+          },
+          settings = {
+            basedpyright = {
+              analysis = {
+                autoSearchPaths = true,
+                useLibraryCodeForTypes = true,
+                diagnosticMode = 'openFilesOnly',
+              },
             },
           },
+          capabilities = {
+            offsetEncoding = { 'utf-16' },
+          },
+          -- on_attach = function(client, bufnr)
+          --   vim.api.nvim_buf_create_user_command(bufnr, 'LspPyrightOrganizeImports', function()
+          --     local params = {
+          --       command = 'basedpyright.organizeimports',
+          --       arguments = { vim.uri_from_bufnr(bufnr) },
+          --     }
+          --
+          --     -- Using client.request() directly because "basedpyright.organizeimports" is private
+          --     -- (not advertised via capabilities), which client:exec_cmd() refuses to call.
+          --     -- https://github.com/neovim/neovim/blob/c333d64663d3b6e0dd9aa440e433d346af4a3d81/runtime/lua/vim/lsp/client.lua#L1024-L1030
+          --     client.request('workspace/executeCommand', params, nil, bufnr)
+          --   end, {
+          --     desc = 'Organize Imports',
+          --   })
+          --
+          --   vim.api.nvim_buf_create_user_command(bufnr, 'LspPyrightSetPythonPath', set_python_path, {
+          --     desc = 'Reconfigure basedpyright with the provided python path',
+          --     nargs = 1,
+          --     complete = 'file',
+          --   })
+          -- end,
         },
-        on_attach = function(client, bufnr)
-          vim.api.nvim_buf_create_user_command(bufnr, 'LspPyrightOrganizeImports', function()
-            local params = {
-              command = 'basedpyright.organizeimports',
-              arguments = { vim.uri_from_bufnr(bufnr) },
-            }
-
-            -- Using client.request() directly because "basedpyright.organizeimports" is private
-            -- (not advertised via capabilities), which client:exec_cmd() refuses to call.
-            -- https://github.com/neovim/neovim/blob/c333d64663d3b6e0dd9aa440e433d346af4a3d81/runtime/lua/vim/lsp/client.lua#L1024-L1030
-            client.request('workspace/executeCommand', params, nil, bufnr)
-          end, {
-            desc = 'Organize Imports',
-          })
-
-          vim.api.nvim_buf_create_user_command(bufnr, 'LspPyrightSetPythonPath', set_python_path, {
-            desc = 'Reconfigure basedpyright with the provided python path',
-            nargs = 1,
-            complete = 'file',
-          })
-        end,
+        -- vim.lsp.enable 'basedpyright'
       }
-      vim.lsp.enable('basedpyright', true)
     end,
   },
 
@@ -146,7 +160,7 @@ return {
     'nvim-neotest/neotest',
     dependencies = {
       'nvim-neotest/neotest-plenary',
-      'nvim-neotest/neotest-go',
+      'nvim-neotest/neotest-python',
       'nvim-neotest/nvim-nio',
     },
     keys = {
@@ -264,59 +278,6 @@ return {
     },
   },
 
-  -- {
-  --   'linux-cultist/venv-selector.nvim',
-  --   cmd = 'VenvSelect',
-  --   dependencies = {
-  --     'neovim/nvim-lspconfig',
-  --   },
-  --   ft = 'python', -- Load when opening Python files
-  --   keys = {
-  --     { '<leader>cv', '<cmd>VenvSelect<cr>', desc = 'Select VirtualEnv', ft = 'python' },
-  --   },
-  --   config = function(_, opts)
-  --     require('venv-selector').setup {
-  --       options = {
-  --         on_venv_activate_callback = nil, -- callback function for after a venv activates
-  --         enable_default_searches = false, -- switches all default searches on/off
-  --         enable_cached_venvs = false, -- use cached venvs that are activated automatically when a python file is registered with the LSP.
-  --         cached_venv_automatic_activation = false, -- if set to false, the VenvSelectCached command becomes available to manually activate them.
-  --         activate_venv_in_terminal = true, -- activate the selected python interpreter in terminal windows opened from neovim
-  --         set_environment_variables = true, -- sets VIRTUAL_ENV or CONDA_PREFIX environment variables
-  --         notify_user_on_venv_activation = true, -- notifies user on activation of the virtual env
-  --         search_timeout = 5, -- if a search takes longer than this many seconds, stop it and alert the user
-  --         debug = true, -- enables you to run the VenvSelectLog command to view debug logs
-  --         -- fd_binary_name = M.find_fd_command_name(), -- plugin looks for `fd` or `fdfind` but you can set something else here
-  --         require_lsp_activation = true, -- require activation of an lsp before setting env variables
-  --         -- telescope viewer options
-  --         on_telescope_result_callback = nil, -- callback function for modifying telescope results
-  --         show_telescope_search_type = true, -- Shows which of the searches found which venv in telescope
-  --         telescope_filter_type = 'substring', -- When you type something in telescope, filter by "substring" or "character"
-  --         telescope_active_venv_color = '#00FF00', -- The color of the active venv in telescope
-  --         picker = 'snacks', -- The picker to use. Valid options are "telescope", "fzf-lua", "snacks", "native", "mini-pick" or "auto"
-  --         icon = '', -- The icon to use in the picker for each item
-  --       },
-  --       search = {
-  --         virtualenvs = false,
-  --         hatch = false,
-  --         poetry = false,
-  --         pyenv = false,
-  --         pipenv = false,
-  --         anaconda_envs = false,
-  --         anaconda_base = false,
-  --         miniconda_envs = false,
-  --         miniconda_base = false,
-  --         pipx = false,
-  --         cwd = false,
-  --         workspace = false,
-  --         file = false,
-  --         uv = {
-  --           command = 'uv python find',
-  --         },
-  --       },
-  --     }
-  --   end,
-  -- },
   {
     'hrsh7th/nvim-cmp',
     opts = function(_, opts)

@@ -23,7 +23,7 @@ local vectorcode = {
   callback = function()
     return require('vectorcode.integrations').codecompanion.chat.make_tool('query', {
       default_num = 15,
-      use_lsp = true,
+      use_lsp = false,
       auto_submit = { ls = true, query = true },
       ls_on_start = false,
     })
