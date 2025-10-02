@@ -51,7 +51,4 @@ fpath=($ZDOTDIR/completions/src $fpath)
 # --- Initialize completion system ---
 autoload -Uz compinit && compinit -d ${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump
 
-# --- Replay intercepted compdefs from plugins ---
-zinit cdreplay -q
-
 

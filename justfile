@@ -23,7 +23,7 @@ migrate-common *extra_args:
 # stow: Restow all configurations managed by stow
 stow-cmd cmd_flag *extra_args:
     stow -d "{{ dotfiles_repo_location }}/common/" -t {{ home }} --verbose=2 {{ extra_args }} {{ common_extra_flags }}  {{ cmd_flag }} .
-    stow -d "{{ dotfiles_repo_location }}/{{ os() }}/" -t {{ dotfiles_target_location }} --verbose=2 {{ extra_args }} {{ cmd_flag }}  .config
+    stow -d "{{ dotfiles_repo_location }}/{{ os() }}/" -t {{ dotfiles_target_location }} --verbose=2 {{ extra_args }} {{ common_extra_flags }}{{ cmd_flag }}  .config
 
 stow: (stow-cmd "-S")
     @echo "✅ Stow complete."
@@ -50,7 +50,6 @@ update:
 # ==============================================================================
 # Stow Health Check (chkstow)
 # ==============================================================================
-
 # check-bogus: Find broken symlinks that point to non-existent files
 check-bogus:
     @chkstow -b -t {{ dotfiles_target_location }}
@@ -74,7 +73,7 @@ clean-aliens-interactive:
     @echo "You will be prompted to delete every file not managed by stow."
     @chkstow -a -t {{ dotfiles_target_location }} | awk -F': ' '{print $2}' | xargs -r -p rm -rf
 
-vectorcode := require("vectorcode")
+# vectorcode := require("vectorcode")
 
 # common_dotfiles_dir := "nvim zsh wezterm just"
 # macos_dotfiles_dir := "aerospace hammerspoon sketchybar borders"
@@ -86,19 +85,19 @@ vectorcode := require("vectorcode")
 #     echo '{{ common_dotfiles_dir }}' | awk '/\S/ {print "common/.config/"$1"/**"}' > .vectorcode/vectorcode.include
 #     # echo '{{ linux_dotfiles_dir }}' | awk '/\S/ {print "linux/.config/"$1"/**"}' > .vectorcode/vectorcode.include
 
-vectorcode-init:
-    {{ if path_exists(".vectorcode") != "true" { shell('vectorcode init') } else { "" } }}
-    @echo 'common/.config/**' > .vectorcode/vectorcode.include
-    @echo '{{ os() }}/.config/**' >> .vectorcode/vectorcode.include
-    @cp .gitignore .vectorcode/vectorcode.exclude
-    {{ vectorcode }} vectorise
-
-vectorcode-check:
-    {{ vectorcode }} check config
-    @bat --paging=never .vectorcode/vectorcode.include
-    @bat --paging=never .vectorcode/vectorcode.exclude
-    {{ vectorcode }} ls --pipe | jq '.'
-    {{ vectorcode }} files ls --pipe | jq '.'
+# vectorcode-init:
+#     {{ if path_exists(".vectorcode") != "true" { shell('vectorcode init') } else { "" } }}
+#     @echo 'common/.config/**' > .vectorcode/vectorcode.include
+#     @echo '{{ os() }}/.config/**' >> .vectorcode/vectorcode.include
+#     @cp .gitignore .vectorcode/vectorcode.exclude
+#     {{ vectorcode }} vectorise
+#
+# vectorcode-check:
+#     {{ vectorcode }} check config
+#     @bat --paging=never .vectorcode/vectorcode.include
+#     @bat --paging=never .vectorcode/vectorcode.exclude
+#     {{ vectorcode }} ls --pipe | jq '.'
+#     {{ vectorcode }} files ls --pipe | jq '.'
 
 chromadb_root_dir := "~/.local/share/chromadb"
 systemd_chroma_service_spec := """

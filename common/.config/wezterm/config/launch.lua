@@ -12,6 +12,9 @@ function M.apply(config)
 	config.initial_rows = 35
 	config.default_workspace = "dotfiles"
 
+	config.set_environment_variables = {
+		ZDOTDIR = "/home/alealfaro/.config/zsh",
+	}
 	-- Input method and scrolling
 	config.use_ime = true
 	config.ime_preedit_rendering = "System"

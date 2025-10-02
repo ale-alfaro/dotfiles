@@ -93,12 +93,10 @@ libfido2
 libjaylink
 libpulse
 libqalculate
-libva-nvidia-driver
 linux
 linux-firmware
 linux-headers
 llvm
-localsend-bin
 luarocks
 ly
 mako
@@ -120,7 +118,6 @@ noto-fonts-cjk
 noto-fonts-emoji
 noto-fonts-extra
 nss-mdns
-nvidia-dkms
 nvm
 obsidian
 omarchy-chromium
