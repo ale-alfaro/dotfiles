@@ -129,8 +129,6 @@ vim.g.markdown_recommended_style = 0
 --
 
 -- opt.statuscolumn = [[%!v:lua.require'snacks.statuscolumn'.get()]]
-vim.g.mapleader = ' '
-vim.g.maplocalleader = ';'
 
 --[[
 -- Backup you shit!

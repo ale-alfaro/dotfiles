@@ -46,24 +46,6 @@ function M.get_keys(alt_modifier)
 		{ key = "w", mods = alt_modifier .. "|SHIFT", action = action.CloseCurrentTab({ confirm = false }) },
 		{ key = "t", mods = "LEADER", action = action.ShowLauncherArgs({ flags = "TABS" }) },
 
-		-- Workspace
-		{
-			key = "l",
-			mods = "LEADER",
-			action = wezterm.action_callback(function(window, pane)
-				functions.switch_previous_workspace(window, pane)
-				window:perform_action(action.EmitEvent("set-previous-workspace"), pane)
-			end),
-		},
-		{
-			key = "s",
-			mods = "LEADER",
-			action = action.Multiple({
-				action.ShowLauncherArgs({ flags = "FUZZY|WORKSPACES" }),
-				action.EmitEvent("set-previous-workspace"),
-			}),
-		},
-
 		-- Pane operations
 		{ key = "s", mods = alt_modifier, action = action.SplitVertical({ domain = "CurrentPaneDomain" }) },
 		{ key = "n", mods = alt_modifier, action = action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
@@ -81,36 +63,6 @@ function M.get_keys(alt_modifier)
 		{ key = "0", mods = alt_modifier, action = action.ResetFontSize },
 		{ key = "-", mods = alt_modifier, action = action.DecreaseFontSize },
 		{ key = "=", mods = alt_modifier, action = action.IncreaseFontSize },
-
-		-- Workspace navigation
-		{
-			key = "[",
-			mods = "LEADER",
-			action = action.Multiple({
-				action.SwitchWorkspaceRelative(-1),
-				action.EmitEvent("set-previous-workspace"),
-			}),
-		},
-		{
-			key = "]",
-			mods = "LEADER",
-			action = action.Multiple({
-				action.SwitchWorkspaceRelative(1),
-				action.EmitEvent("set-previous-workspace"),
-			}),
-		},
-		{
-			key = "p",
-			mods = "LEADER",
-			-- Present in to our project picker
-			action = projects.choose_project(),
-		},
-		{
-			key = "f",
-			mods = "LEADER",
-			-- Present a list of existing workspaces
-			action = wezterm.action.ShowLauncherArgs({ flags = "FUZZY|WORKSPACES" }),
-		},
 
 		-- Utility
 		{ key = "/", mods = alt_modifier, action = action.Search({ CaseInSensitiveString = "" }) },

@@ -37,7 +37,10 @@ smart_splits.apply_to_config(config, {
 	-- log level to use: info, warn, error
 	log_level = "info",
 })
+local utils = require("utils.functions")
 -- local resurrect = require("plugins.resurrect.config")
+--
+local sessionizer = require("plugins.sessionizer.config")
 -- config.keys = require("utils.functions").merge_all(config.keys, resurrect.keys)
-
+config.keys = utils.merge_all(config.keys, sessionizer.keys)
 return config

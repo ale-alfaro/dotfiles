@@ -10,7 +10,7 @@ set unstable := true
 export dotfiles_repo_location := absolute_path(justfile_directory())
 export dotfiles_target_location := if env('XDG_CONFIG_HOME', '') =~ '^/' { absolute_path(env('XDG_CONFIG_HOME')) } else { home_directory() / '.config' }
 home := home_directory()
-common_extra_flags := " --ignore='bin'"
+common_extra_flags := " --ignore='bin' --ignore='chromium'"
 
 # By default, show the list of available recipes
 default:

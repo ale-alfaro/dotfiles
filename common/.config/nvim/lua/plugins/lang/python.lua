@@ -49,6 +49,16 @@ return {
             ruff = {
               init_options = {
                 settings = {
+                  args = {
+                    '--ignore',
+                    'F821',
+                    '--ignore',
+                    'E402',
+                    '--ignore',
+                    'E722',
+                    '--ignore',
+                    'E712',
+                  },
                   logLevel = 'error',
                   -- fixAll = true,
                   lint = {
@@ -121,8 +131,9 @@ return {
             basedpyright = {
               analysis = {
                 autoSearchPaths = true,
-                useLibraryCodeForTypes = true,
-                diagnosticMode = 'openFilesOnly',
+                -- useLibraryCodeForTypes = true,
+                diagnosticMode = 'off',
+                typeCheckingMode = 'off', -- Set type-checking mode to off
               },
             },
           },
@@ -151,7 +162,7 @@ return {
           --   })
           -- end,
         },
-        -- vim.lsp.enable 'basedpyright'
+        vim.lsp.enable('basedpyright', false),
       }
     end,
   },

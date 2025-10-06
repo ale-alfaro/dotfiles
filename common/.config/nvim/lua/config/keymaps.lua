@@ -1,37 +1,38 @@
---[[
 --
 -- This file is automatically loaded by lazyvim.config.init
 
 -- DO NOT USE `LazyVim.safe_keymap_set` IN YOUR OWN CONFIG!!
 -- use `vim.keymap.set` instead
-local map = LazyVim.safe_keymap_set
+local map = vim.keymap.set
+local delmap = vim.keymap.del
 
 -- better up/down
-map({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
-map({ "n", "x" }, "<Down>", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
-map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
-map({ "n", "x" }, "<Up>", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
+delmap({ 'n', 'x' }, 'j')
+delmap({ 'n', 'x' }, '<Down>')
+delmap({ 'n', 'x' }, 'k')
+delmap({ 'n', 'x' }, '<Up>')
 
 -- Move to window using the <ctrl> hjkl keys
-map("n", "<C-h>", "<C-w>h", { desc = "Go to Left Window", remap = true })
-map("n", "<C-j>", "<C-w>j", { desc = "Go to Lower Window", remap = true })
-map("n", "<C-k>", "<C-w>k", { desc = "Go to Upper Window", remap = true })
-map("n", "<C-l>", "<C-w>l", { desc = "Go to Right Window", remap = true })
+-- map('n', '<C-h>', '<C-w>h', { desc = 'Go to Left Window', remap = true })
+-- map('n', '<C-j>', '<C-w>j', { desc = 'Go to Lower Window', remap = true })
+-- map('n', '<C-k>', '<C-w>k', { desc = 'Go to Upper Window', remap = true })
+-- map('n', '<C-l>', '<C-w>l', { desc = 'Go to Right Window', remap = true })
 
 -- Resize window using <ctrl> arrow keys
-map("n", "<C-Up>", "<cmd>resize +2<cr>", { desc = "Increase Window Height" })
-map("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease Window Height" })
-map("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease Window Width" })
-map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase Window Width" })
+-- map('n', '<C-Up>', '<cmd>resize +2<cr>', { desc = 'Increase Window Height' })
+-- map('n', '<C-Down>', '<cmd>resize -2<cr>', { desc = 'Decrease Window Height' })
+-- map('n', '<C-Left>', '<cmd>vertical resize -2<cr>', { desc = 'Decrease Window Width' })
+-- map('n', '<C-Right>', '<cmd>vertical resize +2<cr>', { desc = 'Increase Window Width' })
 
 -- Move Lines
-map("n", "<A-j>", "<cmd>execute 'move .+' . v:count1<cr>==", { desc = "Move Down" })
-map("n", "<A-k>", "<cmd>execute 'move .-' . (v:count1 + 1)<cr>==", { desc = "Move Up" })
-map("i", "<A-j>", "<esc><cmd>m .+1<cr>==gi", { desc = "Move Down" })
-map("i", "<A-k>", "<esc><cmd>m .-2<cr>==gi", { desc = "Move Up" })
-map("v", "<A-j>", ":<C-u>execute \"'<,'>move '>+\" . v:count1<cr>gv=gv", { desc = "Move Down" })
-map("v", "<A-k>", ":<C-u>execute \"'<,'>move '<-\" . (v:count1 + 1)<cr>gv=gv", { desc = "Move Up" })
+delmap('n', '<A-j>')
+delmap('n', '<A-k>')
+delmap('i', '<A-j>')
+delmap('i', '<A-k>')
+delmap('v', '<A-j>')
+delmap('v', '<A-k>')
 
+--[[
 -- buffers
 map("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev Buffer" })
 map("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer" })
@@ -177,7 +178,6 @@ map({"n", "x" }, "<leader>gY", function()
 end, { desc = "Git Browse (copy)" })
 
 -- quit
-map("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit All" })
 
 -- highlights under cursor
 map("n", "<leader>ui", vim.show_pos, { desc = "Inspect Pos" })
@@ -225,14 +225,14 @@ end
 --
 --]]
 --
-local map = vim.keymap.set
-local delmap = vim.keymap.del
 
+map('n', '<leader>zz', '<cmd>qa<cr>', { desc = 'Quit All' })
 -- Terminal Mappings
 map('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 map('t', '<Esc><Esc>', '<cmd>close<cr>', { desc = 'Hide Terminal' })
 delmap('t', '<C-/>')
 delmap('t', '<c-_>')
+delmap('n', '<leader>zz')
 -- Snacks.toggle.zoom():map("<leader>wm"):map("<leader>uZ")
 -- Snacks.toggle.zen():map("<leader>uz")
 

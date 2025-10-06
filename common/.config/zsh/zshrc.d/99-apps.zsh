@@ -55,26 +55,21 @@ else
   echo ERROR: Could not load zoxide shell integration.
 fi
 
-# ---- Zellij ----- NOT IN USE
-# export ZELLIJ_CONFIG_DIR="$XDG_CONFIG_HOME/zellij"
-# eval "$(zellij setup --generate-completion zsh)"
-#
 # ---- Wezterm (terminal emulator) ---
 . $ZDOTDIR/shell_integrations/wezterm.sh
 
+# Initialize Node Version manager
+export NVM_DIR="$XDG_CONFIG_HOME/nvm"
+source "$ZDOTDIR/shell_integrations/zsh-nvm.zsh"
 if [[ "$OSTYPE" == "darwin"* ]]; then
 
-  # Initialize Node Version manager
-  export NVM_DIR=/Users/alealfaro/.nvm
-  [ -s /opt/homebrew/opt/nvm/nvm.sh ] && \. /opt/homebrew/opt/nvm/nvm.sh                                       # This loads nvm
-  [ -s /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm ] && \. /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm # This loads nvm bash_completion
-
+  # export NVM_DIR="${XDG_CONFIG_HOME}/.nvm"
+  # [ -s /opt/homebrew/opt/nvm/nvm.sh ] && \. /opt/homebrew/opt/nvm/nvm.sh                                       # This loads nvm
+  # [ -s /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm ] && \. /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm # This loads nvm bash_completion
   #Set OBSIDIAN_HOME to iCloud directory in MacOS
   export OBSIDIAN_HOME="/Users/alealfaro/Library/Mobile Documents/iCloud~md~obsidian/Documents"
 else
-
-  . /usr/share/nvm/init-nvm.sh
-
+  # . /usr/share/nvm/init-nvm.sh
   export OBSIDIAN_HOME="/home/alealfaro/Documents/Obsidian"
 fi
 

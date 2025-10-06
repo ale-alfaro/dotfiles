@@ -3,8 +3,9 @@ return {
   opts = {
     servers = {
       taplo = {
-        filetypes = 'toml',
-        root_markers = { '.toml' },
+        cmd = { 'taplo', 'lsp', 'stdio' },
+        filetypes = { 'toml' },
+        root_markers = { 'pyproject.toml', '.git' },
       },
     },
   },
