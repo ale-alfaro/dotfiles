@@ -7,8 +7,55 @@ local function have(path)
 end
 
 return {
-  recommended = true,
-  desc = 'Language support for dotfiles',
+  {
+
+    'neovim/nvim-lspconfig',
+    opts = function(_, opts)
+      -- opts.servers = python_lsp_config
+      opts.servers = {
+        ---@type vim.lsp.Config
+        hyprls = {
+          -- build = "go install github.com/hyprland-community/hyprls/cmd/hyprls@latest",
+          cmd = { 'hyprls', '--stdio' },
+          filetypes = { 'hyprlang' },
+
+          root_dir = function(bufnr, on_dir)
+            -- return vim.fs.dirname(vim.fs.find('.git', { path = fname, upward = true })[1])
+            if not vim.fn.bufname(bufnr):match '%.conf$' then
+              on_dir(vim.fn.getcwd())
+            end
+          end,
+          single_file_support = true,
+
+          docs = {
+            description = [[
+      https://github.com/hyprland-community/hyprls
+
+      `hyprls` can be installed via `go`:
+      ```sh
+      go install github.com/ewen-lbh/hyprls/cmd/hyprls@latest
+      ```
+
+      ]],
+          },
+          on_attach = function(client, bufnr)
+            vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWinEnter' }, {
+              pattern = { '*.hl', 'hypr*.conf' },
+              callback = function(event)
+                print(string.format('starting hyprls for %s', vim.inspect(event)))
+                --   vim.lsp.start {
+                --     name = 'hyprlang',
+                --     cmd = { 'hyprls' },
+                --     root_dir = vim.fn.getcwd(),
+                --   }
+              end,
+            })
+          end,
+        },
+      }
+    end,
+    vim.lsp.enable 'hyprls',
+  },
   {
     'neovim/nvim-lspconfig',
     opts = {
@@ -18,6 +65,7 @@ return {
         },
       },
     },
+    setup = {},
   },
   {
     'mason-org/mason.nvim',
