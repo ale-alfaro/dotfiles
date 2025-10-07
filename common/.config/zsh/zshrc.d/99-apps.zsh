@@ -1,9 +1,10 @@
 #######################################################
 # Shell integrations
 #######################################################
+source $ZDOTDIR/functions/stdlib.zsh
 ## fzf
 # ------------------------------------------------------------------------------
-if type fzf &>/dev/null; then
+if has fzf; then
   source <(fzf --zsh)
 
   export FZF_CTRL_R_OPTS="
@@ -33,11 +34,16 @@ else
 fi
 
 # --- Completion from CLI tools ---
-eval "$(jj util completion zsh)"
-if [[ -x "$(command -v bw)" ]]; then
+if has jj; then
+  eval "$(jj util completion zsh)"
+fi
+if has bw; then
   eval "$(bw completion --shell zsh)"
 fi
-[[ -r "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh" ]] && . "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh"
+
+if has nrfutil; then
+  [[ -r "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh" ]] && . "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh"
+fi
 
 # ---- Atuin (better shell command history) -----
 eval "$(atuin init zsh)"
@@ -49,32 +55,41 @@ eval "$(starship init zsh)"
 eval "$(direnv hook zsh)"
 
 # ---- zoxide (better cd) -----
-if type zoxide &>/dev/null; then
+if has zoxide; then
   eval "$(zoxide init zsh --cmd zd)"
 else
   echo ERROR: Could not load zoxide shell integration.
 fi
 
 # ---- Wezterm (terminal emulator) ---
-. $ZDOTDIR/shell_integrations/wezterm.sh
+if has wezterm; then
+  . $ZDOTDIR/shell_integrations/wezterm.sh
+fi
+if has nvm; then
 
-# Initialize Node Version manager
-export NVM_DIR="$XDG_CONFIG_HOME/nvm"
-source "$ZDOTDIR/shell_integrations/zsh-nvm.zsh"
-if [[ "$OSTYPE" == "darwin"* ]]; then
+  # Initialize Node Version manager
+  export NVM_DIR="$XDG_CONFIG_HOME/nvm"
+  source "$ZDOTDIR/shell_integrations/zsh-nvm.zsh"
+  if [[ "$OSTYPE" == "darwin"* ]]; then
 
-  # export NVM_DIR="${XDG_CONFIG_HOME}/.nvm"
-  # [ -s /opt/homebrew/opt/nvm/nvm.sh ] && \. /opt/homebrew/opt/nvm/nvm.sh                                       # This loads nvm
-  # [ -s /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm ] && \. /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm # This loads nvm bash_completion
-  #Set OBSIDIAN_HOME to iCloud directory in MacOS
-  export OBSIDIAN_HOME="/Users/alealfaro/Library/Mobile Documents/iCloud~md~obsidian/Documents"
-else
-  # . /usr/share/nvm/init-nvm.sh
-  export OBSIDIAN_HOME="/home/alealfaro/Documents/Obsidian"
+    # export NVM_DIR="${XDG_CONFIG_HOME}/.nvm"
+    # [ -s /opt/homebrew/opt/nvm/nvm.sh ] && \. /opt/homebrew/opt/nvm/nvm.sh                                       # This loads nvm
+    # [ -s /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm ] && \. /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm # This loads nvm bash_completion
+    #Set OBSIDIAN_HOME to iCloud directory in MacOS
+    export OBSIDIAN_HOME="/Users/alealfaro/Library/Mobile Documents/iCloud~md~obsidian/Documents"
+  else
+    # . /usr/share/nvm/init-nvm.sh
+    export OBSIDIAN_HOME="/home/alealfaro/Documents/Obsidian"
+  fi
 fi
 
-eval "$(uv generate-shell-completion zsh)"
+if has uv; then
+  eval "$(uv generate-shell-completion zsh)"
+fi
 
+if has prek; then
+  eval "$(COMPLETE=zsh prek completion)"
+fi
 # python_clis=("pytest" "ruff" "pylint" "mypy")
 
 # for cli in "${python_clis[@]}"; do

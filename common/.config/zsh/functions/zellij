@@ -1,7 +1,0 @@
-
-zesh list |
-  fzf --prompt 'Sessions> ' \
-      --header 'Select a session to connect to' \
-      --bind 'enter:become(zesh connect {})' \
-      --preview 'tree -C {}'
-
