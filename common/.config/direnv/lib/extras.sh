@@ -89,3 +89,15 @@ use_nvm() {
     nvm use "$node_version"
   fi
 }
+
+git_update_submodules() {
+  git submodule status | while IFS= read -r line; do
+    status_prefix=$(echo "$line" | awk '{print substr($1, 1, 1)}')
+    # submodule_path=$(echo "$line" | awk '{print $2}')
+    if [[ $status_prefix == "-" ]]; then
+      echo "Updating submodules"
+      git submodule update --init --recursive --remote
+      break
+    fi
+  done
+}

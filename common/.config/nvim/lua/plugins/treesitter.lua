@@ -36,30 +36,28 @@ return {
 
   {
     'nvim-treesitter/nvim-treesitter',
-    opts = function(_, opts)
-      if type(opts.ensure_installed) == 'table' then
-        -- add typescript filetypes to treesitter parsers
-        vim.list_extend(opts.ensure_installed, {
-          'bash',
-          'c',
-          'cpp',
-          'cmake',
-          'diff',
-          'html',
-          'kconfig',
-          'lua',
-          'luadoc',
-          'markdown',
-          'markdown_inline',
-          'query',
-          'vim',
-          'vimdoc',
-          'just',
-          'json5',
-          'toml',
-        })
-      end
-    end,
+
+    opts = {
+      ensure_installed = {
+        'bash',
+        'c',
+        'cpp',
+        'cmake',
+        'diff',
+        'html',
+        'kconfig',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc',
+        'just',
+        'json5',
+        'toml',
+      },
+    },
   },
   { 'nvim-treesitter/nvim-treesitter-textobjects' },
 }

@@ -92,7 +92,7 @@ return {
           }, -- opts
           keymaps = {
             close = {
-              modes = { n = 'q', i = '<C-q>' },
+              modes = { n = '<C-q>', i = '<C-q>' },
             },
             send = {
               modes = { n = '<C-s>', i = '<C-s>' },
@@ -139,9 +139,9 @@ return {
               end,
             },
             summary = {
-              create_summary_keymap = '<C-s>c',
-              browse_summaries_keymap = '<C-s>b',
-              preview_summary_keymap = '<C-s>p',
+              create_summary_keymap = '<C-r>c',
+              browse_summaries_keymap = '<C-r>b',
+              preview_summary_keymap = '<C-r>p',
 
               generation_opts = {
                 context_size = 90000,
