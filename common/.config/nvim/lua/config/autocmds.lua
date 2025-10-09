@@ -1,4 +1,4 @@
-local ft_autoclose = { 'snacks_', 'dapui_', 'dap-repl', 'qf', 'codecompanion' }
+local ft_autoclose = {}
 local ft_autoclose_ignore = { 'snacks_dashboard' }
 -- Disable autoformat for lua files
 vim.api.nvim_create_autocmd({ 'FileType' }, {
@@ -44,8 +44,30 @@ vim.keymap.set('n', '<leader>bD', function()
     pcall(vim.cmd.quit)
   end
 end, { desc = '[B]uffer and window [D]elete' })
-
 vim.api.nvim_create_autocmd('QuitPre', {
+  -- group = augroup("close_with_q"),
+  pattern = {
+    'PlenaryTestPopup',
+    'checkhealth',
+    'dbout',
+    'gitsigns-blame',
+    'grug-far',
+    'help',
+    'lspinfo',
+    'neotest-output',
+    'neotest-output-panel',
+    'neotest-summary',
+    'notify',
+    'qf',
+    'spectre_panel',
+    'startuptime',
+    'noice',
+    'dapui',
+    'trouble',
+    'dap-repl',
+    'codecompanion',
+  },
+
   callback = function()
     local _, wins, close = list_wins()
     local cur_win = vim.api.nvim_get_current_win()
@@ -64,4 +86,54 @@ vim.api.nvim_create_autocmd('QuitPre', {
       pcall(vim.api.nvim_win_close, win, true)
     end
   end,
+  -- callback = function(event)
+  --   vim.bo[event.buf].buflisted = false
+  --   vim.schedule(function()
+  --     vim.keymap.set("n", "q", function()
+  --       vim.cmd("close")
+  --       pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
+  --     end, {
+  --       buffer = event.buf,
+  --       silent = true,
+  --       desc = "Quit buffer",
+  --     })
+  --   end)
+  -- end,
 })
+-- vim.api.nvim_create_autocmd('QuitPre', {
+--   callback = function()
+--     local _, wins, close = list_wins()
+--     local cur_win = vim.api.nvim_get_current_win()
+--     if #wins ~= 1 then
+--       return
+--     end
+--     -- Prevent quit when 'close' window is focused
+--     if vim.list_contains(close, cur_win) then
+--       return
+--     end
+--     if vim.list_contains(close, cur_win) then
+--       -- stylua: ignore
+--       vim.defer_fn(function() pcall(vim.cmd.quit) end, 100)
+--     end
+--     for _, win in ipairs(close) do
+--       pcall(vim.api.nvim_win_close, win, true)
+--     end
+--   end,
+-- })
+
+vim.api.nvim_create_autocmd('QuickFixCmdPost', {
+  callback = function()
+    vim.cmd [[Trouble qflist open]]
+  end,
+})
+
+-- vim.api.nvim_create_autocmd('BufRead', {
+--   callback = function(ev)
+--     if vim.bo[ev.buf].buftype == 'quickfix' then
+--       vim.schedule(function()
+--         vim.cmd [[cclose]]
+--         vim.cmd [[Trouble qflist open]]
+--       end)
+--     end
+--   end,
+-- })

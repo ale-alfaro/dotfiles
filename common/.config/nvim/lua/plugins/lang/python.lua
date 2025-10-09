@@ -2,30 +2,6 @@
 ---
 ---
 
-local function set_python_path(command)
-  local path = command.args
-  local python_clients = {
-    {
-      bufnr = vim.api.nvim_get_current_buf(),
-      name = 'basedpyright',
-    },
-
-    {
-      bufnr = vim.api.nvim_get_current_buf(),
-      name = 'ty',
-    },
-  }
-  local clients = vim.lsp.get_clients(python_clients)
-  for _, client in ipairs(clients) do
-    if client.settings then
-      client.settings.python = vim.tbl_deep_extend('force', client.settings.python or {}, { pythonPath = path })
-    else
-      client.config.settings = vim.tbl_deep_extend('force', client.config.settings, { python = { pythonPath = path } })
-    end
-    client:notify('workspace/didChangeConfiguration', { settings = nil })
-  end
-end
-
 return {
   {
     'nvim-treesitter/nvim-treesitter',
@@ -92,30 +68,30 @@ return {
           end,
         },
 
-        -- ty = {
-        --
-        --   mason = false,
-        --   filetypes = { 'python' },
-        --   root_markers = {
-        --     'uv.lock',
-        --     'pyproject.lock',
-        --   },
-        --   cmd = { 'ty', 'server' },
-        --   settings = {
-        --     ty = {
-        --       settings = {
-        --         disableLanguageServices = true,
-        --         diagnosticMode = 'workspace',
-        --         -- experimental = {
-        --         --   autoImport = true,
-        --         -- },
-        --       },
-        --     },
-        --   },
-        --   capabilities = {
-        --     offsetEncoding = { 'utf-16' },
-        --   },
-        -- },
+        ty = {
+
+          mason = false,
+          filetypes = { 'python' },
+          root_markers = {
+            'uv.lock',
+            'pyproject.lock',
+          },
+          cmd = { 'ty', 'server' },
+          settings = {
+            ty = {
+              settings = {
+                disableLanguageServices = true,
+                diagnosticMode = 'workspace',
+                -- experimental = {
+                --   autoImport = true,
+                -- },
+              },
+            },
+          },
+          capabilities = {
+            offsetEncoding = { 'utf-16' },
+          },
+        },
 
         -- vim.lsp.enable 'ty'
         basedpyright = {

@@ -11,9 +11,10 @@ function M.apply(config)
 	config.initial_cols = 160
 	config.initial_rows = 35
 	config.default_workspace = "dotfiles"
-
+	local home_dir = os.getenv("HOME")
 	config.set_environment_variables = {
-		ZDOTDIR = "/home/alealfaro/.config/zsh",
+		ZDOTDIR = home_dir .. "/.config/zsh",
+		TERMINAL = "wezterm",
 	}
 	-- Input method and scrolling
 	config.use_ime = true
@@ -50,11 +51,6 @@ function M.apply(config)
 	config.mouse_bindings = M.get_mouse_bindings()
 	config.hyperlink_rules = M.get_hyperlink_rules()
 	config.launch_menu = M.get_launch_menu()
-
-	-- local work_project_dir = wezterm.home_dir .. "/sibel"
-	local personal_project_dir = wezterm.home_dir .. "/GeekieStuff"
-	local workspaces = require("utils.workspaces")
-	workspaces.add_project_dirs(personal_project_dir)
 end
 
 function M.get_mouse_bindings()

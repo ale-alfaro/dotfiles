@@ -2,7 +2,7 @@
 # $ZDOTDIR/.zprofile: Gets loaded for login shells.
 # ------------------------------------------------------------------------------
 #
-print "Zsh login shell"
+print ".zprofile start"
 
 # PATH extensions
 # ------------------------------------------------------------------------------
@@ -28,8 +28,11 @@ export PATH="$PATH:$HOME/.cargo/bin"
 # Go
 # ------------------------------------------------------------------------------
 export GOROOT="/usr/local/go"
-export GOPATH="/home/alealfaro/go"
+export GOPATH="$HOME/go"
 
+# Go
+# ------------------------------------------------------------------------------
+# export PATH="$PATH:$HOME/.local/share/uv/"
 # Justfiles (Better makefiles)
 # ------------------------------------------------------------------------------
 export JUSTFILES_HOME=$XDG_CONFIG_HOME/just

@@ -155,7 +155,34 @@ return {
   },
   {
     'folke/trouble.nvim',
-    opts = { use_diagnostic_signs = true },
+    opts = {
+      use_diagnostic_signs = true,
+      modes = {
+        uv_qflist = {
+          mode = 'qflist',
+          win = { position = 'bottom', size = 10 },
+          groups = {
+            { 'filename', format = '{file_icon} {basename:Title} {count}' },
+          },
+        },
+
+        uv_wspace_diags = {
+          mode = 'diagnostics', -- inherit from diagnostics mode
+          filter = {
+            any = {
+              buf = 0, -- current buffer
+              {
+                severity = vim.diagnostic.severity.ERROR, -- errors only
+                -- limit to files in the current project
+                function(item)
+                  return item.filename:find((vim.loop or vim.uv).cwd(), 1, true)
+                end,
+              },
+            },
+          },
+        },
+      },
+    },
   },
   {
     'folke/lazydev.nvim',

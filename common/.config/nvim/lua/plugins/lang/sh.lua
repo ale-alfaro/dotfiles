@@ -15,7 +15,7 @@ return {
       opts.servers = {
         ---@type vim.lsp.Config
         hyprls = {
-          -- build = "go install github.com/hyprland-community/hyprls/cmd/hyprls@latest",
+          build = 'go install github.com/hyprland-community/hyprls/cmd/hyprls@latest',
           cmd = { 'hyprls', '--stdio' },
           filetypes = { 'hyprlang' },
 

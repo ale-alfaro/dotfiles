@@ -157,39 +157,39 @@ return {
             memory = { index_on_startup = true },
           },
         },
-        vectorcode = {
-          enabled = vim.fn.executable 'vectorcode' == 1,
-          ---@type VectorCode.CodeCompanion.ExtensionOpts
-          opts = {
-            prompt_library = {
-              ['CodeCompanion Assistant'] = {
-                project_root = plugin.dir,
-                file_patterns = { 'lua/codecompanion/**.lua', 'doc/**/*.md' },
-              },
-              ['Zephyr Assistant'] = {
-                project_root = '/home/alealfaro/ncs/sdk/v3.1.0/zephyr',
-                file_patterns = { '**/*.c*', '**/*.yml', '**/*.dts*', '**/*.cmake', '**/*.txt', '**/*.rst', '**/*.py' },
-              },
-              ['NCS Assistant'] = {
-                project_root = '/home/alealfaro/ncs/sdk/v3.1.0/nrf',
-                file_patterns = { '**/*.c*', '**/*.yml', '**/*.dts*', '**/*.cmake', '**/*.txt', '**/*.rst', '**/*.py' },
-              },
-            },
-            tool_group = { collapse = true },
-            tool_opts = {
-              ---@type VectorCode.CodeCompanion.ToolOpts
-              ['*'] = { use_lsp = false },
-              ls = {},
-              vectorise = {},
-              ---@type VectorCode.CodeCompanion.QueryToolOpts
-              query = {
-                default_num = { document = 5, chunk = 10 },
-                max_num = { document = 10, chunk = 20 },
-                chunk_mode = true,
-              },
-            },
-          },
-        }, -- vectorcode
+        -- vectorcode = {
+        --   enabled = vim.fn.executable 'vectorcode' == 1,
+        --   ---@type VectorCode.CodeCompanion.ExtensionOpts
+        --   opts = {
+        --     prompt_library = {
+        --       ['CodeCompanion Assistant'] = {
+        --         project_root = plugin.dir,
+        --         file_patterns = { 'lua/codecompanion/**.lua', 'doc/**/*.md' },
+        --       },
+        --       ['Zephyr Assistant'] = {
+        --         project_root = '/home/alealfaro/ncs/sdk/v3.1.0/zephyr',
+        --         file_patterns = { '**/*.c*', '**/*.yml', '**/*.dts*', '**/*.cmake', '**/*.txt', '**/*.rst', '**/*.py' },
+        --       },
+        --       ['NCS Assistant'] = {
+        --         project_root = '/home/alealfaro/ncs/sdk/v3.1.0/nrf',
+        --         file_patterns = { '**/*.c*', '**/*.yml', '**/*.dts*', '**/*.cmake', '**/*.txt', '**/*.rst', '**/*.py' },
+        --       },
+        --     },
+        --     tool_group = { collapse = true },
+        --     tool_opts = {
+        --       ---@type VectorCode.CodeCompanion.ToolOpts
+        --       ['*'] = { use_lsp = false },
+        --       ls = {},
+        --       vectorise = {},
+        --       ---@type VectorCode.CodeCompanion.QueryToolOpts
+        --       query = {
+        --         default_num = { document = 5, chunk = 10 },
+        --         max_num = { document = 10, chunk = 20 },
+        --         chunk_mode = true,
+        --       },
+        --     },
+        --   },
+        -- }, -- vectorcode
         spinner = {
           enabled = true,
           opts = {
@@ -214,62 +214,62 @@ return {
       { '<leader>as', mode = { 'n', 'v' }, '<cmd>CodeCompanionSummaries<cr>', desc = 'Browse CodeCompanionSummaries' },
     },
   },
-  {
-    'Davidyz/VectorCode',
-    -- dir = "~/git/VectorCode/",
-    version = '*',
-    -- build = "uv tool upgrade vectorcode",
-    build = function(plugin)
-      if vim.fn.executable 'uv' ~= 1 then
-        return vim.notify('Failed to install VectorCode because `uv` is missing.', vim.log.levels.WARN)
-      end
-      local stdpath = vim.fn.stdpath 'data'
-      if string.find(plugin.dir, stdpath) then
-        local command
-        if vim.fn.executable 'vectorcode' == 1 then
-          command = 'uv tool upgrade vectorcode'
-        else
-          command = 'uv tool install "vectorcode[lsp,mcp]"'
-        end
-        vim.system(vim.split(command, ' ', { trimempty = true }), {}, nil)
-      end
-    end,
-    -- opts = function()
-    --   return {
-    --     async_backend = 'lsp',
-    --     notify = true,
-    --     on_setup = { lsp = true },
-    --     n_query = 10,
-    --     timeout_ms = -1,
-    --     async_opts = {
-    --       events = { 'BufWritePost' },
-    --       single_job = true,
-    --       query_cb = require('vectorcode.utils').make_surrounding_lines_cb(40),
-    --       debounce = -1,
-    --       n_query = 30,
-    --     },
-    --   }
-    -- end,
-    config = function(_, opts)
-      -- vim.lsp.config('vectorcode_server', {
-      --   cmd_env = {
-      --     HTTP_PROXY = os.getenv 'HTTP_PROXY',
-      --     HTTPS_PROXY = os.getenv 'HTTPS_PROXY',
-      --   },
-      -- })
-      require('vectorcode').setup(opts)
-      -- vim.api.nvim_create_autocmd("LspAttach", {
-      --   callback = function()
-      --     require("vectorcode.config").get_cacher_backend().register_buffer(0)
-      --   end,
-      -- })
-    end,
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-    },
-    cmd = 'VectorCode',
-    cond = function()
-      return vim.fn.executable 'vectorcode' == 1
-    end,
-  }, -- vectorcode
+  -- {
+  --   'Davidyz/VectorCode',
+  --   -- dir = "~/git/VectorCode/",
+  --   version = '*',
+  --   -- build = "uv tool upgrade vectorcode",
+  --   build = function(plugin)
+  --     if vim.fn.executable 'uv' ~= 1 then
+  --       return vim.notify('Failed to install VectorCode because `uv` is missing.', vim.log.levels.WARN)
+  --     end
+  --     local stdpath = vim.fn.stdpath 'data'
+  --     if string.find(plugin.dir, stdpath) then
+  --       local command
+  --       if vim.fn.executable 'vectorcode' == 1 then
+  --         command = 'uv tool upgrade vectorcode'
+  --       else
+  --         command = 'uv tool install "vectorcode[lsp,mcp]"'
+  --       end
+  --       vim.system(vim.split(command, ' ', { trimempty = true }), {}, nil)
+  --     end
+  --   end,
+  --   -- opts = function()
+  --   --   return {
+  --   --     async_backend = 'lsp',
+  --   --     notify = true,
+  --   --     on_setup = { lsp = true },
+  --   --     n_query = 10,
+  --   --     timeout_ms = -1,
+  --   --     async_opts = {
+  --   --       events = { 'BufWritePost' },
+  --   --       single_job = true,
+  --   --       query_cb = require('vectorcode.utils').make_surrounding_lines_cb(40),
+  --   --       debounce = -1,
+  --   --       n_query = 30,
+  --   --     },
+  --   --   }
+  --   -- end,
+  --   config = function(_, opts)
+  --     -- vim.lsp.config('vectorcode_server', {
+  --     --   cmd_env = {
+  --     --     HTTP_PROXY = os.getenv 'HTTP_PROXY',
+  --     --     HTTPS_PROXY = os.getenv 'HTTPS_PROXY',
+  --     --   },
+  --     -- })
+  --     require('vectorcode').setup(opts)
+  --     -- vim.api.nvim_create_autocmd("LspAttach", {
+  --     --   callback = function()
+  --     --     require("vectorcode.config").get_cacher_backend().register_buffer(0)
+  --     --   end,
+  --     -- })
+  --   end,
+  --   dependencies = {
+  --     'nvim-lua/plenary.nvim',
+  --   },
+  --   cmd = 'VectorCode',
+  --   cond = function()
+  --     return vim.fn.executable 'vectorcode' == 1
+  --   end,
+  -- }, -- vectorcode
 }

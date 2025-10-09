@@ -17,16 +17,16 @@ zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
 zinit light Aloxaf/fzf-tab
 zinit ice lucid wait'0'
-# zinit light joshskidmore/zsh-fzf-history-search
-# zinit light jeffreytse/zsh-vi-mode
+zinit light joshskidmore/zsh-fzf-history-search
+zinit light jeffreytse/zsh-vi-mode
 
 #Set option for clipboard zsh plugin
-if [[ $OS == "Linux" ]]; then
-  ZSH_SYSTEM_CLIPBOARD_METHOD="wlc" # wayland clipboard (CLIPBOARD)
-  # ZSH_SYSTEM_CLIPBOARD_METHOD="wlp" # wayland clipboard (PRIMARY)
-fi
+# if [[ $OS == "Linux" ]]; then
+#   ZSH_SYSTEM_CLIPBOARD_METHOD="wlc" # wayland clipboard (CLIPBOARD)
+#   # ZSH_SYSTEM_CLIPBOARD_METHOD="wlp" # wayland clipboard (PRIMARY)
+# fi
 zinit light kutsan/zsh-system-clipboard
-
-# Add in snippets
-zinit snippet OMZP::git
-zinit snippet OMZP::sudo
+#
+# # Add in snippets
+# zinit snippet OMZP::git
+# zinit snippet OMZP::sudo

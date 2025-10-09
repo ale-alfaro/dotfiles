@@ -119,3 +119,5 @@ require('lazy').setup {
     },
   },
 }
+
+return M

@@ -1,0 +1,54 @@
+local h = require 'null-ls.helpers'
+local methods = require 'null-ls.methods'
+local uv = require 'custom.python.uv'
+
+local CODE_ACTION = methods.internal.CODE_ACTION
+
+local refactoring_source = h.make_builtin {
+  name = 'refactoring',
+  meta = {
+    url = 'https://github.com/ThePrimeagen/refactoring.nvim',
+    description = 'The Refactoring library based off the Refactoring book by Martin Fowler.',
+    notes = {
+      [[Requires visually selecting the code you want to refactor and calling `:'<,'>lua vim.lsp.buf.code_action()`]],
+    },
+  },
+  method = CODE_ACTION,
+  filetypes = { 'go', 'javascript', 'lua', 'python', 'typescript' },
+  generator = {
+    -- the plugin currently returns all refactors, regardless of context / availability
+    -- so we ignore params
+    fn = function(context)
+      if context.lsp_params.range.start == context.lsp_params.range['end'] then
+        return
+      end
+
+      local ok, refactors = pcall(require('refactoring').get_refactors)
+      if not ok then
+        return
+      end
+
+      local actions = {}
+      for _, name in ipairs(refactors) do
+        table.insert(actions, {
+          title = name,
+          action = function()
+            require('refactoring').refactor(name)
+          end,
+        })
+      end
+      return actions
+    end,
+  },
+}
+
+local M = {}
+
+function M.get_sources()
+  return {
+    refactoring_source,
+    uv.null_ls_sources.code_actions.ruff_fix,
+  }
+end
+
+return M
