@@ -48,48 +48,62 @@ A schema can contain the following elements:
     * Useful for styling, filtering, or formatting entries.
 
 --]]
-local schema = {
-	options = {
 
-		prompt = "Workspace to switch: ",
-		callback = history.Wrapper(sessionizer.DefaultCallback),
-	},
-	sessionizer.DefaultWorkspace({}),
-	history.MostRecentWorkspace({}),
+---Apply plugin to Wezterm config.
+---@param config_builder table
+---@param plugin_config table|nil
+---@return table config_builder the updated config
+local function apply_to_config(config_builder, plugin_config)
+	plugin_config = plugin_config or {}
 
-	wezterm.home_dir .. "/sibel/eng/tools",
-	wezterm.home_dir .. "/dotfiles",
-	wezterm.home_dir .. "/Documents/Obsidian",
+	local schema = plugin_config.schema or {
+		options = {
+			prompt = "Workspace to switch: ",
+			callback = history.Wrapper(sessionizer.DefaultCallback),
+		},
+		sessionizer.DefaultWorkspace({}),
+		history.MostRecentWorkspace({}),
 
-	sessionizer.FdSearch(wezterm.home_dir .. "/dev"),
-	sessionizer.FdSearch(wezterm.home_dir .. "/Uni"),
-	processing = sessionizer.for_each_entry(function(entry)
-		entry.label = entry.label:gsub(wezterm.home_dir, "~")
-	end),
-}
-local smart_workspace_switcher_replica = {
-	options = {
-		prompt = "Workspace to switch: ",
-		callback = history.Wrapper(sessionizer.DefaultCallback),
-	},
-	{
-		sessionizer.AllActiveWorkspaces({ filter_current = false, filter_default = false }),
+		wezterm.home_dir .. "/dotfiles",
+		wezterm.home_dir .. "/Documents/Obsidian",
+
+		sessionizer.FdSearch({
+			wezterm.home_dir .. "/sibel/eng",
+			max_depth = 2,
+			include_submodules = true,
+		}),
+		sessionizer.FdSearch({
+			wezterm.home_dir .. "/GeekieStuff",
+			max_depth = 2,
+			include_submodules = true,
+		}),
 		processing = sessionizer.for_each_entry(function(entry)
-			entry.label = wezterm.format({
-				{ Text = "󱂬 : " .. entry.label },
-			})
+			entry.label = entry.label:gsub(wezterm.home_dir, "~")
 		end),
-	},
-	wezterm.plugin.require("https://github.com/mikkasendke/sessionizer-zoxide.git").Zoxide({}),
-	processing = sessionizer.for_each_entry(function(entry)
-		entry.label = entry.label:gsub(wezterm.home_dir, "~")
-	end),
-}
+	}
 
-local config = {
-	keys = {
+	local smart_workspace_switcher_replica = plugin_config.smart_workspace_switcher_replica or {
+		options = {
+			prompt = "Workspace to switch: ",
+			callback = history.Wrapper(sessionizer.DefaultCallback),
+		},
 		{
-			key = "s",
+			sessionizer.AllActiveWorkspaces({ filter_current = false, filter_default = false }),
+			processing = sessionizer.for_each_entry(function(entry)
+				entry.label = wezterm.format({
+					{ Text = "󱂬 : " .. entry.label },
+				})
+			end),
+		},
+		wezterm.plugin.require("https://github.com/mikkasendke/sessionizer-zoxide.git").Zoxide({}),
+		processing = sessionizer.for_each_entry(function(entry)
+			entry.label = entry.label:gsub(wezterm.home_dir, "~")
+		end),
+	}
+
+	local keys = plugin_config.keys or {
+		{
+			key = "p",
 			mods = "LEADER",
 			action = sessionizer.show(schema),
 		},
@@ -98,12 +112,24 @@ local config = {
 			mods = "LEADER",
 			action = sessionizer.show(smart_workspace_switcher_replica),
 		},
-	},
-	{
-		key = "m",
-		mods = "LEADER",
-		action = history.switch_to_most_recent_workspace,
-	},
-}
+		{
+			key = "m",
+			mods = "LEADER",
+			action = history.switch_to_most_recent_workspace,
+		},
+	}
 
-return config
+	if config_builder.keys == nil then
+		config_builder.keys = keys
+	else
+		for _, keymap in ipairs(keys) do
+			table.insert(config_builder.keys, keymap)
+		end
+	end
+
+	return config_builder
+end
+
+return {
+	apply_to_config = apply_to_config,
+}

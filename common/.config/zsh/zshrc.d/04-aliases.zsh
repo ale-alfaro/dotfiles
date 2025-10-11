@@ -2,13 +2,23 @@
 alias v="n"
 
 n() {
-  if [[ "$#" -eq 0 ]]; then nvim .; fi
+  if [[ "$#" -eq 0 ]]; then nvim; fi
   if [[ "$#" -eq 1 ]]; then
-    if [[ -d "$1" ]]; then
-      zd "$1" && nvim .
-    else
-      nvim "$1"
-    fi
+    case "$1" in
+    zsh)
+      nvim "$ZDOTDIR"
+      ;;
+    hypr)
+      nvim "$XDG_CONFIG_HOME/hypr/hyprland"
+      ;;
+    *)
+      if [[ -d "$1" ]]; then
+        zd "$1" && nvim .
+      else
+        nvim "$1"
+      fi
+      ;;
+    esac
   else
     nvim "$@"
   fi
@@ -29,9 +39,11 @@ zd() {
     z "$@" && printf "\U000F17A9 " && pwd || echo "Error: Directory not found"
   fi
 }
-open() {
-  xdg-open "$@" >/dev/null 2>&1 &
-}
+if [[ "$OS" == "linux"* ]]; then
+  open() {
+    xdg-open "$@" >/dev/null 2>&1 &
+  }
+fi
 # ---- Eza (better ls) -----
 alias lt='eza --tree --level=2 --long --icons --git'
 alias lta='lt -a'

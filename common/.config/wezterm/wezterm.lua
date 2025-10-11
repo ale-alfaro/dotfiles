@@ -2,7 +2,10 @@
 local wezterm = require("wezterm")
 
 ---@type Config
-local config = wezterm.config_builder and wezterm.config_builder() or {}
+local config = {}
+if wezterm.config_builder then
+	config = wezterm.config_builder()
+end
 local colors = require("utils.colors")
 colors.init()
 
@@ -37,10 +40,14 @@ smart_splits.apply_to_config(config, {
 	-- log level to use: info, warn, error
 	log_level = "info",
 })
-local utils = require("utils.functions")
--- local resurrect = require("plugins.resurrect.config")
---
+
+-- Sessionizer for project management
 local sessionizer = require("plugins.sessionizer.config")
--- config.keys = require("utils.functions").merge_all(config.keys, resurrect.keys)
-config.keys = utils.merge_all(config.keys, sessionizer.keys)
+sessionizer.apply_to_config(config)
+
+-- Resurrect for session saving and restoring
+local resurrect = require("plugins.resurrect.config")
+resurrect.apply_to_config(config)
+
+-- wezterm.log_info("Wezterm keys: " .. config.keys)
 return config

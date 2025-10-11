@@ -22,11 +22,18 @@ default:
 
 
 ##### J-Link Documentation #####
-jlink_notes_path := "/home/alealfaro/Documents/Obsidian/Embedded-Cpp-Notes/Build,Test and other tools/JLink/JLinkCommander_Notes.md"
-
+obsidian_home := env('OBSIDIAN_HOME')
+jlink_commander_docs := "https://kb.segger.com/J-Link_Commander"
+jlink_manual  := "/opt/SEGGER/JLink/Doc/Manuals/UM08001_JLink.pdf" 
 # Show J-Link command documentation
 show-jlink-commands:
-    @bat --style=header,grid --paging=always {{jlink_notes_path}}
+  @fd "JLinkCommander" {{ obsidian_home }} -X bat 
+
+show-jlink-docs:
+  @open {{ jlink_manual }}
+
+show-jlink-commander-docs:
+  @open {{ jlink_commander_docs }}
 ##### JLink Common #####
 # Hidden recipe to run JLinkExe with common options
 _jlink-run device script iface='swd' speed='4000' *extra_opts:
@@ -75,10 +82,19 @@ verify-flash-jlink device:
     @echo "INFO: Verifying flash on {{device}}"...
     @just _jlink-run "{{device}}" "{{jlink_verify_script_tmp_path}}"
 
+jlink_status_command := '''
+    st
+    con 
+    q
+'''
+status-jlink device:
+    @echo "{{ jlink_status_command }}"  > "{{jlink_action_script_tmp_path}}"
+    @echo "INFO: Getting Device Status"
+    @just _jlink-run {{ device }} "{{jlink_action_script_tmp_path}}"
 
 ##### J-Link Probe Actions #####
 jlink_action_script_tmp_path := join(cache_directory(), "jlink.action.tmp")
-_jlink-run-action script *extra_opts:
+_jlink-run-probe script *extra_opts:
     @JLinkExe \
         -CommanderScript "{{script}}" \
         -nogui 1 \
@@ -94,7 +110,7 @@ power-jlink state:
     {{  if state =~ 'on&&off' { error('Invalid state') } else { '' } }}
     @echo "{{ replace(jlink_5v_power_command, '<STATE>', state) }}"  > "{{jlink_action_script_tmp_path}}"
     @echo "INFO: Turning target power {{state}}"
-    @just _jlink-run-action "{{jlink_action_script_tmp_path}}"
+    @just _jlink-run-probe "{{jlink_action_script_tmp_path}}"
 
 jlink_vcom_command := '''
     VCOM <STATE>
@@ -105,18 +121,18 @@ vcom-jlink state:
     {{  if state =~ 'enable&&disable' { error('Invalid state') } else { '' } }}
     @echo "{{ replace(jlink_vcom_command, '<STATE>', state) }}"  > "{{jlink_action_script_tmp_path}}"
     @echo "INFO: Setting VCOM to {{state}}. Power-cycle the J-Link probe for change to take effect."
-    @just _jlink-run-action "{{jlink_action_script_tmp_path}}"
+    @just _jlink-run-probe "{{jlink_action_script_tmp_path}}"
 
-jlink_status_command := '''
+jlink_probe_status_command := '''
     st
     f
     q
 '''
-# Show J-Link hardware and firmware status
-status-jlink:
-    @echo "{{ jlink_status_command }}"  > "{{jlink_action_script_tmp_path}}"
-    @echo "INFO: Getting status"
-    @just _jlink-run-action "{{jlink_action_script_tmp_path}}"
+# Show J-Link probe hardware and firmware status
+status-jlink-probe:
+    @echo "{{ jlink_probe_status_command }}"  > "{{jlink_action_script_tmp_path}}"
+    @echo "INFO: Getting JLink probe status"
+    @just _jlink-run-probe "{{jlink_action_script_tmp_path}}"
 
 
 

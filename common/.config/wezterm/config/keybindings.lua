@@ -44,6 +44,7 @@ function M.get_keys(alt_modifier)
 		{ key = "n", mods = alt_modifier .. "|SHIFT", action = action.SpawnTab("DefaultDomain") },
 		{ key = "w", mods = alt_modifier, action = action.CloseCurrentPane({ confirm = false }) },
 		{ key = "w", mods = alt_modifier .. "|SHIFT", action = action.CloseCurrentTab({ confirm = false }) },
+    { key = 'q', mods = 'OPT', action = action.QuitApplication },
 		{ key = "t", mods = "LEADER", action = action.ShowLauncherArgs({ flags = "TABS" }) },
 
 		-- Pane operations
@@ -59,14 +60,9 @@ function M.get_keys(alt_modifier)
 		{ key = "g", mods = "OPT", action = action.ScrollToTop }, -- Jump to top
 		{ key = "g", mods = "OPT|SHIFT", action = action.ScrollToBottom }, -- Jump to bottom
 
-		-- Font size
-		{ key = "0", mods = alt_modifier, action = action.ResetFontSize },
-		{ key = "-", mods = alt_modifier, action = action.DecreaseFontSize },
-		{ key = "=", mods = alt_modifier, action = action.IncreaseFontSize },
 
 		-- Utility
 		{ key = "/", mods = alt_modifier, action = action.Search({ CaseInSensitiveString = "" }) },
-		{ key = "c", mods = "LEADER", action = action.ShowLauncherArgs({ flags = "FUZZY|LAUNCH_MENU_ITEMS" }) },
 		{ key = "d", mods = "LEADER|SHIFT", action = action.ShowDebugOverlay },
 		{ key = "p", mods = alt_modifier, action = action.ActivateCommandPalette },
 		{ key = "v", mods = "LEADER", action = action.ActivateCopyMode },
@@ -136,6 +132,13 @@ function M.get_key_tables()
 			{ key = "l", action = M.copy_line_action() },
 			{ key = "r", action = M.copy_regex_action() },
 		},
+    resize = {
+
+		-- Font size
+      { key = "0", mods = alt_modifier, action = action.ResetFontSize },
+      { key = "-", mods = alt_modifier, action = action.DecreaseFontSize },
+      { key = "=", mods = alt_modifier, action = action.IncreaseFontSize },
+    },
 		open = {
 			{ key = "c", action = M.spawn_command("VS Code", { "zsh", "-lc", "code ." }) },
 			{ key = "u", action = M.open_url_action() },

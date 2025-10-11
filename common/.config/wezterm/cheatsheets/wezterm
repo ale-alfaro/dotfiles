@@ -6,10 +6,10 @@ USAGE: wezterm [command] [options]
 
 APPLICATION CONTROL:
   ALT+p                       Command palette
-  Leader+c                    Launch menu
-  Leader+h                    Show cheatsheets
-  Leader+Shift+d              Debug overlay
+  LEADER+h                    Show cheatsheets
+  LEADER+SHIFT+d              Debug overlay
   ALT+/                       Search current content
+  ALT+q                       Quit Wezterm
 
 FONT & DISPLAY:
   ALT+=                       Increase font size
@@ -17,31 +17,26 @@ FONT & DISPLAY:
   ALT+0                       Reset font size
 
 WORKSPACE MANAGEMENT:
-  Leader+s                    Workspace selector (fuzzy)
-  Leader+f                    Workspace selector (fuzzy)
-
-  Leader+l                    Switch to last workspace
-  Leader+[                    Previous workspace
-  Leader+]                    Next workspace
-  Leader+p                    Project selector
-  Leader+r                    Rename current workspace
+  LEADER+e                    Switch workspace (smart)
+  LEADER+p                    Project selector
+  LEADER+m                    Switch to most recent workspace
+  LEADER+r                    Rename current workspace
 
 SESSION RESURRECTION (PLUGIN):
-  Leader+S                    Save session (workspace & window)
-  Leader+L                    Load session (fuzzy find)
-  Leader+d                    Delete saved session (fuzzy find)
+  LEADER+s                    Save session (workspace & window)
+  LEADER+l                    Load session (fuzzy find)
 
 TAB MANAGEMENT:
-  ALT+Shift+n                 New tab
-  ALT+Shift+w                 Close current tab
+  ALT+SHIFT+n                 New tab
+  ALT+SHIFT+w                 Close current tab
   ALT+1-9                     Jump to tab by number
-  Leader+t                    Tab selector (fuzzy search)
+  LEADER+t                    Tab selector (fuzzy search)
 
 PANE MANAGEMENT:
   Split:
   ALT+s                       Split vertically (top/bottom)
   ALT+n                       Split horizontally (left/right)
-  Leader+z                    Toggle pane zoom
+  LEADER+z                    Toggle pane zoom
 
   Navigation (Smart Splits):
   CTRL+h/j/k/l                Navigate panes by direction
@@ -61,22 +56,22 @@ MODAL OPERATIONS:
   u                           Open URL from screen
 
   Muxer Mode (Leader+m):
-  Leader+a                    Attach to unix domain
-  Leader+d                    Detach from unix domain
-  Leader+Shift+$              Rename session
+  a                           Attach to unix domain
+  d                           Detach from unix domain
+  SHIFT+$                     Rename session
 
 COPY & PASTE:
   ALT+c                       Copy selected text
   ALT+v                       Paste clipboard content
-  Leader+v                    Enter vim-style copy mode
+  LEADER+v                    Enter vim-style copy mode
 
 SCROLLING (VIM-STYLE):
-  OPT+u                       Scroll up half page
-  OPT+d                       Scroll down half page
-  OPT+b                       Scroll up full page
-  OPT+f                       Scroll down full page
-  OPT+g                       Scroll to top
-  OPT+Shift+g                 Scroll to bottom
+  ALT+u                       Scroll up half page
+  ALT+d                       Scroll down half page
+  ALT+b                       Scroll up full page
+  ALT+f                       Scroll down full page
+  ALT+g                       Scroll to top
+  ALT+SHIFT+g                 Scroll to bottom
 
 CONFIGURATION:
   Config location:            ~/.config/wezterm/

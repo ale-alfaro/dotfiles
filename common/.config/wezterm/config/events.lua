@@ -28,17 +28,17 @@ local PROGRAM_ICONS = {
 function M.setup()
 	wezterm.on("update-status", M.update_status)
 	wezterm.on("format-tab-title", M.format_tab_title)
-	wezterm.on("gui-startup", M.gui_startup)
-	wezterm.on("show-workspace-launcher", function()
-		workspaces.show_workspace_launcher()
-	end)
+	-- wezterm.on("gui-startup", M.gui_startup)
+	-- wezterm.on("show-workspace-launcher", function()
+	-- 	workspaces.show_workspace_launcher()
+	-- end)
 
 	-- Copy operations
 	wezterm.on("copy-buffer-from-pane", M.copy_buffer)
 	wezterm.on("copy-text-from-pane", M.copy_text)
-	wezterm.on("flash-terminal", function(window)
-		functions.flash_screen(window)
-	end)
+	-- wezterm.on("flash-terminal", function(window)
+	-- 	functions.flash_screen(window)
+	-- end)
 
 	-- Workspace management
 	wezterm.on("set-previous-workspace", M.set_previous_workspace)

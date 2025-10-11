@@ -28,3 +28,4 @@ install-udev-rules rules_file:
     @sudo udevadm control --reload
 
 mod JLink
+import 'zephyr/dtsh.just'

@@ -21,14 +21,22 @@ use_env_dir() {
 }
 
 uv_check_for_deps() {
-  local deps_groups="$1"
-  shift
+  deps_map=("$@")
+  if [[ -z "$deps_map" ]]; then
+    log_error "uv_check_for_deps: No dependency map provided."
+    return 1
+  fi
 
-  for deps in "$@"; do
-    if ret=$(uv pip show "$deps" 2>/dev/null); then
-      log_status "uv has missing dependency: $deps. Adding."
-      uv add --group "$deps_groups" "$deps"
-    fi
+  for group in "${!deps_map[@]}"; do
+    local deps_list="${deps_map[$group]}"
+    read -r -a individual_deps <<<"$deps_list"
+
+    for dep in "${individual_deps[@]}"; do
+      if ! uv pip show "$dep" &>/dev/null; then
+        log_status "uv has missing dependency: $dep (group: $group). Adding."
+        uv add --group "$group" "$dep"
+      fi
+    done
   done
 }
 

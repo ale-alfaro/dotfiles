@@ -224,15 +224,18 @@ end
 --
 --
 --]]
---
-
-map('n', '<leader>zz', '<cmd>qa<cr>', { desc = 'Quit All' })
+delmap('n', '<leader>e')
+map({ 'n', 'v', 'x' }, '<leader>ev', '<Cmd>edit $MYVIMRC<CR>', { desc = 'Edit ' .. vim.fn.expand '$MYVIMRC' })
+map({ 'n', 'v', 'x' }, '<leader>ez', '<Cmd>e $ZDOTDIR<CR>', { desc = 'Edit .zshrc' })
+map({ 'n', 'v', 'x' }, '<leader>eh', '<Cmd>e $XDG_CONFIG_HOME/hypr/hyprland<CR>', { desc = 'Edit Hyprland Config' })
+map({ 'n', 'v', 'x' }, '<leader>ez', '<Cmd>e $JUSTFILE_HOME<CR>', { desc = 'Edit Global Justfiles' })
+-- map({ 'n', 'v', 'x' }, '<leader>n', ':norm ', { desc = 'ENTER NORM COMMAND.' })
+map({ 'n', 'v', 'x' }, '<leader>o', '<Cmd>source %<CR>', { desc = 'Source ' .. vim.fn.expand '$MYVIMRC' })
+-- map({ 'n', 'v', 'x' }, '<leader>O', '<Cmd>restart<CR>', { desc = 'Restart vim.' })
 -- Terminal Mappings
-map('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
-map('t', '<Esc><Esc>', '<cmd>close<cr>', { desc = 'Hide Terminal' })
-delmap('t', '<C-/>')
-delmap('t', '<c-_>')
-delmap('n', '<leader>zz')
+-- delmap('t', '<C-/>')
+-- delmap('t', '<c-_>')
+-- delmap('n', '<leader>zz')
 -- Snacks.toggle.zoom():map("<leader>wm"):map("<leader>uZ")
 -- Snacks.toggle.zen():map("<leader>uz")
 

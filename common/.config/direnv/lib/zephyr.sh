@@ -35,39 +35,6 @@ parse_ncs_env() {
   done <<<"$nrf_env_output"
 }
 
-layout_ncs_full() {
-  local ncs_version
-  ncs_version="${1:-v3.1.0}"
-  echo "Using NCS version $ncs_version"
-  local nrf_env
-  nrf_env="$($NRFUTIL sdk-manager toolchain env --as-script --ncs-version "$ncs_version")"
-  parse_ncs_env "$nrf_env"
-
-  # --- Apply Fundamental Environment Variables FIRST ---
-  local paths_to_add
-  IFS=':' read -r -a paths_to_add <<<"${ncs_path_vars[PATH]}"
-  for ((i = ${#paths_to_add[@]} - 1; i >= 0; i--)); do
-    PATH_add "${paths_to_add[i]}"
-  done
-  export NRFUTIL_HOME="${ncs_vars[NRFUTIL_HOME]}"
-  export ZEPHYR_TOOLCHAIN_VARIANT="${ncs_vars[ZEPHYR_TOOLCHAIN_VARIANT]}"
-  export ZEPHYR_SDK_INSTALL_DIR="${ncs_vars[ZEPHYR_SDK_INSTALL_DIR]}"
-
-  export NCS_SDK_ROOT="$HOME/ncs/sdk/$ncs_version"
-  export ZEPHYR_BASE="$NCS_SDK_ROOT/zephyr"
-
-  # --- Apply Optional Environment Variables for full NCS setup ---
-  local ld_paths_to_add
-  IFS=':' read -r -a ld_paths_to_add <<<"${ncs_path_vars[LD_LIBRARY_PATH]}"
-  for ((i = ${#ld_paths_to_add[@]} - 1; i >= 0; i--)); do
-    path_add LD_LIBRARY_PATH "${ld_paths_to_add[i]}"
-  done
-  export GIT_EXEC_PATH="${ncs_vars[GIT_EXEC_PATH]}"
-  export GIT_TEMPLATE_DIR="${ncs_vars[GIT_TEMPLATE_DIR]}"
-  export PYTHON_HOME="${ncs_vars[PYTHONHOME]}"
-  export PYTHON_PATH="${ncs_vars[PYTHONPATH]}"
-}
-
 prefix_path_ncs() {
   local ncs_version
   ncs_version="${1:-v3.1.0}"
@@ -92,8 +59,12 @@ prefix_path_ncs() {
 }
 
 use_ncs() {
+
+  if [[ ! "$#" -eq 1 ]]; then
+    fatal "use zephyr requires a version to be specified as an argument"
+  fi
   local ncs_version
-  ncs_version="${1:-v3.1.0}"
+  ncs_version="$1"
   echo "Using NCS version $ncs_version"
   local nrf_env
   nrf_env="$($NRFUTIL sdk-manager toolchain env --as-script --ncs-version "$ncs_version")"
@@ -107,21 +78,25 @@ use_ncs() {
   export ZEPHYR_BASE="$NCS_SDK_ROOT/zephyr"
 }
 
-use_zephyr() {
+use_zephyr_toolchain() {
+  if [[ ! "$#" -eq 1 ]]; then
+    fatal "use zephyr requires a version to be specified as an argument"
+  fi
   local zephyr_version
-  zephyr_version="${1:-v0.17.2}"
+  zephyr_version="$1"
+  # zephyr_repo_path="${2:-~/zephyrproject}"
 
   echo "Using Zephyr version $zephyr_version"
   export ZEPHYR_TOOLCHAIN_VARIANT=zephyr
-  export ZEPHYR_PROJECT_ROOT=~/zephyrproject
-  export ZEPHYR_SDK_INSTALL_DIR="$ZEPHYR_PROJECT_ROOT/toolchains/zephyr-sdk-$zephyr_version"
-  if [[ ! -d "$ZEPHYR_SDK_INSTALL_DIR" ]]; then
+  export ZEPHYR_TOOLCHAIN_ROOT="${2:-$HOME/zephyrproject/toolchains}"
+  toolchain_dir="$ZEPHYR_TOOLCHAIN_ROOT/zephyr-sdk-$zephyr_version"
+  echo "Toolchain dir $toolchain_dir"
+  if [[ ! -e "$toolchain_dir" ]]; then
     echo "Zephyr SDK toolchain is not installed! Please run install_zephyr_sdk_toolchain <VERSION> first!"
     return
   fi
-
+  export ZEPHYR_SDK_INSTALL_DIR=$toolchain_dir
   PATH_add "$ZEPHYR_SDK_INSTALL_DIR/arm-zephyr-eabi/bin"
-  export ZEPHYR_BASE="$ZEPHYR_PROJECT_ROOT/zephyr"
 }
 
 uv_add_zephyr_python_deps() {
@@ -131,7 +106,10 @@ uv_add_zephyr_python_deps() {
 
 layout_uv_zephyr() {
   layout uv_project
-  uv_check_for_deps zephyr west ninja pyelftools
+  declare -A zephyr_deps=(
+    [dev]="west ninja pyelftools"
+  )
+  uv_check_for_deps "${zephyr_deps[@]}"
 }
 
 #Main Functions to use for setting up an environment:
@@ -140,12 +118,27 @@ layout_ncs() {
   local ncs_version
   ncs_version="${1:-v3.1.0}"
   use ncs "$ncs_version"
+  use developer_envs
   layout uv_zephyr
 }
 
 layout_zephyr() {
   local zephyr_version
-  zephyr_version="${1:-v3.1.0}"
-  use zephyr "$zephyr_version"
+  zephyr_version="${1:-0.17.2}"
+  use zephyr_toolchain "$zephyr_version"
+
+  use developer_envs
   layout uv_zephyr
+}
+
+layout_west_workspace() {
+  layout_zephyr $1
+  zephyr_base=$(west config zephyr.base)
+  if [[ -z $zephyr_base ]]; then
+    echo "No ZEPHYR_BASE set. Please specify it through the local west config"
+  else
+    export ZEPHYR_BASE="$(west topdir)/$zephyr_base"
+    west zephyr-export
+  fi
+
 }

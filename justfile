@@ -62,7 +62,7 @@ clean-bogus:
 
 # check-aliens: Find 'alien' files (not managed by stow) in the target directory
 check-aliens:
-    @chkstow -a -t {{ dotfiles_target_location }}
+    @chkstow -a -t {{ dotfiles_target_location }} | awk '{print $2}'
 
 # clean-aliens-interactive: Interactively remove 'alien' files. DANGEROUS!
 # This will prompt you to delete any file or directory in your .config
