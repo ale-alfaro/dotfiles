@@ -10,45 +10,15 @@ return {
   {
     'neovim/nvim-lspconfig',
     opts = function(_, opts)
-      -- opts.servers = python_lsp_config
       opts.servers = {
         ruff = {
-          mason = false,
           root_markers = {
             'uv.lock',
             'pyproject.lock',
           },
           cmd = { 'ruff', 'server' },
           filetypes = { 'python' },
-          settings = {
-
-            ruff = {
-              init_options = {
-                settings = {
-                  args = {
-                    '--ignore',
-                    'F821',
-                    '--ignore',
-                    'E402',
-                    '--ignore',
-                    'E722',
-                    '--ignore',
-                    'E712',
-                  },
-                  logLevel = 'error',
-                  -- fixAll = true,
-                  lint = {
-                    -- preview = true,
-                  },
-                  formatter = {
-                    -- preview = true,
-                    backend = 'uv',
-                  },
-                  exclude = { '**/build/**' },
-                },
-              },
-            },
-          },
+          settings = {},
           capabilities = {
             offsetEncoding = { 'utf-16' },
           },
@@ -69,7 +39,6 @@ return {
         },
 
         ty = {
-
           mason = false,
           filetypes = { 'python' },
           root_markers = {
@@ -77,23 +46,11 @@ return {
             'pyproject.lock',
           },
           cmd = { 'ty', 'server' },
-          settings = {
-            ty = {
-              settings = {
-                disableLanguageServices = true,
-                diagnosticMode = 'workspace',
-                -- experimental = {
-                --   autoImport = true,
-                -- },
-              },
-            },
-          },
+          settings = {},
           capabilities = {
             offsetEncoding = { 'utf-16' },
           },
         },
-
-        -- vim.lsp.enable 'ty'
         basedpyright = {
           mason = false,
           cmd = { 'basedpyright-langserver', '--stdio' },
@@ -116,30 +73,63 @@ return {
           capabilities = {
             offsetEncoding = { 'utf-16' },
           },
-          -- on_attach = function(client, bufnr)
-          --   vim.api.nvim_buf_create_user_command(bufnr, 'LspPyrightOrganizeImports', function()
-          --     local params = {
-          --       command = 'basedpyright.organizeimports',
-          --       arguments = { vim.uri_from_bufnr(bufnr) },
-          --     }
-          --
-          --     -- Using client.request() directly because "basedpyright.organizeimports" is private
-          --     -- (not advertised via capabilities), which client:exec_cmd() refuses to call.
-          --     -- https://github.com/neovim/neovim/blob/c333d64663d3b6e0dd9aa440e433d346af4a3d81/runtime/lua/vim/lsp/client.lua#L1024-L1030
-          --     client.request('workspace/executeCommand', params, nil, bufnr)
-          --   end, {
-          --     desc = 'Organize Imports',
-          --   })
-          --
-          --   vim.api.nvim_buf_create_user_command(bufnr, 'LspPyrightSetPythonPath', set_python_path, {
-          --     desc = 'Reconfigure basedpyright with the provided python path',
-          --     nargs = 1,
-          --     complete = 'file',
-          --   })
-          -- end,
+          on_attach = function(client, bufnr)
+            vim.api.nvim_buf_create_user_command(bufnr, 'LspPyrightOrganizeImports', function()
+              local params = {
+                command = 'basedpyright.organizeimports',
+                arguments = { vim.uri_from_bufnr(bufnr) },
+              }
+
+              -- Using client.request() directly because "basedpyright.organizeimports" is private
+              -- (not advertised via capabilities), which client:exec_cmd() refuses to call.
+              -- https://github.com/neovim/neovim/blob/c333d64663d3b6e0dd9aa440e433d346af4a3d81/runtime/lua/vim/lsp/client.lua#L1024-L1030
+              client.request('workspace/executeCommand', params, nil, bufnr)
+            end, {
+              desc = 'Organize Imports',
+            })
+          end,
         },
-        vim.lsp.enable('basedpyright', false),
       }
+
+      vim.lsp.config('ruff', {
+        init_options = {
+          settings = {
+            args = {
+              '--ignore',
+              'F821',
+              '--ignore',
+              'E402',
+              '--ignore',
+              'E722',
+              '--ignore',
+              'E712',
+            },
+            logLevel = 'error',
+            -- fixAll = true,
+            lint = {
+              -- preview = true,
+            },
+            formatter = {
+              -- preview = true,
+              backend = 'uv',
+            },
+            exclude = { '**/build/**' },
+          },
+        },
+      })
+      vim.lsp.enable 'ruff'
+
+      vim.lsp.config('ty', {
+        settings = {
+          -- disableLanguageServices = true,
+          diagnosticMode = 'workspace',
+          experimental = {
+            autoImport = true,
+          },
+        },
+      })
+      -- vim.lsp.enable 'ty'
+      vim.lsp.enable 'basedpyright'
     end,
   },
 
@@ -212,13 +202,21 @@ return {
   },
   {
     'mfussenegger/nvim-dap-python',
-    dependencies = { 'mfussenegger/nvim-dap' },
+    dependencies = {
+      'mfussenegger/nvim-dap-python',
       -- stylua: ignore
       keys = {
         { "<leader>dPt", function() require('dap-python').test_method() end, desc = "Debug Method", ft = "python" },
         { "<leader>dPc", function() require('dap-python').test_class() end, desc = "Debug Class", ft = "python" },
       },
-    config = true,
+      config = function()
+        if vim.fn.has 'win32' == 1 then
+          require('dap-python').setup(LazyVim.get_pkg_path('debugpy', '/venv/Scripts/pythonw.exe'))
+        else
+          require('dap-python').setup(LazyVim.get_pkg_path('debugpy', '/venv/bin/python'))
+        end
+      end,
+    },
   },
 
   {

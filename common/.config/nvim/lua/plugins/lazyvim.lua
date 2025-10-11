@@ -185,6 +185,15 @@ return {
     },
   },
   {
+    'mason-org/mason.nvim',
+    enabled = false,
+  },
+  {
+
+    'mason-org/mason-lspconfig.nvim',
+    enabled = false,
+  },
+  {
     'folke/lazydev.nvim',
     ft = 'lua',
     opts = function(_, opts)
