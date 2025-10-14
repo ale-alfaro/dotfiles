@@ -13,6 +13,7 @@ return {
       -- make sure mason installs the server
       servers = {
         yamlls = {
+          -- Install with yay or homebrew
           filetypes = { 'yaml' },
           -- Have to add this for yamlls to understand that we support line folding
           capabilities = {
@@ -25,7 +26,8 @@ return {
           },
           -- lazy-load schemastore when needed
           before_init = function(_, new_config)
-            new_config.settings.yaml.schemas = vim.tbl_deep_extend('force', new_config.settings.yaml.schemas or {}, require('schemastore').yaml.schemas())
+            new_config.settings.yaml.schemas = vim.tbl_deep_extend('force', new_config.settings.yaml.schemas or {},
+              require('schemastore').yaml.schemas())
           end,
           settings = {
             redhat = { telemetry = { enabled = false } },

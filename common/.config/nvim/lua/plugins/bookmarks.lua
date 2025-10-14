@@ -65,11 +65,11 @@ return {
     })
   end,
   keys = {
-    { 'mm', '<cmd>BookmarksMark<cr>', desc = 'Mark current line into active BookmarkList.' },
-    { 'mq', '<cmd>BookmarksQuickMark<cr>', desc = 'Mark current line into active BookmarkList (no name).' },
-    { 'mo', '<cmd>BookmarksGoto<cr>', desc = 'Go to bookmark at current active BookmarkList' },
-    { '<leader>bc', '<cmd>BookmarksCommands<cr>', mode = { 'n', 'v' }, desc = 'Open bookmark commands view.' },
-    { '<leader>bt', '<cmd>BookmarksTree<cr>', mode = { 'n', 'v' }, desc = 'Open bookmark tree view.' },
-    { '<leader>bg', '<cmd>BookmarksGrep<cr>', mode = { 'n', 'v' }, desc = 'Grep for bookmarks' },
+    { '<leader>bm', '<cmd>BookmarksMark<cr>',      desc = 'Mark current line into active BookmarkList.' },
+    { '<leader>mm', '<cmd>BookmarksQuickMark<cr>', desc = 'Mark current line into active BookmarkList (no name).' },
+    { '<leader>bg', '<cmd>BookmarksGoto<cr>',      desc = 'Go to bookmark at current active BookmarkList' },
+    { '<leader>bc', '<cmd>BookmarksCommands<cr>',  mode = { 'n', 'v' },                                           desc = 'Open bookmark commands view.' },
+    { '<leader>bt', '<cmd>BookmarksTree<cr>',      mode = { 'n', 'v' },                                           desc = 'Open bookmark tree view.' },
+    { '<leader>bs', '<cmd>BookmarksGrep<cr>',      mode = { 'n', 'v' },                                           desc = 'Grep for bookmarks' },
   },
 }

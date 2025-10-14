@@ -92,7 +92,6 @@ map("n", "gco", "o<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>", { desc = "Add Commen
 map("n", "gcO", "O<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>", { desc = "Add Comment Above" })
 
 -- lazy
-map("n", "<leader>l", "<cmd>Lazy<cr>", { desc = "Lazy" })
 
 -- new file
 map("n", "<leader>fn", "<cmd>new<cr>", { desc = "New File" })
@@ -184,7 +183,6 @@ map("n", "<leader>ui", vim.show_pos, { desc = "Inspect Pos" })
 map("n", "<leader>uI", function() vim.treesitter.inspect_tree() vim.api.nvim_input("I") end, { desc = "Inspect Tree" })
 
 -- LazyVim Changelog
-map("n", "<leader>L", function() LazyVim.news.changelog() end, { desc = "LazyVim Changelog" })
 
 -- floating terminal
 map("n", "<leader>fT", function() Snacks.terminal() end, { desc = "Terminal (cwd)" })
@@ -224,6 +222,8 @@ end
 --
 --
 --]]
+delmap("n", "<leader>l")
+delmap("n", "<leader>L")
 delmap('n', '<leader>e')
 map({ 'n', 'v', 'x' }, '<leader>ev', '<Cmd>edit $MYVIMRC<CR>', { desc = 'Edit ' .. vim.fn.expand '$MYVIMRC' })
 map({ 'n', 'v', 'x' }, '<leader>ez', '<Cmd>e $ZDOTDIR<CR>', { desc = 'Edit .zshrc' })
