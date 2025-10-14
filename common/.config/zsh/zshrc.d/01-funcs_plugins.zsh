@@ -30,3 +30,4 @@ zinit light kutsan/zsh-system-clipboard
 # # Add in snippets
 # zinit snippet OMZP::git
 # zinit snippet OMZP::sudo
+source $ZDOTDIR/functions/stdlib.zsh

@@ -11,36 +11,36 @@
 # Set Up Line Editor
 # ------------------------------------------------------------------------------
 ## Enable vi mode
-# bindkey -v
+bindkey -v
 
 ## Enable edit-command-line widget for vi mode
-# autoload -U edit-command-line
-# zle -N edit-command-line
-# bindkey -M vicmd '^X^E' edit-command-line
-# bindkey -M viins '^X^E' edit-command-line
-# bindkey "^v" edit-command-line
+autoload -U edit-command-line
+zle -N edit-command-line
+bindkey -M vicmd '^X^E' edit-command-line
+bindkey -M viins '^X^E' edit-command-line
+bindkey "^v" edit-command-line
 #
 # ## Lower mode switching delay to 10ms
-# KEYTIMEOUT=10
+KEYTIMEOUT=10
 
-## Change cursor shape depending on active vi mode
-## Cursor shape control sequences are defind in
-## [XTerm Control Sequences](https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h4-Functions-using-CSI-_-ordered-by-the-final-character-lparen-s-rparen:CSI-Ps-SP-q.1D81)
-## Inspired by:
-## - https://unix.stackexchange.com/questions/547/make-my-zsh-prompt-show-mode-in-vi-mode/327572#327572
-## - https://web.archive.org/web/20240411231013/https://dougblack.io/words/zsh-vi-mode.html
-# function zle-line-init zle-keymap-select {
-# if [[ ${KEYMAP} == vicmd ]]; then
-#   # steady block cursor in cmd mode
-#   echo -ne '\e[2 q'
-# else
-#   # steady bar cursor in other modes
-#   echo -ne '\e[6 q'
-# fi
-# zle reset-prompt
-# }
-# zle -N zle-line-init
-# zle -N zle-keymap-select
+# Change cursor shape depending on active vi mode
+# Cursor shape control sequences are defind in
+# [XTerm Control Sequences](https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h4-Functions-using-CSI-_-ordered-by-the-final-character-lparen-s-rparen:CSI-Ps-SP-q.1D81)
+# Inspired by:
+# - https://unix.stackexchange.com/questions/547/make-my-zsh-prompt-show-mode-in-vi-mode/327572#327572
+# - https://web.archive.org/web/20240411231013/https://dougblack.io/words/zsh-vi-mode.html
+function zle-line-init zle-keymap-select {
+if [[ ${KEYMAP} == vicmd ]]; then
+  # steady block cursor in cmd mode
+  echo -ne '\e[2 q'
+else
+  # steady bar cursor in other modes
+  echo -ne '\e[6 q'
+fi
+zle reset-prompt
+}
+zle -N zle-line-init
+zle -N zle-keymap-select
 
 ## Bind Meta-. to insert last word of previous command and stay in insert mode
 # bindkey -M viins "\e." insert-last-word
@@ -55,10 +55,10 @@
 # # bindkey ' ' magic-space
 #
 # ## Bind history navigation to C-P and C-N in all modes
-# bindkey '^P' up-line-or-history
+bindkey '^P' up-line-or-history
 #
 # ## Bind history navigation to C-P and C-N in all modes
-# bindkey '^N' down-line-or-history
+bindkey '^N' down-line-or-history
 
 ## Bind C-D to forward delete next char
 # bindkey '^D' delete-char

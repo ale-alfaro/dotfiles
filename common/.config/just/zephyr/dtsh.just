@@ -1,8 +1,5 @@
-
-
 # Add custom bindings directory to dtsh
 # custom_bindings_dir := join(app_dir, 'dts', 'bindings')
-
 # shell-like interface with Devicetree
 #
 # user files:
@@ -16,12 +13,12 @@
 #   -i, --interactive   enter interactive loop after batch command
 
 tree_cmd := 'tree --format NYKC --pager'
-zephyr_bindings_dir:=join(env('ZEPHYR_BASE'), "dts", "bindings")
-zephyr_extra_bindings_dir:= env('ZEPHYR_EXTRA_BINDINGS_DIR') || ''
+zephyr_bindings_dir := join(env('ZEPHYR_BASE', ''), "dts", "bindings")
+zephyr_extra_bindings_dir := env('ZEPHYR_EXTRA_BINDINGS_DIR', '')
 
 [no-cd]
 dtsh build_dir *args:
-    dtsh {{args}} {{if zephyr_extra_bindings_dir != '' { '-b ' + zephyr_bindings_dir + ' -b ' + zephyr_extra_bindings_dir} else { '' } }} {{join( build_dir,  "zephyr", "zephyr.dts" ) }}
+    dtsh {{ args }} {{ if zephyr_extra_bindings_dir != '' { '-b ' + zephyr_bindings_dir + ' -b ' + zephyr_extra_bindings_dir } else { '' } }} {{ join(build_dir, "zephyr", "zephyr.dts") }}
 
 dtsh-cmd build_dir +cmds=tree_cmd: (dtsh build_dir replace("-c 'CMD' ", "CMD", cmds))
 
@@ -33,4 +30,4 @@ dtsh-find build_dir dts-ord_num: (dtsh-cmd build_dir replace(find_cmd, "NUM", dt
 
 mem_dtsh_file := join(source_directory(), "partitions.dtsh")
 
-dtsh-mem build_dir: (dtsh build_dir append(mem_dtsh_file,"-f "))
+dtsh-mem build_dir: (dtsh build_dir append(mem_dtsh_file, "-f "))

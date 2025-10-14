@@ -1,7 +1,6 @@
 #######################################################
 # Shell integrations
 #######################################################
-source $ZDOTDIR/functions/stdlib.zsh
 ## fzf
 # ------------------------------------------------------------------------------
 if has fzf; then
@@ -39,10 +38,6 @@ if has jj; then
 fi
 if has bw; then
   eval "$(bw completion --shell zsh)"
-fi
-
-if has nrfutil; then
-  [[ -r "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh" ]] && . "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh"
 fi
 
 # ---- Atuin (better shell command history) -----

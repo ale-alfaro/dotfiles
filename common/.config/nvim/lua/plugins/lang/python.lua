@@ -19,9 +19,9 @@ return {
           cmd = { 'ruff', 'server' },
           filetypes = { 'python' },
           settings = {},
-          capabilities = {
-            offsetEncoding = { 'utf-16' },
-          },
+          -- capabilities = {
+          --   offsetEncoding = { 'utf-16' },
+          -- },
           on_attach = function(client, bufnr)
             -- Disable hover in favor of Pyright
             client.server_capabilities.hoverProvider = false
@@ -47,9 +47,9 @@ return {
           },
           cmd = { 'ty', 'server' },
           settings = {},
-          capabilities = {
-            offsetEncoding = { 'utf-16' },
-          },
+          -- capabilities = {
+          --   offsetEncoding = { 'utf-16' },
+          -- },
         },
         basedpyright = {
           mason = false,
@@ -70,9 +70,9 @@ return {
               },
             },
           },
-          capabilities = {
-            offsetEncoding = { 'utf-16' },
-          },
+          -- capabilities = {
+          --   offsetEncoding = { 'utf-16' },
+          -- },
           on_attach = function(client, bufnr)
             vim.api.nvim_buf_create_user_command(bufnr, 'LspPyrightOrganizeImports', function()
               local params = {
@@ -121,15 +121,18 @@ return {
 
       vim.lsp.config('ty', {
         settings = {
-          -- disableLanguageServices = true,
-          diagnosticMode = 'workspace',
-          experimental = {
-            autoImport = true,
+          ty = {
+            -- disableLanguageServices = true,
+            diagnosticMode = 'workspace',
+            experimental = {
+              autoImport = true,
+              rename = true,
+            },
           },
         },
       })
-      -- vim.lsp.enable 'ty'
-      vim.lsp.enable 'basedpyright'
+      vim.lsp.enable 'ty'
+      -- vim.lsp.enable 'basedpyright'
     end,
   },
 

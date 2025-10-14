@@ -60,7 +60,7 @@ end
 ---@return string[]?
 local function uv_run_command(picker, item, additional_input)
   local args = {}
-  local uv_tool_runner = { 'uv', 'run', '--all-packages' }
+  local uv_tool_runner = { 'uv', 'run' }
   if additional_input ~= nil then
     for arg_part in string.gmatch(additional_input, '[^%s]+') do
       --[[
@@ -130,7 +130,7 @@ function M.run_diagnostics_for_file(filepath, tool_names)
       local args = item.default_args or {}
       -- Add the filepath to the arguments for the tool
       table.insert(args, filepath)
-      local cmd = create_tool_call({ 'uv', 'run', '--all-packages' }, item.text, args)
+      local cmd = create_tool_call({ 'uv', 'run' }, item.text, args)
       vim.notify('Running cmd: ' .. cmd)
       Snacks.picker.util.cmd(cmd, function(output, ret_code)
         if output[1] == nil then

@@ -9,7 +9,7 @@ window {
 }
 
 label {
-  font-family: 'Hack';
+  font-family: 'JetBrains Mono';
   font-size: 11pt;
 
   color: @label;

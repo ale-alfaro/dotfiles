@@ -6,8 +6,6 @@ set unstable := true
 
 set shell := ["bash", "-c"]
 
-default_hex_file := "build/zephyr/zephyr.hex"
-
 default:
     @just -g --list
 
@@ -28,4 +26,5 @@ install-udev-rules rules_file:
     @sudo udevadm control --reload
 
 mod JLink
-import 'zephyr/dtsh.just'
+mod zephyr
+mod nordic

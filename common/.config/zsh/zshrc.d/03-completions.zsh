@@ -39,7 +39,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   fi
 fi
 
-    # Open a new shell to load the plugin
+if has nrfutil; then
+  [[ -r "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh" ]] && . "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh"
+fi
 # --- Completion generator setup ---
 ZSH_GEN_COMPLETIONS_FROM_MANPAGES_PATH="$HOME/.local/share/zsh/site"
 fpath+=("$ZSH_GEN_COMPLETIONS_FROM_MANPAGES_PATH" $fpath)
