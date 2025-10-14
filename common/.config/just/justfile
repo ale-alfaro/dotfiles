@@ -1,6 +1,7 @@
 #!/usr/bin/env just --working-directory . --justfile
 
 set unstable := true
+set allow-duplicate-recipes := true
 
 # set shell := ["bash", "-eou", "pipefail", "-c"]
 
@@ -24,6 +25,44 @@ systemd-diagnostics:
 install-udev-rules rules_file:
     @sudo cp {{ rules_file }} /etc/udev/rules.d/
     @sudo udevadm control --reload
+
+stow-cmd pkg_dir target_dir pkgs cmd_flag *extra_args:
+    stow -d {{ pkg_dir }} -t {{ target_dir }} --verbose=2 {{ extra_args }}  {{ cmd_flag }} {{ pkgs }}
+
+stow pkg_dir target_dir pkgs *extra_args: (stow-cmd pkg_dir target_dir pkgs "-S" extra_args)
+    @echo "✅ Stow complete."
+
+restow pkg_dir target_dir pkgs *extra_args: (stow-cmd pkg_dir target_dir pkgs "-R" extra_args)
+    @echo "✅ Stow refresh complete."
+
+unstow pkg_dir target_dir pkgs *extra_args: (stow-cmd pkg_dir target_dir pkgs "-D" extra_args)
+    @echo "✅ Unstowed all packages."
+
+# check: Simulate stowing to check for any conflicts
+restow-sim pkg_dir target_dir pkgs *extra_args: (stow-cmd pkg_dir target_dir pkgs "-R --simulate" extra_args)
+    @echo "Simulating stow to check for conflicts..."
+
+stow-check-bogus target_dir:
+    @chkstow -b -t {{ target_dir }}
+
+# clean-bogus: Find and automatically remove all broken symlinks
+clean-bogus target_dir:
+    @echo "Searching for and removing broken symlinks..."
+    @chkstow -b -t {{ target_dir }} | awk -F': ' '{print $2}' | xargs -r rm
+    @echo "✅ Done."
+
+# check-aliens: Find 'alien' files (not managed by stow) in the target directory
+check-aliens target_dir:
+    @chkstow -a -t {{ target_dir }} | awk '{print $2}'
+
+# clean-aliens-interactive: Interactively remove 'alien' files. DANGEROUS!
+# This will prompt you to delete any file or directory in your .config
+
+# that is NOT a symlink created by stow. Use with extreme caution.
+clean-aliens-interactive target_dir:
+    @echo "WARNING: This is a dangerous operation."
+    @echo "You will be prompted to delete every file not managed by stow."
+    @chkstow -a -t {{ target_dir }} | awk -F': ' '{print $2}' | xargs -r -p rm -rf
 
 mod JLink
 mod zephyr
