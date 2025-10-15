@@ -26,6 +26,19 @@ restow-common-dotfiles: (restow absolute_path(justfile_directory() / "common") d
 
 restow-dotfiles: restow-common-dotfiles restow-platform-dotfiles
 
+neovim_install_prefix := "/home/alealfaro/.local/nvim"
+
+[script("bash")]
+nvim_build:
+    set -euxo pipefail
+    tmpdir=$(mktemp -d)
+    cd tmpdir
+    gh repo clone neovim/neovim
+    make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX={{ neovim_install_prefix }}
+    sudo make install
+    version=$( {{ neovim_install_prefix }}/nvim/bin/nvim --version | grep "NVIM" | awk '{print $2}' )
+    mv {{ neovim_install_prefix }}/{nvim, version}
+
 # check: Simulate stowing to check for any conflicts
 # vectorcode := require("vectorcode")
 # common_dotfiles_dir := "nvim zsh wezterm just"
