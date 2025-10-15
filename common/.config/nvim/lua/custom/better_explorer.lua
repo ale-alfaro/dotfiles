@@ -4,8 +4,8 @@ return {
   {
     'folke/snacks.nvim',
     keys = {
-      { '<leader>e', false }, --desc = "Explorer Snacks (root dir)", remap = true },
-      { '<leader>E', false }, --desc = "Explorer Snacks (cwd)", remap = true },
+      { '<leader>e',  false }, --desc = "Explorer Snacks (root dir)", remap = true },
+      { '<leader>E',  false }, --desc = "Explorer Snacks (cwd)", remap = true },
       { '<leader>fe', false },
       { '<leader>fE', false },
     },
@@ -34,7 +34,7 @@ return {
         desc = 'Explorer Snacks (cwd)',
       },
       { '<leader>e', '<leader>fe', desc = 'Explorer Snacks (root dir)', remap = true },
-      { '<leader>E', '<leader>fE', desc = 'Explorer Snacks (cwd)', remap = true },
+      { '<leader>E', '<leader>fE', desc = 'Explorer Snacks (cwd)',      remap = true },
     },
     opts = {
       picker = {
@@ -55,8 +55,8 @@ return {
                   ['.'] = 'toggle_hidden',
                   ['w'] = 'wezterm_split',
                 }, --keys
-              }, -- list
-            }, -- win
+              },   -- list
+            },     -- win
 
             -- ignored = true,
             hidden = true,
