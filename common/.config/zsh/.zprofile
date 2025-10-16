@@ -3,7 +3,9 @@
 # ------------------------------------------------------------------------------
 #
 print ".zprofile start"
-
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  source ~/.zshenv
+fi
 # PATH extensions
 # ------------------------------------------------------------------------------
 # PATH is extended here in ~/.zprofile instead of ~/.zshenv (the more "correct"
