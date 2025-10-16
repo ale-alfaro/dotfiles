@@ -101,3 +101,136 @@ _G.Utils.nmapleader( "dg" ,"<Cmd> lua vim.print(MiniDeps.get_session())<CR>", "[
 _G.Utils.nmapleader( "ds" ,"<Cmd> lua vim.print(MiniDeps.snap_get())<CR>", "[D]eps [S]napshot")
 _G.Utils.nmapleader( "du" ,"<Cmd> lua vim.print(MiniDeps.update())<CR>", "[D]eps [U]pdate")
 _G.Utils.nmapleader( "dc" ,"<Cmd> lua vim.print(MiniDeps.clean())<CR>", "[D]eps [C]lean")
+
+
+
+
+MiniDeps.now(function()
+	MiniDeps.add({ source = "chentoast/marks.nvim" })
+	MiniDeps.add({ source = "aznhe21/actions-preview.nvim" })
+	MiniDeps.add({ source = "nvim-treesitter/nvim-treesitter",        checkout = "main" })
+	MiniDeps.add({ source = "nvim-telescope/telescope.nvim",          chekcout = "0.1.8" })
+	MiniDeps.add({ source = "nvim-telescope/telescope-ui-select.nvim" })
+	MiniDeps.add({ source = "nvim-lua/plenary.nvim" })
+	MiniDeps.add({ source = "neovim/nvim-lspconfig" })
+	MiniDeps.add({ source = "L3MON4D3/LuaSnip" })
+	MiniDeps.add({ source = "LinArcX/telescope-env.nvim" })
+end)
+
+require "marks".setup {
+	builtin_marks = { "<", ">", "^" },
+	refresh_interval = 250,
+	sign_priority = { lower = 10, upper = 15, builtin = 8, bookmark = 20 },
+	excluded_filetypes = {},
+	excluded_buftypes = {},
+	mappings = {}
+}
+
+
+
+local telescope = require("telescope")
+telescope.setup({
+	defaults = {
+		preview = { treesitter = false },
+		color_devicons = true,
+		sorting_strategy = "ascending",
+		borderchars = {
+			"─", -- top
+			"│", -- right
+			"─", -- bottom
+			"│", -- left
+			"┌", -- top-left
+			"┐", -- top-right
+			"┘", -- bottom-right
+			"└", -- bottom-left
+		},
+		path_displays = { "smart" },
+		layout_config = {
+			height = 100,
+			width = 400,
+			prompt_position = "top",
+			preview_cutoff = 40,
+		}
+	}
+})
+telescope.load_extension("ui-select")
+
+require("actions-preview").setup {
+	backend = { "telescope" },
+	extensions = { "env" },
+	telescope = vim.tbl_extend(
+		"force",
+		require("telescope.themes").get_dropdown(), {}
+	)
+}
+
+vim.api.nvim_create_autocmd('LspAttach', {
+	group = vim.api.nvim_create_augroup('my.lsp', {}),
+	callback = function(args)
+		local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
+		if client:supports_method('textDocument/completion') then
+			-- Optional: trigger autocompletion on EVERY keypress. May be slow!
+			local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
+			client.server_capabilities.completionProvider.triggerCharacters = chars
+			vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
+		end
+	end,
+})
+vim.cmd [[set completeopt+=menuone,noselect,popup]]
+
+
+vim.lsp.enable({
+	"lua_ls", "clangd", "ruff",
+  'ty',
+    'bashls',
+    'taplo',
+    'yamls',
+    'jsonls',
+    'basedpyright',
+
+})
+--
+-- require("oil").setup({
+-- 	lsp_file_methods = {
+-- 		enabled = true,
+-- 		timeout_ms = 1000,
+-- 		autosave_changes = true,
+-- 	},
+-- 	columns = {
+-- 		"permissions",
+-- 		"icon",
+-- 	},
+-- 	float = {
+-- 		max_width = 0.7,
+-- 		max_height = 0.6,
+-- 		border = "rounded",
+-- 	},
+-- })
+
+-- require("luasnip").setup({ enable_autosnippets = true })
+-- require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets/" })
+
+-- ~/.config/nvim/init.lua
+
+
+
+
+local builtin = require("telescope.builtin")
+local map = vim.keymap.set
+
+
+map({ "n" }, "<leader>f", builtin.find_files, { desc = "Telescope live grep" })
+map({ "n" }, "<leader>g", builtin.live_grep, { desc = "Telescope live grep" })
+map({ "n" }, "<leader>b", builtin.buffers, { desc = "Telescope buffers" })
+map({ "n" }, "<leader>si", builtin.grep_string, { desc = "Telescope live string" })
+map({ "n" }, "<leader>so", builtin.oldfiles, { desc = "Telescope buffers" })
+map({ "n" }, "<leader>sh", builtin.help_tags, { desc = "Telescope help tags" })
+map({ "n" }, "<leader>sm", builtin.man_pages, { desc = "Telescope man pages" })
+map({ "n" }, "<leader>sr", builtin.lsp_references, { desc = "Telescope tags" })
+map({ "n" }, "<leader>st", builtin.builtin, { desc = "Telescope tags" })
+map({ "n" }, "<leader>sd", builtin.registers, { desc = "Telescope tags" })
+map({ "n" }, "<leader>sc", builtin.git_bcommits, { desc = "Telescope tags" })
+map({ "n" }, "<leader>se", "<cmd>Telescope env<cr>", { desc = "Telescope tags" })
+map({ "n" }, "<leader>sa", require("actions-preview").code_actions)
+--
+--

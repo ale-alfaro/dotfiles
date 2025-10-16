@@ -1,10 +1,12 @@
+---@module "mini.deps"
 local M = {}
 
 
 
 ---@param name string
 -- function M.get_plugin(name)
---   return require("lazy.core.config").spec.plugins[name]
+--   local plugins = MiniDeps.get_session()
+--
 -- end
 --
 -- ---@param name string

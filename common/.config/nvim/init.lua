@@ -166,7 +166,7 @@ vim.o.virtualedit = "block" -- Allow cursor to move where there is no text in vi
 vim.o.wildmode = "longest:full,full" -- Command-line completion mode
 vim.o.winminwidth = 5 -- Minimum window width
 vim.o.wrap = false -- Disable line wrap
-vim.o.statuscolumn = [[%!v:lua.require'snacks.statuscolumn'.get()]]
+-- vim.o.statuscolumn = [[%!v:lua.require'snacks.statuscolumn'.get()]]
 
 --[[
 -- Backup you shit!
@@ -307,15 +307,17 @@ map("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer" })
 map("n", "[b", "<cmd>bprevious<cr>", { desc = "Prev Buffer" })
 map("n", "]b", "<cmd>bnext<cr>", { desc = "Next Buffer" })
 --
--- -- Clear search and stop snippet on escape
--- map({ "i", "n", "s" }, "<esc>", function()
---   vim.cmd("noh")
---   LazyVim.cmp.actions.snippet_stop()
---   return "<esc>"
--- end, { expr = true, desc = "Escape and Clear hlsearch" })
+map({ "n", "x" }, "<leader>y", '"+y')
+map({ "n", "x" }, "<leader>d", '"+d')
+map({ "v", "x", "n" }, "<C-y>", '"+y', { desc = "System clipboard yank." })
+
 --
--- Clear search, diff update and redraw
--- taken from runtime/lua/_editor.lua
+-- map({ "n", "v", "x" }, "<leader>z", "<Cmd>e ~/.config/zsh/.zshrc<CR>", { desc = "Edit .zshrc" })
+map({ "n", "v", "x" }, "<leader>n", ":norm ", { desc = "ENTER NORM COMMAND." })
+-- map({ "n", "v", "x" }, "<leader>o", "<Cmd>source %<CR>", { desc = "Source " .. vim.fn.expand("$MYVIMRC") })
+-- map({ "n", "v", "x" }, "<leader>O", "<Cmd>restart<CR>", { desc = "Restart vim." })
+-- map({ "n", "v", "x" }, "<C-s>", [[:s/\V]], { desc = "Enter substitue mode in selection" })
+-- map({ "n", "v", "x" }, "<leader>lf", vim.lsp.buf.format, { desc = "Format current buffer" })
 map(
   "n",
   "<leader>ur",
@@ -434,5 +436,11 @@ _G.Utils.nmapleader('lt', '<Cmd>lua vim.lsp.buf.type_definition()<CR>', 'Type de
 
 _G.Utils.xmapleader('lf', formatting_cmd, 'Format selection')
 
+map({ "n" }, "<C-q>", ":copen<CR>", { silent = true })
+map({ "n" }, "<leader>wq", "<Cmd>update<CR>", { desc = "Write the current buffer." })
+map({ "n" }, "<leader>q", "<Cmd>:quit<CR>", { desc = "Quit the current buffer." })
+map({ "n" }, "<leader>Q", "<Cmd>:wqa<CR>", { desc = "Quit all buffers and write." })
+map({ "n" }, "<C-f>", "<Cmd>Open .<CR>", { desc = "Open current directory in Finder." })
+map({ "n" }, "<leader>a", ":edit #<CR>", { desc = "Open current directory in Finder." })
 local nvim_config_path = vim.fn.stdpath('config')
 vim.opt.rtp:append(nvim_config_path .. "/minimax")

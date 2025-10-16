@@ -1,5 +1,5 @@
 
----@class lazyvim.util.format
+---@class Utils.format
 ---@overload fun(opts?: {force?:boolean})
 local M = setmetatable({}, {
   __call = function(m, ...)
@@ -139,57 +139,57 @@ function M.format(opts)
   end
 end
 
-function M.health()
-  local Config = require("lazy.core.config")
-  local has_plugin = Config.spec.plugins["none-ls.nvim"]
-  local has_extra = vim.tbl_contains(Config.spec.modules, "lazyvim.plugins.extras.lsp.none-ls")
-  if has_plugin and not has_extra then
-    LazyVim.warn({
-      "`conform.nvim` and `nvim-lint` are now the default formatters and linters in LazyVim.",
-      "",
-      "You can use those plugins together with `none-ls.nvim`,",
-      "but you need to enable the `lazyvim.plugins.extras.lsp.none-ls` extra,",
-      "for formatting to work correctly.",
-      "",
-      "In case you no longer want to use `none-ls.nvim`, just remove the spec from your config.",
-    })
-  end
-end
+-- function M.health()
+--   local Config = require("lazy.core.config")
+--   local has_plugin = Config.spec.plugins["none-ls.nvim"]
+--   local has_extra = vim.tbl_contains(Config.spec.modules, "lazyvim.plugins.extras.lsp.none-ls")
+--   if has_plugin and not has_extra then
+--     LazyVim.warn({
+--       "`conform.nvim` and `nvim-lint` are now the default formatters and linters in LazyVim.",
+--       "",
+--       "You can use those plugins together with `none-ls.nvim`,",
+--       "but you need to enable the `lazyvim.plugins.extras.lsp.none-ls` extra,",
+--       "for formatting to work correctly.",
+--       "",
+--       "In case you no longer want to use `none-ls.nvim`, just remove the spec from your config.",
+--     })
+--   end
+-- end
 
 function M.setup()
-  M.health()
+  -- M.health()
 
   -- Autoformat autocmd
   vim.api.nvim_create_autocmd("BufWritePre", {
-    group = vim.api.nvim_create_augroup("LazyFormat", {}),
+    group = vim.api.nvim_create_augroup("Format", {}),
     callback = function(event)
       M.format({ buf = event.buf })
     end,
   })
 
   -- Manual format
-  vim.api.nvim_create_user_command("LazyFormat", function()
+  vim.api.nvim_create_user_command("TriggerFormat", function()
     M.format({ force = true })
   end, { desc = "Format selection or buffer" })
 
   -- Format info
-  vim.api.nvim_create_user_command("LazyFormatInfo", function()
+  vim.api.nvim_create_user_command("FormatInfo", function()
     M.info()
   end, { desc = "Show info about the formatters for the current buffer" })
 end
 
 ---@param buf? boolean
 function M.snacks_toggle(buf)
-  return Snacks.toggle({
+  return M.toggle({
     name = "Auto Format (" .. (buf and "Buffer" or "Global") .. ")",
     get = function()
       if not buf then
         return vim.g.autoformat == nil or vim.g.autoformat
       end
-      return LazyVim.format.enabled()
+      return M.format.enabled()
     end,
     set = function(state)
-      LazyVim.format.enable(state, buf)
+      M.format.enable(state, buf)
     end,
   })
 end

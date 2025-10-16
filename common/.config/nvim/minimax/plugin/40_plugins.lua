@@ -108,7 +108,7 @@ now(function()
   local ts_start = function(ev)
     vim.treesitter.start(ev.buf)
   end
-  _G.Utils.new_autocmd('FileType', filetypes,  ts_start,'Start tree-sitter')
+  _G.Utils.new_autocmd('FileType', filetypes, ts_start, 'Start tree-sitter')
 end)
 
 -- Language servers ===========================================================
@@ -125,16 +125,173 @@ end)
 -- Neovim's team collects commonly used configurations for most language servers
 -- inside 'neovim/nvim-lspconfig' plugin.
 --
+-- now(function()
+--   -- OR build from source, requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
+--   local function build_blink(params)
+--     vim.notify('Building blink.cmp', vim.log.levels.INFO)
+--     local obj = vim.system({ 'cargo', 'build', '--release' }, { cwd = params.path }):wait()
+--     if obj.code == 0 then
+--       vim.notify('Building blink.cmp done', vim.log.levels.INFO)
+--     else
+--       vim.notify('Building blink.cmp failed', vim.log.levels.ERROR)
+--     end
+--   end
+--   add {
+--     source = 'Saghen/blink.cmp',
+--     hooks = {
+--       post_install = build_blink,
+--       post_checkout = build_blink,
+--     },
+--   }
+--   require('blink-cmp').setup {
+--     -- 'default' (recommended) for mappings similar to built-in completions (C-y to accept)
+--     -- 'super-tab' for mappings similar to vscode (tab to accept)
+--     -- 'enter' for enter to accept
+--     -- 'none' for no mappings
+--     --
+--     -- All presets have the following mappings:
+--     -- C-space: Open menu or open docs if already open
+--     -- C-n/C-p or Up/Down: Select next/previous item
+--     -- C-e: Hide menu
+--     -- C-k: Toggle signature help (if signature.enabled = true)
+--     --
+--     -- See :h blink-cmp-config-keymap for defining your own keymap
+--     keymap = { preset = 'default' },
+--
+--     appearance = {
+--       -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
+--       -- Adjusts spacing to ensure icons are aligned
+--       nerd_font_variant = 'mono',
+--     },
+--
+--     -- (Default) Only show the documentation popup when manually triggered
+--     completion = { documentation = { auto_show = false } },
+--
+--     -- Default list of enabled providers defined so that you can extend it
+--     -- elsewhere in your config, without redefining it, due to `opts_extend`
+--     signature = { enabled = true },
+--     sources = {
+--       default = { 'lsp', 'path', 'snippets', 'buffer' },
+--       per_filetype = {
+--         lua = { inherit_defaults = true, 'lazydev' },
+--       },
+--       providers = {
+--         lazydev = {
+--           name = 'LazyDev',
+--           module = 'lazydev.integrations.blink',
+--           score_offset = 100,
+--         },
+--         lsp = { async = true, score_offset = 70 },
+--         snippets = { score_offset = 1, max_items = 3 },
+--       },
+--     },
+--     -- (Default) Rust fuzzy matcher for typo resistance and significantly better performance
+--     -- You may use a lua implementation instead by using `implementation = "lua"` or fallback to the lua implementation,
+--     -- when the Rust fuzzy matcher is not available, by using `implementation = "prefer_rust"`
+--     --
+--     -- See the fuzzy documentation for more informationm
+--     fuzzy = { implementation = 'prefer_rust_with_warning' },
+--     cmdline = {
+--       enabled = true,
+--       keymap = { preset = 'cmdline' },
+--       completion = {
+--         list = { selection = { preselect = false } },
+--         menu = {
+--           auto_show = function(ctx)
+--             return vim.fn.getcmdtype() == ':'
+--           end,
+--         },
+--         ghost_text = { enabled = true },
+--       },
+--     }, --cmdline
+--   }
+-- end)
+
 -- Add it now if file (and not 'mini.starter') is shown after startup.
-vim.lsp.enable {
-  'lua_ls',
-  'ruff',
-  'ty',
-  'bashls',
-  'taplo',
-  'yamls',
-  'jsonls',
-}
+-- now(function()
+--   add {
+--     source = 'neovim/nvim-lspconfig',
+--     depends = {
+--       'Saghen/blink.cmp',
+--     },
+--   }
+--
+--   -- Use `:h vim.lsp.enable()` to automatically enable language server based on
+--   -- the rules provided by 'nvim-lspconfig'.
+--   -- Use `:h vim.lsp.config()` or 'ftplugin/lsp/' directory to configure servers.
+--   vim.lsp.config('lua_ls', {
+--     stylua = { enabled = false },
+--     lua_ls = {
+--       cmd = { 'lua-language-server' },
+--       filetypes = { 'lua' },
+--       root_markers = {
+--         '.luarc.json',
+--         '.luarc.jsonc',
+--         '.luacheckrc',
+--         '.stylua.toml',
+--         'stylua.toml',
+--         'selene.toml',
+--         'selene.yml',
+--         '.git',
+--       },
+--       -- mason = false, -- set to false if you don't want this server to be installed with mason
+--       -- Use this to add any additional keymaps
+--       -- for specific lsp servers
+--       -- ---@type LazyKeysSpec[]
+--       -- keys = {},
+--       settings = {
+--         Lua = {
+--           workspace = {
+--             checkThirdParty = false,
+--           },
+--           codeLens = {
+--             enable = true,
+--           },
+--           completion = {
+--             callSnippet = 'Replace',
+--           },
+--           doc = {
+--             privateName = { '^_' },
+--           },
+--           hint = {
+--             enable = true,
+--             setType = false,
+--             paramType = true,
+--             paramName = 'Disable',
+--             semicolon = 'Disable',
+--             arrayIndex = 'Disable',
+--           },
+--         },
+--       },
+--     },
+--   })
+--   local servers = {
+--     'lua_ls',
+--     'ruff',
+--     'ty',
+--     'bashls',
+--     'taplo',
+--     'yamls',
+--     'jsonls',
+--     'basedpyright',
+--   }
+--   local lspconfig = require 'lspconfig'
+--   for server, config in pairs(opts.servers) do
+--     -- passing config.capabilities to blink.cmp merges with the capabilities in your
+--     -- `opts[server].capabilities, if you've defined it
+--     config.capabilities = require('blink.cmp').get_lsp_capabilities(config.capabilities)
+--     lspconfig[server].setup(config)
+--   end
+--
+--   -- example calling setup directly for each LSP
+--   local capabilities = require('blink.cmp').get_lsp_capabilities()
+--   local lspconfig = require 'lspconfig'
+--
+--   lspconfig['lua_ls'].setup { capabilities = capabilities }
+--   -- Uncomment and tweak the following `vim.lsp.enable()` call to enable servers.
+--   vim.lsp.enable(servers) 
+-- end)
+
 -- Formatting =================================================================
 
 -- Programs dedicated to text formatting (a.k.a. formatters) are very useful.
@@ -281,8 +438,6 @@ later(function()
 end)
 
 --
--- local ns = require("lint").get_namespace("my_linter_name")
--- vim.diagnostic.config({ virtual_text = true }, ns)
 -- Smart Splits
 now(function()
   add {
@@ -379,134 +534,7 @@ now(function()
   end
   require('custom.wezterm.wezterm_terminal').setup()
 end)
---
--- -- Bookmarks
--- later(function()
---   local spec = require('plugins.bookmarks')
---   add(spec[1])
---   for _, dep in ipairs(spec.dependencies) do add(dep[1]) end
---   spec.config()
--- end)
---
--- -- Obsidian
--- later(function()
---   local spec = require('plugins.obsidian')[1][1]
---   add(spec[1])
---   require('obsidian').setup(spec.opts)
---   if spec.post_setup then spec.post_setup() end
--- end)
-
--- Python / uv.nvim
--- later(function()
---   local spec = require('custom.python')[1]
---   add(spec[1])
---   spec.config(spec, spec.opts or {})
--- end)
--- Honorable mentions =========================================================
-
--- 'mason-org/mason.nvim' (a.k.a. "Mason") is a great tool (package manager) for
--- installing external language servers, formatters, and linters. It provides
--- a unified interface for installing, updating, and deleting such programs.
---
--- The caveat is that these programs will be set up to be mostly used inside Neovim.
--- If you need them to work elsewhere, consider using other package managers.
---
--- You can use it like so:
-later(function()
-  add {
-    source = 'saghen/blink.cmp',
-    version = 'main',
-    depends = { 'rafamadriz/friendly-snippets' },
-  }
-  require('blink-cmp').setup {
-    keymap = {
-      preset = 'enter',
-      ['<C-y>'] = { 'select_and_accept' },
-    },
-    appearance = {
-      use_nvim_cmp_as_default = true,
-      nerd_font_variant = 'mono',
-    },
-    completion = {
-      accept = {
-        auto_brackets = {
-          enabled = true,
-        },
-      },
-      menu = {
-        draw = {
-          treesitter = { 'lsp' },
-        },
-      },
-      documentation = {
-        auto_show = true,
-        auto_show_delay_ms = 200,
-      },
-      ghost_text = {
-        enabled = true,
-      },
-      trigger = {
-        prefetch_on_insert = true,
-        show_on_keyword = true,
-        show_on_trigger_character = true,
-        show_in_snippet = true,
-        show_on_insert_on_trigger_character = true,
-        show_on_accept_on_trigger_character = true,
-      },
-      list = {
-        selection = {
-          auto_insert = false,
-          preselect = function(ctx)
-            return ctx.mode ~= 'cmdline' and not require('blink.cmp').snippet_active { direction = 1 }
-          end,
-        },
-      },
-    }, -- completion
-    signature = { enabled = true },
-    sources = {
-      compat = {},
-      default = { 'lsp', 'path', 'snippets', 'buffer' },
-      per_filetype = {
-        lua = { inherit_defaults = true, 'lazydev' },
-      },
-      providers = {
-        lazydev = {
-          name = 'LazyDev',
-          module = 'lazydev.integrations.blink',
-          score_offset = 100,
-        },
-        lsp = { async = true, score_offset = 70 },
-        snippets = { score_offset = 1, max_items = 3 },
-      },
-    }, -- sources
-    cmdline = {
-      enabled = true,
-      keymap = { preset = 'cmdline' },
-      completion = {
-        list = { selection = { preselect = false } },
-        menu = {
-          auto_show = function(ctx)
-            return vim.fn.getcmdtype() == ':'
-          end,
-        },
-        ghost_text = { enabled = true },
-      },
-    }, --cmdline
-  }
-end)
-
 now(function()
-  add 'nvim-lua/plenary.nvim'
-end)
--- Beautiful, usable, well maintained color schemes outside of 'mini.nvim' and
--- have full support of its highlight groups. Use if you don't like 'miniwinter'
--- enabled in 'plugin/30_mini.lua' or other suggested 'mini.hues' based ones.
-now(function()
-  -- Install only those that you need
-  -- add('sainnhe/everforest')
-  -- add('Shatur/neovim-ayu')
-  -- add('ellisonleao/gruvbox.nvim')
-
   add 'folke/tokyonight.nvim'
 
   require('tokyonight').setup {
@@ -520,41 +548,41 @@ now(function()
   vim.cmd 'color tokyonight'
 end)
 
-now(function()
-  add 'folke/snacks.nvim'
-  require('snacks').setup {
-    bigfile = { enabled = false },
-    dashboard = { enabled = false },
-    explorer = { enabled = false },
-    indent = { enabled = false },
-    input = { enabled = true },
-    notifier = {
-      enabled = false,
-      timeout = 3000,
-    },
-    quickfile = { enabled = false },
-    scope = { enabled = false },
-    scroll = { enabled = false },
-    statuscolumn = { enabled = false },
-    words = { enabled = false },
-    styles = {
-      notification = {},
-    },
-    terminal = { enabled = false },
-    picker = {
-      enabled = true,
-      ---@type snacks.picker.Action.fn[]
-      actions = {
-        ---@param p snacks.Picker
-        ---@param item snacks.picker.Item
-        run_cmd = function(p, item)
-          local uv = require 'custom.python.uv'
-          uv.uv_run_tool_call(p, item)
-        end,
-      },
-    },
-  }
-end)
+-- now(function()
+--   add 'folke/snacks.nvim'
+--   require('snacks').setup {
+--     bigfile = { enabled = false },
+--     dashboard = { enabled = false },
+--     explorer = { enabled = false },
+--     indent = { enabled = false },
+--     input = { enabled = true },
+--     notifier = {
+--       enabled = false,
+--       timeout = 3000,
+--     },
+--     quickfile = { enabled = false },
+--     scope = { enabled = false },
+--     scroll = { enabled = false },
+--     statuscolumn = { enabled = false },
+--     words = { enabled = false },
+--     styles = {
+--       notification = {},
+--     },
+--     terminal = { enabled = false },
+--     picker = {
+--       enabled = true,
+--       ---@type snacks.picker.Action.fn[]
+--       actions = {
+--         ---@param p snacks.Picker
+--         ---@param item snacks.picker.Item
+--         run_cmd = function(p, item)
+--           local uv = require 'custom.python.uv'
+--           uv.uv_run_tool_call(p, item)
+--         end,
+--       },
+--     },
+--   }
+-- end)
 
 later(function()
   add 'folke/which-key.nvim'
