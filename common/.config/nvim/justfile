@@ -3,11 +3,11 @@
 
 # Check configuration for build errors
 check-config:
-    nvim --headless -c ':q' .
+    nvim --headless -c '5sleep' -c ':q' .
 
 # Run Neovim health check
 check-health:
-    nvim --headless -c "checkhealth" -c "qall"
+    nvim --headless -c "checkhealth" -c '5sleep'  -c "qall"
 
 # Format all Lua files with stylua
 format:

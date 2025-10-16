@@ -45,7 +45,19 @@ now_if_args(function()
     -- Same logic as for 'nvim-treesitter'
     checkout = 'main',
   })
-
+  require('nvim-treesitter-textobjects').setup({
+    move = {
+      enable = true,
+      set_jumps = true, -- whether to set jumps in the jumplist
+      -- LazyVim extention to create buffer-local keymaps
+      keys = {
+        goto_next_start = { ["]f"] = "@function.outer", ["]c"] = "@class.outer", ["]a"] = "@parameter.inner" },
+        goto_next_end = { ["]F"] = "@function.outer", ["]C"] = "@class.outer", ["]A"] = "@parameter.inner" },
+        goto_previous_start = { ["[f"] = "@function.outer", ["[c"] = "@class.outer", ["[a"] = "@parameter.inner" },
+        goto_previous_end = { ["[F"] = "@function.outer", ["[C"] = "@class.outer", ["[A"] = "@parameter.inner" },
+      },
+    },
+  })
   -- Ensure installed parsers for listed languages. Add to `languages`
   -- array languages which you want to have installed. To see available languages:
   -- - Execute `:=require('nvim-treesitter').get_available()`
@@ -63,6 +75,7 @@ now_if_args(function()
     'lua',
     'luadoc',
     'markdown',
+    "python",
     'markdown_inline',
     'query',
     'vim',
@@ -71,7 +84,8 @@ now_if_args(function()
     'json5',
     'toml',
     "ninja",
-    "rst"
+    "rst",
+    "yaml",
   }
   local isnt_installed = function(lang)
     return #vim.api.nvim_get_runtime_file('parser/' .. lang .. '.*', false) == 0
@@ -87,7 +101,7 @@ now_if_args(function()
     end
   end
   local ts_start = function(ev) vim.treesitter.start(ev.buf) end
-  _G.Config.new_autocmd('FileType', filetypes, ts_start, 'Start tree-sitter')
+  _G.Utils.new_autocmd('FileType', ts_start,  filetypes,'Start tree-sitter')
 end)
 
 -- Language servers ===========================================================
@@ -175,14 +189,41 @@ end)
 later(function()
   add('stevearc/conform.nvim')
 
+  -- local init_hook = function()
+  --   -- Install the conform formatter on VeryLazy
+  --   _G.Utils.on_very_lazy(function()
+  --     LazyVim.format.register({
+  --       name = "conform.nvim",
+  --       priority = 100,
+  --       primary = true,
+  --       format = function(buf)
+  --         require("conform").format({ bufnr = buf })
+  --       end,
+  --       sources = function(buf)
+  --         local ret = require("conform").list_formatters(buf)
+  --         ---@param v conform.FormatterInfo
+  --         return vim.tbl_map(function(v)
+  --           return v.name
+  --         end, ret)
+  --       end,
+  --     })
+  --   end)
+  -- end
   -- See also:
   -- - `:h Conform`
   -- - `:h conform-options`
   -- - `:h conform-formatters`
   require('conform').setup({
-    -- Map of filetype to formatters
-    -- Make sure that necessary CLI tool is available
-    formatters = {
+    default_format_opts = {
+      timeout_ms = 3000,
+      async = false,           -- not recommended to change
+      quiet = false,           -- not recommended to change
+      lsp_format = "fallback", -- not recommended to change
+    },
+    formatters_by_ft = {
+      lua = { "stylua" },
+      fish = { "fish_indent" },
+      sh = { "shfmt" },
       -- # Example of using shfmt with extra args
       shfmt = {
         prepend_args = { '-i', '2', '-ci' },
@@ -192,8 +233,6 @@ later(function()
           JUST_UNSTABLE = 1,
         },
       },
-    },
-    formatters_by_ft = {
       python = {
         -- To fix auto-fixable lint errors.
         'ruff_fix',
@@ -205,7 +244,6 @@ later(function()
       zsh = { 'shfmt' },
       markdown = { 'mdformat' },
       yaml = { 'yamlfmt' },
-      just = { 'just' },
       -- ['*'] = { 'codespell' },
       -- ['_'] = { 'trim_whitespace' },
     }
@@ -215,19 +253,19 @@ end)
 later(function()
   add('benomahony/uv.nvim')
 
-  require('uv').setup({
+  require('uv.init').setup({
     keymaps = {
-      prefix = '<leader>x',    -- Main prefix for uv commands
-      commands = true,         -- Show uv commands menu (<leader>x)
-      run_file = false,        -- Run current file (<leader>xr)
-      run_selection = false,   -- Run selected code (<leader>xs)
-      run_function = false,    -- Run function (<leader>xf)
-      venv = true,             -- Environment management (<leader>xe)
-      init = true,             -- Initialize uv project (<leader>xi)
-      add = true,              -- Add a package (<leader>xa)
-      remove = true,           -- Remove a package (<leader>xd)
-      sync = false,            -- Sync packages (<leader>xc)
-      sync_all = false,        -- Sync all packages, extras and groups (<leader>xC)
+      prefix = '<leader>x',  -- Main prefix for uv commands
+      commands = true,       -- Show uv commands menu (<leader>x)
+      run_file = false,      -- Run current file (<leader>xr)
+      run_selection = false, -- Run selected code (<leader>xs)
+      run_function = false,  -- Run function (<leader>xf)
+      venv = true,           -- Environment management (<leader>xe)
+      init = true,           -- Initialize uv project (<leader>xi)
+      add = true,            -- Add a package (<leader>xa)
+      remove = true,         -- Remove a package (<leader>xd)
+      sync = false,          -- Sync packages (<leader>xc)
+      sync_all = false,      -- Sync all packages, extras and groups (<leader>xC)
     }
   })
 
@@ -301,24 +339,24 @@ end)
 -- vim.diagnostic.config({ virtual_text = true }, ns)
 -- Smart Splits
 now(function()
- add(
-   {
-     source = 'mrjones2014/smart-splits.nvim',
-     depends = {
-       'folke/snacks.nvim',
-     },
-   }
- )
- -- add(spec[1])
- --
- local spec = require('custom.better_mux')
- -- for _, dep in ipairs(spec.dependencies) do add(type(dep) == 'string' and dep or dep[1]) end
- local opts = spec.opts or {}
- require('smart-splits').setup(opts)
- for _, key in ipairs(spec.keys) do
-   _G.nmap(key[1], key[2], key[3])
- end
- require('custom.wezterm.wezterm_terminal').setup()
+  add(
+    {
+      source = 'mrjones2014/smart-splits.nvim',
+      depends = {
+        'folke/snacks.nvim',
+      },
+    }
+  )
+  -- add(spec[1])
+  --
+  local spec = require('custom.better_mux')
+  -- for _, dep in ipairs(spec.dependencies) do add(type(dep) == 'string' and dep or dep[1]) end
+  local opts = spec.opts or {}
+  require('smart-splits').setup(opts)
+  for _, key in ipairs(spec.keys) do
+    _G.Utils.nmap(key[1], key[2], key[3])
+  end
+  require('custom.wezterm.wezterm_terminal').setup()
 end)
 --
 -- -- Bookmarks
@@ -354,13 +392,11 @@ end)
 --
 -- You can use it like so:
 later(function()
-  add(
-    add({
-      source = "saghen/blink.cmp",
-      version = "main",
-      depends = { "rafamadriz/friendly-snippets" },
-    })
-  )
+  add({
+    source = "saghen/blink.cmp",
+    version = "main",
+    depends = { "rafamadriz/friendly-snippets" },
+  })
   require('blink-cmp').setup({
     keymap = {
       preset = 'enter',
@@ -404,7 +440,7 @@ later(function()
           end,
         },
       },
-    },   -- completion
+    }, -- completion
     signature = { enabled = true },
     sources = {
       compat = {},
@@ -421,7 +457,7 @@ later(function()
         lsp = { async = true, score_offset = 70 },
         snippets = { score_offset = 1, max_items = 3 },
       },
-    },   -- sources
+    }, -- sources
     cmdline = {
       enabled = true,
       keymap = { preset = 'cmdline' },
@@ -434,7 +470,7 @@ later(function()
         },
         ghost_text = { enabled = true },
       },
-    },   --cmdline
+    }, --cmdline
   })
 end)
 
@@ -497,4 +533,66 @@ now(function()
       },
     },
   })
+end)
+later(function()
+  add('folke/which-key.nvim')
+
+_G.Config.leader_group_clues = {
+  { mode = 'n', keys = '<Leader>b', desc = '+Buffer' },
+  { mode = 'n', keys = '<Leader>e', desc = '+Explore/Edit' },
+  { mode = 'n', keys = '<Leader>f', desc = '+Find' },
+  { mode = 'n', keys = '<Leader>g', desc = '+Git' },
+  { mode = 'n', keys = '<Leader>l', desc = '+Language' },
+  { mode = 'n', keys = '<Leader>m', desc = '+Map' },
+  { mode = 'n', keys = '<Leader>s', desc = '+Session' },
+  { mode = 'n', keys = '<Leader>v', desc = '+Visits' },
+
+  { mode = 'x', keys = '<Leader>g', desc = '+Git' },
+  { mode = 'x', keys = '<Leader>l', desc = '+Language' },
+}
+  local opts = {
+    preset = "helix",
+    defaults = {},
+    spec = {
+      {
+        mode = { "n", "v" },
+        { "<leader>c", group = "code" },
+        { "<leader>d", group = "debug" },
+        -- { "<leader>dp",    group = "profiler" },
+        { "<leader>f", group = "file/find" },
+        { "<leader>g", group = "git" },
+				{'<Leader>l', group = '+Language'},
+				{'<Leader>m', group = '+Map' }, 
+				{'<Leader>s', group = '+Session' ,
+				{'<Leader>v', group = '+Visits' },
+        { "<leader>u", group = "ui" },
+        { "<leader>x", group = "diagnostics/quickfix" },
+        { "[",         group = "prev" },
+        { "]",         group = "next" },
+        { "g",         group = "goto" },
+        { "gs",        group = "surround" },
+        { "z",         group = "fold" },
+        {
+          "<leader>b",
+          group = "buffer",
+          expand = function()
+            return require("which-key.extras").expand.buf()
+          end,
+        },
+        {
+          "<leader>w",
+          group = "windows",
+          proxy = "<c-w>",
+          expand = function()
+            return require("which-key.extras").expand.win()
+          end,
+        },
+        -- better descriptions
+        { "gx", desc = "Open with system app" },
+      },
+    },
+  }
+
+  local wk = require("which-key")
+  wk.setup(opts)
 end)

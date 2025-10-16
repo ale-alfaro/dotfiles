@@ -70,7 +70,7 @@ local add, now, later
 
 --- Initializes the utility with MiniDeps functions.
 ---@param deps { add: function, now: function, later: function }
-function M.init(deps)
+function M.plugin_backend_init(deps)
   add = deps.add
   now = deps.now
   later = deps.later
@@ -78,12 +78,12 @@ end
 
 --- Sets up a single plugin based on a spec.
 ---@param spec PluginSpec
-function M.setup(spec)
+function M.plugin_setup(spec)
   -- Run init function if it exists
   -- if spec.init then
   --   spec.init(spec)
   -- end
-  vim.notify("Adding spec: " .. vim.inspect(spec))
+  -- vim.notify("Adding spec: " .. vim.inspect(spec))
   if type(spec) ~= 'table' then
     vim.notify("Plugin spec is not a table!", "error")
     return
@@ -174,9 +174,9 @@ end
 
 --- Sets up a list of plugins.
 ---@param specs PluginSpec[]
-function M.setup_all(specs)
+function M.plugins_setup_all(specs)
   for _, spec in ipairs(specs) do
-    M.setup(spec)
+    M.plugin_setup(spec)
   end
 end
 

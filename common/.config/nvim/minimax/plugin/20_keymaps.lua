@@ -16,31 +16,31 @@
 -- All these use 'mini.pick'. See `:h MiniPick-overview` for an overview.
 local pick_added_hunks_buf = '<Cmd>Pick git_hunks path="%" scope="staged"<CR>'
 
-_G.nmapleader('f/', '<Cmd>Pick history scope="/"<CR>',            '"/" history')
-_G.nmapleader('f:', '<Cmd>Pick history scope=":"<CR>',            '":" history')
-_G.nmapleader('fa', '<Cmd>Pick git_hunks scope="staged"<CR>',     'Added hunks (all)')
-_G.nmapleader('fA', pick_added_hunks_buf,                         'Added hunks (buf)')
-_G.nmapleader('fb', '<Cmd>Pick buffers<CR>',                      'Buffers')
-_G.nmapleader('fc', '<Cmd>Pick git_commits<CR>',                  'Commits (all)')
-_G.nmapleader('fC', '<Cmd>Pick git_commits path="%"<CR>',         'Commits (buf)')
-_G.nmapleader('fd', '<Cmd>Pick diagnostic scope="all"<CR>',       'Diagnostic workspace')
-_G.nmapleader('fD', '<Cmd>Pick diagnostic scope="current"<CR>',   'Diagnostic buffer')
-_G.nmapleader('ff', '<Cmd>Pick files<CR>',                        'Files')
-_G.nmapleader('fg', '<Cmd>Pick grep_live<CR>',                    'Grep live')
-_G.nmapleader('fG', '<Cmd>Pick grep pattern="<cword>"<CR>',       'Grep current word')
-_G.nmapleader('fh', '<Cmd>Pick help<CR>',                         'Help tags')
-_G.nmapleader('fH', '<Cmd>Pick hl_groups<CR>',                    'Highlight groups')
-_G.nmapleader('fl', '<Cmd>Pick buf_lines scope="all"<CR>',        'Lines (all)')
-_G.nmapleader('fL', '<Cmd>Pick buf_lines scope="current"<CR>',    'Lines (buf)')
-_G.nmapleader('fm', '<Cmd>Pick git_hunks<CR>',                    'Modified hunks (all)')
-_G.nmapleader('fM', '<Cmd>Pick git_hunks path="%"<CR>',           'Modified hunks (buf)')
-_G.nmapleader('fr', '<Cmd>Pick resume<CR>',                       'Resume')
-_G.nmapleader('fp', '<Cmd>Pick projects<CR>',                     'Projects')
-_G.nmapleader('fR', '<Cmd>Pick lsp scope="references"<CR>',       'References (LSP)')
-_G.nmapleader('fs', '<Cmd>Pick lsp scope="workspace_symbol"<CR>', 'Symbols workspace')
-_G.nmapleader('fS', '<Cmd>Pick lsp scope="document_symbol"<CR>',  'Symbols document')
-_G.nmapleader('fv', '<Cmd>Pick visit_paths cwd=""<CR>',           'Visit paths (all)')
-_G.nmapleader('fV', '<Cmd>Pick visit_paths<CR>',                  'Visit paths (cwd)')
+_G.Utils.nmapleader('f/', '<Cmd>Pick history scope="/"<CR>',            '"/" history')
+_G.Utils.nmapleader('f:', '<Cmd>Pick history scope=":"<CR>',            '":" history')
+_G.Utils.nmapleader('fa', '<Cmd>Pick git_hunks scope="staged"<CR>',     'Added hunks (all)')
+_G.Utils.nmapleader('fA', pick_added_hunks_buf,                         'Added hunks (buf)')
+_G.Utils.nmapleader('fb', '<Cmd>Pick buffers<CR>',                      'Buffers')
+_G.Utils.nmapleader('fc', '<Cmd>Pick git_commits<CR>',                  'Commits (all)')
+_G.Utils.nmapleader('fC', '<Cmd>Pick git_commits path="%"<CR>',         'Commits (buf)')
+_G.Utils.nmapleader('fd', '<Cmd>Pick diagnostic scope="all"<CR>',       'Diagnostic workspace')
+_G.Utils.nmapleader('fD', '<Cmd>Pick diagnostic scope="current"<CR>',   'Diagnostic buffer')
+_G.Utils.nmapleader('ff', '<Cmd>Pick files<CR>',                        'Files')
+_G.Utils.nmapleader('fg', '<Cmd>Pick grep_live<CR>',                    'Grep live')
+_G.Utils.nmapleader('fG', '<Cmd>Pick grep pattern="<cword>"<CR>',       'Grep current word')
+_G.Utils.nmapleader('fh', '<Cmd>Pick help<CR>',                         'Help tags')
+_G.Utils.nmapleader('fH', '<Cmd>Pick hl_groups<CR>',                    'Highlight groups')
+_G.Utils.nmapleader('fl', '<Cmd>Pick buf_lines scope="all"<CR>',        'Lines (all)')
+_G.Utils.nmapleader('fL', '<Cmd>Pick buf_lines scope="current"<CR>',    'Lines (buf)')
+_G.Utils.nmapleader('fm', '<Cmd>Pick git_hunks<CR>',                    'Modified hunks (all)')
+_G.Utils.nmapleader('fM', '<Cmd>Pick git_hunks path="%"<CR>',           'Modified hunks (buf)')
+_G.Utils.nmapleader('fr', '<Cmd>Pick resume<CR>',                       'Resume')
+_G.Utils.nmapleader('fp', '<Cmd>Pick projects<CR>',                     'Projects')
+_G.Utils.nmapleader('fR', '<Cmd>Pick lsp scope="references"<CR>',       'References (LSP)')
+_G.Utils.nmapleader('fs', '<Cmd>Pick lsp scope="workspace_symbol"<CR>', 'Symbols workspace')
+_G.Utils.nmapleader('fS', '<Cmd>Pick lsp scope="document_symbol"<CR>',  'Symbols document')
+_G.Utils.nmapleader('fv', '<Cmd>Pick visit_paths cwd=""<CR>',           'Visit paths (all)')
+_G.Utils.nmapleader('fV', '<Cmd>Pick visit_paths<CR>',                  'Visit paths (cwd)')
 
 -- g is for 'Git'. Common usage:
 -- - `<Leader>gs` - show information at cursor
@@ -50,34 +50,34 @@ _G.nmapleader('fV', '<Cmd>Pick visit_paths<CR>',                  'Visit paths (
 local git_log_cmd = [[Git log --pretty=format:\%h\ \%as\ │\ \%s --topo-order]]
 local git_log_buf_cmd = git_log_cmd .. ' --follow -- %'
 
-_G.nmapleader('ga', '<Cmd>Git diff --cached<CR>',             'Added diff')
-_G.nmapleader('gA', '<Cmd>Git diff --cached -- %<CR>',        'Added diff buffer')
-_G.nmapleader('gc', '<Cmd>Git commit<CR>',                    'Commit')
-_G.nmapleader('gC', '<Cmd>Git commit --amend<CR>',            'Commit amend')
-_G.nmapleader('gd', '<Cmd>Git diff<CR>',                      'Diff')
-_G.nmapleader('gD', '<Cmd>Git diff -- %<CR>',                 'Diff buffer')
-_G.nmapleader('gl', '<Cmd>' .. git_log_cmd .. '<CR>',         'Log')
-_G.nmapleader('gL', '<Cmd>' .. git_log_buf_cmd .. '<CR>',     'Log buffer')
-_G.nmapleader('go', '<Cmd>lua MiniDiff.toggle_overlay()<CR>', 'Toggle overlay')
-_G.nmapleader('gs', '<Cmd>lua MiniGit.show_at_cursor()<CR>',  'Show at cursor')
+_G.Utils.nmapleader('ga', '<Cmd>Git diff --cached<CR>',             'Added diff')
+_G.Utils.nmapleader('gA', '<Cmd>Git diff --cached -- %<CR>',        'Added diff buffer')
+_G.Utils.nmapleader('gc', '<Cmd>Git commit<CR>',                    'Commit')
+_G.Utils.nmapleader('gC', '<Cmd>Git commit --amend<CR>',            'Commit amend')
+_G.Utils.nmapleader('gd', '<Cmd>Git diff<CR>',                      'Diff')
+_G.Utils.nmapleader('gD', '<Cmd>Git diff -- %<CR>',                 'Diff buffer')
+_G.Utils.nmapleader('gl', '<Cmd>' .. git_log_cmd .. '<CR>',         'Log')
+_G.Utils.nmapleader('gL', '<Cmd>' .. git_log_buf_cmd .. '<CR>',     'Log buffer')
+_G.Utils.nmapleader('go', '<Cmd>lua MiniDiff.toggle_overlay()<CR>', 'Toggle overlay')
+_G.Utils.nmapleader('gs', '<Cmd>lua MiniGit.show_at_cursor()<CR>',  'Show at cursor')
 
-_G.xmapleader('gs', '<Cmd>lua MiniGit.show_at_cursor()<CR>', 'Show at selection')
+_G.Utils.xmapleader('gs', '<Cmd>lua MiniGit.show_at_cursor()<CR>', 'Show at selection')
 
 
 -- m is for 'Map'. Common usage:
 -- - `<Leader>mt` - toggle map from 'mini.map' (closed by default)
 -- - `<Leader>mf` - focus on the map for fast navigation
 -- - `<Leader>ms` - change map's side (if it covers something underneath)
-_G.nmapleader('mf', '<Cmd>lua MiniMap.toggle_focus()<CR>', 'Focus (toggle)')
-_G.nmapleader('mr', '<Cmd>lua MiniMap.refresh()<CR>',      'Refresh')
-_G.nmapleader('ms', '<Cmd>lua MiniMap.toggle_side()<CR>',  'Side (toggle)')
-_G.nmapleader('mt', '<Cmd>lua MiniMap.toggle()<CR>',       'Toggle')
+_G.Utils.nmapleader('mf', '<Cmd>lua MiniMap.toggle_focus()<CR>', 'Focus (toggle)')
+_G.Utils.nmapleader('mr', '<Cmd>lua MiniMap.refresh()<CR>',      'Refresh')
+_G.Utils.nmapleader('ms', '<Cmd>lua MiniMap.toggle_side()<CR>',  'Side (toggle)')
+_G.Utils.nmapleader('mt', '<Cmd>lua MiniMap.toggle()<CR>',       'Toggle')
 
 -- o is for 'Other'. Common usage:
 -- - `<Leader>oz` - toggle between "zoomed" and regular view of current buffer
-_G.nmapleader('or', '<Cmd>lua MiniMisc.resize_window()<CR>', 'Resize to default width')
-_G.nmapleader('ot', '<Cmd>lua MiniTrailspace.trim()<CR>',    'Trim trailspace')
-_G.nmapleader('oz', '<Cmd>lua MiniMisc.zoom()<CR>',          'Zoom toggle')
+_G.Utils.nmapleader('or', '<Cmd>lua MiniMisc.resize_window()<CR>', 'Resize to default width')
+_G.Utils.nmapleader('ot', '<Cmd>lua MiniTrailspace.trim()<CR>',    'Trim trailspace')
+_G.Utils.nmapleader('oz', '<Cmd>lua MiniMisc.zoom()<CR>',          'Zoom toggle')
 
 -- s is for 'Session'. Common usage:
 -- - `<Leader>sn` - start new session
@@ -85,15 +85,16 @@ _G.nmapleader('oz', '<Cmd>lua MiniMisc.zoom()<CR>',          'Zoom toggle')
 -- - `<Leader>sd` - delete previously started session
 local session_new = 'MiniSessions.write(vim.fn.input("Session name: "))'
 
-_G.nmapleader('sd', '<Cmd>lua MiniSessions.select("delete")<CR>', 'Delete')
-_G.nmapleader('sn', '<Cmd>lua ' .. session_new .. '<CR>',         'New')
-_G.nmapleader('sr', '<Cmd>lua MiniSessions.select("read")<CR>',   'Read')
-_G.nmapleader('sw', '<Cmd>lua MiniSessions.write()<CR>',          'Write current')
+_G.Utils.nmapleader('sd', '<Cmd>lua MiniSessions.select("delete")<CR>', 'Delete')
+_G.Utils.nmapleader('sn', '<Cmd>lua ' .. session_new .. '<CR>',         'New')
+_G.Utils.nmapleader('sr', '<Cmd>lua MiniSessions.select("read")<CR>',   'Read')
+_G.Utils.nmapleader('sw', '<Cmd>lua MiniSessions.write()<CR>',          'Write current')
 
 if vim.lsp.inlay_hint then
-  map('n', '<leader>uh', function()
+  _G.Utils.nmap('<leader>uh', function()
+
     vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
-  end, { desc = 'Toggle Inlay Hints' })
+  end, 'Toggle Inlay Hints')
 end
 
 -- v is for 'Visits'. Common usage:
@@ -118,28 +119,28 @@ local function get_git_root()
   return nil
 end
 
-_G.nmapleader('vc', make_pick_core('',  'Core visits (all)'),       'Core visits (all)')
-_G.nmapleader('vC', make_pick_core(nil, 'Core visits (cwd)'),       'Core visits (cwd)')
-_G.nmapleader('vv', '<Cmd>lua MiniVisits.add_label("core")<CR>',    'Add "core" label')
-_G.nmapleader('vV', '<Cmd>lua MiniVisits.remove_label("core")<CR>', 'Remove "core" label')
-_G.nmapleader('vl', '<Cmd>lua MiniVisits.add_label()<CR>',          'Add label')
-_G.nmapleader('vL', '<Cmd>lua MiniVisits.remove_label()<CR>',       'Remove label')
+_G.Utils.nmapleader('vc', make_pick_core('',  'Core visits (all)'),       'Core visits (all)')
+_G.Utils.nmapleader('vC', make_pick_core(nil, 'Core visits (cwd)'),       'Core visits (cwd)')
+_G.Utils.nmapleader('vv', '<Cmd>lua MiniVisits.add_label("core")<CR>',    'Add "core" label')
+_G.Utils.nmapleader('vV', '<Cmd>lua MiniVisits.remove_label("core")<CR>', 'Remove "core" label')
+_G.Utils.nmapleader('vl', '<Cmd>lua MiniVisits.add_label()<CR>',          'Add label')
+_G.Utils.nmapleader('vL', '<Cmd>lua MiniVisits.remove_label()<CR>',       'Remove label')
 -- stylua: ignore end
 --
 --
-_G.nmapleader('n', "<Cmd>lua MiniNotify.show_history()<CR>", "Notifications")
+_G.Utils.nmapleader('n', "<Cmd>lua MiniNotify.show_history()<CR>", "Notifications")
 -- Lazygit
 if vim.fn.executable('lazygit') == 1 then
-  map('n', '<leader>gg', function()
+  _G.Utils.nmap('<leader>gg', function()
     local git_root = get_git_root()
     require('snacks').lazygit({ cwd = git_root })
-  end, { desc = 'Lazygit (Root Dir)' })
-  map('n', '<leader>gG', function() require('snacks').lazygit() end, { desc = 'Lazygit (cwd)' })
-  map('n', '<leader>gf', function() require('snacks').picker.git_log_file() end, { desc = 'Git Current File History' })
-  map('n', '<leader>gl', function()
+  end, 'Lazygit (Root Dir)')
+  _G.Utils.nmap('<leader>gG', function() require('snacks').lazygit() end, 'Lazygit (cwd)')
+  _G.Utils.nmap('<leader>gf', function() require('snacks').picker.git_log_file() end, 'Git Current File History')
+  _G.Utils.nmap('<leader>gl', function()
     local git_root = get_git_root()
     require('snacks').picker.git_log({ cwd = git_root })
-  end, { desc = 'Git Log' })
-  map('n', '<leader>gL', function() require('snacks').picker.git_log() end, { desc = 'Git Log (cwd)' })
-  map('n', '<leader>gb', function() require('snacks').picker.git_log_line() end, { desc = 'Git Blame Line' })
+  end, 'Git Log')
+  _G.Utils.nmap('<leader>gL', function() require('snacks').picker.git_log() end, 'Git Log (cwd)')
+  _G.Utils.nmap('<leader>gb', function() require('snacks').picker.git_log_line() end, 'Git Blame Line')
 end

@@ -19,6 +19,7 @@
 -- Define config table to be able to pass data between scripts
 _G.Config = {}
 
+
 -- General ====================================================================
 vim.g.mapleader = ' ' -- Use `<Space>` as <Leader> key
 vim.g.localleader = '`' -- Use `<Space>` as <Leader> key
@@ -26,91 +27,84 @@ vim.o.mouse       = 'a'            -- Enable mouse
 vim.o.mousescroll = 'ver:25,hor:6' -- Customize mouse scroll
 vim.o.switchbuf   = 'usetab'       -- Use already opened buffers when switching
 vim.o.undofile    = true           -- Enable persistent undo
-
+--
 vim.o.shada = "'100,<50,s10,:1000,/100,@100,h" -- Limit ShaDa file (for startup)
-
--- Enable all filetype plugins and syntax (if not enabled, for better startup)
-vim.cmd('filetype plugin indent on')
+--
+-- -- Enable all filetype plugins and syntax (if not enabled, for better startup)
+-- vim.cmd('filetype plugin indent on')
 if vim.fn.exists('syntax_on') ~= 1 then vim.cmd('syntax enable') end
-
--- UI =========================================================================
-vim.o.breakindent    = true       -- Indent wrapped lines to match line start
-vim.o.breakindentopt = 'list:-1'  -- Add padding for lists (if 'wrap' is set)
-vim.o.colorcolumn    = '+1'       -- Draw column on the right of maximum width
-vim.o.cursorline     = true       -- Enable current line highlighting
-vim.o.linebreak      = true       -- Wrap lines at 'breakat' (if 'wrap' is set)
-vim.o.list           = true       -- Show helpful text indicators
-vim.o.number         = true       -- Show line numbers
-vim.o.pumheight      = 10         -- Make popup menu smaller
-vim.o.ruler          = false      -- Don't show cursor coordinates
-vim.o.shortmess      = 'CFOSWaco' -- Disable some built-in completion messages
-vim.o.showmode       = false      -- Don't show mode in command line
-vim.o.signcolumn     = 'yes'      -- Always show signcolumn (less flicker)
-vim.o.splitbelow     = true       -- Horizontal splits will be below
-vim.o.splitkeep      = 'screen'   -- Reduce scroll during window split
-vim.o.splitright     = true       -- Vertical splits will be to the right
-vim.o.winborder      = 'single'   -- Use border in floating windows
-vim.o.wrap           = false      -- Don't visually wrap lines (toggle with \w)
-
-vim.o.cursorlineopt  = 'screenline,number' -- Show cursor line per screen line
-
--- Special UI symbols. More is set via 'mini.basics' later.
-vim.o.fillchars = 'eob: ,fold:╌'
-vim.o.listchars = 'extends:…,nbsp:␣,precedes:…,tab:> '
-
--- Folds (see `:h fold-commands`, `:h zM`, `:h zR`, `:h zA`, `:h zj`)
-vim.o.foldlevel   = 10       -- Fold nothing by default; set to 0 or 1 to fold
-vim.o.foldmethod  = 'indent' -- Fold based on indent level
-vim.o.foldnestmax = 10       -- Limit number of fold levels
-vim.o.foldtext    = ''       -- Show text under fold with its highlighting
-
--- Editing ====================================================================
-vim.o.autoindent    = true    -- Use auto indent
-vim.o.expandtab     = true    -- Convert tabs to spaces
+--
+-- -- UI =========================================================================
+-- vim.o.breakindent    = true       -- Indent wrapped lines to match line start
+-- vim.o.breakindentopt = 'list:-1'  -- Add padding for lists (if 'wrap' is set)
+-- vim.o.colorcolumn    = '+1'       -- Draw column on the right of maximum width
+-- vim.o.cursorline     = true       -- Enable current line highlighting
+-- vim.o.linebreak      = true       -- Wrap lines at 'breakat' (if 'wrap' is set)
+-- vim.o.list           = true       -- Show helpful text indicators
+-- vim.o.number         = true       -- Show line numbers
+-- vim.o.pumheight      = 10         -- Make popup menu smaller
+-- vim.o.ruler          = false      -- Don't show cursor coordinates
+-- vim.o.shortmess      = 'CFOSWaco' -- Disable some built-in completion messages
+-- vim.o.showmode       = false      -- Don't show mode in command line
+-- vim.o.signcolumn     = 'yes'      -- Always show signcolumn (less flicker)
+-- vim.o.splitbelow     = true       -- Horizontal splits will be below
+-- vim.o.splitkeep      = 'screen'   -- Reduce scroll during window split
+-- vim.o.splitright     = true       -- Vertical splits will be to the right
+-- vim.o.winborder      = 'single'   -- Use border in floating windows
+-- vim.o.wrap           = false      -- Don't visually wrap lines (toggle with \w)
+--
+-- vim.o.cursorlineopt  = 'screenline,number' -- Show cursor line per screen line
+--
+-- -- Special UI symbols. More is set via 'mini.basics' later.
+-- vim.o.fillchars = 'eob: ,fold:╌'
+-- vim.o.listchars = 'extends:…,nbsp:␣,precedes:…,tab:> '
+--
+-- -- Folds (see `:h fold-commands`, `:h zM`, `:h zR`, `:h zA`, `:h zj`)
+-- vim.o.foldlevel   = 10       -- Fold nothing by default; set to 0 or 1 to fold
+-- vim.o.foldmethod  = 'indent' -- Fold based on indent level
+-- vim.o.foldnestmax = 10       -- Limit number of fold levels
+-- vim.o.foldtext    = ''       -- Show text under fold with its highlighting
+--
+-- -- Editing ====================================================================
+-- vim.o.autoindent    = true    -- Use auto indent
+-- vim.o.expandtab     = true    -- Convert tabs to spaces
 vim.o.formatoptions = 'rqnl1j'-- Improve comment editing
-vim.o.ignorecase    = true    -- Ignore case during search
-vim.o.incsearch     = true    -- Show search matches while typing
-vim.o.infercase     = true    -- Infer case in built-in completion
-vim.o.shiftwidth    = 2       -- Use this number of spaces for indentation
-vim.o.smartcase     = true    -- Respect case if search pattern has upper case
-vim.o.smartindent   = true    -- Make indenting smart
-vim.o.spelloptions  = 'camel' -- Treat camelCase word parts as separate words
-vim.o.tabstop       = 2       -- Show tab as this number of spaces
-vim.o.virtualedit   = 'block' -- Allow going past end of line in blockwise mode
-
-vim.o.iskeyword = '@,48-57,_,192-255,-' -- Treat dash as `word` textobject part
-
--- Pattern for a start of numbered list (used in `gw`). This reads as
--- "Start of list item is: at least one special character (digit, -, +, *)
--- possibly followed by punctuation (. or `)`) followed by at least one space".
+-- vim.o.ignorecase    = true    -- Ignore case during search
+-- vim.o.incsearch     = true    -- Show search matches while typing
+-- vim.o.infercase     = true    -- Infer case in built-in completion
+-- vim.o.shiftwidth    = 2       -- Use this number of spaces for indentation
+-- vim.o.smartcase     = true    -- Respect case if search pattern has upper case
+-- vim.o.smartindent   = true    -- Make indenting smart
+-- vim.o.spelloptions  = 'camel' -- Treat camelCase word parts as separate words
+-- vim.o.tabstop       = 2       -- Show tab as this number of spaces
+-- vim.o.virtualedit   = 'block' -- Allow going past end of line in blockwise mode
+--
+-- vim.o.iskeyword = '@,48-57,_,192-255,-' -- Treat dash as `word` textobject part
+--
+-- -- Pattern for a start of numbered list (used in `gw`). This reads as
+-- -- "Start of list item is: at least one special character (digit, -, +, *)
+-- -- possibly followed by punctuation (. or `)`) followed by at least one space".
 vim.o.formatlistpat = [[^\s*[0-9\-\+\*]\+[\.\)]*\s\+]]
-
--- Built-in completion
+--
+-- -- Built-in completion
 vim.o.complete    = '.,w,b,kspell'                  -- Use less sources
 vim.o.completeopt = 'menuone,noselect,fuzzy,nosort' -- Use custom behavior
-
--- Autocommands ===============================================================
-
--- Define custom autocommand group and helper to create an autocommand.
--- Autocommands are Neovim's way to define actions that are executed on events
--- (like creating a buffer, setting an option, etc.).
 --
--- See also:
--- - `:h autocommand`
--- - `:h nvim_create_augroup()`
--- - `:h nvim_create_autocmd()`
-local gr = vim.api.nvim_create_augroup('custom-config', {})
-_G.Config.new_autocmd = function(event, pattern, callback, desc)
-  local opts = { group = gr, pattern = pattern, callback = callback, desc = desc }
-  vim.api.nvim_create_autocmd(event, opts)
-end
--- Don't auto-wrap comments and don't insert comment leader after hitting 'o'.
--- Do on `FileType` to always override these changes from filetype plugins.
-local f = function() vim.cmd('setlocal formatoptions-=c formatoptions-=o') end
-_G.Config.new_autocmd('FileType', nil, f, "Proper 'formatoptions'")
-
--- There are other autocommands created by 'mini.basics'. See 'plugin/30_mini.lua'.
-
+-- -- Autocommands ===============================================================
+--
+-- -- Define custom autocommand group and helper to create an autocommand.
+-- -- Autocommands are Neovim's way to define actions that are executed on events
+-- -- (like creating a buffer, setting an option, etc.).
+-- --
+-- -- See also:
+-- -- - `:h autocommand`
+-- -- - `:h nvim_create_augroup()`
+-- -- - `:h nvim_create_autocmd()`
+-- -- Don't auto-wrap comments and don't insert comment leader after hitting 'o'.
+-- -- Do on `FileType` to always override these changes from filetype plugins.
+--
+-- -- There are other autocommands created by 'mini.basics'. See 'plugin/30_mini.lua'.
+--
 vim.opt.autowrite = true -- Enable auto write
 -- only set clipboard if not in ssh, to make sure the OSC 52
 -- integration works automatically.
@@ -128,52 +122,51 @@ vim.opt.fillchars = {
   diff = "╱",
   eob = " ",
 }
--- vim.o.foldlevel = 99
--- vim.o.foldmethod = "indent"
--- vim.o.foldtext = ""
--- -- vim.o.formatexpr = "v:lua.LazyVim.format.formatexpr()"
--- vim.o.formatvim.oions = "jcroqlnt" -- tcqj
--- vim.o.grepformat = "%f:%l:%c:%m"
--- vim.o.grepprg = "rg --vimgrep"
--- vim.o.ignorecase = true -- Ignore case
--- vim.o.inccommand = "nosplit" -- preview incremental substitute
--- vim.o.jumpvim.oions = "view"
--- vim.o.laststatus = 3 -- global statusline
--- vim.o.linebreak = true -- Wrap lines at convenient points
--- vim.o.list = true -- Show some invisible characters (tabs...
--- vim.o.mouse = "a" -- Enable mouse mode
--- vim.o.number = true -- Print line number
--- vim.o.pumblend = 10 -- Popup blend
--- vim.o.pumheight = 10 -- Maximum number of entries in a popup
--- vim.o.relativenumber = true -- Relative line numbers
--- vim.o.ruler = false -- Disable the default ruler
--- vim.o.scrolloff = 4 -- Lines of context
--- vim.o.sessionvim.oions = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp", "folds" }
--- vim.o.shiftround = true -- Round indent
--- vim.o.shiftwidth = 2 -- Size of an indent
--- vim.o.shortmess:append({ W = true, I = true, c = true, C = true })
--- vim.o.showmode = false -- Dont show mode since we have a statusline
--- vim.o.sidescrolloff = 8 -- Columns of context
--- vim.o.signcolumn = "yes" -- Always show the signcolumn, otherwise it would shift the text each time
--- vim.o.smartcase = true -- Don't ignore case with capitals
--- vim.o.smartindent = true -- Insert indents automatically
--- vim.o.smoothscroll = true
--- vim.o.spelllang = { "en" }
--- vim.o.splitbelow = true -- Put new windows below current
--- vim.o.splitkeep = "screen"
--- vim.o.splitright = true -- Put new windows right of current
--- -- vim.o.statuscolumn = [[%!v:lua.LazyVim.statuscolumn()]]
--- vim.o.tabstop = 2 -- Number of spaces tabs count for
--- vim.o.termguicolors = true -- True color support
--- vim.o.timeoutlen = vim.g.vscode and 1000 or 300 -- Lower than default (1000) to quickly trigger which-key
--- vim.o.undofile = true
--- vim.o.undolevels = 10000
--- vim.o.updatetime = 200 -- Save swap file and trigger CursorHold
--- vim.o.virtualedit = "block" -- Allow cursor to move where there is no text in visual block mode
--- vim.o.wildmode = "longest:full,full" -- Command-line completion mode
--- vim.o.winminwidth = 5 -- Minimum window width
--- vim.o.wrap = false -- Disable line wrap
--- vim.o.statuscolumn = [[%!v:lua.require'snacks.statuscolumn'.get()]]
+vim.o.foldlevel = 99
+vim.o.foldmethod = "indent"
+vim.o.foldtext = ""
+-- vim.o.formatexpr = "v:lua.LazyVim.format.formatexpr()"
+vim.o.grepformat = "%f:%l:%c:%m"
+vim.o.grepprg = "rg --vimgrep"
+vim.o.ignorecase = true -- Ignore case
+vim.o.inccommand = "nosplit" -- preview incremental substitute
+vim.o.jumpoptions = "view"
+vim.o.laststatus = 3 -- global statusline
+vim.o.linebreak = true -- Wrap lines at convenient points
+vim.o.list = true -- Show some invisible characters (tabs...
+vim.o.mouse = "a" -- Enable mouse mode
+vim.o.number = true -- Print line number
+vim.o.pumblend = 10 -- Popup blend
+vim.o.pumheight = 10 -- Maximum number of entries in a popup
+vim.o.relativenumber = true -- Relative line numbers
+vim.o.ruler = false -- Disable the default ruler
+vim.o.scrolloff = 4 -- Lines of context
+vim.opt.sessionoptions = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp", "folds" }
+vim.o.shiftround = true -- Round indent
+vim.o.shiftwidth = 2 -- Size of an indent
+vim.opt.shortmess:append({ W = true, I = true, c = true, C = true })
+vim.o.showmode = false -- Dont show mode since we have a statusline
+vim.o.sidescrolloff = 8 -- Columns of context
+vim.o.signcolumn = "yes" -- Always show the signcolumn, otherwise it would shift the text each time
+vim.o.smartcase = true -- Don't ignore case with capitals
+vim.o.smartindent = true -- Insert indents automatically
+vim.o.smoothscroll = true
+vim.opt.spelllang = { "en" }
+vim.o.splitbelow = true -- Put new windows below current
+vim.o.splitkeep = "screen"
+vim.o.splitright = true -- Put new windows right of current
+-- vim.o.statuscolumn = [[%!v:lua.LazyVim.statuscolumn()]]
+vim.o.tabstop = 2 -- Number of spaces tabs count for
+vim.o.termguicolors = true -- True color support
+vim.o.timeoutlen = vim.g.vscode and 1000 or 300 -- Lower than default (1000) to quickly trigger which-key
+vim.o.undofile = true
+vim.o.undolevels = 10000
+vim.o.updatetime = 200 -- Save swap file and trigger CursorHold
+vim.o.virtualedit = "block" -- Allow cursor to move where there is no text in visual block mode
+vim.o.wildmode = "longest:full,full" -- Command-line completion mode
+vim.o.winminwidth = 5 -- Minimum window width
+vim.o.wrap = false -- Disable line wrap
+vim.o.statuscolumn = [[%!v:lua.require'snacks.statuscolumn'.get()]]
 
 --[[
 -- Backup you shit!
@@ -189,270 +182,6 @@ vim.o.writebackup = true
 vim.o.backupdir = '/tmp/'
 
 
-local function augroup(name)
-  return vim.api.nvim_create_augroup("user_" .. name, { clear = true })
-end
-
--- Check if we need to reload the file when it changed
-vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
-  group = augroup("checktime"),
-  callback = function()
-    if vim.o.buftype ~= "nofile" then
-      vim.cmd("checktime")
-    end
-  end,
-})
-
--- Highlight on yank
-vim.api.nvim_create_autocmd("TextYankPost", {
-  group = augroup("highlight_yank"),
-  callback = function()
-    (vim.hl or vim.highlight).on_yank()
-  end,
-})
-
--- resize splits if window got resized
-vim.api.nvim_create_autocmd({ "VimResized" }, {
-  group = augroup("resize_splits"),
-  callback = function()
-    local current_tab = vim.fn.tabpagenr()
-    vim.cmd("tabdo wincmd =")
-    vim.cmd("tabnext " .. current_tab)
-  end,
-})
-
--- go to last loc when opening a buffer
--- vim.api.nvim_create_autocmd("BufReadPost", {
---   group = augroup("last_loc"),
---   callback = function(event)
---     local exclude = { "gitcommit" }
---     local buf = event.buf
---     if vim.tbl_contains(exclude, vim.bo[buf].filetype) or vim.b[buf].lazyvim_last_loc then
---       return
---     end
---     vim.b[buf].lazyvim_last_loc = true
---     local mark = vim.api.nvim_buf_get_mark(buf, '"')
---     local lcount = vim.api.nvim_buf_line_count(buf)
---     if mark[1] > 0 and mark[1] <= lcount then
---       pcall(vim.api.nvim_win_set_cursor, 0, mark)
---     end
---   end,
--- })
-
--- close some filetypes with <q>
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup("close_with_q"),
-  pattern = {
-    "PlenaryTestPopup",
-    "checkhealth",
-    "dbout",
-    "gitsigns-blame",
-    "grug-far",
-    "help",
-    "lspinfo",
-    "neotest-output",
-    "neotest-output-panel",
-    "neotest-summary",
-    "notify",
-    "qf",
-    "spectre_panel",
-    "startuptime",
-    "tsplayground",
-  },
-  callback = function(event)
-    vim.bo[event.buf].buflisted = false
-    vim.schedule(function()
-      vim.keymap.set("n", "q", function()
-        vim.cmd("close")
-        pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
-      end, {
-        buffer = event.buf,
-        silent = true,
-        desc = "Quit buffer",
-      })
-    end)
-  end,
-})
-
--- make it easier to close man-files when opened inline
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup("man_unlisted"),
-  pattern = { "man" },
-  callback = function(event)
-    vim.bo[event.buf].buflisted = false
-  end,
-})
-
--- wrap and check for spell in text filetypes
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup("wrap_spell"),
-  pattern = { "text", "plaintex", "typst", "gitcommit", "markdown" },
-  callback = function()
-    vim.opt_local.wrap = true
-    vim.opt_local.spell = true
-  end,
-})
-
--- Fix conceallevel for json files
-vim.api.nvim_create_autocmd({ "FileType" }, {
-  group = augroup("json_conceal"),
-  pattern = { "json", "jsonc", "json5" },
-  callback = function()
-    vim.opt_local.conceallevel = 0
-  end,
-})
-
--- Auto create dir when saving a file, in case some intermediate directory does not exist
-vim.api.nvim_create_autocmd({ "BufWritePre" }, {
-  group = augroup("auto_create_dir"),
-  callback = function(event)
-    if event.match:match("^%w%w+:[\\/][\\/]") then
-      return
-    end
-    local file = vim.fs.abspath(event.match) or event.match
-    vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
-  end,
-})
-
-local ft_autoclose = {}
-local ft_autoclose_ignore = { 'snacks_dashboard' }
--- Disable autoformat for lua files
-vim.api.nvim_create_autocmd({ 'FileType' }, {
-  pattern = { 'hyprlang' },
-  callback = function()
-    vim.notify 'Disabling autoformatting'
-    vim.b.autoformat = false
-  end,
-})
-local list_wins = function()
-  local all, close, rest = vim.api.nvim_list_wins(), {}, {}
-  for _, win in ipairs(all) do
-    local config = vim.api.nvim_win_get_config(win)
-    local buf = vim.api.nvim_win_get_buf(win)
-    local wininfo = vim.fn.getwininfo(win)[1]
-    local is_ignore = vim.iter(ft_autoclose_ignore):any(function(pat)
-      return string.match(vim.bo[buf].ft, pat)
-    end)
-    local is_ft = vim.iter(ft_autoclose):any(function(pat)
-      return string.match(vim.bo[buf].ft, pat)
-    end)
-    local is_float = config.relative ~= ''
-    local is_qf = wininfo.quickfix == 1 or wininfo.loclist == 1
-    if not is_ignore and (is_ft or is_float or is_qf) then
-      table.insert(close, win)
-    else
-      table.insert(rest, win)
-    end
-  end
-  return all, rest, close
-end
-
-vim.keymap.set('n', '<leader>bD', function()
-  local _, wins, close = list_wins()
-  local cur_win = vim.api.nvim_get_current_win()
-  -- Prevent quit when 'close' window is focused
-  if vim.list_contains(close, cur_win) then
-    return
-  end
-  if #wins == 1 then
-    pcall(vim.cmd.quitall)
-  else
-    pcall(vim.cmd.quit)
-  end
-end, { desc = '[B]uffer and window [D]elete' })
-vim.api.nvim_create_autocmd('QuitPre', {
-  -- group = augroup("close_with_q"),
-  pattern = {
-    'PlenaryTestPopup',
-    'checkhealth',
-    'dbout',
-    'gitsigns-blame',
-    'grug-far',
-    'help',
-    'lspinfo',
-    'neotest-output',
-    'neotest-output-panel',
-    'neotest-summary',
-    'notify',
-    'qf',
-    'spectre_panel',
-    'startuptime',
-    'noice',
-    'dapui',
-    'trouble',
-    'dap-repl',
-    'codecompanion',
-  },
-
-  callback = function()
-    local _, wins, close = list_wins()
-    local cur_win = vim.api.nvim_get_current_win()
-    if #wins ~= 1 then
-      return
-    end
-    -- Prevent quit when 'close' window is focused
-    if vim.list_contains(close, cur_win) then
-      return
-    end
-    if vim.list_contains(close, cur_win) then
-      -- stylua: ignore
-      vim.defer_fn(function() pcall(vim.cmd.quit) end, 100)
-    end
-    for _, win in ipairs(close) do
-      pcall(vim.api.nvim_win_close, win, true)
-    end
-  end,
-  -- callback = function(event)
-  --   vim.bo[event.buf].buflisted = false
-  --   vim.schedule(function()
-  --     vim.keymap.set("n", "q", function()
-  --       vim.cmd("close")
-  --       pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
-  --     end, {
-  --       buffer = event.buf,
-  --       silent = true,
-  --       desc = "Quit buffer",
-  --     })
-  --   end)
-  -- end,
-})
--- vim.api.nvim_create_autocmd('QuitPre', {
---   callback = function()
---     local _, wins, close = list_wins()
---     local cur_win = vim.api.nvim_get_current_win()
---     if #wins ~= 1 then
---       return
---     end
---     -- Prevent quit when 'close' window is focused
---     if vim.list_contains(close, cur_win) then
---       return
---     end
---     if vim.list_contains(close, cur_win) then
---       -- stylua: ignore
---       vim.defer_fn(function() pcall(vim.cmd.quit) end, 100)
---     end
---     for _, win in ipairs(close) do
---       pcall(vim.api.nvim_win_close, win, true)
---     end
---   end,
--- })
-
-vim.api.nvim_create_autocmd('QuickFixCmdPost', {
-  callback = function()
-    vim.cmd [[Trouble qflist open]]
-  end,
-})
-
--- vim.api.nvim_create_autocmd('BufRead', {
---   callback = function(ev)
---     if vim.bo[ev.buf].buftype == 'quickfix' then
---       vim.schedule(function()
---         vim.cmd [[cclose]]
---         vim.cmd [[Trouble qflist open]]
---       end)
---     end
---   end,
--- })
 --
 --
 
@@ -462,31 +191,16 @@ vim.api.nvim_create_autocmd('QuickFixCmdPost', {
 --
 -- This file contains definitions of custom general and Leader mappings.
 
+_G.Utils = require("custom.utils")
 -- General mappings ===========================================================
-
 -- Use this section to add custom general mappings. See `:h vim.keymap.set()`.
 
 -- An example helper to create a Normal mode mapping
-function _G._G.nmap(lhs, rhs, desc, opts)
-  -- See `:h vim.keymap.set()`
-  opts = opts or {}
-  opts.desc = desc
-  vim.keymap.set('n', lhs, rhs, opts)
-end
-
-function _G._G.nmapleader(suffix, rhs, desc, opts)
-  opts = opts or {}
-  opts.desc = desc
-  vim.keymap.set('n', '<Leader>' .. suffix, rhs, opts)
-end
-function _G._G.xmapleader(suffix, rhs, desc)
-  vim.keymap.set('x', '<Leader>' .. suffix, rhs, { desc = desc })
-end
 local map = vim.keymap.set
 -- Paste linewise before/after current line
 -- Usage: `yiw` to yank a word and `]p` to put it on the next line.
-_G._G.nmap('[p', '<Cmd>exe "put! " . v:register<CR>', 'Paste Above')
-_G._G.nmap(']p', '<Cmd>exe "put "  . v:register<CR>', 'Paste Below')
+_G.Utils.nmap('[p', '<Cmd>exe "put! " . v:register<CR>', 'Paste Above')
+_G.Utils.nmap(']p', '<Cmd>exe "put "  . v:register<CR>', 'Paste Below')
 
 -- Many general mappings are created by 'mini.basics'. See 'plugin/30_mini.lua'
 
@@ -525,21 +239,6 @@ _G._G.nmap(']p', '<Cmd>exe "put "  . v:register<CR>', 'Paste Below')
 -- This approach also doesn't require the underlying commands/functions to exist
 -- during mapping creation: a "lazy loading" approach to improve startup time.
 
-_G.Config.leader_group_clues = {
-  { mode = 'n', keys = '<Leader>b', desc = '+Buffer' },
-  { mode = 'n', keys = '<Leader>e', desc = '+Explore/Edit' },
-  { mode = 'n', keys = '<Leader>f', desc = '+Find' },
-  { mode = 'n', keys = '<Leader>g', desc = '+Git' },
-  { mode = 'n', keys = '<Leader>l', desc = '+Language' },
-  { mode = 'n', keys = '<Leader>m', desc = '+Map' },
-  { mode = 'n', keys = '<Leader>o', desc = '+Other' },
-  { mode = 'n', keys = '<Leader>s', desc = '+Session' },
-  { mode = 'n', keys = '<Leader>t', desc = '+Terminal' },
-  { mode = 'n', keys = '<Leader>v', desc = '+Visits' },
-
-  { mode = 'x', keys = '<Leader>g', desc = '+Git' },
-  { mode = 'x', keys = '<Leader>l', desc = '+Language' },
-}
 
 
 -- b is for 'Buffer'. Common usage:
@@ -550,12 +249,12 @@ local new_scratch_buffer = function()
   vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(true, true))
 end
 
-_G.nmapleader('ba', '<Cmd>b#<CR>',                                 'Alternate')
-_G.nmapleader('bd', '<Cmd>lua MiniBufremove.delete()<CR>',         'Delete')
-_G.nmapleader('bD', '<Cmd>lua MiniBufremove.delete(0, true)<CR>',  'Delete!')
-_G.nmapleader('bs', new_scratch_buffer,                            'Scratch')
-_G.nmapleader('bw', '<Cmd>lua MiniBufremove.wipeout()<CR>',        'Wipeout')
-_G.nmapleader('bW', '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', 'Wipeout!')
+_G.Utils.nmapleader('ba', '<Cmd>b#<CR>',                                 'Alternate')
+_G.Utils.nmapleader('bd', '<Cmd>lua MiniBufremove.delete()<CR>',         'Delete')
+_G.Utils.nmapleader('bD', '<Cmd>lua MiniBufremove.delete(0, true)<CR>',  'Delete!')
+_G.Utils.nmapleader('bs', new_scratch_buffer,                            'Scratch')
+_G.Utils.nmapleader('bw', '<Cmd>lua MiniBufremove.wipeout()<CR>',        'Wipeout')
+_G.Utils.nmapleader('bW', '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', 'Wipeout!')
 
 map("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
 map("n", "<leader>`", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
@@ -580,23 +279,21 @@ end
 -- an attempt to be more concise yet descriptive. See `:h <Cmd>`.
 -- This approach also doesn't require the underlying commands/functions to exist
 -- during mapping creation: a "lazy loading" approach to improve startup time.
-_G.nmapleader('ei', '<Cmd>edit $MYVIMRC<CR>',                 'init.lua')
-_G.nmapleader('ek', edit_plugin_file('20_keymaps.lua'),       'Keymaps config')
-_G.nmapleader('em', edit_plugin_file('30_mini.lua'),          'MINI config')
-_G.nmapleader('eo', edit_plugin_file('10_options.lua'),       'Options config')
-_G.nmapleader('ep', edit_plugin_file('40_plugins.lua'),       'Plugins config')
-
+_G.Utils.nmapleader('ei', '<Cmd>edit $MYVIMRC<CR>',                 'init.lua')
+_G.Utils.nmapleader('q', '<nop>', "",{ noremap = true })
+_G.Utils.nmapleader('Q', 'q', 'Record macro', { noremap = true })
+_G.Utils.nmapleader('<M-q>', 'Q', 'Replay last register', { noremap = true })
 -- Move to window using the <ctrl> hjkl keys
-_G.nmap( '<C-h>', '<C-w>h', 'Go to Left Window', {remap = true })
-_G.nmap( '<C-j>', '<C-w>j', 'Go to Lower Window',{ remap = true })
-_G.nmap( '<C-k>', '<C-w>k', 'Go to Upper Window',{ remap = true })
-_G.nmap( '<C-l>', '<C-w>l', 'Go to Right Window',{ remap = true })
+_G.Utils.nmap( '<C-h>', '<C-w>h', 'Go to Left Window', {remap = true })
+_G.Utils.nmap( '<C-j>', '<C-w>j', 'Go to Lower Window',{ remap = true })
+_G.Utils.nmap( '<C-k>', '<C-w>k', 'Go to Upper Window',{ remap = true })
+_G.Utils.nmap( '<C-l>', '<C-w>l', 'Go to Right Window',{ remap = true })
 
 -- Resize window using <ctrl> arrow keys
--- _G.nmap( '<C-Up>', '<cmd>resize +2<cr>', { desc = 'Increase Window Height' })
--- _G.nmap( '<C-Down>', '<cmd>resize -2<cr>', { desc = 'Decrease Window Height' })
--- _G.nmap( '<C-Left>', '<cmd>vertical resize -2<cr>', { desc = 'Decrease Window Width' })
--- _G.nmap( '<C-Right>', '<cmd>vertical resize +2<cr>', { desc = 'Increase Window Width' })
+-- _G.Utils.nmap( '<C-Up>', '<cmd>resize +2<cr>', { desc = 'Increase Window Height' })
+-- _G.Utils.nmap( '<C-Down>', '<cmd>resize -2<cr>', { desc = 'Decrease Window Height' })
+-- _G.Utils.nmap( '<C-Left>', '<cmd>vertical resize -2<cr>', { desc = 'Decrease Window Width' })
+-- _G.Utils.nmap( '<C-Right>', '<cmd>vertical resize +2<cr>', { desc = 'Increase Window Width' })
 -- map({ 'n', 'v', 'x' }, '<leader>O', '<Cmd>restart<CR>', { desc = 'Restart vim.' })
 map({ 'n', 'v', 'x' }, '<leader>ev', '<Cmd>edit $MYVIMRC<CR>', { desc = 'Edit ' .. vim.fn.expand '$MYVIMRC' })
 map({ 'n', 'v', 'x' }, '<leader>ez', '<Cmd>e $ZDOTDIR<CR>', { desc = 'Edit .zshrc' })
@@ -689,13 +386,13 @@ local diagnostic_goto = function(next, severity)
     go({ severity = severity })
   end
 end
-_G.nmap( "<leader>cd", vim.diagnostic.open_float, "Line Diagnostics" )
-_G.nmap( "]d", diagnostic_goto(true), "Next Diagnostic")
-_G.nmap( "[d", diagnostic_goto(false), "Prev Diagnostic")
-_G.nmap( "]e", diagnostic_goto(true, "ERROR"), "Next Error")
-_G.nmap( "[e", diagnostic_goto(false, "ERROR"), "Prev Error")
-_G.nmap( "]w", diagnostic_goto(true, "WARN"), "Next Warning")
-_G.nmap( "[w", diagnostic_goto(false, "WARN"), "Prev Warning")
+_G.Utils.nmap( "<leader>cd", vim.diagnostic.open_float, "Line Diagnostics" )
+_G.Utils.nmap( "]d", diagnostic_goto(true), "Next Diagnostic")
+_G.Utils.nmap( "[d", diagnostic_goto(false), "Prev Diagnostic")
+_G.Utils.nmap( "]e", diagnostic_goto(true, "ERROR"), "Next Error")
+_G.Utils.nmap( "[e", diagnostic_goto(false, "ERROR"), "Prev Error")
+_G.Utils.nmap( "]w", diagnostic_goto(true, "WARN"), "Next Warning")
+_G.Utils.nmap( "[w", diagnostic_goto(false, "WARN"), "Prev Warning")
 
 
 -- e is for 'Explore' and 'Edit'. Common usage:
@@ -711,11 +408,10 @@ local explore_quickfix = function()
   vim.cmd('copen')
 end
 
-_G.nmapleader('ed', '<Cmd>lua MiniFiles.open()<CR>',          'Directory')
-_G.nmap('\\',explore_at_file,  'Open file explorer quick')
-_G.nmapleader('ef', explore_at_file,                          'File directory')
-_G.nmapleader('en', '<Cmd>lua MiniNotify.show_history()<CR>', 'Notifications')
-_G.nmapleader('eq', explore_quickfix,                         'Quickfix')
+_G.Utils.nmapleader('ed', '<Cmd>lua MiniFiles.open()<CR>',          'Directory')
+_G.Utils.nmap('\\',explore_at_file,  'Open file explorer quick')
+_G.Utils.nmapleader('en', '<Cmd>lua MiniNotify.show_history()<CR>', 'Notifications')
+_G.Utils.nmapleader('eq', explore_quickfix,                         'Quickfix')
 -- l is for 'Language'. Common usage:
 -- - `<Leader>ld` - show more diagnostic details in a floating window
 -- - `<Leader>lr` - perform rename via LSP
@@ -726,18 +422,17 @@ _G.nmapleader('eq', explore_quickfix,                         'Quickfix')
 -- by an "replace" operator in 'mini.operators' (which is more commonly used).
 local formatting_cmd = '<Cmd>lua require("conform").format({lsp_fallback=true})<CR>'
 
-_G.nmapleader('la', '<Cmd>lua vim.lsp.buf.code_action()<CR>',     'Actions')
-_G.nmapleader('ld', '<Cmd>lua vim.diagnostic.open_float()<CR>',   'Diagnostic popup')
-_G.nmapleader('lf', formatting_cmd,                               'Format')
-_G.nmapleader('li', '<Cmd>lua vim.lsp.buf.implementation()<CR>',  'Implementation')
-_G.nmapleader('lh', '<Cmd>lua vim.lsp.buf.hover()<CR>',           'Hover')
-_G.nmapleader('lr', '<Cmd>lua vim.lsp.buf.rename()<CR>',          'Rename')
-_G.nmapleader('lr', '<Cmd>lua vim.lsp.buf.references()<CR>',      'References')
-_G.nmapleader('ld', '<Cmd>lua vim.lsp.buf.definition()<CR>',      'Source definition')
-_G.nmapleader('lt', '<Cmd>lua vim.lsp.buf.type_definition()<CR>', 'Type definition')
+_G.Utils.nmapleader('la', '<Cmd>lua vim.lsp.buf.code_action()<CR>',     'Actions')
+_G.Utils.nmapleader('ld', '<Cmd>lua vim.diagnostic.open_float()<CR>',   'Diagnostic popup')
+_G.Utils.nmapleader('lf', formatting_cmd,                               'Format')
+_G.Utils.nmapleader('li', '<Cmd>lua vim.lsp.buf.implementation()<CR>',  'Implementation')
+_G.Utils.nmapleader('lh', '<Cmd>lua vim.lsp.buf.hover()<CR>',           'Hover')
+_G.Utils.nmapleader('lr', '<Cmd>lua vim.lsp.buf.rename()<CR>',          'Rename')
+_G.Utils.nmapleader('lr', '<Cmd>lua vim.lsp.buf.references()<CR>',      'References')
+_G.Utils.nmapleader('ld', '<Cmd>lua vim.lsp.buf.definition()<CR>',      'Source definition')
+_G.Utils.nmapleader('lt', '<Cmd>lua vim.lsp.buf.type_definition()<CR>', 'Type definition')
 
-_G.xmapleader('lf', formatting_cmd, 'Format selection')
-
+_G.Utils.xmapleader('lf', formatting_cmd, 'Format selection')
 
 local nvim_config_path = vim.fn.stdpath('config')
 vim.opt.rtp:append(nvim_config_path .. "/minimax")

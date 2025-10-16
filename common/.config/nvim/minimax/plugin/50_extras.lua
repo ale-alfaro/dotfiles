@@ -7,9 +7,6 @@
 --
 -- Use this file to install and configure other such plugins.
 
-local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
-local plugin_utils = require('custom.plugin_utils')
-plugin_utils.init({ add = add, now = now, later = later })
 
 ---@type PluginSpec[]
 local plugins = {
@@ -42,6 +39,42 @@ local plugins = {
           },
         },
       },
+      keys = {
+        { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>",              desc = "Diagnostics (Trouble)" },
+        { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Buffer Diagnostics (Trouble)" },
+        { "<leader>cs", "<cmd>Trouble symbols toggle<cr>",                  desc = "Symbols (Trouble)" },
+        { "<leader>cS", "<cmd>Trouble lsp toggle<cr>",                      desc = "LSP references/definitions/... (Trouble)" },
+        { "<leader>xL", "<cmd>Trouble loclist toggle<cr>",                  desc = "Location List (Trouble)" },
+        { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>",                   desc = "Quickfix List (Trouble)" },
+        {
+          "[q",
+          function()
+            if require("trouble").is_open() then
+              require("trouble").prev({ skip_groups = true, jump = true })
+            else
+              local ok, err = pcall(vim.cmd.cprev)
+              if not ok then
+                vim.notify(err, vim.log.levels.ERROR)
+              end
+            end
+          end,
+          desc = "Previous Trouble/Quickfix Item",
+        },
+        {
+          "]q",
+          function()
+            if require("trouble").is_open() then
+              require("trouble").next({ skip_groups = true, jump = true })
+            else
+              local ok, err = pcall(vim.cmd.cnext)
+              if not ok then
+                vim.notify(err, vim.log.levels.ERROR)
+              end
+            end
+          end,
+          desc = "Next Trouble/Quickfix Item",
+        },
+      }
     },
   },
 
@@ -255,17 +288,17 @@ local plugins = {
   {
     'folke/lazydev.nvim',
     dependencies = {
-       'Bilal2453/luvit-meta',
-       'justinsgithub/wezterm-types',
-       'folke/snacks.nvim'
+      'Bilal2453/luvit-meta',
+      'justinsgithub/wezterm-types',
+      'folke/snacks.nvim'
     },
     opts = {
       library = {
         { path = 'luvit-meta/library', words = { 'vim%.uv' } },
         { path = 'wezterm-types',      mods = { 'wezterm' } },
         { path = 'folke/snacks.nvim',  words = { 'Snacks' } },
-        { path = 'mini.nvim',  words = { 'MiniDeps' } },
-        
+        { path = 'mini.nvim',          words = { 'MiniDeps' } },
+
         {
           path = 'nvim-lua/plenary.nvim',
           words = {
@@ -319,4 +352,4 @@ local plugins = {
   }
 }
 
-plugin_utils.setup_all(plugins)
+_G.Utils.plugin.plugins_setup_all(plugins)

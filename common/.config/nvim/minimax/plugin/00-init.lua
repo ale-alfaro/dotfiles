@@ -71,3 +71,33 @@ end
 -- - 'plugin/30_mini.lua' - more details about 'mini.nvim' in general
 require('mini.deps').setup()
 
+_G.Utils.plugin.plugin_backend_init({ add = MiniDeps.add, now = MiniDeps.now, later = MiniDeps.later })
+-- Diagnostics ================================================================
+
+-- Neovim has built-in support for showing diagnostic messages. This configures
+-- a more conservative display while still being useful.
+-- See `:h vim.diagnostic` and `:h vim.diagnostic.config()`.
+local diagnostic_opts = {
+  -- Show signs on top of any other sign, but only for warnings and errors
+  signs = { priority = 9999, severity = { min = 'WARN', max = 'ERROR' } },
+
+  -- Show all diagnostics as underline (for their messages type `<Leader>ld`)
+  underline = { severity = { min = 'HINT', max = 'ERROR' } },
+
+  -- Show more details immediately for errors on the current line
+  virtual_lines = false,
+  virtual_text = {
+    current_line = true,
+    severity = { min = 'ERROR', max = 'ERROR' },
+  },
+
+  -- Don't update diagnostics when typing
+  update_in_insert = false,
+}
+
+-- Use `later()` to avoid sourcing `vim.diagnostic` on startup
+MiniDeps.later(function() vim.diagnostic.config(diagnostic_opts) end)
+_G.Utils.nmapleader( "dg" ,"<Cmd> lua vim.print(MiniDeps.get_session())<CR>", "[D]eps [G]et")
+_G.Utils.nmapleader( "ds" ,"<Cmd> lua vim.print(MiniDeps.snap_get())<CR>", "[D]eps [S]napshot")
+_G.Utils.nmapleader( "du" ,"<Cmd> lua vim.print(MiniDeps.update())<CR>", "[D]eps [U]pdate")
+_G.Utils.nmapleader( "dc" ,"<Cmd> lua vim.print(MiniDeps.clean())<CR>", "[D]eps [C]lean")

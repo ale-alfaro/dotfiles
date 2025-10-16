@@ -3,7 +3,7 @@
 ---@module "uv.init"
 local UV_M = require 'uv'
 -- JSON = assert(loadfile 'lua/utils/json.lua')()
-JSON = require 'utils.json'
+JSON = require 'custom.python.json'
 local M = {}
 
 ---@return string?
