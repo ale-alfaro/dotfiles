@@ -54,11 +54,6 @@ if not vim.loop.fs_stat(mini_path) then
   vim.cmd('echo "Installed `mini.nvim`" | redraw')
 end
 
--- Add nvim config to package path to require modules from it
-local nvim_config_path = vim.fn.stdpath('config')
-if not (vim.uv or vim.loop).fs_stat(nvim_config_path) then
-  package.path = package.path .. ';' .. nvim_config_path .. '/lua/?.lua'
-end
 
 -- Load core settings from nvim config
 -- pcall(require, 'config.options')
@@ -76,19 +71,3 @@ end
 -- - 'plugin/30_mini.lua' - more details about 'mini.nvim' in general
 require('mini.deps').setup()
 
--- Define config table to be able to pass data between scripts
-_G.Config = {}
-
--- Define custom autocommand group and helper to create an autocommand.
--- Autocommands are Neovim's way to define actions that are executed on events
--- (like creating a buffer, setting an option, etc.).
---
--- See also:
--- - `:h autocommand`
--- - `:h nvim_create_augroup()`
--- - `:h nvim_create_autocmd()`
-local gr = vim.api.nvim_create_augroup('custom-config', {})
-_G.Config.new_autocmd = function(event, pattern, callback, desc)
-  local opts = { group = gr, pattern = pattern, callback = callback, desc = desc }
-  vim.api.nvim_create_autocmd(event, opts)
-end

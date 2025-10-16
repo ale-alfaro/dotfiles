@@ -387,8 +387,7 @@ function M.setup_keymaps()
   vim.api.nvim_set_keymap('n', prefix .. 'l', '<cmd>UVLock<CR>', { noremap = true, silent = true, desc = 'UV Lock Dependencies' })
 end
 -- -- Main setup function
-function M.setup(opts)
-  UV_M.setup(opts)
+function M.setup()
   M.setup_commands()
   M.setup_keymaps()
   M.setup_pickers()

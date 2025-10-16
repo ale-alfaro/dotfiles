@@ -1,3 +1,4 @@
+---@module "mini.nvim"
 -- ┌─────────────────────────┐
 -- │ Plugins outside of MINI │
 -- └─────────────────────────┘
@@ -13,6 +14,7 @@
 -- they are needed during startup to work correctly.
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 local now_if_args = vim.fn.argc(-1) > 0 and now or later
+
 
 -- Tree-sitter ================================================================
 
@@ -210,6 +212,29 @@ later(function()
   })
 end)
 
+later(function()
+  add('benomahony/uv.nvim')
+
+  require('uv').setup({
+    keymaps = {
+      prefix = '<leader>x',    -- Main prefix for uv commands
+      commands = true,         -- Show uv commands menu (<leader>x)
+      run_file = false,        -- Run current file (<leader>xr)
+      run_selection = false,   -- Run selected code (<leader>xs)
+      run_function = false,    -- Run function (<leader>xf)
+      venv = true,             -- Environment management (<leader>xe)
+      init = true,             -- Initialize uv project (<leader>xi)
+      add = true,              -- Add a package (<leader>xa)
+      remove = true,           -- Remove a package (<leader>xd)
+      sync = false,            -- Sync packages (<leader>xc)
+      sync_all = false,        -- Sync all packages, extras and groups (<leader>xC)
+    }
+  })
+
+  require('custom.python.uv').setup()
+end)
+
+
 -- Snippets ===================================================================
 
 -- Although 'mini.snippets' provides functionality to manage snippet files, it
@@ -232,32 +257,32 @@ local severities = {
 later(function()
   add('mfussenegger/nvim-lint')
   local Lint = require('lint')
-  
-    -- Event to trigger linters
-    Lint.linters_by_ft = {
-      cmake = { 'cmakelint' },              -- Install: uv tool install cmakelint, repo: https://github.com/cmake-lint/cmake-lint
-      python = { 'ruff', 'ty' },
-      yaml = { 'yamlint' },                 --Install: uv tool install yamllint, repo: https://github.com/adrienverge/yamllint
-      zsh = { 'zsh' },
-      ['yaml.ghaction'] = { 'actionlint' }, -- Install: go install github.com/rhysd/actionlint/cmd/actionlint@latest, repo: https://github.com/rhysd/actionlint
+
+  -- Event to trigger linters
+  Lint.linters_by_ft = {
+    cmake = { 'cmakelint' },              -- Install: uv tool install cmakelint, repo: https://github.com/cmake-lint/cmake-lint
+    python = { 'ruff', 'ty' },
+    yaml = { 'yamlint' },                 --Install: uv tool install yamllint, repo: https://github.com/adrienverge/yamllint
+    zsh = { 'zsh' },
+    ['yaml.ghaction'] = { 'actionlint' }, -- Install: go install github.com/rhysd/actionlint/cmd/actionlint@latest, repo: https://github.com/rhysd/actionlint
+  }
+  Lint.linters = {
+    ty = {
+      cmd = 'ty',
+      stdin = false,
+      stream = 'stdout',
+      ignore_exitcode = true,
+      args = {
+        'check',
+        '--output-format',
+        'concise',
+        '--color',
+        'never',
+      },
+      parser = require('lint.parser').from_pattern(pattern, groups, severities, { ['source'] = 'ty' },
+        { end_col_offset = 0 }),
     }
-    Lint.linters = {
-      ty = {
-        cmd = 'ty',
-        stdin = false,
-        stream = 'stdout',
-        ignore_exitcode = true,
-        args = {
-          'check',
-          '--output-format',
-          'concise',
-          '--color',
-          'never',
-        },
-        parser = require('lint.parser').from_pattern(pattern, groups, severities, { ['source'] = 'ty' },
-          { end_col_offset = 0 }),
-      }
-    }
+  }
 
   -- local lint_progress = function()
   --   local linters = require("lint").get_running()
@@ -271,16 +296,29 @@ later(function()
   -- })
 end)
 
-  --
-  -- local ns = require("lint").get_namespace("my_linter_name")
-  -- vim.diagnostic.config({ virtual_text = true }, ns)
+--
+-- local ns = require("lint").get_namespace("my_linter_name")
+-- vim.diagnostic.config({ virtual_text = true }, ns)
 -- Smart Splits
-later(function()
-  local spec = require('custom.better_mux')[1]
-  add(spec[1])
-  for _, dep in ipairs(spec.dependencies) do add(type(dep) == 'string' and dep or dep[1]) end
-  local opts = spec.opts(spec, {})
-  require('smart-splits').setup(opts)
+now(function()
+ add(
+   {
+     source = 'mrjones2014/smart-splits.nvim',
+     depends = {
+       'folke/snacks.nvim',
+     },
+   }
+ )
+ -- add(spec[1])
+ --
+ local spec = require('custom.better_mux')
+ -- for _, dep in ipairs(spec.dependencies) do add(type(dep) == 'string' and dep or dep[1]) end
+ local opts = spec.opts or {}
+ require('smart-splits').setup(opts)
+ for _, key in ipairs(spec.keys) do
+   _G.nmap(key[1], key[2], key[3])
+ end
+ require('custom.wezterm.wezterm_terminal').setup()
 end)
 --
 -- -- Bookmarks
@@ -298,8 +336,8 @@ end)
 --   require('obsidian').setup(spec.opts)
 --   if spec.post_setup then spec.post_setup() end
 -- end)
---
--- -- Python / uv.nvim
+
+-- Python / uv.nvim
 -- later(function()
 --   local spec = require('custom.python')[1]
 --   add(spec[1])
@@ -315,20 +353,148 @@ end)
 -- If you need them to work elsewhere, consider using other package managers.
 --
 -- You can use it like so:
--- later(function()
---   add('mason-org/mason.nvim')
---   require('mason').setup()
--- end)
+later(function()
+  add(
+    add({
+      source = "saghen/blink.cmp",
+      version = "main",
+      depends = { "rafamadriz/friendly-snippets" },
+    })
+  )
+  require('blink-cmp').setup({
+    keymap = {
+      preset = 'enter',
+      ['<C-y>'] = { 'select_and_accept' },
+    },
+    appearance = {
+      use_nvim_cmp_as_default = true,
+      nerd_font_variant = 'mono',
+    },
+    completion = {
+      accept = {
+        auto_brackets = {
+          enabled = true,
+        },
+      },
+      menu = {
+        draw = {
+          treesitter = { 'lsp' },
+        },
+      },
+      documentation = {
+        auto_show = true,
+        auto_show_delay_ms = 200,
+      },
+      ghost_text = {
+        enabled = true,
+      },
+      trigger = {
+        prefetch_on_insert = true,
+        show_on_keyword = true,
+        show_on_trigger_character = true,
+        show_in_snippet = true,
+        show_on_insert_on_trigger_character = true,
+        show_on_accept_on_trigger_character = true,
+      },
+      list = {
+        selection = {
+          auto_insert = false,
+          preselect = function(ctx)
+            return ctx.mode ~= 'cmdline' and not require('blink.cmp').snippet_active { direction = 1 }
+          end,
+        },
+      },
+    },   -- completion
+    signature = { enabled = true },
+    sources = {
+      compat = {},
+      default = { 'lsp', 'path', 'snippets', 'buffer' },
+      per_filetype = {
+        lua = { inherit_defaults = true, 'lazydev' },
+      },
+      providers = {
+        lazydev = {
+          name = 'LazyDev',
+          module = 'lazydev.integrations.blink',
+          score_offset = 100,
+        },
+        lsp = { async = true, score_offset = 70 },
+        snippets = { score_offset = 1, max_items = 3 },
+      },
+    },   -- sources
+    cmdline = {
+      enabled = true,
+      keymap = { preset = 'cmdline' },
+      completion = {
+        list = { selection = { preselect = false } },
+        menu = {
+          auto_show = function(ctx)
+            return vim.fn.getcmdtype() == ':'
+          end,
+        },
+        ghost_text = { enabled = true },
+      },
+    },   --cmdline
+  })
+end)
 
+
+now(function() add('nvim-lua/plenary.nvim') end)
 -- Beautiful, usable, well maintained color schemes outside of 'mini.nvim' and
 -- have full support of its highlight groups. Use if you don't like 'miniwinter'
 -- enabled in 'plugin/30_mini.lua' or other suggested 'mini.hues' based ones.
--- now(function()
---   -- Install only those that you need
---   add('sainnhe/everforest')
---   add('Shatur/neovim-ayu')
---   add('ellisonleao/gruvbox.nvim')
---
---   -- Enable only one
---   vim.cmd('color everforest')
--- end)
+now(function()
+  -- Install only those that you need
+  -- add('sainnhe/everforest')
+  -- add('Shatur/neovim-ayu')
+  -- add('ellisonleao/gruvbox.nvim')
+
+  add('folke/tokyonight.nvim')
+
+  require('tokyonight').setup({
+    transparent = true,
+    styles = {
+      sidebars = 'transparent',
+      floats = 'transparent',
+    },
+  })
+  -- Enable only one
+  vim.cmd('color tokyonight')
+end)
+
+now(function()
+  add({ source = 'folke/snacks.nvim' })
+
+  require('snacks').setup({
+    bigfile = { enabled = false },
+    dashboard = { enabled = false },
+    explorer = { enabled = false },
+    indent = { enabled = false },
+    input = { enabled = true },
+    notifier = {
+      enabled = false,
+      timeout = 3000,
+    },
+    quickfile = { enabled = false },
+    scope = { enabled = false },
+    scroll = { enabled = false },
+    statuscolumn = { enabled = false },
+    words = { enabled = false },
+    styles = {
+      notification = {},
+    },
+    terminal = { enabled = false },
+    picker = {
+      enabled = true,
+      ---@type snacks.picker.Action.fn[]
+      actions = {
+        ---@param p snacks.Picker
+        ---@param item snacks.picker.Item
+        run_cmd = function(p, item)
+          local uv = require 'custom.python.uv'
+          uv.uv_run_tool_call(p, item)
+        end,
+      },
+    },
+  })
+end)

@@ -52,18 +52,18 @@ local now, later = MiniDeps.now, MiniDeps.later
 -- - `:h MiniBasics.config.options` - list of adjusted options
 -- - `:h MiniBasics.config.mappings` - list of created mappings
 -- - `:h MiniBasics.config.autocommands` - list of created autocommands
-now(function()
-  require('mini.basics').setup({
-    -- Manage options in 'plugin/10_options.lua' for didactic purposes
-    options = { basic = false },
-    mappings = {
-      -- Create `<C-hjkl>` mappings for window navigation
-      windows = true,
-      -- Create `<M-hjkl>` mappings for navigation in Insert and Command modes
-      move_with_alt = true,
-    },
-  })
-end)
+-- now(function()
+--   require('mini.basics').setup({
+--     -- Manage options in 'plugin/10_options.lua' for didactic purposes
+--     options = { basic = false },
+--     mappings = {
+--       -- Create `<C-hjkl>` mappings for window navigation
+--       windows = true,
+--       -- Create `<M-hjkl>` mappings for navigation in Insert and Command modes
+--       move_with_alt = true,
+--     },
+--   })
+-- end)
 
 -- Icon provider. Usually no need to use manually. It is used by plugins like
 -- 'mini.pick', 'mini.files', 'mini.statusline', and others.
@@ -261,7 +261,6 @@ later(function()
     triggers = {
       { mode = 'n', keys = '<Leader>' }, -- Leader triggers
       { mode = 'x', keys = '<Leader>' },
-      { mode = 'n', keys = '\\' },       -- mini.basics
       { mode = 'n', keys = '[' },        -- mini.bracketed
       { mode = 'n', keys = ']' },
       { mode = 'x', keys = '[' },
@@ -280,6 +279,7 @@ later(function()
       { mode = 'n', keys = '<C-w>' }, -- Window commands
       { mode = 'n', keys = 'z' },     -- `z` key
       { mode = 'x', keys = 'z' },
+     -- { mode = 'n', keys = '\\' },       -- mini.basics
     },
   })
 end)
@@ -453,6 +453,7 @@ later(function()
       trim_right = '>',
     }
   })
+
   local show_dotfiles = true
   local filter_show = function(fs_entry)
     return true
@@ -467,43 +468,43 @@ later(function()
     require('mini.files').refresh { content = { filter = new_filter } }
   end
 
-  -- local map_split = function(buf_id, lhs, direction, close_on_file)
-  --   local rhs = function()
-  --     local MiniFiles = require 'mini.files'
-  --     local fs_entry = MiniFiles.get_fs_entry()
-  --     if not fs_entry then
-  --       return
-  --     end
-  --
-  --     local wezterm = require 'custom.wezterm.wezterm_terminal'
-  --     local Direction = require('smart-splits.types').Direction
-  --
-  --     local wezterm_direction
-  --     if direction == 'horizontal' then
-  --       wezterm_direction = Direction.down
-  --     elseif direction == 'vertical' then
-  --       wezterm_direction = Direction.right
-  --     else
-  --       return
-  --     end
-  --
-  --     if fs_entry.is_dir then
-  --       wezterm.split_pane(wezterm_direction, fs_entry.path, 30)
-  --     else
-  --       wezterm.spawn_nvim_inst(wezterm_direction, fs_entry.path)
-  --     end
-  --
-  --     if close_on_file and not fs_entry.is_dir then
-  --       MiniFiles.close()
-  --     end
-  --   end
-  --
-  --   local desc = 'Open in wezterm ' .. direction .. ' split'
-  --   if close_on_file then
-  --     desc = desc .. ' and close'
-  --   end
-  --   vim.keymap.set('n', lhs, rhs, { buffer = buf_id, desc = desc })
-  -- end
+  local map_split = function(buf_id, lhs, direction, close_on_file)
+    local rhs = function()
+      local MiniFiles = require 'mini.files'
+      local fs_entry = MiniFiles.get_fs_entry()
+      if not fs_entry then
+        return
+      end
+
+      local wezterm = require 'custom.wezterm.wezterm_terminal'
+      local Direction = require('smart-splits.types').Direction
+
+      local wezterm_direction
+      if direction == 'horizontal' then
+        wezterm_direction = Direction.down
+      elseif direction == 'vertical' then
+        wezterm_direction = Direction.right
+      else
+        return
+      end
+
+      if fs_entry.is_dir then
+        wezterm.split_pane(wezterm_direction, fs_entry.path, 30)
+      else
+        wezterm.spawn_nvim_inst(wezterm_direction, fs_entry.path)
+      end
+
+      if close_on_file and not fs_entry.is_dir then
+        MiniFiles.close()
+      end
+    end
+
+    local desc = 'Open in wezterm ' .. direction .. ' split'
+    if close_on_file then
+      desc = desc .. ' and close'
+    end
+    vim.keymap.set('n', lhs, rhs, { buffer = buf_id, desc = desc })
+  end
   --
   -- Set focused directory as current working directory
   local files_set_cwd = function()
@@ -573,8 +574,6 @@ later(function()
 
       map_split(buf_id, '<C-w>s', 'horizontal', false)
       map_split(buf_id, '<C-w>v', 'vertical', false)
-      -- map_split(buf_id, opts.mappings and opts.mappings.go_in_horizontal_plus or '<C-w>S', 'horizontal', true)
-      -- map_split(buf_id, opts.mappings and opts.mappings.go_in_vertical_plus or '<C-w>V', 'vertical', true)
     end,
   })
 
