@@ -15,7 +15,6 @@
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 local now_if_args = vim.fn.argc(-1) > 0 and now or later
 
-
 -- Tree-sitter ================================================================
 
 -- Tree-sitter is a tool for fast incremental parsing. It converts text into
@@ -32,32 +31,36 @@ local now_if_args = vim.fn.argc(-1) > 0 and now or later
 --   textobjects (see `:h text-objects`, `:h MiniAi.gen_spec.treesitter()`).
 --
 -- Add these plugins now if file (and not 'mini.starter') is shown after startup.
-now_if_args(function()
-  add({
+now(function()
+  add {
     source = 'nvim-treesitter/nvim-treesitter',
     -- Use `main` branch since `master` branch is frozen, yet still default
     checkout = 'main',
     -- Update tree-sitter parser after plugin is updated
-    hooks = { post_checkout = function() vim.cmd('TSUpdate') end },
-  })
-  add({
+    hooks = {
+      post_checkout = function()
+        vim.cmd 'TSUpdate'
+      end,
+    },
+  }
+  add {
     source = 'nvim-treesitter/nvim-treesitter-textobjects',
     -- Same logic as for 'nvim-treesitter'
     checkout = 'main',
-  })
-  require('nvim-treesitter-textobjects').setup({
+  }
+  require('nvim-treesitter-textobjects').setup {
     move = {
       enable = true,
       set_jumps = true, -- whether to set jumps in the jumplist
       -- LazyVim extention to create buffer-local keymaps
       keys = {
-        goto_next_start = { ["]f"] = "@function.outer", ["]c"] = "@class.outer", ["]a"] = "@parameter.inner" },
-        goto_next_end = { ["]F"] = "@function.outer", ["]C"] = "@class.outer", ["]A"] = "@parameter.inner" },
-        goto_previous_start = { ["[f"] = "@function.outer", ["[c"] = "@class.outer", ["[a"] = "@parameter.inner" },
-        goto_previous_end = { ["[F"] = "@function.outer", ["[C"] = "@class.outer", ["[A"] = "@parameter.inner" },
+        goto_next_start = { [']f'] = '@function.outer', [']c'] = '@class.outer', [']a'] = '@parameter.inner' },
+        goto_next_end = { [']F'] = '@function.outer', [']C'] = '@class.outer', [']A'] = '@parameter.inner' },
+        goto_previous_start = { ['[f'] = '@function.outer', ['[c'] = '@class.outer', ['[a'] = '@parameter.inner' },
+        goto_previous_end = { ['[F'] = '@function.outer', ['[C'] = '@class.outer', ['[A'] = '@parameter.inner' },
       },
     },
-  })
+  }
   -- Ensure installed parsers for listed languages. Add to `languages`
   -- array languages which you want to have installed. To see available languages:
   -- - Execute `:=require('nvim-treesitter').get_available()`
@@ -75,7 +78,7 @@ now_if_args(function()
     'lua',
     'luadoc',
     'markdown',
-    "python",
+    'python',
     'markdown_inline',
     'query',
     'vim',
@@ -83,15 +86,17 @@ now_if_args(function()
     'just',
     'json5',
     'toml',
-    "ninja",
-    "rst",
-    "yaml",
+    'ninja',
+    'rst',
+    'yaml',
   }
   local isnt_installed = function(lang)
     return #vim.api.nvim_get_runtime_file('parser/' .. lang .. '.*', false) == 0
   end
   local to_install = vim.tbl_filter(isnt_installed, ensure_languages)
-  if #to_install > 0 then require('nvim-treesitter').install(to_install) end
+  if #to_install > 0 then
+    require('nvim-treesitter').install(to_install)
+  end
 
   -- Ensure tree-sitter enabled after opening a file for target language
   local filetypes = {}
@@ -100,8 +105,10 @@ now_if_args(function()
       table.insert(filetypes, ft)
     end
   end
-  local ts_start = function(ev) vim.treesitter.start(ev.buf) end
-  _G.Utils.new_autocmd('FileType', ts_start,  filetypes,'Start tree-sitter')
+  local ts_start = function(ev)
+    vim.treesitter.start(ev.buf)
+  end
+  _G.Utils.new_autocmd('FileType', filetypes,  ts_start,'Start tree-sitter')
 end)
 
 -- Language servers ===========================================================
@@ -119,65 +126,15 @@ end)
 -- inside 'neovim/nvim-lspconfig' plugin.
 --
 -- Add it now if file (and not 'mini.starter') is shown after startup.
-now_if_args(function()
-  add('neovim/nvim-lspconfig')
-
-  -- Use `:h vim.lsp.enable()` to automatically enable language server based on
-  -- the rules provided by 'nvim-lspconfig'.
-  -- Use `:h vim.lsp.config()` or 'ftplugin/lsp/' directory to configure servers.
-  vim.lsp.config('lua_ls', {
-    stylua = { enabled = false },
-    lua_ls = {
-      cmd = { 'lua-language-server' },
-      filetypes = { 'lua' },
-      root_markers = {
-        '.luarc.json',
-        '.luarc.jsonc',
-        '.luacheckrc',
-        '.stylua.toml',
-        'stylua.toml',
-        'selene.toml',
-        'selene.yml',
-        '.git',
-      },
-      -- mason = false, -- set to false if you don't want this server to be installed with mason
-      -- Use this to add any additional keymaps
-      -- for specific lsp servers
-      -- ---@type LazyKeysSpec[]
-      -- keys = {},
-      settings = {
-        Lua = {
-          workspace = {
-            checkThirdParty = false,
-          },
-          codeLens = {
-            enable = true,
-          },
-          completion = {
-            callSnippet = 'Replace',
-          },
-          doc = {
-            privateName = { '^_' },
-          },
-          hint = {
-            enable = true,
-            setType = false,
-            paramType = true,
-            paramName = 'Disable',
-            semicolon = 'Disable',
-            arrayIndex = 'Disable',
-          },
-        },
-      },
-    },
-  })
-  -- Uncomment and tweak the following `vim.lsp.enable()` call to enable servers.
-  vim.lsp.enable({
-    "lua_ls", "ruff", "ty", "bashls", "taplo", "yamls", "jsonls"
-    --   -- For example, if `lua-language-server` is installed, use `'lua_ls'` entry
-  })
-end)
-
+vim.lsp.enable {
+  'lua_ls',
+  'ruff',
+  'ty',
+  'bashls',
+  'taplo',
+  'yamls',
+  'jsonls',
+}
 -- Formatting =================================================================
 
 -- Programs dedicated to text formatting (a.k.a. formatters) are very useful.
@@ -187,7 +144,7 @@ end)
 -- The 'stevearc/conform.nvim' plugin is a good and maintained solution for easier
 -- formatting setup.
 later(function()
-  add('stevearc/conform.nvim')
+  add 'stevearc/conform.nvim'
 
   -- local init_hook = function()
   --   -- Install the conform formatter on VeryLazy
@@ -213,17 +170,17 @@ later(function()
   -- - `:h Conform`
   -- - `:h conform-options`
   -- - `:h conform-formatters`
-  require('conform').setup({
+  require('conform').setup {
     default_format_opts = {
       timeout_ms = 3000,
-      async = false,           -- not recommended to change
-      quiet = false,           -- not recommended to change
-      lsp_format = "fallback", -- not recommended to change
+      async = false, -- not recommended to change
+      quiet = false, -- not recommended to change
+      lsp_format = 'fallback', -- not recommended to change
     },
     formatters_by_ft = {
-      lua = { "stylua" },
-      fish = { "fish_indent" },
-      sh = { "shfmt" },
+      lua = { 'stylua' },
+      fish = { 'fish_indent' },
+      sh = { 'shfmt' },
       -- # Example of using shfmt with extra args
       shfmt = {
         prepend_args = { '-i', '2', '-ci' },
@@ -246,32 +203,31 @@ later(function()
       yaml = { 'yamlfmt' },
       -- ['*'] = { 'codespell' },
       -- ['_'] = { 'trim_whitespace' },
-    }
-  })
+    },
+  }
 end)
 
 later(function()
-  add('benomahony/uv.nvim')
+  add 'benomahony/uv.nvim'
 
-  require('uv.init').setup({
+  require('uv.init').setup {
     keymaps = {
-      prefix = '<leader>x',  -- Main prefix for uv commands
-      commands = true,       -- Show uv commands menu (<leader>x)
-      run_file = false,      -- Run current file (<leader>xr)
+      prefix = '<leader>x', -- Main prefix for uv commands
+      commands = true, -- Show uv commands menu (<leader>x)
+      run_file = false, -- Run current file (<leader>xr)
       run_selection = false, -- Run selected code (<leader>xs)
-      run_function = false,  -- Run function (<leader>xf)
-      venv = true,           -- Environment management (<leader>xe)
-      init = true,           -- Initialize uv project (<leader>xi)
-      add = true,            -- Add a package (<leader>xa)
-      remove = true,         -- Remove a package (<leader>xd)
-      sync = false,          -- Sync packages (<leader>xc)
-      sync_all = false,      -- Sync all packages, extras and groups (<leader>xC)
-    }
-  })
+      run_function = false, -- Run function (<leader>xf)
+      venv = true, -- Environment management (<leader>xe)
+      init = true, -- Initialize uv project (<leader>xi)
+      add = true, -- Add a package (<leader>xa)
+      remove = true, -- Remove a package (<leader>xd)
+      sync = false, -- Sync packages (<leader>xc)
+      sync_all = false, -- Sync all packages, extras and groups (<leader>xC)
+    },
+  }
 
   require('custom.python.uv').setup()
 end)
-
 
 -- Snippets ===================================================================
 
@@ -282,7 +238,9 @@ end)
 -- snippet files. They are organized in 'snippets/' directory (mostly) per language.
 -- 'mini.snippets' is designed to work with it as seamlessly as possible.
 -- See `:h MiniSnippets.gen_loader.from_lang()`.
-later(function() add('rafamadriz/friendly-snippets') end)
+later(function()
+  add 'rafamadriz/friendly-snippets'
+end)
 
 local pattern = '([^:]+):(%d+):(%d+):(%d+):(%d+): (%a+): (.*) %[(%a[%a-]+)%]'
 local groups = { 'file', 'lnum', 'col', 'end_lnum', 'end_col', 'severity', 'message', 'code' }
@@ -293,14 +251,14 @@ local severities = {
 }
 -- nvim-lint
 later(function()
-  add('mfussenegger/nvim-lint')
-  local Lint = require('lint')
+  add 'mfussenegger/nvim-lint'
+  local Lint = require 'lint'
 
   -- Event to trigger linters
   Lint.linters_by_ft = {
-    cmake = { 'cmakelint' },              -- Install: uv tool install cmakelint, repo: https://github.com/cmake-lint/cmake-lint
+    cmake = { 'cmakelint' }, -- Install: uv tool install cmakelint, repo: https://github.com/cmake-lint/cmake-lint
     python = { 'ruff', 'ty' },
-    yaml = { 'yamlint' },                 --Install: uv tool install yamllint, repo: https://github.com/adrienverge/yamllint
+    yaml = { 'yamlint' }, --Install: uv tool install yamllint, repo: https://github.com/adrienverge/yamllint
     zsh = { 'zsh' },
     ['yaml.ghaction'] = { 'actionlint' }, -- Install: go install github.com/rhysd/actionlint/cmd/actionlint@latest, repo: https://github.com/rhysd/actionlint
   }
@@ -317,21 +275,9 @@ later(function()
         '--color',
         'never',
       },
-      parser = require('lint.parser').from_pattern(pattern, groups, severities, { ['source'] = 'ty' },
-        { end_col_offset = 0 }),
-    }
+      parser = require('lint.parser').from_pattern(pattern, groups, severities, { ['source'] = 'ty' }, { end_col_offset = 0 }),
+    },
   }
-
-  -- local lint_progress = function()
-  --   local linters = require("lint").get_running()
-  --   if #linters == 0 then
-  --     return "󰦕"
-  --   end
-  --   return "󱉶 " .. table.concat(linters, ", ")
-  -- end
-  -- vim.api.nvim_create_user_command("ViewLinter", lint_progress, {
-  --   desc = 'View Running Linters',
-  -- })
 end)
 
 --
@@ -339,21 +285,96 @@ end)
 -- vim.diagnostic.config({ virtual_text = true }, ns)
 -- Smart Splits
 now(function()
-  add(
-    {
-      source = 'mrjones2014/smart-splits.nvim',
-      depends = {
-        'folke/snacks.nvim',
-      },
-    }
-  )
+  add {
+    source = 'mrjones2014/smart-splits.nvim',
+    depends = {
+      'folke/snacks.nvim',
+    },
+  }
   -- add(spec[1])
   --
-  local spec = require('custom.better_mux')
   -- for _, dep in ipairs(spec.dependencies) do add(type(dep) == 'string' and dep or dep[1]) end
-  local opts = spec.opts or {}
-  require('smart-splits').setup(opts)
-  for _, key in ipairs(spec.keys) do
+  require('smart-splits').setup {
+    -- Ignored buffer types (only while resizing)
+    ignored_buftypes = {
+      'snacks_picker_list',
+      'codecompanion',
+    },
+    -- Ignored filetypes (only while resizing)
+    ignored_filetypes = { 'snacks_picker_list', 'codecompanion' },
+    -- the default number of lines/columns to resize by at a time
+    --   -- for example `10<A-h>` will `resize_left` by `(10 * config.default_amount)`
+    default_amount = 3,
+    -- when moving cursor between splits left or right,
+    -- place the cursor on the same row of the *screen*
+    -- regardless of line numbers. False by default.
+    -- Can be overridden via function parameter, see Usage.
+    move_cursor_same_row = true,
+  }
+  local keys = {
+
+    {
+      '<A-h>',
+      function()
+        require('smart-splits').resize_left()
+      end,
+      'Resize left',
+    },
+    {
+      '<A-j>',
+      function()
+        require('smart-splits').resize_down()
+      end,
+      'Resize down',
+    },
+    {
+      '<A-k>',
+      function()
+        require('smart-splits').resize_up()
+      end,
+      'Resize up',
+    },
+    {
+      '<A-l>',
+      function()
+        require('smart-splits').resize_right()
+      end,
+      'Resize right',
+    },
+    --   -- moving between splits
+    {
+      '<C-h>',
+      function()
+        require('smart-splits').move_cursor_left()
+      end,
+      'Move window left',
+    },
+    {
+      '<C-j>',
+      function()
+        require('smart-splits').move_cursor_down()
+      end,
+      'Move window down',
+    },
+    {
+      '<C-k>',
+      function()
+        require('smart-splits').move_cursor_up()
+      end,
+      'Move window up',
+    },
+    {
+      '<C-l>',
+      function()
+        require('smart-splits').move_cursor_right()
+      end,
+      'Move window right',
+    },
+    --   -- swapping buffers between windows
+    { '<leader>wt', '<cmd>WeztermTerm<cr>', 'Spawn Terminal (Wezterm)' },
+    { '<leader>ws', '<cmd>WeztermWorkspace<cr>', 'Switch Workspace (Wezterm)' },
+  }
+  for _, key in ipairs(keys) do
     _G.Utils.nmap(key[1], key[2], key[3])
   end
   require('custom.wezterm.wezterm_terminal').setup()
@@ -392,12 +413,12 @@ end)
 --
 -- You can use it like so:
 later(function()
-  add({
-    source = "saghen/blink.cmp",
-    version = "main",
-    depends = { "rafamadriz/friendly-snippets" },
-  })
-  require('blink-cmp').setup({
+  add {
+    source = 'saghen/blink.cmp',
+    version = 'main',
+    depends = { 'rafamadriz/friendly-snippets' },
+  }
+  require('blink-cmp').setup {
     keymap = {
       preset = 'enter',
       ['<C-y>'] = { 'select_and_accept' },
@@ -471,11 +492,12 @@ later(function()
         ghost_text = { enabled = true },
       },
     }, --cmdline
-  })
+  }
 end)
 
-
-now(function() add('nvim-lua/plenary.nvim') end)
+now(function()
+  add 'nvim-lua/plenary.nvim'
+end)
 -- Beautiful, usable, well maintained color schemes outside of 'mini.nvim' and
 -- have full support of its highlight groups. Use if you don't like 'miniwinter'
 -- enabled in 'plugin/30_mini.lua' or other suggested 'mini.hues' based ones.
@@ -485,23 +507,22 @@ now(function()
   -- add('Shatur/neovim-ayu')
   -- add('ellisonleao/gruvbox.nvim')
 
-  add('folke/tokyonight.nvim')
+  add 'folke/tokyonight.nvim'
 
-  require('tokyonight').setup({
+  require('tokyonight').setup {
     transparent = true,
     styles = {
       sidebars = 'transparent',
       floats = 'transparent',
     },
-  })
+  }
   -- Enable only one
-  vim.cmd('color tokyonight')
+  vim.cmd 'color tokyonight'
 end)
 
 now(function()
-  add({ source = 'folke/snacks.nvim' })
-
-  require('snacks').setup({
+  add 'folke/snacks.nvim'
+  require('snacks').setup {
     bigfile = { enabled = false },
     dashboard = { enabled = false },
     explorer = { enabled = false },
@@ -532,67 +553,50 @@ now(function()
         end,
       },
     },
-  })
+  }
 end)
+
 later(function()
-  add('folke/which-key.nvim')
-
-_G.Config.leader_group_clues = {
-  { mode = 'n', keys = '<Leader>b', desc = '+Buffer' },
-  { mode = 'n', keys = '<Leader>e', desc = '+Explore/Edit' },
-  { mode = 'n', keys = '<Leader>f', desc = '+Find' },
-  { mode = 'n', keys = '<Leader>g', desc = '+Git' },
-  { mode = 'n', keys = '<Leader>l', desc = '+Language' },
-  { mode = 'n', keys = '<Leader>m', desc = '+Map' },
-  { mode = 'n', keys = '<Leader>s', desc = '+Session' },
-  { mode = 'n', keys = '<Leader>v', desc = '+Visits' },
-
-  { mode = 'x', keys = '<Leader>g', desc = '+Git' },
-  { mode = 'x', keys = '<Leader>l', desc = '+Language' },
-}
-  local opts = {
-    preset = "helix",
+  add 'folke/which-key.nvim'
+  local wk = require('which-key').setup {
+    preset = 'helix',
     defaults = {},
     spec = {
+      mode = { 'n', 'v' },
+      { '<leader>c', group = 'code' },
+      { '<leader>d', group = 'debug' },
+      { '<leader>f', group = 'file/find' },
+      { '<leader>g', group = 'git' },
+      { '<Leader>l', group = '+Language' },
+      { '<Leader>m', group = '+Map' },
       {
-        mode = { "n", "v" },
-        { "<leader>c", group = "code" },
-        { "<leader>d", group = "debug" },
-        -- { "<leader>dp",    group = "profiler" },
-        { "<leader>f", group = "file/find" },
-        { "<leader>g", group = "git" },
-				{'<Leader>l', group = '+Language'},
-				{'<Leader>m', group = '+Map' }, 
-				{'<Leader>s', group = '+Session' ,
-				{'<Leader>v', group = '+Visits' },
-        { "<leader>u", group = "ui" },
-        { "<leader>x", group = "diagnostics/quickfix" },
-        { "[",         group = "prev" },
-        { "]",         group = "next" },
-        { "g",         group = "goto" },
-        { "gs",        group = "surround" },
-        { "z",         group = "fold" },
+        '<Leader>s',
+        group = '+Session',
+        { '<Leader>v', group = '+Visits' },
+        { '<leader>u', group = 'ui' },
+        { '<leader>x', group = 'diagnostics/quickfix' },
+        { '[', group = 'prev' },
+        { ']', group = 'next' },
+        { 'g', group = 'goto' },
+        { 'gs', group = 'surround' },
+        { 'z', group = 'fold' },
         {
-          "<leader>b",
-          group = "buffer",
+          '<leader>b',
+          group = 'buffer',
           expand = function()
-            return require("which-key.extras").expand.buf()
+            return require('which-key.extras').expand.buf()
           end,
         },
         {
-          "<leader>w",
-          group = "windows",
-          proxy = "<c-w>",
+          '<leader>w',
+          group = 'windows',
+          proxy = '<c-w>',
           expand = function()
-            return require("which-key.extras").expand.win()
+            return require('which-key.extras').expand.win()
           end,
         },
-        -- better descriptions
-        { "gx", desc = "Open with system app" },
       },
     },
   }
-
-  local wk = require("which-key")
-  wk.setup(opts)
+  add 'folke/flash.nvim'
 end)

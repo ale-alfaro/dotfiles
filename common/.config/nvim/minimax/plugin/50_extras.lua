@@ -7,12 +7,10 @@
 --
 -- Use this file to install and configure other such plugins.
 
-
 ---@type PluginSpec[]
 local plugins = {
   {
     'folke/trouble.nvim',
-    lazy = true,
     opts = {
       use_diagnostic_signs = true,
       modes = {
@@ -27,7 +25,7 @@ local plugins = {
           mode = 'diagnostics', -- inherit from diagnostics mode
           filter = {
             any = {
-              buf = 0,                                    -- current buffer
+              buf = 0, -- current buffer
               {
                 severity = vim.diagnostic.severity.ERROR, -- errors only
                 -- limit to files in the current project
@@ -39,104 +37,54 @@ local plugins = {
           },
         },
       },
-      keys = {
-        { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>",              desc = "Diagnostics (Trouble)" },
-        { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Buffer Diagnostics (Trouble)" },
-        { "<leader>cs", "<cmd>Trouble symbols toggle<cr>",                  desc = "Symbols (Trouble)" },
-        { "<leader>cS", "<cmd>Trouble lsp toggle<cr>",                      desc = "LSP references/definitions/... (Trouble)" },
-        { "<leader>xL", "<cmd>Trouble loclist toggle<cr>",                  desc = "Location List (Trouble)" },
-        { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>",                   desc = "Quickfix List (Trouble)" },
-        {
-          "[q",
-          function()
-            if require("trouble").is_open() then
-              require("trouble").prev({ skip_groups = true, jump = true })
-            else
-              local ok, err = pcall(vim.cmd.cprev)
-              if not ok then
-                vim.notify(err, vim.log.levels.ERROR)
-              end
-            end
-          end,
-          desc = "Previous Trouble/Quickfix Item",
-        },
-        {
-          "]q",
-          function()
-            if require("trouble").is_open() then
-              require("trouble").next({ skip_groups = true, jump = true })
-            else
-              local ok, err = pcall(vim.cmd.cnext)
-              if not ok then
-                vim.notify(err, vim.log.levels.ERROR)
-              end
-            end
-          end,
-          desc = "Next Trouble/Quickfix Item",
-        },
-      }
     },
-  },
-
-  -- ============== --
-  -- Editor Functionality --
-  -- ============== --
-  {
-    'folke/flash.nvim',
-    lazy = true,
-    opts = {},
     keys = {
-      { 's', mode = { 'n', 'x', 'o' }, false },
-      { 'r', mode = 'o',               false },
+      { '<leader>xx', '<cmd>Trouble diagnostics toggle<cr>', 'Diagnostics (Trouble)' },
+      { '<leader>xX', '<cmd>Trouble diagnostics toggle filter.buf=0<cr>', 'Buffer Diagnostics (Trouble)' },
+      { '<leader>cs', '<cmd>Trouble symbols toggle<cr>', 'Symbols (Trouble)' },
+      { '<leader>cS', '<cmd>Trouble lsp toggle<cr>', 'LSP references/definitions/... (Trouble)' },
+      { '<leader>xL', '<cmd>Trouble loclist toggle<cr>', 'Location List (Trouble)' },
+      { '<leader>xQ', '<cmd>Trouble qflist toggle<cr>', 'Quickfix List (Trouble)' },
       {
-        'S',
-        mode = { 'n', 'o', 'x' },
+        '[q',
         function()
-          require('flash').treesitter()
+          if require('trouble').is_open() then
+            require('trouble').prev { skip_groups = true, jump = true }
+          else
+            local ok, err = pcall(vim.cmd.cprev)
+            if not ok then
+              vim.notify(err, vim.log.levels.ERROR)
+            end
+          end
         end,
-        desc = 'Flash Treesitter',
+        'Previous Trouble/Quickfix Item',
       },
       {
-        'R',
-        mode = { 'o', 'x' },
+        ']q',
         function()
-          require('flash').treesitter_search()
+          if require('trouble').is_open() then
+            require('trouble').next { skip_groups = true, jump = true }
+          else
+            local ok, err = pcall(vim.cmd.cnext)
+            if not ok then
+              vim.notify(err, vim.log.levels.ERROR)
+            end
+          end
         end,
-        desc = 'Treesitter Search',
-      },
-      { '<c-s>', mode = { 'c' }, false },
-      {
-        '<c-space>',
-        mode = { 'n', 'o', 'x' },
-        function()
-          require('flash').treesitter {
-            actions = {
-              ['<c-space>'] = 'next',
-              ['<BS>'] = 'prev',
-            },
-          }
-        end,
-        desc = 'Treesitter Incremental Selection',
+        'Next Trouble/Quickfix Item',
       },
     },
   },
-
-  -- ============== --
-  --    Completion    --
-  -- ============== --
-
-  -- ============== --
-  --      AI          --
-  -- ============== --
   {
-    'ravitemer/codecompanion-history.nvim'
+    'ravitemer/codecompanion-history.nvim',
+    opts = {}
   },
   {
     'lalitmee/codecompanion-spinners.nvim',
+    opts = {}
   },
   {
     'olimorris/codecompanion.nvim',
-    lazy = true,
     dependencies = {
       'nvim-lua/plenary.nvim',
       'nvim-treesitter/nvim-treesitter',
@@ -281,23 +229,19 @@ local plugins = {
       { '<leader>as', mode = { 'n', 'v' }, '<cmd>CodeCompanionSummaries<cr>',         desc = 'Browse CodeCompanionSummaries' },
     },
   },
-
-  -- ============== --
-  -- Lang & Dev --
-  -- ============== --
   {
     'folke/lazydev.nvim',
     dependencies = {
       'Bilal2453/luvit-meta',
       'justinsgithub/wezterm-types',
-      'folke/snacks.nvim'
+      'folke/snacks.nvim',
     },
     opts = {
       library = {
         { path = 'luvit-meta/library', words = { 'vim%.uv' } },
-        { path = 'wezterm-types',      mods = { 'wezterm' } },
-        { path = 'folke/snacks.nvim',  words = { 'Snacks' } },
-        { path = 'mini.nvim',          words = { 'MiniDeps' } },
+        { path = 'wezterm-types', mods = { 'wezterm' } },
+        { path = 'folke/snacks.nvim', words = { 'Snacks' } },
+        { path = 'mini.nvim', words = { 'MiniDeps' } },
 
         {
           path = 'nvim-lua/plenary.nvim',
@@ -314,13 +258,8 @@ local plugins = {
       },
     },
   },
-
-  -- ============== --
-  --      Other       --
-  -- ============== --
   {
     'obsidian-nvim/obsidian.nvim',
-    lazy = true,
     keys = {
       { '<leader>oo', '<cmd>ObsidianOpen<cr>' },
       { '<leader>on', '<cmd>ObsidianNew<cr>' },
@@ -352,4 +291,4 @@ local plugins = {
   }
 }
 
-_G.Utils.plugin.plugins_setup_all(plugins)
+-- _G.Utils.plugin.plugins_setup_all(plugins)

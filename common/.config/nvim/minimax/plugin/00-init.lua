@@ -71,7 +71,7 @@ end
 -- - 'plugin/30_mini.lua' - more details about 'mini.nvim' in general
 require('mini.deps').setup()
 
-_G.Utils.plugin.plugin_backend_init({ add = MiniDeps.add, now = MiniDeps.now, later = MiniDeps.later })
+-- _G.Utils.plugin.plugin_backend_init({ add = MiniDeps.add, now = MiniDeps.now, later = MiniDeps.later })
 -- Diagnostics ================================================================
 
 -- Neovim has built-in support for showing diagnostic messages. This configures

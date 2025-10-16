@@ -399,7 +399,7 @@ later(function()
   local on_attach = function(ev)
     vim.bo[ev.buf].omnifunc = 'v:lua.MiniCompletion.completefunc_lsp'
   end
-  _G.Utils.new_autocmd('LspAttach', on_attach, nil, "Set 'omnifunc'")
+  _G.Utils.new_autocmd('LspAttach', nil, on_attach, "Set 'omnifunc'")
 
   -- Advertise to servers that Neovim now supports certain set of completion and
   -- signature features through 'mini.completion'.
@@ -629,7 +629,7 @@ later(function()
     MiniFiles.set_bookmark('p', minideps_plugins, { desc = 'Plugins' })
     MiniFiles.set_bookmark('w', vim.fn.getcwd, { desc = 'Working directory' })
   end
-  _G.Utils.new_autocmd('User', add_marks, 'MiniFilesExplorerOpen', 'Add bookmarks')
+  _G.Utils.new_autocmd('User', 'MiniFilesExplorerOpen', add_marks, 'Add bookmarks')
 end)
 
 -- Git integration for more straightforward Git actions based on Neovim's state.
@@ -720,17 +720,17 @@ end)
 -- - `:h MiniKeymap-examples` - examples of common setups
 -- - `:h MiniKeymap.map_multistep()` - map multi-step action
 -- - `:h MiniKeymap.map_combo()` - map combo
-later(function()
-  require('mini.keymap').setup()
-  -- Navigate 'mini.completion' menu with `<Tab>` /  `<S-Tab>`
-  MiniKeymap.map_multistep('i', '<Tab>', { 'pmenu_next' })
-  MiniKeymap.map_multistep('i', '<S-Tab>', { 'pmenu_prev' })
-  -- On `<CR>` try to accept current completion item, fall back to accounting
-  -- for pairs from 'mini.pairs'
-  MiniKeymap.map_multistep('i', '<CR>', { 'pmenu_accept', 'minipairs_cr' })
-  -- On `<BS>` just try to account for pairs from 'mini.pairs'
-  MiniKeymap.map_multistep('i', '<BS>', { 'minipairs_bs' })
-end)
+-- later(function()
+--   require('mini.keymap').setup()
+--   -- Navigate 'mini.completion' menu with `<Tab>` /  `<S-Tab>`
+--   MiniKeymap.map_multistep('i', '<Tab>', { 'pmenu_next' })
+--   MiniKeymap.map_multistep('i', '<S-Tab>', { 'pmenu_prev' })
+--   -- On `<CR>` try to accept current completion item, fall back to accounting
+--   -- for pairs from 'mini.pairs'
+--   MiniKeymap.map_multistep('i', '<CR>', { 'pmenu_accept', 'minipairs_cr' })
+--   -- On `<BS>` just try to account for pairs from 'mini.pairs'
+--   MiniKeymap.map_multistep('i', '<BS>', { 'minipairs_bs' })
+-- end)
 
 -- Window with text overview. It is displayed on the right hand side. Can be used
 -- for quick overview and navigation. Hidden by default. Example usage:

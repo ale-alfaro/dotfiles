@@ -66,15 +66,7 @@ Primarily, specification is a table with the following fields:
 --]]
 local M = {}
 
-local add, now, later
 
---- Initializes the utility with MiniDeps functions.
----@param deps { add: function, now: function, later: function }
-function M.plugin_backend_init(deps)
-  add = deps.add
-  now = deps.now
-  later = deps.later
-end
 
 --- Sets up a single plugin based on a spec.
 ---@param spec PluginSpec
@@ -85,50 +77,23 @@ function M.plugin_setup(spec)
   -- end
   -- vim.notify("Adding spec: " .. vim.inspect(spec))
   if type(spec) ~= 'table' then
-    vim.notify("Plugin spec is not a table!", "error")
+    vim.notify('Plugin spec is not a table!', 'error')
     return
   end
-  ---@type 
-  -- 1. Add the plugin with MiniDeps
-  local add_spec = { source = spec[1] }
-  if spec.dependencies then add_spec.depends = spec.dependencies end
-  if spec.config then add_spec.hooks = { post_install = spec.hooks } end
-  if spec.version then add_spec.checkout = spec.version end
-  -- if spec.build then add_spec.build = spec.build end
-  add(add_spec)
-
-  -- 2. Define configuration logic
-  local do_config = function()
-    -- Extract plugin name from 'owner/repo'
+  MiniDeps.later(function()
     local plugin_name = spec[1]:match '([^/]+)$'
     -- Strip .nvim if present for require path
     plugin_name = plugin_name:gsub('%.nvim$', '')
-
-    -- Determine opts
-    local opts
-    if type(spec.opts) == 'function' then
-      opts = spec.opts(spec, {})
-    else
-      opts = spec.opts
+    local add_spec = { source = spec[1] }
+    if spec.dependencies then
+      add_spec.depends = spec.dependencies
     end
-
-    -- Determine how to configure
-    if spec.config == true then
-      require(plugin_name).setup(opts)
-    elseif type(spec.config) == 'function' then
-      spec.config(spec, opts)
-    elseif opts then
-      require(plugin_name).setup(opts)
-    end
-
-    -- 3. Setup keymaps
+    MiniDeps.add(add_spec)
+    local opts = spec.opts
+    require(plugin_name).setup(opts)
     if spec.keys then
       local keys
-      if type(spec.keys) == 'function' then
-        keys = spec.keys(spec, {})
-      else
-        keys = spec.keys
-      end
+      keys = spec.keys
 
       for _, key_spec in ipairs(keys) do
         local lhs = key_spec[1]
@@ -158,18 +123,7 @@ function M.plugin_setup(spec)
         end
       end
     end
-  end
-
-  -- 4. Schedule configuration
-  local loader = later
-  local is_lazy = spec.event or spec.cmd or spec.ft or spec.lazy
-
-  if spec.load_if_args then
-    loader = vim.fn.argc(-1) > 0 and now or later
-  elseif not is_lazy then
-    loader = now
-  end
-  loader(do_config)
+  end)
 end
 
 --- Sets up a list of plugins.

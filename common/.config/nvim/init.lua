@@ -280,9 +280,9 @@ end
 -- This approach also doesn't require the underlying commands/functions to exist
 -- during mapping creation: a "lazy loading" approach to improve startup time.
 _G.Utils.nmapleader('ei', '<Cmd>edit $MYVIMRC<CR>',                 'init.lua')
-_G.Utils.nmapleader('q', '<nop>', "",{ noremap = true })
-_G.Utils.nmapleader('Q', 'q', 'Record macro', { noremap = true })
-_G.Utils.nmapleader('<M-q>', 'Q', 'Replay last register', { noremap = true })
+_G.Utils.nmap('q', '<nop>', "",{ noremap = true })
+_G.Utils.nmap('Q', 'q', 'Record macro', { noremap = true })
+_G.Utils.nmap('<M-q>', 'Q', 'Replay last register', { noremap = true })
 -- Move to window using the <ctrl> hjkl keys
 _G.Utils.nmap( '<C-h>', '<C-w>h', 'Go to Left Window', {remap = true })
 _G.Utils.nmap( '<C-j>', '<C-w>j', 'Go to Lower Window',{ remap = true })
