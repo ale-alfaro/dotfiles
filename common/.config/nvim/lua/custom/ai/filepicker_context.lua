@@ -121,7 +121,7 @@ function M.add_context_from_explorer()
   add_fs_entry_to_chat(chat, fs_entry)
 end
 
-function M.setup(opts)
+function M.setup()
   vim.api.nvim_create_autocmd('User', {
     pattern = 'CodeCompanionChatCreated',
     callback = function(event)

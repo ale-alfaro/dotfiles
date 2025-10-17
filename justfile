@@ -31,13 +31,13 @@ neovim_install_prefix := "/home/alealfaro/.local/nvim"
 [script("bash")]
 nvim_build:
     set -euxo pipefail
-    tmpdir=$(mktemp -d)
-    cd tmpdir
-    gh repo clone neovim/neovim
-    make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX={{ neovim_install_prefix }}
-    sudo make install
-    version=$( {{ neovim_install_prefix }}/nvim/bin/nvim --version | grep "NVIM" | awk '{print $2}' )
-    mv {{ neovim_install_prefix }}/{nvim, version}
+    # tmpdir=$(mktemp -d)
+    # cd $tmpdir
+    # gh repo clone neovim/neovim
+    # make -C neovim CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX="{{ neovim_install_prefix }}/tmp"
+    # sudo make -C neovim install
+    version=$( "{{ neovim_install_prefix }}/tmp/bin/nvim" --version | grep "NVIM" | awk '{print $2}' )
+    sudo mv {{ neovim_install_prefix }}/tmp "{{ neovim_install_prefix }}/$version"
 
 # check: Simulate stowing to check for any conflicts
 # vectorcode := require("vectorcode")

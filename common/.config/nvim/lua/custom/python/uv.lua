@@ -41,24 +41,11 @@ local function create_tool_call(cmd_runner, tool, args)
   return table.concat(cmd, ' ')
 end
 
--- Function to run a specific Python function
-
--- ---@param opts snacks.picker.proc.Config
--- ---@type snacks.picker.finder
--- function M.uv_run_tool_finder(opts, ctx)
---   return require('snacks.picker.source.proc').proc({
---     opts,
---     {
---       cmd = 'uv',
---       args = { 'tool', 'list' },
---     },
---   }, ctx)
--- end
 ---@param picker snacks.Picker
 ---@param item UVToolFinderItem
 ---@param additional_input string?
 ---@return string[]?
-local function uv_run_command(picker, item, additional_input)
+local function uv_run_command(item, additional_input)
   local args = {}
   local uv_tool_runner = { 'uv', 'run' }
   if additional_input ~= nil then
@@ -79,26 +66,23 @@ local function uv_run_command(picker, item, additional_input)
     end
   end
 
-  local cwd = M.get_project_root() or picker:cwd()
+  local cwd = M.get_project_root()
   local cmd = create_tool_call(uv_tool_runner, item.text, args)
   vim.notify('Running cmd: ' .. cmd)
-  Snacks.picker.util.cmd(cmd, function(output, ret_code)
+  _G.Utils.cmd(cmd, function(output, ret_code)
     if output[1] == nil then
       vim.notify('Got no ouput when it was expecting one', 'error')
     end
     M.handle_output(output, ret_code, item.text)
   end, { cwd = cwd })
 end
----@param picker snacks.Picker
 ---@param item UVToolFinderItem
-function M.uv_run_tool_call(picker, item)
+function M.uv_run_tool_call(item)
   if item.prompt_for_input == nil then
     local default_args = item.default_args or {}
-
-    uv_run_command(picker, item, table.concat(default_args, ' '))
+    uv_run_command(item, table.concat(default_args, ' '))
     return
   end
-  ---@type snacks.input.Opts
   local opts = {
     prompt = item.prompt_for_input,
   }
@@ -107,13 +91,18 @@ function M.uv_run_tool_call(picker, item)
       default = table.concat(item.default_args),
     })
   end
-  Snacks.input.input(opts, function(input)
-    --  match checks for zero or more whitespace characters from the beginning (`^`) to the end (`$`) of the string.
-    --  to filter out for empty or invalid input
-    if (input or ''):match '^%s*$' then
-      return
+
+  vim.ui.input(opts, function(input)
+    if input and input ~= '' then
+      --  match checks for zero or more whitespace characters from the beginning (`^`) to the end (`$`) of the string.
+      --  to filter out for empty or invalid input
+      if (input or ''):match '^%s*$' then
+        return
+      end
+      uv_run_command(item, input)
+    else
+      vim.notify('Cancelled', vim.log.levels.INFO)
     end
-    uv_run_command(picker, item, input)
   end)
 end
 
@@ -132,7 +121,7 @@ function M.run_diagnostics_for_file(filepath, tool_names)
       table.insert(args, filepath)
       local cmd = create_tool_call({ 'uv', 'run' }, item.text, args)
       vim.notify('Running cmd: ' .. cmd)
-      Snacks.picker.util.cmd(cmd, function(output, ret_code)
+      _G.Utils.cmd(cmd, function(ret_code, output)
         if output[1] == nil then
           vim.notify('Got no ouput when it was expecting one', 'error')
         end
@@ -190,27 +179,69 @@ M.registered_tools = {
 -- Set up command pickers for integration with UI plugins
 function M.setup_pickers()
   --   -- Check if Snacks is available
-  --   -- Register UV command source
-  ---@type snacks.picker.Config
-  Snacks.picker.sources.uv_tools = {
+  if _G.Snacks and _G.Snacks.picker then
+    --   -- Register UV command source
+    ---@type snacks.picker.Config
+    Snacks.picker.sources.uv_tools = {
 
-    finder = function()
-      return M.registered_tools
-    end,
-    format = 'text',
-    preview = 'none',
-    confirm = 'uv_run',
-    ---@type snacks.picker.Action.fn[]
-    actions = {
-
-      ---@param p snacks.Picker
-      ---@param item snacks.picker.Item
-      uv_run = function(p, item)
-        p:close()
-        M.uv_run_tool_call(p, item)
+      finder = function()
+        return M.registered_tools
       end,
-    },
-  }
+      format = 'text',
+      preview = 'none',
+      confirm = 'uv_run',
+      ---@type snacks.picker.Action.fn[]
+      actions = {
+
+        ---@param p snacks.Picker
+        ---@param item snacks.picker.Item
+        uv_run = function(p, item)
+          p:close()
+          M.uv_run_tool_call(item)
+        end,
+      },
+    }
+  end
+  -- Check if Telescope is available
+  local has_telescope, telescope = pcall(require, 'telescope')
+  if has_telescope then
+    local pickers = require 'telescope.pickers'
+    local finders = require 'telescope.finders'
+    local sorters = require 'telescope.sorters'
+    local actions = require 'telescope.actions'
+    local action_state = require 'telescope.actions.state'
+
+    -- UV Commands picker for Telescope
+    M.pick_uv_tools = function()
+      pickers
+        .new({}, {
+          prompt_title = 'UV Commands',
+          finder = finders.new_table {
+            results = M.registered_tools,
+            entry_maker = function(entry)
+              return {
+                value = entry,
+                display = entry.text,
+                ordinal = entry.text,
+              }
+            end,
+          },
+          sorter = sorters.get_generic_fuzzy_sorter(),
+          attach_mappings = function(prompt_bufnr, map)
+            local function on_select()
+              local selection = action_state.get_selected_entry().value
+              actions.close(prompt_bufnr)
+
+              M.uv_run_tool_call(selection)
+            end
+            map('i', '<CR>', on_select)
+            map('n', '<CR>', on_select)
+            return true
+          end,
+        })
+        :find()
+    end
+  end
 end
 
 -- Handle output and set diagnostics/quickfix
@@ -371,14 +402,10 @@ function M.setup_keymaps()
   if _G.Snacks and _G.Snacks.picker then
     vim.api.nvim_set_keymap('n', prefix .. 'r', "<cmd>lua Snacks.picker.pick('uv_tools')<CR>", { noremap = true, silent = true, desc = 'UV Pick Tool' })
   end
-
-  -- Run tool with input
-  -- vim.api.nvim_set_keymap(
-  --   'n',
-  --   prefix .. 'r',
-  --   "<cmd>lua vim.ui.input({prompt = 'Enter tool name: '}, function(input) if input and input ~= '' then require('uv').run_command('uv run ' .. input) end end)<CR>",
-  --   { noremap = true, silent = true, desc = 'UV Run Tool with Input' }
-  -- )
+  local has_telescope = pcall(require, 'telescope')
+  if has_telescope then
+    vim.api.nvim_set_keymap('n', prefix, "<cmd>lua require('uv').pick_uv_tools()<CR>", { noremap = true, silent = true, desc = 'UV Commands (Telescope)' })
+  end
   --
   -- Sync packages
   vim.api.nvim_set_keymap('n', prefix .. 'c', '<cmd>UVSync<CR>', { noremap = true, silent = true, desc = 'UV Sync Packages' })

@@ -1,136 +1,185 @@
 ---@module "mini.deps"
 
+---@class VimKeys
+---@param mode string|string[] Mode "short-name" (see |nvim_set_keymap()|), or a list thereof.
+---@param lhs string           Left-hand side |{lhs}| of the mapping.
+---@param rhs string|function  Right-hand side |{rhs}| of the mapping, can be a Lua function.
+---@param desc string
+---@param opts? vim.keymap.set.Opts
+
 ---@class PluginSpec
----@field 1 string The plugin repository (e.g., 'owner/repo')
+---@field source string The plugin repository (e.g., 'owner/repo')
 ---@field dependencies? string[]|table[] List of dependencies
----@field hooks? table Hooks for MiniDeps
----@field checkout? string Branch/tag to checkout
 ---@field build? string|fun() Build command or function
+---@field init? nil|fun(path: string, source: string, name: string) Configuration function
 ---@field opts? table|fun(spec: PluginSpec, opts: table): table Plugin options
----@field config? boolean|fun(spec: PluginSpec, opts: table) Configuration function
----@field keys? table[]|fun(spec: PluginSpec, opts: table): table[] Key mappings
----@field lazy? boolean If true, load with MiniDeps.later()
----@field event? string|string[] Lazy-load on event
----@field cmd? string|string[] Lazy-load on command
----@field ft? string|string[] Lazy-load on filetype
----@field init? fun(spec: PluginSpec) Function to run before setup
----@field load_if_args? boolean Load with `now` if Neovim started with file arguments
---[[
+---@field config? nil|fun(path: string, source: string, name: string) Configuration function
+---@field keys? VimKeys[]|fun(): VimKeys[] Key mappings
+---@field checkout? string Git checkout target (branch, tag, commit)
 
-Each plugin dependency is managed based on its specification (a.k.a. "spec").
-See |MiniDeps-overview| for some examples.
-
-Specification can be a single string which is inferred as:
-- Plugin <name> if it doesn't contain "/".
-- Plugin <source> otherwise.
-
-Primarily, specification is a table with the following fields:
-
-- <source> `(string|nil)` - field with URI of plugin source used during creation
-  or update. Can be anything allowed by `git clone`.
-  Default: `nil` to rely on source set up during install.
-  Notes:
-    - It is required for creating plugin, but can be omitted afterwards.
-    - As the most common case, URI of the format "user/repo" (if it contains
-      valid characters) is transformed into "https://github.com/user/repo".
-
-- <name> `(string|nil)` - directory basename of where to put plugin source.
-  It is put in "pack/deps/opt" subdirectory of `config.path.package`.
-  Default: basename of <source> if it is present, otherwise should be
-  provided explicitly.
-
-- <checkout> `(string|nil)` - checkout target used to set state during update.
-  Can be anything supported by `git checkout` - branch, commit, tag, etc.
-  Default: `nil` for default branch (usually "main" or "master").
-
-- <monitor> `(string|nil)` - monitor branch used to track new changes from
-  different target than `checkout`. Should be a name of present Git branch.
-  Default: `nil` for default branch (usually "main" or "master").
-
-- <depends> `(table|nil)` - array of plugin specifications (strings or tables)
-  to be added prior to the target.
-  Default: `nil` for no dependencies.
-
-- <hooks> `(table|nil)` - table with callable hooks to call on certain events.
-  Possible hook names:
-    - <pre_install>   - before creating plugin directory.
-    - <post_install>  - after  creating plugin directory (before |:packadd|).
-    - <pre_checkout>  - before making change in existing plugin.
-    - <post_checkout> - after  making change in existing plugin.
-  Each hook is executed with the following table as an argument:
-    - <path> (`string`)   - absolute path to plugin's directory
-      (might not yet exist on disk).
-    - <source> (`string`) - resolved <source> from spec.
-    - <name> (`string`)   - resolved <name> from spec.
-  Default: `nil` for no hooks.
---]]
 local M = {}
 
+local setup_logic = function(spec, opts)
+  local plugin_name = spec.source:match '([^/]+)$'
+  plugin_name = plugin_name:gsub('%.nvim$', '')
 
-
---- Sets up a single plugin based on a spec.
----@param spec PluginSpec
-function M.plugin_setup(spec)
-  -- Run init function if it exists
-  -- if spec.init then
-  --   spec.init(spec)
+  -- if _G.Utils.has_vim_pack then
+  --   if spec.init then
+  --     spec.init()
+  --   end
   -- end
-  -- vim.notify("Adding spec: " .. vim.inspect(spec))
-  if type(spec) ~= 'table' then
-    vim.notify('Plugin spec is not a table!', 'error')
+
+  local ok, plugin = pcall(require, plugin_name)
+  if not ok then
     return
   end
-  MiniDeps.later(function()
-    local plugin_name = spec[1]:match '([^/]+)$'
-    -- Strip .nvim if present for require path
-    plugin_name = plugin_name:gsub('%.nvim$', '')
-    local add_spec = { source = spec[1] }
-    if spec.dependencies then
-      add_spec.depends = spec.dependencies
+
+  -- if _G.Utils.has_vim_pack then
+  --   if spec.config then
+  --     spec.config()
+  --   end
+  -- end
+
+  if opts then
+    if type(plugin.setup) == 'function' then
+      if type(spec.opts) == 'table' then
+        plugin.setup(spec.opts)
+      else
+        plugin.setup()
+      end
+    else
+      vim.notify('Plugin ' .. plugin_name .. ' has options but no setup function!')
     end
-    MiniDeps.add(add_spec)
-    local opts = spec.opts
-    require(plugin_name).setup(opts)
-    if spec.keys then
-      local keys
-      keys = spec.keys
+  end
 
-      for _, key_spec in ipairs(keys) do
-        local lhs = key_spec[1]
-        local rhs = key_spec[2]
+  if spec.keys then
+    for _, key in ipairs(spec.keys) do
+      local mode = key.mode or 'n'
+      local key_opts = {}
+      if key.desc then
+        key_opts.desc = key.desc
+      end
+      vim.keymap.set(mode, key[1], key[2], key_opts)
+    end
+  end
+end
+--- Sets up a single plugin based on a spec.
+---@param spec PluginSpec | string
+function M.plugin_spec_add(spec)
+  if _G.Utils.has_vim_pack then
+    if type(spec) == 'string' then
+      vim.pack.add('https://github.com/' .. spec)
+      return
+    end
 
-        if rhs == false then
-          -- Unmap key
-          local modes = key_spec.mode or { 'n', 'v', 'o', 'x', 'i', 'c' }
-          if type(modes) == 'string' then
-            if modes == '' then
-              modes = { 'n', 'v', 'o', 'x', 'i', 'c', 's', 't', 'l', '!' }
-            else
-              modes = { modes }
-            end
-          end
-          for _, m in ipairs(modes) do
-            pcall(vim.keymap.del, m, lhs)
-          end
-        else
-          -- Map key
-          local key_opts = vim.deepcopy(key_spec)
-          key_opts[1] = nil
-          key_opts[2] = nil
-          local mode = key_opts.mode or 'n'
-          key_opts.mode = nil
-          vim.keymap.set(mode, lhs, rhs, key_opts)
+    if type(spec) ~= 'table' and spec.source ~= nil then
+      vim.notify('Plugin spec is not a table!', 'error')
+      return
+    end
+
+    local source = 'https://github.com/' .. spec.source
+    -- Add plugin to manager
+    if spec.dependencies then
+      for _, dep_spec in ipairs(spec.dependencies) do
+        if type(dep_spec) == 'string' then
+          vim.pack.add('https://github.com/' .. dep_spec)
         end
       end
     end
-  end)
+
+    -- Check if it's in 'user/repo' format and not a full URL/path
+    -- if not source:match('^https?://') and not source:match('^/') and source:match('^[%w_.-]+/[%w_.-]+$') then
+    --   source = 'https://github.com/' .. source
+    -- end
+    if spec.checkout ~= nil then
+      if spec.checkout then
+        vim.pack.add {
+          src = source,
+          version = spec.checkout,
+        }
+      end
+    else
+      local add_spec = { source = spec.source }
+      if spec.checkout then
+        add_spec.checkout = spec.checkout
+      end
+      if spec.dependencies then
+        add_spec.depends = spec.dependencies
+      end
+
+      add_spec.hooks = {}
+      if spec.build then
+        if type(spec.build) == 'string' then
+          local build_cmd = '!' .. spec.build
+          add_spec.hooks.post_checkout = function()
+            vim.cmd(build_cmd)
+          end
+          add_spec.hooks.post_install = function()
+            vim.cmd(build_cmd)
+          end
+        else
+          add_spec.hooks.post_checkout = spec.build
+          add_spec.hooks.post_install = spec.build
+        end
+      end
+      if spec.init then
+        add_spec.hooks.pre_install = spec.init
+      end
+      if spec.config then
+        add_spec.hooks.post_install = spec.config
+      end
+      MiniDeps.add(add_spec)
+    end
+  end
+end
+
+---@param name string
+---@param opts table?
+function M.plugin_setup(plugin, opts)
+  -- Setup logic
+  local plugin_setup_logic = function()
+    if opts and type(opts) == 'table' then
+      plugin.setup(opts)
+    else
+      plugin.setup()
+    end
+  end
+  if _G.Utils.has_vim_pack then
+    vim.defer_fn(plugin_setup_logic, 0)
+  else
+    -- For MiniDeps, init and config are handled by hooks.
+    -- So only need to handle opts and keys.
+    MiniDeps.later(plugin_setup_logic)
+  end
 end
 
 --- Sets up a list of plugins.
----@param specs PluginSpec[]
+---@param specs (PluginSpec|string)[]
 function M.plugins_setup_all(specs)
   for _, spec in ipairs(specs) do
-    M.plugin_setup(spec)
+    M.plugin_spec_add(spec)
+
+    local plugin_name = spec.source:match '([^/]+)$'
+    plugin_name = plugin_name:gsub('%.nvim$', '')
+
+    local ok, plugin = pcall(require, plugin_name)
+    if not ok then
+      return
+    end
+    if plugin ~= nil and plugin.setup ~= nil then
+      M.plugin_setup(plugin, spec.opts)
+    end
+
+    if spec.keys then
+      for _, key in ipairs(spec.keys) do
+        local mode = key.mode or 'n'
+        local key_opts = {}
+        if key.desc then
+          key_opts.desc = key.desc
+        end
+        vim.keymap.set(mode, key[1], key[2], key_opts)
+      end
+    end
   end
 end
 

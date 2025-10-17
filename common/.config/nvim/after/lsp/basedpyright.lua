@@ -1,22 +1,14 @@
 return {
-  root_markers = {
-    'pyproject.toml',
-    'uv.lock',
-    'pyproject.lock',
-  },
   settings = {
     basedpyright = {
       analysis = {
         autoSearchPaths = true,
-        -- useLibraryCodeForTypes = true,
-        diagnosticMode = 'off',
-        typeCheckingMode = 'off',         -- Set type-checking mode to off
+        useLibraryCodeForTypes = true,
+        diagnosticMode = 'openFilesOnly',
+        typeCheckingMode = 'recommended',         -- Set type-checking mode to off
       },
     },
   },
-  -- capabilities = {
-  --   offsetEncoding = { 'utf-16' },
-  -- },
   on_attach = function(client, bufnr)
     vim.api.nvim_buf_create_user_command(bufnr, 'LspPyrightOrganizeImports', function()
       local params = {

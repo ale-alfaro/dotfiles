@@ -54,6 +54,8 @@ _G.Utils.new_autocmd('FileType', {
   'spectre_panel',
   'startuptime',
   'tsplayground',
+  -- 'mininotify'
+  'mini*'
 }, function(event)
   vim.bo[event.buf].buflisted = false
   vim.schedule(function()
@@ -120,51 +122,52 @@ local ft_autoclose = {
   'trouble',
   'dap-repl',
   'codecompanion',
+  'mini*'
 }
 local ft_autoclose_ignore = { 'snacks_dashboard' }
 
--- local function list_wins_for_autoclose()
---   local all, close, rest = vim.api.nvim_list_wins(), {}, {}
---   for _, win in ipairs(all) do
---     local config = vim.api.nvim_win_get_config(win)
---     local buf = vim.api.nvim_win_get_buf(win)
---     local wininfo = vim.fn.getwininfo(win)[1]
---     local is_ignore = vim.iter(ft_autoclose_ignore):any(function(pat)
---       return string.match(vim.bo[buf].ft, pat)
---     end)
---     local is_ft = vim.iter(ft_autoclose):any(function(pat)
---       return string.match(vim.bo[buf].ft, pat)
---     end)
---     local is_float = config.relative ~= ''
---     local is_qf = wininfo.quickfix == 1 or wininfo.loclist == 1
---     if not is_ignore and (is_ft or is_float or is_qf) then
---       table.insert(close, win)
---     else
---       table.insert(rest, win)
---     end
---   end
---   return all, rest, close
--- end
---
--- _G.Utils.new_autocmd('QuitPre', nil, function()
---   local _, wins, close = list_wins_for_autoclose()
---   local cur_win = vim.api.nvim_get_current_win()
---   if #wins ~= 1 or vim.list_contains(close, cur_win) then
---     return
---   end
---   vim.defer_fn(function()
---     pcall(vim.cmd.quit)
---   end, 100)
---   for _, win in ipairs(close) do
---     pcall(vim.api.nvim_win_close, win, true)
---   end
--- end, 'Auto-close special windows on quit')
+local function list_wins_for_autoclose()
+  local all, close, rest = vim.api.nvim_list_wins(), {}, {}
+  for _, win in ipairs(all) do
+    local config = vim.api.nvim_win_get_config(win)
+    local buf = vim.api.nvim_win_get_buf(win)
+    local wininfo = vim.fn.getwininfo(win)[1]
+    local is_ignore = vim.iter(ft_autoclose_ignore):any(function(pat)
+      return string.match(vim.bo[buf].ft, pat)
+    end)
+    local is_ft = vim.iter(ft_autoclose):any(function(pat)
+      return string.match(vim.bo[buf].ft, pat)
+    end)
+    local is_float = config.relative ~= ''
+    local is_qf = wininfo.quickfix == 1 or wininfo.loclist == 1
+    if not is_ignore and (is_ft or is_float or is_qf) then
+      table.insert(close, win)
+    else
+      table.insert(rest, win)
+    end
+  end
+  return all, rest, close
+end
+
+_G.Utils.new_autocmd('QuitPre', ft_autoclose, function()
+  local _, wins, close = list_wins_for_autoclose()
+  local cur_win = vim.api.nvim_get_current_win()
+  if #wins ~= 1 or vim.list_contains(close, cur_win) then
+    return
+  end
+  vim.defer_fn(function()
+    pcall(vim.cmd.quit)
+  end, 100)
+  for _, win in ipairs(close) do
+    pcall(vim.api.nvim_win_close, win, true)
+  end
+end, 'Auto-close special windows on quit')
 --
 -- -- Open Trouble for qflist
--- _G.Utils.new_autocmd('QuickFixCmdPost', '*', function()
---   if vim.fn.getqflist({ title = 1 }).title:match 'uv' then
---     vim.cmd [[Trouble uv_qflist open]]
---   else
---     vim.cmd [[Trouble qflist open]]
---   end
--- end, 'Open Trouble for qflist')
+_G.Utils.new_autocmd('QuickFixCmdPost', '*', function()
+  if vim.fn.getqflist({ title = 1 }).title:match 'uv' then
+    vim.cmd [[Trouble uv_qflist open]]
+  else
+    vim.cmd [[Trouble qflist open]]
+  end
+end, 'Open Trouble for qflist')

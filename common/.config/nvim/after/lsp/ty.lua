@@ -1,4 +1,5 @@
 return {
+  root_markers = {  'uv.lock' ,'pyproject.toml', 'ty.toml' },
   settings = {
     ty = {
       -- disableLanguageServices = true,
