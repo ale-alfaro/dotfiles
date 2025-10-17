@@ -7,6 +7,7 @@ export EDITOR=nvim
 export VISUAL=nvim
 export SUDO_EDITOR="$EDITOR"
 export FCEDIT=nvim
+export NVIM_HOME="$HOME/.local/nvim"
 #
 if [[ "$OSTYPE" == "darwin"* ]]; then
   export BROWSER=arc

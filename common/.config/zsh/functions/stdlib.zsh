@@ -6,7 +6,35 @@
 ## Zsh arrays are 1-indexed by default. This options enable 0-indexed arrays which are compatible with bash
 # setopt KSH_ARRAYS
 # Usage: has <command>
+
+# Usage: log_status [<message> ...]
 #
+# Logs a status message. Acts like echo,
+# but wraps output in the standard direnv log format
+# and directs it to stderr rather than stdout.
+#
+# Example:
+#
+#    log_status "Loading ..."
+#
+log_status() {
+  print "$*"
+}
+
+# Usage: log_error [<message> ...]
+#
+# Logs an error message. Acts like echo,
+# but wraps output in the standard direnv log format
+# and directs it to stderr rather than stdout.
+#
+# Example:
+#
+#    log_error "Unable to find specified directory!"
+
+error() {
+  print "error: $*"
+  # exit 1
+}
 # Returns 0 if the <command> is available. Returns 1 otherwise. It can be a
 # binary in the PATH or a shell function.
 #
@@ -19,8 +47,7 @@
 has() {
   type "$1" &>/dev/null
   if (( $? != 0 )); then
-        print "Command not found: $1 "
-        return 1
+        error "Command not found: $1 "
   fi
 
   return 0
@@ -31,9 +58,9 @@ has() {
 # Joins all the passed arguments into a single string that can be evaluated by bash
 #
 # This is useful when one has to serialize an array of arguments back into a string
-# join_args() {
-#   printf '%q ' "$@"
-# }
+join_args() {
+  printf '%q ' "$@"
+}
 
 # Usage: expand_path <rel_path> [<relative_to>]
 #
@@ -279,4 +306,97 @@ load_prefix() {
   # path_add PKG_CONFIG_PATH "$REPLY/lib/pkgconfig"
 }
 
+
+# Usage: semver_search <directory> <folder_prefix> <partial_version>
+#
+# Search a directory for the highest version number in SemVer format (X.Y.Z).
+#
+# Examples:
+#
+# $ tree .
+# .
+# |-- dir
+#     |-- program-1.4.0
+#     |-- program-1.4.1
+#     |-- program-1.5.0
+# $ semver_search "dir" "program-" "1.4.0"
+# 1.4.0
+# $ semver_search "dir" "program-" "1.4"
+# 1.4.1
+# $ semver_search "dir" "program-" "1"
+# 1.5.0
+#
+semver_search() {
+  local version_dir=${1:-}
+  local prefix=${2:-}
+  local partial_version=${3:-}
+  # Look for matching versions in $version_dir path
+  # Strip possible "/" suffix from $version_dir, then use that to
+  # strip $version_dir/$prefix prefix from line.
+  # Sort by version: split by "." then reverse numeric sort for each piece of the version string
+  # The first one is the highest
+  find "$version_dir" -maxdepth 1 -mindepth 1 -type d -name "${prefix}${partial_version}*" |
+    while IFS= read -r line; do echo "${line#"${version_dir%/}"/"${prefix}"}"; done |
+    sort -t . -k 1,1rn -k 2,2rn -k 3,3rn |
+    head -1
+}
+
+# Usage: use node [<version>]
+#
+# Loads the specified NodeJS version into the environment.
+#
+# If a partial NodeJS version is passed (i.e. `4.2`), a fuzzy match
+# is performed and the highest matching version installed is selected.
+#
+# If no version is passed, it will look at the '.nvmrc' or '.node-version'
+# files in the current directory if they exist.
+#
+# Environment Variables:
+#
+# - $NODE_VERSIONS (required)
+#   Points to a folder that contains all the installed Node versions. That
+#   folder must exist.
+#
+# - $NODE_VERSION_PREFIX (optional) [default="node-v"]
+#   Overrides the default version prefix.
+#
+use_nvim() {
+  local version="$1"
+  local nvim_version_prefix="nvim-v"
+  local search_version
+  local nvim_prefix
+
+  if [[ -z ${NVIM_HOME} || ! -d ${NVIM_HOME} ]]; then
+    error "You must specify a $NVIM_HOME environment variable and the directory specified must exist!"
+  fi
+  #   ${var#pattern} - If the pattern match the beginning of the value of var, the match is deleted and the rest is expanded. Use ## to match larger matching pattern.
+  #   Aka we are removing the prefix 'v'
+  version=${version#v}
+
+  if [[ -z $version ]]; then
+    error "I do not know which NodeJS version to load because one has not been specified!"
+  fi
+
+  # Search for the highest version matching $version in the folder
+  search_version=$(semver_search "$NVIM_HOME" "${nvim_version_prefix}" "${version}")
+  nvim_prefix="${NVIM_HOME}/${nvim_version_prefix}${search_version}"
+
+  if [[ ! -d $nvim_prefix ]]; then
+      error "Unable to find NodeJS version ($version) in ($NVIM_HOME)!"
+  fi
+  nvim_exe=${nvim_prefix}/bin/nvim 
+  if [[ ! -x $nvim_exe ]]; then
+      error "Unable to load Neovim (nvim) for version ($version) in ($NVIM_HOME)!"
+  fi
+
+  load_prefix "$nvim_prefix"
+
+  version_read=$(nvim --version)
+
+  if [[ ! -z $version_read ]]; then
+    log_status "Successfully loaded Neovim $version_read, from prefix ($nvim_prefix)"
+  else
+    error "Failed to load Neovim $version_read, from prefix ($nvim_prefix)"
+  fi
+}
 

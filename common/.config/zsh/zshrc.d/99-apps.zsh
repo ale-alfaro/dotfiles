@@ -67,7 +67,6 @@ elif [[ $TERM_PROGRAM == "ghostty" ]]; then
     # source "$GHOSTTY_RESOURCES_DIR"/shell-integration/zsh/ghostty-integration
   fi
 fi
-# if has nvm; then
 
 # Initialize Node Version manager
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -86,7 +85,6 @@ else
   source "$ZDOTDIR/shell_integrations/zsh-nvm.zsh"
   export OBSIDIAN_HOME="/home/alealfaro/Documents/Obsidian"
 fi
-# fi
 
 if has uv; then
   eval "$(uv generate-shell-completion zsh)"
@@ -95,8 +93,5 @@ fi
 if has prek; then
   eval "$(COMPLETE=zsh prek completion)"
 fi
-# python_clis=("pytest" "ruff" "pylint" "mypy")
 
-# for cli in "${python_clis[@]}"; do
-#   eval "$(register-python-argcomplete "$cli")"
-# done
+use_nvim "v0.12"
