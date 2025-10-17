@@ -10,30 +10,31 @@ local win_config = function()
   local pad = vim.o.cmdheight + (has_statusline and 1 or 0)
   return { anchor = 'SE', col = vim.o.columns, row = vim.o.lines - pad }
 end
-require('mini.notify').setup({
-    content = {
-      -- Use notification message as is for LSP progress
-      format = function(notif)
-        if notif.data.source == 'lsp_progress' then return notif.msg end
-        return MiniNotify.default_format(notif)
-      end,
+require('mini.notify').setup {
+  content = {
+    -- Use notification message as is for LSP progress
+    format = function(notif)
+      if notif.data.source == 'lsp_progress' then
+        return notif.msg
+      end
+      return MiniNotify.default_format(notif)
+    end,
 
-      -- Show more recent notifications first
-      sort = function(notif_arr)
-        table.sort(
-          notif_arr,
-          function(a, b) return a.ts_update > b.ts_update end
-        )
-        return notif_arr
-      end,
-    },
- window = { config = win_config }
-})
-vim.notify = MiniNotify.make_notify({ 
+    -- Show more recent notifications first
+    sort = function(notif_arr)
+      table.sort(notif_arr, function(a, b)
+        return a.ts_update > b.ts_update
+      end)
+      return notif_arr
+    end,
+  },
+  window = { config = win_config },
+}
+vim.notify = MiniNotify.make_notify {
   ERROR = { duration = 10000 },
   WARN = { duration = 10000 },
   INFO = { duration = 10000 },
-})
+}
 require('mini.starter').setup()
 require('mini.statusline').setup()
 require('mini.tabline').setup()
@@ -71,7 +72,6 @@ require('mini.files').setup {
     trim_left = '<',
     trim_right = '>',
   },
-
 }
 vim.defer_fn(function()
   require('mini.extra').setup()
@@ -85,22 +85,21 @@ vim.defer_fn(function()
         i = { '@block.inner', '@conditional.inner', '@loop.inner' },
       },
       f = ai.gen_spec.treesitter { a = '@function.outer', i = '@function.inner' }, -- function
-      c = ai.gen_spec.treesitter { a = '@class.outer', i = '@class.inner' },       -- class
-      t = { '<([%p%w]-)%f[^<%w][^<>]->.-</%1>', '^<.->().*()</[^/]->$' },          -- tags
-      d = { '%f[%d]%d+' },                                                         -- digits
-      e = {                                                                        -- Word with case
+      c = ai.gen_spec.treesitter { a = '@class.outer', i = '@class.inner' }, -- class
+      t = { '<([%p%w]-)%f[^<%w][^<>]->.-</%1>', '^<.->().*()</[^/]->$' }, -- tags
+      d = { '%f[%d]%d+' }, -- digits
+      e = { -- Word with case
         { '%u[%l%d]+%f[^%l%d]', '%f[%S][%l%d]+%f[^%l%d]', '%f[%P][%l%d]+%f[^%l%d]', '^[%l%d]+%f[^%l%d]' },
         '^().*()$',
       },
-      g = _G.Utils.mini.ai_buffer,                              -- buffer
-      u = ai.gen_spec.function_call(),                          -- u for "Usage"
+      g = _G.Utils.mini.ai_buffer, -- buffer
+      u = ai.gen_spec.function_call(), -- u for "Usage"
       U = ai.gen_spec.function_call { name_pattern = '[%w_]' }, -- without dot in function name
     },
   }
 
-
   require('mini.colors').setup()
-  vim.cmd('colorscheme minisummer')
+  vim.cmd 'colorscheme minisummer'
   --- You can try these other 'mini.hues'-based color schemes (uncomment with `gcc`):
   --- now(function() vim.cmd('colorscheme minispring') end)
   --- now(function() vim.cmd('colorscheme minisummer') end)
@@ -127,7 +126,7 @@ vim.defer_fn(function()
   require('mini.jump2d').setup()
   require('mini.move').setup()
   require('mini.operators').setup()
-  _G.Utils.mini.pairs({
+  _G.Utils.mini.pairs {
     modes = { insert = true, command = true, terminal = false },
     -- skip autopair when next character is one of these
     skip_next = [=[[%w%%%'%[%"%.%`%$]]=],
@@ -138,98 +137,87 @@ vim.defer_fn(function()
     skip_unbalanced = true,
     -- better deal with markdown code blocks
     markdown = true,
-  })
-  require('mini.pick').setup()
+  }
+  -- require('mini.pick').setup()
   require('mini.splitjoin').setup()
-  require('mini.surround').setup({
+  require('mini.surround').setup {
     mappings = {
-      add = 'gsa',            -- Add surrounding in Normal and Visual modes
-      delete = 'gsd',         -- Delete surrounding
-      find = 'gsf',           -- Find surrounding (to the right)
-      find_left = 'gsF',      -- Find surrounding (to the left)
-      highlight = 'gsh',      -- Highlight surrounding
-      replace = 'gsr',        -- Replace surrounding
+      add = 'gsa', -- Add surrounding in Normal and Visual modes
+      delete = 'gsd', -- Delete surrounding
+      find = 'gsf', -- Find surrounding (to the right)
+      find_left = 'gsF', -- Find surrounding (to the left)
+      highlight = 'gsh', -- Highlight surrounding
+      replace = 'gsr', -- Replace surrounding
       update_n_lines = 'gsn', -- Update `n_lines`
     },
-  })
+  }
 
   -- Git integration for more straightforward Git actions based on Neovim's state.
   -- - `:h :Git` - more details about `:Git` user command
   -- - `:h MiniGit.show_at_cursor()` - what information at cursor is shown
   require('mini.git').setup()
 
-
   -- - `:h MiniVisits-overview` - overview of how module works
   -- - `:h MiniVisits-examples` - examples of common setups
   require('mini.visits').setup()
 end, 0)
 
-
 -- Other plugins
-require "marks".setup {
-  builtin_marks = { "<", ">", "^" },
+require('marks').setup {
+  builtin_marks = { '<', '>', '^' },
   refresh_interval = 250,
   sign_priority = { lower = 10, upper = 15, builtin = 8, bookmark = 20 },
   excluded_filetypes = {},
   excluded_buftypes = {},
-  mappings = {}
+  mappings = {},
 }
 
-local telescope = require("telescope")
-telescope.setup({
-  defaults = {
-    preview = { treesitter = false },
-    color_devicons = true,
-    sorting_strategy = "ascending",
-    borderchars = {
-      "─", -- top
-      "│", -- right
-      "─", -- bottom
-      "│", -- left
-      "┌", -- top-left
-      "┐", -- top-right
-      "┘", -- bottom-right
-      "└", -- bottom-left
-    },
-    path_displays = { "smart" },
-    layout_config = {
-      height = 100,
-      width = 400,
-      prompt_position = "top",
-      preview_cutoff = 40,
-    }
-  }
+local telescope = require 'plugin.better_search'.config()
+vim.lsp.config('bashls', {
+  filetypes = { 'sh', 'zsh', 'bash' },
 })
-telescope.load_extension("ui-select")
-telescope.load_extension("env")
 
-require("actions-preview").setup {
-  backend = { "telescope" },
-  telescope = vim.tbl_extend(
-    "force",
-    require("telescope.themes").get_dropdown(), {}
-  )
-}
-
-vim.lsp.enable({
-  "lua_ls", "clangd", "ruff",
+vim.lsp.enable {
+  'lua_ls',
+  'clangd',
+  'ruff',
   'ty',
   'bashls',
   'taplo',
   'yamls',
   'jsonls',
   'basedpyright',
-})
-
+}
 
 -- Treesitter
-require('nvim-treesitter').install({ 'bash', 'c', 'cpp', 'cmake', 'diff', 'html', 'kconfig', 'lua', 'luadoc',
-  'markdown', 'python', 'markdown_inline', 'query', 'vim', 'vimdoc', 'just',
-  'json5', 'toml', 'ninja', 'rst', 'yaml' })
-    :wait(300000) -- max. 5 minutes
+require('nvim-treesitter')
+  .install({
+    'bash',
+    'c',
+    'cpp',
+    'cmake',
+    'diff',
+    'html',
+    'kconfig',
+    'lua',
+    'luadoc',
+    'markdown',
+    'python',
+    'markdown_inline',
+    'query',
+    'vim',
+    'vimdoc',
+    'just',
+    'json5',
+    'toml',
+    'ninja',
+    'rst',
+    'yaml',
+  })
+  :wait(300000) -- max. 5 minutes
 
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'lua', 'bash', 'just' },
+  pattern = { 'zsh', 'lua', 'bash', 'just' },
   callback = function()
     -- syntax highlighting, provided by Neovim
     vim.treesitter.start()
@@ -266,20 +254,20 @@ Each event populates the following event-data fields:
     - path - full path to plugin's directory.
 
 --]]
-_G.Utils.new_autocmd('PackChangedPre', nil,function(kind,spec,path)
-    if kind ~= 'delete' and spec.src:match 'blink-cmp' ~= nil then
-      vim.notify(kind .. ' blink-cmp. Building binary lib ')
-  -- _G.Utils.cmd(cmd, function(output, ret_code)
-  --   if output[1] == nil then
-  --     vim.notify('Got no ouput when it was expecting one', 'error')
-  --   end
-  --   M.handle_output(output, ret_code, item.text)
-  -- end, { cwd = path })
-      -- plugin_name = plugin_name:gsub('%.n, nilv, nilim$', '')
-    end
-end, "Build Blink.cmp binary")
+_G.Utils.new_autocmd('PackChangedPre', nil, function(kind, spec, path)
+  if kind ~= 'delete' and spec.src:match 'blink-cmp' ~= nil then
+    MiniNotify.add(kind .. ' blink-cmp. Building binary lib ', 'INFO')
+    -- _G.Utils.cmd(cmd, function(output, ret_code)
+    --   if output[1] == nil then
+    --     vim.notify('Got no ouput when it was expecting one', 'error')
+    --   end
+    --   M.handle_output(output, ret_code, item.text)
+    -- end, { cwd = path })
+    -- plugin_name = plugin_name:gsub('%.n, nilv, nilim$', '')
+  end
+end, 'Build Blink.cmp binary')
 -- Blink/Completion
-require('blink-cmp').setup({
+require('blink-cmp').setup {
   keymap = { preset = 'default' },
   appearance = { nerd_font_variant = 'mono' },
   completion = { documentation = { auto_show = false } },
@@ -313,106 +301,19 @@ require('blink-cmp').setup({
       ghost_text = { enabled = true },
     },
   },
-})
+}
 vim.lsp.config('*', { capabilities = require('blink.cmp').get_lsp_capabilities() })
 
 -- Formatting
-
--- Linting
-Lint = require('lint')
-Lint.linters_by_ft = {
-  python = { 'ruff', 'ty' },
-  yaml = { 'yamlint' },
-  zsh = { 'zsh' },
-  ['yaml.ghaction'] = { 'actionlint' },
-}
-
-Lint.linters_by_ft = {
-  cmake = { 'cmakelint' },              -- Install: uv tool install cmakelint, repo: https://github.com/cmake-lint/cmake-lint
-  python = { 'mypy' },
-  yaml = { 'yamlint' },                 --Install: uv tool install yamllint, repo: https://github.com/adrienverge/yamllint
-  zsh = { 'zsh' },
-  ['yaml.ghaction'] = { 'actionlint' }, -- Install: go install github.com/rhysd/actionlint/cmd/actionlint@latest, repo: https://github.com/rhysd/actionlint
-}
-
-local pattern = '([^:]+):(%d+):(%d+): (%a+)[(.*)] %[(%a[%a-]+)%]'
-local groups = { 'file', 'lnum', 'col', 'severity', 'message', 'code' }
-local severities = {
-  error = vim.diagnostic.severity.ERROR,
-  warning = vim.diagnostic.severity.WARN,
-  note = vim.diagnostic.severity.HINT,
-}
-
-Lint.linters = {
-  ty = {
-    cmd = 'ty',
-    stdin = false,
-    stream = 'stdout',
-    ignore_exitcode = true,
-    args = {
-      'check',
-      '--output-format',
-      'concise',
-      '--color',
-      'never',
-    },
-    parser = require('lint.parser').from_pattern(pattern, groups, severities, { ['source'] = 'ty' },
-      { end_col_offset = 0 }),
-  },
-}
-local opts = {
-  events = {"BufWritePost", "BufReadPost", "InsertLeave" }
-}
--- require('custom.lint.better_linting').setup(opts)
--- Smart Splits
-require('smart-splits').setup {
-  ignored_buftypes = { 'codecompanion' },
-  ignored_filetypes = { 'codecompanion' },
-  default_amount = 3,
-  move_cursor_same_row = true,
-}
-
--- Colorscheme
--- require('tokyonight').setup {
---   transparent = true,
---   styles = {
---     sidebars = 'transparent',
---     floats = 'transparent',
---   },
--- }
--- vim.cmd 'color tokyonight'
-
--- Which-key
-
-local init_hook = function()
-  -- Install the conform formatter on VeryLazy
-  _G.Utils.on_very_lazy(function()
-    LazyVim.format.register({
-      name = "conform.nvim",
-      priority = 100,
-      primary = true,
-      format = function(buf)
-        require("conform").format({ bufnr = buf })
-      end,
-      sources = function(buf)
-        local ret = require("conform").list_formatters(buf)
-        ---@param v conform.FormatterInfo
-        return vim.tbl_map(function(v)
-          return v.name
-        end, ret)
-      end,
-    })
-  end)
-end
 -- See also:
 -- - `:h Conform`
 -- - `:h conform-options`
 -- - `:h conform-formatters`
-require('conform').setup {
+_G.Utils.format.setup {
   default_format_opts = {
     timeout_ms = 3000,
-    async = false,           -- not recommended to change
-    quiet = false,           -- not recommended to change
+    async = false, -- not recommended to change
+    quiet = false, -- not recommended to change
     lsp_format = 'fallback', -- not recommended to change
   },
   formatters_by_ft = {
@@ -444,25 +345,52 @@ require('conform').setup {
   },
 }
 
-require('uv.init').setup {
-  keymaps = {
-    prefix = '<leader>x',  -- Main prefix for uv commands
-    commands = true,       -- Show uv commands menu (<leader>x)
-    run_file = false,      -- Run current file (<leader>xr)
-    run_selection = false, -- Run selected code (<leader>xs)
-    run_function = false,  -- Run function (<leader>xf)
-    venv = true,           -- Environment management (<leader>xe)
-    init = true,           -- Initialize uv project (<leader>xi)
-    add = true,            -- Add a package (<leader>xa)
-    remove = true,         -- Remove a package (<leader>xd)
-    sync = false,          -- Sync packages (<leader>xc)
-    sync_all = false,      -- Sync all packages, extras and groups (<leader>xC)
-  },
+-- Linting
+
+local pattern = '([^:]+):(%d+):(%d+): (%a+)[(.*)] %[(%a[%a-]+)%]'
+local groups = { 'file', 'lnum', 'col', 'severity', 'message', 'code' }
+local severities = {
+  error = vim.diagnostic.severity.ERROR,
+  warning = vim.diagnostic.severity.WARN,
+  note = vim.diagnostic.severity.HINT,
 }
-
-require('custom.python.uv').setup()
-
-require('custom.wezterm.wezterm_terminal').setup()
+local opts = {
+  linters_by_ft = {
+    cmake = { 'cmakelint' }, -- Install: uv tool install cmakelint, repo: https://github.com/cmake-lint/cmake-lint
+    python = { 'mypy' },
+    yaml = { 'yamlint' }, --Install: uv tool install yamllint, repo: https://github.com/adrienverge/yamllint
+    bash = { 'shellcheck' },
+    sh = { 'shellcheck' },
+    zsh = { 'zsh', 'shellcheck' },
+    ['yaml.ghaction'] = { 'actionlint' }, -- Install: go install github.com/rhysd/actionlint/cmd/actionlint@latest, repo: https://github.com/rhysd/actionlint
+  },
+  linters = {
+    ty = {
+      cmd = 'ty',
+      stdin = false,
+      stream = 'stdout',
+      ignore_exitcode = true,
+      args = {
+        'check',
+        '--output-format',
+        'concise',
+        '--color',
+        'never',
+      },
+      parser = require('lint.parser').from_pattern(pattern, groups, severities, { ['source'] = 'ty' }, { end_col_offset = 0 }),
+    },
+  },
+  events = { 'BufWritePost', 'BufReadPost', 'InsertLeave' },
+}
+require('custom.lint.better_linting').setup(opts)
+-- Smart Splits
+require('smart-splits').setup {
+  ignored_buftypes = { 'codecompanion' },
+  ignored_filetypes = { 'codecompanion' },
+  default_amount = 3,
+  move_cursor_same_row = true,
+}
+-- Which-key
 
 local wk = require('which-key').setup {
   preset = 'helix',
@@ -481,11 +409,11 @@ local wk = require('which-key').setup {
       { '<Leader>v', group = '+Visits' },
       { '<leader>u', group = 'ui' },
       { '<leader>x', group = 'diagnostics/quickfix' },
-      { '[',         group = 'prev' },
-      { ']',         group = 'next' },
-      { 'g',         group = 'goto' },
-      { 'gs',        group = 'surround' },
-      { 'z',         group = 'fold' },
+      { '[', group = 'prev' },
+      { ']', group = 'next' },
+      { 'g', group = 'goto' },
+      { 'gs', group = 'surround' },
+      { 'z', group = 'fold' },
       {
         '<leader>b',
         group = 'buffer',
@@ -502,5 +430,24 @@ local wk = require('which-key').setup {
         end,
       },
     },
-  }
+  },
 }
+
+require('uv.init').setup {
+  keymaps = {
+    prefix = '<leader>x', -- Main prefix for uv commands
+    commands = true, -- Show uv commands menu (<leader>x)
+    run_file = false, -- Run current file (<leader>xr)
+    run_selection = false, -- Run selected code (<leader>xs)
+    run_function = false, -- Run function (<leader>xf)
+    venv = true, -- Environment management (<leader>xe)
+    init = true, -- Initialize uv project (<leader>xi)
+    add = true, -- Add a package (<leader>xa)
+    remove = true, -- Remove a package (<leader>xd)
+    sync = false, -- Sync packages (<leader>xc)
+    sync_all = false, -- Sync all packages, extras and groups (<leader>xC)
+  },
+}
+
+require('custom.python.uv').setup()
+require('custom.wezterm.wezterm_terminal').setup()

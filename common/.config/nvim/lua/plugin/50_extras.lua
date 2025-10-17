@@ -6,7 +6,7 @@ local K = _G.Utils.keymaps.safe_keymap_set
 require('flash').setup({})
 K({ 'n', 'o', 'x' }, 'S', function() require('flash').treesitter() end, { desc = 'Flash Treesitter' })
 K({ 'o', 'x' }, 'R', function() require('flash').treesitter_search() end, { desc = 'Treesitter Search' })
--- K({  "c" , "<c-s>", function() require("flash").toggle() end, { desc = "Toggle Flash Search" } })
+K('c', '<C-f>', function() require("flash").toggle() end, { desc = "Toggle Flash Search" })
 K({ 'n', 'o', 'x' }, '<c-space>', function()
   require('flash').treesitter {
     actions = {
@@ -109,11 +109,17 @@ require('codecompanion').setup({
   },
 })
 
+K({ 'n', 'v' }, '<leader>ar', '<cmd>CodeCompanionChat RefreshCache<cr>', { desc = 'CodeCompanion RefreshCache' })
+K({ 'n', 'v' }, '<leader>aa', '<cmd>CodeCompanionActions<cr>', { desc = 'CodeCompanion Actions' })
+K({ 'n', 'v' }, '<leader>at', '<cmd>CodeCompanionChat Toggle<cr>', { desc = 'CodeCompanionChat Toggle' })
+K({ 'n', 'v' }, '<leader>ai', '<cmd>CodeCompanionChat Add<cr>', { desc = 'CodeCompanionChat Add' })
+K({ 'n', 'v' }, '<leader>ah', '<cmd>CodeCompanionHistory<cr>', { desc = 'CodeCompanionHistory' })
+K({ 'n', 'v' }, '<leader>as', '<cmd>CodeCompanionSummaries<cr>', { desc = 'Browse CodeCompanionSummaries' })
 -- Obsidian
-require('obsidian').setup({
-  disable_frontmatter = true,
-  workspaces = {
-    { name = 'Personal-Geek', path = vim.fn.expand '$OBSIDIAN_HOME' .. '/Personal-Geek' },
-    { name = 'Sibel-Work',    path = vim.fn.expand '$OBSIDIAN_HOME' .. '/Sibel-Work' },
-  },
-})
+-- require('obsidian').setup({
+--   disable_frontmatter = true,
+--   workspaces = {
+--     { name = 'Personal-Geek', path = vim.fn.expand '$OBSIDIAN_HOME' .. '/Personal-Geek' },
+--     { name = 'Sibel-Work',    path = vim.fn.expand '$OBSIDIAN_HOME' .. '/Sibel-Work' },
+--   },
+-- })

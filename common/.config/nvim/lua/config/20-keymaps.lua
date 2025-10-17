@@ -1,7 +1,6 @@
 -- ┌─────────────────┐
 -- │ Custom mappings │
 -- └─────────────────┘
-local explore_quickfix = 
 _G.Utils.keymaps.define({
   -- General & Navigation
   { lhs = "<leader>bb", rhs = "<cmd>e #<cr>", opts = { desc = "Switch to Other Buffer" } },
@@ -9,7 +8,7 @@ _G.Utils.keymaps.define({
   { lhs = "q", rhs = "<nop>", opts = { noremap = true } },
   { lhs = "Q", rhs = "q", opts = { noremap = true } },
   { lhs = "<M-q>", rhs = "Q", opts = { desc = "Replay last register", noremap = true } },
-  -- { lhs = "<C-h>", rhs = "<C-w>h", opts = { desc = "Go to Left Window", remap = true } },
+ 
   -- { lhs = "<C-j>", rhs = "<C-w>j", opts = { desc = "Go to Lower Window", remap = true } },
   -- { lhs = "<C-k>", rhs = "<C-w>k", opts = { desc = "Go to Upper Window", remap = true } },
   -- { lhs = "<C-l>", rhs = "<C-w>l", opts = { desc = "Go to Right Window", remap = true } },
@@ -55,8 +54,7 @@ _G.Utils.keymaps.define({
   { mode = { "n", "x" }, lhs = "<leader>y", rhs = '"+y' },
   { mode = { "n", "x" }, lhs = "<leader>d", rhs = '"+d' },
   { mode = { "v", "x", "n" }, lhs = "<C-y>", rhs = '"+y', opts = { desc = "System clipboard yank." } },
-  { mode = { "n", "v", "x" }, lhs = "<leader>n", rhs = ":norm ", opts = { desc = "ENTER NORM COMMAND." } },
-  { mode = { "n", "v", "x" }, lhs = "<leader>lf", rhs = vim.lsp.buf.format, opts = { desc = "Format current buffer" } },
+  { mode = { "n", "v", "x" }, lhs = "<leader>no", rhs = ":norm ", opts = { desc = "ENTER NORM COMMAND." } },
   { lhs = "<leader>ur", rhs = "<Cmd>nohlsearch<Bar>diffupdate<Bar>normal! <C-L><CR>", opts = { desc = "Redraw / Clear hlsearch / Diff Update" } },
 
   -- Search
@@ -99,6 +97,7 @@ _G.Utils.keymaps.define({
   { lhs = "<leader>cd", rhs = vim.diagnostic.open_float, opts = { desc = "Line Diagnostics" } },
   { lhs = "]d", rhs = function() vim.diagnostic.get_next() end, opts = { desc = "Next Diagnostic" } },
   { lhs = "[d", rhs = function() vim.diagnostic.get_prev() end, opts = { desc = "Prev Diagnostic" } },
+  { lhs = '<leader>dp', rhs = '<Cmd>lua vim.diagnostic.open_float()<CR>', opts = { desc = 'Diagnostic popup' } },
   { lhs = "]e", rhs = function() vim.diagnostic.get_next({ severity = vim.diagnostic.severity.ERROR }) end, opts = { desc = "Next Error" } },
   { lhs = "[e", rhs = function() vim.diagnostic.get_prev({ severity = vim.diagnostic.severity.ERROR }) end, opts = { desc = "Prev Error" } },
   { lhs = "]w", rhs = function() vim.diagnostic.get_next({ severity = vim.diagnostic.severity.WARN }) end, opts = { desc = "Next Warning" } },
@@ -106,29 +105,16 @@ _G.Utils.keymaps.define({
 
   -- LSP
   { lhs = '<leader>ga', rhs = '<Cmd>lua vim.lsp.buf.code_action()<CR>', opts = { desc = 'Actions' } },
-  { lhs = '<leader>gd', rhs = '<Cmd>lua vim.diagnostic.open_float()<CR>', opts = { desc = 'Diagnostic popup' } },
   { lhs = '<leader>gi', rhs = '<Cmd>lua vim.lsp.buf.implementation()<CR>', opts = { desc = 'Implementation' } },
   { lhs = '<leader>gh', rhs = '<Cmd>lua vim.lsp.buf.hover()<CR>', opts = { desc = 'Hover' } },
   { lhs = '<leader>gn', rhs = '<Cmd>lua vim.lsp.buf.rename()<CR>', opts = { desc = 'Rename' } },
   { lhs = '<leader>gr', rhs = '<Cmd>lua vim.lsp.buf.references()<CR>', opts = { desc = 'References' } },
   { lhs = '<leader>gd', rhs = '<Cmd>lua vim.lsp.buf.definition()<CR>', opts = { desc = 'Source definition' } },
   { lhs = '<leader>gt', rhs = '<Cmd>lua vim.lsp.buf.type_definition()<CR>', opts = { desc = 'Type definition' } },
-  { mode = "x", lhs = '<leader>lf', rhs = '<Cmd>lua require("conform").format({lsp_fallback=true})<CR>', opts = { desc = 'Format selection' } },
 
-  -- Telescope
-  { lhs = "<leader>ff", rhs = require("telescope.builtin").find_files, opts = { desc = "Telescope find files" } },
-  { lhs = "<leader>sg", rhs = require("telescope.builtin").live_grep, opts = { desc = "Telescope live grep" } },
-  { lhs = "<leader>fb", rhs = require("telescope.builtin").buffers, opts = { desc = "Telescope buffers" } },
-  { lhs = "<leader>si", rhs = require("telescope.builtin").grep_string, opts = { desc = "Telescope live string" } },
-  { lhs = "<leader>so", rhs = require("telescope.builtin").oldfiles, opts = { desc = "Telescope old files" } },
-  { lhs = "<leader>sh", rhs = require("telescope.builtin").help_tags, opts = { desc = "Telescope help tags" } },
-  { lhs = "<leader>sm", rhs = require("telescope.builtin").man_pages, opts = { desc = "Telescope man pages" } },
-  { lhs = "<leader>sr", rhs = require("telescope.builtin").lsp_references, opts = { desc = "Telescope LSP references" } },
-  { lhs = "<leader>st", rhs = require("telescope.builtin").builtin, opts = { desc = "Telescope built-in pickers" } },
-  { lhs = "<leader>sd", rhs = require("telescope.builtin").registers, opts = { desc = "Telescope registers" } },
-  { lhs = "<leader>sc", rhs = require("telescope.builtin").git_bcommits, opts = { desc = "Telescope git bcommits" } },
-  { lhs = "<leader>se", rhs = "<cmd>Telescope env<cr>", opts = { desc = "Telescope env variables" } },
-  { lhs = "<leader>sa", rhs = require("actions-preview").code_actions, opts = { desc = "Telescope code actions" } },
+  { mode = { "n", "v", "x" }, lhs = "<leader>lf", rhs = vim.lsp.buf.format, opts = { desc = "Format current buffer" } },
+  -- { mode = { "n", "v", "x" }, lhs = '<leader>lf', rhs = '<Cmd>lua require("conform").format({lsp_fallback=true})<CR>', opts = { desc = 'Format selection' } },
+
 
   -- Smart Splits
   { lhs = '<A-h>', rhs = function() require('smart-splits').resize_left() end, opts = { desc = 'Resize left' } },

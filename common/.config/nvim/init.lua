@@ -138,6 +138,8 @@ if vim.fn.has('nvim-0.12') == 1 then
     { src = "https://github.com/nvim-treesitter/nvim-treesitter-textobjects", version = "main" },
     { src = "https://github.com/nvim-telescope/telescope.nvim",               version = "0.1.8" },
     { src = "https://github.com/nvim-telescope/telescope-ui-select.nvim" },
+    { src = "https://github.com/jvgrootveld/telescope-zoxide"},
+    {src = "https://github.com/nvim-telescope/telescope-fzf-native.nvim"},
     { src = "https://github.com/nvim-lua/plenary.nvim" },
     { src = "https://github.com/neovim/nvim-lspconfig" },
     { src = "https://github.com/L3MON4D3/LuaSnip" },

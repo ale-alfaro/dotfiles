@@ -64,23 +64,35 @@ end
 -- not create a keymap if a keymap already exists.
 -- It will also set `silent` to true by default.
 function M.safe_keymap_set(mode, lhs, rhs, opts)
-  assert(mode ~= nil and (type(mode) == "string" or type(mode) == "table")) 
-  local modes = type(mode) == "string" and { mode } or mode
-  assert(lhs ~= nil and type(lhs) == "string") 
-  local final_modes = {}
-  for _, m in ipairs(modes) do
-    if not M:have(lhs, m) then
-      table.insert(final_modes, m)
-      M.registry[M.encode(lhs, m)] = true
+
+
+
+  vim.validate("lhs",lhs,  { "string" , "table"}, "Keymap: " .. vim.inspect(lhs) .. " has invalid lhs")
+  vim.validate("rhs",rhs, {"function", "string"}, "Keymap: " .. vim.inspect(lhs) .. " has invalid rhs")
+  local keys = lhs.lhs or lhs
+  opts = opts or {}
+  opts.silent = opts.silent ~= false
+  if type(mode) == "string" then
+    if not M:have(lhs, mode) then
+      M.registry[M.encode(lhs, mode)] = true
+        vim.keymap.set(mode, lhs, rhs, opts)
     else
       vim.notify("Keymap already defined and was skipped: " .. M.encode(lhs, m), vim.log.levels.WARN)
+      return
     end
-  end
-
-  if #final_modes > 0 then
-    opts = opts or {}
-    opts.silent = opts.silent ~= false
-    vim.keymap.set(final_modes, lhs, rhs, opts)
+  elseif type(mode) == "table" and vim.islist(mode) then
+    for _, m in ipairs(mode) do
+      if not M:have(lhs, m) then
+        M.registry[M.encode(lhs, m)] = true
+        vim.keymap.set(m, lhs, rhs, opts)
+      else
+        vim.notify("Keymap already defined and was skipped: " .. M.encode(lhs, m), vim.log.levels.WARN)
+        return
+      end
+    end
+  else
+    _G.Utils.notify.error("Mode for keymap is incorrect" .. mode .. " lhs: " .. lhs .. " rhs: " .. rhs)
+    return
   end
 end
 
