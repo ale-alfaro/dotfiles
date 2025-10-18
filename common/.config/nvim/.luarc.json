@@ -2,7 +2,8 @@
   "runtime.version": "LuaJIT",
   "runtime.path": [
     "lua/?.lua",
-    "lua/?/init.lua"
+    "lua/?/init.lua",
+    "$XDG_DATA_HOME/nvim/site/pack/core/opt/"
   ],
   "diagnostics.globals": ["vim"],
   "workspace.checkThirdParty": false,

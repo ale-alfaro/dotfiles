@@ -90,6 +90,7 @@ return {  -- Fuzzy Finder (files, lsp, etc)
     pcall(require('telescope').load_extension, 'ui-select')
     pcall(require('telescope').load_extension, 'zoxide')
     pcall(require('telescope').load_extension, 'env')
+    pcall(require('telescope').load_extension, 'themes')
 
     require('actions-preview').setup {
       backend = { 'telescope' },
@@ -115,7 +116,6 @@ return {  -- Fuzzy Finder (files, lsp, etc)
       { lhs = "<leader>sa",      rhs = require("actions-preview").code_actions,     opts = { desc = "Telescope code actions" } },
       { lhs = '<leader>ss',      rhs = builtin.builtin,                             opts = { desc = '[S]earch [S]elect Telescope' } },
       { lhs = '<leader>sw',      rhs = builtin.grep_string,                         opts = { desc = '[S]earch current [W]ord' } },
-      { lhs = '<leader>sg',      rhs = builtin.live_grep,                           opts = { desc = '[S]earch by [G]rep' } },
       { lhs = '<leader>sG',      rhs = builtin.live_grep,                           opts = { desc = 'Grep in cwd' } },
       { lhs = '<leader>sd',      rhs = builtin.diagnostics,                         opts = { desc = '[S]earch [D]iagnostics' } },
       { lhs = '<leader>sr',      rhs = builtin.resume,                              opts = { desc = '[S]earch [R]esume' } },
@@ -125,15 +125,14 @@ return {  -- Fuzzy Finder (files, lsp, etc)
       { lhs = '<leader>sd',      rhs = '<leader>sh',builtin.help_tags,              opts = { desc = '[S]earch [H]elp' } },
       { lhs = '<leader>sr',      rhs = '<leader>sk',builtin.keymaps,                opts = { desc = '[S]earch [K]eymaps' } },
       {
-        lhs = '<leader>sr',
-        rhs = '<leader>sf',
-        function()
+        lhs = '<leader>sg',
+        rhs = function()
           builtin.find_files { hidden = true, no_ignore = true, no_ignore_parent = true, cwd = vim.fn.expand '%:p:h' }
         end,
         opts = { desc = '[S]earch [f]iles in open buffer directory' }
       },
       {
-        lhs = '<leader>sB',
+        lhs = '<leader>sb',
         rhs = function()
           builtin.live_grep { grep_open_files = true, prompt_title = 'Grep Open Buffers' }
         end,

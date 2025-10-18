@@ -99,12 +99,12 @@ vim.defer_fn(function()
   }
 
   require('mini.colors').setup()
-  vim.cmd 'colorscheme minisummer'
+  -- vim.cmd 'colorscheme minisummer'
   --- You can try these other 'mini.hues'-based color schemes (uncomment with `gcc`):
-  --- now(function() vim.cmd('colorscheme minispring') end)
-  --- now(function() vim.cmd('colorscheme minisummer') end)
-  --- now(function() vim.cmd('colorscheme miniautumn') end)
-  --- now(function() vim.cmd('colorscheme randomhue') end)
+  vim.cmd('colorscheme minispring')
+  --- vim.cmd('colorscheme minisummer')
+  --- vim.cmd('colorscheme miniautumn')
+  --- vim.cmd('colorscheme randomhue') 
   -- It is not enabled by default because it is not really needed on a daily basis.
   -- Uncomment next line (use `gcc`) to enable.
   require('mini.align').setup()
@@ -138,7 +138,7 @@ vim.defer_fn(function()
     -- better deal with markdown code blocks
     markdown = true,
   }
-  -- require('mini.pick').setup()
+  require('mini.pick').setup()
   require('mini.splitjoin').setup()
   require('mini.surround').setup {
     mappings = {
