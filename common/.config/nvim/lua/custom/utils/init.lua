@@ -2,7 +2,6 @@
 local M = {}
 
 
-
 ---@param name string
 -- function M.get_plugin(name)
 --   local plugins = MiniDeps.get_session()
@@ -85,6 +84,7 @@ M.format = require("custom.utils.format")
 M.lsp = require("custom.utils.lsp")
 M.mini = require("custom.utils.mini")
 M.treesitter = require("custom.utils.treesitter")
+M.pack = require('custom.utils.pack')
 M.keymaps = require("custom.utils.keymaps")
 
 return M

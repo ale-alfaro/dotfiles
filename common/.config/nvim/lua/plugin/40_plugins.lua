@@ -254,20 +254,9 @@ Each event populates the following event-data fields:
     - path - full path to plugin's directory.
 
 --]]
-_G.Utils.new_autocmd('PackChangedPre', nil, function(kind, spec, path)
-  if kind ~= 'delete' and spec.src:match 'blink-cmp' ~= nil then
-    MiniNotify.add(kind .. ' blink-cmp. Building binary lib ', 'INFO')
-    -- _G.Utils.cmd(cmd, function(output, ret_code)
-    --   if output[1] == nil then
-    --     vim.notify('Got no ouput when it was expecting one', 'error')
-    --   end
-    --   M.handle_output(output, ret_code, item.text)
-    -- end, { cwd = path })
-    -- plugin_name = plugin_name:gsub('%.n, nilv, nilim$', '')
-  end
-end, 'Build Blink.cmp binary')
+
 -- Blink/Completion
-require('blink-cmp').setup {
+_G.Utils.pack.plugin_spec_add({ src = "https://github.com/Saghen/blink.cmp" }, "cargo install --release", {
   keymap = { preset = 'default' },
   appearance = { nerd_font_variant = 'mono' },
   completion = { documentation = { auto_show = false } },
@@ -301,7 +290,7 @@ require('blink-cmp').setup {
       ghost_text = { enabled = true },
     },
   },
-}
+})
 vim.lsp.config('*', { capabilities = require('blink.cmp').get_lsp_capabilities() })
 
 -- Formatting

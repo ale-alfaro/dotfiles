@@ -155,7 +155,7 @@ if vim.fn.has('nvim-0.12') == 1 then
     { src = "https://github.com/mrjones2014/smart-splits.nvim" },
 
     -- Completion
-    { src = "https://github.com/Saghen/blink.cmp" },
+    -- { src = "https://github.com/Saghen/blink.cmp" },
 
     -- Tooling & Languages
     { src = "https://github.com/stevearc/conform.nvim" },

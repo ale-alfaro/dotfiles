@@ -1,3 +1,28 @@
+-------------------------------------------------------------------------------
+-- autocmds
+--------------------------------------------------------------------------------
+vim.api.nvim_create_autocmd('LspAttach', {
+	group = vim.api.nvim_create_augroup('my.lsp', {}),
+	callback = function(args)
+		local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
+		if client:supports_method('textDocument/definition') then
+			require 'which-key'.add({ 'gd', vim.lsp.buf.definition, desc = 'Go to LSP Definition' })
+		end
+		if client:supports_method('textDocument/completion') then
+			vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = false })
+		end
+		if not client:supports_method('textDocument/willSaveWaitUntil')
+				and client:supports_method('textDocument/formatting') then
+			vim.api.nvim_create_autocmd('BufWritePre', {
+				group = vim.api.nvim_create_augroup('my.lsp', { clear = false }),
+				buffer = args.buf,
+				callback = function()
+					vim.lsp.buf.format({ bufnr = args.buf, id = client.id, timeout_ms = 1000 })
+				end,
+			})
+		end
+	end,
+})
 -- Format Options
 _G.Utils.new_autocmd('FileType', nil, function()
   vim.cmd 'setlocal formatoptions-=c formatoptions-=o'
@@ -11,9 +36,18 @@ _G.Utils.new_autocmd({ 'FocusGained', 'TermClose', 'TermLeave' }, nil, function(
 end, 'Reload file on change')
 
 -- Highlight on yank
-_G.Utils.new_autocmd('TextYankPost', nil, function()
-  (vim.hl or vim.highlight).on_yank()
-end, 'Highlight on yank')
+---- Highlight on yank
+vim.api.nvim_create_autocmd('TextYankPost', {
+	group = vim.api.nvim_create_augroup('highlight_yank', {}),
+	desc = 'Highlight selection on yank',
+	pattern = '*',
+	callback = function()
+		vim.highlight.on_yank { higroup = 'IncSearch', timeout = 100 }
+	end
+})
+-- _G.Utils.new_autocmd('TextYankPost', nil, function()
+--   (vim.hl or vim.highlight).on_yank()
+-- end, 'Highlight on yank')
 
 -- Resize splits if window got resized
 _G.Utils.new_autocmd('VimResized', nil, function()
@@ -54,7 +88,7 @@ _G.Utils.new_autocmd('FileType', {
   'spectre_panel',
   'startuptime',
   'tsplayground',
-  -- 'mininotify'
+  'mininotify-history',
   'mini*'
 }, function(event)
   vim.bo[event.buf].buflisted = false
