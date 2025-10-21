@@ -33,7 +33,7 @@ require('mini.files').setup {
   },
 }
 -- stylua:ignore
-_G.Utils.keymaps.define {
+_G.keymaps_define {
   { lhs = '<leader>ed', rhs = '<Cmd>lua MiniFiles.open()<CR>', opts = { desc = '[E]xplore [D]irectory' } },
   {
     lhs = '\\',
@@ -82,7 +82,7 @@ require('mini.visits').setup()
 -- - `<Leader>vV` - remove "core" label to current file.
 -- - `<Leader>vc` - pick among all files with "core" label.
 --
-_G.Utils.keymaps.define {
+_G.keymaps_define {
   -- General & Navigation
   -- stylua: ignore
   {
@@ -109,7 +109,7 @@ require('smart-splits').setup {
   move_cursor_same_row = true,
 }
 
-_G.Utils.keymaps.define {
+_G.keymaps_define {
   -- stylua: ignore start
   { lhs = '<A-h>', rhs = function() require('smart-splits').resize_left() end,       opts = { desc = 'Resize left' } },
   { lhs = '<A-j>', rhs = function() require('smart-splits').resize_down() end,       opts = { desc = 'Resize down' } },
@@ -179,7 +179,7 @@ _G.Utils.keymaps.define {
 -- }
 --
 -- -- stylua: ignore
--- _G.Utils.keymaps.define {
+-- _G.keymaps_define {
 --   { lhs = '<leader>mf', rhs = '<Cmd>lua MiniMap.toggle_focus()<CR>', opts = { desc = 'Focus (toggle)' } },
 --   { lhs = '<leader>mr', rhs = '<Cmd>lua MiniMap.refresh()<CR>',      opts = { desc = 'Refresh' } },
 --   { lhs = '<leader>ms', rhs = '<Cmd>lua MiniMap.toggle_side()<CR>',  opts = { desc = 'Side (toggle)' } },

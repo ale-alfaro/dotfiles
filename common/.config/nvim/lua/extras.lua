@@ -29,7 +29,7 @@ require('flash').setup {
         search = { enabled = true },
     }}
 
-_G.Utils.keymaps.define({
+_G.keymaps_define({
   { mode = {'n' ,'o', 'x'}, lhs = 'S', rhs = function() require('flash').treesitter() end, { desc = 'Flash Treesitter' }},
   { mode = 'o', lhs = 'r', rhs = function() require('flash').treesitter_search()end, { desc = 'Treesitter Search' }},
   { mode = 'o', lhs = 'R', rhs = function()require('flash').remote() end, { desc = 'Remote Flash' }},
@@ -51,7 +51,7 @@ require('trouble').setup {
     },
   },
 }
-_G.Utils.keymaps.define({
+_G.keymaps_define({
   { rhs = '<leader>xx', lhs = '<cmd>Trouble diagnostics toggle<cr>', { desc = 'Diagnostics (Trouble)' }},
   { rhs = '<leader>xX', lhs = '<cmd>Trouble diagnostics toggle filter.buf=0<cr>', { desc = 'Buffer Diagnostics (Trouble)' }},
   { rhs = '<leader>cs', lhs = '<cmd>Trouble symbols toggle<cr>', { desc = 'Symbols (Trouble)' }},

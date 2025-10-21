@@ -82,7 +82,7 @@ require('codecompanion').setup {
     },
   },
 }
-_G.Utils.keymaps.define({
+_G.keymaps_define({
   {mode = { 'n', 'v' }, lhs = '<leader>ar', rhs = '<cmd>CodeCompanionChat RefreshCache<cr>', { desc = 'CodeCompanion RefreshCache' }},
   {mode = { 'n', 'v' }, lhs = '<leader>aa', rhs = '<cmd>CodeCompanionActions<cr>', { desc = 'CodeCompanion Actions' }},
   {mode = { 'n', 'v' }, lhs = '<leader>at', rhs = '<cmd>CodeCompanionChat Toggle<cr>', { desc = 'CodeCompanionChat Toggle' }},

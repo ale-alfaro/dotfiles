@@ -69,7 +69,7 @@ local function uv_run_command(item, additional_input)
   local cwd = M.get_project_root()
   local cmd = create_tool_call(uv_tool_runner, item.text, args)
   vim.notify('Running cmd: ' .. cmd)
-  _G.Utils.cmd(cmd, function(output, ret_code)
+  _G.cmd(cmd, function(output, ret_code)
     if output[1] == nil then
       vim.notify('Got no ouput when it was expecting one', 'error')
     end
@@ -121,7 +121,7 @@ function M.run_diagnostics_for_file(filepath, tool_names)
       table.insert(args, filepath)
       local cmd = create_tool_call({ 'uv', 'run' }, item.text, args)
       vim.notify('Running cmd: ' .. cmd)
-      _G.Utils.cmd(cmd, function(ret_code, output)
+      _G.cmd(cmd, function(ret_code, output)
         if output[1] == nil then
           vim.notify('Got no ouput when it was expecting one', 'error')
         end

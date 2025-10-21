@@ -69,8 +69,7 @@ function M.info(buf)
   if not have then
     lines[#lines + 1] = '\n***No formatters available for this buffer.***'
   end
-  _G.Utils[enabled and 'info' or 'warn'](table.concat(lines, '\n'),
-    { title = 'Format (' .. (enabled and 'enabled' or 'disabled') .. ')' })
+  M[enabled and 'info' or 'warn'](table.concat(lines, '\n'), { title = 'Format (' .. (enabled and 'enabled' or 'disabled') .. ')' })
 end
 
 ---@param buf? number
@@ -130,13 +129,13 @@ function M.format(opts)
         return formatter.format(buf)
       end)
       if not ok then
-        _G.Utils.error('Formatter `' .. formatter.name .. '` failed')
+        _G.error('Formatter `' .. formatter.name .. '` failed')
       end
     end
   end
 
   if not done and opts and opts.force then
-    _G.Utils.warn 'No formatter available'
+    _G.warn 'No formatter available'
   end
 end
 
@@ -151,8 +150,8 @@ function M.setup(opts)
   Conform.setup(opts)
 
   vim.defer_fn(function()
-    _G.Utils.notify.info 'Registering as a formatter '
-    _G.Utils.format.register {
+    _G.info 'Registering as a formatter '
+    M.register {
       name = 'conform.nvim',
       priority = 100,
       primary = true,

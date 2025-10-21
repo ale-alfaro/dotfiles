@@ -5,7 +5,7 @@
 -- stylua: ignore start
 -- The next part (until `-- stylua: ignore end`) is aligned manually for easier
 -- reading. Consider preserving this or remove `-- stylua` lines to autoformat.
-_G.Utils.keymaps.define({
+_G.keymaps_define({
   -- General & Navigation
   -- stylua:ignore
   { lhs = "<leader>bb",            rhs = "<cmd>e #<cr>",                                         opts = { desc = "Switch to Other Buffer" } },

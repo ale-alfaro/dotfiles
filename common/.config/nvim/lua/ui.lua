@@ -1,5 +1,6 @@
 
- local ui_plugins = _G.plug_spec ({ 
+ vim.pack.add(_G.plug_spec ({ 
+  'catppuccin/nvim',
    'folke/noice.nvim' ,              
    'folke/snacks.nvim' ,             
    'akinsho/bufferline.nvim' ,       
@@ -7,9 +8,7 @@
    'mrjones2014/smart-splits.nvim' , 
    'MunifTanjim/nui.nvim' ,          
    'rcarriga/nvim-notify' ,          
-})
-
- vim.pack.add(ui_plugins)
+}))
 
 require('noice').setup {
   lsp = {
@@ -29,7 +28,7 @@ require('noice').setup {
     lsp_doc_border = false,       -- add a border to hover docs and signature help
   },
 }
-_G.Utils.keymaps.define {
+_G.keymaps_define {
   {
     lhs = '<leader>nh',
     rhs = '<Cmd>Noice All<CR>',
@@ -55,27 +54,21 @@ require('bufferline').setup {
     end,
   },
 }
-_G.Utils.keymaps.define {
+_G.keymaps_define ({
   { lhs = '<leader>bp', rhs = '<Cmd>BufferLinePick<CR>',                 opts = { desc = 'Pick a buffer to open' } },
   { lhs = '<leader>bc', rhs = '<Cmd>BufferLinePickClose<CR>, true)<CR>', opts = { desc = 'Select a buffer to close' } },
   { lhs = '<leader>br', rhs = '<Cmd>BufferLineCloseRight<CR>',           opts = { desc = 'Close buffer to the left' } },
   { lhs = '<leader>bl', rhs = '<Cmd>BufferLineCloseLeft<CR>',            opts = { desc = 'Close buffer to the right' } },
   { lhs = '<leader>bo', rhs = '<Cmd>BufferLineCloseOthers<CR>',          opts = { desc = 'Close other buffers' } },
-}
-_G.Utils.pack.add_plugin {
-  src = 'https://github.com/catppuccin/nvim',
-  name = 'catppuccin',
-  config = function(mod, _)
-    mod.setup {
+})
+require('catppuccin').setup({
       flavour = 'macchiato', -- latte, frappe, macchiato, mocha
       background = {         -- :h background
         light = 'latte',
         dark = 'mocha',
       },
-    }
-    vim.cmd 'colorscheme catppuccin'
-  end,
-}
+})
+vim.cmd 'colorscheme catppuccin'
 -- It is not enabled by default because it is not really needed on a daily basis.
 -- Uncomment next line (use `gcc`) to enable.
 require('mini.hipatterns').setup {
@@ -94,15 +87,11 @@ require('which-key').setup {
   defaults = {},
   spec = {
     mode = { 'n', 'v' },
-    { '<leader>c', group = 'code' },
-    { '<leader>d', group = 'debug' },
-    { '<leader>f', group = 'file/find' },
-    { '<leader>g', group = 'git' },
-    { '<Leader>l', group = '+Language' },
-    { '<Leader>m', group = '+Map' },
-    {
-      '<Leader>s',
-      group = '+Session',
+    { '<leader>c', group = 'Code' },
+    { '<leader>d', group = 'Diff' },
+    { '<leader>f', group = 'File/find' },
+    { '<leader>g', group = 'Git' },
+    { '<Leader>s', group = '+Search',
       { '<Leader>v', group = '+Visits' },
       { '<leader>u', group = 'ui' },
       { '<leader>x', group = 'diagnostics/quickfix' },

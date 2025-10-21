@@ -39,7 +39,7 @@ function M.do_lint()
     ---@type lint.Linter|fun():lint.Linter
     local linter = lint.linters[name]
     if not linter then
-      _G.Utils.notify.warn('Linter not found: ' .. name, { title = 'nvim-lint' })
+      _G.warn('Linter not found: ' .. name, { title = 'nvim-lint' })
       return false
     end
     return true

@@ -30,7 +30,7 @@ require('mini.git').setup()
 -- - `:h MiniDiff.gen_source` - available built-in sources
 require('mini.diff').setup()
 
-_G.Utils.keymaps.define {
+_G.keymaps_define {
   -- General & Navigation
   -- stylua:ignore
   { lhs = '<leader>dt', rhs = '<Cmd>lua MiniDiff.toogle_overlay()<CR>', opts = { desc = 'Diff Toggle Overlay' } },

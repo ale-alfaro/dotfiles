@@ -152,4 +152,47 @@ function M.ensure_treesitter_cli(cb)
   end)
 end
 
+function M.setup(lang)
+    local TS = require('nvim-treesitter')
+    setmetatable(require("nvim-treesitter.install"), {
+      __newindex = function(_, k)
+        if k == "compilers" then
+          vim.schedule(function()
+            _G.Utils.error({
+              "Setting custom compilers for `nvim-treesitter` is no longer supported.",
+              "",
+              "For more info, see:",
+              "- [compilers](https://docs.rs/cc/latest/cc/#compile-time-requirements)",
+            })
+          end)
+        end
+      end,
+    })
+
+    -- some quick sanity checks
+    if not TS.get_installed then
+      return _G.Utils.error("Please use `:Lazy` and update `nvim-treesitter`")
+    elseif type(opts.ensure_installed) ~= "table" then
+      return _G.Utils.error("`nvim-treesitter` opts.ensure_installed must be a table")
+    end
+
+    -- setup treesitter
+    TS.setup({
+      ensure_installed = lang,
+    })
+    local installed = _G.Utils.treesitter.get_installed(true) -- initialize the installed langs
+    vim.notify("Installed Treesitter languages: " .. vim.print(installed))
+    -- install missing parsers
+    -- local install = vim.tbl_filter(function(lang)
+    --   return not _G.Utils.treesitter.have(lang)
+    -- end, opts.ensure_installed or {})
+    -- if #install > 0 then
+    --   _G.Utils.treesitter.build(function()
+    --     TS.install(install, { summary = true }):await(function()
+    --       _G.Utils.treesitter.get_installed(true) -- refresh the installed langs
+    --     end)
+    --   end)
+    -- end
+end
+
 return M

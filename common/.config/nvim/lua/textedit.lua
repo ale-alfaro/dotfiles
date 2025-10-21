@@ -4,8 +4,7 @@ vim.pack.add(_G.plug_spec({
  'nvim-treesitter/nvim-treesitter-textobjects',
 }))
 -- Treesitter
-require('nvim-treesitter')
-    .install({
+require('utils.treesitter').setup({
       'bash',
       'c',
       'cpp',
@@ -27,9 +26,7 @@ require('nvim-treesitter')
       'ninja',
       'rst',
       'yaml',
-    })
-    :wait(300000) -- max. 5 minutes
-
+})
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'zsh', 'lua', 'bash', 'just' },
   callback = function()
@@ -71,16 +68,15 @@ ai.setup {
       { '%u[%l%d]+%f[^%l%d]', '%f[%S][%l%d]+%f[^%l%d]', '%f[%P][%l%d]+%f[^%l%d]', '^[%l%d]+%f[^%l%d]' },
       '^().*()$',
     },
-    g = _G.Utils.mini.ai_buffer,                              -- buffer
+    -- g = _G.mini.ai_buffer,                              -- buffer
     u = ai.gen_spec.function_call(),                          -- u for "Usage"
     U = ai.gen_spec.function_call { name_pattern = '[%w_]' }, -- without dot in function name
   },
 }
 require 'plugin.blink-cmp'
 require('mini.align').setup()
--- require('mini.bracketed').setup()
 require('mini.bufremove').setup()
-_G.Utils.keymaps.define {
+_G.keymaps_define {
   { lhs = '<leader>bd', rhs = '<Cmd>lua MiniBufremove.delete()<CR>',         opts = { desc = 'Delete' } },
   { lhs = '<leader>bD', rhs = '<Cmd>lua MiniBufremove.delete(0, true)<CR>',  opts = { desc = 'Delete!' } },
   { lhs = '<leader>bw', rhs = '<Cmd>lua MiniBufremove.wipeout()<CR>',        opts = { desc = 'Wipeout' } },
@@ -88,19 +84,20 @@ _G.Utils.keymaps.define {
 }
 require('mini.comment').setup()
 require('mini.indentscope').setup()
--- require('mini.move').setup()
-_G.Utils.mini.pairs {
-  modes = { insert = true, command = true, terminal = false },
-  -- skip autopair when next character is one of these
-  skip_next = [=[[%w%%%'%[%"%.%`%$]]=],
-  -- skip autopair when the cursor is inside these treesitter nodes
-  skip_ts = { 'string' },
-  -- skip autopair when next character is closing pair
-  -- and there are more closing pairs than opening pairs
-  skip_unbalanced = true,
-  -- better deal with markdown code blocks
-  markdown = true,
-}
+require('mini.move').setup()
+require('mini.pairs').setup()
+-- _G.mini.pairs {
+--   modes = { insert = true, command = true, terminal = false },
+--   -- skip autopair when next character is one of these
+--   skip_next = [=[[%w%%%'%[%"%.%`%$]]=],
+--   -- skip autopair when the cursor is inside these treesitter nodes
+--   skip_ts = { 'string' },
+--   -- skip autopair when next character is closing pair
+--   -- and there are more closing pairs than opening pairs
+--   skip_unbalanced = true,
+--   -- better deal with markdown code blocks
+--   markdown = true,
+-- }
 -- require('mini.splitjoin').setup()
 require('mini.surround').setup {
   mappings = {

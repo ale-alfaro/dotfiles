@@ -104,10 +104,10 @@ MiniPick.registry.files = function()
   MiniPick.builtin.files({}, { source = { show = show_short_files } })
 end
 -- stylua: ignore
-_G.Utils.keymaps.define {
+_G.keymaps_define {
   { lhs = '<leader><leader>', rhs = '<Cmd>Pick buffers<CR>',                      opts = { desc = 'Pick open buffers' } },
   { lhs = '<leader>sh',       rhs = '<Cmd>Pick history scope=":"<CR>',            opts = { desc = '[S]earch Command [H]istory' } },
-  { lhs = '<leader>fg',       rhs = '<Cmd>Pick grep_live<CR>',                    opts = { desc = '[S]earch [G]rep' } },
+  { lhs = '<leader>sg',       rhs = '<Cmd>Pick grep_live<CR>',                    opts = { desc = '[S]earch [G]rep' } },
   { lhs = '<leader>sw',       rhs = '<Cmd>Pick grep pattern="<cword>"<CR>',       opts = { desc = '[S]earch current [W]ord' } },
   { lhs = '<leader>sd',       rhs = '<Cmd>Pick diagnostic scope="current"<CR>',   opts = { desc = '[S]earch [D]iagnostics (Buffer)' } },
   { lhs = '<leader>sD',       rhs = '<Cmd>Pick diagnostic scope="all"<CR>',       opts = { desc = '[S]earch [D]iagnostics (Workspace)' } },
@@ -115,5 +115,5 @@ _G.Utils.keymaps.define {
   { lhs = '<leader>ss',       rhs = '<Cmd>Pick lsp scope="workspace_symbol"<CR>', opts = { desc = 'Symbols workspace' } },
   { lhs = '<leadersS',        rhs = '<Cmd>Pick lsp scope="document_symbol"<CR>',  opts = { desc = 'Symbols document' } },
   { lhs = '<leader>so',       rhs = '<Cmd>Pick oldfiles<CR>',                     opts = { desc = '[S]earch [O]ld files' } },
-  { lhs = '<leader>so',       rhs = '<Cmd>Pick keymaps<CR>',                      opts = { desc = '[S]earch [K]eymaps' } },
+  { lhs = '<leader>sk',       rhs = '<Cmd>Pick keymaps<CR>',                      opts = { desc = '[S]earch [K]eymaps' } },
 }

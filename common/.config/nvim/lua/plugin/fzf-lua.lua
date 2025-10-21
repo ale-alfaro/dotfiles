@@ -100,7 +100,7 @@ require('fzf-lua').setup {
   },
 }
 
-_G.Utils.keymaps.define {
+_G.keymaps_define {
   {
     mode = { 'n', 'x' },
     lhs = '<leader>fb',
