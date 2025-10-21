@@ -1,4 +1,4 @@
---
+---@module "snacks"
 -- ---@class snacks.notify
 -- ---@overload fun(msg: string|string[], opts?: snacks.notify.Opts)
 local M = setmetatable({}, {
@@ -17,28 +17,27 @@ M.meta = {
 ---@param level string
 ---@param comment string
 function M.notify(msg, level, comment)
-  msg = type(msg) == "table" and table.concat(msg, "\n") or msg --[[@as string]]
+  msg = type(msg) == 'table' and table.concat(msg, '\n') or msg --[[@as string]]
   msg = vim.trim(msg)
-  local id = MiniNotify.add(msg, level, comment)
-  vim.defer_fn(function() MiniNotify.remove(id) end, 1000)
+  vim.notify(msg, level, comment)
 end
 
 ---@param msg string|string[]
 ---@param opts? snacks.notify.Opts
 function M.warn(msg, opts)
-  return M.notify(msg, "WARN")
+  return M.notify(msg, 'WARN')
 end
 
 ---@param msg string|string[]
 ---@param opts? snacks.notify.Opts
 function M.info(msg, opts)
-  return M.notify(msg, "INFO")
+  return M.notify(msg, 'INFO')
 end
 
 ---@param msg string|string[]
 ---@param opts? snacks.notify.Opts
 function M.error(msg, opts)
-  return M.notify(msg, "ERROR")
+  return M.notify(msg, 'ERROR')
 end
 
 -- delay notifications till vim.notify was replaced or after 500ms
@@ -78,4 +77,5 @@ function M.lazy_notify()
   -- or if it took more than 500ms, then something went wrong
   timer:start(500, 0, replay)
 end
+
 return M

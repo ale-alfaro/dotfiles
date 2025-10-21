@@ -6,16 +6,16 @@ local M = setmetatable({}, {
   end,
 })
 
----@class LazyFormatter
+---@class Formatter
 ---@field name string
 ---@field primary? boolean
 ---@field format fun(bufnr:number)
 ---@field sources fun(bufnr:number):string[]
 ---@field priority number
 
-M.formatters = {} ---@type LazyFormatter[]
+M.formatters = {} ---@type Formatter[]
 
----@param formatter LazyFormatter
+---@param formatter Formatter
 function M.register(formatter)
   M.formatters[#M.formatters + 1] = formatter
   table.sort(M.formatters, function(a, b)
@@ -24,16 +24,16 @@ function M.register(formatter)
 end
 
 function M.formatexpr()
-  return require('conform').formatexpr()
-  -- return vim.lsp.formatexpr({ timeout_ms = 3000 })
+  -- return require('conform').formatexpr()
+  return vim.lsp.formatexpr { timeout_ms = 3000 }
 end
 
 ---@param buf? number
----@return (LazyFormatter|{active:boolean,resolved:string[]})[]
+---@return (Formatter|{active:boolean,resolved:string[]})[]
 function M.resolve(buf)
   buf = buf or vim.api.nvim_get_current_buf()
   local have_primary = false
-  ---@param formatter LazyFormatter
+  ---@param formatter Formatter
   return vim.tbl_map(function(formatter)
     local sources = formatter.sources(buf)
     local active = #sources > 0 and (not formatter.primary or not have_primary)
@@ -69,7 +69,8 @@ function M.info(buf)
   if not have then
     lines[#lines + 1] = '\n***No formatters available for this buffer.***'
   end
-  _G.Utils[enabled and 'info' or 'warn'](table.concat(lines, '\n'), { title = 'LazyFormat (' .. (enabled and 'enabled' or 'disabled') .. ')' })
+  _G.Utils[enabled and 'info' or 'warn'](table.concat(lines, '\n'),
+    { title = 'Format (' .. (enabled and 'enabled' or 'disabled') .. ')' })
 end
 
 ---@param buf? number
@@ -115,11 +116,17 @@ function M.format(opts)
     return
   end
 
+  -- Don't format when minifiles is open, since that triggers the "confirm without
+  -- synchronization" message.
+  if vim.g.minifiles_active then
+    return nil
+  end
+
   local done = false
   for _, formatter in ipairs(M.resolve(buf)) do
     if formatter.active then
       done = true
-      local res, ok = pcall(function()
+      local ok, _ = pcall(function()
         return formatter.format(buf)
       end)
       if not ok then
@@ -135,31 +142,32 @@ end
 
 ---@param opts table
 function M.setup(opts)
-  require('conform').setup(opts)
+  -- Use conform for gq.
+  vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
 
-  _G.Utils.new_autocmd('PackChangedPre', nil, function(kind, spec, path)
-    if kind ~= 'delete' and spec.src:match 'conform' ~= nil then
-      MiniNotify.add(kind .. ' conform. Registering as a formatter ', 'INFO')
-      -- Install the conform formatter on VeryLazy
-      -- _G.Utils.on_very_lazy(function()
-      _G.Utils.format.register {
-        name = 'conform.nvim',
-        priority = 100,
-        primary = true,
-        format = function(buf)
-          require('conform').format { bufnr = buf }
-        end,
-        sources = function(buf)
-          local ret = require('conform').list_formatters(buf)
-          ---@param v conform.FormatterInfo
-          return vim.tbl_map(function(v)
-            return v.name
-          end, ret)
-        end,
-      }
-      -- end)
-    end
-  end, 'Register formatters')
+  -- Start auto-formatting by default (and disable with my ToggleFormat command).
+  vim.g.autoformat = true
+  Conform = require 'conform'
+  Conform.setup(opts)
+
+  vim.defer_fn(function()
+    _G.Utils.notify.info 'Registering as a formatter '
+    _G.Utils.format.register {
+      name = 'conform.nvim',
+      priority = 100,
+      primary = true,
+      format = function(buf)
+        require('conform').format { bufnr = buf }
+      end,
+      sources = function(buf)
+        local ret = require('conform').list_formatters(buf)
+        ---@param v conform.FormatterInfo
+        return vim.tbl_map(function(v)
+          return v.name
+        end, ret)
+      end,
+    }
+  end, 5000)
   -- Autoformat autocmd
   vim.api.nvim_create_autocmd('BufWritePre', {
     group = vim.api.nvim_create_augroup('Format', {}),

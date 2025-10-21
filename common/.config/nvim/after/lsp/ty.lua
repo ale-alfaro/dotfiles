@@ -1,5 +1,5 @@
 return {
-  root_markers = {  'uv.lock' ,'pyproject.toml', 'ty.toml' },
+  root_markers = { 'uv.lock', 'pyproject.toml', 'ty.toml' },
   settings = {
     ty = {
       -- disableLanguageServices = true,
@@ -7,6 +7,10 @@ return {
       experimental = {
         autoImport = true,
         rename = true,
+      },
+      inlayHints = {
+        variableTypes = true,
+        callArgumentNames = true,
       },
     },
   },
