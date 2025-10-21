@@ -1,4 +1,6 @@
----@class lazyvim.util.treesitter
+---@module "nvim-treesitter"
+
+---@class util.treesitter
 local M = {}
 
 M._installed = nil ---@type table<string,boolean>?
@@ -90,7 +92,7 @@ function M.check()
 end
 
 ---@param cb fun()
-function M.build(cb)
+local function treesitter_build(cb)
   M.ensure_treesitter_cli(function(_, err)
     local ok, health = M.check()
     if ok then
@@ -152,47 +154,88 @@ function M.ensure_treesitter_cli(cb)
   end)
 end
 
-function M.setup(lang)
-    local TS = require('nvim-treesitter')
-    setmetatable(require("nvim-treesitter.install"), {
-      __newindex = function(_, k)
-        if k == "compilers" then
-          vim.schedule(function()
-            _G.Utils.error({
-              "Setting custom compilers for `nvim-treesitter` is no longer supported.",
-              "",
-              "For more info, see:",
-              "- [compilers](https://docs.rs/cc/latest/cc/#compile-time-requirements)",
-            })
-          end)
-        end
-      end,
-    })
+function M.build()
+  local TS = require 'nvim-treesitter'
+  if not TS.get_installed then
+    _G.error 'Please restart Neovim and run `:TSUpdate` to use the `nvim-treesitter` **main** branch.'
+    return
+  end
+  treesitter_build(function()
+    TS.update(nil, { summary = true })
+  end)
+end
+---@param opts TSConfig
+function M.config(opts)
+  local TS = require 'nvim-treesitter'
+  setmetatable(require 'nvim-treesitter.install', {
+    __newindex = function(_, k)
+      if k == 'compilers' then
+        vim.schedule(function()
+          _G.error {
+            'Setting custom compilers for `nvim-treesitter` is no longer supported.',
+            '',
+            'For more info, see:',
+            '- [compilers](https://docs.rs/cc/latest/cc/#compile-time-requirements)',
+          }
+        end)
+      end
+    end,
+  })
 
-    -- some quick sanity checks
-    if not TS.get_installed then
-      return _G.Utils.error("Please use `:Lazy` and update `nvim-treesitter`")
-    elseif type(opts.ensure_installed) ~= "table" then
-      return _G.Utils.error("`nvim-treesitter` opts.ensure_installed must be a table")
-    end
+  -- some quick sanity checks
+  if not TS.get_installed then
+    return _G.error 'Please use `:Lazy` and update `nvim-treesitter`'
+  elseif type(opts.ensure_installed) ~= 'table' then
+    return _G.error '`nvim-treesitter` opts.ensure_installed must be a table'
+  end
 
-    -- setup treesitter
-    TS.setup({
-      ensure_installed = lang,
-    })
-    local installed = _G.Utils.treesitter.get_installed(true) -- initialize the installed langs
-    vim.notify("Installed Treesitter languages: " .. vim.print(installed))
-    -- install missing parsers
-    -- local install = vim.tbl_filter(function(lang)
-    --   return not _G.Utils.treesitter.have(lang)
-    -- end, opts.ensure_installed or {})
-    -- if #install > 0 then
-    --   _G.Utils.treesitter.build(function()
-    --     TS.install(install, { summary = true }):await(function()
-    --       _G.Utils.treesitter.get_installed(true) -- refresh the installed langs
-    --     end)
-    --   end)
-    -- end
+  -- setup treesitter
+  TS.setup(opts)
+  local installed = M.get_installed(true) -- initialize the installed langs
+  _G.info(vim.print(installed))
+  -- install missing parsers
+  local install = vim.tbl_filter(function(lang)
+    return not M.have(lang)
+  end, opts.ensure_installed or {})
+  if #install > 0 then
+    treesitter_build(function()
+      TS.install(install, { summary = true }):await(function()
+        M.get_installed(true) -- refresh the installed langs
+      end)
+    end)
+  end
+
+  vim.api.nvim_create_autocmd('FileType', {
+    group = vim.api.nvim_create_augroup('treesitter', { clear = true }),
+    callback = function(ev)
+      local ft, lang = ev.match, vim.treesitter.language.get_lang(ev.match)
+      if not M.have(ft) then
+        return
+      end
+      -- highlighting
+      local ok, _ = pcall(vim.treesitter.start)
+      if not ok then
+        _G.error("Couldn't not start treesitter for filetype: " .. ft .. ' lang: ' .. lang)
+        return
+      end
+      -- indents
+      vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+      -- indentation, provided by nvim-treesitter
+      vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+    end,
+  })
+
+  -- vim.api.nvim_create_autocmd('FileType', {
+  --   pattern = { 'zsh', 'lua', 'bash', 'just' },
+  --   callback = function()
+  --     -- syntax highlighting, provided by Neovim
+  --     vim.treesitter.start()
+  --     -- folds, provided by Neovim
+  --     vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+  --     -- indentation, provided by nvim-treesitter
+  --     vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+  --   end,
+  -- })
 end
 
 return M

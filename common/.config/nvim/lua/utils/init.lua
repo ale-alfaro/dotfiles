@@ -1,6 +1,19 @@
----@module "mini.deps"
+local M = {}
 
-
+setmetatable(M, {
+  __index = function(t, k)
+    -- if LazyUtil[k] then
+    --   return LazyUtil[k]
+    -- end
+    -- if M.deprecated[k] then
+    --   return M.deprecated[k]()
+    -- end
+    ---@diagnostic disable-next-line: no-unknown
+    t[k] = require('utils.' .. k)
+    -- M.deprecated.decorate(k, t[k])
+    return t[k]
+  end,
+})
 ---@param msg string|string[]
 ---@param level string
 ---@param comment string
@@ -27,7 +40,6 @@ end
 function _G.error(msg, opts)
   return notify(msg, 'ERROR')
 end
-
 
 ---@param on_attach fun(client:vim.lsp.Client, buffer)
 ---@param name? string
@@ -74,26 +86,26 @@ function _G.run_cmd(cmd, cb, opts)
   end
   return id > 0 and id or nil
 end
-
+---@class KeymapSpec
 -- Tracks defined keymaps to prevent duplicates.
 -- Key is a unique string like "n:<leader>ff".
-_G.keymap_registry = {}
+M.keymap_registry = {}
 
 ---@param lhs string
 ---@param mode string
 local function keymap_encode(lhs, mode)
-  return mode .. ":" .. lhs
+  return mode .. ':' .. lhs
 end
 
 ---@param lhs string
 ---@param mode? string
-local function keymap_have(lhs, mode)
-  local check_mode = mode or "n"
-  return _G.keymap_registry[keymap_encode(lhs, check_mode)] ~= nil
+function M.keymap_have(lhs, mode)
+  local check_mode = mode or 'n'
+  return M.keymap_registry[keymap_encode(lhs, check_mode)] ~= nil
 end
 
 local function add_ft_keymaps(keys)
-  vim.api.nvim_create_autocmd("FileType", {
+  vim.api.nvim_create_autocmd('FileType', {
     pattern = keys.ft,
     callback = function(event)
       if keys.rhs then
@@ -109,7 +121,7 @@ end
 function _G.keymaps_define(keymaps)
   for _, spec in ipairs(keymaps) do
     -- Skip if the condition is not met
-    if spec.cond == false or (type(spec.cond) == "function" and not spec.cond()) then
+    if spec.cond == false or (type(spec.cond) == 'function' and not spec.cond()) then
       goto continue
     end
 
@@ -118,15 +130,15 @@ function _G.keymaps_define(keymaps)
       goto continue
     end
 
-    local modes = spec.mode or "n"
-    if type(modes) == "string" then
+    local modes = spec.mode or 'n'
+    if type(modes) == 'string' then
       modes = { modes }
     end
 
     for _, mode in ipairs(modes) do
       local id = keymap_encode(spec.lhs, mode)
-      if _G.keymap_registry[id] then
-        vim.notify("Keymap already defined and was skipped: " .. id, vim.log.levels.WARN)
+      if M.keymap_registry[id] then
+        vim.notify('Keymap already defined and was skipped: ' .. id, vim.log.levels.WARN)
         goto continue_inner
       end
 
@@ -139,23 +151,28 @@ function _G.keymaps_define(keymaps)
       end
 
       -- Mark this keymap as handled
-      _G.keymap_registry[id] = true
+      M.keymap_registry[id] = true
       ::continue_inner::
     end
     ::continue::
   end
 end
-_G.added_plugins = {}
+M.added_plugins = {}
 function _G.plug(p)
-return {
-	src = 'https://github.com/' .. p,
-	name = p:match '%S+/(%S+)'
-}
+  return {
+    src = 'https://github.com/' .. p,
+    name = p:match '%S+/(%S+)',
+  }
 end
 
 function _G.plug_spec(spec)
-  table.insert(_G.added_plugins, spec)
-	return vim.iter(spec):map(function(p) return _G.plug(p) end):totable()
+  table.insert(M.added_plugins, spec)
+  return vim
+    .iter(spec)
+    :map(function(p)
+      return _G.plug(p)
+    end)
+    :totable()
 end
 
 --- @class PluginFilter
@@ -166,50 +183,55 @@ end
 local function get_plugins(active_only)
   local plugins = vim.pack.get()
   if #plugins > 0 then
-      return vim.iter(plugins):filter(function(plug)
-		if active_only then
-		  return plug.active
-		else
-			return true
-		end
-	      end):map(function(plug)
-		return plug.name
-	      end):totable()
+    return vim
+      .iter(plugins)
+      :filter(function(plug)
+        if active_only then
+          return plug.active
+        else
+          return true
+        end
+      end)
+      :map(function(plug)
+        return plug.name
+      end)
+      :totable()
   end
 end
 --- Updates one or more plugins.
 --- @param plugin_names? string|string[] Optional: A single plugin name or a list of plugin names to update.
 --- If omitted, all plugins will be updated.
 function _G.pack_update()
-  local plugins_to_update = {}
-  local not_found_plugins = {}
   local plugins = get_plugins(true)
   if plugins then
-      vim.pack.update(plugins)
+    vim.pack.update(plugins)
   end
 end
 
 function _G.pack_clean()
-	local active_plugins = {}
-	local unused_plugins = {}
+  local active_plugins = {}
+  local unused_plugins = {}
 
-	for _, plugin in ipairs(vim.pack.get()) do
-		active_plugins[plugin.spec.name] = plugin.active
-	end
+  for _, plugin in ipairs(vim.pack.get()) do
+    active_plugins[plugin.spec.name] = plugin.active
+  end
 
-	for _, plugin in ipairs(vim.pack.get()) do
-		if not active_plugins[plugin.spec.name] then
-			table.insert(unused_plugins, plugin.spec.name)
-		end
-	end
+  for _, plugin in ipairs(vim.pack.get()) do
+    if not active_plugins[plugin.spec.name] then
+      table.insert(unused_plugins, plugin.spec.name)
+    end
+  end
 
-	if #unused_plugins == 0 then
-		print("No unused plugins.")
-		return
-	end
+  if #unused_plugins == 0 then
+    print 'No unused plugins.'
+    return
+  end
 
-	local choice = vim.fn.confirm("Remove unused plugins?", "&Yes\n&No", 2)
-	if choice == 1 then
-		vim.pack.del(unused_plugins)
-	end
+  local choice = vim.fn.confirm('Remove unused plugins?', '&Yes\n&No', 2)
+  if choice == 1 then
+    vim.pack.del(unused_plugins)
+  end
 end
+
+--
+return M

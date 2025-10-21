@@ -1,0 +1,4 @@
+# Changes require a restart to take effect.
+
+export TERMINAL=wezterm
+export EDITOR=nvim

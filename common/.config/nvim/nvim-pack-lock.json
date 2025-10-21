@@ -4,7 +4,6 @@
       "rev": "f958d98",
       "src": "https://github.com/L3MON4D3/LuaSnip"
     },
-    "actions-preview.nvim": [],
     "blink.cmp": {
       "rev": "2cb0a71",
       "src": "https://github.com/Saghen/blink.cmp"
@@ -12,10 +11,6 @@
     "bufferline.nvim": {
       "rev": "655133c",
       "src": "https://github.com/akinsho/bufferline.nvim"
-    },
-    "catppuccin": {
-      "rev": "af58927",
-      "src": "https://github.com/catppuccin/nvim"
     },
     "codecompanion-history.nvim": {
       "rev": "eb99d25",
@@ -45,7 +40,6 @@
       "rev": "c102a4e",
       "src": "https://github.com/ibhagwan/fzf-lua"
     },
-    "marks.nvim": [],
     "mini.nvim": {
       "rev": "14145d3",
       "src": "https://github.com/nvim-mini/mini.nvim"
@@ -86,14 +80,13 @@
       "rev": "b8221e4",
       "src": "https://github.com/nvim-tree/nvim-web-devicons"
     },
-    "obsidian": [],
-    "obsidian.nvim": {
-      "rev": "ac66c4f",
-      "src": "https://github.com/obsidian-nvim/obsidian.nvim"
-    },
     "plenary.nvim": {
       "rev": "b9fd522",
       "src": "https://github.com/nvim-lua/plenary.nvim"
+    },
+    "schemastore.nvim": {
+      "rev": "960a5cf",
+      "src": "https://github.com/b0o/schemastore.nvim"
     },
     "smart-splits.nvim": {
       "rev": "9a26145",

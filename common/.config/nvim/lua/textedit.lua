@@ -1,43 +1,37 @@
-
-vim.pack.add(_G.plug_spec({
- 'nvim-treesitter/nvim-treesitter',
- 'nvim-treesitter/nvim-treesitter-textobjects',
-}))
+vim.pack.add(_G.plug_spec {
+  'nvim-treesitter/nvim-treesitter',
+  'nvim-treesitter/nvim-treesitter-textobjects',
+})
 -- Treesitter
-require('utils.treesitter').setup({
-      'bash',
-      'c',
-      'cpp',
-      'cmake',
-      'diff',
-      'html',
-      'kconfig',
-      'lua',
-      'luadoc',
-      'markdown',
-      'python',
-      'markdown_inline',
-      'query',
-      'vim',
-      'vimdoc',
-      'just',
-      'json5',
-      'toml',
-      'ninja',
-      'rst',
-      'yaml',
-})
-vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'zsh', 'lua', 'bash', 'just' },
-  callback = function()
-    -- syntax highlighting, provided by Neovim
-    vim.treesitter.start()
-    -- folds, provided by Neovim
-    vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
-    -- indentation, provided by nvim-treesitter
-    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-  end,
-})
+require('utils.treesitter').config {
+  indent = { enable = true }, ---@type TSFeat
+  highlight = { enable = true }, ---@type TSFeat
+  folds = { enable = true }, ---@type TSFeat
+  ensure_installed = {
+    'bash',
+    'c',
+    'cpp',
+    'cmake',
+    'diff',
+    'dts',
+    'html',
+    'kconfig',
+    'lua',
+    'luadoc',
+    'markdown',
+    'python',
+    'markdown_inline',
+    'query',
+    'vim',
+    'vimdoc',
+    'just',
+    'json5',
+    'toml',
+    'ninja',
+    'rst',
+    'yaml',
+  },
+}
 
 require('nvim-treesitter-textobjects').setup {
   move = {
@@ -51,9 +45,10 @@ require('nvim-treesitter-textobjects').setup {
     },
   },
 }
+local mini_utils = require 'utils.mini'
 require('mini.extra').setup()
 local ai = require 'mini.ai'
-ai.setup {
+local mini_ai_opts = {
   n_lines = 500,
   custom_textobjects = {
     o = ai.gen_spec.treesitter { -- code block
@@ -61,52 +56,53 @@ ai.setup {
       i = { '@block.inner', '@conditional.inner', '@loop.inner' },
     },
     f = ai.gen_spec.treesitter { a = '@function.outer', i = '@function.inner' }, -- function
-    c = ai.gen_spec.treesitter { a = '@class.outer', i = '@class.inner' },       -- class
-    t = { '<([%p%w]-)%f[^<%w][^<>]->.-</%1>', '^<.->().*()</[^/]->$' },          -- tags
-    d = { '%f[%d]%d+' },                                                         -- digits
-    e = {                                                                        -- Word with case
+    c = ai.gen_spec.treesitter { a = '@class.outer', i = '@class.inner' }, -- class
+    t = { '<([%p%w]-)%f[^<%w][^<>]->.-</%1>', '^<.->().*()</[^/]->$' }, -- tags
+    d = { '%f[%d]%d+' }, -- digits
+    e = { -- Word with case
       { '%u[%l%d]+%f[^%l%d]', '%f[%S][%l%d]+%f[^%l%d]', '%f[%P][%l%d]+%f[^%l%d]', '^[%l%d]+%f[^%l%d]' },
       '^().*()$',
     },
-    -- g = _G.mini.ai_buffer,                              -- buffer
-    u = ai.gen_spec.function_call(),                          -- u for "Usage"
+    g = mini_utils.mini_ai_buffer, -- buffer
+    u = ai.gen_spec.function_call(), -- u for "Usage"
     U = ai.gen_spec.function_call { name_pattern = '[%w_]' }, -- without dot in function name
   },
 }
-require 'plugin.blink-cmp'
+ai.setup(mini_ai_opts)
+vim.schedule(function()
+  mini_utils.mini_ai_whichkey(mini_ai_opts)
+end)
 require('mini.align').setup()
 require('mini.bufremove').setup()
 _G.keymaps_define {
-  { lhs = '<leader>bd', rhs = '<Cmd>lua MiniBufremove.delete()<CR>',         opts = { desc = 'Delete' } },
-  { lhs = '<leader>bD', rhs = '<Cmd>lua MiniBufremove.delete(0, true)<CR>',  opts = { desc = 'Delete!' } },
-  { lhs = '<leader>bw', rhs = '<Cmd>lua MiniBufremove.wipeout()<CR>',        opts = { desc = 'Wipeout' } },
+  { lhs = '<leader>bd', rhs = '<Cmd>lua MiniBufremove.delete()<CR>', opts = { desc = 'Delete' } },
+  { lhs = '<leader>bD', rhs = '<Cmd>lua MiniBufremove.delete(0, true)<CR>', opts = { desc = 'Delete!' } },
+  { lhs = '<leader>bw', rhs = '<Cmd>lua MiniBufremove.wipeout()<CR>', opts = { desc = 'Wipeout' } },
   { lhs = '<leader>bW', rhs = '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', opts = { desc = 'Wipeout!' } },
 }
 require('mini.comment').setup()
 require('mini.indentscope').setup()
 require('mini.move').setup()
-require('mini.pairs').setup()
--- _G.mini.pairs {
---   modes = { insert = true, command = true, terminal = false },
---   -- skip autopair when next character is one of these
---   skip_next = [=[[%w%%%'%[%"%.%`%$]]=],
---   -- skip autopair when the cursor is inside these treesitter nodes
---   skip_ts = { 'string' },
---   -- skip autopair when next character is closing pair
---   -- and there are more closing pairs than opening pairs
---   skip_unbalanced = true,
---   -- better deal with markdown code blocks
---   markdown = true,
--- }
--- require('mini.splitjoin').setup()
+mini_utils.mini_pairs {
+  modes = { insert = true, command = true, terminal = false },
+  -- skip autopair when next character is one of these
+  skip_next = [=[[%w%%%'%[%"%.%`%$]]=],
+  -- skip autopair when the cursor is inside these treesitter nodes
+  skip_ts = { 'string' },
+  -- skip autopair when next character is closing pair
+  -- and there are more closing pairs than opening pairs
+  skip_unbalanced = true,
+  -- better deal with markdown code blocks
+  markdown = true,
+}
 require('mini.surround').setup {
   mappings = {
-    add = 'gsa',            -- Add surrounding in Normal and Visual modes
-    delete = 'gsd',         -- Delete surrounding
-    find = 'gsf',           -- Find surrounding (to the right)
-    find_left = 'gsF',      -- Find surrounding (to the left)
-    highlight = 'gsh',      -- Highlight surrounding
-    replace = 'gsr',        -- Replace surrounding
+    add = 'gsa', -- Add surrounding in Normal and Visual modes
+    delete = 'gsd', -- Delete surrounding
+    find = 'gsf', -- Find surrounding (to the right)
+    find_left = 'gsF', -- Find surrounding (to the left)
+    highlight = 'gsh', -- Highlight surrounding
+    replace = 'gsr', -- Replace surrounding
     update_n_lines = 'gsn', -- Update `n_lines`
   },
 }

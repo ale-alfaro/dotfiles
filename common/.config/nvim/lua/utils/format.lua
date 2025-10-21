@@ -87,13 +87,13 @@ function M.enabled(buf)
   return gaf == nil or gaf
 end
 
----@param buf? boolean
+---@param buf? number buffer number
 function M.toggle(buf)
   M.enable(not M.enabled(), buf)
 end
 
 ---@param enable? boolean
----@param buf? boolean
+---@param buf? number buffer number
 function M.enable(enable, buf)
   if enable == nil then
     enable = true
@@ -168,12 +168,12 @@ function M.setup(opts)
     }
   end, 5000)
   -- Autoformat autocmd
-  vim.api.nvim_create_autocmd('BufWritePre', {
-    group = vim.api.nvim_create_augroup('Format', {}),
-    callback = function(event)
-      M.format { buf = event.buf }
-    end,
-  })
+  -- vim.api.nvim_create_autocmd('BufWritePre', {
+  --   group = vim.api.nvim_create_augroup('Format', {}),
+  --   callback = function(event)
+  --     M.format { buf = event.buf }
+  --   end,
+  -- })
 
   -- Manual format
   vim.api.nvim_create_user_command('TriggerFormat', function()

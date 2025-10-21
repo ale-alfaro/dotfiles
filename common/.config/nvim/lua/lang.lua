@@ -1,8 +1,9 @@
-vim.pack.add(_G.plug_spec({
+vim.pack.add(_G.plug_spec {
   'stevearc/conform.nvim',
   'mfussenegger/nvim-lint',
-  'benomahony/uv.nvim'
-}))
+  'benomahony/uv.nvim',
+  'b0o/schemastore.nvim',
+})
 -- Formatting
 -- See also:
 -- - `:h Conform`
@@ -11,8 +12,8 @@ vim.pack.add(_G.plug_spec({
 require('utils.format').setup {
   default_format_opts = {
     timeout_ms = 3000,
-    async = false,           -- not recommended to change
-    quiet = false,           -- not recommended to change
+    async = false, -- not recommended to change
+    quiet = false, -- not recommended to change
     lsp_format = 'fallback', -- not recommended to change
   },
   formatters_by_ft = {
@@ -57,7 +58,7 @@ local opts = {
   linters_by_ft = {
     cmake = { 'cmakelint' }, -- Install: uv tool install cmakelint, repo: https://github.com/cmake-lint/cmake-lint
     python = { 'mypy' },
-    yaml = { 'yamlint' },    --Install: uv tool install yamllint, repo: https://github.com/adrienverge/yamllint
+    yaml = { 'yamlint' }, --Install: uv tool install yamllint, repo: https://github.com/adrienverge/yamllint
     bash = { 'shellcheck' },
     sh = { 'shellcheck' },
     zsh = { 'zsh', 'shellcheck' },
@@ -76,8 +77,7 @@ local opts = {
         '--color',
         'never',
       },
-      parser = require('lint.parser').from_pattern(pattern, groups, severities, { ['source'] = 'ty' },
-        { end_col_offset = 0 }),
+      parser = require('lint.parser').from_pattern(pattern, groups, severities, { ['source'] = 'ty' }, { end_col_offset = 0 }),
     },
   },
   events = { 'BufWritePost', 'BufReadPost', 'InsertLeave' },
