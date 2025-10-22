@@ -1,6 +1,10 @@
+vim.pack.add({_G.plug(
+  'Saghen/blink.cmp', "cargo build --release"
+)})
+require 'plugin.blink-cmp'
+
 vim.pack.add(_G.plug_spec {
   'L3MON4D3/LuaSnip',
-  'Saghen/blink.cmp',
+  'rafamadriz/friendly-snippets',
 })
-require 'plugin.blink-cmp'
 require 'plugin.luasnip'

@@ -9,7 +9,23 @@
    'MunifTanjim/nui.nvim' ,          
    'rcarriga/nvim-notify' ,          
 }))
+ 
+-- Set up to not prefer extension-based icon for some extensions
+local ext3_blocklist = { scm = true, txt = true, yml = true }
+local ext4_blocklist = { json = true, yaml = true }
+local mini_icons =  require('mini.icons')
+mini_icons.setup({
+    use_file_extension = function(ext, _)
+      return not (ext3_blocklist[ext:sub(-3)] or ext4_blocklist[ext:sub(-4)])
+    end,
+  })
 
+  -- Mock 'nvim-tree/nvim-web-devicons' for plugins without 'mini.icons' support.
+  -- Not needed for 'mini.nvim' or MiniMax, but might be useful for others.
+mini_icons.mock_nvim_web_devicons()
+
+  -- Add LSP kind icons. Useful for 'mini.completion'.
+mini_icons.tweak_lsp_kind("append")
 require('noice').setup {
   lsp = {
     -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
@@ -37,30 +53,34 @@ _G.keymaps_define {
 }
 require('mini.starter').setup()
 require('mini.statusline').setup()
-require('bufferline').setup {
-  options = {
-    show_close_icon = false,
-    show_buffer_close_icons = false,
-    truncate_names = false,
-    indicator = { style = 'underline' },
-    close_command = function(bufnr)
-      require('mini.bufremove').delete(bufnr, false)
-    end,
-    diagnostics = 'nvim_lsp',
-    diagnostics_indicator = function(_, _, diag)
-      local icons = require('icons').diagnostics
-      local indicator = (diag.error and icons.ERROR .. ' ' or '') .. (diag.warning and icons.WARN or '')
-      return vim.trim(indicator)
-    end,
-  },
-}
-_G.keymaps_define ({
-  { lhs = '<leader>bp', rhs = '<Cmd>BufferLinePick<CR>',                 opts = { desc = 'Pick a buffer to open' } },
-  { lhs = '<leader>bc', rhs = '<Cmd>BufferLinePickClose<CR>, true)<CR>', opts = { desc = 'Select a buffer to close' } },
-  { lhs = '<leader>br', rhs = '<Cmd>BufferLineCloseRight<CR>',           opts = { desc = 'Close buffer to the left' } },
-  { lhs = '<leader>bl', rhs = '<Cmd>BufferLineCloseLeft<CR>',            opts = { desc = 'Close buffer to the right' } },
-  { lhs = '<leader>bo', rhs = '<Cmd>BufferLineCloseOthers<CR>',          opts = { desc = 'Close other buffers' } },
-})
+
+-- Tabline. Sets `:h 'tabline'` to show all listed buffers in a line at the top.
+-- Buffers are ordered as they were created. Navigate with `[b` and `]b`.
+require('mini.tabline').setup()
+-- require('bufferline').setup {
+--   options = {
+--     show_close_icon = false,
+--     show_buffer_close_icons = false,
+--     truncate_names = false,
+--     indicator = { style = 'underline' },
+--     close_command = function(bufnr)
+--       require('mini.bufremove').delete(bufnr, false)
+--     end,
+--     diagnostics = 'nvim_lsp',
+--     diagnostics_indicator = function(_, _, diag)
+--       local icons = require('icons').diagnostics
+--       local indicator = (diag.error and icons.ERROR .. ' ' or '') .. (diag.warning and icons.WARN or '')
+--       return vim.trim(indicator)
+--     end,
+--   },
+-- }
+-- _G.keymaps_define ({
+--   { lhs = '<leader>bp', rhs = '<Cmd>BufferLinePick<CR>',                 opts = { desc = 'Pick a buffer to open' } },
+--   { lhs = '<leader>bc', rhs = '<Cmd>BufferLinePickClose<CR>, true)<CR>', opts = { desc = 'Select a buffer to close' } },
+--   { lhs = '<leader>br', rhs = '<Cmd>BufferLineCloseRight<CR>',           opts = { desc = 'Close buffer to the left' } },
+--   { lhs = '<leader>bl', rhs = '<Cmd>BufferLineCloseLeft<CR>',            opts = { desc = 'Close buffer to the right' } },
+--   { lhs = '<leader>bo', rhs = '<Cmd>BufferLineCloseOthers<CR>',          opts = { desc = 'Close other buffers' } },
+-- })
 require('catppuccin').setup({
       flavour = 'macchiato', -- latte, frappe, macchiato, mocha
       background = {         -- :h background

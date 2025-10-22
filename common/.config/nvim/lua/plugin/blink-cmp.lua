@@ -1,30 +1,4 @@
--- local blink_opts = {
---   keymap = { preset = 'default' },
---   appearance = { nerd_font_variant = 'mono' },
---   completion = { documentation = { auto_show = false } },
---   signature = { enabled = true },
---   sources = {
---     default = { 'lsp', 'path', 'snippets', 'buffer' },
---     providers = {
---       lsp = { async = true, score_offset = 70 },
---       snippets = { score_offset = 1, max_items = 3 },
---     },
---   },
---   fuzzy = { implementation = 'prefer_rust_with_warning' },
---   cmdline = {
---     enabled = true,
---     keymap = { preset = 'cmdline' },
---     completion = {
---       list = { selection = { preselect = false } },
---       menu = {
---         auto_show = function(ctx)
---           return vim.fn.getcmdtype() == ':'
---         end,
---       },
---       ghost_text = { enabled = true },
---     },
---   },
--- }
+
 require('blink.cmp').setup {
   keymap = {
     ['<CR>'] = { 'accept', 'fallback' },

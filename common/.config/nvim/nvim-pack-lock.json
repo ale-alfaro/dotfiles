@@ -1,7 +1,7 @@
 {
   "plugins": {
     "LuaSnip": {
-      "rev": "f958d98",
+      "rev": "ccf25a5",
       "src": "https://github.com/L3MON4D3/LuaSnip"
     },
     "blink.cmp": {
@@ -21,15 +21,15 @@
       "src": "https://github.com/lalitmee/codecompanion-spinners.nvim"
     },
     "codecompanion.nvim": {
-      "rev": "b1937ad",
+      "rev": "e69aebb",
       "src": "https://github.com/olimorris/codecompanion.nvim"
     },
     "conform.nvim": {
-      "rev": "fbcb4fa",
+      "rev": "235dd79",
       "src": "https://github.com/stevearc/conform.nvim"
     },
     "flash.nvim": {
-      "rev": "2febce6",
+      "rev": "3be9bf7",
       "src": "https://github.com/folke/flash.nvim"
     },
     "friendly-snippets": {
@@ -41,11 +41,11 @@
       "src": "https://github.com/ibhagwan/fzf-lua"
     },
     "mini.nvim": {
-      "rev": "14145d3",
+      "rev": "cf32454",
       "src": "https://github.com/nvim-mini/mini.nvim"
     },
     "noice.nvim": {
-      "rev": "db24837",
+      "rev": "c86aea5",
       "src": "https://github.com/folke/noice.nvim"
     },
     "nui.nvim": {
@@ -69,16 +69,12 @@
       "src": "https://github.com/rcarriga/nvim-notify"
     },
     "nvim-treesitter": {
-      "rev": "71bf1665",
+      "rev": "42fc28ba",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter"
     },
     "nvim-treesitter-textobjects": {
-      "rev": "1b2d85d",
+      "rev": "a9742cb",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter-textobjects"
-    },
-    "nvim-web-devicons": {
-      "rev": "b8221e4",
-      "src": "https://github.com/nvim-tree/nvim-web-devicons"
     },
     "plenary.nvim": {
       "rev": "b9fd522",
@@ -93,7 +89,7 @@
       "src": "https://github.com/mrjones2014/smart-splits.nvim"
     },
     "snacks.nvim": {
-      "rev": "1b4205e",
+      "rev": "d293b21",
       "src": "https://github.com/folke/snacks.nvim"
     },
     "tiny-code-action.nvim": {

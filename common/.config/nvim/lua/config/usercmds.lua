@@ -71,8 +71,14 @@ command('PackSync', function()
     end
   end
 
-  vim.pack.del(to_delete)
-  vim.pack.add(VimRc.added_plugins)
+  ok, _ = pcall(vim.pack.del(to_delete))
+  if not ok then
+    VimRc.error("Failed to delete plugins with vim.pack.del")
+  end 
+  ok, _ = pcall(vim.pack.add(VimRc.added_plugins))
+  if not ok then
+    VimRc.error("Failed to add plugins with vim.pack.add")
+  end 
   vim.pack.update()
 end, { desc = 'Sync plugins' })
 

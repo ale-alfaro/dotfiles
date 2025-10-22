@@ -157,15 +157,40 @@ function _G.keymaps_define(keymaps)
     ::continue::
   end
 end
+
+
 M.added_plugins = {}
-function _G.plug(p)
+
+local function create_plugin_build_hook(plug_name, build)
+    vim.api.nvim_create_autocmd("PackChanged", {
+        pattern = "*",
+        callback = function(ev)
+            _G.info(ev.data.spec.name .. " has been updated.")
+            if ev.data.spec.name == plug_name
+                and ev.data.spec.kind ~= "deleted" then
+                if type(build_hook) == "string" then
+                vim.system(vim.fn.split(build_hook), { cwd = ev.data.path}):wait()
+              elseif type(build_hook) == "function" then
+                vim.schedule(build_hook)
+              else
+               _G.error("Build hook for plugin " .. plug_name .. " is not a string nor function")
+              end
+            end
+        end,
+    })
+end
+function _G.plug(p, build)
+  local plug_name = p:match '%S+/(%S+)'
+  if build then
+    create_plugin_build_hook(plug_name, build)
+  end
   return {
     src = 'https://github.com/' .. p,
-    name = p:match '%S+/(%S+)',
+    name = plug_name,
   }
 end
 
-function _G.plug_spec(spec)
+function _G.plug_spec(spec, build)
   table.insert(M.added_plugins, spec)
   return vim
     .iter(spec)
