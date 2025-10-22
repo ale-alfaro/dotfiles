@@ -158,26 +158,63 @@ function _G.keymaps_define(keymaps)
   end
 end
 
-
 M.added_plugins = {}
 
-local function create_plugin_build_hook(plug_name, build)
-    vim.api.nvim_create_autocmd("PackChanged", {
-        pattern = "*",
-        callback = function(ev)
-            _G.info(ev.data.spec.name .. " has been updated.")
-            if ev.data.spec.name == plug_name
-                and ev.data.spec.kind ~= "deleted" then
-                if type(build_hook) == "string" then
-                vim.system(vim.fn.split(build_hook), { cwd = ev.data.path}):wait()
-              elseif type(build_hook) == "function" then
-                vim.schedule(build_hook)
-              else
-               _G.error("Build hook for plugin " .. plug_name .. " is not a string nor function")
-              end
-            end
-        end,
+---@param cmd string|string[]
+---@param cb fun(output: string[], code: number)
+---@param opts? {env?: table<string, string>, cwd?: string}
+local function run_build_cmd(cmd, cb, opts)
+  local output = {} ---@type string[]
+  local id = vim.fn.jobstart(
+    cmd,
+    vim.tbl_extend('force', opts or {}, {
+      on_stdout = function(_, data)
+        output[#output + 1] = table.concat(data, '\n')
+      end,
+      on_exit = function(_, code)
+        cb(output, code)
+        if code ~= 0 then
+          vim.notify(
+            ('Terminal **cmd** `%s` failed with code `%d`:\n- `vim.o.shell = %q`\n\nOutput:\n%s'):format(
+              cmd,
+              code,
+              vim.o.shell,
+              vim.trim(table.concat(output, '')),
+              'error'
+            )
+          )
+        end
+      end,
     })
+  )
+  if id <= 0 then
+    _G.error(('Failed to start job `%s`'):format(cmd))
+  end
+  return id > 0 and id or nil
+end
+local function create_plugin_build_hook(plug_name, build)
+  vim.api.nvim_create_autocmd('PackChanged', {
+    pattern = '*',
+    callback = function(ev)
+      _G.info(ev.data)
+      _G.info(ev.data.spec.name .. ' has been updated.')
+      if ev.data.spec.name == plug_name and ev.data.spec.kind ~= 'deleted' then
+        if type(build) == 'string' then
+          run_build_cmd(build, function(output, retcode)
+            if retcode ~= 0 then
+              _G.error('Build command failed for plugin ' .. plug_name)
+              _G.error('Output:' .. output)
+            end
+          end, { cwd = ev.data.path })
+          -- vim.system(vim.fn.split(build), { cwd = ev.data.path}):wait()
+        elseif type(build) == 'function' then
+          vim.schedule(build)
+        else
+          _G.error('Build hook for plugin ' .. plug_name .. ' is not a string nor function')
+        end
+      end
+    end,
+  })
 end
 function _G.plug(p, build)
   local plug_name = p:match '%S+/(%S+)'
@@ -190,7 +227,8 @@ function _G.plug(p, build)
   }
 end
 
-function _G.plug_spec(spec, build)
+---@param spec string[]
+function _G.plug_spec(spec)
   table.insert(M.added_plugins, spec)
   return vim
     .iter(spec)
@@ -203,7 +241,6 @@ end
 --- @class PluginFilter
 --- @field active boolean Whether plugin was added via |vim.pack.add()| to current session.
 
----@param names string[]
 ---@param active_only boolean?
 local function get_plugins(active_only)
   local plugins = vim.pack.get()
@@ -224,16 +261,27 @@ local function get_plugins(active_only)
   end
 end
 --- Updates one or more plugins.
---- @param plugin_names? string|string[] Optional: A single plugin name or a list of plugin names to update.
 --- If omitted, all plugins will be updated.
-function _G.pack_update()
+function M.pack_update()
   local plugins = get_plugins(true)
   if plugins then
     vim.pack.update(plugins)
   end
 end
 
-function _G.pack_clean()
+--- @param plugins string[] Optional: A single plugin name or a list of plugin names to update.
+function M.pack_reload(plugins)
+  local ok, _ = pcall(vim.pack.del, plugins)
+  if not ok then
+    _G.error 'Failed to delete plugins with vim.pack.del'
+  end
+  ok, _ = pcall(vim.pack.add, _G.plug_spec(plugins))
+  if not ok then
+    _G.error 'Failed to add plugins with vim.pack.add'
+  end
+end
+
+function M.pack_clean()
   local active_plugins = {}
   local unused_plugins = {}
 

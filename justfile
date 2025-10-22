@@ -26,18 +26,27 @@ restow-common-dotfiles: (restow absolute_path(justfile_directory() / "common") d
 
 restow-dotfiles: restow-common-dotfiles restow-platform-dotfiles
 
-neovim_install_prefix := "/home/alealfaro/.local/nvim"
+neovim_install_prefix := home_directory() / ".local/nvim"
+xdg_cache_home := if env('XDG_CACHE_HOME', '') =~ '^/' {
+  env('XDG_CACHE_HOME')
+} else {
+  home_directory() / '.cache'
+}
+neovim_cache := xdg_cache_home / "nvim_build"
+neovim_user_repo := "neovim/neovim"
+nvim_build:
+    sudo rm -rf {{ neovim_cache }}
+    sudo gh repo clone {{ neovim_user_repo }} {{ neovim_cache }} -- --filter=blob:none
+    sudo mkdir -p {{ neovim_install_prefix }}
+    sudo make -C {{ neovim_cache }} CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX="{{ neovim_install_prefix }}/tmp"
+
 
 [script("bash")]
-nvim_build:
+nvim_install: nvim_build 
     set -euxo pipefail
-    # tmpdir=$(mktemp -d)
-    # cd $tmpdir
-    # gh repo clone neovim/neovim
-    # make -C neovim CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX="{{ neovim_install_prefix }}/tmp"
-    # sudo make -C neovim install
+    sudo make -C {{ neovim_cache }} install
     version=$( "{{ neovim_install_prefix }}/tmp/bin/nvim" --version | grep "NVIM" | awk '{print $2}' )
-    sudo mv {{ neovim_install_prefix }}/tmp "{{ neovim_install_prefix }}/$version"
+    sudo mv {{ neovim_install_prefix }}/tmp "{{ neovim_install_prefix }}/nvim-${version}"
 
 # check: Simulate stowing to check for any conflicts
 # vectorcode := require("vectorcode")
