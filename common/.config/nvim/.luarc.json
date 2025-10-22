@@ -3,7 +3,8 @@
   "runtime.path": [
     "lua/?.lua",
     "lua/?/init.lua",
-    "$XDG_DATA_HOME/nvim/site/pack/core/opt/"
+    "$XDG_DATA_HOME/nvim/site/pack/core/opt/",
+    "$XDG_DATA_HOME/nvim/site/pack/core/opt/mini.nvim"
   ],
   "diagnostics.globals": ["vim"],
   "workspace.checkThirdParty": false,

@@ -2,9 +2,6 @@ local M = {}
 
 setmetatable(M, {
   __index = function(t, k)
-    -- if LazyUtil[k] then
-    --   return LazyUtil[k]
-    -- end
     -- if M.deprecated[k] then
     --   return M.deprecated[k]()
     -- end
@@ -16,7 +13,6 @@ setmetatable(M, {
 })
 ---@param msg string|string[]
 ---@param level string
----@param comment string
 local function notify(msg, level)
   msg = type(msg) == 'table' and table.concat(msg, '\n') or msg --[[@as string]]
   msg = vim.trim(msg)
@@ -24,20 +20,17 @@ local function notify(msg, level)
 end
 
 ---@param msg string|string[]
----@param opts? snacks.notify.Opts
-function _G.warn(msg, opts)
+function _G.warn(msg)
   return notify(msg, 'WARN')
 end
 
 ---@param msg string|string[]
----@param opts? snacks.notify.Opts
-function _G.info(msg, opts)
+function _G.info(msg)
   return notify(msg, 'INFO')
 end
 
 ---@param msg string|string[]
----@param opts? snacks.notify.Opts
-function _G.error(msg, opts)
+function _G.error(msg)
   return notify(msg, 'ERROR')
 end
 

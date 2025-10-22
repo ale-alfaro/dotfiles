@@ -9,7 +9,7 @@ _G.keymaps_define({
   -- General & Navigation
   -- stylua:ignore
   { lhs = "<leader>bb",            rhs = "<cmd>e #<cr>",                                         opts = { desc = "Switch to Other Buffer" } },
-  { lhs = "<leader>`",             rhs = "<cmd>e #<cr>",                                         opts = { desc = "Switch to Other Buffer" } },
+  { lhs = "<leader>bD",             rhs = "<cmd>:%bdelete|edit #|normal`<cr>",                                         opts = { desc = "Close all Other Buffers" } },
   { lhs = "q",                     rhs = "<nop>",                                                opts = { noremap = true } },
   { lhs = "Q",                     rhs = "q",                                                    opts = { noremap = true } },
   { lhs = "<M-q>",                 rhs = "Q",                                                    opts = { desc = "Replay last register", noremap = true } },

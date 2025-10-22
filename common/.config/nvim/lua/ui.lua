@@ -105,36 +105,35 @@ require('which-key').setup {
   defaults = {},
   spec = {
     mode = { 'n', 'v' },
+    { '<leader>a', group = 'AI' },
     { '<leader>c', group = 'Code' },
     { '<leader>d', group = 'Diff' },
+    { '<leader>e', group = 'Explore/Edit' },
     { '<leader>f', group = 'File/find' },
     { '<leader>g', group = 'Git' },
+    { '<leader>s', group = 'Search' },
+    { '<Leader>v', group = '+Visits' },
+    { '<leader>u', group = 'ui' },
+    { '<leader>x', group = 'diagnostics/quickfix' },
+    { '[', group = 'prev' },
+    { ']', group = 'next' },
+    { 'g', group = 'goto' },
+    { 'gs', group = 'surround' },
+    { 'z', group = 'fold' },
     {
-      '<Leader>s',
-      group = '+Search',
-      { '<Leader>v', group = '+Visits' },
-      { '<leader>u', group = 'ui' },
-      { '<leader>x', group = 'diagnostics/quickfix' },
-      { '[', group = 'prev' },
-      { ']', group = 'next' },
-      { 'g', group = 'goto' },
-      { 'gs', group = 'surround' },
-      { 'z', group = 'fold' },
-      {
-        '<leader>b',
-        group = 'buffer',
-        expand = function()
-          return require('which-key.extras').expand.buf()
-        end,
-      },
-      {
-        '<leader>w',
-        group = 'windows',
-        proxy = '<c-w>',
-        expand = function()
-          return require('which-key.extras').expand.win()
-        end,
-      },
+      '<leader>b',
+      group = 'buffer',
+      expand = function()
+        return require('which-key.extras').expand.buf()
+      end,
+    },
+    {
+      '<leader>w',
+      group = 'windows',
+      proxy = '<c-w>',
+      expand = function()
+        return require('which-key.extras').expand.win()
+      end,
     },
   },
 }

@@ -5,7 +5,7 @@ vim.pack.add {
   _G.plug 'nvim-treesitter/nvim-treesitter-textobjects',
 }
 -- Treesitter
-require('utils.treesitter').config {
+VimRc.treesitter.config {
   indent = { enable = true }, ---@type TSFeat
   highlight = { enable = true }, ---@type TSFeat
   folds = { enable = true }, ---@type TSFeat

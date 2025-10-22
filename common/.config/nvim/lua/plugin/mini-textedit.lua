@@ -1,3 +1,45 @@
+-- Common configuration presets. Example usage:
+-- - `<C-s>` in Insert mode - save and go to Normal mode
+-- - `go` / `gO` - insert empty line before/after in Normal mode
+-- - `gy` / `gp` - copy / paste from system clipboard
+-- - `\` + key - toggle common options. Like `\h` toggles highlighting search.
+-- - `<C-hjkl>` (four combos) - navigate between windows.
+require('mini.basics').setup {
+  -- Options. Set field to `false` to disable.
+  options = {
+    -- Basic options ('number', 'ignorecase', and many more)
+    basic = true,
+
+    -- Extra UI features ('winblend', 'listchars', 'pumheight', ...)
+    extra_ui = true,
+
+    -- Presets for window borders ('single', 'double', ...)
+    -- Default 'auto' infers from 'winborder' option
+    win_borders = 'auto',
+  },
+  mappings = {
+
+    -- Basic mappings (better 'jk', save with Ctrl+S, ...)
+    basic = true,
+
+    -- Prefix for mappings that toggle common options ('wrap', 'spell', ...).
+    -- Supply empty string to not create these mappings.
+    option_toggle_prefix = '',
+    -- Create `<C-hjkl>` mappings for window navigation
+    windows = true,
+    -- Create `<M-hjkl>` mappings for navigation in Insert and Command modes
+    move_with_alt = false,
+  },
+
+  autocommands = {
+    -- Basic autocommands (highlight on yank, start Insert in terminal, ...)
+    basic = true,
+
+    -- Set 'relativenumber' only in linewise and blockwise Visual mode
+    relnum_in_visual_mode = false,
+  },
+}
+
 -- Miscellaneous small but useful functions. Example usage:
 -- - `<Leader>oz` - toggle between "zoomed" and regular view of current buffer
 -- - `<Leader>or` - resize window to its "editable width"
@@ -69,8 +111,7 @@ local mini_ai_opts = {
       '^().*()$',
     },
     g = mini_utils.mini_ai_buffer, -- buffer
-    -- u = ai.gen_spec.function_call(), -- u for "Usage"
-    -- U = ai.gen_spece.function_call { name_pattern = '[%w_]' }, -- without dot in function name
+    U = ai.gen_spec.function_call { name_pattern = '[%w_]' }, -- without dot in function name
   },
   -- 'mini.ai' by default mostly mimics built-in search behavior: first try
   -- to find textobject covering cursor, then try to find to the right.
@@ -78,7 +119,7 @@ local mini_ai_opts = {
   -- always try to search only covering textobject and explicitly ask to search
   -- for next (`an`/`in`) or last (`an`/`il`).
   -- Try this. If you don't like it - delete next line and this comment.
-  search_method = 'cover',
+  search_method = 'cover_or_nearest',
 }
 ai.setup(mini_ai_opts)
 vim.schedule(function()
