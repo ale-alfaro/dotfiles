@@ -232,6 +232,16 @@ function M.config()
       max_width = math.floor(vim.o.columns * 0.4),
     }
   end
+  vim.lsp.config('*', {
+    capabilities = {
+      workspace = {
+        fileOperations = {
+          didRename = true,
+          willRename = true,
+        },
+      },
+    },
+  })
 end
 
 return M

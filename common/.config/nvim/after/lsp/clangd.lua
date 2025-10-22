@@ -6,12 +6,6 @@ return {
     '.clang-tidy',
     '.clang-format',
     'compile_commands.json',
-    'compile_flags.txt',
-    'Makefile',
-    'configure.ac', -- AutoTools
-    'meson.build',
-    'build.ninja',
-    '.git',
   },
   capabilities = {
     offsetEncoding = { 'utf-16' },
@@ -31,8 +25,8 @@ return {
     clangdFileStatus = true,
   },
   on_attach = function(client, buf_id)
-    local keys = {
-      { '<leader>ch', '<cmd>ClangdSwitchSourceHeader<cr>', desc = 'Switch Source/Header (C/C++)' },
+    _G.keymaps_define {
+      { lhs = '<leader>ch', rhs = '<cmd>ClangdSwitchSourceHeader<cr>', { desc = 'Switch Source/Header (C/C++)' } },
     }
-  end
+  end,
 }

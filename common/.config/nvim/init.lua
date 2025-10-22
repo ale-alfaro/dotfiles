@@ -16,9 +16,9 @@ if vim.fn.has 'nvim-0.12' == 1 then
   require 'search'
   require 'textedit'
   require 'inline_cmp'
-  require 'lsp'
   require 'lang'
   require 'extras'
+  require 'lsp'
 else
   _G.error 'Neovim v0.12 is required for this config!'
 end

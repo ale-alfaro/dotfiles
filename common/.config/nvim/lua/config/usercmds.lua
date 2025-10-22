@@ -1,13 +1,5 @@
 local command = vim.api.nvim_create_user_command --[[@type function]]
 
---function _G.new_usercmd(name, callback,  desc)
---  local opts = {}
---  if desc ~= nil then
---    opts.desc = desc
---  end
---  vim.api.nvim_create_user_command(name, callback, opts)
---end
-
 local function ToggleLineNumbers()
   if vim.wo.relativenumber then
     vim.wo.relativenumber = false
@@ -52,7 +44,12 @@ end, { desc = 'Undo Find and Replace' })
 -- end, { desc = "Git sync remote repo" })
 
 command('New', ':enew', { desc = 'New buffer' })
-
+command('PackOpen', function(opts)
+  ok, plug = pcall(vim.pack.get, { opts.fargs[1] })
+  if ok then
+    vim.cmd('edit ' .. plug[1].path)
+  end
+end, { desc = 'Open plugin repository in pack path', nargs = 1 })
 command('PackSync', function()
   local plugins = {}
   for _, plugin in ipairs(VimRc.added_plugins) do
@@ -73,12 +70,12 @@ command('PackSync', function()
 
   ok, _ = pcall(vim.pack.del(to_delete))
   if not ok then
-    VimRc.error("Failed to delete plugins with vim.pack.del")
-  end 
+    VimRc.error 'Failed to delete plugins with vim.pack.del'
+  end
   ok, _ = pcall(vim.pack.add(VimRc.added_plugins))
   if not ok then
-    VimRc.error("Failed to add plugins with vim.pack.add")
-  end 
+    VimRc.error 'Failed to add plugins with vim.pack.add'
+  end
   vim.pack.update()
 end, { desc = 'Sync plugins' })
 

@@ -180,28 +180,5 @@ function M.workspace_picker()
   }
 end
 
-local cmds = {
-  {
-    'WeztermTerm',
-    function()
-      M.spawn_terminal()
-    end,
-    { desc = 'Spawn Wezterm Terminal' },
-  },
-  {
-    'WeztermWorkspace',
-    function()
-      M.workspace_picker()
-    end,
-    { desc = 'Switch Wezterm Workspace' },
-  },
-}
-
-function M.setup()
-  --
-  vim.tbl_map(function(cmd)
-    vim.api.nvim_create_user_command(cmd[1], cmd[2], cmd[3])
-  end, cmds)
-end
 
 return M

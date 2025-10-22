@@ -3,6 +3,24 @@ vim.pack.add(_G.plug_spec {
   'folke/trouble.nvim',
 })
 
+-- Jump to next/previous single character. It implements "smarter `fFtT` keys"
+-- (see `:h f`) that work across multiple lines, start "jumping mode", and
+-- highlight all target matches. Example usage:
+-- - `fxff` - move *f*orward onto next character "x", then next, and next again
+-- - `dt)` - *d*elete *t*ill next closing parenthesis (`)`)
+-- require('mini.jump').setup()
+
+-- Jump within visible lines to pre-defined spots via iterative label filtering.
+-- Spots are computed by a configurable spotter function. Example usage:
+-- - Lock eyes on desired location to jump
+-- - `<CR>` - start jumping; this shows character labels over target spots
+-- - Type character that appears over desired location; number of target spots
+--   should be reduced
+-- - Keep typing labels until target spot is unique to perform the jump
+--
+-- See also:
+-- - `:h MiniJump2d.gen_spotter` - list of available spotters
+-- require('mini.jump2d').setup()
 -- Flash
 --
 require('flash').setup {
@@ -68,3 +86,27 @@ local actions = require("trouble.sources.fzf").actions
 config.defaults.actions.files["ctrl-t"] = actions.open
 -- stylua: ignore end
 require 'plugin.codecompanion'
+
+
+_G.Wezterm = require('custom.wezterm_terminal')
+
+local cmds = {
+  {
+    'WeztermTerm',
+    function()
+      Wezterm.spawn_terminal()
+    end,
+    { desc = 'Spawn Wezterm Terminal' },
+  },
+  {
+    'WeztermWorkspace',
+    function()
+      Wezterm.workspace_picker()
+    end,
+    { desc = 'Switch Wezterm Workspace' },
+  },
+}
+
+vim.tbl_map(function(cmd)
+  vim.api.nvim_create_user_command(cmd[1], cmd[2], cmd[3])
+end, cmds)

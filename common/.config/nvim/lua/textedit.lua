@@ -1,7 +1,9 @@
-vim.pack.add({
-  _G.plug('nvim-treesitter/nvim-treesitter', function() vim.cmd [[ TSUpdate ]] end),
-  _G.plug('nvim-treesitter/nvim-treesitter-textobjects')
-})
+vim.pack.add {
+  _G.plug('nvim-treesitter/nvim-treesitter', function()
+    vim.cmd [[ TSUpdate ]]
+  end),
+  _G.plug 'nvim-treesitter/nvim-treesitter-textobjects',
+}
 -- Treesitter
 require('utils.treesitter').config {
   indent = { enable = true }, ---@type TSFeat
@@ -14,6 +16,7 @@ require('utils.treesitter').config {
     'cmake',
     'diff',
     'dts',
+    'devicetree',
     'html',
     'kconfig',
     'lua',
@@ -32,7 +35,7 @@ require('utils.treesitter').config {
     'yaml',
   },
 }
-require('plugin.mini-textedit')
+require 'plugin.mini-textedit'
 -- require('nvim-treesitter-textobjects').setup {
 --   move = {
 --     enable = true,

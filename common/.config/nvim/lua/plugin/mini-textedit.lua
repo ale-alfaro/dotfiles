@@ -1,4 +1,3 @@
-
 -- Miscellaneous small but useful functions. Example usage:
 -- - `<Leader>oz` - toggle between "zoomed" and regular view of current buffer
 -- - `<Leader>or` - resize window to its "editable width"
@@ -8,24 +7,23 @@
 --   function `f` 100 times and report statistical summary of execution times
 --
 -- Uses `now()` for `setup_xxx()` to work when started like `nvim -- path/to/file`
-  -- Makes `:h MiniMisc.put()` and `:h MiniMisc.put_text()` public
-local ok, misc =  pcall(require,'mini.misc')
+-- Makes `:h MiniMisc.put()` and `:h MiniMisc.put_text()` public
+local ok, misc = pcall(require, 'mini.misc')
 if ok then
   misc.setup()
-    -- Change current working directory based on the current file path. It
-    -- searches up the file tree until the first root marker ('.git' or 'Makefile')
-    -- and sets their parent directory as a current directory.
-    -- This is helpful when simultaneously dealing with files from several projects.
+  -- Change current working directory based on the current file path. It
+  -- searches up the file tree until the first root marker ('.git' or 'Makefile')
+  -- and sets their parent directory as a current directory.
+  -- This is helpful when simultaneously dealing with files from several projects.
   misc.setup_auto_root()
 
-    -- Restore latest cursor position on file open
+  -- Restore latest cursor position on file open
   misc.setup_restore_cursor()
 
-    -- Synchronize terminal emulator background with Neovim's background to remove
-    -- possibly different color padding around Neovim instance
+  -- Synchronize terminal emulator background with Neovim's background to remove
+  -- possibly different color padding around Neovim instance
   misc.setup_termbg_sync()
 end
-
 
 -- Extend and create a/i textobjects, like `:h a(`, `:h a'`, and more).
 -- Contains not only `a` and `i` type of textobjects, but also their "next" and
@@ -52,17 +50,17 @@ local mini_ai_opts = {
   n_lines = 500,
   custom_textobjects = {
 
-      -- Make `aB` / `iB` act on around/inside whole *b*uffer
+    -- Make `aB` / `iB` act on around/inside whole *b*uffer
     B = gen_ai_spec.buffer(),
 
     o = ai.gen_spec.treesitter { -- code block
       a = { '@block.outer', '@conditional.outer', '@loop.outer' },
       i = { '@block.inner', '@conditional.inner', '@loop.inner' },
     },
-      -- For more complicated textobjects that require structural awareness,
-      -- use tree-sitter. This example makes `aF`/`iF` mean around/inside function
-      -- definition (not call). See `:h MiniAi.gen_spec.treesitter()` for details.
-    F = ai.gen_spec.treesitter({ a = '@function.outer', i = '@function.inner' }),
+    -- For more complicated textobjects that require structural awareness,
+    -- use tree-sitter. This example makes `aF`/`iF` mean around/inside function
+    -- definition (not call). See `:h MiniAi.gen_spec.treesitter()` for details.
+    F = ai.gen_spec.treesitter { a = '@function.outer', i = '@function.inner' },
     c = ai.gen_spec.treesitter { a = '@class.outer', i = '@class.inner' }, -- class
     t = { '<([%p%w]-)%f[^<%w][^<>]->.-</%1>', '^<.->().*()</[^/]->$' }, -- tags
     d = { '%f[%d]%d+' }, -- digits
@@ -74,13 +72,13 @@ local mini_ai_opts = {
     -- u = ai.gen_spec.function_call(), -- u for "Usage"
     -- U = ai.gen_spece.function_call { name_pattern = '[%w_]' }, -- without dot in function name
   },
-    -- 'mini.ai' by default mostly mimics built-in search behavior: first try
-    -- to find textobject covering cursor, then try to find to the right.
-    -- Although this works in most cases, some are confusing. It is more robust to
-    -- always try to search only covering textobject and explicitly ask to search
-    -- for next (`an`/`in`) or last (`an`/`il`).
-    -- Try this. If you don't like it - delete next line and this comment.
-    search_method = 'cover',
+  -- 'mini.ai' by default mostly mimics built-in search behavior: first try
+  -- to find textobject covering cursor, then try to find to the right.
+  -- Although this works in most cases, some are confusing. It is more robust to
+  -- always try to search only covering textobject and explicitly ask to search
+  -- for next (`an`/`in`) or last (`an`/`il`).
+  -- Try this. If you don't like it - delete next line and this comment.
+  search_method = 'cover',
 }
 ai.setup(mini_ai_opts)
 vim.schedule(function()
@@ -154,27 +152,7 @@ require('mini.comment').setup()
 --
 -- See also:
 -- - `:h MiniIndentscope.gen_animation` - available animation rules
- require('mini.indentscope').setup()
-
--- Jump to next/previous single character. It implements "smarter `fFtT` keys"
--- (see `:h f`) that work across multiple lines, start "jumping mode", and
--- highlight all target matches. Example usage:
--- - `fxff` - move *f*orward onto next character "x", then next, and next again
--- - `dt)` - *d*elete *t*ill next closing parenthesis (`)`)
-require('mini.jump').setup()
-
--- Jump within visible lines to pre-defined spots via iterative label filtering.
--- Spots are computed by a configurable spotter function. Example usage:
--- - Lock eyes on desired location to jump
--- - `<CR>` - start jumping; this shows character labels over target spots
--- - Type character that appears over desired location; number of target spots
---   should be reduced
--- - Keep typing labels until target spot is unique to perform the jump
---
--- See also:
--- - `:h MiniJump2d.gen_spotter` - list of available spotters
-require('mini.jump2d').setup()
-
+require('mini.indentscope').setup()
 
 -- Move any selection in any direction. Example usage in Normal mode:
 -- - `<M-j>`/`<M-k>` - move current line down / up
@@ -202,16 +180,16 @@ require('mini.move').setup()
 -- See also:
 -- - `:h MiniOperators-mappings` - overview of how mappings are created
 -- - `:h MiniOperators-overview` - overview of present operators
-require('mini.operators').setup()
+require('mini.operators').setup { replace = { prefix = 'cr' } }
 
-  -- Create mappings for swapping adjacent arguments. Notes:
-  -- - Relies on `a` argument textobject from 'mini.ai'.
-  -- - It is not 100% reliable, but mostly works.
-  -- - It overrides `:h (` and `:h )`.
-  -- Explanation: `gx`-`ia`-`gx`-`ila` <=> exchange current and last argument
-  -- Usage: when on `a` in `(aa, bb)` press `)` followed by `(`.
+-- Create mappings for swapping adjacent arguments. Notes:
+-- - Relies on `a` argument textobject from 'mini.ai'.
+-- - It is not 100% reliable, but mostly works.
+-- - It overrides `:h (` and `:h )`.
+-- Explanation: `gx`-`ia`-`gx`-`ila` <=> exchange current and last argument
+-- Usage: when on `a` in `(aa, bb)` press `)` followed by `(`.
 _G.keymaps_define {
-  { lhs = '(', rhs = 'gxiagxila', opts = { remap = true, desc = 'Swap arg left' }},
+  { lhs = '(', rhs = 'gxiagxila', opts = { remap = true, desc = 'Swap arg left' } },
   { lhs = ')', rhs = 'gxiagxina', opts = { remap = true, desc = 'Swap arg right' } },
 }
 -- Autopairs functionality. Insert pair when typing opening character and go over
@@ -222,7 +200,7 @@ _G.keymaps_define {
 -- - `)` when there is ")" to the right - jump over ")" without inserting new one
 -- - `<C-v>(` - always insert a single "(" literally. This is useful since
 --   'mini.pairs' doesn't provide particularly smart behavior, like auto balancing
-  -- Create pairs not only in Insert, but also in Command line mode
+-- Create pairs not only in Insert, but also in Command line mode
 mini_utils.mini_pairs {
   modes = { insert = true, command = true, terminal = false },
   -- skip autopair when next character is one of these
@@ -235,8 +213,6 @@ mini_utils.mini_pairs {
   -- better deal with markdown code blocks
   markdown = true,
 }
-
-
 
 -- Split and join arguments (regions inside brackets between allowed separators).
 -- It uses Lua patterns to find arguments, which means it works in comments and

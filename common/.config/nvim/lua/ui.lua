@@ -1,31 +1,29 @@
-
- vim.pack.add(_G.plug_spec ({ 
+vim.pack.add(_G.plug_spec {
   'catppuccin/nvim',
-   'folke/noice.nvim' ,              
-   'folke/snacks.nvim' ,             
-   'akinsho/bufferline.nvim' ,       
-   'folke/which-key.nvim' ,          
-   'mrjones2014/smart-splits.nvim' , 
-   'MunifTanjim/nui.nvim' ,          
-   'rcarriga/nvim-notify' ,          
-}))
- 
+  'folke/noice.nvim',
+  'akinsho/bufferline.nvim',
+  'folke/which-key.nvim',
+  'mrjones2014/smart-splits.nvim',
+  'MunifTanjim/nui.nvim',
+  'rcarriga/nvim-notify',
+})
+
 -- Set up to not prefer extension-based icon for some extensions
 local ext3_blocklist = { scm = true, txt = true, yml = true }
 local ext4_blocklist = { json = true, yaml = true }
-local mini_icons =  require('mini.icons')
-mini_icons.setup({
-    use_file_extension = function(ext, _)
-      return not (ext3_blocklist[ext:sub(-3)] or ext4_blocklist[ext:sub(-4)])
-    end,
-  })
+local mini_icons = require 'mini.icons'
+mini_icons.setup {
+  use_file_extension = function(ext, _)
+    return not (ext3_blocklist[ext:sub(-3)] or ext4_blocklist[ext:sub(-4)])
+  end,
+}
 
-  -- Mock 'nvim-tree/nvim-web-devicons' for plugins without 'mini.icons' support.
-  -- Not needed for 'mini.nvim' or MiniMax, but might be useful for others.
+-- Mock 'nvim-tree/nvim-web-devicons' for plugins without 'mini.icons' support.
+-- Not needed for 'mini.nvim' or MiniMax, but might be useful for others.
 mini_icons.mock_nvim_web_devicons()
 
-  -- Add LSP kind icons. Useful for 'mini.completion'.
-mini_icons.tweak_lsp_kind("append")
+-- Add LSP kind icons. Useful for 'mini.completion'.
+mini_icons.tweak_lsp_kind 'append'
 require('noice').setup {
   lsp = {
     -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
@@ -37,11 +35,11 @@ require('noice').setup {
   },
   -- you can enable a preset for easier configuration
   presets = {
-    bottom_search = true,         -- use a classic bottom cmdline for search
-    command_palette = true,       -- position the cmdline and popupmenu together
+    bottom_search = true, -- use a classic bottom cmdline for search
+    command_palette = true, -- position the cmdline and popupmenu together
     long_message_to_split = true, -- long messages will be sent to a split
-    inc_rename = false,           -- enables an input dialog for inc-rename.nvim
-    lsp_doc_border = false,       -- add a border to hover docs and signature help
+    inc_rename = false, -- enables an input dialog for inc-rename.nvim
+    lsp_doc_border = false, -- add a border to hover docs and signature help
   },
 }
 _G.keymaps_define {
@@ -81,13 +79,13 @@ require('mini.tabline').setup()
 --   { lhs = '<leader>bl', rhs = '<Cmd>BufferLineCloseLeft<CR>',            opts = { desc = 'Close buffer to the right' } },
 --   { lhs = '<leader>bo', rhs = '<Cmd>BufferLineCloseOthers<CR>',          opts = { desc = 'Close other buffers' } },
 -- })
-require('catppuccin').setup({
-      flavour = 'macchiato', -- latte, frappe, macchiato, mocha
-      background = {         -- :h background
-        light = 'latte',
-        dark = 'mocha',
-      },
-})
+require('catppuccin').setup {
+  flavour = 'macchiato', -- latte, frappe, macchiato, mocha
+  background = { -- :h background
+    light = 'latte',
+    dark = 'mocha',
+  },
+}
 vim.cmd 'colorscheme catppuccin'
 -- It is not enabled by default because it is not really needed on a daily basis.
 -- Uncomment next line (use `gcc`) to enable.
@@ -111,15 +109,17 @@ require('which-key').setup {
     { '<leader>d', group = 'Diff' },
     { '<leader>f', group = 'File/find' },
     { '<leader>g', group = 'Git' },
-    { '<Leader>s', group = '+Search',
+    {
+      '<Leader>s',
+      group = '+Search',
       { '<Leader>v', group = '+Visits' },
       { '<leader>u', group = 'ui' },
       { '<leader>x', group = 'diagnostics/quickfix' },
-      { '[',         group = 'prev' },
-      { ']',         group = 'next' },
-      { 'g',         group = 'goto' },
-      { 'gs',        group = 'surround' },
-      { 'z',         group = 'fold' },
+      { '[', group = 'prev' },
+      { ']', group = 'next' },
+      { 'g', group = 'goto' },
+      { 'gs', group = 'surround' },
+      { 'z', group = 'fold' },
       {
         '<leader>b',
         group = 'buffer',

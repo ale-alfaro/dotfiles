@@ -16,11 +16,7 @@ require('utils.format').setup {
     quiet = false, -- not recommended to change
     lsp_format = 'fallback', -- not recommended to change
   },
-  formatters_by_ft = {
-    lua = { 'stylua' },
-    fish = { 'fish_indent' },
-    sh = { 'shfmt' },
-    -- # Example of using shfmt with extra args
+  formatters = {
     shfmt = {
       prepend_args = { '-i', '2', '-ci' },
     },
@@ -29,6 +25,12 @@ require('utils.format').setup {
         JUST_UNSTABLE = 1,
       },
     },
+  },
+  formatters_by_ft = {
+    lua = { 'stylua' },
+    fish = { 'fish_indent' },
+    sh = { 'shfmt' },
+    -- # Example of using shfmt with extra args
     python = {
       -- To fix auto-fixable lint errors.
       'ruff_fix',
@@ -41,7 +43,7 @@ require('utils.format').setup {
     markdown = { 'mdformat' },
     yaml = { 'yamlfmt' },
     -- ['*'] = { 'codespell' },
-    -- ['_'] = { 'trim_whitespace' },
+    ['_'] = { 'trim_whitespace' },
   },
 }
 
@@ -83,4 +85,20 @@ local opts = {
   events = { 'BufWritePost', 'BufReadPost', 'InsertLeave' },
 }
 require('custom.better_linting').setup(opts)
-require('custom.wezterm_terminal').setup()
+
+require('uv.init').setup {
+  keymaps = {
+    prefix = '<leader>x',  -- Main prefix for uv commands
+    commands = true,       -- Show uv commands menu (<leader>x)
+    run_file = false,      -- Run current file (<leader>xr)
+    run_selection = false, -- Run selected code (<leader>xs)
+    run_function = false,  -- Run function (<leader>xf)
+    venv = true,           -- Environment management (<leader>xe)
+    init = true,           -- Initialize uv project (<leader>xi)
+    add = true,            -- Add a package (<leader>xa)
+    remove = true,         -- Remove a package (<leader>xd)
+    sync = false,          -- Sync packages (<leader>xc)
+    sync_all = false,      -- Sync all packages, extras and groups (<leader>xC)
+  },
+}
+require('custom.python.uv').setup()

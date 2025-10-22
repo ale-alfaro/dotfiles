@@ -59,6 +59,7 @@ local lsp_servers = {
   'yamls',
   'jsonls',
   'basedpyright',
+  'dts-lsp',
 }
 -- -- Set up LSP servers.
 vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {

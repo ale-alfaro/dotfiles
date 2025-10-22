@@ -5,7 +5,7 @@
       "src": "https://github.com/L3MON4D3/LuaSnip"
     },
     "blink.cmp": {
-      "rev": "2cb0a71",
+      "rev": "d93e01a",
       "src": "https://github.com/Saghen/blink.cmp"
     },
     "bufferline.nvim": {
@@ -21,7 +21,7 @@
       "src": "https://github.com/lalitmee/codecompanion-spinners.nvim"
     },
     "codecompanion.nvim": {
-      "rev": "e69aebb",
+      "rev": "9c350d1",
       "src": "https://github.com/olimorris/codecompanion.nvim"
     },
     "conform.nvim": {
@@ -37,7 +37,7 @@
       "src": "https://github.com/rafamadriz/friendly-snippets"
     },
     "fzf-lua": {
-      "rev": "c102a4e",
+      "rev": "f2968f3",
       "src": "https://github.com/ibhagwan/fzf-lua"
     },
     "mini.nvim": {
@@ -87,10 +87,6 @@
     "smart-splits.nvim": {
       "rev": "9a26145",
       "src": "https://github.com/mrjones2014/smart-splits.nvim"
-    },
-    "snacks.nvim": {
-      "rev": "d293b21",
-      "src": "https://github.com/folke/snacks.nvim"
     },
     "tiny-code-action.nvim": {
       "rev": "0c24efc",
