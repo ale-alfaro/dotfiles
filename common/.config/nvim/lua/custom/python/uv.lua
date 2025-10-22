@@ -17,7 +17,7 @@ function M.get_project_root()
   return workspace_root
 end
 
----@class UVToolFinderItem : snacks.picker.finder.Item
+---@class UVToolFinderItem
 ---@field default_args? string[]
 ---@field prompt_for_input? string
 ---@field options? string[]
@@ -41,7 +41,6 @@ local function create_tool_call(cmd_runner, tool, args)
   return table.concat(cmd, ' ')
 end
 
----@param picker snacks.Picker
 ---@param item UVToolFinderItem
 ---@param additional_input string?
 ---@return string[]?
@@ -62,16 +61,16 @@ local function uv_run_command(item, additional_input)
     end
 
     if #args == 0 then
-      vim.notify('Error: At least one positional argument is required.', 'error')
+      VimRc.error 'Error: At least one positional argument is required.'
     end
   end
 
   local cwd = M.get_project_root()
   local cmd = create_tool_call(uv_tool_runner, item.text, args)
-  vim.notify('Running cmd: ' .. cmd)
-  _G.cmd(cmd, function(output, ret_code)
+  VimRc.info('Running cmd: ' .. cmd)
+  VimRc.cmd(cmd, function(output, ret_code)
     if output[1] == nil then
-      vim.notify('Got no ouput when it was expecting one', 'error')
+      VimRc.error 'Got no ouput when it was expecting one'
     end
     M.handle_output(output, ret_code, item.text)
   end, { cwd = cwd })
@@ -101,7 +100,7 @@ function M.uv_run_tool_call(item)
       end
       uv_run_command(item, input)
     else
-      vim.notify('Cancelled', vim.log.levels.INFO)
+      VimRc.info 'Cancelled'
     end
   end)
 end
@@ -120,15 +119,15 @@ function M.run_diagnostics_for_file(filepath, tool_names)
       -- Add the filepath to the arguments for the tool
       table.insert(args, filepath)
       local cmd = create_tool_call({ 'uv', 'run' }, item.text, args)
-      vim.notify('Running cmd: ' .. cmd)
-      _G.cmd(cmd, function(ret_code, output)
+      VimRc.info('Running cmd: ' .. cmd)
+      VimRc.cmd(cmd, function(ret_code, output)
         if output[1] == nil then
-          vim.notify('Got no ouput when it was expecting one', 'error')
+          VimRc.error 'Got no ouput when it was expecting one'
         end
         M.handle_output(output, ret_code, item.text)
       end, { cwd = cwd })
     else
-      vim.notify('Unknown diagnostic tool: ' .. tool_name, 'warn')
+      VimRc.warn('Unknown diagnostic tool: ' .. tool_name)
     end
   end
 end
@@ -248,7 +247,7 @@ end
 function M.handle_output(output, ret_code, tool_name)
   local diagnostics = {}
   local qf_list = {}
-  -- vim.notify('Got output from ' .. tool_name .. ' ret: ' .. ret_code .. ' output len: ' .. #output)
+  -- VimRc.info('Got output from ' .. tool_name .. ' ret: ' .. ret_code .. ' output len: ' .. #output)
   for idx = 1, #output do
     local output_str = output[idx]
     if output_str ~= '' then
@@ -257,11 +256,11 @@ function M.handle_output(output, ret_code, tool_name)
       })
       -- local ok, result = pcall(vim.json.decode, json_str)
       if err ~= nil then
-        vim.notify('JSON decode error: ' .. err)
+        VimRc.info('JSON decode error: ' .. err)
         return
       end
       if result ~= nil then
-        vim.notify(vim.inspect(result))
+        VimRc.info(vim.inspect(result))
 
         if tool_name == 'ruff check' then
           for _, d in ipairs(result) do
@@ -294,7 +293,7 @@ function M.handle_output(output, ret_code, tool_name)
         elseif tool_name == 'basedpyright' then
           local diag_list = result.generalDiagnostics
           if diag_list == nil then
-            vim.notify('Diag is nil', 'error')
+            VimRc.info 'Diag is nil'
             return
           end
           for _, d in ipairs(diag_list) do
@@ -356,10 +355,10 @@ function M.handle_output(output, ret_code, tool_name)
               type = string.sub(severity_str, 1, 1):upper(), -- E for Error, W for Warning
             })
           else
-            vim.notify('Failed to parse ty check output: ' .. output_str, 'warn')
+            VimRc.warn('Failed to parse ty check output: ' .. output_str)
           end
         else
-          vim.notify('Unsupported tool output ' .. tool_name, 'error')
+          VimRc.error('Unsupported tool output ' .. tool_name)
         end
       end
     end

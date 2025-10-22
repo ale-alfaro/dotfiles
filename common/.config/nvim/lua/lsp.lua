@@ -18,7 +18,7 @@ vim.pack.add(_G.plug_spec {
 --   underline = { severity = { min = 'HINT', max = 'ERROR' } },
 -- }
 -- vim.diagnostic.config(diagnostics_opts)
-vimrc.lsp.config()
+VimRc.lsp.config()
 -- build = 'cargo install --release',
 -- get all the servers that are available through mason-lspconfig
 local lspau = vim.api.nvim_create_augroup('vimrc.lsp', {})
@@ -30,7 +30,7 @@ vim.lsp.handlers['client/registerCapability'] = function(err, res, ctx)
     return
   end
 
-  vimrc.lsp.on_attach(client, vim.api.nvim_get_current_buf())
+  VimRc.lsp.on_attach(client, vim.api.nvim_get_current_buf())
   return register_capability(err, res, ctx)
 end
 
@@ -45,7 +45,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
       return
     end
 
-    vimrc.lsp.on_attach(client, args.buf)
+    VimRc.lsp.on_attach(client, args.buf)
   end,
 })
 

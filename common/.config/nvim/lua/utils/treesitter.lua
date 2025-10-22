@@ -192,7 +192,7 @@ function M.config(opts)
   -- setup treesitter
   TS.setup(opts)
   local installed = M.get_installed(true) -- initialize the installed langs
-  _G.info(vim.print(installed))
+  -- _G.info(vim.print(installed))
   -- install missing parsers
   local install = vim.tbl_filter(function(lang)
     return not M.have(lang)

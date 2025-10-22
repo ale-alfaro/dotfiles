@@ -65,7 +65,7 @@ function M.on_attach(client, bufnr)
     vim.api.nvim_create_autocmd('BufWritePre', {
       buffer = bufnr,
       callback = function()
-        vimrc.format { buf = bufnr }
+        VimRc.format { buf = bufnr }
         -- vim.lsp.buf.format { bufnr = bufnr, id = client.id, timeout_ms = 1000 }
       end,
     })

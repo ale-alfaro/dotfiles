@@ -20,15 +20,15 @@ command('LineNumbers', function()
 end, { desc = 'Toggle line numbers' })
 
 command('ToggleAutoformat', function()
-  _G.vimrc.format.toggle()
+  VimRc.format.toggle()
 end, { desc = 'Toggle Autoformat (Global)' })
 
 command('ToggleBufAutoformat', function()
-  _G.vimrc.format.toggle(vim.api.nvim_buf_get_current_buf())
+  VimRc.format.toggle(vim.api.nvim_buf_get_current_buf())
 end, { desc = 'Toggle Autoformat (Buffer)' })
-command('ChangeFiletype', function()
-  om.ChangeFiletype()
-end, { desc = 'Change filetype of current buffer' })
+-- command('ChangeFiletype', function()
+--   om.ChangeFiletype()
+-- end, { desc = 'Change filetype of current buffer' })
 
 command('CopyMessage', function()
   vim.cmd [[let @+ = execute('messages')]]
@@ -55,7 +55,7 @@ command('New', ':enew', { desc = 'New buffer' })
 
 command('PackSync', function()
   local plugins = {}
-  for _, plugin in ipairs(_G.added_plugins) do
+  for _, plugin in ipairs(VimRc.added_plugins) do
     if type(plugin) == 'string' then
       plugins[plugin] = true
     elseif type(plugin) == 'table' and plugin.src then
@@ -72,7 +72,7 @@ command('PackSync', function()
   end
 
   vim.pack.del(to_delete)
-  vim.pack.add(_G.added_plugins)
+  vim.pack.add(VimRc.added_plugins)
   vim.pack.update()
 end, { desc = 'Sync plugins' })
 
