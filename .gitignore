@@ -10,7 +10,7 @@ atuin_key
 **/current/
 .zsh_history
 **/envs/
-theme*
 **/scratch/
 nvm/
 SEGGER/
+*.bak*
