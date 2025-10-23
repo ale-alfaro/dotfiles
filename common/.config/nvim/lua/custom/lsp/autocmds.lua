@@ -56,7 +56,9 @@ A.on_attach = function(bufnr, client)
     })
   end
 
+    local diag_group = vim.api.nvim_create_augroup('diagnosis', { clear = false })
   vim.api.nvim_create_autocmd('CursorHold', {
+    group = diag_group,
     buffer = bufnr,
     desc = '✨lsp show diagnostics on CursorHold',
     callback = function()
@@ -67,7 +69,7 @@ A.on_attach = function(bufnr, client)
         source = 'always',
         prefix = ' ',
       }
-      vim.diagnostic.open_float(nil, hover_opts)
+      vim.diagnostic.open_float(hover_opts)
     end,
   })
 end

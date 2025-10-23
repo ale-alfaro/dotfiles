@@ -85,28 +85,5 @@ local config = require("fzf-lua.config")
 local actions = require("trouble.sources.fzf").actions
 config.defaults.actions.files["ctrl-t"] = actions.open
 -- stylua: ignore end
-require 'plugin.codecompanion'
 
 
-_G.Wezterm = require('custom.wezterm_terminal')
-
-local cmds = {
-  {
-    'WeztermTerm',
-    function()
-      Wezterm.spawn_terminal()
-    end,
-    { desc = 'Spawn Wezterm Terminal' },
-  },
-  {
-    'WeztermWorkspace',
-    function()
-      Wezterm.workspace_picker()
-    end,
-    { desc = 'Switch Wezterm Workspace' },
-  },
-}
-
-vim.tbl_map(function(cmd)
-  vim.api.nvim_create_user_command(cmd[1], cmd[2], cmd[3])
-end, cmds)

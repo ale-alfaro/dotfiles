@@ -66,7 +66,7 @@ require('mini.tabline').setup()
 --     end,
 --     diagnostics = 'nvim_lsp',
 --     diagnostics_indicator = function(_, _, diag)
---       local icons = require('icons').diagnostics
+--       local icons = VimRc.icons.diagnostics
 --       local indicator = (diag.error and icons.ERROR .. ' ' or '') .. (diag.warning and icons.WARN or '')
 --       return vim.trim(indicator)
 --     end,

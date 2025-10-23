@@ -3,6 +3,7 @@
 ---@module "vectorcode"
 ---@module "codecompanion"
 
+---@type LazySpec[]
 return {
 
   {
@@ -202,15 +203,15 @@ return {
             },
           },
         }, -- spinner
-      }    -- extensions
-    end,   -- opts
+      } -- extensions
+    end, -- opts
     keys = {
       { '<leader>ar', mode = { 'n', 'v' }, '<cmd>CodeCompanionChat RefreshCache<cr>', desc = 'CodeCompanion RefreshCache' },
-      { '<leader>aa', mode = { 'n', 'v' }, '<cmd>CodeCompanionActions<cr>',           desc = 'CodeCompanion Actions' },
-      { '<leader>at', mode = { 'n', 'v' }, '<cmd>CodeCompanionChat Toggle<cr>',       desc = 'CodeCompanionChat Toggle' },
-      { '<leader>ai', mode = { 'n', 'v' }, '<cmd>CodeCompanionChat Add<cr>',          desc = 'CodeCompanionChat Add' },
-      { '<leader>ah', mode = { 'n', 'v' }, '<cmd>CodeCompanionHistory<cr>',           desc = 'CodeCompanionHistory' },
-      { '<leader>as', mode = { 'n', 'v' }, '<cmd>CodeCompanionSummaries<cr>',         desc = 'Browse CodeCompanionSummaries' },
+      { '<leader>aa', mode = { 'n', 'v' }, '<cmd>CodeCompanionActions<cr>', desc = 'CodeCompanion Actions' },
+      { '<leader>at', mode = { 'n', 'v' }, '<cmd>CodeCompanionChat Toggle<cr>', desc = 'CodeCompanionChat Toggle' },
+      { '<leader>ai', mode = { 'n', 'v' }, '<cmd>CodeCompanionChat Add<cr>', desc = 'CodeCompanionChat Add' },
+      { '<leader>ah', mode = { 'n', 'v' }, '<cmd>CodeCompanionHistory<cr>', desc = 'CodeCompanionHistory' },
+      { '<leader>as', mode = { 'n', 'v' }, '<cmd>CodeCompanionSummaries<cr>', desc = 'Browse CodeCompanionSummaries' },
     },
   },
   -- {

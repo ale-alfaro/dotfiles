@@ -1,13 +1,9 @@
 local M = {}
-
+M.icons = require 'custom.icons'
 setmetatable(M, {
   __index = function(t, k)
-    -- if M.deprecated[k] then
-    --   return M.deprecated[k]()
-    -- end
     ---@diagnostic disable-next-line: no-unknown
     t[k] = require('utils.' .. k)
-    -- M.deprecated.decorate(k, t[k])
     return t[k]
   end,
 })
@@ -296,6 +292,25 @@ function M.pack_clean()
   local choice = vim.fn.confirm('Remove unused plugins?', '&Yes\n&No', 2)
   if choice == 1 then
     vim.pack.del(unused_plugins)
+  end
+end
+
+function M.require_config_dir(dir)
+  -- ~/.config/nvim/lua/
+  dir = dir or 'lua'
+  local base_lua_path = vim.fs.joinpath(vim.fn.stdpath('config') , 'lua')
+  -- i.e. ~/.config/nvim/lua/plugins/*.lua
+  local glob_path = vim.fs.joinpath( base_lua_path, "[^0-9]*.lua")
+
+  local paths_str = vim.fn.glob(glob_path)
+  local paths_tbl = vim.split(paths_str, "\n")
+
+  for _, path in pairs(paths_tbl) do
+    -- convert absolute filename to relative
+    -- ~/.config/nvim/lua/plugins/config_file.lua -> plugins/config_file
+    local relfilename = vim.fs.relpath(base_lua_path, path):gsub(".lua", "")
+    _G.info('Requiring: ' .. relfilename)
+    require(relfilename)
   end
 end
 

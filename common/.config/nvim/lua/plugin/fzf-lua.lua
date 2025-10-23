@@ -45,7 +45,7 @@ require('fzf-lua').setup {
   grep = {
     -- Search in hidden files by default.
     hidden = true,
-    header_prefix = require('icons').misc.search .. ' ',
+    header_prefix = VimRc.icons.misc.search .. ' ',
     rg_glob_fn = function(query, opts)
       local regex, flags = query:match(string.format('^(.*)%s(.*)$', opts.glob_separator))
       -- Return the original query if there's no separator.
@@ -60,17 +60,17 @@ require('fzf-lua').setup {
   },
   lsp = {
     symbols = {
-      symbol_icons = require('icons').symbol_kinds,
+      symbol_icons = VimRc.icons.symbol_kinds,
     },
   },
   diagnostics = {
     -- Remove the dashed line between diagnostic items.
     multiline = 1,
     diag_icons = {
-      require('icons').diagnostics.ERROR,
-      require('icons').diagnostics.WARN,
-      require('icons').diagnostics.INFO,
-      require('icons').diagnostics.HINT,
+      VimRc.icons.diagnostics.ERROR,
+      VimRc.icons.diagnostics.WARN,
+      VimRc.icons.diagnostics.INFO,
+      VimRc.icons.diagnostics.HINT,
     },
     actions = {
       ['ctrl-e'] = {

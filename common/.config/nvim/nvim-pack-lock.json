@@ -5,7 +5,7 @@
       "src": "https://github.com/L3MON4D3/LuaSnip"
     },
     "blink.cmp": {
-      "rev": "d93e01a",
+      "rev": "8743384",
       "src": "https://github.com/Saghen/blink.cmp"
     },
     "bufferline.nvim": {
@@ -21,11 +21,11 @@
       "src": "https://github.com/lalitmee/codecompanion-spinners.nvim"
     },
     "codecompanion.nvim": {
-      "rev": "9c350d1",
+      "rev": "7b336cc",
       "src": "https://github.com/olimorris/codecompanion.nvim"
     },
     "conform.nvim": {
-      "rev": "235dd79",
+      "rev": "9fd3d5e",
       "src": "https://github.com/stevearc/conform.nvim"
     },
     "flash.nvim": {
@@ -37,7 +37,7 @@
       "src": "https://github.com/rafamadriz/friendly-snippets"
     },
     "fzf-lua": {
-      "rev": "f2968f3",
+      "rev": "9244bd4",
       "src": "https://github.com/ibhagwan/fzf-lua"
     },
     "mini.nvim": {
@@ -61,7 +61,7 @@
       "src": "https://github.com/mfussenegger/nvim-lint"
     },
     "nvim-lspconfig": {
-      "rev": "e5c61b0",
+      "rev": "52a8932",
       "src": "https://github.com/neovim/nvim-lspconfig"
     },
     "nvim-notify": {
@@ -81,7 +81,7 @@
       "src": "https://github.com/nvim-lua/plenary.nvim"
     },
     "schemastore.nvim": {
-      "rev": "960a5cf",
+      "rev": "54994d5",
       "src": "https://github.com/b0o/schemastore.nvim"
     },
     "smart-splits.nvim": {

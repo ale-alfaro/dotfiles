@@ -1,6 +1,6 @@
 vim.pack.add(_G.plug_spec({'ibhagwan/fzf-lua' }))
 
-local icons = require 'icons'
+local icons = VimRc.icons
 ---@diagnostic disable-next-line: duplicate-set-field
 vim.ui.select = function(items, opts, on_choice)
   local ui_select = require 'fzf-lua.providers.ui_select'

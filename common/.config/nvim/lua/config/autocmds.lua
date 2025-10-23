@@ -8,21 +8,21 @@ local function augroup(name)
 end
 
 local autocmd = vim.api.nvim_create_autocmd --[[@type function]]
-local cc = augroup 'dotfiles.codecompanion'
-autocmd('User', {
-  group = cc,
-  pattern = 'CodeCompanionInlineFinished',
-  callback = function()
-    vim.lsp.buf.format()
-  end,
-})
-autocmd('User', {
-  group = cc,
-  pattern = 'CodeCompanionChatCreated',
-  callback = function(args)
-    vim.treesitter.start(args.data.bufnr, 'markdown')
-  end,
-})
+-- local cc = augroup 'dotfiles.codecompanion'
+-- autocmd('User', {
+--   group = cc,
+--   pattern = 'CodeCompanionInlineFinished',
+--   callback = function()
+--     vim.lsp.buf.format()
+--   end,
+-- })
+-- autocmd('User', {
+--   group = cc,
+--   pattern = 'CodeCompanionChatCreated',
+--   callback = function(args)
+--     vim.treesitter.start(args.data.bufnr, 'markdown')
+--   end,
+-- })
 local gr = augroup 'custom-config'
 
 local function new_autocmd(event, pattern, callback, desc)

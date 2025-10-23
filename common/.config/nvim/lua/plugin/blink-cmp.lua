@@ -52,10 +52,13 @@ require('blink.cmp').setup {
       return sources
     end,
     per_filetype = {
-      codecompanion = { 'codecompanion', 'buffer' },
+      codecompanion = { 'codecompanion' },
     },
+    -- providers = {
+    --   codecompanion = { 'codecompanion' },
+    -- },
   },
   appearance = {
-    kind_icons = require('icons').symbol_kinds,
+    kind_icons = VimRc.icons.symbol_kinds,
   },
 }

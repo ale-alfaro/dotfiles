@@ -1,0 +1,54 @@
+--
+require 'plugin.codecompanion'
+-- vim.pack.add(_G.plug_spec{ 'olimorris/codecompanion.nvim', 'lalitmee/codecompanion-spinners.nvim', 'ravitemer/codecompanion-history.nvim' })
+-- -- CodeCompanion
+-- local opts = {
+--   display = {
+--     action_palette = { provider = 'fzf_lua' },
+--     chat = {
+--       show_settings = true,
+--       show_header_separator = true,
+--       auto_scroll = true,
+--       show_token_count = true,
+--     },
+--   },
+--   adapters = {
+--     acp = {
+--       gemini_cli = function()
+--         return require('codecompanion.adapters').extend('gemini_cli', {
+--           commands = {
+--             ['Gemini 2.5 Pro'] = { 'gemini', '--experimental-acp', '-m', 'gemini-2.5-pro' },
+--             ['default'] = { 'gemini', '--experimental-acp', '-m', 'gemini-2.5-flash' },
+--           },
+--           defaults = { auth_method = 'gemini-api-key', mcpServers = {}, timeout = 20000 },
+--           env = { GEMINI_API_KEY = vim.fn.expand '$GEMINI_API_KEY' },
+--         })
+--       end,
+--     },
+--   },
+--   extensions = {
+--     history = {
+--       enabled = true,
+--       opts = {
+--         keymap = 'gh',
+--         save_chat_keymap = 'sc',
+--         auto_save = true,
+--         expiration_days = 7,
+--         picker = 'fzf_lua',
+--       },
+--     },
+--     spinner = {
+--       enabled = true,
+--       opts = { style = 'native' },
+--     },
+--   },
+-- }
+-- VimRc.ai.setup(opts)
+-- _G.keymaps_define {
+--   { mode = { 'n', 'v' }, lhs = '<leader>ar', rhs = '<cmd>CodeCompanionChat RefreshCache<cr>', { desc = 'CodeCompanion RefreshCache' } },
+--   { mode = { 'n', 'v' }, lhs = '<leader>aa', rhs = '<cmd>CodeCompanionActions<cr>', { desc = 'CodeCompanion Actions' } },
+--   { mode = { 'n', 'v' }, lhs = '<leader>at', rhs = '<cmd>CodeCompanionChat Toggle<cr>', { desc = 'CodeCompanionChat Toggle' } },
+--   { mode = { 'n', 'v' }, lhs = '<leader>ai', rhs = '<cmd>CodeCompanionChat Add<cr>', { desc = 'CodeCompanionChat Add' } },
+--   { mode = { 'n', 'v' }, lhs = '<leader>ah', rhs = '<cmd>CodeCompanionHistory<cr>', { desc = 'CodeCompanionHistory' } },
+--   { mode = { 'n', 'v' }, lhs = '<leader>as', rhs = '<cmd>CodeCompanionSummaries<cr>', { desc = 'Browse CodeCompanionSummaries' } },
+-- }

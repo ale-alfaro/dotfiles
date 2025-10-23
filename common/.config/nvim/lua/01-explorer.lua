@@ -1,62 +1,40 @@
-require('mini.files').setup {
-  windows = {
+-- {
+--   windows = {
+--
+--     -- Maximum number of windows to show side by side
+--     max_number = math.huge,
+--     -- Whether to show preview of file/directory under cursor
+--     preview = false,
+--     -- Width of focused window
+--     width_focus = 50,
+--     -- Width of non-focused window
+--     width_nofocus = 15,
+--     -- Width of preview window
+--     width_preview = 25,
+--   },
+--   options = {
+--     permanent_delete = false,
+--     use_as_default_explorer = true,
+--   },
+--   mappings = {
+--     close = 'q',
+--     go_in = 'l',
+--     go_in_plus = 'L',
+--     go_out = 'H',
+--     go_out_plus = '<Left>',
+--     mark_goto = 'mg',
+--     mark_set = 'mm',
+--     reset = '<BS>',
+--     reveal_cwd = '<C-d>',
+--     show_help = '?',
+--     synchronize = 's',
+--     trim_left = '<',
+--     trim_right = '>',
+--   },
+-- }
+--
+require 'plugin.mini-files'
 
-    -- Maximum number of windows to show side by side
-    max_number = math.huge,
-    -- Whether to show preview of file/directory under cursor
-    preview = false,
-    -- Width of focused window
-    width_focus = 50,
-    -- Width of non-focused window
-    width_nofocus = 15,
-    -- Width of preview window
-    width_preview = 25,
-  },
-  options = {
-    permanent_delete = false,
-    use_as_default_explorer = true,
-  },
-  mappings = {
-    close = 'q',
-    go_in = 'l',
-    go_in_plus = 'L',
-    go_out = 'H',
-    go_out_plus = '<Left>',
-    mark_goto = 'mg',
-    mark_set = 'mm',
-    reset = '<BS>',
-    reveal_cwd = '<C-d>',
-    show_help = '?',
-    synchronize = 's',
-    trim_left = '<',
-    trim_right = '>',
-  },
-}
--- stylua:ignore
-_G.keymaps_define {
-  { lhs = '<leader>ed', rhs = '<Cmd>lua MiniFiles.open()<CR>', opts = { desc = '[E]xplore [D]irectory' } },
-  {
-    lhs = '\\',
-    rhs = '<Cmd>lua MiniFiles.open(vim.api.nvim_buf_get_name(0))<CR>',
-    opts = { desc = 'Open file explorer quick' },
-  },
-}
--- Keep track of when the explorer is open to disable format on save.
-local minifiles_explorer_group = vim.api.nvim_create_augroup('minifiles_explorer', { clear = true })
-vim.api.nvim_create_autocmd('User', {
-  group = minifiles_explorer_group,
-  pattern = 'MiniFilesExplorerOpen',
-  callback = function()
-    vim.g.minifiles_active = true
-  end,
-})
-vim.api.nvim_create_autocmd('User', {
-  group = minifiles_explorer_group,
-  pattern = 'MiniFilesExplorerClose',
-  callback = function()
-    vim.g.minifiles_active = false
-  end,
-})
 local make_select_path = function(select_global, recency_weight)
   local visits = require 'mini.visits'
   local sort = visits.gen_sort.default { recency_weight = recency_weight }
@@ -95,10 +73,10 @@ _G.keymaps_define {
     rhs = '<Cmd>lua MiniVisits.remove_label()<CR>',
     opts = { desc = 'Remove label' },
   },
-  { lhs = '<leader>vc', rhs = make_pick_core('', 'Core visits (all)'),  opts = { desc = 'Core visits (all)' } },
+  { lhs = '<leader>vc', rhs = make_pick_core('', 'Core visits (all)'), opts = { desc = 'Core visits (all)' } },
   { lhs = '<leader>vC', rhs = make_pick_core(nil, 'Core visits (cwd)'), opts = { desc = 'Core visits (cwd)' } },
-  { lhs = '<leader>vr', rhs = make_select_path(true, 0.5),              opts = { desc = 'Frecent visits (all)' } },
-  { lhs = '<leader>vR', rhs = make_select_path(false, 0.5),             opts = { desc = 'Frecent visits (cwd)' } },
+  { lhs = '<leader>vr', rhs = make_select_path(true, 0.5), opts = { desc = 'Frecent visits (all)' } },
+  { lhs = '<leader>vR', rhs = make_select_path(false, 0.5), opts = { desc = 'Frecent visits (cwd)' } },
 }
 
 -- Smart Splits

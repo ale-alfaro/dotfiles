@@ -5,7 +5,7 @@ local M = {}
 
 local lb_name = 'mariasolos/lightbulb'
 local lb_namespace = vim.api.nvim_create_namespace(lb_name)
-local lb_icon = require('icons').diagnostics.HINT
+local lb_icon = VimRc.icons.diagnostics.HINT
 local lb_group = vim.api.nvim_create_augroup(lb_name, {})
 local code_action_method = 'textDocument/codeAction' --- @type vim.lsp.protocol.Method.ClientToServer.Request
 
@@ -88,7 +88,7 @@ end
 --- Configures autocommands to update the code action lightbulb.
 ---@param bufnr integer
 ---@param client vim.lsp.Client
-M.on_attach = function(bufnr, client)
+function M.on_attach(bufnr, client)
   local buf_group_name = lb_name .. tostring(bufnr)
   if pcall(vim.api.nvim_get_autocmds, { group = buf_group_name, buffer = bufnr }) then
     return
