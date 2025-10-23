@@ -1,3 +1,6 @@
+
+require 'plugin.codecompanion'
+
 vim.pack.add(_G.plug_spec {
   'folke/flash.nvim',
   'folke/trouble.nvim',

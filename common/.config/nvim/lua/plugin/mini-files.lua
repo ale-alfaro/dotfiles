@@ -49,15 +49,6 @@ local toggle_dotfiles = function()
   require('mini.files').refresh { content = { filter = new_filter } }
 end
 
--- Set focused directory as current working directory
-local files_set_cwd = function()
-  local path = (MiniFiles.get_fs_entry() or {}).path
-  if path == nil then
-    return vim.notify 'Cursor is not on valid entry'
-  end
-  vim.fn.chdir(vim.fs.dirname(path))
-end
-
 local minifiles_explorer_group = vim.api.nvim_create_augroup('minifiles_explorer', { clear = true })
 -- Yank in register full path of entry under cursor
 local yank_path = function()

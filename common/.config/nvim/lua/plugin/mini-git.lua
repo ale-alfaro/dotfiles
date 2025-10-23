@@ -1,3 +1,4 @@
+
 -- Git integration for more straightforward Git actions based on Neovim's state.
 -- It is not meant as a fully featured Git client, only to provide helpers that
 -- integrate better with Neovim. Example usage:

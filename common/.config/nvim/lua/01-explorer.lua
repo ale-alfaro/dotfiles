@@ -1,38 +1,3 @@
--- {
---   windows = {
---
---     -- Maximum number of windows to show side by side
---     max_number = math.huge,
---     -- Whether to show preview of file/directory under cursor
---     preview = false,
---     -- Width of focused window
---     width_focus = 50,
---     -- Width of non-focused window
---     width_nofocus = 15,
---     -- Width of preview window
---     width_preview = 25,
---   },
---   options = {
---     permanent_delete = false,
---     use_as_default_explorer = true,
---   },
---   mappings = {
---     close = 'q',
---     go_in = 'l',
---     go_in_plus = 'L',
---     go_out = 'H',
---     go_out_plus = '<Left>',
---     mark_goto = 'mg',
---     mark_set = 'mm',
---     reset = '<BS>',
---     reveal_cwd = '<C-d>',
---     show_help = '?',
---     synchronize = 's',
---     trim_left = '<',
---     trim_right = '>',
---   },
--- }
---
 require 'plugin.mini-files'
 
 local make_select_path = function(select_global, recency_weight)
@@ -79,6 +44,7 @@ _G.keymaps_define {
   { lhs = '<leader>vR', rhs = make_select_path(false, 0.5), opts = { desc = 'Frecent visits (cwd)' } },
 }
 
+
 -- Smart Splits
 require('smart-splits').setup {
   ignored_buftypes = { 'codecompanion' },
@@ -86,7 +52,6 @@ require('smart-splits').setup {
   default_amount = 3,
   move_cursor_same_row = true,
 }
-
 _G.keymaps_define {
   -- stylua: ignore start
   { lhs = '<A-h>', rhs = function() require('smart-splits').resize_left() end,       opts = { desc = 'Resize left' } },
@@ -97,77 +62,6 @@ _G.keymaps_define {
   { lhs = '<C-j>', rhs = function() require('smart-splits').move_cursor_down() end,  opts = { desc = 'Move window down' } },
   { lhs = '<C-k>', rhs = function() require('smart-splits').move_cursor_up() end,    opts = { desc = 'Move window up' } },
   { lhs = '<C-l>', rhs = function() require('smart-splits').move_cursor_right() end, opts = { desc = 'Move window right' } },
+  { lhs = '<leader>ms', rhs = function() VimRc.wezterm_spawn_terminal() end, opts = { desc = 'Move window right' } },
   -- stylua: ignore end
 }
-
--- Window with text overview. It is displayed on the right hand side. Can be used
--- for quick overview and navigation. Hidden by default. Example usage:
--- - `<Leader>mt` - toggle map window
--- - `<Leader>mf` - focus on the map for fast navigation
--- - `<Leader>ms` - change map's side (if it covers something underneath)
---
--- See also:
--- - `:h MiniMap.gen_encode_symbols` - list of symbols to use for text encoding
--- - `:h MiniMap.gen_integration` - list of integrations to show in the map
---
--- NOTE: Might introduce lag on very big buffers (10000+ lines)
--- local map = require 'mini.map'
--- map.setup {
---
---   -- Highlight integrations (none by default)
---   -- Show built-in search matches, 'mini.diff' hunks, and diagnostic entries
---   integrations = {
---     map.gen_integration.builtin_search(),
---     map.gen_integration.diff(),
---     map.gen_integration.diagnostic(),
---   },
---
---   -- Symbols used to display data
---   symbols = {
---     -- Encode symbols. See `:h MiniMap.config` for specification and
---     -- `:h MiniMap.gen_encode_symbols` for pre-built ones.
---     -- Use Braille dots to encode text
---     encode = map.gen_encode_symbols.dot '4x2',
---
---     -- Scrollbar parts for view and line. Use empty string to disable any.
---     scroll_line = '█',
---     scroll_view = '┃',
---   },
---
---   -- Window options
---   window = {
---     -- Whether window is focusable in normal way (with `wincmd` or mouse)
---     focusable = true,
---
---     -- Side to stick ('left' or 'right')
---     side = 'right',
---
---     -- Whether to show count of multiple integration highlights
---     show_integration_count = true,
---
---     -- Total width
---     width = 20,
---
---     -- Value of 'winblend' option
---     winblend = 25,
---
---     -- Z-index
---     zindex = 10,
---   },
--- }
---
--- -- stylua: ignore
--- _G.keymaps_define {
---   { lhs = '<leader>mf', rhs = '<Cmd>lua MiniMap.toggle_focus()<CR>', opts = { desc = 'Focus (toggle)' } },
---   { lhs = '<leader>mr', rhs = '<Cmd>lua MiniMap.refresh()<CR>',      opts = { desc = 'Refresh' } },
---   { lhs = '<leader>ms', rhs = '<Cmd>lua MiniMap.toggle_side()<CR>',  opts = { desc = 'Side (toggle)' } },
---   { lhs = '<leader>mt', rhs = '<Cmd>lua MiniMap.toggle()<CR>',       opts = { desc = 'Toggle' } },
--- }
---
--- for _, key in ipairs { 'n', 'N', '*', '#' } do
---   local rhs = key
---       -- Also open enough folds when jumping to the next match
---       .. 'zv'
---       .. '<Cmd>lua MiniMap.refresh({}, { lines = false, scrollbar = false })<CR>'
---   vim.keymap.set('n', key, rhs)
--- end

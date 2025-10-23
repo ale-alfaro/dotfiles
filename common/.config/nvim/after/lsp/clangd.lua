@@ -1,7 +1,6 @@
 return {
-  filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda', 'proto' },
+  filetypes = { 'c', 'cpp' },
   root_markers = {
-
     '.clangd',
     '.clang-tidy',
     '.clang-format',
