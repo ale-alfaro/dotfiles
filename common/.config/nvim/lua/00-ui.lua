@@ -49,43 +49,36 @@ _G.keymaps_define {
     opts = { desc = '[N]otification [H]istory' },
   },
 }
-require('mini.starter').setup()
+-- Similar to 'mhinz/vim-startify' ~
+  local starter = require('mini.starter')
+  starter.setup({
+    evaluate_single = true,
+    items = {
+      starter.sections.builtin_actions(),
+      starter.sections.recent_files(10, false),
+      starter.sections.recent_files(10, true),
+      -- Use this if you set up 'mini.sessions'
+      -- starter.sections.sessions(5, true)
+      starter.sections.telescope(),
+    },
+    content_hooks = {
+      starter.gen_hook.adding_bullet(),
+      starter.gen_hook.indexing('all', { 'Builtin actions' }),
+      starter.gen_hook.padding(3, 2),
+    },
+  })
 require('mini.statusline').setup()
 
 -- Tabline. Sets `:h 'tabline'` to show all listed buffers in a line at the top.
 -- Buffers are ordered as they were created. Navigate with `[b` and `]b`.
 require('mini.tabline').setup()
--- require('bufferline').setup {
---   options = {
---     show_close_icon = false,
---     show_buffer_close_icons = false,
---     truncate_names = false,
---     indicator = { style = 'underline' },
---     close_command = function(bufnr)
---       require('mini.bufremove').delete(bufnr, false)
---     end,
---     diagnostics = 'nvim_lsp',
---     diagnostics_indicator = function(_, _, diag)
---       local icons = VimRc.icons.diagnostics
---       local indicator = (diag.error and icons.ERROR .. ' ' or '') .. (diag.warning and icons.WARN or '')
---       return vim.trim(indicator)
---     end,
---   },
--- }
--- _G.keymaps_define ({
---   { lhs = '<leader>bp', rhs = '<Cmd>BufferLinePick<CR>',                 opts = { desc = 'Pick a buffer to open' } },
---   { lhs = '<leader>bc', rhs = '<Cmd>BufferLinePickClose<CR>, true)<CR>', opts = { desc = 'Select a buffer to close' } },
---   { lhs = '<leader>br', rhs = '<Cmd>BufferLineCloseRight<CR>',           opts = { desc = 'Close buffer to the left' } },
---   { lhs = '<leader>bl', rhs = '<Cmd>BufferLineCloseLeft<CR>',            opts = { desc = 'Close buffer to the right' } },
---   { lhs = '<leader>bo', rhs = '<Cmd>BufferLineCloseOthers<CR>',          opts = { desc = 'Close other buffers' } },
--- })
-require('catppuccin').setup {
-  flavour = 'macchiato', -- latte, frappe, macchiato, mocha
-  background = { -- :h background
-    light = 'latte',
-    dark = 'mocha',
-  },
-}
+require('catppuccin').setup({
+      flavour = 'macchiato', -- latte, frappe, macchiato, mocha
+      background = {         -- :h background
+        light = 'latte',
+        dark = 'mocha',
+      },
+})
 vim.cmd 'colorscheme catppuccin'
 -- It is not enabled by default because it is not really needed on a daily basis.
 -- Uncomment next line (use `gcc`) to enable.
