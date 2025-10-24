@@ -9,7 +9,7 @@ vim.pack.add(_G.plug_spec {
 -- - `:h Conform`
 -- - `:h conform-options`
 -- - `:h conform-formatters`
-require('utils.format').setup {
+require('conform').setup {
   default_format_opts = {
     timeout_ms = 3000,
     async = false, -- not recommended to change

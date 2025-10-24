@@ -375,4 +375,28 @@ function M.require_config_dir(dir)
 end
 
 --
+--
+
+
+---@param what string|number|nil
+---@param query? string
+---@overload fun(buf?:number):boolean
+---@overload fun(ft:string):boolean
+---@return boolean
+function M.treesitter_have(what, query)
+  what = what or vim.api.nvim_get_current_buf()
+  what = type(what) == 'number' and vim.bo[what].filetype or what --[[@as string]]
+  local lang = vim.treesitter.language.get_lang(what)
+
+  local parsers = require('nvim-treesitter.info').installed_parsers()
+  return vim.list_contains(parsers, lang)
+end
+
+function M.treesitter_foldexpr()
+  return M.treesitter_have(nil, 'folds') and vim.treesitter.foldexpr() or '0'
+end
+
+function M.tresitter_indentexpr()
+  return M.treesitter_have(nil, 'indents') and require('nvim-treesitter').indentexpr() or -1
+end
 return M

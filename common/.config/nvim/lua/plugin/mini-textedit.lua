@@ -83,9 +83,26 @@ end
 -- - `:h text-objects` - general info about what textobjects are
 -- - `:h MiniAi-builtin-textobjects` - list of all supported textobjects
 -- - `:h MiniAi-textobject-specification` - examples of custom textobjects
-local mini_utils = require 'utils.mini'
+
+
 require('mini.extra').setup()
 
+
+local function mini_ai_buffer(ai_type)
+  local start_line, end_line = 1, vim.fn.line '$'
+  if ai_type == 'i' then
+    -- Skip first and last blank lines for `i` textobject
+    local first_nonblank, last_nonblank = vim.fn.nextnonblank(start_line), vim.fn.prevnonblank(end_line)
+    -- Do nothing for buffer with all blanks
+    if first_nonblank == 0 or last_nonblank == 0 then
+      return { from = { line = start_line, col = 1 } }
+    end
+    start_line, end_line = first_nonblank, last_nonblank
+  end
+
+  local to_col = math.max(vim.fn.getline(end_line):len(), 1)
+  return { from = { line = start_line, col = 1 }, to = { line = end_line, col = to_col } }
+end
 local gen_ai_spec = require('mini.extra').gen_ai_spec
 local ai = require 'mini.ai'
 local mini_ai_opts = {
@@ -110,7 +127,7 @@ local mini_ai_opts = {
       { '%u[%l%d]+%f[^%l%d]', '%f[%S][%l%d]+%f[^%l%d]', '%f[%P][%l%d]+%f[^%l%d]', '^[%l%d]+%f[^%l%d]' },
       '^().*()$',
     },
-    g = mini_utils.mini_ai_buffer, -- buffer
+    -- g = mini_ai_buffer, -- buffer
     U = ai.gen_spec.function_call { name_pattern = '[%w_]' }, -- without dot in function name
   },
   -- 'mini.ai' by default mostly mimics built-in search behavior: first try
@@ -122,9 +139,60 @@ local mini_ai_opts = {
   search_method = 'cover_or_nearest',
 }
 ai.setup(mini_ai_opts)
-vim.schedule(function()
-  mini_utils.mini_ai_whichkey(mini_ai_opts)
-end)
+local objects = {
+  { ' ', desc = 'whitespace' },
+  { '"', desc = '" string' },
+  { "'", desc = "' string" },
+  { '(', desc = '() block' },
+  { ')', desc = '() block with ws' },
+  { '<', desc = '<> block' },
+  { '>', desc = '<> block with ws' },
+  { '?', desc = 'user prompt' },
+  { 'U', desc = 'use/call without dot' },
+  { '[', desc = '[] block' },
+  { ']', desc = '[] block with ws' },
+  { '_', desc = 'underscore' },
+  { '`', desc = '` string' },
+  { 'a', desc = 'argument' },
+  { 'b', desc = ')]} block' },
+  { 'c', desc = 'class' },
+  { 'd', desc = 'digit(s)' },
+  { 'e', desc = 'CamelCase / snake_case' },
+  { 'f', desc = 'function' },
+  { 'g', desc = 'entire file' },
+  { 'i', desc = 'indent' },
+  { 'o', desc = 'block, conditional, loop' },
+  { 'q', desc = 'quote `"\'' },
+  { 't', desc = 'tag' },
+  { 'u', desc = 'use/call' },
+  { '{', desc = '{} block' },
+  { '}', desc = '{} with ws' },
+}
+
+local ret = { mode = { 'o', 'x' } }
+local mappings =  {
+  around = 'a',
+  inside = 'i',
+  around_next = 'an',
+  inside_next = 'in',
+  around_last = 'al',
+  inside_last = 'il',
+}
+mappings.goto_left = nil
+mappings.goto_right = nil
+
+for name, prefix in pairs(mappings) do
+  name = name:gsub('^around_', ''):gsub('^inside_', '')
+  ret[#ret + 1] = { prefix, group = name }
+  for _, obj in ipairs(objects) do
+    local desc = obj.desc
+    if prefix:sub(1, 1) == 'i' then
+      desc = desc:gsub(' with ws', '')
+    end
+    ret[#ret + 1] = { prefix .. obj[1], desc = obj.desc }
+  end
+end
+require('which-key').add(ret, { notify = false })
 
 -- Align text interactively. Example usage:
 -- - `gaip,` - `ga` (align operator) *i*nside *p*aragraph by comma
@@ -242,18 +310,11 @@ _G.keymaps_define {
 -- - `<C-v>(` - always insert a single "(" literally. This is useful since
 --   'mini.pairs' doesn't provide particularly smart behavior, like auto balancing
 -- Create pairs not only in Insert, but also in Command line mode
-mini_utils.mini_pairs {
+
+require 'mini.pairs'.setup({
   modes = { insert = true, command = true, terminal = false },
-  -- skip autopair when next character is one of these
-  skip_next = [=[[%w%%%'%[%"%.%`%$]]=],
-  -- skip autopair when the cursor is inside these treesitter nodes
-  skip_ts = { 'string' },
-  -- skip autopair when next character is closing pair
-  -- and there are more closing pairs than opening pairs
-  skip_unbalanced = true,
-  -- better deal with markdown code blocks
-  markdown = true,
-}
+})
+
 
 -- Split and join arguments (regions inside brackets between allowed separators).
 -- It uses Lua patterns to find arguments, which means it works in comments and

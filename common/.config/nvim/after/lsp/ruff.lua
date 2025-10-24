@@ -4,6 +4,8 @@ return {
     init_options = {
       settings = {
         args = {
+          '--extend-select', 
+          'I', 
           '--ignore',
           'F821',
           '--ignore',

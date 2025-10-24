@@ -140,14 +140,12 @@ function M.format(opts)
 end
 
 ---@param opts table
-function M.setup(opts)
+function M.setup()
   -- Use conform for gq.
   vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
 
   -- Start auto-formatting by default (and disable with my ToggleFormat command).
   vim.g.autoformat = true
-  Conform = require 'conform'
-  Conform.setup(opts)
 
   vim.defer_fn(function()
     _G.info 'Registering as a formatter '
@@ -168,12 +166,12 @@ function M.setup(opts)
     }
   end, 5000)
   -- Autoformat autocmd
-  -- vim.api.nvim_create_autocmd('BufWritePre', {
-  --   group = vim.api.nvim_create_augroup('Format', {}),
-  --   callback = function(event)
-  --     M.format { buf = event.buf }
-  --   end,
-  -- })
+  vim.api.nvim_create_autocmd('BufWritePre', {
+    group = vim.api.nvim_create_augroup('Format', {}),
+    callback = function(event)
+      M.format { buf = event.buf }
+    end,
+  })
 
   -- Manual format
   vim.api.nvim_create_user_command('TriggerFormat', function()
