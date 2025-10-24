@@ -2,7 +2,7 @@ vim.pack.add(plug_spec { 'olimorris/codecompanion.nvim', 'lalitmee/codecompanion
 -- CodeCompanion
 require('custom.ai').setup {
   display = {
-    action_palette = { provider = 'fzf-lua' },
+    action_palette = { provider = 'fzf_lua' },
     chat = {
       show_settings = true,
       show_header_separator = true,
@@ -32,7 +32,7 @@ require('custom.ai').setup {
         save_chat_keymap = 'sc',
         auto_save = true,
         expiration_days = 7,
-        picker = 'fzf-lua',
+        picker = 'fzf_lua',
       },
     },
     spinner = {
@@ -49,3 +49,20 @@ _G.keymaps_define {
   { mode = { 'n', 'v' }, lhs = '<leader>ah', rhs = '<cmd>CodeCompanionHistory<cr>', { desc = 'CodeCompanionHistory' } },
   { mode = { 'n', 'v' }, lhs = '<leader>as', rhs = '<cmd>CodeCompanionSummaries<cr>', { desc = 'Browse CodeCompanionSummaries' } },
 }
+
+
+-- local cc = augroup 'dotfiles.codecompanion'
+-- vim.api.nvim_create_autocmnew_autocmd('User', {
+--   group = cc,
+--   pattern = 'CodeCompanionInlineFinished',
+--   callback = function()
+--     vim.lsp.buf.format()
+--   end,
+-- })
+-- autocmd('User', {
+--   group = cc,
+--   pattern = 'CodeCompanionChatCreated',
+--   callback = function(args)
+--     vim.treesitter.start(args.data.bufnr, 'markdown')
+--   end,
+-- })

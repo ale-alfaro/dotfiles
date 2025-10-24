@@ -30,13 +30,13 @@ _G.keymaps_define {
   -- stylua: ignore
   {
     lhs = '<leader>vl',
-    rhs = '<Cmd>lua MiniVisits.add_label()<CR>',
-    opts = { desc = 'Add label' },
+    rhs = '<Cmd>lua MiniVisits.add_label("core")<CR>',
+    opts = { desc = 'Add to core' },
   },
   {
     lhs = '<leader>vL',
-    rhs = '<Cmd>lua MiniVisits.remove_label()<CR>',
-    opts = { desc = 'Remove label' },
+    rhs = '<Cmd>lua MiniVisits.remove_label("core")<CR>',
+    opts = { desc = 'Remove from core' },
   },
   { lhs = '<leader>vc', rhs = make_pick_core('', 'Core visits (all)'), opts = { desc = 'Core visits (all)' } },
   { lhs = '<leader>vC', rhs = make_pick_core(nil, 'Core visits (cwd)'), opts = { desc = 'Core visits (cwd)' } },

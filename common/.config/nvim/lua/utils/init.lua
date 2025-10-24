@@ -30,19 +30,7 @@ function _G.error(msg)
   return notify(msg, 'ERROR')
 end
 
----@param on_attach fun(client:vim.lsp.Client, buffer)
----@param name? string
-function _G.lsp_on_attach(on_attach, name)
-  return vim.api.nvim_create_autocmd('LspAttach', {
-    callback = function(args)
-      local buffer = args.buf ---@type number
-      local client = vim.lsp.get_client_by_id(args.data.client_id)
-      if client and (not name or client.name == name) then
-        return on_attach(client, buffer)
-      end
-    end,
-  })
-end
+
 ---@param cmd string|string[]
 ---@param cb fun(output: string[], code: number)
 ---@param opts? {env?: table<string, string>, cwd?: string}
@@ -295,6 +283,15 @@ function M.pack_clean()
   end
 end
 
+function M.pack_list()
+      local lines = { 'Vim.pack list:' }
+      --- @type vim.pack.PlugData[]
+      local plugins = vim.pack.get()
+      for _, plug in ipairs(plugins) do
+        lines[#lines + 1] = (' %s - `%s`'):format(plug.spec.name, plug.spec.version)
+      end
+      _G.info(lines)
+end
 Direction = {
   left = 'left',
   right = 'right',

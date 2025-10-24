@@ -40,6 +40,10 @@
       "rev": "9244bd4",
       "src": "https://github.com/ibhagwan/fzf-lua"
     },
+    "grug-far.nvim": {
+      "rev": "3e72397",
+      "src": "https://github.com/MagicDuck/grug-far.nvim"
+    },
     "mini.nvim": {
       "rev": "cf32454",
       "src": "https://github.com/nvim-mini/mini.nvim"

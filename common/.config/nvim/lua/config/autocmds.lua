@@ -3,31 +3,16 @@
 --------------------------------------------------------------------------------
 ---Helper to create augroups
 ---@param name string
-local function augroup(name)
+function _G.augroup(name)
   return vim.api.nvim_create_augroup(name, { clear = true })
 end
 
 local autocmd = vim.api.nvim_create_autocmd --[[@type function]]
--- local cc = augroup 'dotfiles.codecompanion'
--- autocmd('User', {
---   group = cc,
---   pattern = 'CodeCompanionInlineFinished',
---   callback = function()
---     vim.lsp.buf.format()
---   end,
--- })
--- autocmd('User', {
---   group = cc,
---   pattern = 'CodeCompanionChatCreated',
---   callback = function(args)
---     vim.treesitter.start(args.data.bufnr, 'markdown')
---   end,
--- })
 local gr = augroup 'custom-config'
 
-local function new_autocmd(event, pattern, callback, desc)
+function _G.new_autocmd(event, pattern, callback)
   autocmd(event, {
-    group = gr,
+    group = group or gr,
     pattern = pattern,
     callback = callback,
   })

@@ -51,6 +51,9 @@ command('PackOpen', function(opts)
   end
 end, { desc = 'Open plugin repository in pack path', nargs = 1 })
 
+command('PackList', function()
+  VimRc.pack_list()
+end, { desc = 'List plugins installed with vim.pack' })
 command('PackReload', function(opts)
   local plug = { opts.fargs[1] }
   local ok, _ = pcall(vim.pack.get, plug)

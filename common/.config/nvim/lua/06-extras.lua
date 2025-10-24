@@ -4,26 +4,80 @@ require 'plugin.codecompanion'
 vim.pack.add(_G.plug_spec {
   'folke/flash.nvim',
   'folke/trouble.nvim',
+  'MagicDuck/grug-far.nvim',
 })
 
--- Jump to next/previous single character. It implements "smarter `fFtT` keys"
--- (see `:h f`) that work across multiple lines, start "jumping mode", and
--- highlight all target matches. Example usage:
--- - `fxff` - move *f*orward onto next character "x", then next, and next again
--- - `dt)` - *d*elete *t*ill next closing parenthesis (`)`)
--- require('mini.jump').setup()
+require('grug-far').setup {
+    -- Disable folding.
+    folding = { enabled = false },
+    -- Don't numerate the result list.
+    resultLocation = { showNumberLabel = false },
+    engines = { 
+      ripgrep = {
+      -- ripgrep executable to use, can be a different path if you need to configure
+      path = 'rg',
 
--- Jump within visible lines to pre-defined spots via iterative label filtering.
--- Spots are computed by a configurable spotter function. Example usage:
--- - Lock eyes on desired location to jump
--- - `<CR>` - start jumping; this shows character labels over target spots
--- - Type character that appears over desired location; number of target spots
---   should be reduced
--- - Keep typing labels until target spot is unique to perform the jump
---
--- See also:
--- - `:h MiniJump2d.gen_spotter` - list of available spotters
--- require('mini.jump2d').setup()
+      -- extra args that you always want to pass
+      -- like for example if you always want context lines around matches
+      extraArgs = '--hidden',
+
+      -- whether to show diff of the match being replaced as opposed to just the
+      -- replaced result. It usually makes it easier to understand the change being made
+      showReplaceDiff = true,
+
+      -- placeholders to show in input areas when they are empty
+      -- set individual ones to '' to disable, or set enabled = false for complete disable
+      -- placeholders = {
+      --   -- whether to show placeholders
+      --   enabled = true,
+      --
+      --   search = 'e.g. foo   foo([a-z0-9]*)   fun\\(',
+      --   replacement = 'e.g. bar   ${1}_foo   $$MY_ENV_VAR ',
+      --   replacement_lua = 'e.g. if vim.startsWith(match, "use") \\n then return "employ" .. match \\n else return match end',
+      --   replacement_vimscript = 'e.g. return "bob_" .. match',
+      --   filesFilter = 'e.g. *.lua   *.{css,js}   **/docs/*.md   (specify one per line)',
+      --   flags = 'e.g. --help --ignore-case (-i) --replace= (empty replace) --multiline (-U)',
+      --   paths = 'e.g. /foo/bar   ../   ./hello\\ world/   ./src/foo.lua   ~/.config',
+      -- },
+      -- defaults to fill into the inputs when loading or switching to this engine
+      -- they only apply when non-nil
+    --   defaults = {
+    --     search = nil,
+    --     replacement = nil,
+    --     filesFilter = nil,
+    --     flags = nil,
+    --     paths = nil,
+    --   },
+    }
+  }
+}
+
+_G.keymaps_define({
+{
+        mode = { 'n', 'v' },
+        lhs = '<leader>cg',
+        rhs = function()
+            local grug = require 'grug-far'
+            grug.open { transient = true }
+        end,
+        { desc = 'GrugFar' },
+    },
+})
+
+-- grug-far main buffers will have `filetype=grug-far`.
+-- grug-far history buffers will have `filetype=grug-far-history`
+-- grug-far help buffers will have `filetype=grug-far-help` 
+_G.new_autocmd('FileType', { 'grug-far' }, function()
+	    vim.keymap.set('n', '<C-enter>', function()
+	        local inst = require('grug-far').get_instance(0)
+		inst:open_location()
+		inst:close()
+	    end, { buffer = true })
+	end)
+  --
+  --
+  --
+  --
 -- Flash
 --
 require('flash').setup {
