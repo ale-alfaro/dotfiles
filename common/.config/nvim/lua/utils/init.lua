@@ -385,8 +385,14 @@ function M.treesitter_have(what, query)
   what = type(what) == 'number' and vim.bo[what].filetype or what --[[@as string]]
   local lang = vim.treesitter.language.get_lang(what)
 
-  local parsers = require('nvim-treesitter.info').installed_parsers()
-  return vim.list_contains(parsers, lang)
+  local parsers = require('nvim-treesitter').get_installed()
+  if lang == nil or parsers[lang] == nil then
+    return false
+  end
+  -- if query and not M.have_query(lang, query) then
+  --   return false
+  -- end
+  return true
 end
 
 function M.treesitter_foldexpr()
