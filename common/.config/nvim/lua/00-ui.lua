@@ -59,7 +59,7 @@ _G.keymaps_define {
       starter.sections.recent_files(10, true),
       -- Use this if you set up 'mini.sessions'
       -- starter.sections.sessions(5, true)
-      starter.sections.telescope(),
+      starter.sections.pick(),
     },
     content_hooks = {
       starter.gen_hook.adding_bullet(),
