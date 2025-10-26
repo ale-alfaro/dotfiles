@@ -1,11 +1,11 @@
 return {
-  root_markers = { 'uv.lock','pyproject.toml', 'ruff.toml', '.ruff.toml', '.git' },
+  root_markers = { 'uv.lock', 'pyproject.toml', 'ruff.toml', '.ruff.toml', '.git' },
   settings = {
     init_options = {
       settings = {
         args = {
-          '--extend-select', 
-          'I', 
+          '--extend-select',
+          'I',
           '--ignore',
           'F821',
           '--ignore',

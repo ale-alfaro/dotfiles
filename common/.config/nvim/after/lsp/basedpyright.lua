@@ -1,4 +1,9 @@
+---@type vim.lsp.Config
 return {
+  root_markers = {
+    'uv.lock',
+    'pyproject.toml',
+  },
   settings = {
     basedpyright = {
       disableOrganizeImports = true,

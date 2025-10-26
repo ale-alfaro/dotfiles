@@ -11,57 +11,56 @@
 local function gh(plug)
   return 'https://github.com/' .. plug
 end
-vim.pack.add({{
-  src =  gh("nvim-treesitter/nvim-treesitter"),
-  version = "main",
-},
+vim.pack.add {
+  {
+    src = gh 'nvim-treesitter/nvim-treesitter',
+    version = 'main',
+  },
   -- {src = gh('nvim-treesitter/nvim-treesitter-textobjects')}
-
-})
+}
 
 local ensure_installed = {
-      "bash",
-      "c",
-      "diff",
-      "html",
-      "javascript",
-      "jsdoc",
-      "json",
-      "jsonc",
-      "lua",
-      "luadoc",
-      "luap",
-      "markdown",
-      "markdown_inline",
-      "printf",
-      "python",
-      "query",
-      "regex",
-      "toml",
-      "tsx",
-      "typescript",
-      "vim",
-      "vimdoc",
-      "xml",
-      "yaml",
+  'bash',
+  'c',
+  'diff',
+  'html',
+  'javascript',
+  'jsdoc',
+  'json',
+  'jsonc',
+  'lua',
+  'luadoc',
+  'luap',
+  'markdown',
+  'markdown_inline',
+  'printf',
+  'python',
+  'query',
+  'regex',
+  'toml',
+  'tsx',
+  'typescript',
+  'vim',
+  'vimdoc',
+  'xml',
+  'yaml',
 }
 vim.list_extend(ensure_installed, {
-    'cpp',
-    'cmake',
-    'devicetree',
-    'kconfig',
-    'python',
-    'just',
-    'json5',
-    'toml',
-    'ninja',
-    'rst',
+  'cpp',
+  'cmake',
+  'devicetree',
+  'kconfig',
+  'python',
+  'just',
+  'json5',
+  'toml',
+  'ninja',
+  'rst',
 })
 
-require('nvim-treesitter').setup(
-  {
-    ensure_installed = ensure_installed
-  })
+require('nvim-treesitter').setup {
+  ensure_installed = ensure_installed,
+}
 
 vim.api.nvim_create_autocmd('FileType', {
   group = vim.api.nvim_create_augroup('treesitter', { clear = true }),
@@ -82,4 +81,3 @@ vim.api.nvim_create_autocmd('FileType', {
     vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
   end,
 })
-

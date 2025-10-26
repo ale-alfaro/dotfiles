@@ -10,28 +10,38 @@ end
 local autocmd = vim.api.nvim_create_autocmd --[[@type function]]
 local gr = augroup 'custom-config'
 
-function _G.new_autocmd(event, pattern, callback)
-  autocmd(event, {
-    group = group or gr,
+---@alias autocmd_cb string|fun(args: vim.api.keyset.create_autocmd.callback_args): boolean?
+---@param event  string
+---@param callback autocmd_cb
+---@param pattern? string|string[]
+---@param desc? string|string[]
+---
+---@overload fun(event: string, callback: autocmd_cb , desc: string)
+function _G.new_autocmd(event, callback, pattern, desc)
+  if pattern ~= nil and desc == nil then
+    -- Overload without pattern
+    desc = pattern
+  end
+  local opts = {
+    group = gr,
     pattern = pattern,
     callback = callback,
-  })
+    desc = desc
+  }
+  ok, _ = pcall(vim.api.nvim_create_autocmd, event, opts)
+  if not ok then
+    _G.error("Failed to create autocmd " .. event)
+  end
 end
 
 -- Format Options
-new_autocmd('FileType', nil, function()
-  vim.cmd 'setlocal formatoptions-=c formatoptions-=o'
-end, "Proper 'formatoptions'")
+-- new_autocmd('FileType', function()
+--   vim.cmd 'setlocal formatoptions-=c formatoptions-=o'
+-- end, "Proper 'formatoptions'")
 
 -- CodeCompanion
 
 -- Check if we need to reload the file when it changed
-new_autocmd({ 'FocusGained', 'TermClose', 'TermLeave' }, nil, function()
-  if vim.o.buftype ~= 'nofile' then
-    vim.cmd 'checktime'
-  end
-end, 'Reload file on change')
-
 -- Highlight on yank
 ---- Highlight on yank
 vim.api.nvim_create_autocmd('TextYankPost', {
@@ -42,19 +52,19 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.highlight.on_yank { higroup = 'IncSearch', timeout = 100 }
   end,
 })
-new_autocmd('TextYankPost', nil, function()
+new_autocmd('TextYankPost', function()
   (vim.hl or vim.highlight).on_yank()
 end, 'Highlight on yank')
 
 -- Resize splits if window got resized
-new_autocmd('VimResized', nil, function()
+new_autocmd('VimResized', function()
   local current_tab = vim.fn.tabpagenr()
   vim.cmd 'tabdo wincmd ='
   vim.cmd('tabnext ' .. current_tab)
 end, 'Resize splits on window resize')
 
 -- Go to last loc when opening a buffer
-new_autocmd('BufReadPost', nil, function(event)
+new_autocmd('BufReadPost', function(event)
   local exclude = { 'gitcommit' }
   local buf = event.buf
   if vim.tbl_contains(exclude, vim.bo[buf].filetype) or vim.b[buf].custom_last_loc then
@@ -69,56 +79,53 @@ new_autocmd('BufReadPost', nil, function(event)
 end, 'Go to last location on buffer open')
 
 -- Close some filetypes with <q>
-new_autocmd('FileType', {
-  'PlenaryTestPopup',
-  'checkhealth',
-  'dbout',
-  'gitsigns-blame',
-  'grug-far',
-  'help',
-  'lspinfo',
-  'neotest-output',
-  'neotest-output-panel',
-  'neotest-summary',
-  'notify',
-  'qf',
-  'spectre_panel',
-  'startuptime',
-  'tsplayground',
-  'mininotify-history',
-  'mini*',
-}, function(event)
-  vim.bo[event.buf].buflisted = false
-  vim.schedule(function()
-    vim.keymap.set('n', 'q', function()
-      vim.cmd 'close'
-      pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
-    end, {
-      buffer = event.buf,
-      silent = true,
-      desc = 'Quit buffer',
-    })
-  end)
-end, 'Close special filetypes with <q>')
-
--- Make it easier to close man-files when opened inline
-new_autocmd('FileType', 'man', function(event)
-  vim.bo[event.buf].buflisted = false
-end, 'Make man pages unlisted')
+new_autocmd('FileType', function(event)
+    vim.bo[event.buf].buflisted = false
+    vim.schedule(function()
+      vim.keymap.set('n', 'q', function()
+        vim.cmd 'close'
+        pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
+      end, {
+        buffer = event.buf,
+        silent = true,
+        desc = 'Quit buffer',
+      })
+    end)
+  end,
+  {
+    'PlenaryTestPopup',
+    'checkhealth',
+    'dbout',
+    'gitsigns-blame',
+    'grug-far',
+    'help',
+    'lspinfo',
+    'neotest-output',
+    'neotest-output-panel',
+    'neotest-summary',
+    'notify',
+    'qf',
+    'spectre_panel',
+    'startuptime',
+    'tsplayground',
+    'mininotify-history',
+    'mini*',
+  },
+  'Close special filetypes with <q>')
 
 -- Wrap and check for spell in text filetypes
-new_autocmd('FileType', { 'text', 'plaintex', 'typst', 'gitcommit', 'markdown' }, function()
+new_autocmd('FileType', function()
   vim.opt_local.wrap = true
   vim.opt_local.spell = true
-end, 'Wrap and spell check for text filetypes')
+end, { 'text', 'plaintex', 'typst', 'gitcommit', 'markdown' }, 'Wrap and spell check for text filetypes')
 
 -- Fix conceallevel for json files
-new_autocmd('FileType', { 'json', 'jsonc', 'json5' }, function()
-  vim.opt_local.conceallevel = 0
-end, 'Fix conceallevel for json files')
+-- new_autocmd('FileType', { 'json', 'jsonc', 'json5' }, function()
+--   vim.opt_local.conceallevel = 0
+-- end, 'Fix conceallevel for json files')
 
 -- Auto create dir when saving a file, in case some intermediate directory does not exist
-new_autocmd('BufWritePre', nil, function(event)
+new_autocmd('BufWritePre', function(event)
   if event.match:match '^%w%w+://' then
     return
   end
@@ -127,10 +134,10 @@ new_autocmd('BufWritePre', nil, function(event)
 end, 'Auto create directory on save')
 
 -- Disable autoformat for hyprlang files
-new_autocmd('FileType', 'hyprlang', function()
+new_autocmd('FileType', function()
   vim.notify 'Disabling autoformatting'
   vim.b.autoformat = false
-end, 'Disable autoformat for hyprlang')
+end, 'hyprlang', 'Disable autoformat for hyprlang')
 
 -- Auto-close floating/special windows on QuitPre
 local ft_autoclose = {
@@ -180,7 +187,7 @@ local function list_wins_for_autoclose()
   return all, rest, close
 end
 
-new_autocmd('QuitPre', ft_autoclose, function()
+new_autocmd('QuitPre', function()
   local _, wins, close = list_wins_for_autoclose()
   local cur_win = vim.api.nvim_get_current_win()
   if #wins ~= 1 or vim.list_contains(close, cur_win) then
@@ -192,13 +199,9 @@ new_autocmd('QuitPre', ft_autoclose, function()
   for _, win in ipairs(close) do
     pcall(vim.api.nvim_win_close, win, true)
   end
-end, 'Auto-close special windows on quit')
+end, ft_autoclose, 'Auto-close special windows on quit')
 --
 -- -- Open Trouble for qflist
-new_autocmd('QuickFixCmdPost', '*', function()
-  if vim.fn.getqflist({ title = 1 }).title:match 'uv' then
-    vim.cmd [[Trouble uv_qflist open]]
-  else
-    vim.cmd [[Trouble qflist open]]
-  end
+new_autocmd('QuickFixCmdPost', function()
+  vim.cmd([[Trouble qflist open]])
 end, 'Open Trouble for qflist')

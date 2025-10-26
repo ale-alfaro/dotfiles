@@ -1,18 +1,16 @@
-
 vim.g.use_nvim_treesitter_main = true
-
 
 -- Treesitter
 if vim.g.use_nvim_treesitter_main then
-  require('plugin.treesitter')
+  require 'plugin.treesitter'
 else
-vim.pack.add {
-  _G.plug('nvim-treesitter/nvim-treesitter', function()
-    vim.cmd [[ TSUpdate ]]
-  end),
-  _G.plug 'nvim-treesitter/nvim-treesitter-textobjects',
-}
-  require('nvim-treesitter.configs').setup{
+  vim.pack.add {
+    _G.plug('nvim-treesitter/nvim-treesitter', function()
+      vim.cmd [[ TSUpdate ]]
+    end),
+    _G.plug 'nvim-treesitter/nvim-treesitter-textobjects',
+  }
+  require('nvim-treesitter.configs').setup {
     indent = { enable = true }, ---@type TSFeat
     highlight = { enable = true }, ---@type TSFeat
     folds = { enable = true }, ---@type TSFeat
@@ -42,7 +40,6 @@ vim.pack.add {
       'yaml',
     },
   }
-
 
   vim.cmd [[ set foldmethod=expr ]]
   vim.cmd [[set foldexpr=nvim_treesitter#foldexpr()]]

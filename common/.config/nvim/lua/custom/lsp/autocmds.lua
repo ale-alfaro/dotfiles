@@ -56,7 +56,7 @@ A.on_attach = function(bufnr, client)
     })
   end
 
-    local diag_group = vim.api.nvim_create_augroup('diagnosis', { clear = false })
+  local diag_group = vim.api.nvim_create_augroup('diagnosis', { clear = false })
   vim.api.nvim_create_autocmd('CursorHold', {
     group = diag_group,
     buffer = bufnr,

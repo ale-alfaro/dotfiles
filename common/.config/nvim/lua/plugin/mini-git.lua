@@ -1,4 +1,3 @@
-
 -- Git integration for more straightforward Git actions based on Neovim's state.
 -- It is not meant as a fully featured Git client, only to provide helpers that
 -- integrate better with Neovim. Example usage:
@@ -28,7 +27,7 @@ _G.keymaps_define {
   -- General & Navigation
   -- stylua:ignore
   { lhs = '<leader>dt', rhs = '<Cmd>lua MiniDiff.toogle_overlay()<CR>', opts = { desc = 'Diff Toggle Overlay' } },
-  { lhs = '<leader>dc', rhs = '<Cmd>lua MiniGit.show_at_cursor()<CR>',  opts = { desc = 'Diff Showw at Cursor' } },
-  { lhs = '<leader>dd', rhs = '<Cmd>Git diff<CR>',                      opts = { desc = 'Diff' } },
-  { lhs = '<leader>da', rhs = '<Cmd>Git diff --cached<CR>',             opts = { desc = 'Added Diff' } },
+  { lhs = '<leader>dc', rhs = '<Cmd>lua MiniGit.show_at_cursor()<CR>', opts = { desc = 'Diff Showw at Cursor' } },
+  { lhs = '<leader>dd', rhs = '<Cmd>Git diff<CR>', opts = { desc = 'Diff' } },
+  { lhs = '<leader>da', rhs = '<Cmd>Git diff --cached<CR>', opts = { desc = 'Added Diff' } },
 }

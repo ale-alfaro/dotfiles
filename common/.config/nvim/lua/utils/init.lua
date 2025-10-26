@@ -30,7 +30,6 @@ function _G.error(msg)
   return notify(msg, 'ERROR')
 end
 
-
 ---@param cmd string|string[]
 ---@param cb fun(output: string[], code: number)
 ---@param opts? {env?: table<string, string>, cwd?: string}
@@ -284,13 +283,13 @@ function M.pack_clean()
 end
 
 function M.pack_list()
-      local lines = { 'Vim.pack list:' }
-      --- @type vim.pack.PlugData[]
-      local plugins = vim.pack.get()
-      for _, plug in ipairs(plugins) do
-        lines[#lines + 1] = (' %s - `%s`'):format(plug.spec.name, plug.spec.version)
-      end
-      _G.info(lines)
+  local lines = { 'Vim.pack list:' }
+  --- @type vim.pack.PlugData[]
+  local plugins = vim.pack.get()
+  for _, plug in ipairs(plugins) do
+    lines[#lines + 1] = (' %s - `%s`'):format(plug.spec.name, plug.spec.version)
+  end
+  _G.info(lines)
 end
 Direction = {
   left = 'left',
@@ -351,21 +350,20 @@ function M.wezterm_spawn_nvim_inst(direction, file)
   return ok
 end
 
-
 function M.require_config_dir(dir)
   -- ~/.config/nvim/lua/
   dir = dir or 'lua'
-  local base_lua_path = vim.fs.joinpath(vim.fn.stdpath('config') , 'lua')
+  local base_lua_path = vim.fs.joinpath(vim.fn.stdpath 'config', 'lua')
   -- i.e. ~/.config/nvim/lua/plugins/*.lua
-  local glob_path = vim.fs.joinpath( base_lua_path, "[^0-9]*.lua")
+  local glob_path = vim.fs.joinpath(base_lua_path, '[^0-9]*.lua')
 
   local paths_str = vim.fn.glob(glob_path)
-  local paths_tbl = vim.split(paths_str, "\n")
+  local paths_tbl = vim.split(paths_str, '\n')
 
   for _, path in pairs(paths_tbl) do
     -- convert absolute filename to relative
     -- ~/.config/nvim/lua/plugins/config_file.lua -> plugins/config_file
-    local relfilename = vim.fs.relpath(base_lua_path, path):gsub(".lua", "")
+    local relfilename = vim.fs.relpath(base_lua_path, path):gsub('.lua', '')
     _G.info('Requiring: ' .. relfilename)
     require(relfilename)
   end
@@ -373,7 +371,6 @@ end
 
 --
 --
-
 
 ---@param what string|number|nil
 ---@param query? string

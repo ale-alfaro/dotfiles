@@ -1,4 +1,3 @@
-
 require 'plugin.codecompanion'
 
 vim.pack.add(_G.plug_spec {
@@ -8,12 +7,12 @@ vim.pack.add(_G.plug_spec {
 })
 
 require('grug-far').setup {
-    -- Disable folding.
-    folding = { enabled = false },
-    -- Don't numerate the result list.
-    resultLocation = { showNumberLabel = false },
-    engines = { 
-      ripgrep = {
+  -- Disable folding.
+  folding = { enabled = false },
+  -- Don't numerate the result list.
+  resultLocation = { showNumberLabel = false },
+  engines = {
+    ripgrep = {
       -- ripgrep executable to use, can be a different path if you need to configure
       path = 'rg',
 
@@ -41,43 +40,43 @@ require('grug-far').setup {
       -- },
       -- defaults to fill into the inputs when loading or switching to this engine
       -- they only apply when non-nil
-    --   defaults = {
-    --     search = nil,
-    --     replacement = nil,
-    --     filesFilter = nil,
-    --     flags = nil,
-    --     paths = nil,
-    --   },
-    }
-  }
+      --   defaults = {
+      --     search = nil,
+      --     replacement = nil,
+      --     filesFilter = nil,
+      --     flags = nil,
+      --     paths = nil,
+      --   },
+    },
+  },
 }
 
-_G.keymaps_define({
-{
-        mode = { 'n', 'v' },
-        lhs = '<leader>cg',
-        rhs = function()
-            local grug = require 'grug-far'
-            grug.open { transient = true }
-        end,
-        { desc = 'GrugFar' },
-    },
-})
+_G.keymaps_define {
+  {
+    mode = { 'n', 'v' },
+    lhs = '<leader>cg',
+    rhs = function()
+      local grug = require 'grug-far'
+      grug.open { transient = true }
+    end,
+    { desc = 'GrugFar' },
+  },
+}
 
 -- grug-far main buffers will have `filetype=grug-far`.
 -- grug-far history buffers will have `filetype=grug-far-history`
--- grug-far help buffers will have `filetype=grug-far-help` 
+-- grug-far help buffers will have `filetype=grug-far-help`
 _G.new_autocmd('FileType', { 'grug-far' }, function()
-	    vim.keymap.set('n', '<C-enter>', function()
-	        local inst = require('grug-far').get_instance(0)
-		inst:open_location()
-		inst:close()
-	    end, { buffer = true })
-	end)
-  --
-  --
-  --
-  --
+  vim.keymap.set('n', '<C-enter>', function()
+    local inst = require('grug-far').get_instance(0)
+    inst:open_location()
+    inst:close()
+  end, { buffer = true })
+end)
+--
+--
+--
+--
 -- Flash
 --
 require('flash').setup {
@@ -142,5 +141,3 @@ local config = require("fzf-lua.config")
 local actions = require("trouble.sources.fzf").actions
 config.defaults.actions.files["ctrl-t"] = actions.open
 -- stylua: ignore end
-
-

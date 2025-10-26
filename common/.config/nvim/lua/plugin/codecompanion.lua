@@ -50,7 +50,6 @@ _G.keymaps_define {
   { mode = { 'n', 'v' }, lhs = '<leader>as', rhs = '<cmd>CodeCompanionSummaries<cr>', { desc = 'Browse CodeCompanionSummaries' } },
 }
 
-
 -- local cc = augroup 'dotfiles.codecompanion'
 -- vim.api.nvim_create_autocmnew_autocmd('User', {
 --   group = cc,

@@ -72,25 +72,25 @@ function M.info(buf)
   M[enabled and 'info' or 'warn'](table.concat(lines, '\n'), { title = 'Format (' .. (enabled and 'enabled' or 'disabled') .. ')' })
 end
 
----@param buf? number
-function M.enabled(buf)
-  buf = (buf == nil or buf == 0) and vim.api.nvim_get_current_buf() or buf
-  local gaf = vim.g.autoformat
-  local baf = vim.b[buf].autoformat
-
-  -- If the buffer has a local value, use that
-  if baf ~= nil then
-    return baf
-  end
-
-  -- Otherwise use the global value if set, or true by default
-  return gaf == nil or gaf
-end
-
----@param buf? number buffer number
-function M.toggle(buf)
-  M.enable(not M.enabled(), buf)
-end
+-- ---@param buf? number
+-- function M.enabled(buf)
+--   buf = (buf == nil or buf == 0) and vim.api.nvim_get_current_buf() or buf
+--   local gaf = vim.g.autoformat
+--   local baf = vim.b[buf].autoformat
+--
+--   -- If the buffer has a local value, use that
+--   if baf ~= nil then
+--     return baf
+--   end
+--
+--   -- Otherwise use the global value if set, or true by default
+--   return gaf == nil or gaf
+-- end
+--
+-- ---@param buf? number buffer number
+-- function M.toggle(buf)
+--   M.enable(not M.enabled(), buf)
+-- end
 
 ---@param enable? boolean
 ---@param buf? number buffer number
@@ -111,9 +111,9 @@ end
 function M.format(opts)
   opts = opts or {}
   local buf = opts.buf or vim.api.nvim_get_current_buf()
-  if not ((opts and opts.force) or M.enabled(buf)) then
-    return
-  end
+  -- if not ((opts and opts.force) or M.enabled(buf)) then
+  --   return
+  -- end
 
   -- Don't format when minifiles is open, since that triggers the "confirm without
   -- synchronization" message.
@@ -147,24 +147,22 @@ function M.setup()
   -- Start auto-formatting by default (and disable with my ToggleFormat command).
   vim.g.autoformat = true
 
-  vim.defer_fn(function()
-    _G.info 'Registering as a formatter '
-    M.register {
-      name = 'conform.nvim',
-      priority = 100,
-      primary = true,
-      format = function(buf)
-        require('conform').format { bufnr = buf }
-      end,
-      sources = function(buf)
-        local ret = require('conform').list_formatters(buf)
-        ---@param v conform.FormatterInfo
-        return vim.tbl_map(function(v)
-          return v.name
-        end, ret)
-      end,
-    }
-  end, 5000)
+  _G.info 'Registering as a formatter '
+  M.register {
+    name = 'conform.nvim',
+    priority = 100,
+    primary = true,
+    format = function(buf)
+      require('conform').format { bufnr = buf }
+    end,
+    sources = function(buf)
+      local ret = require('conform').list_formatters(buf)
+      ---@param v conform.FormatterInfo
+      return vim.tbl_map(function(v)
+        return v.name
+      end, ret)
+    end,
+  }
   -- Autoformat autocmd
   vim.api.nvim_create_autocmd('BufWritePre', {
     group = vim.api.nvim_create_augroup('Format', {}),

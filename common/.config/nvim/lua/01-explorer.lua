@@ -44,7 +44,6 @@ _G.keymaps_define {
   { lhs = '<leader>vR', rhs = make_select_path(false, 0.5), opts = { desc = 'Frecent visits (cwd)' } },
 }
 
-
 -- Smart Splits
 require('smart-splits').setup {
   ignored_buftypes = { 'codecompanion' },

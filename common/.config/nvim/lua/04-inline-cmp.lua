@@ -1,6 +1,4 @@
-vim.pack.add({_G.plug(
-  'Saghen/blink.cmp', "cargo build --release"
-)})
+vim.pack.add { _G.plug('Saghen/blink.cmp', 'cargo build --release') }
 require 'plugin.blink-cmp'
 
 vim.pack.add(_G.plug_spec {

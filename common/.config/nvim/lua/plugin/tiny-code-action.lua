@@ -6,11 +6,11 @@ require('tiny-code-action').setup {
       -- Use numeric labels.
       hotkeys_mode = function(titles)
         return vim
-            .iter(ipairs(titles))
-            :map(function(i)
-              return tostring(i)
-            end)
-            :totable()
+          .iter(ipairs(titles))
+          :map(function(i)
+            return tostring(i)
+          end)
+          :totable()
       end,
     },
   },

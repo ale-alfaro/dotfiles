@@ -1,7 +1,6 @@
 vim.pack.add(_G.plug_spec {
   'stevearc/conform.nvim',
   'mfussenegger/nvim-lint',
-  'benomahony/uv.nvim',
   'b0o/schemastore.nvim',
 })
 -- Formatting
@@ -12,8 +11,8 @@ vim.pack.add(_G.plug_spec {
 require('conform').setup {
   default_format_opts = {
     timeout_ms = 3000,
-    async = false, -- not recommended to change
-    quiet = false, -- not recommended to change
+    async = false,           -- not recommended to change
+    quiet = false,           -- not recommended to change
     lsp_format = 'fallback', -- not recommended to change
   },
   formatters = {
@@ -60,7 +59,7 @@ local opts = {
   linters_by_ft = {
     cmake = { 'cmakelint' }, -- Install: uv tool install cmakelint, repo: https://github.com/cmake-lint/cmake-lint
     python = { 'mypy' },
-    yaml = { 'yamlint' }, --Install: uv tool install yamllint, repo: https://github.com/adrienverge/yamllint
+    yaml = { 'yamlint' },    --Install: uv tool install yamllint, repo: https://github.com/adrienverge/yamllint
     bash = { 'shellcheck' },
     sh = { 'shellcheck' },
     zsh = { 'zsh', 'shellcheck' },
@@ -79,26 +78,10 @@ local opts = {
         '--color',
         'never',
       },
-      parser = require('lint.parser').from_pattern(pattern, groups, severities, { ['source'] = 'ty' }, { end_col_offset = 0 }),
+      parser = require('lint.parser').from_pattern(pattern, groups, severities, { ['source'] = 'ty' },
+        { end_col_offset = 0 }),
     },
   },
   events = { 'BufWritePost', 'BufReadPost', 'InsertLeave' },
 }
 require('custom.better_linting').setup(opts)
-
-require('uv.init').setup {
-  keymaps = {
-    prefix = '<leader>x',  -- Main prefix for uv commands
-    commands = true,       -- Show uv commands menu (<leader>x)
-    run_file = false,      -- Run current file (<leader>xr)
-    run_selection = false, -- Run selected code (<leader>xs)
-    run_function = false,  -- Run function (<leader>xf)
-    venv = true,           -- Environment management (<leader>xe)
-    init = true,           -- Initialize uv project (<leader>xi)
-    add = true,            -- Add a package (<leader>xa)
-    remove = true,         -- Remove a package (<leader>xd)
-    sync = false,          -- Sync packages (<leader>xc)
-    sync_all = false,      -- Sync all packages, extras and groups (<leader>xC)
-  },
-}
-require('custom.python.uv').setup()

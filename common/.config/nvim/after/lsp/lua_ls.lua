@@ -4,7 +4,6 @@
 --
 -- This file contains configuration of 'lua_ls' language server.
 -- Source: https://github.com/LuaLS/lua-language-server
---
 -- It is used by `:h vim.lsp.enable()` and `:h vim.lsp.config()`.
 -- See `:h vim.lsp.Config` and `:h vim.lsp.ClientConfig` for all available fields.
 --
@@ -15,12 +14,26 @@ return {
   settings = {
     Lua = {
       -- Define runtime properties. Use 'LuaJIT', as it is built into Neovim.
-      runtime = { version = 'LuaJIT', path = vim.split(package.path, ';') },
+      runtime = {
+        version = 'LuaJIT',
+        path = {
+          'lua/?.lua',
+          'lua/?/init.lua',
+          '$XDG_DATA_HOME/nvim/site/pack/core/opt/?/lua/?.lua',
+          '$XDG_DATA_HOME/nvim/site/pack/core/opt/?/lua/?/?.lua',
+          '$XDG_DATA_HOME/nvim/site/pack/core/opt/?/lua/?/init.lua',
+        },
+
+      },
       workspace = {
         -- Don't analyze code from submodules
         -- ignoreSubmodules = true,
         -- Add Neovim's methods for easier code writing
-        library = { vim.env.VIMRUNTIME },
+        library = {
+          vim.env.VIMRUNTIME,
+          '${3rd}/luv/library'
+
+        },
         checkThirdParty = false,
       },
       --

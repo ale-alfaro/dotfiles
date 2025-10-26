@@ -25,31 +25,31 @@ local types = require 'luasnip.util.types'
 local luasnip = require 'luasnip'
 
 ---@diagnostic disable: undefined-field
-luasnip.setup({
-    -- Check if the current snippet was deleted.
-    delete_check_events = 'TextChanged',
-    -- Display a cursor-like placeholder in unvisited nodes
-    -- of the snippet.
-    ext_opts = {
-      [types.insertNode] = {
-        unvisited = {
-          virt_text = { { '|', 'Conceal' } },
-          virt_text_pos = 'inline',
-        },
-      },
-      [types.exitNode] = {
-        unvisited = {
-          virt_text = { { '|', 'Conceal' } },
-          virt_text_pos = 'inline',
-        },
-      },
-      [types.choiceNode] = {
-        active = {
-          virt_text = { { '(snippet) choice node', 'LspInlayHint' } },
-        },
+luasnip.setup {
+  -- Check if the current snippet was deleted.
+  delete_check_events = 'TextChanged',
+  -- Display a cursor-like placeholder in unvisited nodes
+  -- of the snippet.
+  ext_opts = {
+    [types.insertNode] = {
+      unvisited = {
+        virt_text = { { '|', 'Conceal' } },
+        virt_text_pos = 'inline',
       },
     },
-  })
+    [types.exitNode] = {
+      unvisited = {
+        virt_text = { { '|', 'Conceal' } },
+        virt_text_pos = 'inline',
+      },
+    },
+    [types.choiceNode] = {
+      active = {
+        virt_text = { { '(snippet) choice node', 'LspInlayHint' } },
+      },
+    },
+  },
+}
 
 -- Load my custom snippets:
 require('luasnip.loaders.from_vscode').lazy_load {

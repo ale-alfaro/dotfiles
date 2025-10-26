@@ -85,6 +85,11 @@ MiniPick.setup {
   },
 }
 
+local wipeout_cur = function()
+  vim.api.nvim_buf_delete(MiniPick.get_picker_matches().current.bufnr, {})
+end
+local buffer_mappings = { wipeout = { char = '<C-d>', func = wipeout_cur } }
+--
 local parent_dir_pattern = vim.fn.has 'win32' == 1 and '([^\\/]+)([\\/])' or '([^/]+)(/)'
 local shorten_dirname = function(name, path_sep)
   local first = vim.fn.strcharpart(name, 0, 1)
@@ -105,7 +110,7 @@ MiniPick.registry.files = function()
 end
 -- stylua: ignore
 _G.keymaps_define {
-  { lhs = '<leader><leader>', rhs = '<Cmd>Pick buffers<CR>',                      opts = { desc = 'Pick open buffers' } },
+  { lhs = '<leader><leader>', rhs = function()MiniPick.builtin.buffers({}, { mappings = buffer_mappings })end,         opts = { desc = 'Pick open buffers' } },
   { lhs = '<leader>sh',       rhs = '<Cmd>Pick history scope=":"<CR>',            opts = { desc = '[S]earch Command [H]istory' } },
   { lhs = '<leader>sg',       rhs = '<Cmd>Pick grep_live<CR>',                    opts = { desc = '[S]earch [G]rep' } },
   { lhs = '<leader>sw',       rhs = '<Cmd>Pick grep pattern="<cword>"<CR>',       opts = { desc = '[S]earch current [W]ord' } },

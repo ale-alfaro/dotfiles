@@ -24,7 +24,7 @@ return {
     Constant = '󰏿',
     Constructor = '',
     Enum = '',
-    EnumMember = ''
+    EnumMember = '',
   },
   os = {
     Event = '',
@@ -61,11 +61,4 @@ return {
     toolbox = '󰦬',
     vertical_bar = '│',
   },
-
 }
-
-
-
-
-
-

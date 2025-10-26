@@ -1,6 +1,6 @@
 ---@module "mini.nvim"
 
-require('mini.files').setup({
+require('mini.files').setup {
   windows = {
 
     -- Maximum number of windows to show side by side
@@ -33,7 +33,7 @@ require('mini.files').setup({
     trim_left = '<',
     trim_right = '>',
   },
-})
+}
 local show_dotfiles = true
 local filter_show = function(fs_entry)
   return true

@@ -9,7 +9,7 @@ _G.keymaps_define({
   -- General & Navigation
   -- stylua:ignore
   { lhs = "<leader>bb",            rhs = "<cmd>e #<cr>",                                         opts = { desc = "Switch to Other Buffer" } },
-  { lhs = "<leader>bD",             rhs = "<cmd>:%bdelete|edit #|normal`<cr>",                                         opts = { desc = "Close all Other Buffers" } },
+  { lhs = "<leader>bD",            rhs = "<cmd>:%bdelete|edit #|normal`<cr>",                    opts = { desc = "Close all Other Buffers" } },
   { lhs = "q",                     rhs = "<nop>",                                                opts = { noremap = true } },
   { lhs = "Q",                     rhs = "q",                                                    opts = { noremap = true } },
   { lhs = "<M-q>",                 rhs = "Q",                                                    opts = { desc = "Replay last register", noremap = true } },
@@ -92,21 +92,10 @@ _G.keymaps_define({
   -- Diagnostics
   -- stylua:ignore
   { lhs = "<leader>cd",       rhs = vim.diagnostic.open_float,                                                            opts = { desc = "Line Diagnostics" } },
-  { lhs = "]d",               rhs = function() vim.diagnostic.get_next() end,                                             opts = { desc = "Next Diagnostic" } },
-  { lhs = "[d",               rhs = function() vim.diagnostic.get_prev() end,                                             opts = { desc = "Prev Diagnostic" } },
   { lhs = "]e",               rhs = function() vim.diagnostic.get_next({ severity = vim.diagnostic.severity.ERROR }) end, opts = { desc = "Next Error" } },
   { lhs = "[e",               rhs = function() vim.diagnostic.get_prev({ severity = vim.diagnostic.severity.ERROR }) end, opts = { desc = "Prev Error" } },
   { lhs = "]w",               rhs = function() vim.diagnostic.get_next({ severity = vim.diagnostic.severity.WARN }) end,  opts = { desc = "Next Warning" } },
   { lhs = "[w",               rhs = function() vim.diagnostic.get_prev({ severity = vim.diagnostic.severity.WARN }) end,  opts = { desc = "Prev Warning" } },
-
-  { lhs = '<leader>ga',       rhs = '<Cmd>lua vim.lsp.buf.code_action()<CR>',                                             opts = { desc = 'Actions' } },
-  { lhs = '<leader>gi',       rhs = '<Cmd>lua vim.lsp.buf.implementation()<CR>',                                          opts = { desc = 'Implementation' } },
-  { lhs = '<leader>gh',       rhs = '<Cmd>lua vim.lsp.buf.hover()<CR>',                                                   opts = { desc = 'Hover' } },
-  { lhs = '<leader>gn',       rhs = '<Cmd>lua vim.lsp.buf.rename()<CR>',                                                  opts = { desc = 'Rename' } },
-  { lhs = '<leader>gr',       rhs = '<Cmd>lua vim.lsp.buf.references()<CR>',                                              opts = { desc = 'References' } },
-  { lhs = '<leader>gd',       rhs = '<Cmd>lua vim.lsp.buf.definition()<CR>',                                              opts = { desc = 'Source definition' } },
-  { lhs = '<leader>gt',       rhs = '<Cmd>lua vim.lsp.buf.type_definition()<CR>',                                         opts = { desc = 'Type definition' } },
-
-  { mode = { "n", "v", "x" }, lhs = "<leader>lf", rhs = vim.lsp.buf.format, opts = { desc = "Format current buffer" } },
+  { mode = { "n", "v", "x" }, lhs = "<leader>lf",                                                                         rhs = vim.lsp.buf.format,             opts = { desc = "Format current buffer" } },
 })
 -- stylua: ignore end

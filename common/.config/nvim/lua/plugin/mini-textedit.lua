@@ -84,9 +84,7 @@ end
 -- - `:h MiniAi-builtin-textobjects` - list of all supported textobjects
 -- - `:h MiniAi-textobject-specification` - examples of custom textobjects
 
-
 require('mini.extra').setup()
-
 
 local function mini_ai_buffer(ai_type)
   local start_line, end_line = 1, vim.fn.line '$'
@@ -170,7 +168,7 @@ local objects = {
 }
 
 local ret = { mode = { 'o', 'x' } }
-local mappings =  {
+local mappings = {
   around = 'a',
   inside = 'i',
   around_next = 'an',
@@ -311,10 +309,9 @@ _G.keymaps_define {
 --   'mini.pairs' doesn't provide particularly smart behavior, like auto balancing
 -- Create pairs not only in Insert, but also in Command line mode
 
-require 'mini.pairs'.setup({
+require('mini.pairs').setup {
   modes = { insert = true, command = true, terminal = false },
-})
-
+}
 
 -- Split and join arguments (regions inside brackets between allowed separators).
 -- It uses Lua patterns to find arguments, which means it works in comments and

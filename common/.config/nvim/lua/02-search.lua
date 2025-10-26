@@ -1,4 +1,4 @@
-vim.pack.add(_G.plug_spec({'ibhagwan/fzf-lua' }))
+vim.pack.add(_G.plug_spec { 'ibhagwan/fzf-lua' })
 
 local icons = VimRc.icons
 ---@diagnostic disable-next-line: duplicate-set-field
