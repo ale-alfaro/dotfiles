@@ -62,6 +62,7 @@ function _G.run_cmd(cmd, cb, opts)
   end
   return id > 0 and id or nil
 end
+
 ---@class KeymapSpec
 -- Tracks defined keymaps to prevent duplicates.
 -- Key is a unique string like "n:<leader>ff".
@@ -134,6 +135,18 @@ function _G.keymaps_define(keymaps)
   end
 end
 
+function M.setTimeout(timeout, callback)
+  local timer = vim.uv.new_timer()
+  if timer ~= nil then
+    timer:start(timeout, 0, function()
+      timer:stop()
+      timer:close()
+      callback()
+    end)
+    return timer
+  end
+end
+
 M.added_plugins = {}
 
 ---@param cmd string|string[]
@@ -168,34 +181,61 @@ local function run_build_cmd(cmd, cb, opts)
   end
   return id > 0 and id or nil
 end
-local function create_plugin_build_hook(plug_name, build)
-  vim.api.nvim_create_autocmd('PackChanged', {
-    pattern = '*',
-    callback = function(ev)
-      _G.info(ev.data)
-      _G.info(ev.data.spec.name .. ' has been updated.')
-      if ev.data.spec.name == plug_name and ev.data.spec.kind ~= 'deleted' then
-        if type(build) == 'string' then
-          run_build_cmd(build, function(output, retcode)
-            if retcode ~= 0 then
-              _G.error('Build command failed for plugin ' .. plug_name)
-              _G.error('Output:' .. output)
-            end
-          end, { cwd = ev.data.path })
-          -- vim.system(vim.fn.split(build), { cwd = ev.data.path}):wait()
-        elseif type(build) == 'function' then
-          vim.schedule(build)
-        else
-          _G.error('Build hook for plugin ' .. plug_name .. ' is not a string nor function')
-        end
+
+---@alias BuildHookCmdTypes 'shell' | 'user'
+BuildHookCmdTypes = {
+  shell = 'shell',
+  user = 'user',
+}
+
+---@class VimPackBuildHooks
+---@field plugin string
+---@field build_cmd_type BuildHookCmdTypes
+---@field build_cmd string
+
+---@param build_hook VimPackBuildHooks
+local function create_plugin_build_hook(build_hook)
+  vim.validate("build_hook", build_hook, "table")
+  local plugin = build_hook.plugin
+  vim.validate("plugin", plugin, "string")
+  local type = build_hook.build_cmd_type
+  vim.validate("type", type, "string")
+  local cmd = build_hook.build_cmd
+  vim.validate("cmd", cmd, "string")
+
+  local hooks = function(ev)
+    -- Use available |event-data|
+    local name, kind = ev.data.spec.name, ev.data.kind
+    if type == BuildHookCmdTypes.shell then
+      -- Run build script after plugin's code has changed
+      if name == plugin and (kind == 'install' or kind == 'update') then
+        vim.system({ 'make' }, { cwd = ev.data.path })
       end
-    end,
-  })
+    elseif type == BuildHookCmdTypes.user then
+      -- If action relies on code from the plugin (like user command or
+      -- Lua code), make sure to explicitly load it first
+      if name == 'plug-2' and kind == 'update' then
+        if not ev.data.active then
+          vim.cmd.packadd('plug-2')
+        end
+        vim.cmd('PlugTwoUpdate')
+        require('plug2').after_update()
+      end
+    else
+      _G.error("Invalid build cmd type " .. type)
+    end
+  end
+
+  -- If hooks need to run on install, run this before `vim.pack.add()`
+  vim.api.nvim_create_autocmd('PackChanged', { callback = hooks })
 end
-function _G.plug(p, build)
+
+---@param p string
+---@param build_hook VimPackBuildHooks?
+function _G.plug(p, build_hook)
   local plug_name = p:match '%S+/(%S+)'
-  if build then
-    create_plugin_build_hook(plug_name, build)
+  if build_hook then
+    create_plugin_build_hook(build_hook)
   end
   return {
     src = 'https://github.com/' .. p,
@@ -207,11 +247,11 @@ end
 function _G.plug_spec(spec)
   table.insert(M.added_plugins, spec)
   return vim
-    .iter(spec)
-    :map(function(p)
-      return _G.plug(p)
-    end)
-    :totable()
+      .iter(spec)
+      :map(function(p)
+        return _G.plug(p)
+      end)
+      :totable()
 end
 
 --- @class PluginFilter
@@ -222,18 +262,18 @@ local function get_plugins(active_only)
   local plugins = vim.pack.get()
   if #plugins > 0 then
     return vim
-      .iter(plugins)
-      :filter(function(plug)
-        if active_only then
-          return plug.active
-        else
-          return true
-        end
-      end)
-      :map(function(plug)
-        return plug.name
-      end)
-      :totable()
+        .iter(plugins)
+        :filter(function(plug)
+          if active_only then
+            return plug.active
+          else
+            return true
+          end
+        end)
+        :map(function(plug)
+          return plug.name
+        end)
+        :totable()
   end
 end
 --- Updates one or more plugins.
@@ -291,6 +331,7 @@ function M.pack_list()
   end
   _G.info(lines)
 end
+
 Direction = {
   left = 'left',
   right = 'right',
@@ -399,4 +440,5 @@ end
 function M.tresitter_indentexpr()
   return M.treesitter_have(nil, 'indents') and require('nvim-treesitter').indentexpr() or -1
 end
+
 return M

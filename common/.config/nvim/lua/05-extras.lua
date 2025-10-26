@@ -66,13 +66,13 @@ _G.keymaps_define {
 -- grug-far main buffers will have `filetype=grug-far`.
 -- grug-far history buffers will have `filetype=grug-far-history`
 -- grug-far help buffers will have `filetype=grug-far-help`
-_G.new_autocmd('FileType', { 'grug-far' }, function()
+_G.new_autocmd('FileType', function()
   vim.keymap.set('n', '<C-enter>', function()
     local inst = require('grug-far').get_instance(0)
     inst:open_location()
     inst:close()
   end, { buffer = true })
-end)
+end, 'grug-far', "Keep one instance of grug")
 --
 --
 --
@@ -105,18 +105,23 @@ require('flash').setup {
 }
 -- stylua: ignore start
 _G.keymaps_define({
-  { mode = {'n' ,'o', 'x'}, lhs = 'S', rhs = function() require('flash').treesitter() end, { desc = 'Flash Treesitter' }},
-  { mode = 'o', lhs = 'r', rhs = function() require('flash').treesitter_search()end, { desc = 'Treesitter Search' }},
-  { mode = 'o', lhs = 'R', rhs = function()require('flash').remote() end, { desc = 'Remote Flash' }},
-  { mode = 'c',  lhs = '<c-s>', rhs = function() require('flash').toggle()end , { desc = 'Flash Toggle' }},
-  { mode = { 'n', 'o', 'x' }, lhs =  '<c-space>', rhs = function()
-  require('flash').treesitter {
-    actions = {
-      ['<c-space>'] = 'next',
-      ['<BS>'] = 'prev',
-    },
-  }
-end, { desc = 'Treesitter Incremental Selection' }}})
+  { mode = { 'n', 'o', 'x' }, lhs = 'S',   rhs = function() require('flash').treesitter() end,       { desc = 'Flash Treesitter' } },
+  { mode = 'o',             lhs = 'r',     rhs = function() require('flash').treesitter_search() end, { desc = 'Treesitter Search' } },
+  { mode = 'o',             lhs = 'R',     rhs = function() require('flash').remote() end,           { desc = 'Remote Flash' } },
+  { mode = 'c',             lhs = '<c-s>', rhs = function() require('flash').toggle() end,           { desc = 'Flash Toggle' } },
+  {
+    mode = { 'n', 'o', 'x' },
+    lhs = '<c-space>',
+    rhs = function()
+      require('flash').treesitter {
+        actions = {
+          ['<c-space>'] = 'next',
+          ['<BS>'] = 'prev',
+        },
+      }
+    end,
+    { desc = 'Treesitter Incremental Selection' }
+  } })
 
 -- Trouble
 require('trouble').setup {
@@ -129,12 +134,12 @@ require('trouble').setup {
   },
 }
 _G.keymaps_define({
-  { lhs = '<leader>xx', rhs = '<cmd>Trouble diagnostics toggle<cr>', { desc = 'Diagnostics (Trouble)' }},
-  { lhs = '<leader>xX', rhs = '<cmd>Trouble diagnostics toggle filter.buf=0<cr>', { desc = 'Buffer Diagnostics (Trouble)' }},
-  { lhs = '<leader>cs', rhs = '<cmd>Trouble symbols toggle<cr>', { desc = 'Symbols (Trouble)' }},
-  { lhs = '<leader>xS', rhs = '<cmd>Trouble lsp toggle<cr>', { desc = 'LSP references/definitions/... (Trouble)' }},
-  { lhs = '<leader>xL', rhs = '<cmd>Trouble loclist toggle<cr>', { desc = 'Location List (Trouble)' }},
-  { lhs = '<leader>xQ', rhs = '<cmd>Trouble qflist toggle<cr>', { desc = 'Quickfix List (Trouble)' }},
+  { lhs = '<leader>xx', rhs = '<cmd>Trouble diagnostics toggle<cr>',              { desc = 'Diagnostics (Trouble)' } },
+  { lhs = '<leader>xX', rhs = '<cmd>Trouble diagnostics toggle filter.buf=0<cr>', { desc = 'Buffer Diagnostics (Trouble)' } },
+  { lhs = '<leader>cs', rhs = '<cmd>Trouble symbols toggle<cr>',                  { desc = 'Symbols (Trouble)' } },
+  { lhs = '<leader>xS', rhs = '<cmd>Trouble lsp toggle<cr>',                      { desc = 'LSP references/definitions/... (Trouble)' } },
+  { lhs = '<leader>xL', rhs = '<cmd>Trouble loclist toggle<cr>',                  { desc = 'Location List (Trouble)' } },
+  { lhs = '<leader>xQ', rhs = '<cmd>Trouble qflist toggle<cr>',                   { desc = 'Quickfix List (Trouble)' } },
 })
 
 local config = require("fzf-lua.config")

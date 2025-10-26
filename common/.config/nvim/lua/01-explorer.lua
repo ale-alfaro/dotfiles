@@ -38,10 +38,10 @@ _G.keymaps_define {
     rhs = '<Cmd>lua MiniVisits.remove_label("core")<CR>',
     opts = { desc = 'Remove from core' },
   },
-  { lhs = '<leader>vc', rhs = make_pick_core('', 'Core visits (all)'), opts = { desc = 'Core visits (all)' } },
+  { lhs = '<leader>vc', rhs = make_pick_core('', 'Core visits (all)'),  opts = { desc = 'Core visits (all)' } },
   { lhs = '<leader>vC', rhs = make_pick_core(nil, 'Core visits (cwd)'), opts = { desc = 'Core visits (cwd)' } },
-  { lhs = '<leader>vr', rhs = make_select_path(true, 0.5), opts = { desc = 'Frecent visits (all)' } },
-  { lhs = '<leader>vR', rhs = make_select_path(false, 0.5), opts = { desc = 'Frecent visits (cwd)' } },
+  { lhs = '<leader>vr', rhs = make_select_path(true, 0.5),              opts = { desc = 'Frecent visits (all)' } },
+  { lhs = '<leader>vR', rhs = make_select_path(false, 0.5),             opts = { desc = 'Frecent visits (cwd)' } },
 }
 
 -- Smart Splits
@@ -53,14 +53,14 @@ require('smart-splits').setup {
 }
 _G.keymaps_define {
   -- stylua: ignore start
-  { lhs = '<A-h>', rhs = function() require('smart-splits').resize_left() end,       opts = { desc = 'Resize left' } },
-  { lhs = '<A-j>', rhs = function() require('smart-splits').resize_down() end,       opts = { desc = 'Resize down' } },
-  { lhs = '<A-k>', rhs = function() require('smart-splits').resize_up() end,         opts = { desc = 'Resize up' } },
-  { lhs = '<A-l>', rhs = function() require('smart-splits').resize_right() end,      opts = { desc = 'Resize right' } },
-  { lhs = '<C-h>', rhs = function() require('smart-splits').move_cursor_left() end,  opts = { desc = 'Move window left' } },
-  { lhs = '<C-j>', rhs = function() require('smart-splits').move_cursor_down() end,  opts = { desc = 'Move window down' } },
-  { lhs = '<C-k>', rhs = function() require('smart-splits').move_cursor_up() end,    opts = { desc = 'Move window up' } },
-  { lhs = '<C-l>', rhs = function() require('smart-splits').move_cursor_right() end, opts = { desc = 'Move window right' } },
-  { lhs = '<leader>ms', rhs = function() VimRc.wezterm_spawn_terminal() end, opts = { desc = 'Move window right' } },
+  { lhs = '<A-h>',      rhs = function() require('smart-splits').resize_left() end,       opts = { desc = 'Resize left' } },
+  { lhs = '<A-j>',      rhs = function() require('smart-splits').resize_down() end,       opts = { desc = 'Resize down' } },
+  { lhs = '<A-k>',      rhs = function() require('smart-splits').resize_up() end,         opts = { desc = 'Resize up' } },
+  { lhs = '<A-l>',      rhs = function() require('smart-splits').resize_right() end,      opts = { desc = 'Resize right' } },
+  { lhs = '<C-h>',      rhs = function() require('smart-splits').move_cursor_left() end,  opts = { desc = 'Move window left' } },
+  { lhs = '<C-j>',      rhs = function() require('smart-splits').move_cursor_down() end,  opts = { desc = 'Move window down' } },
+  { lhs = '<C-k>',      rhs = function() require('smart-splits').move_cursor_up() end,    opts = { desc = 'Move window up' } },
+  { lhs = '<C-l>',      rhs = function() require('smart-splits').move_cursor_right() end, opts = { desc = 'Move window right' } },
+  { lhs = '<leader>wt', rhs = function() VimRc.wezterm_spawn_terminal() end,              opts = { desc = 'Spawn wezterm terminal' } },
   -- stylua: ignore end
 }

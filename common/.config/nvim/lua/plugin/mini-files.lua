@@ -48,7 +48,6 @@ local toggle_dotfiles = function()
   require('mini.files').refresh { content = { filter = new_filter } }
 end
 
-local minifiles_explorer_group = vim.api.nvim_create_augroup('minifiles_explorer', { clear = true })
 -- Yank in register full path of entry under cursor
 local yank_path = function()
   local path = (MiniFiles.get_fs_entry() or {}).path
@@ -57,19 +56,6 @@ local yank_path = function()
   end
   vim.fn.setreg(vim.v.register, path)
 end
-vim.api.nvim_create_autocmd('User', {
-  pattern = 'MiniFilesWindowOpen',
-  callback = function(args)
-    local win_id = args.data.win_id
-    vim.g.minifiles_active = true
-
-    -- Customize window-local settings
-    vim.wo[win_id].winblend = 25
-    local config = vim.api.nvim_win_get_config(win_id)
-    config.border, config.title_pos = 'double', 'right'
-    vim.api.nvim_win_set_config(win_id, config)
-  end,
-})
 
 -- stylua:ignore
 _G.keymaps_define {
@@ -89,63 +75,44 @@ end
 -- However, some parts (like window title and height) of window config are later
 -- updated internally. Use `MiniFilesWindowUpdate` event for them: >lua
 
-vim.api.nvim_create_autocmd('User', {
-  pattern = 'MiniFilesWindowUpdate',
-  callback = function(args)
-    local config = vim.api.nvim_win_get_config(args.data.win_id)
 
-    -- Ensure fixed height
-    config.height = 30
+_G.new_autocmd('User', function(args)
+  vim.g.minifiles_active = true
+  local buf_id = args.data.buf_id
+  vim.keymap.set('n', '.', toggle_dotfiles, { buffer = buf_id, desc = 'Toggle hidden files' })
+  vim.keymap.set('n', 'gy', yank_path, { buffer = buf_id, desc = 'Yank path' })
+  vim.keymap.set('n', 'gX', ui_open, { buffer = buf_id, desc = 'OS open' })
+end, 'MiniFilesBufferCreate', "MiniFiles local keymaps")
 
-    -- Ensure no title padding
-    local n = #config.title
-    config.title[1][1] = config.title[1][1]:gsub('^ ', '')
-    config.title[n][1] = config.title[n][1]:gsub(' $', '')
 
-    vim.api.nvim_win_set_config(args.data.win_id, config)
-  end,
-})
-
-vim.api.nvim_create_autocmd('User', {
-  pattern = 'MiniFilesBufferCreate',
-  callback = function(args)
-    local buf_id = args.data.buf_id
-    vim.keymap.set('n', '.', toggle_dotfiles, { buffer = buf_id, desc = 'Toggle hidden files' })
-    vim.keymap.set('n', 'gy', yank_path, { buffer = buf_id, desc = 'Yank path' })
-    vim.keymap.set('n', 'gX', ui_open, { buffer = buf_id, desc = 'OS open' })
-  end,
-})
-
-vim.api.nvim_create_autocmd('User', {
-  pattern = 'MiniFilesActionRename',
-  callback = function(event)
-    VimRc.mini.files_on_rename(event.data.from, event.data.to)
-  end,
-})
-
-local function files_on_rename(from, to, rename)
-  local changes = { files = { {
-    oldUri = vim.uri_from_fname(from),
-    newUri = vim.uri_from_fname(to),
-  } } }
-
-  local clients = vim.lsp.get_clients()
-  for _, client in ipairs(clients) do
-    if client:supports_method 'workspace/willRenameFiles' then
-      local resp = client:request_sync('workspace/willRenameFiles', changes, 1000, 0)
-      if resp and resp.result ~= nil then
-        vim.lsp.util.apply_workspace_edit(resp.result, client.offset_encoding)
-      end
-    end
-  end
-
-  if rename then
-    rename()
-  end
-
-  for _, client in ipairs(clients) do
-    if client:supports_method 'workspace/didRenameFiles' then
-      client:notify('workspace/didRenameFiles', changes)
-    end
-  end
-end
+--
+-- _G.new_autocmd('User', function(event)
+--   local from = event.data.from
+--   local to = event.data.to
+--   local changes = {
+--     files = { {
+--       oldUri = vim.uri_from_fname(from),
+--       newUri = vim.uri_from_fname(to),
+--     } }
+--   }
+--
+--   local clients = vim.lsp.get_clients()
+--   for _, client in ipairs(clients) do
+--     if client:supports_method 'workspace/willRenameFiles' then
+--       local resp = client:request_sync('workspace/willRenameFiles', changes, 1000, 0)
+--       if resp and resp.result ~= nil then
+--         vim.lsp.util.apply_workspace_edit(resp.result, client.offset_encoding)
+--       end
+--     end
+--   end
+--
+--   -- if rename then
+--   --   rename()
+--   -- end
+--
+--   for _, client in ipairs(clients) do
+--     if client:supports_method 'workspace/didRenameFiles' then
+--       client:notify('workspace/didRenameFiles', changes)
+--     end
+--   end
+-- end, 'MiniFilesActionRename', "Rename Files")

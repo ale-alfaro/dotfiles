@@ -36,27 +36,20 @@ require('blink.cmp').setup {
   sources = {
     -- Disable some sources in comments and strings.
     default = function()
-      local sources = { 'lsp', 'buffer' }
-      local ok, node = pcall(vim.treesitter.get_node)
-
-      if ok and node then
-        if not vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }, node:type()) then
-          table.insert(sources, 'path')
-        end
-        if node:type() ~= 'string' then
-          table.insert(sources, 'snippets')
-        end
-      end
-
+      local sources = { "lsp", "buffer", "path", "snippets" }
       return sources
     end,
     per_filetype = {
       codecompanion = { 'codecompanion' },
     },
-    -- providers = {
-    --   codecompanion = { 'codecompanion' },
+    --  providers = {
+    -- 	lazydev = { module = "lazydev.integrations.blink", score_offset = 100 },
+    -- 	copilot = { module = "blink-copilot" },
+    -- 	emoji = { module = "blink-emoji", score_offset = 15 },
+    -- 	nerdfont = { module = "blink-nerdfont", score_offset = 15 },
     -- },
   },
+  snippets = { preset = "luasnip" },
   appearance = {
     kind_icons = VimRc.icons.symbol_kinds,
   },
