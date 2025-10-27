@@ -165,38 +165,7 @@ vim.pack.add(
     _G.plug("obsidian-nvim/obsidian.nvim"),
     _G.plug('MeanderingProgrammer/render-markdown.nvim'),
   })
-_G.new_autocmd('FileType', function()
-  local ok, _ = pcall(require, 'obsidian')
-  if ok then
-    require("render-markdown").setup({
-      code = {
-        sign = false,
-        width = "block",
-        right_pad = 1,
-      },
-      heading = {
-        sign = false,
-        icons = {},
-      },
-      checkbox = {
-        enabled = false,
-      },
-      { ui = { enable = false } },
-      { latex = { enabled = false } },
-      completions = { lsp = { enabled = true } },
-    })
-  else
-    _G.error("Couldn't load render-markdown.nvim plugin")
-  end
-  ok, _ = pcall(require, 'obsidian')
-  if ok then
-    require('obsidian').setup({
-      legacy_commands = false,
-    })
-  else
-    _G.error("Couldn't load obsidian.nvim plugin")
-  end
-end, "markdown", "Markdown render plugin")
+-- Obsidian and render-markdown are loaded in after/ftplugin/markdown.lua
 
-
+vim.g.markdown_plugins_loaded = false
 -- stylua: ignore end
