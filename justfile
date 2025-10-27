@@ -26,6 +26,10 @@ restow-common-dotfiles: (restow absolute_path(justfile_directory() / "common") d
 
 restow-dotfiles: restow-common-dotfiles restow-platform-dotfiles
 
+migration_hw_config hw:
+  rm -r "{{ dotfiles_target_location }}//hypr/hyprland/hw"
+  cp -r "{{ dotfiles_repo_location }}/linux/.config/hypr/hyprland/hw/{{ hw }}"
+
 neovim_install_prefix := home_directory() / ".local/nvim"
 xdg_cache_home := if env('XDG_CACHE_HOME', '') =~ '^/' {
   env('XDG_CACHE_HOME')
