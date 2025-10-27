@@ -78,14 +78,15 @@
       "src": "https://github.com/nvim-treesitter/nvim-treesitter",
       "version": "'main'"
     },
-    "nvim-treesitter-textobjects": {
-      "rev": "a9742cb",
-      "src": "https://github.com/nvim-treesitter/nvim-treesitter-textobjects"
+    "obsidian.nvim": {
+      "rev": "1a1a475",
+      "src": "https://github.com/obsidian-nvim/obsidian.nvim"
     },
     "plenary.nvim": {
       "rev": "b9fd522",
       "src": "https://github.com/nvim-lua/plenary.nvim"
     },
+    "render-markdown.nvim": [],
     "schemastore.nvim": {
       "rev": "54994d5",
       "src": "https://github.com/b0o/schemastore.nvim"
@@ -101,10 +102,6 @@
     "trouble.nvim": {
       "rev": "76030c5",
       "src": "https://github.com/folke/trouble.nvim"
-    },
-    "uv.nvim": {
-      "rev": "be4a7d4",
-      "src": "https://github.com/benomahony/uv.nvim"
     },
     "which-key.nvim": {
       "rev": "b4177e3",

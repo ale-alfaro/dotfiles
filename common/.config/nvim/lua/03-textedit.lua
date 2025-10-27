@@ -58,13 +58,14 @@ local ensure_installed = {
 
 require('nvim-treesitter').setup {
   ensure_installed = ensure_installed,
+  highlighter = true,
 }
 
 _G.new_autocmd('FileType', function(ev)
   local ft, lang = ev.match, vim.treesitter.language.get_lang(ev.match)
-  if not VimRc.treesitter_have(ft) then
-    return
-  end
+  -- if not VimRc.treesitter_have(ft) then
+  --   return
+  -- end
   -- highlighting
   local ok, _ = pcall(vim.treesitter.start)
   if not ok then

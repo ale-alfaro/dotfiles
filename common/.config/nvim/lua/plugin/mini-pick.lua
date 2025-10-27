@@ -89,36 +89,17 @@ local wipeout_cur = function()
   vim.api.nvim_buf_delete(MiniPick.get_picker_matches().current.bufnr, {})
 end
 local buffer_mappings = { wipeout = { char = '<C-d>', func = wipeout_cur } }
---
-local parent_dir_pattern = vim.fn.has 'win32' == 1 and '([^\\/]+)([\\/])' or '([^/]+)(/)'
-local shorten_dirname = function(name, path_sep)
-  local first = vim.fn.strcharpart(name, 0, 1)
-  first = first == '.' and vim.fn.strcharpart(name, 0, 2) or first
-  return first .. path_sep
-end
-local make_short_path = function(path)
-  return path:gsub(parent_dir_pattern, shorten_dirname)
-end
-
-local show_short_files = function(buf_id, items_to_show, query)
-  local short_items_to_show = vim.tbl_map(make_short_path, items_to_show)
-  MiniPick.default_show(buf_id, short_items_to_show, query)
-end
-
-MiniPick.registry.files = function()
-  MiniPick.builtin.files({}, { source = { show = show_short_files } })
-end
 -- stylua: ignore
 _G.keymaps_define {
-  { lhs = '<leader><leader>', rhs = function()MiniPick.builtin.buffers({}, { mappings = buffer_mappings })end,         opts = { desc = 'Pick open buffers' } },
-  { lhs = '<leader>sh',       rhs = '<Cmd>Pick history scope=":"<CR>',            opts = { desc = '[S]earch Command [H]istory' } },
-  { lhs = '<leader>sg',       rhs = '<Cmd>Pick grep_live<CR>',                    opts = { desc = '[S]earch [G]rep' } },
-  { lhs = '<leader>sw',       rhs = '<Cmd>Pick grep pattern="<cword>"<CR>',       opts = { desc = '[S]earch current [W]ord' } },
-  { lhs = '<leader>sd',       rhs = '<Cmd>Pick diagnostic scope="current"<CR>',   opts = { desc = '[S]earch [D]iagnostics (Buffer)' } },
-  { lhs = '<leader>sD',       rhs = '<Cmd>Pick diagnostic scope="all"<CR>',       opts = { desc = '[S]earch [D]iagnostics (Workspace)' } },
-  { lhs = '<leader>sr',       rhs = '<Cmd>Pick lsp scope="references"<CR>',       opts = { desc = 'References (LSP)' } },
-  { lhs = '<leader>ss',       rhs = '<Cmd>Pick lsp scope="workspace_symbol"<CR>', opts = { desc = 'Symbols workspace' } },
-  { lhs = '<leadersS',        rhs = '<Cmd>Pick lsp scope="document_symbol"<CR>',  opts = { desc = 'Symbols document' } },
-  { lhs = '<leader>so',       rhs = '<Cmd>Pick oldfiles<CR>',                     opts = { desc = '[S]earch [O]ld files' } },
-  { lhs = '<leader>sk',       rhs = '<Cmd>Pick keymaps<CR>',                      opts = { desc = '[S]earch [K]eymaps' } },
+  { lhs = '<leader><leader>', rhs = function() MiniPick.builtin.buffers({}, { mappings = buffer_mappings }) end, opts = { desc = 'Pick open buffers' } },
+  { lhs = '<leader>sh',       rhs = '<Cmd>Pick history scope=":"<CR>',                                         opts = { desc = '[S]earch Command [H]istory' } },
+  { lhs = '<leader>sg',       rhs = '<Cmd>Pick grep_live<CR>',                                                 opts = { desc = '[S]earch [G]rep' } },
+  { lhs = '<leader>sw',       rhs = '<Cmd>Pick grep pattern="<cword>"<CR>',                                    opts = { desc = '[S]earch current [W]ord' } },
+  { lhs = '<leader>sd',       rhs = '<Cmd>Pick diagnostic scope="current"<CR>',                                opts = { desc = '[S]earch [D]iagnostics (Buffer)' } },
+  { lhs = '<leader>sD',       rhs = '<Cmd>Pick diagnostic scope="all"<CR>',                                    opts = { desc = '[S]earch [D]iagnostics (Workspace)' } },
+  { lhs = '<leader>sr',       rhs = '<Cmd>Pick lsp scope="references"<CR>',                                    opts = { desc = 'References (LSP)' } },
+  { lhs = '<leader>ss',       rhs = '<Cmd>Pick lsp scope="workspace_symbol"<CR>',                              opts = { desc = 'Symbols workspace' } },
+  { lhs = '<leadersS',        rhs = '<Cmd>Pick lsp scope="document_symbol"<CR>',                               opts = { desc = 'Symbols document' } },
+  { lhs = '<leader>so',       rhs = '<Cmd>Pick oldfiles<CR>',                                                  opts = { desc = '[S]earch [O]ld files' } },
+  { lhs = '<leader>sk',       rhs = '<Cmd>Pick keymaps<CR>',                                                   opts = { desc = '[S]earch [K]eymaps' } },
 }

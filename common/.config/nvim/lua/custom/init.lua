@@ -7,6 +7,8 @@ setmetatable(M, {
     return t[k]
   end,
 })
+
+
 ---@param msg string|string[]
 ---@param level string
 local function notify(msg, level)
@@ -58,12 +60,84 @@ function _G.run_cmd(cmd, cb, opts)
     })
   )
   if id <= 0 then
-    vim.notify(('Failed to start job `%s`'):format(cmd), 'error')
+    _G.error(('Failed to start job `%s`'):format(cmd))
   end
   return id > 0 and id or nil
 end
 
+--- Runs a system command or throws an error if {cmd} cannot be run.
+---
+--- The command runs directly (not in 'shell') so shell builtins such as "echo" in cmd.exe, cmdlets
+--- in powershell, or "help" in bash, will not work unless you actually invoke a shell:
+--- `vim.system({'bash', '-c', 'help'})`.
+---
+--- Examples:
+---
+--- ```lua
+--- local on_exit = function(obj)
+---   print(obj.code)
+---   print(obj.signal)
+---   print(obj.stdout)
+---   print(obj.stderr)
+--- end
+---
+--- -- Runs asynchronously:
+--- vim.system({'echo', 'hello'}, { text = true }, on_exit)
+---
+--- -- Runs synchronously:
+--- local obj = vim.system({'echo', 'hello'}, { text = true }):wait()
+--- -- { code = 0, signal = 0, stdout = 'hello\n', stderr = '' }
+---
+--- ```
+---
+--- See |uv.spawn()| for more details. Note: unlike |uv.spawn()|, vim.system
+--- throws an error if {cmd} cannot be run.
+---
+---@param cmd string[]
+---@param stdout_cb fun( data: string?, lines: string[])
+---@param sync boolean
+---@param cwd? string
+function M.run_command_with_output(cmd, stdout_cb, sync, cwd)
+  if cwd == nil then
+    cwd = M.get_project_root()
+  end
+
+  local on_exit = function(obj)
+    if obj.code == 0 and obj.stdout then
+      _G.info("Command completed successfully")
+      local data = obj.stdout
+      if data and data:match("%S") then
+        local line_output = vim.split(data, "\n") or {}
+        _G.info("comand output: " .. data)
+        if stdout_cb then
+          stdout_cb(data, line_output)
+        end
+      else
+        _G.error("Command failed")
+      end
+    end
+  end
+  if sync then
+    ---@type vim.SystemOpts
+    local opts = {
+      cwd = cwd,
+      text = true,
+
+    }
+    local obj = vim.system(cmd, opts):wait()
+    on_exit(obj)
+  else
+    --- @type fun(out: vim.SystemCompleted)
+    -- Run command in background and capture output
+    vim.system(cmd, on_exit)
+  end
+end
+
 ---@class KeymapSpec
+---@field lhs string
+---@field rhs string|fun(args:table)
+---@field mode string|string[]?
+---@field opts table?
 -- Tracks defined keymaps to prevent duplicates.
 -- Key is a unique string like "n:<leader>ff".
 M.keymap_registry = {}
@@ -98,20 +172,15 @@ end
 function _G.keymaps_define(keymaps)
   for _, spec in ipairs(keymaps) do
     -- Skip if the condition is not met
-    if spec.cond == false or (type(spec.cond) == 'function' and not spec.cond()) then
-      goto continue
-    end
+    -- if spec.cond == false or (type(spec.cond) == 'function' and not spec.cond()) then
+    --   goto continue
+    -- end
+    -- if spec.ft then
+    --   add_ft_keymaps(spec)
+    --   goto continue
+    -- end
 
-    if spec.ft then
-      add_ft_keymaps(spec)
-      goto continue
-    end
-
-    local modes = spec.mode or 'n'
-    if type(modes) == 'string' then
-      modes = { modes }
-    end
-
+    local modes = vim._ensure_list(spec.mode or 'n')
     for _, mode in ipairs(modes) do
       local id = keymap_encode(spec.lhs, mode)
       if M.keymap_registry[id] then
@@ -229,6 +298,10 @@ local function create_plugin_build_hook(build_hook)
   -- If hooks need to run on install, run this before `vim.pack.add()`
   vim.api.nvim_create_autocmd('PackChanged', { callback = hooks })
 end
+
+---@class VimPackOpts
+---@field version string
+---@field build_hook VimPackBuildHooks
 
 ---@param p string
 ---@param build_hook VimPackBuildHooks?

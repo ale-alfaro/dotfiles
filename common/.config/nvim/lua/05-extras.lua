@@ -4,6 +4,7 @@ vim.pack.add(_G.plug_spec {
   'folke/flash.nvim',
   'folke/trouble.nvim',
   'MagicDuck/grug-far.nvim',
+  'folke/lazydev.nvim'
 })
 
 require('grug-far').setup {
@@ -105,10 +106,10 @@ require('flash').setup {
 }
 -- stylua: ignore start
 _G.keymaps_define({
-  { mode = { 'n', 'o', 'x' }, lhs = 'S',   rhs = function() require('flash').treesitter() end,       { desc = 'Flash Treesitter' } },
-  { mode = 'o',             lhs = 'r',     rhs = function() require('flash').treesitter_search() end, { desc = 'Treesitter Search' } },
-  { mode = 'o',             lhs = 'R',     rhs = function() require('flash').remote() end,           { desc = 'Remote Flash' } },
-  { mode = 'c',             lhs = '<c-s>', rhs = function() require('flash').toggle() end,           { desc = 'Flash Toggle' } },
+  { mode = { 'n', 'o', 'x' }, lhs = 'S',     rhs = function() require('flash').treesitter() end,        { desc = 'Flash Treesitter' } },
+  { mode = 'o',               lhs = 'r',     rhs = function() require('flash').treesitter_search() end, { desc = 'Treesitter Search' } },
+  { mode = 'o',               lhs = 'R',     rhs = function() require('flash').remote() end,            { desc = 'Remote Flash' } },
+  { mode = 'c',               lhs = '<c-s>', rhs = function() require('flash').toggle() end,            { desc = 'Flash Toggle' } },
   {
     mode = { 'n', 'o', 'x' },
     lhs = '<c-space>',
@@ -133,6 +134,7 @@ require('trouble').setup {
     },
   },
 }
+
 _G.keymaps_define({
   { lhs = '<leader>xx', rhs = '<cmd>Trouble diagnostics toggle<cr>',              { desc = 'Diagnostics (Trouble)' } },
   { lhs = '<leader>xX', rhs = '<cmd>Trouble diagnostics toggle filter.buf=0<cr>', { desc = 'Buffer Diagnostics (Trouble)' } },
@@ -145,4 +147,56 @@ _G.keymaps_define({
 local config = require("fzf-lua.config")
 local actions = require("trouble.sources.fzf").actions
 config.defaults.actions.files["ctrl-t"] = actions.open
+
+-- require('lazydev').setup({
+--   library = {
+--     vim.fn.stdpath('config') .. "/lua/custom/",
+--     -- Only load luvit types when the `vim.uv` word is found
+--     { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+--     -- Load the wezterm types when the `wezterm` module is required
+--     -- Needs `DrKJeff16/wezterm-types` to be installed
+--     -- { path = "wezterm-types",      mods = { "wezterm" } },
+--   },
+-- }
+-- )
+
+vim.pack.add(
+  {
+    _G.plug("obsidian-nvim/obsidian.nvim"),
+    _G.plug('MeanderingProgrammer/render-markdown.nvim'),
+  })
+_G.new_autocmd('FileType', function()
+  local ok, _ = pcall(require, 'obsidian')
+  if ok then
+    require("render-markdown").setup({
+      code = {
+        sign = false,
+        width = "block",
+        right_pad = 1,
+      },
+      heading = {
+        sign = false,
+        icons = {},
+      },
+      checkbox = {
+        enabled = false,
+      },
+      { ui = { enable = false } },
+      { latex = { enabled = false } },
+      completions = { lsp = { enabled = true } },
+    })
+  else
+    _G.error("Couldn't load render-markdown.nvim plugin")
+  end
+  ok, _ = pcall(require, 'obsidian')
+  if ok then
+    require('obsidian').setup({
+      legacy_commands = false,
+    })
+  else
+    _G.error("Couldn't load obsidian.nvim plugin")
+  end
+end, "markdown", "Markdown render plugin")
+
+
 -- stylua: ignore end

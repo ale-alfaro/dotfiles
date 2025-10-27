@@ -40,3 +40,46 @@ vim.b.minisurround_config = {
     },
   },
 }
+if not vim.g.markdown_plugins_loaded then
+  local ok, _ = pcall(require, 'render-markdown')
+  if ok then
+    require("render-markdown").setup({
+      code = {
+        sign = false,
+        width = "block",
+        right_pad = 1,
+      },
+      heading = {
+        sign = false,
+        icons = {},
+      },
+      checkbox = {
+        enabled = false,
+      },
+      { ui = { enable = false } },
+      { latex = { enabled = false } },
+      completions = { lsp = { enabled = true } },
+    })
+  else
+    _G.error("Couldn't load render-markdown.nvim plugin")
+  end
+  ok, _ = pcall(require, 'obsidian')
+  if ok then
+    require('obsidian').setup({
+      legacy_commands = false,
+      workspaces = {
+        {
+          name = "Personal-Geek",
+          path = vim.fn.expand("$HOME") .. "/Documents/Obsidian"
+        },
+        -- {
+        --   name = "Sibel-Work",
+        --   path = vim.fn.expand("$HOME") .. "/Documents/Obsidian/Sibel-Work"
+        -- }
+      }
+    })
+  else
+    _G.error("Couldn't load obsidian.nvim plugin")
+  end
+  vim.g.markdown_plugins_loaded = true
+end

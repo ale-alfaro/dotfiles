@@ -1,4 +1,4 @@
-_G.VimRc = require 'utils'
+_G.VimRc = require 'custom'
 require 'config.opts'
 require 'config.autocmds'
 require 'config.usercmds'

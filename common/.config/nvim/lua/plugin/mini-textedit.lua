@@ -57,7 +57,10 @@ if ok then
   -- searches up the file tree until the first root marker ('.git' or 'Makefile')
   -- and sets their parent directory as a current directory.
   -- This is helpful when simultaneously dealing with files from several projects.
-  misc.setup_auto_root()
+  misc.setup_auto_root({ '.luarc.json', '.git' }, function()
+    _G.error("Couldn't find the root directory. No .git folder found in parents")
+    return nil
+  end)
 
   -- Restore latest cursor position on file open
   misc.setup_restore_cursor()
@@ -119,9 +122,9 @@ local mini_ai_opts = {
     -- definition (not call). See `:h MiniAi.gen_spec.treesitter()` for details.
     F = ai.gen_spec.treesitter { a = '@function.outer', i = '@function.inner' },
     c = ai.gen_spec.treesitter { a = '@class.outer', i = '@class.inner' }, -- class
-    t = { '<([%p%w]-)%f[^<%w][^<>]->.-</%1>', '^<.->().*()</[^/]->$' }, -- tags
-    d = { '%f[%d]%d+' }, -- digits
-    e = { -- Word with case
+    t = { '<([%p%w]-)%f[^<%w][^<>]->.-</%1>', '^<.->().*()</[^/]->$' },    -- tags
+    d = { '%f[%d]%d+' },                                                   -- digits
+    e = {                                                                  -- Word with case
       { '%u[%l%d]+%f[^%l%d]', '%f[%S][%l%d]+%f[^%l%d]', '%f[%P][%l%d]+%f[^%l%d]', '^[%l%d]+%f[^%l%d]' },
       '^().*()$',
     },
@@ -232,7 +235,7 @@ require('mini.bracketed').setup()
 -- - `<Leader>bd` - delete current buffer (see `:h :bdelete`)
 require('mini.bufremove').setup()
 _G.keymaps_define {
-  { lhs = '<leader>bd', rhs = '<Cmd>lua MiniBufremove.delete()<CR>', opts = { desc = 'Delete' } },
+  { lhs = '<leader>bd', rhs = '<Cmd>lua MiniBufremove.delete()<CR>',        opts = { desc = 'Delete' } },
   { lhs = '<leader>dd', rhs = '<Cmd>lua MiniBufremove.delete(0, true)<CR>', opts = { desc = 'Delete!' } },
   -- { lhs = '<leader>bw', rhs = '<Cmd>lua MiniBufremove.wipeout()<CR>', opts = { desc = 'Wipeout' } },
   -- { lhs = '<leader>bW', rhs = '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', opts = { desc = 'Wipeout!' } },
@@ -350,12 +353,12 @@ require('mini.splitjoin').setup()
 -- - `:h MiniSurround-vim-surround-config` - alternative set of action mappings
 require('mini.surround').setup {
   mappings = {
-    add = 'gsa', -- Add surrounding in Normal and Visual modes
-    delete = 'gsd', -- Delete surrounding
-    find = 'gsf', -- Find surrounding (to the right)
-    find_left = 'gsF', -- Find surrounding (to the left)
-    highlight = 'gsh', -- Highlight surrounding
-    replace = 'gsr', -- Replace surrounding
+    add = 'gsa',            -- Add surrounding in Normal and Visual modes
+    delete = 'gsd',         -- Delete surrounding
+    find = 'gsf',           -- Find surrounding (to the right)
+    find_left = 'gsF',      -- Find surrounding (to the left)
+    highlight = 'gsh',      -- Highlight surrounding
+    replace = 'gsr',        -- Replace surrounding
     update_n_lines = 'gsn', -- Update `n_lines`
   },
 }

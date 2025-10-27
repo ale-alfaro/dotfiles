@@ -95,7 +95,6 @@ function VimRc.do_lint()
   local ctx = { filename = vim.api.nvim_buf_get_name(0) }
   ctx.dirname = vim.fn.fnamemodify(ctx.filename, ':h')
   names = vim.tbl_filter(function(name)
-    ---@type lint.Linter|fun():lint.Linter
     local linter = lint.linters[name]
     if not linter then
       _G.warn('Linter not found: ' .. name, { title = 'nvim-lint' })
@@ -112,14 +111,23 @@ end
 
 local lint = require 'lint'
 lint.linters_by_ft = VimRc.linters_by_ft
--- _G.new_autocmd("User", function() M.debounce(100, M.do_lint) end,{ 'BufWritePost', 'BufReadPost', 'InsertLeave' }, "Automatic linter run")
-_G.new_autocmd('ViewLinter', function()
+
+_G.new_autocmd("User", function()
+    if vim.g.run_linter_after_save then
+      M.debounce(100, M.do_lint)
+    end
+  end,
+  { 'BufWritePost', 'BufReadPost', 'InsertLeave' },
+  "Automatic linter run")
+
+
+vim.api.nvim_create_user_command('ViewLinter', function()
   local cur = M.current_linters()
   local ft = M.filetype_linters()
   vim.notify('Current running linters: ' .. table.concat(cur, ', '))
   vim.notify('ft linters: ' .. table.concat(ft, ', '))
-end, 'View Running Linters')
+end, { desc = 'View Running Linters' })
 
-_G.new_autocmd('Lint', function()
+vim.api.nvim_create_user_command('Lint', function()
   M.do_lint()
-end, 'Run Linter')
+end, { desc = 'View Running Linters' })

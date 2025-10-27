@@ -39,15 +39,15 @@ local function lsp_setup(lsp_servers)
     group = lspau,
     once = true,
     callback = function()
-    -- stylua: ignore
-    local server_configs = vim.iter(vim.api.nvim_get_runtime_file('lsp/*.lua', true))
-        :map(function(file)
-          return vim.fn.fnamemodify(file, ':t:r')
-        end)
-        :filter(function(file_name)
-          return vim.list_contains(lsp_servers, file_name)
-        end)
-        :totable()
+      -- stylua: ignore
+      local server_configs = vim.iter(vim.api.nvim_get_runtime_file('lsp/*.lua', true))
+          :map(function(file)
+            return vim.fn.fnamemodify(file, ':t:r')
+          end)
+          :filter(function(file_name)
+            return vim.list_contains(lsp_servers, file_name)
+          end)
+          :totable()
       vim.lsp.enable(server_configs)
     end,
   })
@@ -63,4 +63,5 @@ lsp_setup {
   'jsonls',
   'basedpyright',
   'dts-lsp',
+  'marksman',
 }

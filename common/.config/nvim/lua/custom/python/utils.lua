@@ -78,59 +78,6 @@ end
 
 
 
----
----
--- ---@param item UVToolFinderItem
--- function M.uv_run_tool_call(item)
---   if item.prompt_for_input == nil then
---     local default_args = item.default_args or {}
---     -- run_command(item, table.concat(default_args, ' '))
---     return
---   end
---   local opts = {
---     prompt = item.prompt_for_input,
---   }
---   if item.default_args ~= nil then
---     table.insert(opts, {
---       default = table.concat(item.default_args),
---     })
---   end
---
---   vim.ui.input(opts, function(input)
---     if input and input ~= '' then
---       --  match checks for zero or more whitespace characters from the beginning (`^`) to the end (`$`) of the string.
---       --  to filter out for empty or invalid input
---       if (input or ''):match '^%s*$' then
---         return
---       end
---       -- run_command(item, input)
---     else
---       VimRc.info 'Cancelled'
---     end
---   end)
--- end
-
----@param cmd_runner string[]
----@param tool string
----@param args? string[]
----@return string
-local function create_tool_call(cmd_runner, tool, args)
-  local cmd = cmd_runner or { 'uv', 'run' }
-  -- ret = UV_M.run_command "uv pip list --format=json --editable | jq '.[].editable_project_location'"
-  for w in string.gmatch(tool, '%a+') do
-    cmd[#cmd + 1] = w
-  end
-  if args ~= nil then
-    for idx = 1, #args do
-      cmd[#cmd + 1] = args[idx]
-    end
-  end
-  return table.concat(cmd, ' ')
-end
-
-
-
-
 ---@class UVTool
 ---@field name string
 ---@field base_cmd string[]
@@ -177,7 +124,7 @@ M.registered_tools = {
     base_cmd = { 'uv', 'run', 'ruff', 'check', '--output-format=rdjson', '--exit-zero' },
     -- default_args = { '--fix', '--output-format', 'json-lines' },
     prompt_for_input = 'Additional arguments for ruff check: ',
-    postprocess = function(raw_out, _lines)
+    postprocess = function(raw_out, _)
       local mapping = {
         ['end_col'] = { 'location', 'range', 'end', 'column' },
         ['end_lnum'] = { 'location', 'range', 'end', 'line' },
