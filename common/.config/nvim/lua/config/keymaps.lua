@@ -25,8 +25,10 @@ _G.keymaps_define({
   -- stylua:ignore
   { mode = { "n", "v", "x" },      lhs = "<leader>ev",                        rhs = "<Cmd>edit $MYVIMRC<CR>",                          opts = { desc = "Edit " .. vim.fn.expand("$MYVIMRC") } },
   { mode = { "n", "v", "x" },      lhs = "<leader>ez",                        rhs = "<Cmd>e $ZDOTDIR<CR>",                             opts = { desc = "Edit .zshrc" } },
+  { mode = { "n", "v", "x" },      lhs = "<leader>ej",                        rhs = "<Cmd>e $JUSTFILE_HOME<CR>",                       opts = { desc = "Edit Global JustFiles" } },
+  { mode = { "n", "v", "x" },      lhs = "<leader>ed",                        rhs = "<Cmd>e $XDG_CONFIG_HOME/direnv<CR>",              opts = { desc = "Edit Direnv config" } },
   { mode = { "n", "v", "x" },      lhs = "<leader>eh",                        rhs = "<Cmd>e $XDG_CONFIG_HOME/hypr/hyprland<CR>",       opts = { desc = "Edit Hyprland Config" } },
-  { mode = { "n", "v", "x" },      lhs = "<leader>sO",                        rhs = "<Cmd>source %<CR>",                               opts = { desc = "Source " .. vim.fn.expand("$MYVIMRC") } },
+  { mode = { "n", "v", "x" },      lhs = "<leader>o",                         rhs = "<Cmd>source $MYVIMRC<CR>",                        opts = { desc = "Source " .. vim.fn.expand("$MYVIMRC") } },
   { mode = { 'n', 'v', 'x' },      lhs = '<leader>O',                         rhs = '<Cmd>restart<CR>',                                opts = { desc = 'Restart vim.' } },
 
   -- Buffers

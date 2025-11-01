@@ -216,7 +216,21 @@ function M.setTimeout(timeout, callback)
   end
 end
 
+---@class VimPackPlugin
+---@field name string
+---@field plugin vim.pack.Spec
+---@field opts table
+---@field keys KeymapSpec[]
+---
+---@type VimPackPlugin[]
 M.added_plugins = {}
+---@param spec VimPackPlugin
+function M.pack_add(spec)
+  vim.pack.add(spec.plugin)
+  require(spec.name).setup(spec.opts)
+  _G.keymaps_define(spec.keys)
+  M.added_plugins[#M.added_plugins + 1] = spec
+end
 
 ---@param cmd string|string[]
 ---@param cb fun(output: string[], code: number)

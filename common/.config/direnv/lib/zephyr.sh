@@ -3,8 +3,8 @@
 NRFUTIL="/usr/local/bin/nrfutil"
 
 fatal() {
-	echo '[FATAL]' "$@" >&2
-	exit 1
+  echo '[FATAL]' "$@" >&2
+  exit 1
 }
 
 # @description Parses the output of the nrfutil toolchain env command
@@ -12,134 +12,143 @@ fatal() {
 # @glocal ncs_vars Associative array containing the parsed variables
 # @glocal ncs_path_vars Associative array containing the parsed path-like variables
 parse_ncs_env() {
-	local nrf_env_output="$1"
-	declare -gA ncs_vars
-	declare -gA ncs_path_vars
-	ncs_vars=()
-	ncs_path_vars=()
-	while IFS= read -r line; do
-		# Strip potential trailing carriage returns
-		line=${line%$'\r'}
-		if [[ -z "$line" || $line != export* ]]; then
-			continue
-		fi
-		line=${line#export }
-		key=${line%%=*}
-		value=${line#*=}
-		if [[ "$value" == *":\$$key"* ]]; then
-			value=${value%:"\$$key"}
-			ncs_path_vars[$key]="$value"
-		else
-			ncs_vars[$key]="$value"
-		fi
-	done <<<"$nrf_env_output"
+  local nrf_env_output="$1"
+  declare -gA ncs_vars
+  declare -gA ncs_path_vars
+  ncs_vars=()
+  ncs_path_vars=()
+  while IFS= read -r line; do
+    # Strip potential trailing carriage returns
+    line=${line%$'\r'}
+    if [[ -z "$line" || $line != export* ]]; then
+      continue
+    fi
+    line=${line#export }
+    key=${line%%=*}
+    value=${line#*=}
+    if [[ "$value" == *":\$$key"* ]]; then
+      value=${value%:"\$$key"}
+      ncs_path_vars[$key]="$value"
+    else
+      ncs_vars[$key]="$value"
+    fi
+  done <<<"$nrf_env_output"
 }
 
 prefix_path_ncs() {
-	local ncs_version
-	ncs_version="${1:-v3.1.0}"
-	echo "Using NCS version $ncs_version"
-	local nrf_env
-	nrf_env="$($NRFUTIL sdk-manager toolchain env --as-script --ncs-version "$ncs_version")"
-	parse_ncs_env "$nrf_env"
+  local ncs_version
+  ncs_version="${1:-v3.1.0}"
+  echo "Using NCS version $ncs_version"
+  local nrf_env
+  nrf_env="$($NRFUTIL sdk-manager toolchain env --as-script --ncs-version "$ncs_version")"
+  parse_ncs_env "$nrf_env"
 
-	local paths_to_add
-	##export PATH=/opt/nordic/ncs/toolchains/5c0d382932/bin:
-	##/opt/nordic/ncs/toolchains/5c0d382932/usr/bin:
-	#/opt/nordic/ncs/toolchains/5c0d382932/usr/local/bin:
-	#/opt/nordic/ncs/toolchains/5c0d382932/opt/bin:
-	#/opt/nordic/ncs/toolchains/5c0d382932/opt/nanopb/generator-bin:
-	#/opt/nordic/ncs/toolchains/5c0d382932/nrfutil/bin:
-	#/opt/nordic/ncs/toolchains/5c0d382932/opt/zephyr-sdk/arm-zephyr-eabi/bin:
-	#/opt/nordic/ncs/toolchains/5c0d382932/opt/zephyr-sdk/riscv64-zephyr-elf/bin
-	IFS=':' read -r -a paths_to_add <<<"${ncs_path_vars[PATH]}"
-	for ((i = ${#paths_to_add[@]} - 1; i >= 0; i--)); do
-		path_add PATH "${paths_to_add[i]}"
-	done
+  local paths_to_add
+  ##export PATH=/opt/nordic/ncs/toolchains/5c0d382932/bin:
+  ##/opt/nordic/ncs/toolchains/5c0d382932/usr/bin:
+  #/opt/nordic/ncs/toolchains/5c0d382932/usr/local/bin:
+  #/opt/nordic/ncs/toolchains/5c0d382932/opt/bin:
+  #/opt/nordic/ncs/toolchains/5c0d382932/opt/nanopb/generator-bin:
+  #/opt/nordic/ncs/toolchains/5c0d382932/nrfutil/bin:
+  #/opt/nordic/ncs/toolchains/5c0d382932/opt/zephyr-sdk/arm-zephyr-eabi/bin:
+  #/opt/nordic/ncs/toolchains/5c0d382932/opt/zephyr-sdk/riscv64-zephyr-elf/bin
+  IFS=':' read -r -a paths_to_add <<<"${ncs_path_vars[PATH]}"
+  for ((i = ${#paths_to_add[@]} - 1; i >= 0; i--)); do
+    path_add PATH "${paths_to_add[i]}"
+  done
 }
 
 use_ncs() {
 
-	if [[ ! "$#" -eq 1 ]]; then
-		fatal "use zephyr requires a version to be specified as an argument"
-	fi
-	local ncs_version
-	ncs_version="$1"
-	echo "Using NCS version $ncs_version"
-	local nrf_env
-	nrf_env="$($NRFUTIL sdk-manager toolchain env --as-script --ncs-version "$ncs_version")"
-	parse_ncs_env "$nrf_env"
+  if [[ ! "$#" -eq 1 ]]; then
+    fatal "use zephyr requires a version to be specified as an argument"
+  fi
+  local ncs_version
+  ncs_version="$1"
+  echo "Using NCS version $ncs_version"
+  local nrf_env
+  nrf_env="$($NRFUTIL sdk-manager toolchain env --as-script --ncs-version "$ncs_version")"
+  parse_ncs_env "$nrf_env"
 
-	export NRFUTIL_HOME="${ncs_vars[NRFUTIL_HOME]}"
-	export ZEPHYR_TOOLCHAIN_VARIANT="${ncs_vars[ZEPHYR_TOOLCHAIN_VARIANT]}"
-	export ZEPHYR_SDK_INSTALL_DIR="${ncs_vars[ZEPHYR_SDK_INSTALL_DIR]}"
-	if [[ ! -d "$NCS_SDK_HOME" ]]; then fatal "NCS_SDK_HOME ENV VAR MUST BE SET"; fi
-	export NCS_SDK_ROOT="$NCS_SDK_HOME/$ncs_version"
-	export ZEPHYR_BASE="$NCS_SDK_ROOT/zephyr"
+  export NRFUTIL_HOME="${ncs_vars[NRFUTIL_HOME]}"
+  export ZEPHYR_TOOLCHAIN_VARIANT="${ncs_vars[ZEPHYR_TOOLCHAIN_VARIANT]}"
+  export ZEPHYR_SDK_INSTALL_DIR="${ncs_vars[ZEPHYR_SDK_INSTALL_DIR]}"
+  if [[ ! -d "$NCS_SDK_HOME" ]]; then fatal "NCS_SDK_HOME ENV VAR MUST BE SET"; fi
+  export NCS_SDK_ROOT="$NCS_SDK_HOME/$ncs_version"
+  export ZEPHYR_BASE="$NCS_SDK_ROOT/zephyr"
 }
 
 use_zephyr_toolchain() {
-	if [[ ! "$#" -eq 1 ]]; then
-		fatal "use zephyr requires a version to be specified as an argument"
-	fi
-	local zephyr_version
-	zephyr_version="$1"
-	# zephyr_repo_path="${2:-~/zephyrproject}"
+  if [[ ! "$#" -eq 1 ]]; then
+    fatal "use zephyr requires a version to be specified as an argument"
+  fi
+  local zephyr_version
+  zephyr_version="$1"
+  # zephyr_repo_path="${2:-~/zephyrproject}"
 
-	echo "Using Zephyr version $zephyr_version"
-	export ZEPHYR_TOOLCHAIN_VARIANT=zephyr
-	export ZEPHYR_TOOLCHAIN_ROOT="${2:-$HOME/zephyrproject/toolchains}"
-	toolchain_dir="$ZEPHYR_TOOLCHAIN_ROOT/zephyr-sdk-$zephyr_version"
-	echo "Toolchain dir $toolchain_dir"
-	if [[ ! -e "$toolchain_dir" ]]; then
-		echo "Zephyr SDK toolchain is not installed! Please run install_zephyr_sdk_toolchain <VERSION> first!"
-		return
-	fi
-	export ZEPHYR_SDK_INSTALL_DIR=$toolchain_dir
-	PATH_add "$ZEPHYR_SDK_INSTALL_DIR/arm-zephyr-eabi/bin"
-}
-
-uv_add_zephyr_python_deps() {
-	fd "requirements.txt" "$ZEPHYR_BASE" -X uv pip compile -q -o pylock.toml
-	uv pip sync --quiet pylock.toml
+  echo "Using Zephyr version $zephyr_version"
+  export ZEPHYR_TOOLCHAIN_VARIANT=zephyr
+  export ZEPHYR_TOOLCHAIN_ROOT="${2:-$HOME/zephyrproject/toolchains}"
+  toolchain_dir="$ZEPHYR_TOOLCHAIN_ROOT/zephyr-sdk-$zephyr_version"
+  echo "Toolchain dir $toolchain_dir"
+  if [[ ! -e "$toolchain_dir" ]]; then
+    echo "Zephyr SDK toolchain is not installed! Please run install_zephyr_sdk_toolchain <VERSION> first!"
+    return
+  fi
+  export ZEPHYR_SDK_INSTALL_DIR=$toolchain_dir
+  PATH_add "$ZEPHYR_SDK_INSTALL_DIR/arm-zephyr-eabi/bin"
 }
 
 layout_uv_zephyr() {
-	layout uv_project
-	# west packages pip | xargs uv add
-	# declare -A zephyr_deps=(
-	# 	[dev]="west ninja pyelftools"
-	# )
-	# uv_check_for_deps "${zephyr_deps[@]}"
+  layout uv
+  echo "Installing west and required python packages for building (pyelftools ninja intelhex)"
+  uv add --dev west pyelftools ninja intelhex
+  is_workspace=$(west topdir)
+  if [[ -d "$is_workspace" ]]; then
+    west packages pip | xargs uv add --dev
+  else
+    log_status "Not inside a workspace. Are you out-of-tree?"
+  fi
 }
 
 #Main Functions to use for setting up an environment:
 
 layout_ncs() {
-	local ncs_version
-	ncs_version="${1:-v3.1.0}"
-	use ncs "$ncs_version"
-	use developer_envs
-	layout uv_zephyr
+  local ncs_version
+  ncs_version="${1:-v3.1.0}"
+  use ncs "$ncs_version"
+  use developer_envs
+  layout uv_zephyr
 }
 
 layout_zephyr() {
-	local zephyr_version
-	zephyr_version="${1:-0.17.2}"
-	use zephyr_toolchain "$zephyr_version"
+  local zephyr_version
+  zephyr_version="${1:-0.17.2}"
+  use zephyr_toolchain "$zephyr_version"
 
-	use developer_envs
-	layout uv_zephyr
+  use developer_envs
+}
+
+use_out_of_tree_west_workspace() {
+  if [[ -z "$ZEPHYR_BASE" ]]; then
+    fatal "ZEPHYR_BASE must be set to use an out of tree west workspace"
+  fi
+  if has west; then
+    west config zephyr.base "$ZEPHYR_BASE"
+    source "${ZEPHYR_BASE}/zephyr-env.sh"
+    west zephyr-export
+  else
+    fatal "Need west to be installed in the uv environement"
+  fi
+
 }
 
 layout_west_workspace() {
-	layout_zephyr $1
-	zephyr_base=$(west config zephyr.base)
-	if [[ -z $zephyr_base ]]; then
-		echo "No ZEPHYR_BASE set. Please specify it through the local west config"
-	else
-		export ZEPHYR_BASE="$(west topdir)/$zephyr_base"
-		west zephyr-export
-	fi
-
+  zephyr_base=$(west config zephyr.base)
+  if [[ -z $zephyr_base ]]; then
+    echo "No ZEPHYR_BASE set. Please specify it through the local west config"
+  else
+    export ZEPHYR_BASE="$(west topdir)/$zephyr_base"
+    west zephyr-export
+  fi
 }

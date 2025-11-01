@@ -2,3 +2,5 @@
 
 export TERMINAL=wezterm
 export EDITOR=nvim
+
+export OMARCHY_SCREENSHOT_DIR="$HOME/Pictures/Screenshots"

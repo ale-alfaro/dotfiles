@@ -40,13 +40,16 @@ uv_check_for_deps() {
   done
 }
 
-layout_uv() {
+layout_uv_venv() {
+
+  python_version="--python=${1:-3.12}"
+
   if [[ -d ".venv" ]]; then
     VIRTUAL_ENV="$(pwd)/.venv"
   fi
   if [[ -z $VIRTUAL_ENV || ! -d $VIRTUAL_ENV ]]; then
     log_status "No virtual environment exists. Executing uv venv to create one."
-    uv venv
+    uv venv "$python_version"
     VIRTUAL_ENV="$(pwd)/.venv"
   fi
   PATH_add "$VIRTUAL_ENV/bin"
@@ -56,25 +59,18 @@ layout_uv() {
 }
 
 layout_uv_project() {
-  if [[ -d ".venv" ]]; then
-    VIRTUAL_ENV="$(pwd)/.venv"
-  fi
 
+  project_type="${1:-virtual}"
+  uv_project_init_cmd="uv init --bare --$project_type"
   if [[ ! -f "$(pwd)/pyproject.toml" ]]; then
-    log_status "No uv project exists. Executing uv init --no-readme to create one."
-    uv init --bare
+    log_status "No uv project exists. Executing $uv_project_init_cmd to create one."
+    $uv_project_init_cmd
   fi
+}
 
-  if [[ -z $VIRTUAL_ENV || ! -d $VIRTUAL_ENV ]]; then
-    log_status "No venv detected. Creating a new one"
-    uv venv
-    VIRTUAL_ENV="$(pwd)/.venv"
-  fi
-
-  PATH_add "$VIRTUAL_ENV/bin"
-  export UV_ACTIVE=1 # or VENV_ACTIVE=1
-  export VIRTUAL_ENV
-  export UV_PYTHON="$VIRTUAL_ENV/bin/python"
+layout_uv() {
+  layout_uv_venv "$1"
+  layout_uv_project "$2"
 }
 
 alias_justfile_recipes() {
@@ -86,7 +82,15 @@ alias_justfile_recipes() {
   done
 }
 use_developer_envs() {
-  use_env_dir "$HOME/.config/direnv/envs"
+
+  local env_type
+  if [[ -z $WORK_ENV ]]; then
+    env_type="personal"
+  else
+    env_type="work"
+  fi
+  use_env_dir "$XDG_CONFIG_HOME/direnv/envs/common"
+  use_env_dir "$XDG_CONFIG_HOME/direnv/envs/${env_type}"
 }
 
 use_nvm() {

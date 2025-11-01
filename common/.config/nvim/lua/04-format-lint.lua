@@ -53,7 +53,7 @@ require('conform').setup {
 
 VimRc.linters_by_ft = {
   cmake = { 'cmakelint' }, -- Install: uv tool install cmakelint, repo: https://github.com/cmake-lint/cmake-lint
-  -- python = { 'mypy' },
+  python = { 'mypy' },
   yaml = { 'yamlint' },    --Install: uv tool install yamllint, repo: https://github.com/adrienverge/yamllint
   bash = { 'shellcheck' },
   sh = { 'shellcheck' },
@@ -114,7 +114,7 @@ lint.linters_by_ft = VimRc.linters_by_ft
 
 _G.new_autocmd("User", function()
     if vim.g.run_linter_after_save then
-      M.debounce(100, M.do_lint)
+      M.debounce(100, VimRc.do_lint)
     end
   end,
   { 'BufWritePost', 'BufReadPost', 'InsertLeave' },
@@ -122,12 +122,17 @@ _G.new_autocmd("User", function()
 
 
 vim.api.nvim_create_user_command('ViewLinter', function()
-  local cur = M.current_linters()
-  local ft = M.filetype_linters()
+  local cur = VimRc.current_linters()
+  local ft = VimRc.filetype_linters()
   vim.notify('Current running linters: ' .. table.concat(cur, ', '))
   vim.notify('ft linters: ' .. table.concat(ft, ', '))
 end, { desc = 'View Running Linters' })
 
 vim.api.nvim_create_user_command('Lint', function()
-  M.do_lint()
+  VimRc.do_lint()
 end, { desc = 'View Running Linters' })
+
+
+_G.keymaps_define({
+  { lhs = '<leader>ll', rhs = '<cmd>Lint<cr>', { desc = 'Lint' } },
+})

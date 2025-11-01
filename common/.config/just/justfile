@@ -66,5 +66,6 @@ clean-aliens-interactive target_dir:
 
 mod JLink
 mod zephyr
-mod nordic
+mod nrfutil
 mod git
+mod ozone

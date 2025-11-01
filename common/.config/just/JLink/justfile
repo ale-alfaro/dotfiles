@@ -76,23 +76,27 @@ flash device hex_file erase='true' reset='true' *extra_opts:
 # Reset the target using J-Link
 
 jlink_reset_script_tmp_path := join(cache_directory(), "jlink.reset.tmp")
-
+jlink_reset_command := '''
+    con
+    reset
+    q
+'''
 reset device:
-    @echo "r\nq" > {{ jlink_reset_script_tmp_path }}
-    @echo "INFO: Resetting {{ device }}"...
+    @echo {{ jlink_reset_command }} > {{ jlink_reset_script_tmp_path }}
+    @echo "INFO: Resetting {{ device }} "
     @just _jlink-run "{{ device }}" "{{ jlink_reset_script_tmp_path }}"
 
 jlink_verify_script_tmp_path := join(cache_directory(), "jlink.verify.tmp")
 
 # Verify flash content by reading memory with J-Link
-verify-flash device:
-    @echo "r\nh\nmem32 0x10000200 4\nq" > {{ jlink_verify_script_tmp_path }}
-    @echo "INFO: Verifying flash on {{ device }}"...
-    @just _jlink-run "{{ device }}" "{{ jlink_verify_script_tmp_path }}"
+# verify-flash device:
+#     @echo "r\nh\nmem32 0x10000200 4\nq" > {{ jlink_verify_script_tmp_path }}
+#     @echo "INFO: Verifying flash on {{ device }}"...
+#     @just _jlink-run "{{ device }}" "{{ jlink_verify_script_tmp_path }}"
 
 jlink_status_command := '''
     st
-    con 
+    con
     q
 '''
 

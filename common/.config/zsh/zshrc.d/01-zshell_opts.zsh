@@ -64,10 +64,10 @@ bindkey '^N' down-line-or-history
 
 # Remove some default bindkeys
 # bindkey -r '^c'
-# bindkey -r '^l' # Clear screen
+bindkey -r '^l' # Clear screen
 # bindkey -r '^h'
 
-# bindkey -s '^Z' 'fg\n'
+bindkey -s '^Z' 'fg\n'
 #######################################################
 # History Configuration
 #######################################################

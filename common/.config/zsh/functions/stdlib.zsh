@@ -400,3 +400,42 @@ use_nvim() {
   fi
 }
 
+# Transcode any image to JPG image that's great for shrinking wallpapers
+img2jpg() {
+  magick $1 -quality 95 -strip ${1%.*}.jpg
+}
+
+# Transcode any image to JPG image that's great for sharing online without being too big
+img2jpg-small() {
+  magick $1 -resize 1080x\> -quality 95 -strip ${1%.*}.jpg
+}
+
+# Transcode any image to compressed-but-lossless PNG
+img2png() {
+  magick "$1" -strip -define png:compression-filter=5 \
+    -define png:compression-level=9 \
+    -define png:compression-strategy=1 \
+    -define png:exclude-chunk=all \
+    "${1%.*}.png"
+}
+
+convert_rst_to_md() {
+  filename="${1%.*}"
+  echo "Converting $1 to $filename.md"
+  pandoc "$1" -f rst -t markdown -o "${filename}.md"
+}
+
+convert_rst_to_md_dir(){
+
+  dir="${1:-$PWD}"
+  # Non-recursively
+  for rst in "${dir}/*.rst"; do pandoc "$rst" -f rst -t markdown -o "${rst%.*}.md"; done
+
+  # Recursively (if your shell supports double-star globs)
+  # for rst in **/*.rst; do pandoc "$rst" -f rst -t markdown -o "${rst%.*}.md"; done
+  # dir="${1:-$PWD}"
+  # FILES=dir/*.rst
+  # for f in $FILES; do
+  #   convert_rst_to_md f
+  # done
+}
