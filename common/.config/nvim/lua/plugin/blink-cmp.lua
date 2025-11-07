@@ -18,7 +18,7 @@ require('blink.cmp').setup {
     menu = { scrollbar = false },
   },
   signature = { enabled = true },
-  -- snippets = { preset = 'luasnip' },
+  snippets = { preset = 'luasnip' },
   -- Disable command line completion:
   cmdline = {
     enabled = true,
@@ -43,7 +43,6 @@ require('blink.cmp').setup {
       codecompanion = { 'codecompanion' },
     },
   },
-  snippets = { preset = "luasnip" },
   appearance = {
     kind_icons = VimRc.icons.symbol_kinds,
   },

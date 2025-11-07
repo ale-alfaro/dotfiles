@@ -1,3 +1,5 @@
+---@module "noice"
+
 vim.pack.add(_G.plug_spec {
   'catppuccin/nvim',
   'folke/noice.nvim',
@@ -23,7 +25,9 @@ mini_icons.mock_nvim_web_devicons()
 
 -- Add LSP kind icons. Useful for 'mini.completion'.
 mini_icons.tweak_lsp_kind 'append'
-require('noice').setup {
+
+---@type NoiceConfig
+local noice_opts = {
   lsp = {
     -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
     override = {
@@ -41,6 +45,7 @@ require('noice').setup {
     lsp_doc_border = false,       -- add a border to hover docs and signature help
   },
 }
+require('noice').setup(noice_opts)
 -- Similar to 'mhinz/vim-startify' ~
 local starter = require('mini.starter')
 starter.setup({
@@ -90,7 +95,6 @@ require('which-key').setup {
   defaults = {},
   spec = {
     mode = { 'n', 'v' },
-    { '<leader>a', group = 'AI' },
     { '<leader>c', group = 'Code' },
     { '<leader>e', group = 'Explore/Edit' },
     { '<leader>x', group = 'diagnostics/quickfix' },
