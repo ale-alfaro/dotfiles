@@ -30,7 +30,7 @@ if [[ $- != *i* ]]; then
 fi
 
 case "$TERM" in
-linux | dumb)
+linux | dumb | xterm-ghostty)
   # Avoid terminals that don't like OSC sequences
   return 0
   ;;

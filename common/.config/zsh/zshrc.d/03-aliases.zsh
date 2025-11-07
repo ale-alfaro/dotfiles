@@ -5,11 +5,11 @@ n() {
   if [[ "$#" -eq 0 ]]; then nvim; fi
   if [[ "$#" -eq 1 ]]; then
     case "$1" in
-      zsh)
-        nvim "$ZDOTDIR"
+      nvim|zsh|direnv|hypr|wezterm)
+        nvim "$XDG_CONFIG_HOME/$1"
         ;;
-      hypr)
-        nvim "$XDG_CONFIG_HOME/hypr/hyprland"
+      sdk-ncs)
+        nvim "$HOME/ncs"
         ;;
       *)
         if [[ -d "$1" ]]; then
@@ -46,7 +46,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 fi
 # ---- Eza (better ls) -----
 if has eza; then
-  alias lt='eza --tree --level=2 --long --icons --git'
+  alias lt='eza --tree --level=3 --long --icons --git'
   alias lta='lt -a'
   alias ls="eza --icons=always --oneline --no-git --all"
 fi
@@ -69,3 +69,4 @@ fi
 if has fzf; then
   alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
 fi
+

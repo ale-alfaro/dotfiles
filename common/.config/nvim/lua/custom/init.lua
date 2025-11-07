@@ -137,7 +137,8 @@ end
 ---@field lhs string
 ---@field rhs string|fun(args:table)
 ---@field mode string|string[]?
----@field opts table?
+---@field opts vim.keymap.set.Opts?
+---
 -- Tracks defined keymaps to prevent duplicates.
 -- Key is a unique string like "n:<leader>ff".
 M.keymap_registry = {}
@@ -155,7 +156,7 @@ function M.keymap_have(lhs, mode)
   return M.keymap_registry[keymap_encode(lhs, check_mode)] ~= nil
 end
 
-local function add_ft_keymaps(keys)
+function M.add_ft_keymaps(keys)
   vim.api.nvim_create_autocmd('FileType', {
     pattern = keys.ft,
     callback = function(event)
@@ -167,19 +168,22 @@ local function add_ft_keymaps(keys)
     end,
   })
 end
+
+---@class WhichKeyGroupSpec
+---@field prefix string
+---@field group string
+
 --- Defines a list of keymaps, preventing duplicates and handling conditions.
 ---@param keymaps KeymapSpec[]
-function _G.keymaps_define(keymaps)
-  for _, spec in ipairs(keymaps) do
-    -- Skip if the condition is not met
-    -- if spec.cond == false or (type(spec.cond) == 'function' and not spec.cond()) then
-    --   goto continue
-    -- end
-    -- if spec.ft then
-    --   add_ft_keymaps(spec)
-    --   goto continue
-    -- end
+---@param wkey_group WhichKeyGroupSpec?
+function _G.keymaps_define(keymaps, wkey_group)
+  local wkey_spec = {}
+  if wkey_group then
+    wkey_spec[#wkey_spec + 1] = { wkey_group.prefix, group = wkey_group.group }
+  end
 
+  for _, spec in ipairs(keymaps) do
+    ---@type table
     local modes = vim._ensure_list(spec.mode or 'n')
     for _, mode in ipairs(modes) do
       local id = keymap_encode(spec.lhs, mode)
@@ -188,19 +192,41 @@ function _G.keymaps_define(keymaps)
         goto continue_inner
       end
 
-      if spec.rhs == false or spec.rhs == nil then
-        -- Unmap the key
-        pcall(vim.keymap.del, mode, spec.lhs)
-      else
-        -- Set the keymap
-        vim.keymap.set(mode, spec.lhs, spec.rhs, spec.opts or {})
+      ---@type vim.keymap.set.Opts
+      local opts = spec.opts or {}
+      vim.keymap.set(mode, spec.lhs, spec.rhs, opts)
+      if wkey_group then
+        wkey_spec[#wkey_spec + 1] = { spec.lhs, desc = opts.desc or wkey_group.prefix }
       end
 
       -- Mark this keymap as handled
       M.keymap_registry[id] = true
       ::continue_inner::
     end
-    ::continue::
+  end
+
+  if #wkey_spec > 1 then
+    require('which-key').add(wkey_spec)
+  end
+end
+
+---@param keymaps KeymapSpec[]
+---@param enable boolean
+function _G.keymaps_toggle(keymaps, enable)
+  for _, spec in ipairs(keymaps) do
+    ---@type table
+    local modes = vim._ensure_list(spec.mode or 'n')
+    for _, mode in ipairs(modes) do
+      if enable then
+        -- Set the keymap
+        ---@type vim.keymap.set.Opts
+        local opts = spec.opts or {}
+        vim.keymap.set(mode, spec.lhs, spec.rhs, opts)
+      else
+        -- Unmap the key
+        pcall(vim.keymap.del, mode, spec.lhs)
+      end
+    end
   end
 end
 
@@ -219,16 +245,28 @@ end
 ---@class VimPackPlugin
 ---@field name string
 ---@field plugin vim.pack.Spec
----@field opts table
----@field keys KeymapSpec[]
----
+---@field dependencies vim.pack.Spec?
+---@field opts table?
+---@field config fun(opts: table)?
+---@field keys KeymapSpec[]?
+---@field wkey_group WhichKeyGroupSpec?
 ---@type VimPackPlugin[]
 M.added_plugins = {}
 ---@param spec VimPackPlugin
 function M.pack_add(spec)
+  if spec.dependencies then
+    vim.pack.add(spec.dependencies)
+  end
   vim.pack.add(spec.plugin)
-  require(spec.name).setup(spec.opts)
-  _G.keymaps_define(spec.keys)
+  if spec.config then
+    local opts = spec.opts or {}
+    spec.config(opts)
+  else
+    require(spec.name).setup(spec.opts)
+  end
+  if spec.keys then
+    _G.keymaps_define(spec.keys, spec.wkey_group)
+  end
   M.added_plugins[#M.added_plugins + 1] = spec
 end
 

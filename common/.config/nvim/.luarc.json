@@ -1,14 +1,44 @@
 {
-  "runtime.version": "LuaJIT",
-  "runtime.path": [
-    "lua/?.lua",
-    "lua/?/init.lua",
-    "$XDG_DATA_HOME/nvim/site/pack/core/opt/",
-    "$XDG_DATA_HOME/nvim/site/pack/core/opt/mini.nvim"
+  "diagnostics.globals": [
+    "vim"
   ],
-  "diagnostics.globals": ["vim"],
-  "workspace.checkThirdParty": false,
   "workspace.library": [
-    "$VIMRUNTIME"
+    "$VIMRUNTIME",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/tiny-code-action.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim-lspconfig",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim-dap",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim-dap-virtual-text",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim-dap-python",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim-dap-ui",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim-nio",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/render-markdown.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/obsidian.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/lazydev.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/grug-far.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/trouble.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/flash.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/codecompanion-history.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/codecompanion-spinners.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/codecompanion.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/schemastore.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim-lint",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/conform.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/blink.cmp",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/LuaSnip",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/friendly-snippets",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim-treesitter",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/fzf-lua",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim-notify",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nui.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/smart-splits.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/which-key.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/bufferline.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/noice.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/mini.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/plenary.nvim",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/obsidian.nvim/after",
+    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim/after",
+    "/home/alealfaro/.config/nvim/after"
   ]
 }

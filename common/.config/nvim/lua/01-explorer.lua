@@ -21,28 +21,17 @@ end
 -- - `:h MiniVisits-examples` - examples of common setups
 require('mini.visits').setup()
 -- v is for 'Visits'. Common usage:
--- - `<Leader>vv` - add    "core" label to current file.
--- - `<Leader>vV` - remove "core" label to current file.
--- - `<Leader>vc` - pick among all files with "core" label.
---
-_G.keymaps_define {
-  -- General & Navigation
-  -- stylua: ignore
-  {
-    lhs = '<leader>vl',
-    rhs = '<Cmd>lua MiniVisits.add_label("core")<CR>',
-    opts = { desc = 'Add to core' },
-  },
-  {
-    lhs = '<leader>vL',
-    rhs = '<Cmd>lua MiniVisits.remove_label("core")<CR>',
-    opts = { desc = 'Remove from core' },
-  },
-  { lhs = '<leader>vc', rhs = make_pick_core('', 'Core visits (all)'),  opts = { desc = 'Core visits (all)' } },
-  { lhs = '<leader>vC', rhs = make_pick_core(nil, 'Core visits (cwd)'), opts = { desc = 'Core visits (cwd)' } },
-  { lhs = '<leader>vr', rhs = make_select_path(true, 0.5),              opts = { desc = 'Frecent visits (all)' } },
-  { lhs = '<leader>vR', rhs = make_select_path(false, 0.5),             opts = { desc = 'Frecent visits (cwd)' } },
-}
+local prefix = '<leader>v'
+
+-- stylua: ignore
+_G.keymaps_define({
+  { lhs = prefix .. 'l', rhs = '<Cmd>lua MiniVisits.add_label("core")<CR>',    opts = { desc = 'Add to core' }, },
+  { lhs = prefix .. 'L', rhs = '<Cmd>lua MiniVisits.remove_label("core")<CR>', opts = { desc = 'Remove from core' }, },
+  { lhs = prefix .. 'c', rhs = make_pick_core('', 'Core visits (all)'),        opts = { desc = 'Core visits (all)' } },
+  { lhs = prefix .. 'C', rhs = make_pick_core(nil, 'Core visits (cwd)'),       opts = { desc = 'Core visits (cwd)' } },
+  { lhs = prefix .. 'r', rhs = make_select_path(true, 0.5),                    opts = { desc = 'Frecent visits (all)' } },
+  { lhs = prefix .. 'R', rhs = make_select_path(false, 0.5),                   opts = { desc = 'Frecent visits (cwd)' } },
+}, { prefix = prefix, group = 'Visits' })
 
 -- Smart Splits
 require('smart-splits').setup {

@@ -60,12 +60,13 @@ fi
 if [[ $TERM_PROGRAM == "WezTerm" ]]; then
   echo "Enabling wezterm shell integration"
   . $ZDOTDIR/shell_integrations/wezterm.sh
-
 elif [[ $TERM_PROGRAM == "ghostty" ]]; then
   if [[ -n $GHOSTTY_RESOURCES_DIR ]]; then
     echo "Enabling ghostty shell integration"
-    # source "$GHOSTTY_RESOURCES_DIR"/shell-integration/zsh/ghostty-integration
+    source "$GHOSTTY_RESOURCES_DIR"/shell-integration/zsh/ghostty-integration
   fi
+else
+  echo "Unsupported TERM_PROGRAM=$TERM_PROGRAM"
 fi
 
 # Initialize Node Version manager

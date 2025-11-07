@@ -132,7 +132,8 @@ vim.api.nvim_create_user_command('Lint', function()
   VimRc.do_lint()
 end, { desc = 'View Running Linters' })
 
-
+local prefix = '<leader>l'
 _G.keymaps_define({
-  { lhs = '<leader>ll', rhs = '<cmd>Lint<cr>', { desc = 'Lint' } },
-})
+    { lhs = prefix .. 'l', rhs = '<cmd>Lint<cr>', opts = { desc = 'Lint' } },
+  },
+  { prefix = prefix, group = "Lint" })

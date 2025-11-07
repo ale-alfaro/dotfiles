@@ -23,7 +23,7 @@ else
   # export PICO_SDK_PATH=$PICO_HOME/sdk
   # export PICO_EXAMPLES_PATH=$PICO_HOME/examples
   # export PICO_OPENOCD_PATH=$PICO_HOME/openocd
-  export NCS_SDK_HOME="$HOME/ncs/sdk"
+  export NCS_SDK_HOME="$HOME/ncs"
 fi
 
 export BAT_THEME=ansi

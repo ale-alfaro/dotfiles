@@ -3,7 +3,7 @@
 ---@type  VimPackPlugin
 return {
   name = 'flash',
-  plugin = _G.plug("folke/flash.nvim"),
+  plugin = _G.plug_spec { "folke/flash.nvim" },
   opts = {
     labels = "asdfqwerzxcv", -- Limit labels to left side of the keyboard
     modes = {
@@ -48,10 +48,10 @@ return {
     jump = { nohlsearch = true },
   },
   keys = {
-    { mode = { 'n', 'o', 'x' }, lhs = 'S',     rhs = function() require('flash').treesitter() end,        { desc = 'Flash Treesitter' } },
-    { mode = 'o',               lhs = 'r',     rhs = function() require('flash').treesitter_search() end, { desc = 'Treesitter Search' } },
-    { mode = 'o',               lhs = 'R',     rhs = function() require('flash').remote() end,            { desc = 'Remote Flash' } },
-    { mode = 'c',               lhs = '<c-s>', rhs = function() require('flash').toggle() end,            { desc = 'Flash Toggle' } },
+    { mode = { 'n', 'o', 'x' }, lhs = 'S',     rhs = function() require('flash').treesitter() end,        opts = { desc = 'Flash Treesitter' } },
+    { mode = 'o',               lhs = 'r',     rhs = function() require('flash').treesitter_search() end, opts = { desc = 'Treesitter Search' } },
+    { mode = 'o',               lhs = 'R',     rhs = function() require('flash').remote() end,            opts = { desc = 'Remote Flash' } },
+    { mode = 'c',               lhs = '<c-s>', rhs = function() require('flash').toggle() end,            opts = { desc = 'Flash Toggle' } },
     {
       mode = { 'n', 'o', 'x' },
       lhs = '<c-space>',

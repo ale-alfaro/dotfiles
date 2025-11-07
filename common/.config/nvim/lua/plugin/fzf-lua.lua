@@ -99,11 +99,11 @@ require('fzf-lua').setup {
     },
   },
 }
-
-_G.keymaps_define {
+local wkey_prefix = '<leader>f'
+_G.keymaps_define({
   {
     mode = { 'n', 'x' },
-    lhs = '<leader>fb',
+    lhs = '<leader><leader>',
     rhs = function()
       local opts = {
         winopts = {
@@ -133,36 +133,25 @@ _G.keymaps_define {
     end,
     opts = { desc = 'Search current buffer' },
   },
-  -- {
-  --   lhs = '<leader>s/',
-  --   rhs = function()
-  --     require('fzf-lua').live_grep()
-  --   end,
-  --   opts = { desc = '[S]earch [/] in Open Files' },
-  -- },
-  --   {
-  --     lhs = '<leader>sb',
-  --     rhs = telescope_builtin.current_buffer_fuzzy_find,
-  --     opts = { desc = 'Buffer Lines' },
-  --   },
-  --   {
-  --     lhs = '<leader>sB',
-  --     rhs = function()
-  --       telescope_builtin.live_grep { grep_open_files = true, prompt_title = 'Grep Open Buffers' }
-  --     end,
-  --     opts = { desc = 'Grep Open Buffers' },
-  --   },
-  -- }
-  { lhs = '<leader>fB', rhs = '<cmd>FzfLua buffers<cr>',                  opts = { desc = 'Buffers' } },
-  { lhs = '<leader>fd', rhs = '<cmd>FzfLua lsp_document_diagnostics<cr>', opts = { desc = 'Document diagnostics' } },
-  { lhs = '<leader>ff', rhs = '<cmd>FzfLua files<cr>',                    opts = { desc = 'Find files' } },
-  { lhs = '<leader>fg', rhs = "<cmd>FzfLua live_grep cwd=\'%:p:h\'<cr>",  opts = { desc = 'Grep (At open buffer directory)' } },
-  { lhs = '<leader>fG', rhs = '<cmd>FzfLua grep_project<cr>',             opts = { desc = 'Grep Project' } },
-  { mode = 'x',         lhs = '<leader>fg',                               rhs = '<cmd>FzfLua grep_visual<cr>',                opts = { desc = 'Grep' } },
-  { lhs = '<leader>fc', rhs = '<cmd>FzfLua changes<cr>',                  opts = { desc = 'Changes' } },
-  { lhs = '<leader>fh', rhs = '<cmd>FzfLua help_tags<cr>',                opts = { desc = 'Help' } },
-  { lhs = '<leader>fr', rhs = '<cmd>FzfLua oldfiles<cr>',                 opts = { desc = 'Recently opened files' } },
-  { lhs = '<leader>f<', rhs = '<cmd>FzfLua resume<cr>',                   opts = { desc = 'Resume last fzf command' } },
-  { lhs = 'z=',         rhs = '<cmd>FzfLua spell_suggest<cr>',            opts = { desc = 'Spelling suggestions' } },
-  { lhs = '<leader>zd', rhs = '<cmd>FzfLua zoxide<cr>',                   opts = { desc = 'Zoxide' } },
-}
+  {
+    lhs = '<leader>s/',
+    rhs = function()
+      require('fzf-lua').live_grep()
+    end,
+    opts = { desc = '[S]earch [/] in Open Files' },
+  },
+  { mode = 'x',               lhs = '<leader>fg',                               rhs = '<cmd>FzfLua grep_visual<cr>',        opts = { desc = 'Grep' } },
+  { lhs = 'z=',               rhs = '<cmd>FzfLua spell_suggest<cr>',            opts = { desc = 'Spelling suggestions' } },
+
+  { lhs = wkey_prefix .. 'b', rhs = '<cmd>FzfLua blines<cr>',                   opts = { desc = 'Buffer Lines' }, },
+  { lhs = wkey_prefix .. 'B', rhs = '<cmd>FzfLua buffers<cr>',                  opts = { desc = 'Buffers' } },
+  { lhs = wkey_prefix .. 'd', rhs = '<cmd>FzfLua lsp_document_diagnostics<cr>', opts = { desc = 'Document diagnostics' } },
+  { lhs = wkey_prefix .. 'f', rhs = '<cmd>FzfLua files<cr>',                    opts = { desc = 'Find files' } },
+  { lhs = wkey_prefix .. 'g', rhs = '<cmd>FzfLua grep_project<cr>',             opts = { desc = 'Grep Project' } },
+  { lhs = wkey_prefix .. 'c', rhs = '<cmd>FzfLua changes<cr>',                  opts = { desc = 'Changes' } },
+  { lhs = wkey_prefix .. 'h', rhs = '<cmd>FzfLua help_tags<cr>',                opts = { desc = 'Help' } },
+  { lhs = wkey_prefix .. 'o', rhs = '<cmd>FzfLua oldfiles<cr>',                 opts = { desc = 'Recently opened files' } },
+  { lhs = wkey_prefix .. 'r', rhs = '<cmd>FzfLua resume<cr>',                   opts = { desc = 'Resume last fzf command' } },
+  { lhs = wkey_prefix .. 'z', rhs = '<cmd>FzfLua zoxide<cr>',                   opts = { desc = 'Zoxide' } },
+  { lhs = wkey_prefix .. 'k', rhs = '<Cmd>FzfLua keymaps<CR>',                  opts = { desc = 'Keymaps' } },
+}, { prefix = wkey_prefix, group = 'Find' })

@@ -235,10 +235,10 @@ require('mini.bracketed').setup()
 -- - `<Leader>bd` - delete current buffer (see `:h :bdelete`)
 require('mini.bufremove').setup()
 _G.keymaps_define {
-  { lhs = '<leader>bd', rhs = '<Cmd>lua MiniBufremove.delete()<CR>',        opts = { desc = 'Delete' } },
-  { lhs = '<leader>dd', rhs = '<Cmd>lua MiniBufremove.delete(0, true)<CR>', opts = { desc = 'Delete!' } },
-  -- { lhs = '<leader>bw', rhs = '<Cmd>lua MiniBufremove.wipeout()<CR>', opts = { desc = 'Wipeout' } },
-  -- { lhs = '<leader>bW', rhs = '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', opts = { desc = 'Wipeout!' } },
+  { lhs = '<leader>bd', rhs = '<Cmd>lua MiniBufremove.delete()<CR>',         opts = { desc = 'Delete' } },
+  { lhs = '<leader>bD', rhs = '<Cmd>lua MiniBufremove.delete(0, true)<CR>',  opts = { desc = 'Delete!' } },
+  { lhs = '<leader>bw', rhs = '<Cmd>lua MiniBufremove.wipeout()<CR>',        opts = { desc = 'Wipeout' } },
+  { lhs = '<leader>bW', rhs = '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', opts = { desc = 'Wipeout!' } },
 }
 
 -- Comment lines. Provides functionality to work with commented lines.

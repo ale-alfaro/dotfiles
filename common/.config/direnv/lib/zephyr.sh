@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-NRFUTIL="/usr/local/bin/nrfutil"
-
 fatal() {
   echo '[FATAL]' "$@" >&2
   exit 1
@@ -40,6 +38,7 @@ prefix_path_ncs() {
   ncs_version="${1:-v3.1.0}"
   echo "Using NCS version $ncs_version"
   local nrf_env
+  NRFUTIL="$(which nrfutil)"
   nrf_env="$($NRFUTIL sdk-manager toolchain env --as-script --ncs-version "$ncs_version")"
   parse_ncs_env "$nrf_env"
 
@@ -67,12 +66,14 @@ use_ncs() {
   ncs_version="$1"
   echo "Using NCS version $ncs_version"
   local nrf_env
+  NRFUTIL="$(which nrfutil)"
   nrf_env="$($NRFUTIL sdk-manager toolchain env --as-script --ncs-version "$ncs_version")"
   parse_ncs_env "$nrf_env"
 
   export NRFUTIL_HOME="${ncs_vars[NRFUTIL_HOME]}"
   export ZEPHYR_TOOLCHAIN_VARIANT="${ncs_vars[ZEPHYR_TOOLCHAIN_VARIANT]}"
   export ZEPHYR_SDK_INSTALL_DIR="${ncs_vars[ZEPHYR_SDK_INSTALL_DIR]}"
+  export NCS_SDK_HOME="${2:-$HOME/ncs}"
   if [[ ! -d "$NCS_SDK_HOME" ]]; then fatal "NCS_SDK_HOME ENV VAR MUST BE SET"; fi
   export NCS_SDK_ROOT="$NCS_SDK_HOME/$ncs_version"
   export ZEPHYR_BASE="$NCS_SDK_ROOT/zephyr"
@@ -103,11 +104,13 @@ layout_uv_zephyr() {
   layout uv
   echo "Installing west and required python packages for building (pyelftools ninja intelhex)"
   uv add --dev west pyelftools ninja intelhex
-  is_workspace=$(west topdir)
-  if [[ -d "$is_workspace" ]]; then
-    west packages pip | xargs uv add --dev
-  else
-    log_status "Not inside a workspace. Are you out-of-tree?"
+  if [[ -z "$ALL_ZEPHYR_PYTHON_DEPS" ]]; then
+    is_workspace=$(west topdir)
+    if [[ -d "$is_workspace" ]]; then
+      west packages pip | xargs uv add --dev
+    else
+      log_status "Not inside a workspace. Are you out-of-tree?"
+    fi
   fi
 }
 
@@ -117,16 +120,12 @@ layout_ncs() {
   local ncs_version
   ncs_version="${1:-v3.1.0}"
   use ncs "$ncs_version"
-  use developer_envs
-  layout uv_zephyr
 }
 
 layout_zephyr() {
   local zephyr_version
   zephyr_version="${1:-0.17.2}"
   use zephyr_toolchain "$zephyr_version"
-
-  use developer_envs
 }
 
 use_out_of_tree_west_workspace() {

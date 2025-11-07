@@ -89,17 +89,14 @@ local wipeout_cur = function()
   vim.api.nvim_buf_delete(MiniPick.get_picker_matches().current.bufnr, {})
 end
 local buffer_mappings = { wipeout = { char = '<C-d>', func = wipeout_cur } }
+local prefix = '<leader>s'
 -- stylua: ignore
-_G.keymaps_define {
-  { lhs = '<leader><leader>', rhs = function() MiniPick.builtin.buffers({}, { mappings = buffer_mappings }) end, opts = { desc = 'Pick open buffers' } },
-  { lhs = '<leader>sh',       rhs = '<Cmd>Pick history scope=":"<CR>',                                         opts = { desc = '[S]earch Command [H]istory' } },
-  { lhs = '<leader>sg',       rhs = '<Cmd>Pick grep_live<CR>',                                                 opts = { desc = '[S]earch [G]rep' } },
-  { lhs = '<leader>sw',       rhs = '<Cmd>Pick grep pattern="<cword>"<CR>',                                    opts = { desc = '[S]earch current [W]ord' } },
-  { lhs = '<leader>sd',       rhs = '<Cmd>Pick diagnostic scope="current"<CR>',                                opts = { desc = '[S]earch [D]iagnostics (Buffer)' } },
-  { lhs = '<leader>sD',       rhs = '<Cmd>Pick diagnostic scope="all"<CR>',                                    opts = { desc = '[S]earch [D]iagnostics (Workspace)' } },
-  { lhs = '<leader>sr',       rhs = '<Cmd>Pick lsp scope="references"<CR>',                                    opts = { desc = 'References (LSP)' } },
-  { lhs = '<leader>ss',       rhs = '<Cmd>Pick lsp scope="workspace_symbol"<CR>',                              opts = { desc = 'Symbols workspace' } },
-  { lhs = '<leadersS',        rhs = '<Cmd>Pick lsp scope="document_symbol"<CR>',                               opts = { desc = 'Symbols document' } },
-  { lhs = '<leader>so',       rhs = '<Cmd>Pick oldfiles<CR>',                                                  opts = { desc = '[S]earch [O]ld files' } },
-  { lhs = '<leader>sk',       rhs = '<Cmd>Pick keymaps<CR>',                                                   opts = { desc = '[S]earch [K]eymaps' } },
-}
+_G.keymaps_define({
+  { lhs = prefix .. 'b', rhs = function() MiniPick.builtin.buffers({}, { mappings = buffer_mappings }) end, opts = { desc = 'Pick open buffers' } },
+  { lhs = prefix .. 'h', rhs = '<Cmd>Pick history scope=":"<CR>',                                           opts = { desc = '[S]earch Command [H]istory' } },
+  { lhs = prefix .. 'd', rhs = '<Cmd>Pick diagnostic scope="current"<CR>',                                  opts = { desc = '[S]earch [D]iagnostics (Buffer)' } },
+  { lhs = prefix .. 'D', rhs = '<Cmd>Pick diagnostic scope="all"<CR>',                                      opts = { desc = '[S]earch [D]iagnostics (Workspace)' } },
+  { lhs = prefix .. 'r', rhs = '<Cmd>Pick lsp scope="references"<CR>',                                      opts = { desc = 'References (LSP)' } },
+  { lhs = prefix .. 's', rhs = '<Cmd>Pick lsp scope="workspace_symbol"<CR>',                                opts = { desc = 'Symbols workspace' } },
+  { lhs = prefix .. 'd', rhs = '<Cmd>Pick lsp scope="document_symbol"<CR>',                                 opts = { desc = 'Symbols document' } },
+}, { prefix = prefix, group = 'Pick' })

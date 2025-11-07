@@ -35,49 +35,42 @@ require('noice').setup {
   },
   -- you can enable a preset for easier configuration
   presets = {
-    bottom_search = true, -- use a classic bottom cmdline for search
-    command_palette = true, -- position the cmdline and popupmenu together
+    bottom_search = true,         -- use a classic bottom cmdline for search
+    command_palette = true,       -- position the cmdline and popupmenu together
     long_message_to_split = true, -- long messages will be sent to a split
-    inc_rename = false, -- enables an input dialog for inc-rename.nvim
-    lsp_doc_border = false, -- add a border to hover docs and signature help
-  },
-}
-_G.keymaps_define {
-  {
-    lhs = '<leader>nh',
-    rhs = '<Cmd>Noice All<CR>',
-    opts = { desc = '[N]otification [H]istory' },
+    inc_rename = false,           -- enables an input dialog for inc-rename.nvim
+    lsp_doc_border = false,       -- add a border to hover docs and signature help
   },
 }
 -- Similar to 'mhinz/vim-startify' ~
-  local starter = require('mini.starter')
-  starter.setup({
-    evaluate_single = true,
-    items = {
-      starter.sections.builtin_actions(),
-      starter.sections.recent_files(10, false),
-      starter.sections.recent_files(10, true),
-      -- Use this if you set up 'mini.sessions'
-      -- starter.sections.sessions(5, true)
-      starter.sections.pick(),
-    },
-    content_hooks = {
-      starter.gen_hook.adding_bullet(),
-      starter.gen_hook.indexing('all', { 'Builtin actions' }),
-      starter.gen_hook.padding(3, 2),
-    },
-  })
+local starter = require('mini.starter')
+starter.setup({
+  evaluate_single = true,
+  items = {
+    starter.sections.builtin_actions(),
+    starter.sections.recent_files(10, false),
+    starter.sections.recent_files(10, true),
+    -- Use this if you set up 'mini.sessions'
+    -- starter.sections.sessions(5, true)
+    starter.sections.pick(),
+  },
+  content_hooks = {
+    starter.gen_hook.adding_bullet(),
+    starter.gen_hook.indexing('all', { 'Builtin actions' }),
+    starter.gen_hook.padding(3, 2),
+  },
+})
 require('mini.statusline').setup()
 
 -- Tabline. Sets `:h 'tabline'` to show all listed buffers in a line at the top.
 -- Buffers are ordered as they were created. Navigate with `[b` and `]b`.
 require('mini.tabline').setup()
 require('catppuccin').setup({
-      flavour = 'macchiato', -- latte, frappe, macchiato, mocha
-      background = {         -- :h background
-        light = 'latte',
-        dark = 'mocha',
-      },
+  flavour = 'macchiato', -- latte, frappe, macchiato, mocha
+  background = {         -- :h background
+    light = 'latte',
+    dark = 'mocha',
+  },
 })
 vim.cmd 'colorscheme catppuccin'
 -- It is not enabled by default because it is not really needed on a daily basis.
@@ -100,19 +93,13 @@ require('which-key').setup {
     mode = { 'n', 'v' },
     { '<leader>a', group = 'AI' },
     { '<leader>c', group = 'Code' },
-    { '<leader>d', group = 'Diff' },
     { '<leader>e', group = 'Explore/Edit' },
-    { '<leader>f', group = 'File/find' },
-    { '<leader>g', group = 'Git' },
-    { '<leader>s', group = 'Search' },
-    { '<Leader>v', group = '+Visits' },
-    { '<leader>u', group = 'ui' },
     { '<leader>x', group = 'diagnostics/quickfix' },
-    { '[', group = 'prev' },
-    { ']', group = 'next' },
-    { 'g', group = 'goto' },
-    { 'gs', group = 'surround' },
-    { 'z', group = 'fold' },
+    { '[',         group = 'prev' },
+    { ']',         group = 'next' },
+    { 'g',         group = 'goto' },
+    { 'gs',        group = 'surround' },
+    { 'z',         group = 'fold' },
     {
       '<leader>b',
       group = 'buffer',
@@ -130,3 +117,32 @@ require('which-key').setup {
     },
   },
 }
+
+
+_G.keymaps_define({
+  {
+    lhs = '<leader>na',
+    rhs = '<Cmd>NoiceAll<CR>',
+    opts = { desc = '[N]otification [A]ll' },
+  },
+  {
+    lhs = '<leader>nf',
+    rhs = '<Cmd>Noice fzf<CR>',
+    opts = { desc = '[N]otification [F]ind' },
+  },
+  {
+    lhs = '<leader>nh',
+    rhs = '<Cmd>NoiceHistory<CR>',
+    opts = { desc = '[N]otification [H]istory' },
+  },
+  {
+    lhs = '<leader>ne',
+    rhs = '<Cmd>NoiceErrors<CR>',
+    opts = { desc = '[N]otification [E]rrors' },
+  },
+  {
+    lhs = '<leader>nd',
+    rhs = '<Cmd>NoiceDismiss<CR>',
+    opts = { desc = '[N]otification [D]ismiss' },
+  },
+}, { prefix = '<leader>n', group = 'Notification' })
