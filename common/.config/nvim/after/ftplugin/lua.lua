@@ -15,3 +15,6 @@ vim.b.minisplitjoin_config = {
   split = { hooks_post = { add_comma_curly } },
   join = { hooks_post = { del_comma_curly, pad_curly } },
 }
+
+-- For setting the project root automatically
+MiniMisc.setup_auto_root({ '.luarc.json' })

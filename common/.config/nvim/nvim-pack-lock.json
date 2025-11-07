@@ -45,6 +45,7 @@
       "rev": "3e72397",
       "src": "https://github.com/MagicDuck/grug-far.nvim"
     },
+    "lazydev.nvim": [],
     "mini.nvim": {
       "rev": "d1a9158",
       "src": "https://github.com/nvim-mini/mini.nvim"
@@ -61,6 +62,22 @@
       "rev": "af58927",
       "src": "https://github.com/catppuccin/nvim"
     },
+    "nvim-dap": {
+      "rev": "e97dc47",
+      "src": "https://github.com/mfussenegger/nvim-dap"
+    },
+    "nvim-dap-python": {
+      "rev": "64652d1",
+      "src": "https://github.com/mfussenegger/nvim-dap-python"
+    },
+    "nvim-dap-ui": {
+      "rev": "cf91d5e",
+      "src": "https://github.com/rcarriga/nvim-dap-ui"
+    },
+    "nvim-dap-virtual-text": {
+      "rev": "fbdb48c",
+      "src": "https://github.com/theHamsta/nvim-dap-virtual-text"
+    },
     "nvim-lint": {
       "rev": "9da1fb9",
       "src": "https://github.com/mfussenegger/nvim-lint"
@@ -68,6 +85,10 @@
     "nvim-lspconfig": {
       "rev": "a9b2fb5",
       "src": "https://github.com/neovim/nvim-lspconfig"
+    },
+    "nvim-nio": {
+      "rev": "21f5324",
+      "src": "https://github.com/nvim-neotest/nvim-nio"
     },
     "nvim-notify": {
       "rev": "8701bec",
@@ -86,7 +107,10 @@
       "rev": "b9fd522",
       "src": "https://github.com/nvim-lua/plenary.nvim"
     },
-    "render-markdown.nvim": [],
+    "render-markdown.nvim": {
+      "rev": "10126ef",
+      "src": "https://github.com/MeanderingProgrammer/render-markdown.nvim"
+    },
     "schemastore.nvim": {
       "rev": "54994d5",
       "src": "https://github.com/b0o/schemastore.nvim"

@@ -1,5 +1,55 @@
 local command = vim.api.nvim_create_user_command --[[@type function]]
 
+--[[
+--
+
+Lua functions are called with a single table argument containing arguments and
+modifiers. The most important are:
+• `name`: a string with the command name
+• `fargs`: a table containing the command arguments split by whitespace (see |<f-args>|)
+• `bang`: `true` if the command was executed with a `!` modifier (see |<bang>|)
+• `line1`: the starting line number of the command range (see |<line1>|)
+• `line2`: the final line number of the command range (see |<line2>|)
+• `range`: the number of items in the command range: 0, 1, or 2 (see |<range>|)
+• `count`: any count supplied (see |<count>|)
+• `smods`: a table containing the command modifiers (see |<mods>|)
+
+For example:
+>lua
+    vim.api.nvim_create_user_command('Upper',
+      function(opts)
+        print(string.upper(opts.fargs[1]))
+      end,
+      { nargs = 1 })
+
+    vim.cmd.Upper('foo')
+    --> FOO
+<
+The `complete` attribute can take a Lua function in addition to the
+attributes listed in |:command-complete|. >lua
+
+    vim.api.nvim_create_user_command('Upper',
+      function(opts)
+        print(string.upper(opts.fargs[1]))
+      end,
+      { nargs = 1,
+        complete = function(ArgLead, CmdLine, CursorPos)
+          -- return completion candidates as a list-like table
+          return { "foo", "bar", "baz" }
+        end,
+    })
+<
+Buffer-local user commands are created with `vim.api.`|nvim_buf_create_user_command()|.
+Here the first argument is the buffer number (`0` being the current buffer);
+the remaining arguments are the same as for |nvim_create_user_command()|:
+>lua
+    vim.api.nvim_buf_create_user_command(0, 'Upper',
+      function(opts)
+        print(string.upper(opts.fargs[1]))
+      end,
+      { nargs = 1 })
+--]]
+
 local function ToggleLineNumbers()
   if vim.wo.relativenumber then
     vim.wo.relativenumber = false
@@ -44,23 +94,40 @@ end, { desc = 'Undo Find and Replace' })
 -- end, { desc = "Git sync remote repo" })
 
 command('New', ':enew', { desc = 'New buffer' })
+
+
+---@param desc string
+---@return vim.api.keyset.user_command
+local function pack_usercmd_opts(desc)
+  return {
+    desc = desc,
+    nargs = 1,
+    complete = function(ArgLead, CmdLine, CursorPos)
+      -- return completion candidates as a list-like table
+      return VimRc.get_packpath_dirs()
+    end,
+  }
+end
+
 command('PackOpen', function(opts)
   local ok, plug = pcall(vim.pack.get, { opts.fargs[1] })
   if ok then
     vim.cmd('edit ' .. plug[1].path)
   end
-end, { desc = 'Open plugin repository in pack path', nargs = 1 })
+end, pack_usercmd_opts('Open plugin repository in pack path'))
 
 command('PackList', function()
   VimRc.pack_list()
 end, { desc = 'List plugins installed with vim.pack' })
+
 command('PackReload', function(opts)
   local plug = { opts.fargs[1] }
   local ok, _ = pcall(vim.pack.get, plug)
   if ok then
     VimRc.pack_reload(plug)
   end
-end, { desc = 'Open plugin repository in pack path', nargs = 1 })
+end, pack_usercmd_opts('Reload plugin'))
+
 command('PackSync', function()
   local plugins = {}
   for _, plugin in ipairs(VimRc.added_plugins) do

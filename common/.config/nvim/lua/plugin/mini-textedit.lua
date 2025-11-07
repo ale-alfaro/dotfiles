@@ -57,10 +57,6 @@ if ok then
   -- searches up the file tree until the first root marker ('.git' or 'Makefile')
   -- and sets their parent directory as a current directory.
   -- This is helpful when simultaneously dealing with files from several projects.
-  misc.setup_auto_root({ '.luarc.json', '.git' }, function()
-    _G.error("Couldn't find the root directory. No .git folder found in parents")
-    return nil
-  end)
 
   -- Restore latest cursor position on file open
   misc.setup_restore_cursor()

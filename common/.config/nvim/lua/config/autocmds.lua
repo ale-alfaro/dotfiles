@@ -108,8 +108,6 @@ new_autocmd('FileType', function(event)
     'spectre_panel',
     'startuptime',
     'tsplayground',
-    'mininotify-history',
-    'mini*',
   },
   'Close special filetypes with <q>')
 

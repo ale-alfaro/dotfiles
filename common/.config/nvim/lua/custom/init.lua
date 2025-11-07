@@ -242,6 +242,27 @@ function M.setTimeout(timeout, callback)
   end
 end
 
+M.packpath = vim.fn.expand("$XDG_DATA_HOME") .. "/nvim/site/pack/core/opt"
+
+---@return table<string>
+function M.get_packpath_dirs()
+  local paths = {}
+  for name, type in vim.fs.dir(M.packpath, {
+    skip = function(dir_name)
+      if not string.match(dir_name, '^nvim') then
+        return true
+      else
+        return false
+      end
+    end
+  }) do
+    if type == 'directory' then
+      table.insert(paths, name)
+    end
+  end
+  return paths
+end
+
 ---@class VimPackPlugin
 ---@field name string
 ---@field plugin vim.pack.Spec
