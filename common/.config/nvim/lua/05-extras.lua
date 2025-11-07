@@ -4,7 +4,6 @@ vim.pack.add(_G.plug_spec {
   'folke/flash.nvim',
   'folke/trouble.nvim',
   'MagicDuck/grug-far.nvim',
-  'folke/lazydev.nvim'
 })
 
 require('grug-far').setup {
@@ -109,17 +108,6 @@ local config = require("fzf-lua.config")
 local actions = require("trouble.sources.fzf").actions
 config.defaults.actions.files["ctrl-t"] = actions.open
 
--- require('lazydev').setup({
---   library = {
---     vim.fn.stdpath('config') .. "/lua/custom/",
---     -- Only load luvit types when the `vim.uv` word is found
---     { path = "${3rd}/luv/library", words = { "vim%.uv" } },
---     -- Load the wezterm types when the `wezterm` module is required
---     -- Needs `DrKJeff16/wezterm-types` to be installed
---     -- { path = "wezterm-types",      mods = { "wezterm" } },
---   },
--- }
--- )
 
 vim.pack.add(
   {
