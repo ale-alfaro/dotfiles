@@ -61,13 +61,6 @@ command('LineNumbers', function()
   ToggleLineNumbers()
 end, { desc = 'Toggle line numbers' })
 
-command('ToggleAutoformat', function()
-  VimRc.format.toggle()
-end, { desc = 'Toggle Autoformat (Global)' })
-
-command('ToggleBufAutoformat', function()
-  VimRc.format.toggle(vim.api.nvim_buf_get_current_buf())
-end, { desc = 'Toggle Autoformat (Buffer)' })
 -- command('ChangeFiletype', function()
 --   om.ChangeFiletype()
 -- end, { desc = 'Change filetype of current buffer' })

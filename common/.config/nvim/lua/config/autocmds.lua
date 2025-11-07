@@ -7,7 +7,6 @@ function _G.augroup(name)
   return vim.api.nvim_create_augroup(name, { clear = true })
 end
 
-local autocmd = vim.api.nvim_create_autocmd --[[@type function]]
 local gr = augroup 'custom-config'
 
 ---@alias autocmd_cb string|fun(args: vim.api.keyset.create_autocmd.callback_args): boolean?
@@ -34,6 +33,13 @@ function _G.new_autocmd(event, callback, pattern, desc)
   end
 end
 
+---@param callback autocmd_cb
+---@param pattern? string|string[]
+---@param desc? string|string[]
+function _G.new_user_autocmd(callback, pattern, desc)
+  pattern = pattern or "*"
+  _G.new_autocmd("User", callback, pattern, desc)
+end
 -- Format Options
 -- new_autocmd('FileType', function()
 --   vim.cmd 'setlocal formatoptions-=c formatoptions-=o'
@@ -41,17 +47,6 @@ end
 
 -- CodeCompanion
 
--- Check if we need to reload the file when it changed
--- Highlight on yank
----- Highlight on yank
-vim.api.nvim_create_autocmd('TextYankPost', {
-  group = vim.api.nvim_create_augroup('highlight_yank', {}),
-  desc = 'Highlight selection on yank',
-  pattern = '*',
-  callback = function()
-    vim.highlight.on_yank { higroup = 'IncSearch', timeout = 100 }
-  end,
-})
 new_autocmd('TextYankPost', function()
   (vim.hl or vim.highlight).on_yank()
 end, 'Highlight on yank')
@@ -135,7 +130,7 @@ end, 'Auto create directory on save')
 new_autocmd('FileType', function()
   vim.notify 'Disabling autoformatting'
   vim.b.autoformat = false
-end, 'hyprlang', 'Disable autoformat for hyprlang')
+end, { 'hyprlang', 'devicetree' }, 'Disable autoformat for hyprlang')
 
 -- Auto-close floating/special windows on QuitPre
 local ft_autoclose = {

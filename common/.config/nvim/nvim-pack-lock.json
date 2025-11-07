@@ -23,7 +23,8 @@
     },
     "codecompanion.nvim": {
       "rev": "bcd4f84",
-      "src": "https://github.com/olimorris/codecompanion.nvim"
+      "src": "https://github.com/olimorris/codecompanion.nvim",
+      "version": "'17.30.0'"
     },
     "conform.nvim": {
       "rev": "9fd3d5e",

@@ -1,7 +1,6 @@
 vim.pack.add(_G.plug_spec {
   'catppuccin/nvim',
   'folke/noice.nvim',
-  'akinsho/bufferline.nvim',
   'folke/which-key.nvim',
   'mrjones2014/smart-splits.nvim',
   'MunifTanjim/nui.nvim',

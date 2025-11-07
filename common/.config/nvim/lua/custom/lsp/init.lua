@@ -1,12 +1,4 @@
 M = {}
---
--- setmetatable(M, {
---   __index = function(t, k)
---     ---@diagnostic disable-next-line: no-unknown
---     t[k] = require('custom.lsp.' .. k)
---     return t[k]
---   end,
--- })
 --- Sets up LSP keymaps and autocommands for the given buffer.
 ---@param client vim.lsp.Client
 ---@param bufnr integer
@@ -25,11 +17,12 @@ function M.on_attach(client, bufnr)
   end
 
   if not client:supports_method 'textDocument/willSaveWaitUntil' and client:supports_method 'textDocument/formatting' then
-    -- require('custom.lsp.format').setup()
+    Format = require('custom.lsp.format')
+    Format.toggle(bufnr)
     vim.api.nvim_create_autocmd('BufWritePre', {
       buffer = bufnr,
       callback = function()
-        -- VimRc.format { buf = bufnr }
+        -- Format.format(client, bufnr)
         vim.lsp.buf.format { bufnr = bufnr, id = client.id, timeout_ms = 1000 }
       end,
     })
@@ -45,6 +38,7 @@ function M.config()
   vim.g.inlay_hints = false
   -- Diagnostic configuration.
   require('custom.lsp.diagnostics').setup()
+  require('custom.lsp.format').setup()
 
 
   local hover = vim.lsp.buf.hover

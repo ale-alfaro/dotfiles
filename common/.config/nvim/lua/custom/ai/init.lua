@@ -229,7 +229,7 @@ function M.setup(opts)
           modes = { n = '<C-s>', i = '<C-s>' },
         },
         change_model = {
-          modes = { n = 'gm' },
+          modes = { n = '<C-m>' },
           name = 'Change Model',
           callback = M.change_model_callback,
           description = 'Change the model for the current chat',

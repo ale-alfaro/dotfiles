@@ -1,10 +1,11 @@
-vim.pack.add(plug_spec { 'olimorris/codecompanion.nvim', 'lalitmee/codecompanion-spinners.nvim', 'ravitemer/codecompanion-history.nvim' })
+vim.pack.add({ _G.plug('olimorris/codecompanion.nvim', { version = "17.30.0" }), _G.plug(
+'lalitmee/codecompanion-spinners.nvim'), _G.plug('ravitemer/codecompanion-history.nvim') })
 -- CodeCompanion
 require('custom.ai').setup {
   display = {
     action_palette = { provider = 'fzf_lua' },
     chat = {
-      show_settings = true,
+      show_settings = false,
       show_header_separator = true,
       auto_scroll = true,
       show_token_count = true,
@@ -20,6 +21,31 @@ require('custom.ai').setup {
           },
           defaults = { auth_method = 'gemini-api-key', mcpServers = {}, timeout = 20000 },
           env = { GEMINI_API_KEY = vim.fn.expand '$GEMINI_API_KEY' },
+        })
+      end,
+    },
+    http = {
+      qwen3 = function()
+        return require("codecompanion.adapters").extend("ollama", {
+          name = "qwen3-coder", -- Give this adapter a different name to differentiate it from the default ollama adapter
+          opts = {
+            vision = true,
+            stream = true,
+          },
+          schema = {
+            model = {
+              default = "qwen3-coder:latest",
+            },
+            num_ctx = {
+              default = 16384,
+            },
+            think = {
+              default = false,
+            },
+            keep_alive = {
+              default = "5m",
+            },
+          },
         })
       end,
     },
@@ -43,25 +69,18 @@ require('custom.ai').setup {
 }
 _G.keymaps_define {
   { mode = { 'n', 'v' }, lhs = '<leader>ar', rhs = '<cmd>CodeCompanionChat RefreshCache<cr>', { desc = 'CodeCompanion RefreshCache' } },
-  { mode = { 'n', 'v' }, lhs = '<leader>aa', rhs = '<cmd>CodeCompanionActions<cr>', { desc = 'CodeCompanion Actions' } },
-  { mode = { 'n', 'v' }, lhs = '<leader>at', rhs = '<cmd>CodeCompanionChat Toggle<cr>', { desc = 'CodeCompanionChat Toggle' } },
-  { mode = { 'n', 'v' }, lhs = '<leader>ai', rhs = '<cmd>CodeCompanionChat Add<cr>', { desc = 'CodeCompanionChat Add' } },
-  { mode = { 'n', 'v' }, lhs = '<leader>ah', rhs = '<cmd>CodeCompanionHistory<cr>', { desc = 'CodeCompanionHistory' } },
-  { mode = { 'n', 'v' }, lhs = '<leader>as', rhs = '<cmd>CodeCompanionSummaries<cr>', { desc = 'Browse CodeCompanionSummaries' } },
+  { mode = { 'n', 'v' }, lhs = '<leader>aa', rhs = '<cmd>CodeCompanionActions<cr>',           { desc = 'CodeCompanion Actions' } },
+  { mode = { 'n', 'v' }, lhs = '<leader>at', rhs = '<cmd>CodeCompanionChat Toggle<cr>',       { desc = 'CodeCompanionChat Toggle' } },
+  { mode = { 'n', 'v' }, lhs = '<leader>ai', rhs = '<cmd>CodeCompanionChat Add<cr>',          { desc = 'CodeCompanionChat Add' } },
+  { mode = { 'n', 'v' }, lhs = '<leader>ah', rhs = '<cmd>CodeCompanionHistory<cr>',           { desc = 'CodeCompanionHistory' } },
+  { mode = { 'n', 'v' }, lhs = '<leader>as', rhs = '<cmd>CodeCompanionSummaries<cr>',         { desc = 'Browse CodeCompanionSummaries' } },
 }
 
--- local cc = augroup 'dotfiles.codecompanion'
--- vim.api.nvim_create_autocmnew_autocmd('User', {
---   group = cc,
---   pattern = 'CodeCompanionInlineFinished',
---   callback = function()
---     vim.lsp.buf.format()
---   end,
--- })
--- autocmd('User', {
---   group = cc,
---   pattern = 'CodeCompanionChatCreated',
---   callback = function(args)
---     vim.treesitter.start(args.data.bufnr, 'markdown')
---   end,
--- })
+local cc = augroup 'dotfiles.codecompanion'
+_G.new_user_autocmd(function()
+  vim.lsp.buf.format()
+end, 'CodeCompanionInlineFinished', { desc = "CodeCompanion Inline Format" })
+
+_G.new_user_autocmd(function(args)
+  vim.treesitter.start(args.data.bufnr, 'markdown')
+end, 'CodeCompanionChatCreated', { desc = "CodeCompanion Chat Treesitter start" })

@@ -1,28 +1,15 @@
 -- Treesitter
 require 'plugin.mini-textedit'
 
-_G.new_autocmd("PackChanged", function(ev)
-  local kind = ev.data.kind
-  local spec = ev.data.spec
-  vim.validate("kind", kind, "string")
-  vim.validate("spec", spec, "table")
-  if not vim.list_contains({ "install", "update", "delete" }, kind) then
-    _G.error("PackChanged event didn not contain expected kind value")
-    return
-  end
-  if spec.name == "nvim-treesitter"
-      and kind ~= "deleted" then
-    vim.cmd [[ TSUpdate ]]
-  end
-end, "TSUpdate after installing treesitter")
-local function gh(plug)
-  return 'https://github.com/' .. plug
-end
 vim.pack.add {
-  {
-    src = gh 'nvim-treesitter/nvim-treesitter',
+  _G.plug('nvim-treesitter/nvim-treesitter',{
     version = 'main',
-  },
+    build_hook = {
+      plugin = "nvim-treesitter",
+      build_cmd = 'TSUpdate',
+      build_cmd_type = 'user',
+    }
+  })
 }
 
 local ensure_installed = {
@@ -80,8 +67,8 @@ end, "Nvim-Treesitter start")
 
 vim.pack.add(
   {
-    { src = 'https://github.com/rafamadriz/friendly-snippets' }, --dependecy goes first,
-    { src = 'https://github.com/L3MON4D3/LuaSnip',            version = '2.4.0' },
+    _G.plug('rafamadriz/friendly-snippets'), --dependecy goes first,
+    _G.plug('L3MON4D3/LuaSnip',  {  version = '2.4.0' }),
   }
 )
 
@@ -145,8 +132,8 @@ require('luasnip.loaders.from_vscode').lazy_load()
 ---@type VimPackBuildHooks
 local blink_build_hook = {
   plugin = "blink.cmp",
-  build_cmd_type = BuildHookCmdTypes.shell,
+  build_cmd_type = 'shell',
   build_cmd = 'cargo build --release'
 }
-vim.pack.add { _G.plug('Saghen/blink.cmp', blink_build_hook) }
+vim.pack.add { _G.plug('Saghen/blink.cmp', { build_hook=blink_build_hook }) }
 require 'plugin.blink-cmp'

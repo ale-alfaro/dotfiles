@@ -351,17 +351,17 @@ local function create_plugin_build_hook(build_hook)
     if type == BuildHookCmdTypes.shell then
       -- Run build script after plugin's code has changed
       if name == plugin and (kind == 'install' or kind == 'update') then
-        vim.system({ 'make' }, { cwd = ev.data.path })
+        vim.system(vim.fn.split(cmd), { cwd = ev.data.path })
       end
     elseif type == BuildHookCmdTypes.user then
       -- If action relies on code from the plugin (like user command or
       -- Lua code), make sure to explicitly load it first
-      if name == 'plug-2' and kind == 'update' then
+      if name == plugin and kind == 'update' then
         if not ev.data.active then
-          vim.cmd.packadd('plug-2')
+          vim.cmd.packadd(plugin)
         end
-        vim.cmd('PlugTwoUpdate')
-        require('plug2').after_update()
+        vim.cmd(cmd)
+        require(plugin).after_update()
       end
     else
       _G.error("Invalid build cmd type " .. type)
@@ -373,20 +373,26 @@ local function create_plugin_build_hook(build_hook)
 end
 
 ---@class VimPackOpts
----@field version string
----@field build_hook VimPackBuildHooks
+---@field version string?
+---@field build_hook VimPackBuildHooks?
 
 ---@param p string
----@param build_hook VimPackBuildHooks?
-function _G.plug(p, build_hook)
+---@param opts VimPackOpts?
+---@return vim.pack.Spec
+function _G.plug(p,  opts)
   local plug_name = p:match '%S+/(%S+)'
-  if build_hook then
-    create_plugin_build_hook(build_hook)
+  if opts and opts.build_hook then
+    create_plugin_build_hook(opts.build_hook)
   end
-  return {
+  ---@type vim.pack.Spec
+  local plug =  {
     src = 'https://github.com/' .. p,
     name = plug_name,
   }
+  if opts and opts.version then
+    plug.version = opts.version
+  end
+  return plug
 end
 
 ---@param spec string[]
