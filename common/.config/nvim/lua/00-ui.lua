@@ -1,4 +1,5 @@
 ---@module "noice"
+---@module "which-key"
 
 vim.pack.add(_G.plug_spec {
   'catppuccin/nvim',
@@ -96,7 +97,6 @@ require('which-key').setup {
   spec = {
     mode = { 'n', 'v' },
     { '<leader>c', group = 'Code' },
-    { '<leader>e', group = 'Explore/Edit' },
     { '<leader>x', group = 'diagnostics/quickfix' },
     { '[',         group = 'prev' },
     { ']',         group = 'next' },

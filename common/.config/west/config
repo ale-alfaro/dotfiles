@@ -1,0 +1,11 @@
+[grep]
+tool = ripgrep
+
+[update]
+narrow = true
+
+[alias]
+update = update -o=--depth=1 -n
+run = build --pristine=never --target run
+menuconfig = build --pristine=never --target menuconfig
+boards_show = boards --format "{name}: {qualifiers} dir:{dir}"

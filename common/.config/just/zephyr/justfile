@@ -25,15 +25,18 @@ default:
     @just --list
 
 # initialize west
+[group('zephyr')]
 init:
     @west init -l config
     @west update --fetch-opt=--filter=blob:none
     @west zephyr-export
 
 # update west
+[group('zephyr')]
 update:
     @west update --fetch-opt=--filter=blob:none
 
+[group('zephyr')]
 setup-nrfutil:
     #!/usr/bin/env bash
     echo "Setting up nrfutil"
@@ -48,12 +51,25 @@ setup-nrfutil:
     fi
     nrfutil install completion device nrf5sdk-tools toolchain-manager sdk-manager
 
+[group('zephyr')]
 install-tooling:
     pip install -U dtsh #DTS viewer in terminal
 
+[group('zephyr')]
 west-boards *filter:
     @echo "Getting all boards available"
     @west boards -f "{name}#_#_#{dir}#_#_{qualifiers}" | awk -v cwd="$(pwd)/" -F '#_#_#' 'BEGIN {print "| Board | Path | Qualifiers |"; print "|---|---|---|" } {{ filter }} { sub(cwd, "", $2); gsub(/^[ \t]+|[ \t]+$/, "", $1); gsub(/^[ \t]+|[ \t]+$/, "", $2); gsub(/^[ \t]+|[ \t]+$/, "", $3); print "| " $1 " | " $2 " | " $3 " |"}'
 
+[group('zephyr')]
 west-boards-filter-by-path path="app":
     just west-boards '$2 ~ /\/{{ path }}\// '
+
+
+# Flash with runner. Supported runners: uf2 (default) or jlink
+[group('zephyr')]
+flash build_dir runner="jlink":
+    @ {{ if runner == "uf2" { "sudo" } else { "" } }} uv run west flash -r {{ runner }} -d {{ build_dir }}
+
+[group('zephyr')]
+rtt:
+    @west rtt -r jlink

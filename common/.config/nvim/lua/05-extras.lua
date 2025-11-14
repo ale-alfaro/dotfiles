@@ -18,7 +18,7 @@ require('grug-far').setup {
 
       -- extra args that you always want to pass
       -- like for example if you always want context lines around matches
-      extraArgs = '--hidden',
+      extraArgs = '--no-hidden --no-ignore',
 
       -- whether to show diff of the match being replaced as opposed to just the
       -- replaced result. It usually makes it easier to understand the change being made

@@ -1,9 +1,8 @@
 P = {}
 
-setmetatable(P, {
-  __index = function(t, k)
-    return require('custom.ai.prompts.' .. k)
-  end,
-})
+
+function P.setup(opts)
+  opts.prompt_library = require('custom.ai.prompts.library')
+end
 
 return P

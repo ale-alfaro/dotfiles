@@ -89,7 +89,7 @@ local wipeout_cur = function()
   vim.api.nvim_buf_delete(MiniPick.get_picker_matches().current.bufnr, {})
 end
 local buffer_mappings = { wipeout = { char = '<C-d>', func = wipeout_cur } }
-local prefix = '<leader>s'
+local prefix = '<leader>p'
 -- stylua: ignore
 _G.keymaps_define({
   { lhs = prefix .. 'b', rhs = function() MiniPick.builtin.buffers({}, { mappings = buffer_mappings }) end, opts = { desc = 'Pick open buffers' } },

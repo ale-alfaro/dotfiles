@@ -26,3 +26,12 @@ gui:
       - "#db4b4b"
     defaultFgColor:
       - "#c0caf5"
+customCommands:
+  - key: 'C'
+    command: 'git commit -m {{.Form.CommitMsg| quote}}'
+    context: 'global'
+    prompts:
+      - type: 'input'
+        title: 'Msg:'
+        key: 'CommitMsg'
+        initialValue: 'username/{{ runCommand "date +\"%Y/%-m\"" }}/'

@@ -75,7 +75,7 @@ use_ncs() {
   export ZEPHYR_SDK_INSTALL_DIR="${ncs_vars[ZEPHYR_SDK_INSTALL_DIR]}"
   export NCS_SDK_HOME="${2:-$HOME/ncs}"
   if [[ ! -d "$NCS_SDK_HOME" ]]; then fatal "NCS_SDK_HOME ENV VAR MUST BE SET"; fi
-  export NCS_SDK_ROOT="$NCS_SDK_HOME/$ncs_version"
+  export NCS_SDK_ROOT="$NCS_SDK_HOME/sdk/$ncs_version"
   export ZEPHYR_BASE="$NCS_SDK_ROOT/zephyr"
 }
 
@@ -101,16 +101,20 @@ use_zephyr_toolchain() {
 }
 
 layout_uv_zephyr() {
-  layout uv
+  if [[ ! "$#" -eq 1 ]]; then
+    fatal "layout_uv_zephyr requires python version to be specified"
+  fi
+  layout uv "${1:-3.12}"
+
   echo "Installing west and required python packages for building (pyelftools ninja intelhex)"
   uv add --dev west pyelftools ninja intelhex
-  if [[ -z "$ALL_ZEPHYR_PYTHON_DEPS" ]]; then
-    is_workspace=$(west topdir)
-    if [[ -d "$is_workspace" ]]; then
-      west packages pip | xargs uv add --dev
-    else
-      log_status "Not inside a workspace. Are you out-of-tree?"
-    fi
+}
+add_all_python_deps() {
+  is_workspace=$(west topdir)
+  if [[ -d "$is_workspace" ]]; then
+    west packages pip | xargs uv add --dev
+  else
+    log_status "Not inside a workspace. Are you out-of-tree?"
   fi
 }
 

@@ -11,45 +11,6 @@ require('custom.ai').setup {
       show_token_count = true,
     },
   },
-  adapters = {
-    acp = {
-      gemini_cli = function()
-        return require('codecompanion.adapters').extend('gemini_cli', {
-          commands = {
-            ['Gemini 2.5 Pro'] = { 'gemini', '--experimental-acp', '-m', 'gemini-2.5-pro' },
-            ['default'] = { 'gemini', '--experimental-acp', '-m', 'gemini-2.5-flash' },
-          },
-          defaults = { auth_method = 'gemini-api-key', mcpServers = {}, timeout = 20000 },
-          env = { GEMINI_API_KEY = vim.fn.expand '$GEMINI_API_KEY' },
-        })
-      end,
-    },
-    http = {
-      qwen3 = function()
-        return require("codecompanion.adapters").extend("ollama", {
-          name = "qwen3-coder", -- Give this adapter a different name to differentiate it from the default ollama adapter
-          opts = {
-            vision = true,
-            stream = true,
-          },
-          schema = {
-            model = {
-              default = "qwen3-coder:latest",
-            },
-            num_ctx = {
-              default = 16384,
-            },
-            think = {
-              default = false,
-            },
-            keep_alive = {
-              default = "5m",
-            },
-          },
-        })
-      end,
-    },
-  },
   extensions = {
     history = {
       enabled = true,
@@ -66,6 +27,45 @@ require('custom.ai').setup {
       opts = { style = 'native' },
     },
   },
+  -- adapters = {
+  --   acp = {
+  --     gemini_cli = function()
+  --       return require('codecompanion.adapters').extend('gemini_cli', {
+  --         commands = {
+  --           ['Gemini 2.5 Pro'] = { 'gemini', '--experimental-acp', '-m', 'gemini-2.5-pro' },
+  --           ['default'] = { 'gemini', '--experimental-acp', '-m', 'gemini-2.5-flash' },
+  --         },
+  --         defaults = { auth_method = 'gemini-api-key', mcpServers = {}, timeout = 20000 },
+  --         env = { GEMINI_API_KEY = vim.fn.expand '$GEMINI_API_KEY' },
+  --       })
+  --     end,
+  --   },
+  --   http = {
+  --     qwen3 = function()
+  --       return require("codecompanion.adapters").extend("ollama", {
+  --         name = "qwen3-coder", -- Give this adapter a different name to differentiate it from the default ollama adapter
+  --         opts = {
+  --           vision = true,
+  --           stream = true,
+  --         },
+  --         schema = {
+  --           model = {
+  --             default = "qwen3-coder:latest",
+  --           },
+  --           num_ctx = {
+  --             default = 16384,
+  --           },
+  --           think = {
+  --             default = false,
+  --           },
+  --           keep_alive = {
+  --             default = "5m",
+  --           },
+  --         },
+  --       })
+  --     end,
+  --   },
+  -- },
 }
 local wkey_prefix = '<leader>a'
 _G.keymaps_define({
@@ -85,3 +85,9 @@ end, 'CodeCompanionInlineFinished', { desc = "CodeCompanion Inline Format" })
 _G.new_user_autocmd(function(args)
   vim.treesitter.start(args.data.bufnr, 'markdown')
 end, 'CodeCompanionChatCreated', { desc = "CodeCompanion Chat Treesitter start" })
+
+local diff = require("mini.diff")
+diff.setup({
+  -- Disabled by default
+  source = diff.gen_source.none(),
+})

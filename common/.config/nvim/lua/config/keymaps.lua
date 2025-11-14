@@ -11,25 +11,21 @@ _G.keymaps_define({
   { lhs = "<leader>bb",            rhs = "<cmd>e #<cr>",                      opts = { desc = "Switch to Other Buffer" } },
   { lhs = "<leader>bD",            rhs = "<cmd>:%bdelete|edit #|normal`<cr>", opts = { desc = "Close all Other Buffers" } },
   { lhs = "q",                     rhs = "<nop>",                             opts = { noremap = true } },
-  { lhs = "Q",                     rhs = "q",                                 opts = { noremap = true } },
-  { lhs = "<M-q>",                 rhs = "Q",                                 opts = { desc = "Replay last register", noremap = true } },
-  { mode = { "n" },                lhs = "<C-q>",                             rhs = ":copen<CR>",                                      opts = { silent = true } },
-  { mode = { "n" },                lhs = "<leader>u",                         rhs = "<Cmd>update<CR>",                                 opts = { desc = "Write the current buffer." } },
-  { mode = { "n" },                lhs = "<leader>q",                         rhs = "<Cmd>:quit<CR>",                                  opts = { desc = "Quit the current buffer." } },
-  { mode = { "n" },                lhs = "<leader>Q",                         rhs = "<Cmd>:wqa<CR>",                                   opts = { desc = "Quit all buffers and write." } },
-  { mode = { "n" },                lhs = "<C-f>",                             rhs = "<Cmd>Open .<CR>",                                 opts = { desc = "Open current directory in Finder." } },
+  { lhs = "Q",                     rhs = "<nop>",                             opts = { noremap = true } },
   { lhs = '[p',                    rhs = '<Cmd>exe "put! " . v:register<CR>', opts = { desc = 'Paste Above' } },
   { lhs = ']p',                    rhs = '<Cmd>exe "put "  . v:register<CR>', opts = { desc = 'Paste Below' } },
 
   -- File & Config Editing
   -- stylua:ignore
-  { mode = { "n", "v", "x" },      lhs = "<leader>ev",                        rhs = "<Cmd>edit $MYVIMRC<CR>",                          opts = { desc = "Edit " .. vim.fn.expand("$MYVIMRC") } },
-  { mode = { "n", "v", "x" },      lhs = "<leader>ez",                        rhs = "<Cmd>e $ZDOTDIR<CR>",                             opts = { desc = "Edit .zshrc" } },
-  { mode = { "n", "v", "x" },      lhs = "<leader>ej",                        rhs = "<Cmd>e $JUSTFILE_HOME<CR>",                       opts = { desc = "Edit Global JustFiles" } },
-  { mode = { "n", "v", "x" },      lhs = "<leader>ed",                        rhs = "<Cmd>e $XDG_CONFIG_HOME/direnv<CR>",              opts = { desc = "Edit Direnv config" } },
-  { mode = { "n", "v", "x" },      lhs = "<leader>eh",                        rhs = "<Cmd>e $XDG_CONFIG_HOME/hypr/hyprland<CR>",       opts = { desc = "Edit Hyprland Config" } },
-  { mode = { "n", "v", "x" },      lhs = "<leader>o",                         rhs = "<Cmd>source $MYVIMRC<CR>",                        opts = { desc = "Source " .. vim.fn.expand("$MYVIMRC") } },
-  { mode = { 'n', 'v', 'x' },      lhs = '<leader>O',                         rhs = '<Cmd>restart<CR>',                                opts = { desc = 'Restart vim.' } },
+  { mode = { "n", "v", "x" },      lhs = "<leader>o",                         rhs = "<Cmd>source $MYVIMRC<CR>",                               opts = { desc = "Source " .. vim.fn.expand("$MYVIMRC") } },
+  { mode = { 'n', 'v', 'x' },      lhs = '<M-r>',                             rhs = '<Cmd>restart<CR>',                                       opts = { desc = 'Restart vim.', noremap = true } },
+  -- Save
+  { mode = { "n" },                lhs = "<C-f>",                             rhs = "<Cmd>Open .<CR>",                                        opts = { desc = "Open current directory in Finder.", noremap = true } },
+  -- Save
+  { mode = { "i", "x", "n", "s" }, lhs = "<C-s>",                             rhs = "<cmd>w<cr><esc>",                                        opts = { desc = "Save File", noremap = true } },
+  -- Quit
+  { mode = { "n" },                lhs = "<C-q>",                             rhs = "<Cmd>:quit<CR>",                                         opts = { desc = "Quit the current buffer.", noremap = true } },
+  { lhs = "<M-q>",                 rhs = "<Cmd>:wqa<CR>",                     opts = { desc = "Quit all buffers and write.", noremap = true } },
 
   -- Buffers
   -- stylua:ignore
@@ -42,11 +38,11 @@ _G.keymaps_define({
   -- Search
   -- stylua:ignore
   { lhs = "n",                     rhs = "'Nn'[v:searchforward].'zv'",        opts = { expr = true, desc = "Next Search Result" } },
-  { mode = "x",                    lhs = "n",                                 rhs = "'Nn'[v:searchforward]",                           opts = { expr = true, desc = "Next Search Result" } },
-  { mode = "o",                    lhs = "n",                                 rhs = "'Nn'[v:searchforward]",                           opts = { expr = true, desc = "Next Search Result" } },
+  { mode = "x",                    lhs = "n",                                 rhs = "'Nn'[v:searchforward]",                                  opts = { expr = true, desc = "Next Search Result" } },
+  { mode = "o",                    lhs = "n",                                 rhs = "'Nn'[v:searchforward]",                                  opts = { expr = true, desc = "Next Search Result" } },
   { lhs = "N",                     rhs = "'nN'[v:searchforward].'zv'",        opts = { expr = true, desc = "Prev Search Result" } },
-  { mode = "x",                    lhs = "N",                                 rhs = "'nN'[v:searchforward]",                           opts = { expr = true, desc = "Prev Search Result" } },
-  { mode = "o",                    lhs = "N",                                 rhs = "'nN'[v:searchforward]",                           opts = { expr = true, desc = "Prev Search Result" } },
+  { mode = "x",                    lhs = "N",                                 rhs = "'nN'[v:searchforward]",                                  opts = { expr = true, desc = "Prev Search Result" } },
+  { mode = "o",                    lhs = "N",                                 rhs = "'nN'[v:searchforward]",                                  opts = { expr = true, desc = "Prev Search Result" } },
 
   -- Insert Mode Enhancements
   -- stylua:ignore
@@ -54,9 +50,6 @@ _G.keymaps_define({
   { mode = "i",                    lhs = ".",                                 rhs = ".<c-g>u" },
   { mode = "i",                    lhs = ";",                                 rhs = ";<c-g>u" },
 
-  -- Save
-  -- stylua:ignore
-  { mode = { "i", "x", "n", "s" }, lhs = "<C-s>",                             rhs = "<cmd>w<cr><esc>",                                 opts = { desc = "Save File" } },
 
   -- Visual Mode Enhancements
   -- stylua:ignore

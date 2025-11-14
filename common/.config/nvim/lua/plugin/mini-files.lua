@@ -11,6 +11,7 @@ require('mini.files').setup {
     width_focus = 50,
     -- Width of non-focused window
     width_nofocus = 15,
+    --
     -- Width of preview window
     width_preview = 25,
   },
@@ -20,7 +21,7 @@ require('mini.files').setup {
   },
   mappings = {
     close = 'q',
-    go_in = 'l',
+    go_in = '<Right>',
     go_in_plus = 'L',
     go_out = 'H',
     go_out_plus = '<Left>',
@@ -58,14 +59,21 @@ local yank_path = function()
 end
 
 -- stylua:ignore
-_G.keymaps_define {
-  { lhs = '<leader>ed', rhs = '<Cmd>lua MiniFiles.open()<CR>', opts = { desc = '[E]xplore [D]irectory' } },
+local wkey_prefix = '<leader>e'
+_G.keymaps_define({
+  { lhs = wkey_prefix .. 'c', rhs = '<Cmd>lua MiniFiles.open()<CR>',                             opts = { desc = 'File Explorer (cwd)' } },
+  { lhs = wkey_prefix .. 'x', rhs = '<Cmd>lua MiniFiles.open(vim.api.nvim_buf_get_name(0))<CR>', opts = { desc = 'File Explorer' } },
+  { mode = { "n", "v", "x" }, lhs = wkey_prefix .. 'v',                                          rhs = "<Cmd>edit $MYVIMRC<CR>",                    opts = { desc = "Edit $MYVIMRC" } },
+  { mode = { "n", "v", "x" }, lhs = wkey_prefix .. 'z',                                          rhs = "<Cmd>e $ZDOTDIR<CR>",                       opts = { desc = "Edit .zshrc" } },
+  { mode = { "n", "v", "x" }, lhs = wkey_prefix .. 'j',                                          rhs = "<Cmd>e $JUSTFILES_HOME<CR>",                opts = { desc = "Edit Global JustFiles" } },
+  { mode = { "n", "v", "x" }, lhs = wkey_prefix .. 'd',                                          rhs = "<Cmd>e $XDG_CONFIG_HOME/direnv<CR>",        opts = { desc = "Edit Direnv config" } },
+  { mode = { "n", "v", "x" }, lhs = wkey_prefix .. 'h',                                          rhs = "<Cmd>e $XDG_CONFIG_HOME/hypr/hyprland<CR>", opts = { desc = "Edit Hyprland Config" } },
   {
     lhs = '\\',
     rhs = '<Cmd>lua MiniFiles.open(vim.api.nvim_buf_get_name(0))<CR>',
-    opts = { desc = 'Open file explorer quick' },
+    opts = { desc = 'Open file explorer shortcut' },
   },
-}
+}, { group = 'Explore/Edit', prefix = wkey_prefix })
 -- Keep track of when the explorer is open to disable format on save.
 
 -- Open path with system default handler (useful for non-text files)

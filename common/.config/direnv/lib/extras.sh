@@ -20,29 +20,11 @@ use_env_dir() {
   fi
 }
 
-uv_check_for_deps() {
-  deps_map=("$@")
-  if [[ -z "$deps_map" ]]; then
-    log_error "uv_check_for_deps: No dependency map provided."
-    return 1
-  fi
-
-  for group in "${!deps_map[@]}"; do
-    local deps_list="${deps_map[$group]}"
-    read -r -a individual_deps <<<"$deps_list"
-
-    for dep in "${individual_deps[@]}"; do
-      if ! uv pip show "$dep" &>/dev/null; then
-        log_status "uv has missing dependency: $dep (group: $group). Adding."
-        uv add --group "$group" "$dep"
-      fi
-    done
-  done
-}
-
 layout_uv_venv() {
-
-  python_version="--python=${1:-3.12}"
+  if [ $# -ne 1 ]; then
+    log_fatal "Need to specify python version"
+  fi
+  python_version="--python=$1"
 
   if [[ -d ".venv" ]]; then
     VIRTUAL_ENV="$(pwd)/.venv"
@@ -58,19 +40,12 @@ layout_uv_venv() {
   export UV_PYTHON="$VIRTUAL_ENV/bin/python"
 }
 
-layout_uv_project() {
-
-  project_type="${1:-virtual}"
-  uv_project_init_cmd="uv init --bare --$project_type"
-  if [[ ! -f "$(pwd)/pyproject.toml" ]]; then
-    log_status "No uv project exists. Executing $uv_project_init_cmd to create one."
-    $uv_project_init_cmd
-  fi
-}
-
 layout_uv() {
   layout_uv_venv "$1"
-  layout_uv_project "$2"
+  if [[ ! -f "$(pwd)/pyproject.toml" ]]; then
+    log_status "No uv project exists. Executing uv init --bare to create one."
+    uv init --bare
+  fi
 }
 
 alias_justfile_recipes() {
