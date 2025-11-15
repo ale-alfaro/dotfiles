@@ -1,0 +1,51 @@
+# Run linters
+[group('qa')]
+lint *args:
+    uvx ruff check --fix {{ args }}
+    uvx ruff format
+
+unsafe_fix: (lint "--unsafe-fixes")
+
+package_list := prepend("packages/", "core_io core_io_ble ble_shell  pytest-core-io")
+uv_run_flags := "--all-packages"
+uv_run := "uv run "
+python := if env('UV_PYTHON', "") != "" { "uv run python" } else { "python" }
+
+# Check types
+[group('qa')]
+typing:
+    {{ uv_run }} ty check
+    # uvx ty check --python .venv {{ package_list }}
+
+[group('qa')]
+typing_extra:
+    {{ uv_run }}  basedpyright  --level error
+    {{ uv_run }}  mypy  --no-warn-unused-ignore --no-warn-no-return {{ package_list }}
+
+# Perform all checks
+[group('qa')]
+check-all: lint typing typing_extra
+
+UV_SYNC_FLAGS := "--dev --all-packages"
+
+# Update dependencies
+[group('lifecycle')]
+update:
+    uv sync --upgrade {{ UV_SYNC_FLAGS }}
+
+[group('lifecycle')]
+install python_semver="3.13":
+    uv venv "--python={{ python_semver }}"
+    uv sync {{ UV_SYNC_FLAGS }}
+    @echo "Installing pre-commit hook"
+    @uv run prek install
+
+# Remove temporary files
+[group('lifecycle')]
+clean:
+    rm -rf .venv .pytest_cache .mypy_cache .ruff_cache
+    find . -type d -name "__pycache__" -exec rm -r {} +
+
+# Recreate project virtualenv from nothing
+[group('lifecycle')]
+fresh: clean install

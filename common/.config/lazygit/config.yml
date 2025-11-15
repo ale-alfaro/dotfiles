@@ -29,7 +29,8 @@ gui:
 customCommands:
   - key: 'C'
     command: 'git commit -m {{.Form.CommitMsg| quote}}'
-    context: 'global'
+    context: "global"
+    output: "terminal"
     prompts:
       - type: 'input'
         title: 'Msg:'

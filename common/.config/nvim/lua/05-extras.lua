@@ -72,7 +72,7 @@ _G.new_autocmd('FileType', function()
     inst:open_location()
     inst:close()
   end, { buffer = true })
-end, 'grug-far', "Keep one instance of grug")
+end, 'grug-far*', "Keep one instance of grug")
 --
 --
 --
@@ -114,8 +114,32 @@ vim.pack.add(
     _G.plug("obsidian-nvim/obsidian.nvim"),
     _G.plug('MeanderingProgrammer/render-markdown.nvim'),
   })
--- Obsidian and render-markdown are loaded in after/ftplugin/markdown.lua
+-- Obsidian is loaded in after/ftplugin/markdown.lua
 
+local ok, render_md = pcall(require, 'render-markdown')
+if ok then
+  render_md.setup({
+    restart_highlighter = false,
+    file_types = { 'markdown', 'codecompanion' },
+    code = {
+      sign = false,
+      width = "block",
+      right_pad = 1,
+    },
+    heading = {
+      sign = false,
+      icons = {},
+    },
+    checkbox = {
+      enabled = false,
+    },
+    { ui = { enable = false } },
+    { latex = { enabled = false } },
+    completions = { lsp = { enabled = true } },
+  })
+else
+  _G.error("Couldn't load render-markdown.nvim plugin")
+end
 vim.g.markdown_plugins_loaded = false
 -- stylua: ignore end
 --

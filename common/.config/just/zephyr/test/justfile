@@ -1,6 +1,4 @@
-
-
-serial_port := env('PORT_VAR','/dev/ttyACM0')
+serial_port := env('PORT_VAR', '/dev/ttyACM0')
 
 #Not using snr, needed for multiple jlinks
 # serial_number := env('SNR_VAR') || '728343547'
@@ -11,24 +9,65 @@ test_dir := invocation_directory()
 default:
     @just --list
 
+twister_default_flags := " -vv --allow-installed-plugin --clobber-output --no-detailed-test-id "
+twister := "$west" + " twister" + twister_default_flags
+
 prep-test board cwd=test_dir:
-    @echo "Preparing test for {{board}}"
-    @echo "cwd={{cwd}}"
-    @echo "test_dir={{test_dir}}"
-    @mkdir -p {{test_dir}}/twister
+    @echo "Preparing test for {{ board }}"
+    @echo "cwd={{ cwd }}"
+    @echo "test_dir={{ test_dir }}"
+    @mkdir -p {{ test_dir }}/twister
     west twister \
-    --platform {{board}} \
-    -T {{cwd}} \
+    --platform {{ board }} \
+    -T {{ cwd }} \
     --prep-artifacts-for-testing \
-    -O "{{test_dir}}/twister/out-{{datetime('%m-%d-%H-%M-%S')}}"
+    -O "{{ test_dir }}/twister/out-{{ datetime('%m-%d-%H-%M-%S') }}"
 
 run-hw-test board cwd=test_dir port=serial_port:
     west twister \
         -vv \
-        --platform {{board}} \
-        -T {{cwd}} \
+        --platform {{ board }} \
+        -T {{ cwd }} \
         --device-testing \
-        --device-serial {{port}} --test-only \
+        --device-serial {{ port }} --test-only \
         --west-flash="--skip-rebuild" \
-        -O "{{test_dir}}/twister/out-{{datetime('%m-%d-%H-%M-%S')}}"
+        -O "{{ test_dir }}/twister/out-{{ datetime('%m-%d-%H-%M-%S') }}"
 
+twister_report_flags := "--report-dir samples/shell_hil/twister_report --outdir samples/shell_hil/twister_out"
+native_sim_west_flags := "-b native_sim -- -DCONFIG_UART_NATIVE_PTY_0_ON_STDINOUT=y"
+qemu_west_flags := "-b qemu_x86 -- -DQEMU_PIPE=qemu-fifo"
+pytest_base_opts := "--strict-markers --strict-config -ra --log-cli-level='INFO' "
+pytest_debug_opts := "-v -s -log-cli-level='DEBUG' "
+pytest_zephyr_opts := " --twister-harness --build-dir=build  --device-serial=" + env('SERIAL_PORT', '/dev/ttyACM0')
+pytest := if env('UV_PYTHON', "") != "" { "uv run pytest" } else { "pytest" }
+
+[group('test')]
+twister_run test_root platform *args:
+    {{ twister }} -p {{ platform }} -T {{ test_root }} {{ args }}
+
+[group('test')]
+twister_run_scenario test_root platform scenario *args:
+    {{ twister }} -p {{ platform }} -T {{ test_root }} -s {{ scenario }} {{ args }}
+
+_pytest_run *args:
+    {{ pytest }} {{ pytest_base_opts }} {{ args }}
+
+_pytest_run_debug $PYTHONASYNCIODEBUG="1" *args:
+    {{ pytest }} {{ pytest_debug_opts }} {{ args }}
+
+[group('test')]
+pytest_run platform *args:
+    just _pytest_run  {{ pytest_zephyr_opts + " " + append(platform, " --device-type=") }} "{{ args }}"
+
+[group('test')]
+pytest_run_shell *args: (pytest_run "hardware" args)
+
+[group('test')]
+twister_run_sim test_root *args:
+    just twister_run {{ test_root }} native_sim {{ args }}
+
+hardware_twister_flags := "--west-flash --enable-slow --device-testing --device-serial=" + env('SERIAL_PORT', '/dev/ttyACM0')
+
+[group('test')]
+twister_run_serial test_root $BOARD *args:
+    just twister_run {{ test_root }} {{ "$BOARD" }} "{{ hardware_twister_flags }} {{ args }}"

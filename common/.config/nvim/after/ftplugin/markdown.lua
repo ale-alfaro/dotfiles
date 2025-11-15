@@ -1,3 +1,5 @@
+---@module "render-markdown"
+
 -- ┌─────────────────────────┐
 -- │ Filetype config example │
 -- └─────────────────────────┘
@@ -41,28 +43,6 @@ vim.b.minisurround_config = {
   },
 }
 if not vim.g.markdown_plugins_loaded then
-  local ok, _ = pcall(require, 'render-markdown')
-  if ok then
-    require("render-markdown").setup({
-      code = {
-        sign = false,
-        width = "block",
-        right_pad = 1,
-      },
-      heading = {
-        sign = false,
-        icons = {},
-      },
-      checkbox = {
-        enabled = false,
-      },
-      { ui = { enable = false } },
-      { latex = { enabled = false } },
-      completions = { lsp = { enabled = true } },
-    })
-  else
-    _G.error("Couldn't load render-markdown.nvim plugin")
-  end
   ok, _ = pcall(require, 'obsidian')
   if ok then
     require('obsidian').setup({
