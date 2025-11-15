@@ -1,3 +1,9 @@
+# ---- zsh-compatible Direnv stdlib helpers + other utilities for zsh scripts -----
+source $ZDOTDIR/functions/stdlib.zsh
+
+# Plugin Helper
+# ------------------------------------------------------------------------------
+source $ZDOTDIR/shell_integrations/plugin_helper.zsh
 # ---- Editor -----
 alias v="n"
 
@@ -5,7 +11,7 @@ n() {
   if [[ "$#" -eq 0 ]]; then nvim; fi
   if [[ "$#" -eq 1 ]]; then
     case "$1" in
-      nvim|zsh|direnv|hypr|wezterm)
+      nvim | zsh | direnv | hypr | wezterm)
         nvim "$XDG_CONFIG_HOME/$1"
         ;;
       sdk-ncs)
@@ -69,4 +75,3 @@ fi
 if has fzf; then
   alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
 fi
-

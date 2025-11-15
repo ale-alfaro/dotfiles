@@ -1,6 +1,13 @@
 #######################################################
 # Shell integrations
 #######################################################
+#
+# Other nice plugins
+plugins=(
+  zsh-users/zsh-syntax-highlighting
+  zsh-users/zsh-autosuggestions
+)
+__init_plugins "${plugins[@]}"
 ## fzf
 # ------------------------------------------------------------------------------
 if has fzf; then
@@ -31,15 +38,6 @@ if has fzf; then
 else
   echo ERROR: Could not fzf shell integration.
 fi
-
-# --- Completion from CLI tools ---
-if has jj; then
-  eval "$(jj util completion zsh)"
-fi
-if has bw; then
-  eval "$(bw completion --shell zsh)"
-fi
-
 # ---- Atuin (better shell command history) -----
 eval "$(atuin init zsh)"
 
@@ -68,25 +66,20 @@ elif [[ $TERM_PROGRAM == "ghostty" ]]; then
 else
   echo "Unsupported TERM_PROGRAM=$TERM_PROGRAM"
 fi
+export OBSIDIAN_HOME="${HOME}/Documents/Obsidian"
 
 # Initialize Node Version manager
 if [[ "$OSTYPE" == "darwin"* ]]; then
-
-  # export NVM_DIR="${XDG_CONFIG_HOME}/.nvm"
   export NVM_DIR="$HOME/.nvm"
   [ -s "$(brew --prefix nvm)/nvm.sh" ] && \. "$(brew --prefix nvm)/nvm.sh"                                       # This loads nvm
   [ -s "$(brew --prefix nvm)/etc/bash_completion.d/nvm" ] && \. "$(brew --prefix nvm)/etc/bash_completion.d/nvm" # This loads nvm bash_completion
-  # [ -s /opt/homebrew/opt/nvm/nvm.sh ] && \. /opt/homebrew/opt/nvm/nvm.sh                                       # This loads nvm
-  # [ -s /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm ] && \. /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm # This loads nvm bash_completion
-  #Set OBSIDIAN_HOME to iCloud directory in MacOS
-  export OBSIDIAN_HOME="/Users/alealfaro/Documents/Obsidian"
 else
-  # . /usr/share/nvm/init-nvm.sh
   export NVM_DIR="$XDG_CONFIG_HOME/nvm"
   source "$ZDOTDIR/shell_integrations/zsh-nvm.zsh"
-  export OBSIDIAN_HOME="/home/alealfaro/Documents/Obsidian"
 fi
+use_nvim "v0.12"
 
+# --- Completion from CLI tools ---
 if has uv; then
   eval "$(uv generate-shell-completion zsh)"
 fi
@@ -95,4 +88,14 @@ if has prek; then
   eval "$(COMPLETE=zsh prek completion)"
 fi
 
-use_nvim "v0.12"
+# --- Optional completions from CLI tools ---
+if [[ -z "$JJ_COMPLETIONS" ]]; then
+  if has jj; then
+    eval "$(jj util completion zsh)"
+  fi
+fi
+if [[ -z "$BW_CLI_COMPLETIONS" ]]; then
+  if has bw; then
+    eval "$(bw completion --shell zsh)"
+  fi
+fi

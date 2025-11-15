@@ -32,11 +32,11 @@ function M.get_keys(alt_modifier)
 		{ key = "m", mods = "LEADER", action = M.activate_table("muxer") },
 
 		-- Clipboard
-		{ key = "v", mods = alt_modifier, action = action.PasteFrom("Clipboard") },
+		{ key = "v", mods = "CTRL|SHIFT", action = action.PasteFrom("Clipboard") },
 
 		{
 			key = "c",
-			mods = alt_modifier,
+			mods = "CTRL|SHIFT",
 			action = action.CopyTo("Clipboard"),
 		},
 
