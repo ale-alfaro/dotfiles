@@ -62,7 +62,6 @@ else
 fi
 use_nvim "v0.12"
 
-
 ## Additional completions. This can be here because they don't add to the fpath and get activated by eval
 # --- Completion from CLI tools ---
 if has uv; then
@@ -84,3 +83,5 @@ if [[ -z "$BW_CLI_COMPLETIONS" ]]; then
     eval "$(bw completion --shell zsh)"
   fi
 fi
+
+export GEMINI_CLI_SYSTEM_SETTINGS_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/gemini"

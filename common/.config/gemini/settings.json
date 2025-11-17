@@ -1,0 +1,32 @@
+{
+  "security": {
+    "auth": {
+      "selectedType": "gemini-api-key"
+    }
+  },
+  "contextFileName": [
+    "GEMINI.md",
+    "AGENTS.md"
+  ],
+  "theme": "GitHub",
+  "telemetry": {
+    "enabled": false
+  },
+  "usageStatisticsEnabled": true,
+  "hideTips": false,
+  "hideBanner": false,
+  "maxSessionTurns": 10,
+  "summarizeToolOutput": {
+    "run_shell_command": {
+      "tokenBudget": 100
+    }
+  },
+  "excludedProjectEnvVars": [
+    "DEBUG",
+    "DEBUG_MODE"
+  ],
+  "includeDirectories": [
+    "~/.config/gemini/memory"
+  ],
+  "loadMemoryFromIncludeDirectories": true
+}
