@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+############## Utils ###################################
 # Usage: use_env_dir [env_dir]
 #
 # Load environment variables from `$(direnv_layout_dir)/envs" directory.
@@ -20,6 +21,33 @@ use_env_dir() {
   fi
 }
 
+############## Envs ###################################
+
+use_llm_lang_rules() {
+  if [[ ! "$#" -eq 1 ]]; then
+    log_fatal "Need to specify the language to add llm rules for (cpp or python)"
+  fi
+
+  # Python codebase add python llm memory
+  local llm_rules_dir="$XDG_CONFIG_HOME/direnv/res/llm_memory/${1:-"python"}"
+  if [[ -d "$llm_rules_dir" ]]; then
+    export LLM_MEMORY_DIR="$llm_rules_dir"
+  fi
+
+}
+
+use_developer_envs() {
+
+  local env_type
+  if [[ -z $WORK_ENV ]]; then
+    env_type="personal"
+  else
+    env_type="work"
+  fi
+  use_env_dir "$XDG_CONFIG_HOME/direnv/envs/common"
+  use_env_dir "$XDG_CONFIG_HOME/direnv/envs/${env_type}"
+}
+############## Python ###################################
 layout_uv_venv() {
   if [ $# -ne 1 ]; then
     log_fatal "Need to specify python version"
@@ -48,26 +76,7 @@ layout_uv() {
   fi
 }
 
-alias_justfile_recipes() {
-  justfile_home="${JUSTFILE_HOME:-$HOME/.config/just}"
-  justfile_recipes="$justfile_home/${1:""}/justfile"
-  for recipe in $(just --justfile "$justfile_recipes" --summary); do
-    echo "aliasing $recipe"
-    alias "$recipe"='just --justfile "$justfile_recipes" --working-directory . "$recipe"'
-  done
-}
-use_developer_envs() {
-
-  local env_type
-  if [[ -z $WORK_ENV ]]; then
-    env_type="personal"
-  else
-    env_type="work"
-  fi
-  use_env_dir "$XDG_CONFIG_HOME/direnv/envs/common"
-  use_env_dir "$XDG_CONFIG_HOME/direnv/envs/${env_type}"
-}
-
+############## Node ###################################
 use_nvm() {
   local node_version=$1
   nvm_sh=~/.nvm/nvm.sh
@@ -77,6 +86,7 @@ use_nvm() {
   fi
 }
 
+############## GIT ###################################
 git_update_submodules() {
   git submodule status | while IFS= read -r line; do
     status_prefix=$(echo "$line" | awk '{print substr($1, 1, 1)}')
@@ -87,4 +97,13 @@ git_update_submodules() {
       break
     fi
   done
+}
+
+############## Nix ###################################
+source_nix_url() {
+  if ! has nix_direnv_version || ! nix_direnv_version 3.1.0; then
+    source_url "https://raw.githubusercontent.com/nix-community/nix-direnv/3.1.0/direnvrc" "sha256-yMJ2OVMzrFaDPn7q8nCBZFRYpL/f0RcHzhmw/i6btJM="
+  else
+    log_error "Couldn't source the nix-direnv url"
+  fi
 }

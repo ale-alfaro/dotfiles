@@ -65,3 +65,12 @@ lsp_setup {
   'dts-lsp',
   'marksman',
 }
+
+vim.lsp.config('vectorcode-server', {
+  filetypes = { 'codecompanion' },
+  -- cmd_env = {
+  --   HTTP_PROXY = os.getenv 'HTTP_PROXY',
+  --   HTTPS_PROXY = os.getenv 'HTTPS_PROXY',
+  -- },
+  cmd = { vim.fs.normalize '~/.local/bin/vectorcode-server' },
+})

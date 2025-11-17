@@ -1,43 +1,26 @@
 #######################################################
 # Shell integrations
 #######################################################
-#
-# Other nice plugins
-plugins=(
-  zsh-users/zsh-syntax-highlighting
-  zsh-users/zsh-autosuggestions
-)
-__init_plugins "${plugins[@]}"
-## fzf
-# ------------------------------------------------------------------------------
-if has fzf; then
-  source <(fzf --zsh)
 
-  export FZF_CTRL_R_OPTS="
-  --color header:italic
-  --height=80%
-  --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
-  --header 'CTRL-Y: Copy command into clipboard, CTRL-/: Toggle line wrapping, CTRL-R: Toggle sorting by relevance'
-  "
+# Quickly go back to a specific parent directory instead of typing cd ../../.. redundantly
+# Example usage:
+# $ mkdir -p a/b/c/d
+# $ cd a/b/c/d
+# $ bd b
+# $ ls
+# c
+# $ cd c/d
+# $ bd 2
+# $ ls
+# c
 
-  export FZF_CTRL_T_OPTS="
-  --walker-skip .git,node_modules,target
-  --preview 'bat -n --color=always {}'
-  --height=80%
-  --bind 'ctrl-/:change-preview-window(down|hidden|)'
-  --header 'CTRL-/: Toggle preview window position'
-  "
-
-  export FZF_ALT_C_OPTS="
-  --walker-skip .git,node_modules,target
-  --preview 'tree -C {}'
-  --height=80%
-  --bind 'ctrl-/:change-preview-window(down|hidden|)'
-  --header 'CTRL-/: Toggle preview window position'
-  "
-else
-  echo ERROR: Could not fzf shell integration.
+bd_zsh="$shell_integrations/bd.zsh"
+if [[ -f "$bd_zsh" ]]; then
+  source "$bd_zsh"
 fi
+# Load syntax-highlighting and auto-suggestion. Don't need to initialize the repo as it was already done when loading zsh-completions
+__load_plugin zsh-users/zsh-syntax-highlighting
+__load_plugin zsh-users/zsh-autosuggestions
 # ---- Atuin (better shell command history) -----
 eval "$(atuin init zsh)"
 
@@ -57,11 +40,11 @@ fi
 # ---- Wezterm (terminal emulator) ---
 if [[ $TERM_PROGRAM == "WezTerm" ]]; then
   echo "Enabling wezterm shell integration"
-  . $ZDOTDIR/shell_integrations/wezterm.sh
+  . "$shell_integrations/wezterm.sh"
 elif [[ $TERM_PROGRAM == "ghostty" ]]; then
   if [[ -n $GHOSTTY_RESOURCES_DIR ]]; then
     echo "Enabling ghostty shell integration"
-    source "$GHOSTTY_RESOURCES_DIR"/shell-integration/zsh/ghostty-integration
+    source "$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
   fi
 else
   echo "Unsupported TERM_PROGRAM=$TERM_PROGRAM"
@@ -79,6 +62,8 @@ else
 fi
 use_nvim "v0.12"
 
+
+## Additional completions. This can be here because they don't add to the fpath and get activated by eval
 # --- Completion from CLI tools ---
 if has uv; then
   eval "$(uv generate-shell-completion zsh)"

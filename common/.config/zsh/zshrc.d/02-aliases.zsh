@@ -1,9 +1,10 @@
 # ---- zsh-compatible Direnv stdlib helpers + other utilities for zsh scripts -----
-source $ZDOTDIR/functions/stdlib.zsh
+source "$ZDOTDIR/functions/stdlib.zsh"
 
+shell_integrations="$ZDOTDIR/shell_integrations"
 # Plugin Helper
 # ------------------------------------------------------------------------------
-source $ZDOTDIR/shell_integrations/plugin_helper.zsh
+source "$shell_integrations/plugin_helper.zsh"
 # ---- Editor -----
 alias v="n"
 
@@ -30,10 +31,9 @@ n() {
   fi
 }
 
-# Directories
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
+# Navigate back to directories easily using the zsh directory stack feature
+alias d='dirs -v'
+for index ({1..9}) alias "$index"="cd +${index}"; unset index
 
 alias cd="zd"
 zd() {

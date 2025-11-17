@@ -118,12 +118,40 @@ zstyle ':completion:*:*:-command-:*:*' group-order aliases builtins functions co
 # zstyle ':completion:*' max-errors 2
 # zstyle :compinstall filename "$ZDOTDIR/.zshrc"
 
-# FZF-tab completion helper
 # ------------------------------------------------------------------------------
-plugins=(
-  Aloxaf/fzf-tab
-)
-__init_plugins "${plugins[@]}"
+## fzf
+# ------------------------------------------------------------------------------
+if has fzf; then
+  source <(fzf --zsh)
 
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
-zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
+  export FZF_CTRL_R_OPTS="
+  --color header:italic
+  --height=80%
+  --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
+  --header 'CTRL-Y: Copy command into clipboard, CTRL-/: Toggle line wrapping, CTRL-R: Toggle sorting by relevance'
+  "
+
+  export FZF_CTRL_T_OPTS="
+  --walker-skip .git,node_modules,target
+  --preview 'bat -n --color=always {}'
+  --height=80%
+  --bind 'ctrl-/:change-preview-window(down|hidden|)'
+  --header 'CTRL-/: Toggle preview window position'
+  "
+
+  export FZF_ALT_C_OPTS="
+  --walker-skip .git,node_modules,target
+  --preview 'tree -C {}'
+  --height=80%
+  --bind 'ctrl-/:change-preview-window(down|hidden|)'
+  --header 'CTRL-/: Toggle preview window position'
+  "
+  # FZF-tab completion helper
+  plugins=(
+    Aloxaf/fzf-tab
+  )
+  __init_plugins "${plugins[@]}"
+
+  zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
+  zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
+fi

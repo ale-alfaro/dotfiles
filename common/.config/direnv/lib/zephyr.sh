@@ -100,24 +100,27 @@ use_zephyr_toolchain() {
   PATH_add "$ZEPHYR_SDK_INSTALL_DIR/arm-zephyr-eabi/bin"
 }
 
-layout_uv_zephyr() {
-  if [[ ! "$#" -eq 1 ]]; then
-    fatal "layout_uv_zephyr requires python version to be specified"
-  fi
-  layout uv "${1:-3.12}"
-
-  echo "Installing west and required python packages for building (pyelftools ninja intelhex)"
+zephyr_pip_install() {
   uv add --dev west pyelftools ninja intelhex
-}
-add_all_python_deps() {
-  is_workspace=$(west topdir)
-  if [[ -d "$is_workspace" ]]; then
-    west packages pip | xargs uv add --dev
+  zephyr_base_config=$(uv run --dev west config zephyr.base)
+  zephyr_base=${ZEPHYR_BASE:-$zephyr_base_config}
+  if [[ -d "$zephyr_base" ]]; then
+    "$(uv run --dev west packages pip | xargs uv add --dev)" &>/dev/null || eval "$(uv add --requirements "$zephyr_base/scripts/requirements.txt" --dev)"
+
   else
     log_status "Not inside a workspace. Are you out-of-tree?"
   fi
 }
 
+layout_uv_zephyr() {
+  # if [[ ! "$#" -eq 1 ]]; then
+  #   fatal "layout_uv_zephyr requires python version to be specified"
+  # fi
+  layout uv "${1:-3.12}"
+
+  echo "Installing west and required python packages for building (pyelftools ninja intelhex)"
+  zephyr_pip_install
+}
 #Main Functions to use for setting up an environment:
 
 layout_ncs() {
@@ -146,12 +149,17 @@ use_out_of_tree_west_workspace() {
 
 }
 
-layout_west_workspace() {
-  zephyr_base=$(west config zephyr.base)
-  if [[ -z $zephyr_base ]]; then
-    echo "No ZEPHYR_BASE set. Please specify it through the local west config"
+use_west_workspace() {
+  if [[ ! "$#" -eq 1 || ! -z "$ZEPHYR_BASE" ]]; then
+    fatal "use west workspace requires the location of ZEPHYR_BASE to be specified as an argument or environment variable"
+  fi
+  if ! has west; then
+    layout uv_zephyr
+  fi
+  west config zephyr.base "${1:-$ZEPHYR_BASE}"
+  if [[ -z $ZEPHYR_BASE ]]; then
+    export ZEPHYR_BASE="$(west topdir)/$1"
   else
-    export ZEPHYR_BASE="$(west topdir)/$zephyr_base"
     west zephyr-export
   fi
 }

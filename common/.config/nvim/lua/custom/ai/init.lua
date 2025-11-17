@@ -2,7 +2,6 @@
 
 local M = {}
 
-
 local function get_tool_list()
   ---@class CodeCompanion.Tools
   local tools = require 'codecompanion.strategies.chat.tools'
@@ -34,14 +33,22 @@ end
 --   end,
 -- }
 
-
 function M.setup(opts)
   require('custom.ai.adapters').setup(opts)
   require('custom.ai.memory').setup(opts)
 
   require('custom.ai.prompts').setup(opts)
+  require('custom.ai.extensions').setup(opts)
   ---@type CodeCompanion
   require('codecompanion').setup(opts)
+
+  require('custom.ai.extensions.vectorcode').setup()
+  -- if #extensions.additional_setup > 0 then
+  --   local setups = extensions.additional_setup
+  --   for i in 1, #setups do
+  --     setups[i]()
+  --   end
+  -- end
 
   vim.cmd [[cab cc CodeCompanion]]
   vim.api.nvim_create_user_command('CodeCompanionTools', get_tool_list, {
