@@ -84,4 +84,4 @@ if [[ -z "$BW_CLI_COMPLETIONS" ]]; then
   fi
 fi
 
-export GEMINI_CLI_SYSTEM_SETTINGS_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/gemini"
+export GEMINI_CLI_SYSTEM_SETTINGS_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/gemini/settings.json"

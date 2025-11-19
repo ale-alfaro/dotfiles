@@ -1,24 +1,12 @@
 #!/usr/bin/env just --justfile --working-directory `pwd`
 
 set shell := ["bash", "-c"]
-
-# full_board_name_cmd := 'west boards -f "{name}/{qualifiers}"  --name "$1"'
-
 set unstable := true
 set allow-duplicate-recipes := true
 
-west-topdir := env('WEST_TOPDIR', shell('topdir=$(west topdir)'))
-zephyr_base := env('ZEPHYR_BASE', ```
-    topdir=$(west topdir)
-    zephyr_base="$(realpath $topdir)/$(west config zephyr.base)"
-    echo $zephyr_base
-```)
 export west := if env('UV_PYTHON', "") != "" { "uv run west" } else { "west" }
 
-# default_hex_file := "build/zephyr/zephyr.hex"
-
 import 'dtsh.just'
-import 'build.just'
 import 'test/justfile'
 
 mod test
@@ -28,6 +16,7 @@ default:
 
 # initialize west
 [group('zephyr')]
+[no-cd]
 init:
     @west init -l config
     @west update --fetch-opt=--filter=blob:none
@@ -35,6 +24,7 @@ init:
 
 # update west
 [group('zephyr')]
+[no-cd]
 update:
     @west update --fetch-opt=--filter=blob:none
 
@@ -64,6 +54,7 @@ west-boards *filter:
     @west boards -f "{name}#_#_#{dir}#_#_{qualifiers}" | awk -v cwd="$(pwd)/" -F '#_#_#' 'BEGIN {print "| Board | Path | Qualifiers |"; print "|---|---|---|" } {{ filter }} { sub(cwd, "", $2); gsub(/^[ \t]+|[ \t]+$/, "", $1); gsub(/^[ \t]+|[ \t]+$/, "", $2); gsub(/^[ \t]+|[ \t]+$/, "", $3); print "| " $1 " | " $2 " | " $3 " |"}'
 
 [group('zephyr')]
+[no-cd]
 west-boards-filter-by-path path="app":
     just west-boards '$2 ~ /\/{{ path }}\// '
 
@@ -73,13 +64,24 @@ west-boards-filter-by-path path="app":
 #     @ {{ if runner == "uf2" { "sudo" } else { "" } }} uv run west flash -r {{ runner }} -d {{ build_dir }}
 
 [group('debugging')]
+[no-cd]
 rtt:
     @west rtt -r jlink
 
 [group('lifecycle')]
 [no-cd]
-build app_dir board *args:
-    {{ west }} build --pristine=always -b {{ board }} {{ args }} -s {{ app_dir }} -d "{{ app_dir }}/build"
+build app_dir board *extra:
+    {{ west }} build --pristine=always -b {{ board }}  -s {{ app_dir }} -d "{{ app_dir }}/build" {{ if is_dependency() == "false" { extra } else { "" } }}
+    {{ if is_dependency() == "true" { extra } else { "" } }}
+
+[group('lifecycle')]
+[no-cd]
+build_full app_dir board artifact extra_conf="" extra_dtc="":
+    {{ west }} build --pristine=always -b {{ board }}  -s {{ app_dir }} -d {{ app_dir / "build_" + artifact }}  \
+                  {{ if extra_conf != "" { '--extra-conf ' + extra_conf } else { "" } }} \
+                  {{ if extra_dtc != "" { '--extra-dtc-overlay ' + extra_dtc } else { "" } }} \
+                  {{ if env('SHIELD', "") != "" { '--shield ' + env('SHIELD') } else { "" } }} \
+                  {{ if env('SNIPPET', "") != "" { '--S ' + env('SNIPPET') } else { "" } }}
 
 default_runner := if env('BOARD', "") =~ "^nrf5" { "nrfutil" } else { "jlink" }
 

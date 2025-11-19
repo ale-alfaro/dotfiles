@@ -4,29 +4,53 @@
       "selectedType": "gemini-api-key"
     }
   },
-  "contextFileName": [
-    "GEMINI.md",
-    "AGENTS.md"
-  ],
-  "theme": "GitHub",
+  "ui": {
+    "theme": "ANSI",
+    "hideTips": false,
+    "hideBanner": false
+  },
   "telemetry": {
     "enabled": false
   },
-  "usageStatisticsEnabled": true,
-  "hideTips": false,
-  "hideBanner": false,
-  "maxSessionTurns": 10,
-  "summarizeToolOutput": {
-    "run_shell_command": {
-      "tokenBudget": 100
+  "privacy": { "usageStatisticsEnabled": true },
+  "model": {
+    "name": "gemini-2.5-pro-latest",
+    "maxSessionTurns": 10,
+    "summarizeToolOutput": {
+      "run_shell_command": {
+        "tokenBudget": 100
+      }
     }
   },
-  "excludedProjectEnvVars": [
-    "DEBUG",
-    "DEBUG_MODE"
-  ],
-  "includeDirectories": [
-    "~/.config/gemini/memory"
-  ],
-  "loadMemoryFromIncludeDirectories": true
+
+  "context": {
+    "fileName": ["AGENTS.md", "CONTEXT.md", "GEMINI.md"],
+    "includeDirectories": ["~/.config/gemini/memory"],
+    "loadFromIncludeDirectories": true,
+    "fileFiltering": {
+      "respectGitIgnore": false
+    }
+  },
+  "advanced": {
+    "excludedEnvVars": ["DEBUG", "DEBUG_MODE", "NODE_ENV"]
+  },
+  "tools": {
+    "useRipgrep": true,
+    "shell": {
+      "pager": "bat"
+    }
+  },
+  "general": {
+    "preferredEditor": "nvim",
+    "vimMode": true,
+    "checkpointing": {
+      "enabled": true
+    },
+    "enablePromptCompletion": true,
+    "disableUpdateNag": true
+  },
+  "ide": {
+    "enabled": true,
+    "hasSeenNudge": true
+  }
 }

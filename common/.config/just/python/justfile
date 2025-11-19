@@ -1,51 +1,58 @@
+set unstable := true
+set allow-duplicate-recipes := true
+
 # Run linters
 [group('qa')]
-lint *args:
+[no-cd]
+lint_ruff *args:
     uvx ruff check --fix {{ args }}
     uvx ruff format
 
-unsafe_fix: (lint "--unsafe-fixes")
+lint_ruff_unsafe *args:
+    uvx ruff check --fix --unsafe-fixes {{ args }}
+    uvx ruff format
 
-package_list := prepend("packages/", "core_io core_io_ble ble_shell  pytest-core-io")
-uv_run_flags := "--all-packages"
-uv_run := "uv run "
-python := if env('UV_PYTHON', "") != "" { "uv run python" } else { "python" }
+uv_run_flags := env('UV_RUN_FLAGS', "--all-packages")
+uv_sync_flags := env('UV_SYNC_FLAGS', "--dev --all-packages")
 
 # Check types
 [group('qa')]
-typing:
-    {{ uv_run }} ty check
-    # uvx ty check --python .venv {{ package_list }}
+[no-cd]
+typing_ty *ty_flags:
+    uv run {{ uv_run_flags }} ty check {{ ty_flags }}
 
 [group('qa')]
-typing_extra:
-    {{ uv_run }}  basedpyright  --level error
-    {{ uv_run }}  mypy  --no-warn-unused-ignore --no-warn-no-return {{ package_list }}
+[no-cd]
+typing_basedpyright *basedpyright_flags:
+    uv run {{ uv_run_flags }}  basedpyright  {{ basedpyright_flags }}
 
-# Perform all checks
 [group('qa')]
-check-all: lint typing typing_extra
-
-UV_SYNC_FLAGS := "--dev --all-packages"
+[no-cd]
+typing_mypy package_list *mypy_flags:
+    uv run mypy  {{ package_list }} {{ mypy_flags }}
 
 # Update dependencies
 [group('lifecycle')]
+[no-cd]
 update:
-    uv sync --upgrade {{ UV_SYNC_FLAGS }}
+    uv sync --upgrade {{ uv_sync_flags }}
 
 [group('lifecycle')]
+[no-cd]
 install python_semver="3.13":
     uv venv "--python={{ python_semver }}"
-    uv sync {{ UV_SYNC_FLAGS }}
+    uv sync {{ uv_sync_flags }}
     @echo "Installing pre-commit hook"
     @uv run prek install
 
 # Remove temporary files
 [group('lifecycle')]
+[no-cd]
 clean:
     rm -rf .venv .pytest_cache .mypy_cache .ruff_cache
     find . -type d -name "__pycache__" -exec rm -r {} +
 
 # Recreate project virtualenv from nothing
 [group('lifecycle')]
+[no-cd]
 fresh: clean install

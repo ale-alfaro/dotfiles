@@ -103,7 +103,7 @@ local wkey_prefix = '<leader>f'
 _G.keymaps_define({
   {
     mode = { 'n', 'x' },
-    lhs = '<leader><leader>',
+    lhs = '<leader>.',
     rhs = function()
       local opts = {
         winopts = {
@@ -134,24 +134,24 @@ _G.keymaps_define({
     opts = { desc = 'Search current buffer' },
   },
   {
-    lhs = '<leader>s/',
+    lhs = '<leader>,',
     rhs = function()
       require('fzf-lua').live_grep()
     end,
     opts = { desc = '[S]earch [/] in Open Files' },
   },
-  { mode = 'x',               lhs = '<leader>fg',                               rhs = '<cmd>FzfLua grep_visual<cr>',        opts = { desc = 'Grep' } },
-  { lhs = 'z=',               rhs = '<cmd>FzfLua spell_suggest<cr>',            opts = { desc = 'Spelling suggestions' } },
+  { mode = 'x', lhs = '<leader>,', rhs = '<cmd>FzfLua grep_visual<cr>', opts = { desc = 'Grep' } },
+  { lhs = 'z=', rhs = '<cmd>FzfLua spell_suggest<cr>', opts = { desc = 'Spelling suggestions' } },
 
-  { lhs = wkey_prefix .. 'b', rhs = '<cmd>FzfLua blines<cr>',                   opts = { desc = 'Buffer Lines' }, },
-  { lhs = wkey_prefix .. 'B', rhs = '<cmd>FzfLua buffers<cr>',                  opts = { desc = 'Buffers' } },
+  { lhs = wkey_prefix .. 'b', rhs = '<cmd>FzfLua blines<cr>', opts = { desc = 'Buffer Lines' } },
+  { lhs = wkey_prefix .. 'B', rhs = '<cmd>FzfLua buffers<cr>', opts = { desc = 'Buffers' } },
   { lhs = wkey_prefix .. 'd', rhs = '<cmd>FzfLua lsp_document_diagnostics<cr>', opts = { desc = 'Document diagnostics' } },
-  { lhs = wkey_prefix .. 'f', rhs = '<cmd>FzfLua files<cr>',                    opts = { desc = 'Find files' } },
-  { lhs = wkey_prefix .. 'g', rhs = '<cmd>FzfLua grep_project<cr>',             opts = { desc = 'Grep Project' } },
-  { lhs = wkey_prefix .. 'c', rhs = '<cmd>FzfLua changes<cr>',                  opts = { desc = 'Changes' } },
-  { lhs = wkey_prefix .. 'h', rhs = '<cmd>FzfLua help_tags<cr>',                opts = { desc = 'Help' } },
-  { lhs = wkey_prefix .. 'o', rhs = '<cmd>FzfLua oldfiles<cr>',                 opts = { desc = 'Recently opened files' } },
-  { lhs = wkey_prefix .. 'r', rhs = '<cmd>FzfLua resume<cr>',                   opts = { desc = 'Resume last fzf command' } },
-  { lhs = wkey_prefix .. 'z', rhs = '<cmd>FzfLua zoxide<cr>',                   opts = { desc = 'Zoxide' } },
-  { lhs = wkey_prefix .. 'k', rhs = '<Cmd>FzfLua keymaps<CR>',                  opts = { desc = 'Keymaps' } },
+  { lhs = wkey_prefix .. 'f', rhs = '<cmd>FzfLua files<cr>', opts = { desc = 'Find files' } },
+  { lhs = wkey_prefix .. 'g', rhs = '<cmd>FzfLua grep_project<cr>', opts = { desc = 'Grep Project' } },
+  { lhs = wkey_prefix .. 'c', rhs = '<cmd>FzfLua changes<cr>', opts = { desc = 'Changes' } },
+  { lhs = wkey_prefix .. 'h', rhs = '<cmd>FzfLua help_tags<cr>', opts = { desc = 'Help' } },
+  { lhs = wkey_prefix .. 'o', rhs = '<cmd>FzfLua oldfiles<cr>', opts = { desc = 'Recently opened files' } },
+  { lhs = wkey_prefix .. 'r', rhs = '<cmd>FzfLua resume<cr>', opts = { desc = 'Resume last fzf command' } },
+  { lhs = wkey_prefix .. 'z', rhs = '<cmd>FzfLua zoxide<cr>', opts = { desc = 'Zoxide' } },
+  { lhs = wkey_prefix .. 'k', rhs = '<Cmd>FzfLua keymaps<CR>', opts = { desc = 'Keymaps' } },
 }, { prefix = wkey_prefix, group = 'Find' })

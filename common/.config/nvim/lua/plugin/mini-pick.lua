@@ -92,7 +92,7 @@ local buffer_mappings = { wipeout = { char = '<C-d>', func = wipeout_cur } }
 local prefix = '<leader>p'
 -- stylua: ignore
 _G.keymaps_define({
-  { lhs = prefix .. 'b', rhs = function() MiniPick.builtin.buffers({}, { mappings = buffer_mappings }) end, opts = { desc = 'Pick open buffers' } },
+  { lhs =  '<leader><leader>', rhs = function() MiniPick.builtin.buffers({}, { mappings = buffer_mappings }) end, opts = { desc = 'Pick open buffers' } },
   { lhs = prefix .. 'h', rhs = '<Cmd>Pick history scope=":"<CR>',                                           opts = { desc = '[S]earch Command [H]istory' } },
   { lhs = prefix .. 'd', rhs = '<Cmd>Pick diagnostic scope="current"<CR>',                                  opts = { desc = '[S]earch [D]iagnostics (Buffer)' } },
   { lhs = prefix .. 'D', rhs = '<Cmd>Pick diagnostic scope="all"<CR>',                                      opts = { desc = '[S]earch [D]iagnostics (Workspace)' } },

@@ -1,8 +1,7 @@
-#!/usr/bin/just --justfile
-# set shell := ["bash", "-c"]
-# set unstable := true
+set shell := ["bash", "-c"]
+set unstable := true
 
-import "common/.config/just/justfile"
+mod global "common/.config/just/justfile"
 
 # ==============================================================================
 # Stow Management
@@ -12,6 +11,7 @@ export dotfiles_repo_location := absolute_path(justfile_directory())
 export dotfiles_target_location := if env('XDG_CONFIG_HOME', '') =~ '^/' { absolute_path(env('XDG_CONFIG_HOME')) } else { home_directory() / '.config' }
 home := home_directory()
 common_extra_flags := " --ignore='bin' --ignore='zmk-config'"
+
 # By default, show the list of available recipes
 default:
     @just --list
@@ -19,26 +19,22 @@ default:
 
 [group('maintanance')]
 restow-platform-dotfiles:
-    just restow {{  absolute_path(justfile_directory() / os())  }} {{ dotfiles_target_location }} ".config"
+    just global restow {{ absolute_path(justfile_directory() / os()) }} {{ dotfiles_target_location }} ".config"
     echo "Stowed {{ os() }} packages"
 
 [group('maintanance')]
 restow-common-dotfiles:
-    just restow {{  absolute_path(justfile_directory() / "common")  }} {{ dotfiles_target_location  }} ".config"  " --ignore='chromium' "
+    just global restow {{ absolute_path(justfile_directory() / "common") }} {{ dotfiles_target_location }} ".config"  " --ignore='chromium' "
     echo "Stowed common packages"
 
 [group('maintanance')]
 restow-dotfiles: restow-common-dotfiles restow-platform-dotfiles
 
-
 neovim_install_prefix := home_directory() / ".local/nvim"
-xdg_cache_home := if env('XDG_CACHE_HOME', '') =~ '^/' {
-  env('XDG_CACHE_HOME')
-} else {
-  home_directory() / '.cache'
-}
+xdg_cache_home := if env('XDG_CACHE_HOME', '') =~ '^/' { env('XDG_CACHE_HOME') } else { home_directory() / '.cache' }
 neovim_cache := xdg_cache_home / "nvim_build"
 neovim_user_repo := "neovim/neovim"
+
 [group('install')]
 nvim_build:
     sudo rm -rf {{ neovim_cache }}
@@ -46,14 +42,13 @@ nvim_build:
     sudo mkdir -p {{ neovim_install_prefix }}
     sudo make -C {{ neovim_cache }} CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX="{{ neovim_install_prefix }}/tmp"
 
-
-[script('bash'), group('install')]
-nvim_install: nvim_build 
+[group('install')]
+[script('bash')]
+nvim_install: nvim_build
     set -euxo pipefail
     sudo make -C {{ neovim_cache }} install
     version=$( "{{ neovim_install_prefix }}/tmp/bin/nvim" --version | grep "NVIM" | awk '{print $2}' )
     sudo mv {{ neovim_install_prefix }}/tmp "{{ neovim_install_prefix }}/nvim-${version}"
-
 
 global_gitignore_path := home_directory() / ".config" / "git" / "global.gitignore"
 
