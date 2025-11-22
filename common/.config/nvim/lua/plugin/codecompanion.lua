@@ -1,9 +1,7 @@
 vim.pack.add {
-  _G.plug('olimorris/codecompanion.nvim', { version = '17.30.0' }),
-  _G.plug 'lalitmee/codecompanion-spinners.nvim',
-  _G.plug 'ravitemer/codecompanion-history.nvim',
-  _G.plug 'ravitemer/codecompanion-history.nvim',
-  _G.plug 'Davidyz/VectorCode',
+  { src = 'https://github.com/olimorris/codecompanion.nvim', version = 'main' },
+  { src = 'https://github.com/lalitmee/codecompanion-spinners.nvim' },
+  { src = 'https://github.com/ravitemer/codecompanion-history.nvim' },
 }
 -- CodeCompanion
 require('custom.ai').setup {

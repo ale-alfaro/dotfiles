@@ -88,7 +88,6 @@ end, { desc = 'Undo Find and Replace' })
 
 command('New', ':enew', { desc = 'New buffer' })
 
-
 ---@param desc string
 ---@return vim.api.keyset.user_command
 local function pack_usercmd_opts(desc)
@@ -107,7 +106,7 @@ command('PackOpen', function(opts)
   if ok then
     vim.cmd('edit ' .. plug[1].path)
   end
-end, pack_usercmd_opts('Open plugin repository in pack path'))
+end, pack_usercmd_opts 'Open plugin repository in pack path')
 
 command('PackList', function()
   VimRc.pack_list()
@@ -119,31 +118,22 @@ command('PackReload', function(opts)
   if ok then
     VimRc.pack_reload(plug)
   end
-end, pack_usercmd_opts('Reload plugin'))
+end, pack_usercmd_opts 'Reload plugin')
 
 command('PackSync', function()
-  local plugins = {}
-  for _, plugin in ipairs(VimRc.added_plugins) do
-    if type(plugin) == 'string' then
-      plugins[plugin] = true
-    elseif type(plugin) == 'table' and plugin.src then
-      plugins[plugin.src] = true
-    end
-  end
+  ---@type VimPackPlugin[]
+  local plugins = vim.pack.get()
 
   local to_delete = {}
-  for _, plugin in ipairs(vim.pack.get()) do
-    local src = plugin.spec and plugin.spec.src
-    if src and not plugins[src] then
-      table.insert(to_delete, plugin.spec.name)
-    end
+  for _, plugin in ipairs(plugins) do
+    table.insert(to_delete, plugin.name)
   end
 
   local ok, _ = pcall(vim.pack.del, to_delete)
   if not ok then
     _G.error 'Failed to delete plugins with vim.pack.del'
   end
-  ok, _ = pcall(vim.pack.add, VimRc.added_plugins)
+  ok, _ = pcall(vim.pack.add, plugins)
   if not ok then
     _G.error 'Failed to add plugins with vim.pack.add'
   end
@@ -156,4 +146,4 @@ end, { desc = 'Clean unactive plugins' })
 
 command('PackUpdate', function()
   VimRc.pack_update()
-end, { desc = 'Update active plugins' })
+end, pack_usercmd_opts 'Update active plugins')

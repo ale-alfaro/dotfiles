@@ -1,7 +1,5 @@
 require 'plugin.codecompanion'
-
 vim.pack.add(_G.plug_spec {
-  'folke/flash.nvim',
   'folke/trouble.nvim',
   'MagicDuck/grug-far.nvim',
 })
@@ -69,10 +67,12 @@ _G.keymaps_define {
 _G.new_autocmd('FileType', function()
   vim.keymap.set('n', '<C-enter>', function()
     local inst = require('grug-far').get_instance(0)
-    inst:open_location()
-    inst:close()
+    if inst then
+      inst:open_location()
+      inst:close()
+    end
   end, { buffer = true })
-end, 'grug-far*', "Keep one instance of grug")
+end, 'grug-far*', 'Keep one instance of grug')
 --
 --
 --
@@ -95,35 +95,33 @@ require('trouble').setup {
   },
 }
 
-_G.keymaps_define({
-  { lhs = '<leader>xx', rhs = '<cmd>Trouble diagnostics toggle<cr>',              opts = { desc = 'Diagnostics (Trouble)' } },
+_G.keymaps_define {
+  { lhs = '<leader>xx', rhs = '<cmd>Trouble diagnostics toggle<cr>', opts = { desc = 'Diagnostics (Trouble)' } },
   { lhs = '<leader>xX', rhs = '<cmd>Trouble diagnostics toggle filter.buf=0<cr>', opts = { desc = 'Buffer Diagnostics (Trouble)' } },
-  { lhs = '<leader>cs', rhs = '<cmd>Trouble symbols toggle<cr>',                  opts = { desc = 'Symbols (Trouble)' } },
-  { lhs = '<leader>xS', rhs = '<cmd>Trouble lsp toggle<cr>',                      opts = { desc = 'LSP references/definitions/... (Trouble)' } },
-  { lhs = '<leader>xL', rhs = '<cmd>Trouble loclist toggle<cr>',                  opts = { desc = 'Location List (Trouble)' } },
-  { lhs = '<leader>xQ', rhs = '<cmd>Trouble qflist toggle<cr>',                   opts = { desc = 'Quickfix List (Trouble)' } },
+  { lhs = '<leader>cs', rhs = '<cmd>Trouble symbols toggle<cr>', opts = { desc = 'Symbols (Trouble)' } },
+  { lhs = '<leader>xS', rhs = '<cmd>Trouble lsp toggle<cr>', opts = { desc = 'LSP references/definitions/... (Trouble)' } },
+  { lhs = '<leader>xL', rhs = '<cmd>Trouble loclist toggle<cr>', opts = { desc = 'Location List (Trouble)' } },
+  { lhs = '<leader>xQ', rhs = '<cmd>Trouble qflist toggle<cr>', opts = { desc = 'Quickfix List (Trouble)' } },
+}
+
+local config = require 'fzf-lua.config'
+local actions = require('trouble.sources.fzf').actions
+config.defaults.actions.files['ctrl-t'] = actions.open
+
+vim.pack.add(_G.plug_spec {
+  'obsidian-nvim/obsidian.nvim',
+  'MeanderingProgrammer/render-markdown.nvim',
 })
-
-local config = require("fzf-lua.config")
-local actions = require("trouble.sources.fzf").actions
-config.defaults.actions.files["ctrl-t"] = actions.open
-
-
-vim.pack.add(
-  {
-    _G.plug("obsidian-nvim/obsidian.nvim"),
-    _G.plug('MeanderingProgrammer/render-markdown.nvim'),
-  })
 -- Obsidian is loaded in after/ftplugin/markdown.lua
 
 local ok, render_md = pcall(require, 'render-markdown')
 if ok then
-  render_md.setup({
+  render_md.setup {
     restart_highlighter = false,
     file_types = { 'markdown', 'codecompanion' },
     code = {
       sign = false,
-      width = "block",
+      width = 'block',
       right_pad = 1,
     },
     heading = {
@@ -136,12 +134,13 @@ if ok then
     { ui = { enable = false } },
     { latex = { enabled = false } },
     completions = { lsp = { enabled = true } },
-  })
+  }
 else
-  _G.error("Couldn't load render-markdown.nvim plugin")
+  _G.error "Couldn't load render-markdown.nvim plugin"
 end
 vim.g.markdown_plugins_loaded = false
 -- stylua: ignore end
 --
-local dap = require('plugin.dap')
+
+local dap = require 'plugin.dap'
 VimRc.pack_add(dap)

@@ -58,11 +58,11 @@ end
 
 function M.setup(opts)
   ---@type string|nil
-  local default_memory_groups = { 'default' }
-  if MiniMisc.find_root(0, { 'uv.lock', 'pyproject.toml' }) then
-    default_memory_groups = { 'default', 'Python' }
-  end
-
+  -- local default_memory_groups = { 'default' }
+  -- if MiniMisc.find_root(0, { 'uv.lock', 'pyproject.toml' }) then
+  --   default_memory_groups = { 'default', 'Python' }
+  -- end
+  local ctx_files_dir = vim.fn.stdpath 'config' .. '/lua/custom/ai/memory/ctx'
   opts.memory = {
     ---@type MemoryGroup[]
     general = {
@@ -77,15 +77,26 @@ function M.setup(opts)
     },
     Python = {
       description = 'Python memory files',
-      parser = 'claude',
       ---@return boolean
       enabled = function()
         -- Don't show this to users who aren't working on CodeCompanion itself
         return MiniMisc.find_root(0, { 'uv.lock', 'pyproject.toml' }) ~= nil
       end,
       files = {
-        '~/.config/direnv/res/llm_memory/python/RULES.md',
-        '~/.config/direnv/res/llm_memory/python/libs/anyio.md',
+        vim.fs.joinpath(ctx_files_dir, 'python', 'anyio.md'),
+        vim.fs.joinpath(ctx_files_dir, 'python', 'RULES.md'),
+      },
+    },
+    Just = {
+      description = 'Justfile memory files',
+      files = {
+        vim.fs.joinpath(ctx_files_dir, 'justfile.md'),
+      },
+    },
+    Cpp = {
+      description = 'Justfile memory files',
+      files = {
+        vim.fs.joinpath(ctx_files_dir, 'cpp', 'best-practices.md'),
       },
     },
     parsers = {
@@ -103,7 +114,7 @@ function M.setup(opts)
           return true
         end,
 
-        default_memory = default_memory_groups, -- The memory groups to load when opening chat buffer
+        default_memory = 'general', -- The memory groups to load when opening chat buffer
         default_params = 'watch', -- watch|pin - when adding a buffer to the chat
       },
     },

@@ -1,0 +1,13 @@
+[common]
+board = "nice_nano_v2"
+app_dir = "zmk"
+cmake_args = ["CONFIG_ZMK_STUDIO=y"]
+snippets = "studio-rpc-usb-uart"
+
+[[apps]]
+shield = "corne_left"
+artifact = "corne_urob_left_studio"
+
+[[apps]]
+shield = "corne_right"
+artifact = "corne_urob_right_studio"

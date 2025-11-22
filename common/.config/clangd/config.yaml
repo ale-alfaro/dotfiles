@@ -1,4 +1,7 @@
-Hover:
-  ShowAKA: Yes
+CompileFlags:
+  Add: -Wno-unknown-warning-option
+  Remove: [-mfp16-format=ieee, -fno-reorder-functions]
 Diagnostics:
   UnusedIncludes: Strict
+  Suppress:
+    - drv_unknown_argument

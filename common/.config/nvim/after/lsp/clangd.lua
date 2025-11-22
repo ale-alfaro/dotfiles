@@ -16,7 +16,16 @@ return {
     '--header-insertion=iwyu',
     '--completion-style=detailed',
     '--function-arg-placeholders',
-    '--fallback-style=llvm',
+    '--pretty',
+    '--enable-config',
+    '--background-index',
+    '--log=error',
+    -- optional:
+    -- "--log=verbose",
+    -- '--compile-commands-dir=${workspaceFolder}/build',
+    -- Zephyr specific
+    -- '--query-driver=${env:ZEPHYR_SDK_INSTALL_DIR}/arm-zephyr-eabi/bin/arm-zephyr-eabi-*',
+    --
   },
   init_options = {
     usePlaceholders = true,
