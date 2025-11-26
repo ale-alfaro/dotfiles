@@ -118,13 +118,13 @@ local mini_ai_opts = {
     -- definition (not call). See `:h MiniAi.gen_spec.treesitter()` for details.
     F = ai.gen_spec.treesitter { a = '@function.outer', i = '@function.inner' },
     c = ai.gen_spec.treesitter { a = '@class.outer', i = '@class.inner' }, -- class
-    t = { '<([%p%w]-)%f[^<%w][^<>]->.-</%1>', '^<.->().*()</[^/]->$' },    -- tags
-    d = { '%f[%d]%d+' },                                                   -- digits
-    e = {                                                                  -- Word with case
+    t = { '<([%p%w]-)%f[^<%w][^<>]->.-</%1>', '^<.->().*()</[^/]->$' }, -- tags
+    d = { '%f[%d]%d+' }, -- digits
+    e = { -- Word with case
       { '%u[%l%d]+%f[^%l%d]', '%f[%S][%l%d]+%f[^%l%d]', '%f[%P][%l%d]+%f[^%l%d]', '^[%l%d]+%f[^%l%d]' },
       '^().*()$',
     },
-    -- g = mini_ai_buffer, -- buffer
+    g = mini_ai_buffer, -- buffer
     U = ai.gen_spec.function_call { name_pattern = '[%w_]' }, -- without dot in function name
   },
   -- 'mini.ai' by default mostly mimics built-in search behavior: first try
@@ -231,9 +231,9 @@ require('mini.bracketed').setup()
 -- - `<Leader>bd` - delete current buffer (see `:h :bdelete`)
 require('mini.bufremove').setup()
 _G.keymaps_define {
-  { lhs = '<leader>bd', rhs = '<Cmd>lua MiniBufremove.delete()<CR>',         opts = { desc = 'Delete' } },
-  { lhs = '<leader>bD', rhs = '<Cmd>lua MiniBufremove.delete(0, true)<CR>',  opts = { desc = 'Delete!' } },
-  { lhs = '<leader>bw', rhs = '<Cmd>lua MiniBufremove.wipeout()<CR>',        opts = { desc = 'Wipeout' } },
+  { lhs = '<leader>bd', rhs = '<Cmd>lua MiniBufremove.delete()<CR>', opts = { desc = 'Delete' } },
+  { lhs = '<leader>bD', rhs = '<Cmd>lua MiniBufremove.delete(0, true)<CR>', opts = { desc = 'Delete!' } },
+  { lhs = '<leader>bw', rhs = '<Cmd>lua MiniBufremove.wipeout()<CR>', opts = { desc = 'Wipeout' } },
   { lhs = '<leader>bW', rhs = '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', opts = { desc = 'Wipeout!' } },
 }
 
@@ -349,12 +349,12 @@ require('mini.splitjoin').setup()
 -- - `:h MiniSurround-vim-surround-config` - alternative set of action mappings
 require('mini.surround').setup {
   mappings = {
-    add = 'gsa',            -- Add surrounding in Normal and Visual modes
-    delete = 'gsd',         -- Delete surrounding
-    find = 'gsf',           -- Find surrounding (to the right)
-    find_left = 'gsF',      -- Find surrounding (to the left)
-    highlight = 'gsh',      -- Highlight surrounding
-    replace = 'gsr',        -- Replace surrounding
+    add = 'gsa', -- Add surrounding in Normal and Visual modes
+    delete = 'gsd', -- Delete surrounding
+    find = 'gsf', -- Find surrounding (to the right)
+    find_left = 'gsF', -- Find surrounding (to the left)
+    highlight = 'gsh', -- Highlight surrounding
+    replace = 'gsr', -- Replace surrounding
     update_n_lines = 'gsn', -- Update `n_lines`
   },
 }

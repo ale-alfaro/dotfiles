@@ -1,17 +1,16 @@
 return {
-  cmd = { 'uv', 'run', 'ty', 'server' },
+  cmd = { 'ty', 'server' },
   root_markers = { 'uv.lock', 'pyproject.toml', 'ty.toml' },
   settings = {
     ty = {
-      -- disableLanguageServices = true,
       diagnosticMode = 'workspace',
       experimental = {
         autoImport = true,
         rename = true,
       },
       inlayHints = {
-        variableTypes = true,
-        callArgumentNames = true,
+        variableTypes = false,
+        callArgumentNames = false,
       },
     },
   },

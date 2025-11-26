@@ -11,9 +11,6 @@
 ---@field resize string[] keys to use for resizing windows
 
 ---@class SmartSplitsWeztermConfig
----@field default_amount number The number of cells to resize by
----@field direction_keys string[]|DirectionKeys Keys to use for movements, not including the modifier key (such as alt or ctrl), in order of left, down, up, right
----@field modifiers SmartSplitsWeztermModifiers Modifier keys to use for movement and resize actions, these should be Wezterm's modifier key strings such as 'META', 'CTRL', etc.
 ---@field log_level 'info'|'warn'|'error'
 
 if vim ~= nil then
@@ -22,39 +19,15 @@ end
 
 local wezterm = require("wezterm")
 
----@type SmartSplitsWeztermConfig
-local _smart_splits_wezterm_config = {
-	default_amount = 3,
-	direction_keys = { "h", "j", "k", "l" },
-	modifiers = {
-		move = "CTRL",
-		resize = "META",
-	},
-	log_level = "info",
-}
-
 local logger = {
 	info = function(...)
-		if _smart_splits_wezterm_config.log_level == "info" then
-			wezterm.log_info(...)
-		end
+		wezterm.log_info(...)
 	end,
 	warn = function(...)
-		if
-			_smart_splits_wezterm_config.log_level == "info" --
-			or _smart_splits_wezterm_config.log_level == "warn"
-		then
-			wezterm.log_warn(...)
-		end
+		wezterm.log_warn(...)
 	end,
 	error = function(...)
-		if
-			_smart_splits_wezterm_config.log_level == "info"
-			or _smart_splits_wezterm_config.log_level == "warn"
-			or _smart_splits_wezterm_config.log_level == "error"
-		then
-			wezterm.log_error(...)
-		end
+		wezterm.log_error(...)
 	end,
 }
 
@@ -77,8 +50,7 @@ local Directions = { "Left", "Down", "Up", "Right" }
 ---@param direction 'Left'|'Down'|'Up'|'Right'
 ---@return table
 local function split_nav(resize_or_move, key, direction)
-	local modifier = resize_or_move == "resize" and _smart_splits_wezterm_config.modifiers.resize
-		or _smart_splits_wezterm_config.modifiers.move
+	local modifier = resize_or_move == "move" and "CTRL" or "ALT"
 	local wezterm_modifier = type(modifier) == "table" and modifier.wezterm or modifier
 	local neovim_modifier = type(modifier) == "table" and modifier.neovim or modifier
 	logger.info("[smart-splits.nvim]: Wezterm mod: " .. wezterm_modifier .. " Nvim mod: " .. neovim_modifier)
@@ -97,10 +69,7 @@ local function split_nav(resize_or_move, key, direction)
 				}, pane)
 			else
 				if resize_or_move == "resize" then
-					win:perform_action(
-						{ AdjustPaneSize = { direction, _smart_splits_wezterm_config.default_amount } },
-						pane
-					)
+					win:perform_action({ AdjustPaneSize = { direction, 3 } }, pane)
 				else
 					win:perform_action({ ActivatePaneDirection = direction }, pane)
 				end
@@ -109,55 +78,19 @@ local function split_nav(resize_or_move, key, direction)
 	}
 end
 
----@return string[]
-local function get_move_direction_keys()
-	-- check if table format or list format
-	if _smart_splits_wezterm_config.direction_keys.move ~= nil then
-		return _smart_splits_wezterm_config.direction_keys.move
-	end
-
-	return _smart_splits_wezterm_config.direction_keys --[[@as string[] ]]
-end
-
----@return string[]
-local function get_resize_direction_keys()
-	-- check if table format or list format
-	if _smart_splits_wezterm_config.direction_keys.resize ~= nil then
-		return _smart_splits_wezterm_config.direction_keys.resize
-	end
-
-	return _smart_splits_wezterm_config.direction_keys --[[@as string[] ]]
-end
-
 ---Apply plugin to Wezterm config.
 ---@param config_builder table
----@param plugin_config SmartSplitsWeztermConfig|nil
 ---@return table config_builder the updated config
-local function apply_to_config(config_builder, plugin_config)
-	-- apply plugin config
-	if plugin_config then
-		_smart_splits_wezterm_config.direction_keys = plugin_config.direction_keys
-			or _smart_splits_wezterm_config.direction_keys
-		if plugin_config.modifiers then
-			_smart_splits_wezterm_config.modifiers.move = plugin_config.modifiers.move
-				or _smart_splits_wezterm_config.modifiers.move
-			_smart_splits_wezterm_config.modifiers.resize = plugin_config.modifiers.resize
-				or _smart_splits_wezterm_config.modifiers.resize
-		end
-		if plugin_config.default_amount then
-			_smart_splits_wezterm_config.default_amount = plugin_config.default_amount
-				or _smart_splits_wezterm_config.default_amount
-		end
-		if plugin_config.log_level then
-			_smart_splits_wezterm_config.log_level = plugin_config.log_level
-		end
-	end
-
+local function apply_to_config(config_builder)
 	local keymaps = {}
-	for idx, key in ipairs(get_move_direction_keys()) do
+	local dir_keys = { "h", "j", "k", "l" }
+	for idx, key in ipairs(dir_keys) do
 		table.insert(keymaps, split_nav("move", key, Directions[idx]))
 	end
-	for idx, key in ipairs(get_resize_direction_keys()) do
+	for idx, key in ipairs({ "LeftArrow", "DownArrow", "UpArrow", "RightArrow" }) do
+		table.insert(keymaps, split_nav("move", key, Directions[idx]))
+	end
+	for idx, key in ipairs(dir_keys) do
 		table.insert(keymaps, split_nav("resize", key, Directions[idx]))
 	end
 

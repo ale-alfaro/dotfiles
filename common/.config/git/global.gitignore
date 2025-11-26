@@ -6,6 +6,8 @@
 *build/
 *out/
 
+*.*db
+
 # Mac
 .DS_Store
 

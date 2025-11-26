@@ -34,7 +34,7 @@ function M.setup(opts)
           },
           schema = {
             model = {
-              default = 'qwen3:latest',
+              default = 'qwen3-coder:30b',
             },
             num_ctx = {
               default = 30000,

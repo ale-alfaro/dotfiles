@@ -19,8 +19,8 @@ function P.load_prompt_library()
     conventional_commits = true,
     code_reviewer = true,
   }
-
-  local prompt_dir = vim.fs.normalize(vim.fs.joinpath(vim.fn.stdpath 'config', 'lua', 'custom', 'ai', 'prompt_library', 'prompts'))
+  local nvim_conf = vim.fn.stdpath 'config'
+  local prompt_dir = nvim_conf .. '/lua/custom/ai/prompts/library'
   local stat = vim.uv.fs_stat(prompt_dir)
   if not (stat and stat.type == 'directory') then
     vim.print "Couldn't load prompt library"

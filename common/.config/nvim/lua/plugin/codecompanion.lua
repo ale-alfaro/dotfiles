@@ -4,17 +4,7 @@ vim.pack.add {
   { src = 'https://github.com/ravitemer/codecompanion-history.nvim' },
 }
 -- CodeCompanion
-require('custom.ai').setup {
-  display = {
-    action_palette = { provider = 'fzf_lua' },
-    chat = {
-      show_settings = false,
-      show_header_separator = true,
-      auto_scroll = true,
-      show_token_count = true,
-    },
-  },
-}
+require 'custom.ai'
 local wkey_prefix = '<leader>a'
 _G.keymaps_define({
   { mode = { 'n', 'v' }, lhs = wkey_prefix .. 'r', rhs = '<cmd>CodeCompanionChat RefreshCache<cr>', opts = { desc = 'CodeCompanion RefreshCache' } },

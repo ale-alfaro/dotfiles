@@ -1,5 +1,3 @@
----@module "render-markdown"
-
 -- ┌─────────────────────────┐
 -- │ Filetype config example │
 -- └─────────────────────────┘
@@ -40,26 +38,14 @@ vim.b.minisurround_config = {
         return { left = '[', right = '](' .. link .. ')' }
       end,
     },
+    c = {
+      input = { '%[%[().-()%]%]' },
+      output = { left = '```', right = '```' },
+    },
   },
 }
-if not vim.g.markdown_plugins_loaded then
-  ok, _ = pcall(require, 'obsidian')
-  if ok then
-    require('obsidian').setup({
-      legacy_commands = false,
-      workspaces = {
-        {
-          name = "Personal-Geek",
-          path = vim.fn.expand("$HOME") .. "/Documents/Obsidian"
-        },
-        -- {
-        --   name = "Sibel-Work",
-        --   path = vim.fn.expand("$HOME") .. "/Documents/Obsidian/Sibel-Work"
-        -- }
-      }
-    })
-  else
-    _G.error("Couldn't load obsidian.nvim plugin")
-  end
-  vim.g.markdown_plugins_loaded = true
+local obsidian_dir = vim.fs.root(0, { '.obsidian' })
+local obsidian_home = vim.fn.expand '$OBSIDIAN_HOME' or 'w+/Obsidian/'
+if obsidian_dir or vim.fn.getcwd():match(obsidian_home) then
+  require 'plugin.obsidian'
 end

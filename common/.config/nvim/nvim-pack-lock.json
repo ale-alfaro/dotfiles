@@ -2,8 +2,7 @@
   "plugins": {
     "LuaSnip": {
       "rev": "ccf25a5",
-      "src": "https://github.com/L3MON4D3/LuaSnip",
-      "version": "'2.4.0'"
+      "src": "https://github.com/L3MON4D3/LuaSnip"
     },
     "VectorCode": {
       "rev": "171361e",
@@ -103,6 +102,10 @@
     "plenary.nvim": {
       "rev": "b9fd522",
       "src": "https://github.com/nvim-lua/plenary.nvim"
+    },
+    "quicker.nvim": {
+      "rev": "12a2291",
+      "src": "https://github.com/stevearc/quicker.nvim"
     },
     "render-markdown.nvim": {
       "rev": "10126ef",

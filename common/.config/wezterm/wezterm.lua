@@ -30,16 +30,7 @@ require("config.keybindings").apply(config, alt_modifier)
 -- Plugins:
 -- Smart-splits for beter navigation in Wezterm and Neovim
 local smart_splits = require("plugins.smart-splits")
-smart_splits.apply_to_config(config, {
-	direction_keys = { "h", "j", "k", "l" },
-	-- modifier keys to combine with direction_keys
-	modifiers = {
-		move = "CTRL", -- modifier to use for pane movement, e.g. CTRL+h to move left
-		resize = alt_modifier, -- modifier to use for pane resize, e.g. META+h to resize to the left
-	},
-	-- log level to use: info, warn, error
-	log_level = "info",
-})
+smart_splits.apply_to_config(config)
 
 -- Sessionizer for project management
 local sessionizer = require("plugins.sessionizer.config")

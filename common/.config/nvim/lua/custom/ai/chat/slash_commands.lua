@@ -111,7 +111,7 @@ local function get_majority_filetype(files)
 end
 
 local function send_project_tree(chat, root)
-  local result = vim.system({ 'tree', '-a', '-L', '2', '--noreport', root }, { text = true }):wait()
+  local result = vim.system({ 'eza', '-a', '-L', '2', root }, { text = true }):wait()
   local tree = result.stdout or ''
   chat:add_message {
     role = 'user',
@@ -144,7 +144,7 @@ return {
         vim.cmd.redraw { bang = true }
         local stat = vim.uv.fs_stat(dir)
         if not (stat and stat.type == 'directory') then
-          vim.notify('Directory not found: ' .. dir, vim.log.levels.ERROR)
+          _G.error('Directory not found: ' .. dir, vim.log.levels.ERROR)
           return
         end
 

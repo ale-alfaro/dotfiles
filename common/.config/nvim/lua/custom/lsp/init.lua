@@ -1,40 +1,42 @@
 M = {}
---- Sets up LSP keymaps and autocommands for the given buffer.
+
 ---@param client vim.lsp.Client
----@param bufnr integer
-function M.on_attach(client, bufnr)
-  if client:supports_method 'textDocument/codeAction' then
-    require('custom.lsp.code_action').on_attach(bufnr, client)
-  end
+---@param bufnr number
+local function add_inlay_hint_support(client, bufnr)
+  local inlay_hints_group = vim.api.nvim_create_augroup('mariasolos/toggle_inlay_hints', { clear = false })
 
-  if client:supports_method 'textDocument/completion' then
-    local ok, blink = pcall(require, 'blink.cmp')
-    if ok then
-      client.server_capabilities = blink.get_lsp_capabilities(client.server_capabilities)
-    else
-      vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = false })
-    end
-  end
+  -- Initial inlay hint display.
+  -- Idk why but without the delay inlay hints aren't displayed at the very start.
+  vim.defer_fn(function()
+    local mode = vim.api.nvim_get_mode().mode
+    vim.lsp.inlay_hint.enable(mode == 'n' or mode == 'v', { bufnr = bufnr })
+  end, 500)
 
-  -- if not client:supports_method 'textDocument/willSaveWaitUntil' and client:supports_method 'textDocument/formatting' then
-  --   Format = require('custom.lsp.format')
-  --   Format.toggle(bufnr)
-  --   vim.api.nvim_create_autocmd('BufWritePre', {
-  --     buffer = bufnr,
-  --     callback = function()
-  --       -- Format.format(client, bufnr)
-  --       vim.lsp.buf.format { bufnr = bufnr, id = client.id, timeout_ms = 1000 }
-  --     end,
-  --   })
-  -- end
+  vim.api.nvim_create_autocmd('InsertEnter', {
+    group = inlay_hints_group,
+    desc = 'Enable inlay hints',
+    buffer = bufnr,
+    callback = function()
+      if vim.g.inlay_hints then
+        vim.lsp.inlay_hint.enable(false, { bufnr = bufnr })
+      end
+    end,
+  })
 
-  -- Don't check for the capability here to allow dynamic registration of the request.
-  vim.lsp.document_color.enable(true, bufnr)
-  require('custom.lsp.autocmds').on_attach(bufnr, client)
-  require('custom.lsp.keys').on_attach(bufnr, client)
+  vim.api.nvim_create_autocmd('InsertLeave', {
+    group = inlay_hints_group,
+    desc = 'Disable inlay hints',
+    buffer = bufnr,
+    callback = function()
+      if vim.g.inlay_hints then
+        vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+      end
+    end,
+  })
 end
 
-function M.config()
+---@param lsp_servers string[]
+function M.config(lsp_servers)
   vim.g.inlay_hints = false
   -- Diagnostic configuration.
   require('custom.lsp.diagnostics').setup()
@@ -56,16 +58,90 @@ function M.config()
       max_width = math.floor(vim.o.columns * 0.4),
     }
   end
-  vim.lsp.config('*', {
-    capabilities = {
-      workspace = {
-        fileOperations = {
-          didRename = true,
-          willRename = true,
-        },
-      },
-    },
+
+  local lspau = vim.api.nvim_create_augroup('vimrc.lsp', {})
+  vim.api.nvim_create_autocmd('LspAttach', {
+    group = lspau,
+    desc = 'Configure LSP keymaps',
+    callback = function(args)
+      local client = vim.lsp.get_client_by_id(args.data.client_id)
+
+      -- I don't think this can happen but it's a wild world out there.
+      if not client then
+        return
+      end
+      local bufnr = args.buf
+      if client:supports_method 'textDocument/documentHighlight' then
+        local under_cursor_highlights_group = vim.api.nvim_create_augroup('mariasolos/cursor_highlights', { clear = false })
+        vim.api.nvim_create_autocmd({ 'CursorHold', 'InsertLeave' }, {
+          group = under_cursor_highlights_group,
+          desc = 'Highlight references under the cursor',
+          buffer = bufnr,
+          callback = vim.lsp.buf.document_highlight,
+        })
+        vim.api.nvim_create_autocmd({ 'CursorMoved', 'InsertEnter', 'BufLeave' }, {
+          group = under_cursor_highlights_group,
+          desc = 'Clear highlight references',
+          buffer = bufnr,
+          callback = vim.lsp.buf.clear_references,
+        })
+      end
+
+      if client:supports_method 'textDocument/inlayHint' then
+        vim.api.nvim_create_user_command('InlayHints', function()
+          add_inlay_hint_support(client, bufnr)
+        end, { desc = 'Enable InlayHints' })
+      end
+
+      local diag_group = vim.api.nvim_create_augroup('diagnosis', { clear = false })
+      vim.api.nvim_create_autocmd('CursorHold', {
+        group = diag_group,
+        buffer = bufnr,
+        desc = '✨lsp show diagnostics on CursorHold',
+        callback = function()
+          local hover_opts = {
+            focusable = false,
+            close_events = { 'BufLeave', 'CursorMoved', 'InsertEnter', 'FocusLost' },
+            border = 'rounded',
+            source = 'always',
+            prefix = ' ',
+          }
+          vim.diagnostic.open_float(hover_opts)
+        end,
+      })
+      if client:supports_method 'textDocument/codeAction' then
+        require('custom.lsp.code_action').on_attach(bufnr, client)
+      end
+
+      -- vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = false })
+
+      -- Don't check for the capability here to allow dynamic registration of the request.
+      vim.lsp.document_color.enable(true, bufnr)
+      require('custom.lsp.keys').on_attach(bufnr, client)
+    end,
   })
+
+  -- Set up LSP servers.
+  vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
+    once = true,
+    callback = function()
+      -- Extend neovim's client capabilities with the completion ones.
+      vim.lsp.config('*', { capabilities = require('blink.cmp').get_lsp_capabilities(nil, true) })
+
+      vim.lsp.enable(lsp_servers)
+    end,
+  })
+
+  -- Update mappings when registering dynamic capabilities.
+  local register_capability = vim.lsp.handlers['client/registerCapability']
+  vim.lsp.handlers['client/registerCapability'] = function(err, res, ctx)
+    local client = vim.lsp.get_client_by_id(ctx.client_id)
+    if not client then
+      return
+    end
+
+    return register_capability(err, res, ctx)
+  end
 end
 
 return M

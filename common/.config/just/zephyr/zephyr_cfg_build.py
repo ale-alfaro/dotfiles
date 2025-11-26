@@ -8,11 +8,14 @@
 #     "PyYAML",
 #     "tomlkit",
 #     "anyio",
+#     "rich"
 # ]
 # ///
 import logging
 import pathlib
+import shutil
 from functools import partial
+from subprocess import CalledProcessError
 from typing import Self
 
 import anyio
@@ -21,15 +24,21 @@ import tomlkit
 import yaml
 from cattrs.preconf.pyyaml import make_converter as pyyaml_make_converter
 from cattrs.preconf.tomlkit import make_converter as tomlkit_make_converter
+from rich.console import Console
+from rich.logging import RichHandler
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+error_console = Console(stderr=True, style="bold red")
+FORMAT = "%(message)s"
+
+logger = logging.getLogger("rich")
 
 
 @attrs.define
 class ZephyrAppBuildArgs:
+    artifact: str = "build"
     app_dir: pathlib.Path | None = None
     board: str | None = None
-    artifact: str | None = None
     conf_file: str | None = None
     dtc_overlay: str | None = None
     snippets: str | None = None
@@ -73,6 +82,16 @@ class ZephyrBuildArgs:
             return converter.structure(load_fn(f), ZephyrBuildArgs)
 
 
+def copy_artifacts(build_dir: pathlib.Path, dest: pathlib.Path) -> None:
+
+    dest.mkdir(parents=True, exist_ok=True)
+    artifact_path = build_dir / "zephyr"
+    if artifacts := artifact_path.glob(pattern="zmk.{hex,uf2,elf}"):
+        for file_path in artifacts:
+            # shutil.copy2 copies file data and metadata (like modification times)
+            shutil.copy2(file_path, dest)
+
+
 async def run_cmd(
     bin_exe: list[str],
     cwd: pathlib.Path,
@@ -80,46 +99,60 @@ async def run_cmd(
 ) -> None:
 
     common_build_args = attrs.asdict(build_args.common)
-
     logger.debug("%s", common_build_args)
     for app in build_args.apps:
         cmake_args: list[str] = []
-        west_args: list[str] = ["--pristine=always"]
-        field_dict: dict[str, str | pathlib.Path | list[str]] = attrs.asdict(app)
+        build_dir = cwd / f"build_{app.artifact}"
+        west_args: list[str] = [
+            "--pristine=always",
+            "-d",
+            build_dir.absolute().as_posix(),
+        ]
+        field_dict: dict[str, str | pathlib.Path | list[str]] = common_build_args | {
+            k: v for k, v in attrs.asdict(app).items() if v
+        }
         logger.info("%s", field_dict)
-        for field, value in field_dict.items():
-            # Check for None or empty list
-            common_val = common_build_args.get(field)
-            resolved_val: str | pathlib.Path | list[str] = value or common_val
-            if flag := flags_for_field_map.get(field):
-                match resolved_val:
-                    case list() as args_list if len(args_list) > 0:
-                        for arg in args_list:
-                            cmake_args.append(f"-D{arg}")
-                    case pathlib.Path() as path_val:
-                        west_arg_val: str = path_val.absolute().as_posix()
-                        west_args.extend([flag, west_arg_val])
-                    case str() as str_val:
-                        west_arg_val = str_val
-                        west_args.extend([flag, west_arg_val])
+        flag_val = {
+            flag: val
+            for flag, val in {
+                flags_for_field_map.get(field): value
+                for field, value in field_dict.items()
+            }.items()
+            if flag
+        }
+        for flag, value in flag_val.items():
+            match flag, value:
+                case ("--", list() as cmake_args) if len(cmake_args) > 0:
+                    if common_cmake_args := common_build_args.get("cmake_args"):
+                        cmake_args.extend(common_cmake_args)
+                    west_args.extend(["--", *cmake_args])
+                case ("-s", pathlib.Path() as path_val):
+                    app_dir = cwd / path_val
+                    west_args.extend([flag, app_dir.absolute().as_posix()])
+
+                case (_, str() as str_val):
+                    west_arg_val = str_val
+                    west_args.extend([flag, west_arg_val])
 
         build_cmd: list[str] = [*bin_exe, "west", "build", *west_args]
-        if cmake_args:
-            build_cmd.extend(["--", *cmake_args])
 
         logger.info(f"Running {build_cmd} in  {cwd}")  # noqa: G004
         try:
             res = await anyio.run_process(build_cmd, check=True, cwd=cwd)
             logger.info("Success! ")
             logger.debug(res.stdout.decode())
-        except anyio.CalledProcessError as exc:
+            # Ensure the destination directory exists
+        except CalledProcessError as exc:
             logger.exception(f"""
                     Process Failed!
                         cmd: {exc.cmd}
                         retcode: {exc.returncode}
                         stderr: {exc.stderr.rstrip().decode()}
-                        stdout: {exc.output.rstrip().decode()}
-                    """)  # noqa: G004
+                        """)  # noqa: G004
+            logger.exception(f"stdout: {exc.stdout.rstrip().decode()}")  # noqa: G004
+
+        except OSError:
+            logger.exception("Failed to copy artifacts")
 
 
 if __name__ == "__main__":
@@ -142,11 +175,16 @@ if __name__ == "__main__":
     cwd: pathlib.Path = args.cwd or file.parent
 
     log_level = logging.DEBUG if args.test else logging.INFO
-    logging.basicConfig(level=log_level)
+    logging.basicConfig(
+        level=log_level,
+        format=FORMAT,
+        datefmt="[%X]",
+        handlers=[RichHandler()],
+    )
     anyio.run(
         partial(
             run_cmd,
-            bin_exe=["echo"] if args.test else ["uv", "run"],
+            bin_exe=["echo"] if args.test else ["uv", "run", "--active"],
             cwd=cwd.absolute(),
             build_args=ZephyrBuildArgs.from_file(file),
         ),

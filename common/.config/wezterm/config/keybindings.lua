@@ -28,7 +28,6 @@ function M.get_keys(alt_modifier)
 	local keys = {
 		-- Key table modes
 		{ key = "o", mods = "LEADER", action = M.activate_table("open") },
-		{ key = "y", mods = "LEADER", action = M.activate_table("copy") },
 		{ key = "m", mods = "LEADER", action = M.activate_table("muxer") },
 
 		-- Clipboard
@@ -44,7 +43,7 @@ function M.get_keys(alt_modifier)
 		{ key = "n", mods = alt_modifier .. "|SHIFT", action = action.SpawnTab("DefaultDomain") },
 		{ key = "w", mods = alt_modifier, action = action.CloseCurrentPane({ confirm = false }) },
 		{ key = "w", mods = alt_modifier .. "|SHIFT", action = action.CloseCurrentTab({ confirm = false }) },
-    { key = 'q', mods = 'OPT', action = action.QuitApplication },
+		{ key = "q", mods = "OPT", action = action.QuitApplication },
 		{ key = "t", mods = "LEADER", action = action.ShowLauncherArgs({ flags = "TABS" }) },
 
 		-- Pane operations
@@ -53,13 +52,12 @@ function M.get_keys(alt_modifier)
 		{ key = "z", mods = "LEADER", action = action.TogglePaneZoomState },
 
 		-- Vim-style scrolling
-		{ key = "u", mods = "OPT", action = action.ScrollByPage(-0.5) }, -- Scroll up half page
-		{ key = "d", mods = "OPT", action = action.ScrollByPage(1.5) }, -- Scroll down half page
-		{ key = "b", mods = "OPT", action = action.ScrollByPage(-1) }, -- Scroll up full page
-		{ key = "f", mods = "OPT", action = action.ScrollByPage(1) }, -- Scroll down full page
-		{ key = "g", mods = "OPT", action = action.ScrollToTop }, -- Jump to top
-		{ key = "g", mods = "OPT|SHIFT", action = action.ScrollToBottom }, -- Jump to bottom
-
+		-- { key = "u", mods = "OPT", action = action.ScrollByPage(-0.5) }, -- Scroll up half page
+		-- { key = "d", mods = "OPT", action = action.ScrollByPage(1.5) }, -- Scroll down half page
+		-- { key = "b", mods = "OPT", action = action.ScrollByPage(-1) }, -- Scroll up full page
+		-- { key = "f", mods = "OPT", action = action.ScrollByPage(1) }, -- Scroll down full page
+		-- { key = "g", mods = "OPT", action = action.ScrollToTop }, -- Jump to top
+		-- { key = "g", mods = "OPT|SHIFT", action = action.ScrollToBottom }, -- Jump to bottom
 
 		-- Utility
 		{ key = "/", mods = alt_modifier, action = action.Search({ CaseInSensitiveString = "" }) },
@@ -67,6 +65,9 @@ function M.get_keys(alt_modifier)
 		{ key = "p", mods = alt_modifier, action = action.ActivateCommandPalette },
 		{ key = "v", mods = "LEADER", action = action.ActivateCopyMode },
 
+		{ key = "b", mods = alt_modifier .. "|SHIFT", action = action.EmitEvent("copy-buffer-from-pane") },
+		{ key = "p", mods = alt_modifier .. "|SHIFT", action = action.EmitEvent("copy-text-from-pane") },
+		{ key = "l", mods = alt_modifier .. "|SHIFT", action = M.copy_line_action() },
 		-- Rename
 		{ key = "r", mods = "LEADER", action = M.rename_workspace_prompt() },
 
@@ -126,19 +127,6 @@ end
 
 function M.get_key_tables()
 	return {
-		copy = {
-			{ key = "b", action = action.EmitEvent("copy-buffer-from-pane") },
-			{ key = "p", action = action.EmitEvent("copy-text-from-pane") },
-			{ key = "l", action = M.copy_line_action() },
-			{ key = "r", action = M.copy_regex_action() },
-		},
-    resize = {
-
-		-- Font size
-      { key = "0", mods = alt_modifier, action = action.ResetFontSize },
-      { key = "-", mods = alt_modifier, action = action.DecreaseFontSize },
-      { key = "=", mods = alt_modifier, action = action.IncreaseFontSize },
-    },
 		open = {
 			{ key = "c", action = M.spawn_command("VS Code", { "zsh", "-lc", "code ." }) },
 			{ key = "u", action = M.open_url_action() },
@@ -198,26 +186,6 @@ function M.copy_line_action()
 	})
 end
 
-function M.copy_regex_action()
-	return action.QuickSelectArgs({
-		label = "COPY REGEX",
-		patterns = {
-			"(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(?:/\\d{1,2})?)",
-			"((?:[[:xdigit:]]{0,4}:){2,7}[[:xdigit:]]{0,4}(?:/\\d{1,3})?)",
-			"[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}",
-			"\\S+@\\S+\\.\\S+",
-			"[[:xdigit:]]{12}",
-			"\\S+/\\S+:\\S+",
-			"[[:xdigit:]]{7,}",
-			"(?:https?|s?ftp)://\\S+",
-		},
-		action = action.Multiple({
-			action.CopyTo("ClipboardAndPrimarySelection"),
-			action.ClearSelection,
-		}),
-	})
-end
-
 function M.open_url_action()
 	return action.QuickSelectArgs({
 		label = "Open URL",
@@ -226,21 +194,6 @@ function M.open_url_action()
 		action = wezterm.action_callback(function(window, pane)
 			local url = window:get_selection_text_for_pane(pane)
 			wezterm.open_with(url)
-		end),
-	})
-end
-
-function M.rename_tab_prompt()
-	return action.PromptInputLine({
-		description = wezterm.format({
-			{ Attribute = { Intensity = "Bold" } },
-			{ Foreground = { Color = colors.fg() } },
-			{ Text = "Rename tab:" },
-		}),
-		action = wezterm.action_callback(function(window, _, line)
-			if line then
-				window:active_tab():set_title(line)
-			end
 		end),
 	})
 end

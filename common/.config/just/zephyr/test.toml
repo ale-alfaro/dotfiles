@@ -1,7 +1,7 @@
 [common]
 board = "nice_nano_v2"
 app_dir = "zmk"
-cmake_args = ["CONFIG_ZMK_STUDIO=y"]
+cmake_args = ["-DCONFIG_ZMK_STUDIO=y"]
 snippets = "studio-rpc-usb-uart"
 
 [[apps]]

@@ -8,7 +8,8 @@
 _G.keymaps_define({
   -- General & Navigation
   -- stylua:ignore
-  { lhs = "<leader>bb",            rhs = "<cmd>e #<cr>",                      opts = { desc = "Switch to Other Buffer" } },
+  { lhs = "<leader>bb",            rhs = "<cmd>b#<cr>",                      opts = { desc = "Switch to Other Buffer" } },
+  {lhs = "<leader>bs", rhs = function() vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(true, true)) end, opts = { desc = "Scratch Buffer"}},
   { lhs = "<leader>bD",            rhs = "<cmd>:%bdelete|edit #|normal`<cr>", opts = { desc = "Close all Other Buffers" } },
   { lhs = "q",                     rhs = "<nop>",                             opts = { noremap = true } },
   { lhs = "Q",                     rhs = "<nop>",                             opts = { noremap = true } },
@@ -18,6 +19,7 @@ _G.keymaps_define({
   -- File & Config Editing
   -- stylua:ignore
   { mode = { "n", "v", "x" },      lhs = "<leader>o",                         rhs = "<Cmd>source $MYVIMRC<CR>",                               opts = { desc = "Source " .. vim.fn.expand("$MYVIMRC") } },
+  { mode = { "n", "v", "x" },      lhs = "<leader>O",                         rhs = "<Cmd>source %<CR>",                               opts = { desc = "Source " .. vim.fn.expand("%") } },
   { mode = { 'n', 'v', 'x' },      lhs = '<M-r>',                             rhs = '<Cmd>restart<CR>',                                       opts = { desc = 'Restart vim.', noremap = true } },
   -- Save
   { mode = { "n" },                lhs = "<C-f>",                             rhs = "<Cmd>Open .<CR>",                                        opts = { desc = "Open current directory in Finder.", noremap = true } },
@@ -56,25 +58,6 @@ _G.keymaps_define({
   { mode = "v",                    lhs = "<",                                 rhs = "<gv" },
   { mode = "v",                    lhs = ">",                                 rhs = ">gv" },
 
-  -- Quickfix & Location Lists
-  {
-    lhs = "<leader>xl",
-    rhs = function()
-      local success, err = pcall(vim.fn.getloclist(0, { winid = 0 }).winid ~= 0 and vim.cmd.lclose or vim.cmd.lopen)
-      if not success and err then vim.notify(err, vim.log.levels.ERROR) end
-    end,
-    opts = { desc = "Location List" }
-  },
-  {
-    lhs = "<leader>xq",
-    rhs = function()
-      local success, err = pcall(vim.fn.getqflist({ winid = 0 }).winid ~= 0 and vim.cmd.cclose or vim.cmd.copen)
-      if not success and err then vim.notify(err, vim.log.levels.ERROR) end
-    end,
-    opts = { desc = "Quickfix List" }
-  },
-  { lhs = "[q",         rhs = vim.cmd.cprev,                                                                        opts = { desc = "Previous Quickfix" } },
-  { lhs = "]q",         rhs = vim.cmd.cnext,                                                                        opts = { desc = "Next Quickfix" } },
 
   -- Diagnostics
   -- stylua:ignore

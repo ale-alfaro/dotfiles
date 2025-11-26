@@ -61,6 +61,7 @@ else
   source "$ZDOTDIR/shell_integrations/zsh-nvm.zsh"
 fi
 use_nvim "v0.12"
+export npm_config_prefix="$HOME/.local"
 
 ## Additional completions. This can be here because they don't add to the fpath and get activated by eval
 # --- Completion from CLI tools ---

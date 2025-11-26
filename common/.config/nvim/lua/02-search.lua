@@ -41,3 +41,20 @@ vim.ui.select = function(items, opts, on_choice)
 end
 require 'plugin.fzf-lua'
 require 'plugin.mini-pick'
+
+local ok, grug = pcall(require, 'plugin.grug')
+if ok then
+  VimRc.pack_add(grug)
+  -- grug-far main buffers will have `filetype=grug-far`.
+  -- grug-far history buffers will have `filetype=grug-far-history`
+  -- grug-far help buffers will have `filetype=grug-far-help`
+  _G.new_autocmd('FileType', function()
+    vim.keymap.set('n', '<C-enter>', function()
+      local inst = require('grug-far').get_instance(0)
+      if inst then
+        inst:open_location()
+        inst:close()
+      end
+    end, { buffer = true })
+  end, 'grug-far*', 'Keep one instance of grug')
+end

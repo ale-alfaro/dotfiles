@@ -1,16 +1,20 @@
+#!/usr/bin/env -S uv run --script
+#
 # /// script
+# requires-python = ">=3.13"
 # dependencies = [
 #   "requests<3",
 #   "psutil",
 # ]
+# ///
 
 """UF2 runner (flash only) for UF2 compatible bootloaders."""
 
 import argparse
 import logging
-from pathlib import Path
 import shutil
 import sys
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +28,8 @@ def get_uf2_info_path(part) -> Path:
 
 def is_uf2_partition(part):
     try:
-        return (part.fstype in ["vfat", "FAT", "msdos"]) and get_uf2_info_path(
-            part
+        return (part.fstype in {"vfat", "FAT", "msdos"}) and get_uf2_info_path(
+            part,
         ).is_file()
     except PermissionError:
         return False
@@ -56,7 +60,8 @@ def get_uf2_partitions(board_id=None):
         parts = [part for part in parts if match_board_id(part, board_id)]
         if not parts:
             logger.warning(
-                "Discovered UF2 partitions don't match Board-ID '%s'", board_id
+                "Discovered UF2 partitions don't match Board-ID '%s'",
+                board_id,
             )
 
     return parts
@@ -87,11 +92,13 @@ def list_devices(board_id=None):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Flash a UF2 file to a device or list available devices."
+        description="Flash a UF2 file to a device or list available devices.",
     )
     parser.add_argument("uf2_file", type=Path, nargs="?", help="The UF2 file to flash.")
     parser.add_argument(
-        "--board-id", dest="board_id", help="Board-ID value to match from INFO_UF2.TXT"
+        "--board-id",
+        dest="board_id",
+        help="Board-ID value to match from INFO_UF2.TXT",
     )
     parser.add_argument(
         "--list-devices",
@@ -119,7 +126,7 @@ def main():
     if len(partitions) > 1:
         if args.board_id is None:
             logger.error(
-                "More than one UF2 partition found. Please specify a --board-id"
+                "More than one UF2 partition found. Please specify a --board-id",
             )
             list_devices()
             sys.exit(1)
@@ -133,4 +140,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
