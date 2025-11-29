@@ -1,6 +1,6 @@
 ---@type vim.lsp.Config
 return {
-  cmd = { 'uv', 'run', 'basedpyright-langserver', '--stdio' },
+  cmd = { 'basedpyright-langserver', '--stdio' },
   root_markers = {
     'uv.lock',
     'pyproject.toml',

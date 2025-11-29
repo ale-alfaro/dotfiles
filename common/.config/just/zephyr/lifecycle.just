@@ -31,11 +31,6 @@ build_spec yaml_toml_spec *args:
 
 default_runner := if env('BOARD', "") =~ "^nrf5" { "nrfutil" } else { "jlink" }
 
-# Flash with runner. Supported runners: uf2 (default) or jlink
-# [group('zephyr')]
-# flash build_dir runner="jlink":
-#     @ {{ if runner == "uf2" { "sudo" } else { "" } }} uv run west flash -r {{ runner }} -d {{ build_dir }}
-
 [group('lifecycle')]
 [no-cd]
 flash build_dir runner=default_runner:

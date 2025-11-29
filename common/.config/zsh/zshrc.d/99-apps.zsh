@@ -60,7 +60,7 @@ else
   export NVM_DIR="$XDG_CONFIG_HOME/nvm"
   source "$ZDOTDIR/shell_integrations/zsh-nvm.zsh"
 fi
-use_nvim "v0.12"
+# . $ZDOTDIR/shell_integrations/nvimv use nightly
 export npm_config_prefix="$HOME/.local"
 
 ## Additional completions. This can be here because they don't add to the fpath and get activated by eval

@@ -16,7 +16,7 @@ uv_sync_flags := env('UV_SYNC_FLAGS', "--dev --all-packages")
 [group('qa')]
 [no-cd]
 typing_ty *ty_flags:
-    uv run {{ uv_run_flags }} ty check {{ ty_flags }}
+    uvx ty check {{ ty_flags }}
 
 [group('qa')]
 [no-cd]

@@ -1,5 +1,5 @@
 return {
-  cmd = { 'uv', 'run', 'ruff', 'server' },
+  cmd = { 'ruff', 'server' },
   root_markers = { 'uv.lock', 'pyproject.toml', 'ruff.toml', '.ruff.toml', '.git' },
   settings = {
     init_options = {

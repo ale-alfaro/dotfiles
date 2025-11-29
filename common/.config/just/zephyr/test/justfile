@@ -5,19 +5,18 @@
 default:
     @just --list
 
-twister_default_flags := " -vv --allow-installed-plugin --clobber-output --no-detailed-test-id "
-twister := "$west" + " twister" + twister_default_flags
+zephyr_base := env('ZEPHYR_BASE')
+requirements_txt := if path_exists(source_dir() / "requirements-twister.txt") == "true" { source_dir() / "requirements-twister.txt" } else { zephyr_base / "scripts" / "requirements-base.txt" }
+twister := "uv run --no-project --python=3.13 --with-requirements " + requirements_txt + " west twister"
 twister_report_flags := "--report-dir samples/shell_hil/twister_report --outdir samples/shell_hil/twister_out"
-native_sim_west_flags := "-b native_sim -- -DCONFIG_UART_NATIVE_PTY_0_ON_STDINOUT=y"
-qemu_west_flags := "-b qemu_x86 -- -DQEMU_PIPE=qemu-fifo"
-hardware_twister_flags := "--west-flash=--skip-rebuld --enable-slow --device-testing --device-serial=" + env('SERIAL_PORT', '/dev/ttyACM0')
-twister_verbose_flags := env('TWISTER_VERBOSITY', '')
+twister_verbose_flags := env('TWISTER_VERBOSITY', '-v')
+twister_default_flags := twister_verbose_flags + " --allow-installed-plugin --clobber-output --no-detailed-test-id "
 
 [group('twister')]
 [no-cd]
 twister_run test_root platform *args:
     {{ twister }} \
-    {{ twister_verbose_flags }} \
+    {{ twister_default_flags }} \
       -p {{ platform }} \
       -T {{ test_root }} \
       {{ args }}
@@ -26,6 +25,7 @@ twister_run test_root platform *args:
 [no-cd]
 twister_run_scenario test_root platform scenario *args:
     {{ twister }} \
+    {{ twister_default_flags }} \
       -p {{ platform }} \
       -T {{ test_root }} \
       -s {{ scenario }} \
@@ -33,19 +33,19 @@ twister_run_scenario test_root platform scenario *args:
 
 [group('twister')]
 [no-cd]
-prep-test test_root board:
-    @echo "Preparing test for {{ board }}"
-    just twister_run {{ board }} {{ test_root }} --prep-artifacts-for-testing
+prep-test test_root board: (twister_run board test_root "--prep-artifacts-for-testing")
+
+native_sim_west_flags := "-b native_sim -- -DCONFIG_UART_NATIVE_PTY_0_ON_STDINOUT=y"
+qemu_west_flags := "-b qemu_x86 -- -DQEMU_PIPE=qemu-fifo"
+hardware_twister_flags := "--west-flash=--skip-rebuld --enable-slow --device-testing --device-serial=" + env('SERIAL_PORT', '/dev/ttyACM0')
 
 [group('twister')]
 [no-cd]
-run-hw-test test_root board:
-    just twister_run {{ board }} {{ test_root }} {{ hardware_twister_flags }}
+run-hw-test test_root $BOARD *args: (twister_run "$BOARD" test_root hardware_twister_flags + ' ' + args)
 
 [group('twister')]
 [no-cd]
-twister_run_sim test_root *args:
-    just twister_run {{ test_root }} native_sim {{ args }}
+twister_run_sim test_root *args: (twister_run test_root "native_sim" args)
 
 [group('twister')]
 [no-cd]

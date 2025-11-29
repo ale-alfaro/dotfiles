@@ -5,7 +5,7 @@ vim.pack.add(_G.plug_spec {
 
 local ok, lsp = pcall(require, 'custom.lsp')
 if ok then
-  lsp.config { 'lua_ls', 'clangd', 'bashls', 'taplo', 'yamls', 'jsonls', 'dts-lsp', 'marksman', 'ruff', 'pyrefly' }
+  lsp.config { 'lua_ls', 'clangd', 'bashls', 'taplo', 'yamls', 'jsonls', 'dts-lsp', 'marksman', 'ruff', 'basedpyright', 'ty' }
 else
   _G.error "COULDN'T LOAD LSP CONFIG"
 end

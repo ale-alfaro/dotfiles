@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-fatal() {
-  echo '[FATAL]' "$@" >&2
-  exit 1
-}
-
 # @description Parses the output of the nrfutil toolchain env command
 # @arg $1 string The output of the nrfutil command
 # @glocal ncs_vars Associative array containing the parsed variables
@@ -60,7 +55,7 @@ prefix_path_ncs() {
 use_ncs() {
 
   if [[ ! "$#" -eq 1 ]]; then
-    fatal "use zephyr requires a version to be specified as an argument"
+    log_error "use zephyr requires a version to be specified as an argument"
   fi
   local ncs_version
   ncs_version="$1"
@@ -73,15 +68,11 @@ use_ncs() {
   export NRFUTIL_HOME="${ncs_vars[NRFUTIL_HOME]}"
   export ZEPHYR_TOOLCHAIN_VARIANT="${ncs_vars[ZEPHYR_TOOLCHAIN_VARIANT]}"
   export ZEPHYR_SDK_INSTALL_DIR="${ncs_vars[ZEPHYR_SDK_INSTALL_DIR]}"
-  export NCS_SDK_HOME="${2:-$HOME/ncs}"
-  if [[ ! -d "$NCS_SDK_HOME" ]]; then fatal "NCS_SDK_HOME ENV VAR MUST BE SET"; fi
-  export NCS_SDK_ROOT="$NCS_SDK_HOME/sdk/$ncs_version"
-  export ZEPHYR_BASE="$NCS_SDK_ROOT/zephyr"
 }
 
 use_zephyr_toolchain() {
   if [[ ! "$#" -eq 1 ]]; then
-    fatal "use zephyr requires a version to be specified as an argument"
+    log_error "use zephyr requires a version to be specified as an argument"
   fi
   local zephyr_version
   zephyr_version="$1"
@@ -93,32 +84,30 @@ use_zephyr_toolchain() {
   toolchain_dir="$ZEPHYR_TOOLCHAIN_ROOT/zephyr-sdk-$zephyr_version"
   echo "Toolchain dir $toolchain_dir"
   if [[ ! -e "$toolchain_dir" ]]; then
-    echo "Zephyr SDK toolchain is not installed! Please run install_zephyr_sdk_toolchain <VERSION> first!"
-    return
+    log_error "Zephyr SDK toolchain is not installed! Please run install_zephyr_sdk_toolchain <VERSION> first!"
   fi
   export ZEPHYR_SDK_INSTALL_DIR=$toolchain_dir
   PATH_add "$ZEPHYR_SDK_INSTALL_DIR/arm-zephyr-eabi/bin"
+  export ZEPHYR_BASE=${2:-"$HOME/zephyrproject/zephyr"}
+  if [[ ! -d $ZEPHYR_BASE ]]; then
+    log_error "ZEPHYR_BASE=$ZEPHYR_BASE is not a valid directory"
+  fi
+  PATH_add "$ZEPHYR_BASE/scripts"
 }
 
 zephyr_pip_install() {
-  uv add --dev west pyelftools ninja intelhex
-  zephyr_base_config=$(uv run --dev west config zephyr.base)
-  zephyr_base=${ZEPHYR_BASE:-$zephyr_base_config}
-  if [[ -d "$zephyr_base" ]]; then
-    "$(uv run --dev west packages pip | xargs uv add --dev)" &>/dev/null || eval "$(uv add --requirements "$zephyr_base/scripts/requirements.txt" --dev)"
-
+  # uv add west pyelftools ninja intelhex
+  zephyr_scripts_path=${1:-"$ZEPHYR_BASE/scripts"}
+  if [[ ! -d "$zephyr_scripts_path" ]]; then
+    "$(uv run --dev west packages pip | xargs uv add --dev)" &>/dev/null || log_error "Couldn't get pip packages to install through  'west packages pip'"
   else
-    log_status "Not inside a workspace. Are you out-of-tree?"
+    uv add --requirements "$zephyr_scripts_path/requirements.txt" --dev
   fi
 }
 
-layout_uv_zephyr() {
-  # if [[ ! "$#" -eq 1 ]]; then
-  #   fatal "layout_uv_zephyr requires python version to be specified"
-  # fi
+layout_python_zephyr() {
   layout uv "${1:-3.12}"
-
-  echo "Installing west and required python packages for building (pyelftools ninja intelhex)"
+  log_status "Installing west and required python packages for building (pyelftools,ninja,intelhex,etc)"
   zephyr_pip_install
 }
 #Main Functions to use for setting up an environment:
@@ -127,39 +116,17 @@ layout_ncs() {
   local ncs_version
   ncs_version="${1:-v3.1.0}"
   use ncs "$ncs_version"
+  env_vars_required ZEPHYR_BASE
+  if [[ ! -d $ZEPHYR_BASE ]]; then
+    log_error "ZEPHYR_BASE=$ZEPHYR_BASE is not a valid directory"
+  fi
+  PATH_add "$ZEPHYR_BASE/scripts"
+  layout_uv "3.13"
 }
 
 layout_zephyr() {
   local zephyr_version
   zephyr_version="${1:-0.17.2}"
   use zephyr_toolchain "$zephyr_version"
-}
-
-use_out_of_tree_west_workspace() {
-  if [[ -z "$ZEPHYR_BASE" ]]; then
-    fatal "ZEPHYR_BASE must be set to use an out of tree west workspace"
-  fi
-  if has west; then
-    west config zephyr.base "$ZEPHYR_BASE"
-    source "${ZEPHYR_BASE}/zephyr-env.sh"
-    west zephyr-export
-  else
-    fatal "Need west to be installed in the uv environement"
-  fi
-
-}
-
-use_west_workspace() {
-  if [[ ! "$#" -eq 1 || ! -z "$ZEPHYR_BASE" ]]; then
-    fatal "use west workspace requires the location of ZEPHYR_BASE to be specified as an argument or environment variable"
-  fi
-  if ! has west; then
-    layout uv_zephyr
-  fi
-  west config zephyr.base "${1:-$ZEPHYR_BASE}"
-  if [[ -z $ZEPHYR_BASE ]]; then
-    export ZEPHYR_BASE="$(west topdir)/$1"
-  else
-    west zephyr-export
-  fi
+  layout_python_zephyr "3.13"
 }

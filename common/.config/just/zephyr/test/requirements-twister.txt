@@ -1,0 +1,82 @@
+# RUN-TEST: required to do run time tests of zephyr
+#
+# things used by twister or related in run time testing
+
+# used to flash & debug various boards
+pyocd>=0.35.0
+
+# used by twister for board/hardware map
+tabulate
+
+# used by mcuboot
+cbor>=1.0.0
+
+# use for twister
+psutil>=5.6.6
+
+# used for CAN <=> host testing
+python-can>=4.3.0
+# BUILD-TEST: required to do build tests of zephyr
+#
+# things used by twister or other things like code coverage or python
+# testing
+
+# used by twister for ansi color
+colorama
+
+# python lex/yex used by twister
+ply>=3.10
+
+# used for code coverage
+gcovr>=6.0
+coverage
+
+# used for west-command testing
+pytest
+mypy
+
+# used for mocking functions in pytest
+mock>=4.0.1
+
+# used for JUnit XML parsing in CTest harness
+junitparser
+# BASE: required to build or create images with zephyr
+#
+# While technically west isn't required it's considered in base since it's
+# part of the recommended workflow
+
+# used by various build scripts
+pyelftools>=0.29
+
+# used by dts generation to parse binding YAMLs, also used by
+# twister to parse YAMLs, by west, zephyr_module,...
+PyYAML>=6.0
+
+# YAML validation. Used by zephyr_module.
+pykwalify
+
+# used by west_commands
+canopen
+packaging
+progress
+patool
+psutil>=5.6.6
+pylink-square
+pyserial
+requests>=2.32.0
+semver
+tqdm>=4.67.1
+
+# for ram/rom reports
+anytree
+
+# intelhex used by mergehex.py
+intelhex
+
+# it's west
+# Keep the version identical to the minimum required in cmake/modules/west.cmake
+west>=0.14.0
+
+# used for windows based 'menuconfig'
+# "win32" is used for 64-bit Windows as well
+windows-curses; sys_platform == "win32"

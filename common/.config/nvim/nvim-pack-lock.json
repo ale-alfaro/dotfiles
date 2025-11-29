@@ -8,6 +8,10 @@
       "rev": "171361e",
       "src": "https://github.com/Davidyz/VectorCode"
     },
+    "actions-preview.nvim": {
+      "rev": "cb938c25edaac38d362555f19244a9cb85d561e8",
+      "src": "https://github.com/aznhe21/actions-preview.nvim"
+    },
     "blink.cmp": {
       "rev": "8743384",
       "src": "https://github.com/Saghen/blink.cmp"
@@ -16,9 +20,17 @@
       "rev": "655133c",
       "src": "https://github.com/akinsho/bufferline.nvim"
     },
-    "codecompanion-history.nvim": [],
-    "codecompanion-spinners.nvim": [],
+    "codecompanion-history.nvim": {
+      "rev": "eb99d256352144cf3b6a1c45608ec25544a0813d",
+      "src": "https://github.com/ravitemer/codecompanion-history.nvim"
+    },
+    "codecompanion-spinners.nvim": {
+      "rev": "86926cbf7554d69d40d2a5c3cf576063814a42d5",
+      "src": "https://github.com/lalitmee/codecompanion-spinners.nvim"
+    },
     "codecompanion.nvim": {
+      "rev": "96a102b037c96a64c137f846c9450cace220a2f1",
+      "src": "https://github.com/olimorris/codecompanion.nvim",
       "version": "'main'"
     },
     "conform.nvim": {
@@ -41,7 +53,18 @@
       "rev": "3e72397",
       "src": "https://github.com/MagicDuck/grug-far.nvim"
     },
-    "lazydev.nvim": [],
+    "lazydev.nvim": {
+      "rev": "e28ce52fc7ff79fcb76f0e79ee6fb6182fca90b9",
+      "src": "https://github.com/folke/lazydev.nvim"
+    },
+    "luvit-meta": {
+      "rev": "0ea4ff636c5bb559ffa78108561d0976f4de9682",
+      "src": "https://github.com/Bilal2453/luvit-meta"
+    },
+    "marks.nvim": {
+      "rev": "f353e8c08c50f39e99a9ed474172df7eddd89b72",
+      "src": "https://github.com/chentoast/marks.nvim"
+    },
     "mini.nvim": {
       "rev": "d1a9158",
       "src": "https://github.com/nvim-mini/mini.nvim"
@@ -99,6 +122,10 @@
       "rev": "1a1a475",
       "src": "https://github.com/obsidian-nvim/obsidian.nvim"
     },
+    "oil.nvim": {
+      "rev": "71948729cda5fc1b761d6ae60ff774b5525f1d50",
+      "src": "https://github.com/stevearc/oil.nvim"
+    },
     "plenary.nvim": {
       "rev": "b9fd522",
       "src": "https://github.com/nvim-lua/plenary.nvim"
@@ -119,13 +146,45 @@
       "rev": "9a26145",
       "src": "https://github.com/mrjones2014/smart-splits.nvim"
     },
+    "snacks.nvim": {
+      "rev": "d293b21fe1a603dfb4757feb82ab3e67b78589f2",
+      "src": "https://github.com/folke/snacks.nvim"
+    },
+    "telescope-env.nvim": {
+      "rev": "00a703cc7b713cdda0a981d88fddf3ce25502af5",
+      "src": "https://github.com/LinArcX/telescope-env.nvim"
+    },
+    "telescope-fzf-native.nvim": {
+      "rev": "1f08ed60cafc8f6168b72b80be2b2ea149813e55",
+      "src": "https://github.com/nvim-telescope/telescope-fzf-native.nvim"
+    },
+    "telescope-ui-select.nvim": {
+      "rev": "6e51d7da30bd139a6950adf2a47fda6df9fa06d2",
+      "src": "https://github.com/nvim-telescope/telescope-ui-select.nvim"
+    },
+    "telescope-zoxide": {
+      "rev": "54bfe630bad08dc9891ec78c7cf8db38dd725c97",
+      "src": "https://github.com/jvgrootveld/telescope-zoxide"
+    },
+    "telescope.nvim": {
+      "rev": "a0bbec21143c7bc5f8bb02e0005fa0b982edc026",
+      "src": "https://github.com/nvim-telescope/telescope.nvim"
+    },
     "tiny-code-action.nvim": {
       "rev": "0c24efc",
       "src": "https://github.com/rachartier/tiny-code-action.nvim"
     },
+    "tokyonight.nvim": {
+      "rev": "d14614cbfc63b6037bfccd48bb982d2ad2003352",
+      "src": "https://github.com/folke/tokyonight.nvim"
+    },
     "trouble.nvim": {
       "rev": "76030c5",
       "src": "https://github.com/folke/trouble.nvim"
+    },
+    "wezterm-types": {
+      "rev": "b8c96829a39f7daf341aa5a6ec19bb2174a94881",
+      "src": "https://github.com/justinsgithub/wezterm-types"
     },
     "which-key.nvim": {
       "rev": "b4177e3",
