@@ -79,23 +79,13 @@ function C.initialize()
         },
         qwen3 = function()
           return require('codecompanion.adapters').extend('ollama', {
-            name = 'qwen3', -- Give this adapter a different name to differentiate it from the default ollama adapter
-            opts = {
-              vision = true,
-              stream = true,
-            },
+            name = 'qwen3-coder', -- Give this adapter a different name to differentiate it from the default ollama adapter
             schema = {
               model = {
                 default = 'qwen3-coder:30b',
               },
               num_ctx = {
-                default = 30000,
-              },
-              think = {
-                default = false,
-              },
-              keep_alive = {
-                default = '5m',
+                default = 20000,
               },
             },
           })
