@@ -19,7 +19,7 @@ jlink-verify-command := '''
     mem32 VTOR_ADDR
     '''
 
-default:
+@_:
     @just --list
 
 ##### J-Link Documentation #####
@@ -81,6 +81,7 @@ jlink_reset_command := '''
     reset
     q
 '''
+
 reset device:
     @echo {{ jlink_reset_command }} > {{ jlink_reset_script_tmp_path }}
     @echo "INFO: Resetting {{ device }} "

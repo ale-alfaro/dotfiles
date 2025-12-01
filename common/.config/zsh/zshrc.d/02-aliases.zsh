@@ -66,7 +66,6 @@ if has batman; then
 fi
 # Alias for lazygit
 # Link: https://github.com/jesseduffield/lazygit
-
 if has lazygit; then
   alias lg='lazygit'
 fi
@@ -74,4 +73,11 @@ fi
 # Link: https://github.com/junegunn/fzf
 if has fzf; then
   alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
+fi
+
+
+# Alias for just (command runner)
+if has just; then
+  alias j='just'
+  alias .j='just --justfile ~/.config/just/justfile --working-directory .'
 fi

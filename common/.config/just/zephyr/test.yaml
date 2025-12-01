@@ -1,6 +1,0 @@
-board: nrf54l15dk/nrf54l15/cpuapp
-apps:
-  - app_dir: shell_module
-    conf_file: overlay-bt.conf
-    dtc_overlay: bt.overlay
-  - app_dir: bt_nus

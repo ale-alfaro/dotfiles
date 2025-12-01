@@ -1,21 +1,26 @@
 #!/usr/bin/env just --justfile --working-directory `pwd`
 
-set shell := ["bash", "-c"]
+set shell := ["zsh", "-uc"]
 set unstable := true
 set allow-duplicate-recipes := true
+set allow-duplicate-variables := true
 
-uv_run := "uv run " + env('VIRTUAL_ENV', '') && "--active "
-west := uv_run + "west "
+zephyr_base := env('ZEPHYR_BASE')
+requirements_txt := zephyr_base / "scripts" / "requirements.txt"
+uv_with_flags := "--with-requirements " + requirements_txt
+uv_python_flags := " --python=3.13"
+west := "uv tool run " + uv_with_flags + uv_python_flags + " west"
 
-import 'dtsh.just'
+# has_nrfutil := shell('type "$1" &>/dev/null', "nrfutil")
+
 import 'test/justfile'
-import 'lifecycle.just'
+import 'build/justfile'
 
 default:
     @just --list
 
 # initialize west
-[group('zephyr')]
+[group('manifest')]
 [no-cd]
 init west_yaml:
     @west init -l {{ west_yaml }}
@@ -23,29 +28,28 @@ init west_yaml:
     @west zephyr-export
 
 # update west
-[group('zephyr')]
+[group('manifest')]
 [no-cd]
 update:
     @west update --fetch-opt=--filter=blob:none
 
-[group('zephyr')]
-setup-nrfutil:
-    #!/usr/bin/env bash
-    echo "Setting up nrfutil"
-    echo "Checking if nrfutil is installed"
-    if command -v nrfutil &> /dev/null 2>&1; then
-        echo "nrfutil already exists"
-    else
-        echo "Downloading nrfutil"
-        curl https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil -o nrfutil
-        chmod +x nrfutil
-        mv nrfutil /usr/local/bin
-    fi
-    nrfutil install completion device nrf5sdk-tools toolchain-manager sdk-manager
+[group('install')]
+install-nrfutil install_prefix="/usr/local/bin":
+    curl https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil -o nrfutil
+    chmod +x nrfutil 
+    mv nrfutil {{ install_prefix }}
 
-[group('zephyr')]
+[group('install')]
+setup-nrfutil:
+    {{ if which('nrfutil') == '' { `just install-nrfutil` } else { which('nrfutil') } }}
+    {{ which('nrfutil') }} install completion device nrf5sdk-tools toolchain-manager sdk-manager
+
+uv_tool_install := "uv tool install " + uv_with_flags + uv_python_flags
+
+[group('install')]
 install-tooling:
-    pip install -U dtsh #DTS viewer in terminal
+    {{ uv_tool_install }}  west # zephyr meta-tool
+    {{ uv_tool_install }} dtsh #DTS viewer in terminal
 
 [group('debugging')]
 [no-cd]

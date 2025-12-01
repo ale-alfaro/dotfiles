@@ -118,6 +118,10 @@
       "src": "https://github.com/nvim-treesitter/nvim-treesitter",
       "version": "'main'"
     },
+    "nvim-web-devicons": {
+      "rev": "b8221e42cf7287c4dcde81f232f58d7b947c210d",
+      "src": "https://github.com/nvim-tree/nvim-web-devicons"
+    },
     "obsidian.nvim": {
       "rev": "1a1a475",
       "src": "https://github.com/obsidian-nvim/obsidian.nvim"

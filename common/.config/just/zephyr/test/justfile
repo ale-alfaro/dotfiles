@@ -4,19 +4,23 @@
 
 default:
     @just --list
+pytest_twister_harness := env('PYTEST_TWISTER_HARNESS_PATH') || zephyr_base / "scripts" / "pylib" / "pytest_twister_harness"
+twister_isolated := "uvx " + uv_with_flags +  " --with " + pytest_twister_harness + " " + uv_python_flags + ' west twister'
+twister_non_isolated := "uv run " + uv_with_flags + ' west twister'
+twister := if env("TWISTER_NO_ISOLATION", "")  == "1" { twister_non_isolated } else { twister_isolated  }
 
-zephyr_base := env('ZEPHYR_BASE')
-requirements_txt := if path_exists(source_dir() / "requirements-twister.txt") == "true" { source_dir() / "requirements-twister.txt" } else { zephyr_base / "scripts" / "requirements-base.txt" }
-twister := "uv run --no-project --python=3.13 --with-requirements " + requirements_txt + " west twister"
-twister_report_flags := "--report-dir samples/shell_hil/twister_report --outdir samples/shell_hil/twister_out"
+twister_report_flags := "--report-dir twister_report --outdir twister_out"
 twister_verbose_flags := env('TWISTER_VERBOSITY', '-v')
-twister_default_flags := twister_verbose_flags + " --allow-installed-plugin --clobber-output --no-detailed-test-id "
+twister_default_flags := twister_verbose_flags + " --allow-installed-plugin --clobber-output --no-detailed-test-id " 
+# twister_default_flags := twister_verbose_flags + " --allow-installed-plugin --clobber-output " 
 
 [group('twister')]
 [no-cd]
 twister_run test_root platform *args:
+    @echo "Running twister test suite at {{ invocation_directory() }} and test_root {{  test_root }}"
     {{ twister }} \
     {{ twister_default_flags }} \
+    {{ replace(twister_report_flags, "twister", test_root + "/twister") }} \
       -p {{ platform }} \
       -T {{ test_root }} \
       {{ args }}
@@ -26,6 +30,7 @@ twister_run test_root platform *args:
 twister_run_scenario test_root platform scenario *args:
     {{ twister }} \
     {{ twister_default_flags }} \
+    {{ replace(twister_report_flags, "twister", test_root + "/twister") }} \
       -p {{ platform }} \
       -T {{ test_root }} \
       -s {{ scenario }} \
@@ -37,11 +42,12 @@ prep-test test_root board: (twister_run board test_root "--prep-artifacts-for-te
 
 native_sim_west_flags := "-b native_sim -- -DCONFIG_UART_NATIVE_PTY_0_ON_STDINOUT=y"
 qemu_west_flags := "-b qemu_x86 -- -DQEMU_PIPE=qemu-fifo"
-hardware_twister_flags := "--west-flash=--skip-rebuld --enable-slow --device-testing --device-serial=" + env('SERIAL_PORT', '/dev/ttyACM0')
+hardware_twister_flags :=  "--west-flash=--skip-rebuild --enable-slow --device-testing "
+serial_flags := hardware_twister_flags + "--device-serial=" + env('SERIAL_PORT', '/dev/ttyACM0') + " "
 
 [group('twister')]
 [no-cd]
-run-hw-test test_root $BOARD *args: (twister_run "$BOARD" test_root hardware_twister_flags + ' ' + args)
+twister_run_hw test_root board *args: (twister_run test_root env('BOARD', board) hardware_twister_flags + args)
 
 [group('twister')]
 [no-cd]
@@ -49,13 +55,13 @@ twister_run_sim test_root *args: (twister_run test_root "native_sim" args)
 
 [group('twister')]
 [no-cd]
-twister_run_serial test_root $BOARD *args:
-    just twister_run {{ test_root }} {{ "$BOARD" }} "{{ hardware_twister_flags }} {{ args }}"
+twister_run_serial test_root $BOARD *args: (twister_run test_root "$BOARD" quote(serial_flags + args))
 
-pytest_base_opts := "--strict-markers --strict-config -ra --log-cli-level='INFO' "
-pytest_debug_opts := "-v -s -log-cli-level='DEBUG' "
-pytest_zephyr_opts := " --twister-harness --build-dir=build  --device-serial=" + env('SERIAL_PORT', '/dev/ttyACM0')
-pytest := if env('UV_PYTHON', "") != "" { "uv run pytest" } else { "pytest" }
+pytest_base_opts := " --strict-markers --strict-config -ra "
+pytest_debug_opts := " -v -s --log-cli-level='DEBUG' "
+pytest_zephyr_opts := " --twister-harness "
+pytest_opts := pytest_base_opts + pytest_debug_opts + pytest_zephyr_opts
+pytest := if env('PYTEST_NO_ISOLATION', "") == "1" { "uv run " + uv_with_flags + " -m pytest" } else { "uv tool run " + uv_with_flags +" pytest" }
 
 _pytest_run *args:
     {{ pytest }} {{ pytest_base_opts }} {{ args }}
@@ -65,9 +71,10 @@ _pytest_run_debug $PYTHONASYNCIODEBUG="1" *args:
 
 [group('pytest')]
 [no-cd]
-pytest_run platform *args:
-    just _pytest_run  {{ pytest_zephyr_opts + " " + append(platform, " --device-type=") }} "{{ args }}"
+pytest_run platform build-dir *args:
+    {{ pytest }} {{ pytest_opts }} {{  append(build-dir, " --build-dir=") + " " + append(platform, " --device-type=") }} '{{ args }}'
 
 [group('pytest')]
 [no-cd]
-pytest_run_shell *args: (pytest_run "hardware" args)
+pytest_run_hw build-dir *args:
+    {{ pytest }} {{ pytest_opts }} {{  append(build-dir, " --build-dir=") + " " + append("hardware", " --device-type=") }} '{{ args }}'

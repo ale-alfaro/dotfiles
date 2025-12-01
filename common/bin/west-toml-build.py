@@ -17,12 +17,14 @@ import logging
 import os
 import pathlib
 import shutil
+from collections import defaultdict
 from functools import partial
 from subprocess import CalledProcessError
 from typing import Self
 
 import anyio
 import attrs
+import cattrs
 import tomlkit
 import yaml
 from cattrs.preconf.pyyaml import make_converter as pyyaml_make_converter
@@ -38,16 +40,16 @@ FORMAT = "%(message)s"
 logger = logging.getLogger("rich")
 
 
-@attrs.define
-class ZephyrAppBuildArgs:
-    artifact: str = "build"
-    app_dir: pathlib.Path | None = None
-    board: str | None = None
-    conf_file: str | None = None
-    dtc_overlay: str | None = None
-    snippets: str | None = None
-    shield: str | None = None
-    cmake_args: list[str] = attrs.field(factory=list)
+def optional_path(value: str | pathlib.Path | None) -> pathlib.Path | None:
+    if value is None:
+        return None
+    return pathlib.Path(value)
+
+
+def str_to_path(value: str | None) -> pathlib.Path | None:
+    if not value:
+        return None
+    return pathlib.Path(value)
 
 
 flags_for_field_map: dict[str, str] = {
@@ -63,44 +65,25 @@ flags_for_field_map: dict[str, str] = {
 
 
 @attrs.define
-class ZephyrBuildArgs:
-    common: ZephyrAppBuildArgs
-    apps: list[ZephyrAppBuildArgs] = attrs.field(factory=list)
+class ZephyrAppBuildArgs:
+    app_dir: pathlib.Path
+    board: str | None = None
+    conf_file: str | None = None
+    dtc_overlay: str | None = None
+    snippets: str | None = None
+    shield: str | None = None
+    artifact: str = attrs.field(init=False)
+    build_dir: pathlib.Path | None = attrs.field(init=False)
+    cmake_args: list[str] = attrs.field(factory=list)
 
-    @classmethod
-    def from_file(
-        cls,
-        file: pathlib.Path,
-    ) -> Self:
-        if file.suffix == ".yaml":
-            converter = pyyaml_make_converter()
-            load_fn = yaml.safe_load
-        elif file.suffix == ".toml":
-            converter = tomlkit_make_converter()
-            load_fn = tomlkit.load
-        else:
-            msg = f"wrong file type {file}. Ext: {file.suffix}"
-            raise ValueError(msg)
-        with file.open(encoding="utf-8") as f:
-            return converter.structure(load_fn(f), ZephyrBuildArgs)
+    def update_with_cwd(self, cwd: pathlib.Path) -> None:
+        self.app_dir = cwd.absolute() / self.app_dir
+        self.artifact = f"build_{self.app_dir.name}"
+        self.build_dir = self.app_dir / self.artifact
 
 
-@attrs.define
-class ZephyrBuildSpec:
-    build_args: ZephyrBuildArgs
-    cwd: pathlib.Path
-
-    @classmethod
-    def from_arg(cls, arg: str) -> Self:
-        file = pathlib.Path(arg)
-        if not file.exists():
-            msg = f"File argument: {arg!r}  doesn't exist"
-            raise argparse.ArgumentError(msg)
-        try:
-            return cls(ZephyrBuildArgs.from_file(file), file)
-        except ValueError as e:
-            msg = f"File argument invalid. {e}"
-            raise argparse.ArgumentError(msg) from e
+BuildSpecDefaultDict = defaultdict[str, str | pathlib.Path | list[str]]
+DEFAULT_WEST_BUILD_CMD = ["build", "--pristine=always"]
 
 
 def copy_artifacts(build_dir: pathlib.Path, dest: pathlib.Path) -> None:
@@ -112,65 +95,90 @@ def copy_artifacts(build_dir: pathlib.Path, dest: pathlib.Path) -> None:
             shutil.copy2(file_path, dest)
 
 
-DEFAULT_WEST_BUILD_CMD = ["build", "--pristine=always"]
+@attrs.define
+class ZephyrBuildSpec:
+    cwd: pathlib.Path
+    apps: list[ZephyrAppBuildArgs] = attrs.field(factory=list)
+
+    @classmethod
+    def from_file(
+        cls,
+        file: pathlib.Path,
+    ) -> Self:
+        if file.suffix == ".yaml":
+            pyyaml_make_converter()
+            load_fn = yaml.safe_load
+        elif file.suffix == ".toml":
+            tomlkit_make_converter()
+            load_fn = tomlkit.load
+        else:
+            msg = f"wrong file type {file}. Ext: {file.suffix}"
+            raise ValueError(msg)
+
+        with file.open(encoding="utf-8") as f:
+            doc: tomlkit.TOMLDocument = load_fn(f)
+            base = file.parent.absolute()
+            logger.info(f"path: {base} spec_file: {doc}")  # noqa: G004
+            if (_common := doc.get("common")) and (_apps := doc.get("apps")):
+
+                def resolve_app(
+                    raw: BuildSpecDefaultDict,
+                ) -> ZephyrAppBuildArgs:
+                    c = cattrs.Converter()
+                    if app := c.structure(_common | raw, ZephyrAppBuildArgs):
+                        app.update_with_cwd(base)
+                        return app
+                    raise ValueError("Couldn't resolve")
+
+                return cls(base, [resolve_app(app) for app in _apps])
+            msg = f"Mising fields in {file}. Ext: {file.suffix}"
+            raise ValueError(msg)
+
+    @classmethod
+    def from_arg(cls, arg: str) -> Self:
+        file = pathlib.Path(arg)
+        if not file.exists():
+            msg = f"File argument: {arg!r}  doesn't exist"
+            raise argparse.ArgumentError(argument="spec_file", message=msg) from e
+        try:
+            return cls.from_file(file)
+        except ValueError as e:
+            msg = f"File argument invalid. {e}"
+            raise argparse.ArgumentError(argument="spec_file", message=msg) from e
 
 
-def create_west_build_cmd_from_spec(
+async def create_west_build_cmd_from_spec(
     spec: ZephyrBuildSpec,
     *,
     cwd_arg: pathlib.Path | None = None,
+    zephyr_base: pathlib.Path,
     test_mode: bool = False,
-) -> list[list[str]]:
-    build_args: ZephyrBuildArgs = spec.build_args
-    cwd: pathlib.Path = cwd_arg or spec.cwd.parent
-    common_build_args = attrs.asdict(build_args.common)
-    logger.debug("%s", common_build_args)
-    build_cmds: list[list[str]] = []
-    for app in build_args.apps:
-        build_dir = cwd.absolute() / f"build_{app.artifact}"
-        west_args: list[str] = [
-            *DEFAULT_WEST_BUILD_CMD,
-            "-d",
-            str(build_dir),
-        ]
-        field_dict: dict[str, str | pathlib.Path | list[str]] = common_build_args | {
-            k: v for k, v in attrs.asdict(app).items() if v
-        }
-        logger.info("%s", field_dict)
-        flag_val = {
-            flag: val
-            for flag, val in {
-                flags_for_field_map.get(field): value
-                for field, value in field_dict.items()
-            }.items()
-            if flag
-        }
-        for flag, value in flag_val.items():
-            match flag, value:
-                case ("-s", pathlib.Path() as path_val):
-                    app_dir = cwd / path_val
-                    west_args.extend([flag, str(app_dir)])
+    flash: bool = False,
+) -> None:
 
-                case (_, str() as str_val):
-                    west_arg_val = str_val
-                    west_args.extend([flag, west_arg_val])
+    cwd = cwd_arg or spec.cwd
+    build_dirs: list[pathlib.Path] = []
+
+    for app in spec.apps:
+        west_args: list[str] = list(DEFAULT_WEST_BUILD_CMD)
+        if app.build_dir:
+            build_dirs.append(app.build_dir)
+            west_args.extend(["-d", str(app.build_dir.absolute())])
+        if app.app_dir:
+            west_args.extend(["-s", str(app.app_dir.absolute())])
+
+        for field in ("board", "conf_file", "dtc_overlay", "snippets", "shield"):
+            if value := getattr(app, field):
+                west_args.extend([flags_for_field_map[field], value])
+
+        if app.cmake_args:
+            west_args.extend(["--", *app.cmake_args])
 
         if test_mode:
             west_args.append("--dry-run")
-        if cmake_args := field_dict.get("cmake_args"):
-            west_args.extend([flag, *cmake_args])
-
-        build_cmds.append(west_args)
-    return build_cmds
-
-
-async def build_west_spec(
-    build_cmds: list[list[str]],
-    cwd: pathlib.Path,
-    zephyr_base: pathlib.Path,
-) -> None:
-    for cmd in build_cmds:
-        await run_west_cmd(cmd, cwd, zephyr_base)
+        await run_west_cmd(west_args, cwd, zephyr_base)
+        if flash:
+            await run_west_cmd(["flash", "-d", str(app.build_dir)], cwd, zephyr_base)
 
 
 async def run_west_cmd(
@@ -224,7 +232,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "spec_file",
         help="YAML or TOML file to convert to spec",
-        type=ZephyrBuildSpec.from_arg,
+        type=pathlib.Path,
         nargs="?",
     )
     parser.add_argument(
@@ -243,6 +251,11 @@ if __name__ == "__main__":
         help="Zephyr Base directory",
         type=pathlib.Path,
     )
+    parser.add_argument(
+        "--flash",
+        help="Flash after building",
+        action="store_true",
+    )
     parser.add_argument("--test", action="store_true", help="Test mode")
     args = parser.parse_args()
     if args.dotenv:
@@ -253,12 +266,18 @@ if __name__ == "__main__":
             msg = f".env file not found at {dotenv}"
             raise FileNotFoundError(msg)
 
-    if zephyr_base := args.zephyr_base:
-        config = io.StringIO("ZEPHYR_BASE=" + zephyr_base)
+    zephyr_base: pathlib.Path
+    if arg := args.zephyr_base:
+        zephyr_base = pathlib.Path(arg)
+        config = io.StringIO("ZEPHYR_BASE=" + str(zephyr_base))
         load_dotenv(stream=config)
+    elif env_var := os.environ.get("ZEPHYR_BASE"):
+        zephyr_base = pathlib.Path(
+            env_var,
+        )
     else:
-        zephyr_base: pathlib.Path = pathlib.Path(
-            os.environ.get("ZEPHYR_BASE"),
+        parser.error(
+            "ZEPHYR_BASE not defined; set the env var or pass -z/--zephyr-base",
         )
 
     log_level = logging.DEBUG if args.test else logging.INFO
@@ -273,25 +292,25 @@ if __name__ == "__main__":
         logger.error(msg)
         raise NotADirectoryError(msg)
 
-    if spec_file := args.spec_file:
-        build_cmds = create_west_build_cmd_from_spec(
-            spec_file,
-            test_mode=args.test,
-        )
+    if (spec_file := args.spec_file) and spec_file.exists():
+        spec = ZephyrBuildSpec.from_file(spec_file)
         anyio.run(
             partial(
-                build_west_spec,
-                build_cmds,
-                cwd=args.cwd,
+                create_west_build_cmd_from_spec,
+                spec,
+                cwd_arg=spec.cwd,
                 zephyr_base=zephyr_base,
+                flash=args.flash,
+                test_mode=args.test,
             ),
         )
     else:
+        cwd = args.cwd or pathlib.Path.cwd()
         anyio.run(
             partial(
                 run_west_cmd,
                 ["topdir"],
-                cwd=args.cwd or pathlib.Path.cwd(),
+                cwd=cwd,
                 zephyr_base=zephyr_base,
             ),
         )

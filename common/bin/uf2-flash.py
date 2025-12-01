@@ -1,12 +1,11 @@
 #!/usr/bin/env -S uv run --script
-#
 # /// script
-# requires-python = ">=3.13"
+# requires-python = ">=3.12"
 # dependencies = [
-#   "requests<3",
-#   "psutil",
+#     "psutil",
 # ]
 # ///
+
 
 """UF2 runner (flash only) for UF2 compatible bootloaders."""
 
@@ -40,7 +39,7 @@ def get_uf2_info(part):
 
     lines = lines[1:]  # Skip the first summary line
 
-    def split_uf2_info(line: str):
+    def split_uf2_info(line: str) -> tuple[str, str]:
         k, _, val = line.partition(":")
         return k.strip(), val.strip()
 
@@ -71,7 +70,7 @@ def copy_uf2_to_partition(uf2_file, part):
     try:
         shutil.copy(uf2_file, part.mountpoint)
     except OSError as e:
-        if e.errno == PermissionError:
+        if isinstance(e, PermissionError):
             logger.info("Flash successful (device disconnected as expected).")
         else:
             raise

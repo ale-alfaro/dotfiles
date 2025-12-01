@@ -1,0 +1,531 @@
+usage: west twister [-h] [-E FILENAME] [-F FILENAME] [-T TESTSUITE_ROOT] [-f]
+                    [--list-tests] [--test-tree] [-G | --emulation-only]
+                    [--device-testing |
+                    --generate-hardware-map GENERATE_HARDWARE_MAP |
+                    --simulation {mdb-nsim,nsim,renode,qemu,tsim,armfvp,xt-sim,native,custom,simics}]
+                    [--device-serial DEVICE_SERIAL |
+                    --device-serial-pty DEVICE_SERIAL_PTY |
+                    --hardware-map HARDWARE_MAP]
+                    [--device-flash-timeout DEVICE_FLASH_TIMEOUT]
+                    [--device-flash-with-test] [--flash-before] [-b]
+                    [--prep-artifacts-for-testing]
+                    [--package-artifacts PACKAGE_ARTIFACTS] [--test-only]
+                    [--timeout-multiplier TIMEOUT_MULTIPLIER] [-s TEST |
+                    --sub-test SUB_TEST] [--pytest-args PYTEST_ARGS]
+                    [--ctest-args CTEST_ARGS] [--enable-valgrind |
+                    --enable-asan] [-A BOARD_ROOT] [--allow-installed-plugin]
+                    [-a ARCH] [-B SUBSET] [--shuffle-tests]
+                    [--shuffle-tests-seed SHUFFLE_TESTS_SEED] [-c]
+                    [--cmake-only] [--enable-coverage] [-C]
+                    [--gcov-tool GCOV_TOOL]
+                    [--coverage-basedir COVERAGE_BASEDIR]
+                    [--coverage-platform COVERAGE_PLATFORM]
+                    [--coverage-tool {lcov,gcovr}]
+                    [--coverage-formats COVERAGE_FORMATS]
+                    [--coverage-per-instance] [--disable-coverage-aggregation]
+                    [--test-config TEST_CONFIG] [--level LEVEL]
+                    [--device-serial-baud DEVICE_SERIAL_BAUD]
+                    [--disable-suite-name-check] [-e EXCLUDE_TAG]
+                    [--enable-lsan] [--enable-ubsan]
+                    [--filter {buildable,runnable}] [--force-color]
+                    [--force-toolchain] [--create-rom-ram-report]
+                    [--footprint-report [{all,ROM,RAM}]]
+                    [--enable-size-report] [--footprint-from-buildlog] [-m |
+                    --compare-report COMPARE_REPORT] [--show-footprint]
+                    [-H FOOTPRINT_THRESHOLD] [-D] [-z FILENAME] [-i]
+                    [--ignore-platform-key] [-j JOBS] [-K] [-l] [--list-tags]
+                    [--log-file FILENAME] [-M [{pass,all}]]
+                    [--keep-artifacts KEEP_ARTIFACTS] [-N | -k] [-n]
+                    [--aggressive-no-clean] [--detailed-test-id]
+                    [--no-detailed-test-id] [--detailed-skipped-report]
+                    [-O OUTDIR] [-o REPORT_DIR] [--overflow-as-errors]
+                    [--report-filtered] [-P EXCLUDE_PLATFORM]
+                    [--persistent-hardware-map] [--vendor VENDOR]
+                    [-p PLATFORM] [--platform-reports]
+                    [--pre-script PRE_SCRIPT] [--quarantine-list FILENAME]
+                    [--quarantine-verify] [--quit-on-failure]
+                    [--report-name REPORT_NAME]
+                    [--report-summary [REPORT_SUMMARY]]
+                    [--report-suffix REPORT_SUFFIX] [--report-all-options]
+                    [--retry-failed RETRY_FAILED]
+                    [--retry-interval RETRY_INTERVAL] [--retry-build-errors]
+                    [-S] [--enable-slow-only] [--seed SEED]
+                    [--short-build-path] [-t TAG] [--timestamps] [-u] [-v]
+                    [-ll {NOTSET,DEBUG,INFO,WARNING,ERROR,CRITICAL}] [-W]
+                    [--west-flash [WEST_FLASH]] [--west-runner WEST_RUNNER]
+                    [-X FIXTURE] [-x EXTRA_ARGS] [-y]
+                    [--alt-config-root ALT_CONFIG_ROOT]
+                    ...
+
+Convenience wrapper for twister. The below options are shared with the twister
+script and have the same effects as if you ran twister directly. Refer to the
+twister documentation for more information.
+
+positional arguments:
+  extra_test_args       Additional args following a '--' are passed to the
+                        test binary
+
+options:
+  -h, --help            show this help message and exit
+  -G, --integration     Run integration tests
+  --emulation-only      Only build and run emulation platforms
+  --device-testing      Test on device directly. Specify the serial device to
+                        use with the --device-serial option.
+  --generate-hardware-map GENERATE_HARDWARE_MAP
+                        Probe serial devices connected to this platform and
+                        create a hardware map file to be used with --device-
+                        testing
+  --simulation {mdb-nsim,nsim,renode,qemu,tsim,armfvp,xt-sim,native,custom,simics}
+                        Selects which simulation to use. Must match one of the
+                        names defined in the board's manifest. If multiple
+                        simulator are specified in the selected board and this
+                        argument is not passed, then the first simulator is
+                        selected.
+  --device-serial DEVICE_SERIAL
+                        Serial device for accessing the board (e.g.,
+                        /dev/ttyACM0)
+  --device-serial-pty DEVICE_SERIAL_PTY
+                        Script for controlling pseudoterminal. Twister
+                        believes that it interacts with a terminal when it
+                        actually interacts with the script. E.g "twister
+                        --device-testing --device-serial-pty <script>
+  --hardware-map HARDWARE_MAP
+                        Load hardware map from a file. This will be used for
+                        testing on hardware that is listed in the file.
+  --device-flash-timeout DEVICE_FLASH_TIMEOUT
+                        Set timeout for the device flash operation in seconds.
+  --device-flash-with-test
+                        Add a test case timeout to the flash operation timeout
+                        when flash operation also executes test case on the
+                        platform.
+  --flash-before        Flash device before attaching to serial port. This is
+                        useful for devices that share the same port for
+                        programming and serial console, or use soft-USB, where
+                        flash must come first.
+  -b, --build-only      Only build the code, do not attempt to run the code on
+                        targets.
+  --prep-artifacts-for-testing
+                        Generate artifacts for testing, do not attempt to run
+                        the code on targets.
+  --package-artifacts PACKAGE_ARTIFACTS
+                        Package artifacts needed for flashing in a file to be
+                        used with --test-only
+  --test-only           Only run device tests with current artifacts, do not
+                        build the code
+  --timeout-multiplier TIMEOUT_MULTIPLIER
+                        Globally adjust tests timeouts by specified
+                        multiplier. The resulting test timeout would be
+                        multiplication of test timeout value, board-level
+                        timeout multiplier and global timeout multiplier (this
+                        parameter)
+  --pytest-args PYTEST_ARGS
+                        Pass additional arguments to the pytest subprocess.
+                        This parameter will extend the pytest_args from the
+                        harness_config in YAML file.
+  --ctest-args CTEST_ARGS
+                        Pass additional arguments to the ctest subprocess.
+                        This parameter will extend the ctest_args from the
+                        harness_config in YAML file.
+  --enable-valgrind     Run binary through valgrind and check for several
+                        memory access errors. Valgrind needs to be installed
+                        on the host. This option only works with host binaries
+                        such as those generated for the native_sim
+                        configuration and is mutual exclusive with --enable-
+                        asan.
+  --enable-asan         Enable address sanitizer to check for several memory
+                        access errors. Libasan needs to be installed on the
+                        host. This option only works with host binaries such
+                        as those generated for the native_sim configuration
+                        and is mutual exclusive with --enable-valgrind.
+  -A, --board-root BOARD_ROOT
+                        Directory to search for board configuration files. All
+                        .yaml files in the directory will be processed. The
+                        directory should have the same structure in the main
+                        Zephyr tree: boards/<vendor>/<board_name>/
+  --allow-installed-plugin
+                        Allow to use pytest plugin installed by pip for pytest
+                        tests.
+  -a, --arch ARCH       Arch filter for testing. Takes precedence over
+                        --platform. If unspecified, test all arches. Multiple
+                        invocations are treated as a logical 'or' relationship
+  -B, --subset SUBSET   Only run a subset of the tests, 1/4 for running the
+                        first 25%, 3/5 means run the 3rd fifth of the total.
+                        This option is useful when running a large number of
+                        tests on different hosts to speed up execution time.
+  --shuffle-tests       Shuffle test execution order to get randomly
+                        distributed tests across subsets. Used only when
+                        --subset is provided.
+  --shuffle-tests-seed SHUFFLE_TESTS_SEED
+                        Seed value for random generator used to shuffle tests.
+                        If not provided, seed in generated by system. Used
+                        only when --shuffle-tests is provided.
+  -c, --clobber-output  Cleaning the output directory will simply delete it
+                        instead of the default policy of renaming.
+  --cmake-only          Only run cmake, do not build or run.
+  --test-config TEST_CONFIG
+                        Path to file with plans and test configurations.
+  --level LEVEL         Test level to be used. By default, no levels are used
+                        for filtering and do the selection based on existing
+                        filters.
+  --device-serial-baud DEVICE_SERIAL_BAUD
+                        Serial device baud rate (default 115200)
+  --disable-suite-name-check
+                        Disable extended test suite name verification at the
+                        beginning of Ztest test. This option could be useful
+                        for tests or platforms, which from some reasons cannot
+                        print early logs.
+  -e, --exclude-tag EXCLUDE_TAG
+                        Specify tags of tests that should not run. Default is
+                        to run all tests with all tags.
+  --enable-lsan         Enable leak sanitizer to check for heap memory leaks.
+                        Libasan needs to be installed on the host. This option
+                        only works with host binaries such as those generated
+                        for the native_sim configuration and when --enable-
+                        asan is given.
+  --enable-ubsan        Enable undefined behavior sanitizer to check for
+                        undefined behaviour during program execution. It uses
+                        an optional runtime library to provide better error
+                        diagnostics. This option only works with host binaries
+                        such as those generated for the native_sim
+                        configuration.
+  --filter {buildable,runnable}
+                        Filter tests to be built and executed. By default
+                        everything is built and if a test is runnable
+                        (emulation or a connected device), it is run. This
+                        option allows for example to only build tests that can
+                        actually be run. Runnable is a subset of buildable.
+  --force-color         Always output ANSI color escape sequences even when
+                        the output is redirected (not a tty)
+  --force-toolchain     Do not filter based on toolchain, use the set
+                        toolchain unconditionally
+  -i, --inline-logs     Upon test failure, print relevant log data to stdout
+                        instead of just a path to it.
+  --ignore-platform-key
+                        Do not filter based on platform key
+  -j, --jobs JOBS       Number of jobs for building, defaults to number of CPU
+                        threads, overcommitted by factor 2 when --build-only.
+  -K, --force-platform  Force testing on selected platforms, even if they are
+                        excluded in the test configuration (testcase.yaml).
+  -l, --all             Build/test on all platforms. Any --platform arguments
+                        ignored.
+  --log-file FILENAME   Specify a file where to save logs.
+  -M, --runtime-artifact-cleanup [{pass,all}]
+                        Cleanup test artifacts. The default behavior is 'pass'
+                        which only removes artifacts of passing tests. If you
+                        wish to remove all artificats including those of
+                        failed tests, use 'all'.
+  --keep-artifacts KEEP_ARTIFACTS
+                        Keep specified artifacts when cleaning up at runtime.
+                        Multiple invocations are possible.
+  -n, --no-clean        Re-use the outdir before building. Will result in
+                        faster compilation since builds will be incremental.
+  --aggressive-no-clean
+                        Re-use the outdir before building and do not re-run
+                        cmake. Will result in much faster compilation since
+                        builds will be incremental. This option might result
+                        in build failures and inconsistencies if dependencies
+                        change or when applied on a significantly changed code
+                        base. Use on your own risk. It is recommended to only
+                        use this option for local development and when testing
+                        localized change in a subsystem.
+  --detailed-test-id    Compose each test Suite name from its configuration
+                        path (relative to root) and the appropriate Scenario
+                        name using PATH_TO_TEST_CONFIG/SCENARIO_NAME schema.
+                        Also (for Ztest only), prefix each test Case name with
+                        its Scenario name. For example: 'kernel.common.timing'
+                        Scenario with test Suite name
+                        'tests/kernel/sleep/kernel.common.timing' and
+                        'kernel.common.timing.sleep.usleep' test Case (where
+                        'sleep' is its Ztest suite name and 'usleep' is Ztest
+                        test name.
+  --no-detailed-test-id
+                        Don't prefix each test Suite name with its
+                        configuration path, so it is the same as the
+                        appropriate Scenario name. Also (for Ztest only),
+                        don't prefix each Ztest Case name with its Scenario
+                        name. For example: 'kernel.common.timing' Scenario
+                        name, the same Suite name, and 'sleep.usleep' test
+                        Case (where 'sleep' is its Ztest suite name and
+                        'usleep' is Ztest test name.
+  --detailed-skipped-report
+                        Generate a detailed report with all skipped test cases
+                        including those that are filtered based on testsuite
+                        definition.
+  -O, --outdir OUTDIR   Output directory for logs and binaries. Default is
+                        'twister-out' in the current directory. This directory
+                        will be cleaned unless '--no-clean' is set. The '--
+                        clobber-output' option controls what cleaning does.
+  -o, --report-dir REPORT_DIR
+                        Output reports containing results of the test run into
+                        the specified directory. The output will be both in
+                        JSON and JUNIT format (twister.json and twister.xml).
+  --overflow-as-errors  Treat RAM/SRAM overflows as errors.
+  --report-filtered     Include filtered tests in the reports.
+  -P, --exclude-platform EXCLUDE_PLATFORM
+                        Exclude platforms and do not build or run any tests on
+                        those platforms. This option can be called multiple
+                        times.
+  --persistent-hardware-map
+                        With --generate-hardware-map, tries to use persistent
+                        names for serial devices on platforms that support
+                        this feature (currently only Linux).
+  --vendor VENDOR       Vendor filter for testing
+  -p, --platform PLATFORM
+                        Platform filter for testing. This option may be used
+                        multiple times. Test suites will only be built/run on
+                        the platforms specified. If this option is not used,
+                        then platforms marked as default in the platform
+                        metadata file will be chosen to build and test.
+  --platform-reports    Create individual reports for each platform.
+  --pre-script PRE_SCRIPT
+                        specify a pre script. This will be executed before
+                        device handler open serial port and invoke runner.
+  --quarantine-list FILENAME
+                        Load list of test scenarios under quarantine. The
+                        entries in the file need to correspond to the test
+                        scenarios names as in corresponding tests .yaml files.
+                        These scenarios will be skipped with quarantine as the
+                        reason.
+  --quarantine-verify   Use the list of test scenarios under quarantine and
+                        run them to verify their current status.
+  --quit-on-failure     quit twister once there is build / run failure
+  --report-name REPORT_NAME
+                        Create a report with a custom name.
+  --report-summary [REPORT_SUMMARY]
+                        Show failed/error report from latest run. Default
+                        shows all items found. However, you can specify the
+                        number of items (e.g. --report-summary 15). It also
+                        works well with the --outdir switch.
+  --report-suffix REPORT_SUFFIX
+                        Add a suffix to all generated file names, for example
+                        to add a version or a commit ID.
+  --report-all-options  Show all command line options applied, including
+                        defaults, as environment.options object in
+                        twister.json. Default: show only non-default settings.
+  --retry-failed RETRY_FAILED
+                        Retry failing tests again, up to the number of times
+                        specified.
+  --retry-interval RETRY_INTERVAL
+                        Retry failing tests after specified period of time.
+  --retry-build-errors  Retry build errors as well.
+  -S, --enable-slow     Execute time-consuming test cases that have been
+                        marked as 'slow' in testcase.yaml. Normally these are
+                        only built.
+  --enable-slow-only    Execute time-consuming test cases that have been
+                        marked as 'slow' in testcase.yaml only. This also set
+                        the option --enable-slow
+  --seed SEED           Seed for native_sim pseudo-random number generator
+  --short-build-path    Create shorter build directory paths based on symbolic
+                        links. The shortened build path will be used by CMake
+                        for generating the build system and executing the
+                        build. Use this option if you experience build
+                        failures related to path length, for example on
+                        Windows OS. This option can be used only with '--
+                        ninja' argument (to use Ninja build generator).
+  -t, --tag TAG         Specify tags to restrict which tests to run by tag
+                        value. Default is to not do any tag filtering.
+                        Multiple invocations are treated as a logical 'or'
+                        relationship.
+  --timestamps          Print all messages with time stamps.
+  -u, --no-update       Do not update the results of the last run. This option
+                        is only useful when reusing the same output directory
+                        of twister, for example when re-running failed tests
+                        with --only-failed or --no-clean. This option is for
+                        debugging purposes only.
+  -v, --verbose         Call multiple times to increase verbosity.
+  -ll, --log-level {NOTSET,DEBUG,INFO,WARNING,ERROR,CRITICAL}
+                        Select the threshold event severity for which you'd
+                        like to receive logs in console. Default is INFO.
+  -W, --disable-warnings-as-errors
+                        Do not treat warning conditions as errors.
+  --west-flash [WEST_FLASH]
+                        Uses west instead of ninja or make to flash when
+                        running with --device-testing. Supports comma-
+                        separated argument list. E.g "twister --device-testing
+                        --device-serial /dev/ttyACM0 --west-flash="--board-
+                        id=foobar,--erase" will translate to "west flash --
+                        --board-id=foobar --erase" NOTE: device-testing must
+                        be enabled to use this option.
+  --west-runner WEST_RUNNER
+                        Uses the specified west runner instead of default when
+                        running with --west-flash. E.g "twister --device-
+                        testing --device-serial /dev/ttyACM0 --west-flash
+                        --west-runner=pyocd" will translate to "west flash
+                        --runner pyocd" NOTE: west-flash must be enabled to
+                        use this option.
+  -X, --fixture FIXTURE
+                        Specify a fixture that a board might support.
+  -x, --extra-args EXTRA_ARGS
+                        Extra CMake cache entries to define when building test
+                        cases. May be called multiple times. The key-value
+                        entries will be prefixed with -D before being passed
+                        to CMake. E.g "twister -x=USE_CCACHE=0" will translate
+                        to "cmake -DUSE_CCACHE=0" which will ultimately
+                        disable ccache.
+  -y, --dry-run         Create the filtered list of test cases, but don't
+                        actually run them. Useful if you're just interested in
+                        the test plan generated for every run and saved in the
+                        specified output directory (testplan.json).
+  --alt-config-root ALT_CONFIG_ROOT
+                        Alternative test configuration root/s. When a test is
+                        found, Twister will check if a test configuration file
+                        exist in any of the alternative test configuration
+                        root folders. For example, given
+                        $test_root/tests/foo/testcase.yaml, Twister will use
+                        $alt_config_root/tests/foo/testcase.yaml if it exists
+
+Test case selection:
+  
+  Artificially long but functional example:
+      $ ./scripts/twister -v     \
+        --testsuite-root tests/ztest/base    \
+        --testsuite-root tests/kernel   \
+        --test      tests/ztest/base/testing.ztest.verbose_0  \
+        --test      tests/kernel/fifo/fifo_api/kernel.fifo
+  
+     "kernel.fifo.poll" is one of the test section names in
+                                   __/fifo_api/testcase.yaml
+      
+
+  -F, --load-tests FILENAME
+                        Load a list of tests and platforms to be run from a
+                        JSON file ('testplan.json' schema).
+  -T, --testsuite-root TESTSUITE_ROOT
+                        Base directory to recursively search for test cases.
+                        All testcase.yaml files under here will be processed.
+                        May be called multiple times. Defaults to the
+                        'samples/' and 'tests/' directories at the base of the
+                        Zephyr tree.
+  -f, --only-failed     Run only those tests that failed the previous twister
+                        run invocation.
+  -s, --test, --scenario TEST
+                        Run only the specified test suite scenario. These are
+                        named by 'path/relative/to/Zephyr/base/section.subsect
+                        ion_in_testcase_yaml', or just 'section.subsection'
+                        identifier. With '--testsuite-root' option the
+                        scenario will be found faster.
+  --sub-test SUB_TEST   Recursively find sub-test functions (test cases) and
+                        run the entire test scenario (section.subsection)
+                        where they were found, including all sibling test
+                        functions. Sub-tests are named by: 'section.subsection
+                        _in_testcase_yaml.ztest_suite.ztest_without_test_prefi
+                        x'. Example_1: 'kernel.fifo.fifo_api_1cpu.fifo_loop'
+                        where 'kernel.fifo' is a test scenario name
+                        (section.subsection) and 'fifo_api_1cpu.fifo_loop' is
+                        a Ztest 'suite_name.test_name'. Example_2:
+                        'debug.coredump.logging_backend' is a standalone test
+                        scenario name. Note: This selection mechanism works
+                        only for Ztest suite and test function names in the
+                        source files which are not generated by macro-
+                        substitutions. Note: With --no-detailed-test-id use
+                        only Ztest names without scenario name.
+  -N, --ninja           Use the Ninja generator with CMake. (This is the
+                        default)
+  -k, --make            Use the unix Makefile generator with CMake.
+
+Test plan reporting:
+  Report the composed test plan details and exit (dry-run).
+
+  -E, --save-tests FILENAME
+                        Write a list of tests and platforms to be run to
+                        FILENAME file and stop execution. The resulting file
+                        will have the same content as 'testplan.json'.
+  --list-tests          List of all sub-test functions recursively found in
+                        all --testsuite-root arguments. The output is
+                        flattened and reports detailed sub-test names without
+                        their directories. Note: sub-test names can share the
+                        same test scenario identifier prefix
+                        (section.subsection) even if they are from different
+                        test projects.
+  --test-tree           Output the test plan in a tree form.
+  --list-tags           List all tags occurring in selected tests.
+
+Memory footprint:
+  Collect and report ROM/RAM size footprint for the test instance images built.
+
+  --create-rom-ram-report
+                        Generate detailed json reports with ROM/RAM symbol
+                        sizes for each test image built using additional build
+                        option `--target footprint`.
+  --footprint-report [{all,ROM,RAM}]
+                        Select which memory area symbols' data to collect as
+                        'footprint' property of each test suite built, and
+                        report in 'twister_footprint.json' together with the
+                        relevant execution metadata the same way as in
+                        `twister.json`. Implies '--create-rom-ram-report' to
+                        generate the footprint data files. No value means
+                        'all'. Default: None
+  --enable-size-report  Collect and report ROM/RAM section sizes for each test
+                        image built.
+  --footprint-from-buildlog
+                        Take ROM/RAM sections footprint summary values from
+                        the 'build.log' instead of 'objdump' results used
+                        otherwise.Requires --enable-size-report or one of the
+                        baseline comparison modes.Warning: the feature will
+                        not work correctly with sysbuild.
+  -m, --last-metrics    Compare footprints to the previous twister invocation
+                        as a baseline running in the same output directory.
+                        Implies --enable-size-report option.
+  --compare-report COMPARE_REPORT
+                        Use this report file as a baseline for footprint
+                        comparison. The file should be of 'twister.json'
+                        schema. Implies --enable-size-report option.
+  --show-footprint      With footprint comparison to a baseline, log ROM/RAM
+                        section deltas.
+  -H, --footprint-threshold FOOTPRINT_THRESHOLD
+                        With footprint comparison to a baseline, warn the user
+                        for any of the footprint metric change which is
+                        greater or equal to the specified percentage value.
+                        Default is 5.0 for 5.0% delta from the new footprint
+                        value. Use zero to warn on any footprint metric
+                        increase.
+  -D, --all-deltas      With footprint comparison to a baseline, warn on any
+                        footprint change, increase or decrease. Implies
+                        --footprint-threshold=0
+  -z, --size FILENAME   Ignore all other command line options and just produce
+                        a report to stdout with ROM/RAM section sizes on the
+                        specified binary images.
+
+Code coverage:
+  Build with code coverage support, collect code coverage statistics executing tests, compose code coverage report at the end.
+  Effective for devices with 'HAS_COVERAGE_SUPPORT'.
+
+  --enable-coverage     Enable code coverage collection using gcov.
+  -C, --coverage        Generate coverage reports. Implies --enable-coverage
+                        to collect the coverage data first.
+  --gcov-tool GCOV_TOOL
+                        Path to the 'gcov' tool to use for code coverage
+                        reports. By default it will be chosen in the following
+                        order: using ZEPHYR_TOOLCHAIN_VARIANT ('llvm': from
+                        LLVM_TOOLCHAIN_PATH), gcov installed on the host - for
+                        'native' or 'unit' platform types, using
+                        ZEPHYR_SDK_INSTALL_DIR.
+  --coverage-basedir COVERAGE_BASEDIR
+                        Base source directory for coverage report.
+  --coverage-platform COVERAGE_PLATFORM
+                        Platforms to run coverage reports on. This option may
+                        be used multiple times. Default to what was selected
+                        with --platform.
+  --coverage-tool {lcov,gcovr}
+                        Tool to use to generate coverage reports (gcovr -
+                        default).
+  --coverage-formats COVERAGE_FORMATS
+                        Output formats to use for generated coverage reports
+                        as a comma-separated list without spaces. Valid
+                        options for 'gcovr' tool are:
+                        html,xml,csv,txt,coveralls,sonarqube (html - default).
+                        Valid options for 'lcov' tool are: html,lcov
+                        (html,lcov - default).
+  --coverage-per-instance
+                        Compose individual coverage reports for each test
+                        suite when coverage reporting is enabled; it might run
+                        in addition to the default aggregation mode which
+                        produces one coverage report for all executed test
+                        suites. Default: False
+  --disable-coverage-aggregation
+                        Don't aggregate coverage report statistics for all the
+                        test suites selected to run with enabled coverage.
+                        Requires another reporting mode to be active
+                        (`--coverage-per-instance`) to have at least one of
+                        these reporting modes. Default: False
+

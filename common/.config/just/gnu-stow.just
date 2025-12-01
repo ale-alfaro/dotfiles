@@ -1,0 +1,49 @@
+@_:
+    @just --list
+
+[group('stow')]
+stow-cmd pkg_dir target_dir pkgs cmd_flag *extra_args:
+    stow -d {{ pkg_dir }} -t {{ target_dir }} --verbose=2 {{ extra_args }}  {{ cmd_flag }} {{ pkgs }}
+
+[group('stow')]
+stow pkg_dir target_dir pkgs *extra_args: (stow-cmd pkg_dir target_dir pkgs "-S" extra_args)
+    @echo "✅ Stow complete."
+
+[group('stow')]
+restow pkg_dir target_dir pkgs *extra_args: (stow-cmd pkg_dir target_dir pkgs "-R" extra_args)
+    @echo "✅ Stow refresh complete."
+
+[group('stow')]
+unstow pkg_dir target_dir pkgs *extra_args: (stow-cmd pkg_dir target_dir pkgs "-D" extra_args)
+    @echo "✅ Unstowed all packages."
+
+# check: Simulate stowing to check for any conflicts
+[group('stow')]
+restow-sim pkg_dir target_dir pkgs *extra_args: (stow-cmd pkg_dir target_dir pkgs "-R --simulate" extra_args)
+    @echo "Simulating stow to check for conflicts..."
+
+[group('stow')]
+stow-check-bogus target_dir:
+    @chkstow -b -t {{ target_dir }}
+
+# clean-bogus: Find and automatically remove all broken symlinks
+[group('stow')]
+clean-bogus target_dir:
+    @echo "Searching for and removing broken symlinks..."
+    @chkstow -b -t {{ target_dir }} | awk -F': ' '{print $2}' | xargs -r rm
+    @echo "✅ Done."
+
+# check-aliens: Find 'alien' files (not managed by stow) in the target directory
+[group('stow')]
+check-aliens target_dir:
+    @chkstow -a -t {{ target_dir }} | awk '{print $2}'
+
+# clean-aliens-interactive: Interactively remove 'alien' files. DANGEROUS!
+# This will prompt you to delete any file or directory in your .config
+
+# that is NOT a symlink created by stow. Use with extreme caution.
+[group('stow')]
+clean-aliens-interactive target_dir:
+    @echo "WARNING: This is a dangerous operation."
+    @echo "You will be prompted to delete every file not managed by stow."
+    @chkstow -a -t {{ target_dir }} | awk -F': ' '{print $2}' | xargs -r -p rm -rf

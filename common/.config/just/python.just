@@ -1,3 +1,6 @@
+@_:
+    @just --list
+
 # Run linters
 [group('qa')]
 [no-cd]

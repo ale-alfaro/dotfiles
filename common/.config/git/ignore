@@ -13,7 +13,6 @@
 
 ### direnv ###
 .direnv
-.env
 
 ### Linux ###
 *~
@@ -119,10 +118,8 @@ venv.bak/
 dmypy.json
 
 # Pyre type checker
-.pyre/
+.pyrefly/
 
-# pytype static type analyzer
-.pytype/
 
 # Cython debug symbols
 cython_debug/
