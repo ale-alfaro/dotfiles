@@ -72,9 +72,8 @@ _pytest_run_debug $PYTHONASYNCIODEBUG="1" *args:
 [group('pytest')]
 [no-cd]
 pytest_run platform build-dir *args:
-    {{ pytest }} {{ pytest_opts }} {{  append(build-dir, " --build-dir=") + " " + append(platform, " --device-type=") }} '{{ args }}'
+    {{ replace(pytest, uv_with_flags, uv_with_flags + " --directory=" + parent_directory(build-dir)) }} {{ pytest_opts }} {{  " --rootdir=pytest " + append(file_stem(build-dir), " --build-dir=") + " " + append(platform, " --device-type=") }} {{ args }}
 
 [group('pytest')]
 [no-cd]
-pytest_run_hw build-dir *args:
-    {{ pytest }} {{ pytest_opts }} {{  append(build-dir, " --build-dir=") + " " + append("hardware", " --device-type=") }} '{{ args }}'
+pytest_run_hw build-dir *args: (pytest_run "hardware" build-dir args)

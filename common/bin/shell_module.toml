@@ -1,7 +1,0 @@
-[common]
-app_dir = "shell_module"
-board = "native_sim"
-cmake_args = ["-DCONFIG_UART_NATIVE_PTY_0_ON_STDINOUT=y"]
-
-[[apps]]
-artifact = "shell_simulator"
