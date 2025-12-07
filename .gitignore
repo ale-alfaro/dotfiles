@@ -15,3 +15,5 @@ nvm/
 SEGGER/
 *.bak*
 linux/.config/hypr/hyprland/hw
+btop.conf
+*target.wants
