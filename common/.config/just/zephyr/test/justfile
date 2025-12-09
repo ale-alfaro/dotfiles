@@ -2,28 +2,61 @@
 # serial_number := env('SNR_VAR') || '728343547'
 #--west-flash="--dev-id=${SNR_VAR}"
 
+uv_run_flags := '--with-requirements ' + env('ZEPHYR_BASE') / "scripts" / "requirements.txt" + " --python=3.13 --with-editable core-io.[test] "
+uv_run := "uv run " + uv_run_flags + if env("TWISTER_NO_ISOLATION", "") == "1" { "" } else { "--no-project --isolated " }
+uvx_flags := '--with-requirements ' + env('ZEPHYR_BASE') / "scripts" / "requirements.txt" + " --python=3.13 --with-editable . "
+uvx := "uvx " + uvx_flags
+
 default:
     @just --list
-pytest_twister_harness := env('PYTEST_TWISTER_HARNESS_PATH') || zephyr_base / "scripts" / "pylib" / "pytest_twister_harness"
-twister_isolated := "uvx " + uv_with_flags +  " --with " + pytest_twister_harness + " " + uv_python_flags + ' west twister'
-twister_non_isolated := "uv run " + uv_with_flags + ' west twister'
-twister := if env("TWISTER_NO_ISOLATION", "")  == "1" { twister_non_isolated } else { twister_isolated  }
 
+twister := uv_run + " west twister "
 twister_report_flags := "--report-dir twister_report --outdir twister_out"
 twister_verbose_flags := env('TWISTER_VERBOSITY', '-v')
-twister_default_flags := twister_verbose_flags + " --allow-installed-plugin --clobber-output --no-detailed-test-id " 
-# twister_default_flags := twister_verbose_flags + " --allow-installed-plugin --clobber-output " 
+twister_default_flags := twister_verbose_flags + " --allow-installed-plugin --clobber-output --no-detailed-test-id "
+
+# twister_default_flags := twister_verbose_flags + " --allow-installed-plugin --clobber-output "
 
 [group('twister')]
 [no-cd]
-twister_run test_root platform *args:
-    @echo "Running twister test suite at {{ invocation_directory() }} and test_root {{  test_root }}"
+_twister_run test_root platform *args:
+    @echo "Running twister test suite at {{ invocation_directory() }} and test_root {{ test_root }}"
     {{ twister }} \
     {{ twister_default_flags }} \
     {{ replace(twister_report_flags, "twister", test_root + "/twister") }} \
       -p {{ platform }} \
       -T {{ test_root }} \
       {{ args }}
+
+twister_run:
+    #!/usr/bin/env -S bash -euxo pipefail
+    usage() {
+      echo "Usage: uv-test [-p|--python PY_VER] [pytest args...]"
+      echo "  -p, --python  Set Python version (default: \$UV_PY or 3.14)"
+      echo "  -h, --help    Show this help"
+    }
+
+    PYVER="${UV_PY:-3.14}"
+    # Parse only our flags; pass the rest to pytest
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        -p|--python)
+          shift
+          [ $# -gt 0 ] || { echo "error: -p/--python requires a version" >&2; exit 2; }
+          PYVER="$1"; shift ;;
+        -h|--help) usage; exit 0 ;;
+        --) shift; break ;;
+        *) break ;;
+      esac
+    done
+
+    command -v uv >/dev/null 2>&1 || { echo "error: 'uv' not found in PATH" >&2; exit 127; }
+    if [ ! -f pyproject.toml ] && [ ! -f setup.py ]; then
+      echo "error: no project file found (need pyproject.toml or setup.py). Run from project root." >&2
+      exit 1
+    fi
+
+    exec uv run --python "$PYVER" --isolated --with-editable '.[test]' -- python -m pytest "$@"
 
 [group('twister')]
 [no-cd]
@@ -38,30 +71,31 @@ twister_run_scenario test_root platform scenario *args:
 
 [group('twister')]
 [no-cd]
-prep-test test_root board: (twister_run board test_root "--prep-artifacts-for-testing")
+prep-test test_root board: (_twister_run board test_root "--prep-artifacts-for-testing")
 
-native_sim_west_flags := "-b native_sim -- -DCONFIG_UART_NATIVE_PTY_0_ON_STDINOUT=y"
-qemu_west_flags := "-b qemu_x86 -- -DQEMU_PIPE=qemu-fifo"
-hardware_twister_flags :=  "--west-flash=--skip-rebuild --enable-slow --device-testing "
+# native_sim_west_flags := "-b native_sim -- -DCONFIG_UART_NATIVE_PTY_0_ON_STDINOUT=y"
+# qemu_west_flags := "-b qemu_x86 -- -DQEMU_PIPE=qemu-fifo"
+
+hardware_twister_flags := "--west-flash=--skip-rebuild --enable-slow --device-testing "
 serial_flags := hardware_twister_flags + "--device-serial=" + env('SERIAL_PORT', '/dev/ttyACM0') + " "
 
 [group('twister')]
 [no-cd]
-twister_run_hw test_root board *args: (twister_run test_root env('BOARD', board) hardware_twister_flags + args)
+twister_run_hw test_root board *args: (_twister_run test_root env('BOARD', board) hardware_twister_flags + args)
 
 [group('twister')]
 [no-cd]
-twister_run_sim test_root *args: (twister_run test_root "native_sim" args)
+twister_run_sim test_root *args: (_twister_run test_root "native_sim" args)
 
 [group('twister')]
 [no-cd]
-twister_run_serial test_root $BOARD *args: (twister_run test_root "$BOARD" quote(serial_flags + args))
+twister_run_serial test_root $BOARD *args: (_twister_run test_root "$BOARD" quote(serial_flags + args))
 
 pytest_base_opts := " --strict-markers --strict-config -ra "
 pytest_debug_opts := " -v -s --log-cli-level='DEBUG' "
 pytest_zephyr_opts := " --twister-harness "
 pytest_opts := pytest_base_opts + pytest_debug_opts + pytest_zephyr_opts
-pytest := if env('PYTEST_NO_ISOLATION', "") == "1" { "uv run " + uv_with_flags + " -m pytest" } else { "uv tool run " + uv_with_flags +" pytest" }
+pytest := if env('PYTEST_NO_ISOLATION', "") == "1" { uv_run + " -m pytest" } else { uvx + " pytest" }
 
 _pytest_run *args:
     {{ pytest }} {{ pytest_base_opts }} {{ args }}
@@ -72,7 +106,7 @@ _pytest_run_debug $PYTHONASYNCIODEBUG="1" *args:
 [group('pytest')]
 [no-cd]
 pytest_run platform build-dir *args:
-    {{ replace(pytest, uv_with_flags, uv_with_flags + " --directory=" + parent_directory(build-dir)) }} {{ pytest_opts }} {{  " --rootdir=pytest " + append(file_stem(build-dir), " --build-dir=") + " " + append(platform, " --device-type=") }} {{ args }}
+    {{ pytest }} {{ pytest_opts }} {{ " --rootdir=pytest " + append(file_stem(build-dir), " --build-dir=") + " " + append(platform, " --device-type=") }} {{ args }}
 
 [group('pytest')]
 [no-cd]

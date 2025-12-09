@@ -66,24 +66,27 @@ export npm_config_prefix="$HOME/.local"
 
 ## Additional completions. This can be here because they don't add to the fpath and get activated by eval
 # --- Completion from CLI tools ---
-if has uv; then
-  eval "$(uv generate-shell-completion zsh)"
-fi
-
-if has prek; then
-  eval "$(COMPLETE=zsh prek completion)"
-fi
+# if has prek; then
+#   eval "$(COMPLETE=zsh prek completion)"
+# fi
 
 # --- Optional completions from CLI tools ---
-if [[ -z "$JJ_COMPLETIONS" ]]; then
+if [[ ! -z "$JJ_COMPLETIONS" ]]; then
   if has jj; then
     eval "$(jj util completion zsh)"
   fi
 fi
-if [[ -z "$BW_CLI_COMPLETIONS" ]]; then
+if [[ ! -z "$BW_CLI_COMPLETIONS" ]]; then
   if has bw; then
     eval "$(bw completion --shell zsh)"
   fi
 fi
 
-export GEMINI_CLI_SYSTEM_SETTINGS_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/gemini/settings.json"
+if has codex; then
+  eval "$(codex completion zsh)"
+  export CODEX_HOME="${XDG_CONFIG_HOME}/codex"
+fi
+
+if has gemini; then
+  export GEMINI_CLI_SYSTEM_SETTINGS_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/gemini/settings.json"
+fi

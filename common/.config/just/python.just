@@ -1,16 +1,38 @@
+concise := env('PYTHON_DIAG_CONCISE', '1')
+uv_concise_flags := "--output-format concise"
+ruff_args := "--fix --unsafe-fixes " + if concise == "1" { uv_concise_flags } else { "" }
+ty_args := " " + if concise == "1" { uv_concise_flags } else { "" }
+basedpyright_args := "--level error " + if concise == "1" { "" } else { "" }
+pyrefly_args := " " + if concise == "1" { "--output-format min-text" } else { "" }
+commands := "ruff ty basedpyright pyrefly"
+
 @_:
     @just --list
+
+noop *args:
+    @echo "No-op for {{ args }}"
 
 # Run linters
 [group('qa')]
 [no-cd]
-lint_ruff *args:
-    uvx ruff check --fix {{ args }}
+ruff:
+    -uvx ruff check {{ ruff_args }}
     uvx ruff format
 
-lint_ruff_unsafe *args:
-    uvx ruff check --fix --unsafe-fixes {{ args }}
-    uvx ruff format
+[group('qa')]
+[no-cd]
+basedpyright:
+    uvx basedpyright  {{ basedpyright_args }}
+
+[group('qa')]
+[no-cd]
+pyrefly:
+    uvx pyrefly check {{ pyrefly_args }}
+
+[group('qa')]
+[no-cd]
+ty:
+    uvx ty check
 
 uv_run_flags := env('UV_RUN_FLAGS', "--all-packages")
 uv_sync_flags := env('UV_SYNC_FLAGS', "--dev --all-packages")
@@ -18,18 +40,13 @@ uv_sync_flags := env('UV_SYNC_FLAGS', "--dev --all-packages")
 # Check types
 [group('qa')]
 [no-cd]
-typing_ty *ty_flags:
-    uvx ty check {{ ty_flags }}
-
-[group('qa')]
-[no-cd]
-typing_basedpyright *basedpyright_flags:
-    uv run {{ uv_run_flags }}  basedpyright  {{ basedpyright_flags }}
-
-[group('qa')]
-[no-cd]
-typing_mypy package_list *mypy_flags:
-    uv run mypy  {{ package_list }} {{ mypy_flags }}
+check-all pattern *extra:
+    for cmd in {{ commands }}; do \
+        if [[ "$cmd" =~ {{ pattern }} ]]; then \
+          just python::$cmd; else just python::noop $cmd; \
+        fi; \
+    done
+    {{ extra }}
 
 # Update dependencies
 [group('lifecycle')]
@@ -55,4 +72,4 @@ clean:
 # Recreate project virtualenv from nothing
 [group('lifecycle')]
 [no-cd]
-fresh: clean install
+fresh *python_semver: clean (install python_semver)

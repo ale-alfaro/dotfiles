@@ -48,6 +48,12 @@ _G.keymaps_define({
     opts = { desc = 'Edit Hyprland Config' },
   },
   {
+    mode = { 'n', 'v', 'x' },
+    lhs = wkey_prefix .. 'w',
+    rhs = '<Cmd>e $ZEPHYR_BASE<CR>',
+    opts = { desc = 'Explore Zephyr Base' },
+  },
+  {
     lhs = '\\',
     rhs = '<Cmd>lua MiniFiles.open(vim.api.nvim_buf_get_name(0))<CR>',
     opts = { desc = 'Open file explorer shortcut' },

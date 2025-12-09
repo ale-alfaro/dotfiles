@@ -59,6 +59,10 @@ _G.keymaps_define({
   { mode = "v",                    lhs = ">",                                 rhs = ">gv" },
 
 
+  -- Quickfix
+  -- stylua:ignore
+  { lhs = '[q', rhs = vim.cmd.cprev, opts = { desc = 'Previous Quickfix' } },
+  { lhs = ']q', rhs = vim.cmd.cnext, opts = { desc = 'Next Quickfix' } },
   -- Diagnostics
   -- stylua:ignore
   { lhs = "<leader>cd", rhs = vim.diagnostic.open_float,                                                            opts = { desc = "Line Diagnostics" } },
