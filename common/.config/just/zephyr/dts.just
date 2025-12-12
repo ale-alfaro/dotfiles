@@ -15,11 +15,12 @@
 tree_cmd := 'tree --format NYKC --pager'
 zephyr_bindings_dir := join(env('ZEPHYR_BASE', ''), "dts", "bindings")
 zephyr_extra_bindings_dir := env('ZEPHYR_EXTRA_BINDINGS_DIR', '')
+dtsh := "uvx dtsh"
 
 [group('tools')]
 [no-cd]
 dtsh build_dir *args:
-    dtsh {{ args }} {{ if zephyr_extra_bindings_dir != '' { '-b ' + zephyr_bindings_dir + ' -b ' + zephyr_extra_bindings_dir } else { '' } }} {{ join(build_dir, "zephyr", "zephyr.dts") }}
+    {{ dtsh }} {{ args }} {{ if zephyr_extra_bindings_dir != '' { '-b ' + zephyr_bindings_dir + ' -b ' + zephyr_extra_bindings_dir } else { '' } }} {{ join(build_dir, "zephyr", "zephyr.dts") }}
 
 [group('tools')]
 [no-cd]

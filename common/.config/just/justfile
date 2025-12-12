@@ -2,13 +2,16 @@ set unstable := true
 set allow-duplicate-recipes := true
 set shell := ["zsh", "-uc"]
 
-mod python
+mod python "python.just"
 mod gnu-stow
 mod JLink
 mod openocd
 mod arch-linux
 mod git
+mod zephyr
 
 @_:
-    @just --summary --unsorted
-    @just --list
+    @just -g --summary --unsorted
+    @just -g --list
+    @just --justfile {{ config_dir() / "just" / "python.just" }} --list
+    @just --justfile {{ config_dir() / "just" / "zephyr.just" }} --list

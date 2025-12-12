@@ -56,6 +56,7 @@ use_ncs() {
 
   if [[ ! "$#" -eq 1 ]]; then
     log_error "use zephyr requires a version to be specified as an argument"
+    return 1
   fi
   local ncs_version
   ncs_version="$1"
@@ -70,29 +71,53 @@ use_ncs() {
   export ZEPHYR_SDK_INSTALL_DIR="${ncs_vars[ZEPHYR_SDK_INSTALL_DIR]}"
 }
 
-use_zephyr_toolchain() {
-  if [[ ! "$#" -eq 1 ]]; then
-    log_error "use zephyr requires a version to be specified as an argument"
-  fi
-  local zephyr_version
-  zephyr_version="$1"
-  # zephyr_repo_path="${2:-~/zephyrproject}"
+#TODO: Finish and make compatible with new toolchain dir structures
+zephyr_toolchain_path_add() {
 
-  echo "Using Zephyr version $zephyr_version"
-  export ZEPHYR_TOOLCHAIN_VARIANT=zephyr
-  export ZEPHYR_TOOLCHAIN_ROOT="${2:-$HOME/zephyrproject/toolchains}"
-  toolchain_dir="$ZEPHYR_TOOLCHAIN_ROOT/zephyr-sdk-$zephyr_version"
-  echo "Toolchain dir $toolchain_dir"
-  if [[ ! -e "$toolchain_dir" ]]; then
-    log_error "Zephyr SDK toolchain is not installed! Please run install_zephyr_sdk_toolchain <VERSION> first!"
+  env_vars_required ZEPHYR_BASE ZEPHYR_TOOLCHAIN_DIR ZEPHYR_TOOLCHAIN_VARIANT
+  if [[ ! -d "$ZEPHYR_TOOLCHAIN_DIR" ]]; then
+    log_error "Zephyr SDK toolchain is not found"
+    return 1
   fi
-  export ZEPHYR_SDK_INSTALL_DIR=$toolchain_dir
-  PATH_add "$ZEPHYR_SDK_INSTALL_DIR/arm-zephyr-eabi/bin"
-  export ZEPHYR_BASE=${2:-"$HOME/zephyrproject/zephyr"}
-  if [[ ! -d $ZEPHYR_BASE ]]; then
-    log_error "ZEPHYR_BASE=$ZEPHYR_BASE is not a valid directory"
+  if [[ "$ZEPHYR_TOOLCHAIN_VARIANT" == "zephyr" ]]; then
+    if [[ -d "${ZEPHYR_TOOLCHAIN_DIR}/gnu" ]]; then
+      ZEPHYR_TOOLCHAIN_DIR="${ZEPHYR_TOOLCHAIN_DIR}/gnu"
+    fi
+    PATH_add "${ZEPHYR_TOOLCHAIN_DIR}/arm-zephyr-eabi/bin"
+    PATH_add "${ZEPHYR_TOOLCHAIN_DIR}/x86_64-zephyr-elf/bin"
+  elif [[ "$ZEPHYR_TOOLCHAIN_VARIANT" == "llvm" ]]; then
+    found_version=$(semver_search "/opt/ATfE" "ATfE-" "21")
+    export LLVM_TOOLCHAIN_PATH="/opt/ATfE/ATfE-${found_version}"
+    PATH_add "${LLVM_TOOLCHAIN_PATH}/bin"
+  else
+    log_error "Invalid toolchain variant"
+    return 1
   fi
-  PATH_add "$ZEPHYR_BASE/scripts"
+
+  export ZEPHYR_SCRIPTS_DIR="${ZEPHYR_BASE:-$HOME/zephyrproject/zephyr}/scripts"
+  PATH_add "$zephyr_scripts_path"
+}
+
+use_zephyr_sdk_toolchain() {
+
+  if [[ ! "$#" -eq 2 ]]; then
+    log_error "use zephyr requires a version and toolchain variant (zephyr, llvm, gnu)to be specified as an argument"
+    return 1
+  fi
+
+  if [[ ! "$2" =~ zephyr|llvm ]]; then
+    log_error "use zephyr toolchain variant must be one of the following (llvm, gnu)to be specified as an argument"
+    return 1
+  fi
+
+  local version="$1"
+  export ZEPHYR_SDK_INSTALL_DIR="${ZEPHYR_SDK_INSTALL_DIR:-$HOME/zephyrproject/toolchains}"
+  local found_version
+  found_version=$(semver_search "${ZEPHYR_SDK_INSTALL_DIR}" "zephyr-sdk-" "${version}")
+  export ZEPHYR_TOOLCHAIN_DIR="${ZEPHYR_SDK_INSTALL_DIR}/zephyr-sdk-${found_version}"
+  export ZEPHYR_TOOLCHAIN_VARIANT="$2"
+
+  echo "Using Zephyr version $zephyr_version, looking for the ${ZEPHYR_TOOLCHAIN_VARIANT} in ${ZEPHYR_SDK_INSTALL_DIR}"
 }
 
 zephyr_pip_install() {
@@ -119,14 +144,15 @@ layout_ncs() {
   env_vars_required ZEPHYR_BASE
   if [[ ! -d $ZEPHYR_BASE ]]; then
     log_error "ZEPHYR_BASE=$ZEPHYR_BASE is not a valid directory"
+    return 1
   fi
   PATH_add "$ZEPHYR_BASE/scripts"
-  layout_uv "3.13"
 }
 
 layout_zephyr() {
-  local zephyr_version
-  zephyr_version="${1:-0.17.2}"
-  use zephyr_toolchain "$zephyr_version"
-  layout_python_zephyr "3.13"
+  local zephyr_version="${1:-0.17.4}"
+  zephyr_version="${zephyr_version#v}"
+  toolchain_variant="${2:-zephyr}"
+  use zephyr_sdk_toolchain "$zephyr_version" "$toolchain_variant"
+  zephyr_toolchain_path_add
 }

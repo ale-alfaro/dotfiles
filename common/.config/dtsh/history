@@ -69,3 +69,11 @@ q
 tree --format NYKC
 chosen
 q
+ls
+ls -al
+ls -l
+tree --format NYKC
+cd spi@200
+ls
+cat -A bmi@3
+q

@@ -2,14 +2,10 @@
 # serial_number := env('SNR_VAR') || '728343547'
 #--west-flash="--dev-id=${SNR_VAR}"
 
-uv_run_flags := '--with-requirements ' + env('ZEPHYR_BASE') / "scripts" / "requirements.txt" + " --python=3.13 --with-editable core-io.[test] "
+uv_run_flags := '--with-requirements ' + requirements_txt + " --python=3.13 --with-editable core-io.[test] "
 uv_run := "uv run " + uv_run_flags + if env("TWISTER_NO_ISOLATION", "") == "1" { "" } else { "--no-project --isolated " }
-uvx_flags := '--with-requirements ' + env('ZEPHYR_BASE') / "scripts" / "requirements.txt" + " --python=3.13 --with-editable . "
+uvx_flags := '--with-requirements ' + requirements_txt  + " --python=3.13 --with-editable . "
 uvx := "uvx " + uvx_flags
-
-default:
-    @just --list
-
 twister := uv_run + " west twister "
 twister_report_flags := "--report-dir twister_report --outdir twister_out"
 twister_verbose_flags := env('TWISTER_VERBOSITY', '-v')
@@ -27,36 +23,6 @@ _twister_run test_root platform *args:
       -p {{ platform }} \
       -T {{ test_root }} \
       {{ args }}
-
-twister_run:
-    #!/usr/bin/env -S bash -euxo pipefail
-    usage() {
-      echo "Usage: uv-test [-p|--python PY_VER] [pytest args...]"
-      echo "  -p, --python  Set Python version (default: \$UV_PY or 3.14)"
-      echo "  -h, --help    Show this help"
-    }
-
-    PYVER="${UV_PY:-3.14}"
-    # Parse only our flags; pass the rest to pytest
-    while [ $# -gt 0 ]; do
-      case "$1" in
-        -p|--python)
-          shift
-          [ $# -gt 0 ] || { echo "error: -p/--python requires a version" >&2; exit 2; }
-          PYVER="$1"; shift ;;
-        -h|--help) usage; exit 0 ;;
-        --) shift; break ;;
-        *) break ;;
-      esac
-    done
-
-    command -v uv >/dev/null 2>&1 || { echo "error: 'uv' not found in PATH" >&2; exit 127; }
-    if [ ! -f pyproject.toml ] && [ ! -f setup.py ]; then
-      echo "error: no project file found (need pyproject.toml or setup.py). Run from project root." >&2
-      exit 1
-    fi
-
-    exec uv run --python "$PYVER" --isolated --with-editable '.[test]' -- python -m pytest "$@"
 
 [group('twister')]
 [no-cd]

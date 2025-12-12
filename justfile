@@ -12,9 +12,8 @@ home := home_directory()
 
 #set this to 1 to run a simulated or dry-run (i.e j restow-user-bin stow_simulate=1)
 
-stow_simulate := "0"
+stow_simulate := "1"
 stow_cmd := "just stow::restow" + if stow_simulate == "1" { "-sim" } else { "" }
-stow_common_flags := "--simulate"
 
 # By default, show the list of available recipes
 default:
@@ -32,7 +31,7 @@ restow-user-home:
 
 [group('maintanance')]
 restow-user-bin:
-    {{ stow_cmd }} {{ absolute_path(justfile_directory() / "common") }} {{ executable_dir() }} "bin"
+    {{ stow_cmd }} {{ absolute_path(justfile_directory() / "common") }} {{ executable_dir() }} "bin" " --ignore='/*.venv' "
 
 [group('maintanance')]
 restow-common-dotfiles:

@@ -20,6 +20,10 @@
       "rev": "655133c",
       "src": "https://github.com/akinsho/bufferline.nvim"
     },
+    "clangd_extensions.nvim": {
+      "rev": "b67cc417d9020fb4b83d46662351b4d16894905e",
+      "src": "https://github.com/p00f/clangd_extensions.nvim"
+    },
     "codecompanion-history.nvim": {
       "rev": "eb99d256352144cf3b6a1c45608ec25544a0813d",
       "src": "https://github.com/ravitemer/codecompanion-history.nvim"

@@ -13,25 +13,47 @@
 #     "python-dotenv"
 # ]
 # ///
+
+import sys
+from functools import partial
+from pathlib import Path
+from typing import overload
+
+import attrs
+import cattrs
+from rich.pretty import pprint
+
+EXAMPLE_TOML = """
+
+[common]
+board = "nice_nano_v2"
+app_dir = "zmk/app"
+cmake_args = ["-DCONFIG_ZMK_STUDIO=y" ,"-DCONFIG_ZMK_STUDIO_LOCKING=n" , '-DBOARD_ROOT=/home/alealfaro/dotfiles/common/zmk-config/zmk/app' ,'-DZMK_CONFIG=/home/alealfaro/dotfiles/common/zmk-config/config']
+snippets = "studio-rpc-usb-uart"
+
+[[apps]]
+id = "corne_left"
+cmake_args = [ '-DSHIELD=corne_left' ]
+
+[[apps]]
+id = "corne_right"
+cmake_args = [ '-DSHIELD=corne_right' ]
+
+"""
 import io
 import logging
 import os
-import pathlib
 import shlex
-import shutil
-import tomllib
 from collections import defaultdict
-from collections.abc import Mapping
 from functools import cached_property
 from subprocess import CalledProcessError
 from typing import Annotated, Any, Self, cast, override
 
 import anyio
-import attrs
-import cattrs
+import attr
 import cyclopts
-import yaml
 from attr import AttrsInstance
+from cattrs.preconf.tomlkit import TomlkitConverter
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.panel import Panel
@@ -50,8 +72,9 @@ logger = logging.getLogger(__name__)
 # log_handler = RichHandler()
 
 
-BuildSpecDefaultDict = defaultdict[str, str | pathlib.Path | list[str]]
+BuildSpecDefaultDict = defaultdict[str, str | Path | list[str]]
 DEFAULT_WEST_BUILD_CMD = ["build", "--pristine=always"]
+DEFAULT_TWISTER_FLAGS = ["--clobber-output", "-W", "-i"]
 flags_for_field_map: dict[str, str] = {
     "board": "-b",
     "app_dir": "-s",
@@ -64,38 +87,69 @@ flags_for_field_map: dict[str, str] = {
 }
 
 
-def update_with_cwd(value: pathlib.Path, self) -> pathlib.Path:
-    return self.cwd.absolute() / value
+@attrs.define
+class CommonCfg:
+    board: str | None = None
+    app_dir: Path | None = None
+    conf_file: str | None = None
+    dtc_overlay: str | None = None
+    snippets: str | None = None
+    shield: str | None = None
+    cmake_args: list[str] | None = None
+
+
+@attrs.define
+class AppCfg(CommonCfg):
+    id: str | None = None
+
+
+@attrs.define
+class FileSpec:
+    common: CommonCfg = attrs.field(factory=CommonCfg)
+    apps: list[AppCfg] = attrs.field(factory=list)
 
 
 @attrs.define
 class ZephyrAppBuildArgs:
     id: str
-    cwd: pathlib.Path
-    app_dir: pathlib.Path = attrs.field(
-        converter=attrs.Converter(
-            update_with_cwd,
-            takes_self=True,
-        ),
-    )
+    cwd: Path
+    app_dir: Path
     board: str
     conf_file: str | None = None
     dtc_overlay: str | None = None
     snippets: str | None = None
     shield: str | None = None
-    cmake_args: list[str] = attrs.field(factory=list)
+    cmake_args: list[str] | None = None
+
+    @classmethod
+    def from_cfg(cls, cfg: AppCfg, cwd: Path) -> Self:
+        if cfg.app_dir is None:
+            raise ValueError("app_dir is required (set in [common] or each [[apps]])")
+        if cfg.board is None:
+            raise ValueError("board is required (set in [common] or each [[apps]])")
+
+        app_id = cfg.id or f"{cfg.board[:5]}_{cfg.app_dir.name}"
+        return cls(
+            id=app_id,
+            cwd=cwd,
+            app_dir=cfg.app_dir,
+            board=cfg.board,
+            conf_file=cfg.conf_file,
+            dtc_overlay=cfg.dtc_overlay,
+            snippets=cfg.snippets,
+            shield=cfg.shield,
+            cmake_args=cfg.cmake_args,
+        )
 
     @property
-    def build_dir(self) -> pathlib.Path:
+    def build_dir(self) -> Path:
         return self.app_dir / f"build_{self.id}"
 
     @property
     def west_command(self) -> list[str]:
         west_args: list[str] = list(DEFAULT_WEST_BUILD_CMD)
-        if self.build_dir:
-            west_args.extend(["-d", str(self.build_dir.absolute())])
-        if self.app_dir:
-            west_args.extend(["-s", str(self.app_dir.absolute())])
+        west_args.extend(["-d", str(self.build_dir.absolute())])
+        west_args.extend(["-s", str(self.app_dir.absolute())])
 
         for field in ("board", "conf_file", "dtc_overlay", "snippets", "shield"):
             if value := getattr(self, field):
@@ -106,73 +160,101 @@ class ZephyrAppBuildArgs:
         return west_args
 
 
-def copy_artifacts(build_dir: pathlib.Path, dest: pathlib.Path) -> None:
-    dest.mkdir(parents=True, exist_ok=True)
-    artifact_path = build_dir / "zephyr"
-    if artifacts := artifact_path.glob(pattern="zmk.{hex,uf2,elf}"):
-        for file_path in artifacts:
-            # shutil.copy2 copies file data and metadata (like modification times)
-            shutil.copy2(file_path, dest)
+def _make_file_spec(text: str, spec_dir: Path) -> FileSpec:
+    converter = TomlkitConverter()
+
+    @converter.register_structure_hook
+    def resolve_path(val, _) -> Path:
+        # Accept tomlkit nodes, strings, or Paths and make them absolute against spec_dir.
+        p = val if isinstance(val, Path) else Path(str(val))
+        return p if p.is_absolute() else (spec_dir / p).resolve()
+
+    file_spec = converter.loads(text, FileSpec)
+
+    return file_spec
+
+
+@overload
+def load_spec(
+    *,
+    file: Path,
+    text: None = ...,
+    spec_dir: None = ...,
+) -> tuple[list[ZephyrAppBuildArgs], Path]: ...
+
+
+@overload
+def load_spec(
+    *,
+    file: None = ...,
+    text: str,
+    spec_dir: Path,
+) -> tuple[list[ZephyrAppBuildArgs], Path]: ...
+
+
+def load_spec(
+    *,
+    file: Path | None = None,
+    text: str | None = None,
+    spec_dir: Path | None = None,
+) -> tuple[list[ZephyrAppBuildArgs], Path]:
+    if text and spec_dir:
+        logger.info(f"Got text{text} and spec_dir{spec_dir}")  # noqa: G004
+    elif file:
+        spec_dir = file.parent
+        text = file.read_text()
+    else:
+        raise ValueError
+
+    file_spec = _make_file_spec(text, spec_dir)
+    cmake_args: list[str] = file_spec.common.cmake_args or []
+    common_dict = attrs.asdict(
+        file_spec.common,
+        recurse=False,
+        filter=attrs.filters.exclude(list),
+    )
+    merged_apps: list[ZephyrAppBuildArgs] = []
+
+    def app_dict_serializer(inst: type, field: attr.Attribute, value: Any) -> Any:
+        match value:
+            case [*args] if cmake_args:
+                return [*cmake_args, *args]
+            case Path() as path if field.name == "app_dir":
+                return spec_dir / path
+            case None if val := common_dict.get(field.name):
+                return val
+            case _:
+                return value
+
+    for raw_app in file_spec.apps:
+        merged = attrs.asdict(
+            raw_app,
+            value_serializer=app_dict_serializer,
+        )
+        # breakpoint()
+
+        merged_cfg = cattrs.global_converter.structure_attrs_fromdict(merged, AppCfg)
+        merged_apps.append(ZephyrAppBuildArgs.from_cfg(merged_cfg, spec_dir))
+
+    return merged_apps, spec_dir
 
 
 @attrs.define
 class WestSpec:
-    cwd: pathlib.Path
-    apps: list[ZephyrAppBuildArgs] = attrs.field(factory=list)
-
-    @classmethod
-    def from_file(
-        cls,
-        file: pathlib.Path,
-        cwd_arg: pathlib.Path | None = None,
-    ) -> Self:
-        if file.suffix == ".yaml":
-            load_fn = yaml.safe_load
-        elif file.suffix == ".toml":
-            load_fn = tomllib.load
-        else:
-            msg = f"wrong file type {file}. Ext: {file.suffix}"
-            raise ValueError(msg)
-
-        with file.open("+rb") as f:
-            doc = load_fn(f)
-            cwd = cwd_arg or file.parent.absolute()
-            logger.info(f"path: {cwd} spec_file: {doc}")  # noqa: G004
-
-            try:
-                if (_common := doc.get("common")) and (_apps := doc.get("apps")):
-
-                    def resolve_app(
-                        raw: Mapping[str, str],
-                    ) -> ZephyrAppBuildArgs:
-                        c = cattrs.Converter()
-                        resolved_dict = _common | raw
-                        app_dir = resolved_dict["app_dir"]
-                        board: str = resolved_dict["board"]
-                        if "id" not in resolved_dict:
-                            resolved_dict["id"] = f"{board[:5]}_{app_dir}"
-                        resolved_dict["cwd"] = cwd
-                        app = c.structure(resolved_dict, ZephyrAppBuildArgs)
-                        return app
-
-                    return cls(cwd, [resolve_app(app) for app in _apps])
-                raise ValueError
-
-            except (KeyError, ValueError, TypeError) as e:
-                msg = f"Mising fields in {file}. Ext: {file.suffix}"
-                raise ValueError(msg) from e
+    apps: list[ZephyrAppBuildArgs]
+    cwd: Path
 
 
 async def run_west_cmd(
     west_cmd: list[str],
-    cwd: pathlib.Path,
-    zephyr_base: pathlib.Path | None = None,
+    cwd: Path,
+    zephyr_base: Path | None = None,
 ) -> None:
     if zephyr_base:
         config = io.StringIO("ZEPHYR_BASE=" + str(zephyr_base))
         load_dotenv(stream=config)
     elif env_var := os.environ.get("ZEPHYR_BASE"):
-        zephyr_base = pathlib.Path(
+        zephyr_base = Path(
             env_var,
         )
     else:
@@ -191,8 +273,7 @@ async def run_west_cmd(
         raise FileExistsError(msg)
 
     cmd = [
-        "uv",
-        "run",
+        "uvx",
         "--with-requirements",
         str(requirements_txt_path),
         "west",
@@ -205,13 +286,22 @@ async def run_west_cmd(
         console=print_console,
         transient=True,
     ) as progress:
+        match west_cmd[0]:
+            case "build":
+                action = "Building"
+            case "flash":
+                action = "Flashing"
+            case "twister":
+                action = "Testing"
+            case _:
+                action = "Running"
         progress.console.print(
             Panel(
                 f"""
 Running:
     [bold]west {shlex.join(west_cmd)}[/bold]
                                """,
-                title=f"{'Building' if west_cmd[0] == 'build' else 'Flashing'} app ",
+                title=f"{action} app ",
             ),
             overflow="fold",
         )
@@ -226,15 +316,16 @@ Running:
                 check=True,
                 cwd=cwd,
             )
-            progress.console.print(
-                Panel(
-                    f"""
+            if res.stdout:
+                progress.console.print(
+                    Panel(
+                        f"""
             [bold]{res.stdout.decode().rstrip()}[/bold]
                                """,
-                    title=f"{'Build' if west_cmd[0] == 'build' else 'Flash'} Output ",
-                ),
-                overflow="ellipsis",
-            )
+                        title=f"{action} Output ",
+                    ),
+                    overflow="ellipsis",
+                )
 
             progress.update(task, description="Success!")
         except CalledProcessError as exc:
@@ -248,9 +339,7 @@ Running:
                             stdout: {exc.stdout.rstrip().decode()}
                             """)
 
-        except OSError:
-            progress.update(task, description="Failed to copy artifacts!")
-            error_console.print("Failed to copy artifacts")
+            sys.exit(1)
 
 
 app = cyclopts.App()
@@ -260,11 +349,11 @@ app = cyclopts.App()
 class OptionalPathValidator(cyclopts.validators.Path):
     @override
     def __call__(self, type_: Any, path: Any) -> Any:
-        if isinstance(type_, pathlib.Path | None):
+        if isinstance(type_, Path | None):
             if path is None:
                 return None
 
-            return super().__call__(pathlib.Path, cast("pathlib.Path", path))
+            return super().__call__(Path, cast("Path", path))
 
         return super().__call__(type_, path)
 
@@ -273,7 +362,6 @@ def complicated(
     value: int | str | None,
     self: AttrsInstance,
 ) -> ZephyrAppBuildArgs | None:
-
     build = cast("Common", self)
     spec = build.spec
     app: ZephyrAppBuildArgs | None = None
@@ -300,7 +388,7 @@ def complicated(
 @attrs.define
 class Common:
     spec_file: Annotated[
-        pathlib.Path,
+        Path,
         cyclopts.Parameter(validator=cyclopts.validators.Path(exists=True)),
     ]
     """Specification file for running west commands"""
@@ -315,17 +403,17 @@ class Common:
     )
     """Enable test mode"""
     cwd: Annotated[
-        pathlib.Path | None,
+        Path | None,
         cyclopts.Parameter(validator=OptionalPathValidator(exists=True)),
     ] = None
     """Current working directory to run the west commands on"""
     zephyr_base: Annotated[
-        pathlib.Path | None,
+        Path | None,
         cyclopts.Parameter(validator=OptionalPathValidator(exists=True)),
     ] = None
     """ Zephyr Base environment variable pointing to the zephyr project in use"""
     dotenv: Annotated[
-        pathlib.Path | None,
+        Path | None,
         cyclopts.Parameter(validator=OptionalPathValidator(exists=True)),
     ] = None
     """.env file to load environment variables"""
@@ -343,7 +431,7 @@ class Common:
     def spec(self) -> WestSpec:
         if not self.spec_file.exists():
             raise cyclopts.ValidationError("Spec file path doesnt exist")
-        return WestSpec.from_file(self.spec_file, self.cwd)
+        return WestSpec(*load_spec(file=self.spec_file))
 
     def __attrs_post_init__(self):
         if dotenv := self.dotenv:
@@ -361,33 +449,91 @@ class Common:
             # handlers=[log_handler],
         )
 
-        if not self.spec_file.exists():
-            raise cyclopts.ValidationError("Spec file path doesnt exist")
-        self.spec = WestSpec.from_file(self.spec_file, self.cwd)
+
+async def run_build(
+    app: ZephyrAppBuildArgs,
+    west_extra_args: list[str],
+    cwd: Path,
+    zephyr_base: Path | None = None,
+) -> None:
+    west_args = app.west_command
+    if west_extra_args:
+        west_args.extend(west_extra_args)
+    await run_west_cmd(west_args, cwd, zephyr_base)
+
+
+async def run_test(
+    app: ZephyrAppBuildArgs,
+    twister_extra_args: list[str],
+    cwd: Path,
+    zephyr_base: Path | None = None,
+) -> None:
+    west_args = [
+        "twister",
+        "-T",
+        str(app.app_dir),
+        "-p",
+        app.board,
+        *DEFAULT_TWISTER_FLAGS,
+    ]
+    if twister_extra_args:
+        west_args.extend(twister_extra_args)
+
+    await run_west_cmd(west_args, cwd, zephyr_base)
 
 
 @app.command
 async def build(common: Common, target: str | None = None) -> None:
     west_extra_args = []
 
-    spec = common.spec
-
     if common.test:
         west_extra_args.append("--dry-run")
     if target:
         west_extra_args.extend(["-t", target])
-
-    async def run_build(app: ZephyrAppBuildArgs) -> None:
-        west_args = app.west_command
-        if west_extra_args:
-            west_args.extend(west_extra_args)
-        await run_west_cmd(west_args, spec.cwd, common.zephyr_base)
-
+    cwd: Path = common.cwd or common.spec.cwd
     if app := common.single_app:
-        await run_build(app)
+        await run_build(app, west_extra_args, cwd, common.zephyr_base)
     else:
-        for app in spec.apps:
-            await run_build(app)
+        for app in common.spec.apps:
+            await run_build(app, west_extra_args, cwd, common.zephyr_base)
+            async for file in anyio.Path(app.build_dir / app.app_dir.stem).glob(
+                "compile_commands.json",
+            ):
+                compile_commands = anyio.Path(
+                    app.app_dir / "compile_commands.json",
+                )
+                try:
+                    logger.info(
+                        "unlinking first in case compile_commands.json is present at %s",
+                        compile_commands,
+                    )
+                    await compile_commands.unlink(missing_ok=True)
+
+                    logger.info(
+                        "symlinking compile_commands.json, to %s from %s",
+                        compile_commands,
+                        file,
+                    )
+                    await compile_commands.symlink_to(file)
+
+                except FileExistsError as e:
+                    logger.info("compile_commands.json alredy symlinked")
+                    raise StopAsyncIteration from e
+
+
+@app.command
+async def test(common: Common) -> None:
+    """Run twister for each app in the spec (or a single app if selected)."""
+    twister_extra_args: list[str] = []
+    if common.verbose:
+        twister_extra_args.append("-v")
+
+    cwd: Path = common.cwd or common.spec.cwd
+    if app := common.single_app:
+        await run_test(app, twister_extra_args, cwd, common.zephyr_base)
+    else:
+        for app in common.spec.apps:
+            await run_test(app, twister_extra_args, cwd, common.zephyr_base)
 
 
 @app.command
@@ -396,10 +542,10 @@ async def flash(
     *,
     clean: Annotated[bool, cyclopts.Parameter(negative="")] = False,
 ) -> None:
-
     spec = common.spec
-    if not (app := common.single_app):
-        app = spec.apps[0]
+    app = spec.apps[0]
+    if single_app := common.single_app:
+        app = single_app
 
     if not app.build_dir.exists() or clean:
         build_cmd = app.west_command
@@ -416,6 +562,14 @@ async def flash(
 
 
 @app.command
+def demo():
+    """Print resolved west build commands using the embedded EXAMPLE_TOML."""
+    apps, _spec_dir = load_spec(text=EXAMPLE_TOML, spec_dir=Path.cwd())
+    for _app in apps:
+        pprint(_app)
+
+
+@app.command
 def help():
     """Display the help screen."""
     app.help_print()
@@ -426,4 +580,4 @@ async def main_loop():
 
 
 if __name__ == "__main__":
-    anyio.run(main_loop, backend="asyncio")
+    anyio.run(partial(main_loop), backend="asyncio")

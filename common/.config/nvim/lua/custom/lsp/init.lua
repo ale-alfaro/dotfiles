@@ -127,6 +127,15 @@ function M.config(lsp_servers)
     callback = function()
       -- Extend neovim's client capabilities with the completion ones.
       vim.lsp.config('*', { capabilities = require('blink.cmp').get_lsp_capabilities(nil, true) })
+      local lsp_path = vim.fs.joinpath(vim.fn.stdpath 'config', 'lua', 'lsp')
+      local servers = vim
+        .iter(vim.fn.glob(vim.fs.joinpath(lsp_path, '*.lua'), false, true))
+        :map(function(file)
+          return vim.fn.fnamemodify(file, ':t:r')
+        end)
+        :totable()
+      -- _G.info('registering lsp_servers: ' .. vim.print(servers))
+      vim.lsp.enable(servers)
 
       vim.lsp.enable(lsp_servers)
     end,

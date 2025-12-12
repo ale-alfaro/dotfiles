@@ -1,6 +1,6 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.12"
+# requires-python = ">=3.13"
 # dependencies = [
 #     "psutil",
 # ]
@@ -11,14 +11,14 @@
 
 import argparse
 import logging
-import shutil
 import sys
 from pathlib import Path
+from shutil import copy
 
-logger = logging.getLogger(__name__)
-
-
-import psutil
+try:
+    import psutil
+except ImportError:
+    sys.exit(1)
 
 
 def get_uf2_info_path(part) -> Path:
@@ -39,7 +39,7 @@ def get_uf2_info(part):
 
     lines = lines[1:]  # Skip the first summary line
 
-    def split_uf2_info(line: str) -> tuple[str, str]:
+    def split_uf2_info(line: str):
         k, _, val = line.partition(":")
         return k.strip(), val.strip()
 
@@ -58,7 +58,7 @@ def get_uf2_partitions(board_id=None):
     if (board_id is not None) and parts:
         parts = [part for part in parts if match_board_id(part, board_id)]
         if not parts:
-            logger.warning(
+            logging.warning(
                 "Discovered UF2 partitions don't match Board-ID '%s'",
                 board_id,
             )
@@ -68,10 +68,10 @@ def get_uf2_partitions(board_id=None):
 
 def copy_uf2_to_partition(uf2_file, part):
     try:
-        shutil.copy(uf2_file, part.mountpoint)
+        copy(uf2_file, part.mountpoint)
     except OSError as e:
         if isinstance(e, PermissionError):
-            logger.info("Flash successful (device disconnected as expected).")
+            logging.info("Flash successful (device disconnected as expected).")
         else:
             raise
 
@@ -79,14 +79,14 @@ def copy_uf2_to_partition(uf2_file, part):
 def list_devices(board_id=None):
     partitions = get_uf2_partitions(board_id)
     if not partitions:
-        logger.info("No matching UF2 partitions found")
+        logging.info("No matching UF2 partitions found")
         return
 
-    logger.info("Found %d matching UF2 partitions:", len(partitions))
+    logging.info("Found %d matching UF2 partitions:", len(partitions))
     for part in partitions:
         info = get_uf2_info(part)
-        logger.info("  - Mountpoint: %s", part.mountpoint)
-        logger.info("    Board-ID: %s", info.get("Board-ID", "N/A"))
+        logging.info("  - Mountpoint: %s", part.mountpoint)
+        logging.info("    Board-ID: %s", info.get("Board-ID", "N/A"))
 
 
 def main():
@@ -116,16 +116,19 @@ def main():
         parser.error("the following arguments are required: uf2_file")
 
     if not args.uf2_file.is_file():
-        raise RuntimeError("UF2 file not found")
+        msg = f"UF2 file not found: {args.uf2_file}"
+        raise RuntimeError(msg)
 
     partitions = get_uf2_partitions(args.board_id)
-    if not partitions or args.board_id is None:
-        raise RuntimeError("No UF2 partitions found. Please specify a --board-id.")
+    if not partitions:
+        if args.board_id is None:
+            raise RuntimeError("No UF2 partitions found. Please specify a --board-id.")
+        raise RuntimeError("No matching UF2 partitions found")
 
     if len(partitions) > 1:
         if args.board_id is None:
-            logger.error(
-                "More than one UF2 partition found. Please specify a --board-id",
+            logging.error(
+                "More than one UF2 partition found. Please specify a --board-id.",
             )
             list_devices()
             sys.exit(1)
@@ -133,7 +136,7 @@ def main():
             raise RuntimeError("More than one matching UF2 partitions found")
 
     part = partitions[0]
-    logger.info("Copying UF2 file to '%s'", part.mountpoint)
+    logging.info("Copying UF2 file to '%s'", part.mountpoint)
     copy_uf2_to_partition(args.uf2_file, part)
 
 
