@@ -2,7 +2,11 @@ set unstable := true
 set allow-duplicate-recipes := true
 set shell := ["zsh", "-uc"]
 
-mod python "python.just"
+justfile_home := config_dir() / 'just'
+modules_regex := "python|gnu-stow|JLink|openocd|arch-linux|git|zephyr"
+
+mod agents
+mod python
 mod gnu-stow
 mod JLink
 mod openocd
@@ -10,8 +14,9 @@ mod arch-linux
 mod git
 mod zephyr
 
-@_:
-    @just -g --summary --unsorted
-    @just -g --list
-    @just --justfile {{ config_dir() / "just" / "python.just" }} --list
-    @just --justfile {{ config_dir() / "just" / "zephyr.just" }} --list
+_:
+    fd . {{ justfile_home }} --extension=just -d 1 -x \
+      just --color=always \
+      --list {/.} \
+      --justfile {{ justfile_home / 'justfile' }} \
+      --list-heading='{{ "{/.}:" + "\n\n" }}'

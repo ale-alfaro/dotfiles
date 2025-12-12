@@ -7,7 +7,7 @@ pyrefly_args := " " + if concise == "1" { "--output-format min-text" } else { ""
 commands := "ruff ty basedpyright pyrefly"
 
 @_:
-    @just --list
+    just --list
 
 noop *args:
     @echo "No-op for {{ args }}"

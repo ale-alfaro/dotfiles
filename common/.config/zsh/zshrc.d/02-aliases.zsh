@@ -1,6 +1,13 @@
+#!/usr/bin/env zsh
+
 # ---- zsh-compatible Direnv stdlib helpers + other utilities for zsh scripts -----
 source "$ZDOTDIR/functions/stdlib.zsh"
 
+compress(){
+  tar -czf "${1%/}.tar.gz" "${1%/}"
+}
+
+alias decompress="tar -xzf"
 shell_integrations="$ZDOTDIR/shell_integrations"
 # Plugin Helper
 # ------------------------------------------------------------------------------

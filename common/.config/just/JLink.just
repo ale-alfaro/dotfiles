@@ -20,7 +20,7 @@ jlink-verify-command := '''
     '''
 
 @_:
-    @just --list
+    just --list
 
 ##### J-Link Documentation #####
 

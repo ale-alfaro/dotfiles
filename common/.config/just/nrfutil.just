@@ -1,5 +1,5 @@
-default:
-    @just --list
+@_:
+    just --list
 
 [group('nrfutil')]
 flash hex_file snr:

@@ -5,8 +5,8 @@ agents-md-repo := home_dir() / "dotfiles" / "common" / "llm_memory"
 tech-stack-agents-md := agents-md-repo / "tech_stacks"
 codex_home := env('CODEX_HOME')
 
-default:
-    @just --list
+@_:
+    just --list
 
 [group('agents-md')]
 global-override sysprompt_path:

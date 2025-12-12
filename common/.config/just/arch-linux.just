@@ -1,5 +1,5 @@
 @_:
-    @just --list
+    just --list
 
 [group('pacman')]
 list-orphans:

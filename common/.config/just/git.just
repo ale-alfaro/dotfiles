@@ -1,5 +1,5 @@
 @_:
-    @just --list
+    just --list
 
 submodule-sync:
     @git submodule update --init --recursive

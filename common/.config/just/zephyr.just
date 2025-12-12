@@ -17,7 +17,7 @@ import 'zephyr/build.just'
 import 'zephyr/dts.just'
 
 @_:
-    @just --list
+    just --list
 
 # initialize west
 [group('manifest')]
