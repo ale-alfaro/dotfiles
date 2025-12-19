@@ -29,7 +29,7 @@ fi
 export BAT_THEME=ansi
 export MANPAGER="sh -c 'awk '\''{ gsub(/\x1B\[[0-9;]*m/, \"\", \$0); gsub(/.\x08/, \"\", \$0); print }'\'' | bat -p -lman'"
 export PAGER=bat
-
+export RIPGREP_CONFIG_PATH="${XDG_CONFIG_HOME}/ripgrep/ripgreprc"
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
     --info=default\
     --ansi \

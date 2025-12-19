@@ -42,16 +42,6 @@ n() {
 alias d='dirs -v'
 for index ({1..9}) alias "$index"="cd +${index}"; unset index
 
-alias cd="zd"
-zd() {
-  if [ $# -eq 0 ]; then
-    builtin cd ~ && return
-  elif [ -d "$1" ]; then
-    builtin cd "$1"
-  else
-    z "$@" && printf "\U000F17A9 " && pwd || echo "Error: Directory not found"
-  fi
-}
 if [[ "$OSTYPE" == "linux"* ]]; then
   open() {
     xdg-open "$@" >/dev/null 2>&1 &
@@ -81,8 +71,21 @@ fi
 if has fzf; then
   alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
 fi
-
-
+if has zoxide; then
+  zv(){ 
+    zoxide query -l $1 |  fzf --bind 'enter:become(nvim {})'
+  }
+  alias cd="zd"
+  zd() {
+    if [ $# -eq 0 ]; then
+      builtin cd ~ && return
+    elif [ -d "$1" ]; then
+      builtin cd "$1"
+    else
+      z "$@" && printf "\U000F17A9 " && pwd || echo "Error: Directory not found"
+    fi
+  }
+fi
 # Alias for just (command runner)
 if has just; then
   alias j='just'
