@@ -68,12 +68,41 @@ layout_uv_venv() {
   export UV_PYTHON="$VIRTUAL_ENV/bin/python"
 }
 
-layout_uv() {
-  layout_uv_venv "$1"
-  if [[ ! -f "$(pwd)/pyproject.toml" ]]; then
-    log_status "No uv project exists. Executing uv init --bare to create one."
+use_uv() {
+  local pyver="${1:-3.11}"
+  if ! has uv; then
+    log_error"ERROR: uv not installed"
+    return 1
+  fi
+  uv python install "$pyver"
+  if [ ! -d .venv ]; then
+    uv venv --python "$pyver"
+  fi
+  PATH_add ".venv/bin"
+  export VIRTUAL_ENV="$PWD/.venv"
+  if [ ! -f pyproject.toml ]; then
     uv init --bare
   fi
+  watch_file pyproject.toml
+  watch_file uv.lock
+  if [ -f uv.lock ]; then
+    uv sync --frozen || uv sync
+  else
+    uv sync
+  fi
+}
+
+layout_uv() {
+  if [ -f .python-version ]; then
+    use uv "$(cat .python-version)"
+  elif [ $# -eq 1 ]; then
+    use uv "$1"
+  else
+    use uv
+  fi
+
+  export UV_ACTIVE=1 # or VENV_ACTIVE=1
+  export UV_PYTHON="$VIRTUAL_ENV/bin/python"
 }
 
 ############## Node ###################################

@@ -1,0 +1,14 @@
+template := x'${JUST_HOME}/ozone/TEMPLATE.jdebug'
+
+@_:
+    just --list
+
+# Creates a .jdebug file from the template
+jdebug project_dir device_type elf_file output_file="out":
+    @echo "Creating {{ output_file }} from template..."
+    @sed \
+        -e 's|{{{{ PROJECT_DIR }}|"{{ project_dir }}"|g' \
+        -e 's|{{{{ DEVICE_TYPE }}|"{{ device_type }}"|g' \
+        -e 's|{{{{ ELF_FILE_PATH }}|"{{ elf_file }}"|g' \
+         {{ template }} > "{{ project_dir / output_file }}.jdebug"
+    @echo "Done."

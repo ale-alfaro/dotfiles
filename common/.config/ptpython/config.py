@@ -7,8 +7,6 @@ On macOS, this is: ~/Library/Application Support/ptpython/config.py
 On Windows, this is: ~\AppData\Local\prompt_toolkit\ptpython\config.py
 """
 
-from prompt_toolkit.key_binding import KeyPress
-from prompt_toolkit.keys import Keys
 from ptpython.layout import CompletionVisualisation
 
 __all__ = ["configure"]
@@ -56,7 +54,7 @@ def configure(repl):
     repl.wrap_lines = True
 
     # Mouse support.
-    repl.enable_mouse_support = True
+    repl.enable_mouse_support = False
 
     # Complete while typing. (Don't require tab before the
     # completion menu is shown.)
@@ -87,7 +85,7 @@ def configure(repl):
     # Note: When enable, please disable the `complete_while_typing` option.
     #       otherwise, when there is a completion available, the arrows will
     #       browse through the available completions instead of the history.
-    repl.enable_history_search = False
+    repl.enable_history_search = True
 
     # Enable auto suggestions. (Pressing right arrow will complete the input,
     # based on the history.)
@@ -99,7 +97,7 @@ def configure(repl):
 
     # Enable system prompt. Pressing meta-! will display the system prompt.
     # Also enables Control-Z suspend.
-    repl.enable_system_bindings = True
+    repl.enable_system_bindings = False
 
     # Ask for confirmation on exit.
     repl.confirm_exit = True
@@ -136,64 +134,3 @@ def configure(repl):
 
     # Preserve last used Vi input mode between main loop iterations
     repl.vi_keep_last_used_mode = False
-
-    # Install custom colorscheme named 'my-colorscheme' and use it.
-    """
-    repl.install_ui_colorscheme("my-colorscheme", Style.from_dict(_custom_ui_colorscheme))
-    repl.use_ui_colorscheme("my-colorscheme")
-    """
-
-    # Add custom key binding for PDB.
-    @repl.add_key_binding("c-b")
-    def _(event):
-        """Pressing Control-B will insert "pdb.set_trace()"."""
-        event.cli.current_buffer.insert_text("\nimport pdb; pdb.set_trace()\n")
-
-    # Typing ControlE twice should also execute the current command.
-    # (Alternative for Meta-Enter.)
-    @repl.add_key_binding("c-m")
-    def _(event):
-        event.cli.key_processor.feed(KeyPress(Keys("f4")))
-
-    # Typing 'jj' in Vi Insert mode, should send escape. (Go back to navigation
-    # mode.)
-    @repl.add_key_binding("c-h")
-    def _(event):
-        event.cli.key_processor.feed(KeyPress(Keys("f3")))
-
-    # Custom key binding for some simple autocorrection while typing.
-    """
-    corrections = {
-        "impotr": "import",
-        "pritn": "print",
-    }
-
-    @repl.add_key_binding(" ")
-    def _(event):
-        " When a space is pressed. Check & correct word before cursor. "
-        b = event.cli.current_buffer
-        w = b.document.get_word_before_cursor()
-
-        if w is not None:
-            if w in corrections:
-                b.delete_before_cursor(count=len(w))
-                b.insert_text(corrections[w])
-
-        b.insert_text(" ")
-    """
-
-    # Add a custom title to the status bar. This is useful when ptpython is
-    # embedded in other applications.
-    """
-    repl.title = "My custom prompt."
-    """
-
-
-# Custom colorscheme for the UI. See `ptpython/layout.py` and
-# `ptpython/style.py` for all possible tokens.
-_custom_ui_colorscheme = {
-    # Blue prompt.
-    "prompt": "bg:#eeeeff #000000 bold",
-    # Make the status toolbar red.
-    "status-toolbar": "bg:#ff0000 #000000",
-}

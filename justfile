@@ -1,7 +1,7 @@
 set shell := ["zsh", "-uc"]
 set unstable := true
 
-mod stow "common/.config/just/gnu-stow.just"
+mod stow x"${JUST_HOME}/gnu-stow.just"
 
 # ==============================================================================
 # Stow Management

@@ -1,8 +1,7 @@
 set shell := ["zsh", "-uc"]
 
 supported_langs := "python|cpp|lua|bash"
-agents-md-repo := home_dir() / "dotfiles" / "common" / "llm_memory"
-tech-stack-agents-md := agents-md-repo / "tech_stacks"
+agents-md-repo := home_dir() / "dotfiles" / "common" / "llm_memory" / "tech_stacks"
 codex_home := env('CODEX_HOME')
 
 @_:
@@ -12,15 +11,15 @@ codex_home := env('CODEX_HOME')
 global-override sysprompt_path:
     ln -sf {{ sysprompt_path }} {{ codex_home / "AGENTS.override.md" }}
 
-[group('agents-md')]
-project lang dst="AGENTS.md":
-    ln -sf {{ if lang =~ supported_langs { tech-stack-agents-md / lang / "AGENTS.md" } else { error("Unsupported language") } }} {{ if is_dependency() == "true" { invocation_directory() / dst } else { dst } }}
-
-supported_tech_stacks := "python|just"
+symlink := 'ln -sf "$1" "$2"'
 
 [group('agents-md')]
-tech-stack stack dst="TECH_STACK.md":
-    ln -sf {{ if stack =~ supported_tech_stacks { tech-stack-agents-md / stack / "TECH_STACK.md" } else { error("Unsupported language") } }} {{ if is_dependency() == "true" { invocation_directory() / dst } else { dst } }}
+ln_file file_path agents_file="AGENTS.md":
+    {{ if path_exists(invocation_directory() / agents_file) == "true" { shell('rm "$1"', invocation_directory() / agents_file) } else { "" } }}
+    {{ shell(symlink, agents-md-repo / file_path / agents_file, invocation_directory() / agents_file) }}
+
+[group('agents-md')]
+ln_tech_stack_file lang: (ln_file lang "TECH_STACK.md")
 
 [group('prompts')]
 [no-cd]

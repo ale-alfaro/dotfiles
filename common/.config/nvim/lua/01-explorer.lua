@@ -32,7 +32,7 @@ _G.keymaps_define({
   {
     mode = { 'n', 'v', 'x' },
     lhs = wkey_prefix .. 'j',
-    rhs = '<Cmd>e $JUSTFILES_HOME<CR>',
+    rhs = '<Cmd>e $JUST_HOME<CR>',
     opts = { desc = 'Edit Global JustFiles' },
   },
   {

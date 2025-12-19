@@ -89,5 +89,5 @@ fi
 # Alias for just (command runner)
 if has just; then
   alias j='just'
-  alias .j='just --justfile ~/.config/just/justfile --working-directory .'
+  alias .j='just --justfile ~/.config/just/Justfile --working-directory .'
 fi

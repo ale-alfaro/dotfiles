@@ -8,16 +8,21 @@ local function create_cmd(_, config)
     '--completion-style=detailed',
     '--fallback-style=llvm',
   }
+  local zephyr_toolchain_variant_env = vim.fn.getenv 'ZEPHYR_TOOLCHAIN_VARIANT'
+  local toolchain_variant = zephyr_toolchain_variant_env ~= vim.v.null and zephyr_toolchain_variant_env or 'zephyr'
+  if toolchain_variant ~= 'zephyr|host|llvm' then
+    if toolchain_variant == 'zephyr' then
+      local compiler = vim.fn.executable 'arm-zephyr-eabi-g++' and vim.fn.exepath 'arm-zephyr-eabi-g++' or ''
+      if compiler then
+        _G.info 'Clangd query-driver'
+        vim.print(compiler)
+        config.cmd[#config.cmd + 1] = '--query-driver=' .. compiler
+      end
+    end
+  end
   -- local zephyr_cross_tc = {'arm-zephyr-eabi-gcc','x86_64-zephyr-elf'}
-  -- vim.fn.exepath()
-  -- local zephyr_toolchain_dir = vim.fn.getenv 'ZEPHYR_TOOLCHAIN_DIR'
-  -- if zephyr_toolchain_dir ~= vim.v.null and vim.uv.fs_stat(zephyr_toolchain_dir) then
-  --   local compiler = zephyr_toolchain_dir .. '/arm-zephyr-eabi/bin/arm-zephyr-eabi-*'
-  --   if vim.fn.glob(compiler) then
-  --     -- _G.info('Clangd query-driver ' .. zephyr_toolchain_dir)
-  --     -- vim.print(compiler)
-  --     config.cmd[#config.cmd + 1] = '--query-driver=' .. zephyr_toolchain_dir .. '/arm-zephyr-eabi/bin/arm-zephyr-eabi-*'
-  --   end
+  -- if vim.fn.executable("rg") == 1 then
+  --
   -- end
   -- local cwd = vim.fn.getcwd()
   -- local files_found = vim.fs.find { 'testcase.yml', 'sample.yml', 'app.overlay', 'prj.conf', 'CMakeLists.txt' }

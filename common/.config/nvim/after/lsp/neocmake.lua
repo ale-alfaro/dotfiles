@@ -10,7 +10,6 @@ return {
         relative_pattern_support = true,
       },
     },
-
     textDocument = {
       completion = {
         completionItem = {

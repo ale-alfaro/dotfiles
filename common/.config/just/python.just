@@ -1,7 +1,7 @@
 concise := env('PYTHON_DIAG_CONCISE', '1')
 uv_concise_flags := "--output-format concise"
-ruff_args := "--fix --unsafe-fixes " + if concise == "1" { uv_concise_flags } else { "" }
-ty_args := " " + if concise == "1" { uv_concise_flags } else { "" }
+ruff_args := "--fix --unsafe-fixes --exit-zero " + if concise == "1" { uv_concise_flags } else { "" }
+ty_args := "--exit-zero " + if concise == "1" { uv_concise_flags } else { "" }
 basedpyright_args := "--level error " + if concise == "1" { "" } else { "" }
 pyrefly_args := " " + if concise == "1" { "--output-format min-text" } else { "" }
 commands := "ruff ty basedpyright pyrefly"
@@ -16,7 +16,7 @@ noop *args:
 [group('qa')]
 [no-cd]
 ruff:
-    -uvx ruff check {{ ruff_args }}
+    uvx ruff check {{ ruff_args }}
     uvx ruff format
 
 [group('qa')]
@@ -32,7 +32,7 @@ pyrefly:
 [group('qa')]
 [no-cd]
 ty:
-    uvx ty check
+    uvx ty check {{ ty_args }}
 
 uv_run_flags := env('UV_RUN_FLAGS', "--all-packages")
 uv_sync_flags := env('UV_SYNC_FLAGS', "--dev --all-packages")
@@ -73,3 +73,10 @@ clean:
 [group('lifecycle')]
 [no-cd]
 fresh *python_semver: clean (install python_semver)
+
+pytest_log_lvl := "INFO"
+pytest_opts := f" --strict-markers --strict-config -ra -v -s --log-cli-level={{pytest_log_lvl}}"
+pytest := f"uvx {{pytest_opts}} pytest"
+
+pytest_run *args:
+    {{ pytest }} {{ pytest_opts }} {{ args }}

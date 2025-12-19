@@ -36,7 +36,7 @@ return {
       modes = {
         symbols = {
           ---@class trouble.Window.split
-          win = { type = 'split', position = 'right', size = { width = 1.0, height = 0.0 } },
+          win = { type = 'split', position = 'right', size = { width = 0.5, height = 0.0 } },
         },
       },
     }

@@ -14,7 +14,7 @@
 ################################################################################
 
 # Primary model used by Codex. Default: "gpt-5.1-codex-max" on all platforms.
-model = "gpt-5.1-codex-max"
+model = "gpt-5.2-codex"
 
 # Model used by the /review feature (code reviews). Default: "gpt-5.1-codex-max".
 review_model = "gpt-5.1-codex-max"
@@ -33,10 +33,10 @@ model_provider = "openai"
 ################################################################################
 
 # Reasoning effort: minimal | low | medium | high (default: medium)
-model_reasoning_effort = "high"
+model_reasoning_effort = "medium"
 
 # Reasoning summary: auto | concise | detailed | none (default: auto)
-model_reasoning_summary = "auto"
+model_reasoning_summary = "concise"
 
 # Text verbosity for GPT-5 family (Responses API): low | medium | high (default: medium)
 model_verbosity = "medium"
@@ -57,13 +57,13 @@ model_reasoning_summary_format = "none"
 # - on-failure: auto-run in sandbox; prompt only on failure for escalation
 # - on-request: model decides when to ask (default)
 # - never: never prompt (risky)
-approval_policy = "on-request"
+approval_policy = "untrusted"
 
 # Filesystem/network sandbox policy for tool calls:
 # - read-only (default)
 # - workspace-write
 # - danger-full-access (no sandbox; extremely risky)
-sandbox_mode = "workspace-write"
+sandbox_mode = "read-only"
 
 # Extra settings used only when sandbox_mode = "workspace-write".
 [sandbox_workspace_write]
@@ -168,6 +168,9 @@ project_doc_max_bytes = 32768
 # Ordered fallbacks when AGENTS.md is missing at a directory level. Default: []
 project_doc_fallback_filenames = ["TECH_STACK.md"]
 
+[notice.model_migrations]
+"gpt-5.1-codex-max" = "gpt-5.2-codex"
+
 
 
 ################################################################################
@@ -178,12 +181,11 @@ project_doc_fallback_filenames = ["TECH_STACK.md"]
 # Leave this table empty to accept defaults. Set explicit booleans to opt in/out.
 unified_exec = true
 rmcp_client = false
-apply_patch_freeform = false
+apply_patch_freeform = true
 view_image_tool = true
 web_search_request = true
-experimental_sandbox_command_assessment = true
-ghost_commit = false
-enable_experimental_windows_sandbox = false
+ghost_commit = true
+shell_snapshot= true
 
 
 # Define MCP servers under this table. Leave empty to disable.
@@ -258,48 +260,18 @@ base_url = "https://api.openai.com/v1"
 # env_key = "OPENAI_API_KEY"
 wire_api = "chat"
 
-[profiles.o3]
-model = "o3"
-model_provider = "openai"
-approval_policy = "never"
-model_reasoning_effort = "high"
-model_reasoning_summary = "detailed"
-
-[profiles.gpt3]
-model = "gpt-3.5-turbo"
-model_provider = "openai-chat-completions"
-
-[profiles.zdr]
-model = "o3"
-model_provider = "openai"
-approval_policy = "on-failure"
 ################################################################################
 # Profiles (named presets)
 ################################################################################
 
 # Active profile name. When unset, no profile is applied.
-# profile = "default"
+profile = "default"
 
 [profiles]
 
 [profiles.default]
-model = "gpt-5.1-codex-max"
-model_provider = "openai"
-approval_policy = "on-request"
-sandbox_mode = "read-only"
-model_reasoning_effort = "medium"
-model_reasoning_summary = "auto"
-model_verbosity = "medium"
-chatgpt_base_url = "https://chatgpt.com/backend-api/"
-# experimental_compact_prompt_file = "compact_prompt.txt"
-include_apply_patch_tool = false
-experimental_use_unified_exec_tool = true
-experimental_use_rmcp_client = false
-experimental_use_freeform_apply_patch = false
-experimental_sandbox_command_assessment = true
-tools_web_search = true
-tools_view_image = true
-features = { unified_exec = true}
+approval_policy = "untrusted"
+sandbox_mode = "workspace-write"
 
 [profiles.full_auto]
 approval_policy = "on-request"
@@ -308,6 +280,33 @@ sandbox_mode    = "workspace-write"
 [profiles.readonly_quiet]
 approval_policy = "never"
 sandbox_mode    = "read-only"
+
+[profiles.o3]
+model = "o3"
+model_provider = "openai"
+approval_policy = "on-failure"
+model_reasoning_effort = "high"
+model_reasoning_summary = "detailed"
+
+[profiles.gpt3]
+model = "gpt-3.5-turbo"
+model_provider = "openai-chat-completions"
+
+
+# model_reasoning_effort = "medium"
+# model_reasoning_summary = "auto"
+# model_verbosity = "medium"
+# chatgpt_base_url = "https://chatgpt.com/backend-api/"
+# # experimental_compact_prompt_file = "compact_prompt.txt"
+# include_apply_patch_tool = false
+# experimental_use_unified_exec_tool = true
+# experimental_use_rmcp_client = false
+# experimental_use_freeform_apply_patch = false
+# experimental_sandbox_command_assessment = true
+# tools_web_search = true
+# tools_view_image = true
+# features = { unified_exec = true}
+
 ################################################################################
 # Projects (trust levels)
 ################################################################################

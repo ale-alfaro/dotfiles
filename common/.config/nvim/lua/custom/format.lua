@@ -85,6 +85,8 @@ local function setup_formatting()
       },
     },
     formatters_by_ft = {
+      c = { name = 'clangd', timeout_ms = 500, lsp_format = 'prefer' },
+      cpp = { name = 'clangd', timeout_ms = 500, lsp_format = 'prefer' },
       lua = { 'stylua' },
       fish = { 'fish_indent' },
       sh = { 'shfmt' },
