@@ -22,3 +22,4 @@ common/.config/codex/history.jsonl
 common/.config/codex/version.json
 common/.config/codex/auth.json
 linux/.config/SEGGERJLinkRTTViewerSettings.ini
+common/.config/dtsh/history
