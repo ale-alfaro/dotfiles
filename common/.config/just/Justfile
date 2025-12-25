@@ -13,12 +13,17 @@ mod arch-linux
 mod git
 mod direnv
 mod zephyr
-mod nrfutil
+mod nordic
 mod ozone
 
-_:
+[default]
+@list_mods:
     fd . {{ justfile_home }} --extension=just -d 1 -x \
       just --color=always \
       --list {/.} \
       --justfile {{ justfile_home / 'Justfile' }} \
       --list-heading='{{ "{/.}:" + "\n\n" }}'
+
+@list_all:
+    fd . {{ justfile_home }} --extension=just -d 1 -x \
+      just --justfile {}

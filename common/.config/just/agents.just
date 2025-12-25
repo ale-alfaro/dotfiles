@@ -4,8 +4,9 @@ supported_langs := "python|cpp|lua|bash"
 agents-md-repo := home_dir() / "dotfiles" / "common" / "llm_memory" / "tech_stacks"
 codex_home := env('CODEX_HOME')
 
-@_:
-    just --list
+[default]
+@list:
+    just --list --justfile {{ source_file() }}
 
 [group('agents-md')]
 global-override sysprompt_path:
@@ -14,9 +15,9 @@ global-override sysprompt_path:
 symlink := 'ln -sf "$1" "$2"'
 
 [group('agents-md')]
-ln_file file_path agents_file="AGENTS.md":
-    {{ if path_exists(invocation_directory() / agents_file) == "true" { shell('rm "$1"', invocation_directory() / agents_file) } else { "" } }}
-    {{ shell(symlink, agents-md-repo / file_path / agents_file, invocation_directory() / agents_file) }}
+ln_file file_path loc=(invocation_directory() / "AGENTS.md"):
+    {{ if path_exists(loc) == "true" { shell('rm "$1"', loc) } else { "" } }}
+    {{ shell(symlink, agents-md-repo / file_path / "AGENTS.md", loc) }}
 
 [group('agents-md')]
 ln_tech_stack_file lang: (ln_file lang "TECH_STACK.md")

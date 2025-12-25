@@ -1,5 +1,6 @@
-@_:
-    just --list
+[default]
+@list:
+    just --list --justfile {{ source_file() }}
 
 [group('stow')]
 stow-cmd pkg_dir target_dir pkgs cmd_flag *extra_args:

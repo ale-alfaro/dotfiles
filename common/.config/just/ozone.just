@@ -1,7 +1,8 @@
 template := x'${JUST_HOME}/ozone/TEMPLATE.jdebug'
 
-@_:
-    just --list
+[default]
+@list:
+    just --list --justfile {{ source_file() }}
 
 # Creates a .jdebug file from the template
 jdebug project_dir device_type elf_file output_file="out":

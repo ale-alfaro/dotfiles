@@ -23,3 +23,5 @@ common/.config/codex/version.json
 common/.config/codex/auth.json
 linux/.config/SEGGERJLinkRTTViewerSettings.ini
 common/.config/dtsh/history
+common/.config/codex/shell_snapshots
+linux/.config/ly/save.txt

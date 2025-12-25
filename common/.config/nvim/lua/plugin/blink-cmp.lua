@@ -38,7 +38,6 @@ return {
     },
     signature = { enabled = true },
     snippets = { preset = 'luasnip' },
-    -- Disable command line completion:
     cmdline = {
       enabled = true,
       keymap = { preset = 'cmdline' },
@@ -55,7 +54,7 @@ return {
     sources = {
       -- Disable some sources in comments and strings.
       default = function()
-        local sources = { 'lsp', 'buffer' }
+        local sources = { 'lsp', 'snippets', 'buffer' }
         local ok, node = pcall(vim.treesitter.get_node)
 
         if ok and node then

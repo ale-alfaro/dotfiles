@@ -1,0 +1,42 @@
+
+set shell := ['zsh', '-uc']
+
+mod zephyr x'${JUST_HOME}/zephyr.just'
+
+west := require('west')
+
+@_:
+    just --list
+
+app_name := env('SIBEL_APP_NAME')
+board := env('SIBEL_BOARD_NAME')
+board_rev := env('SIBEL_BOARD_REV', '')
+app_dir := justfile_directory() / app_name / "app"
+build_dir := app_dir / "build" / board
+
+# board := f'{{board_name}}@{{board_rev}}'
+
+build_dir_rm := if path_exists(build_dir) == 'true' { f'rm -r {{build_dir}}' } else { '' }
+clean := '0'
+pristine_mode := if clean == '1' { "always" } else { "auto" }
+west_build_flags := f'--board {{board}} --p {{pristine_mode}}'
+
+[group('build')]
+[working-directory(x"${WEST_TOPDIR}/${SIBEL_APP_NAME}/app")]
+build:
+    {{ if clean == '1' { build_dir_rm } else { '' } }}
+    -{{ west }} build {{ west_build_flags }}
+
+[arg('img', pattern='app|mcuboot')]
+[group('utils')]
+[working-directory(x"${WEST_TOPDIR}/${SIBEL_APP_NAME}/app")]
+config img="app":
+    {{ west }} build {{ west_build_flags }} -d {{ "build" / img }} -t menuconfig
+
+dtsh: (zephyr::dtsh-sh build_dir / "app")
+
+dts_tree: (zephyr::dtsh-tree build_dir / "app")
+
+dts_ls: (zephyr::dtsh-ls build_dir / "app")
+
+dts_find ord: (zephyr::dtsh-find build_dir / "app" ord)

@@ -21,20 +21,63 @@ use_env_dir() {
   fi
 }
 
-############## Envs ###################################
-
-use_llm_lang_rules() {
-  if [[ ! "$#" -eq 1 ]]; then
-    log_fatal "Need to specify the language to add llm rules for (cpp or python)"
+# Usage: load_toolchain_prefix <prefix_path>
+#
+# Expands some common path variables for the given <prefix_path> prefix. This is
+# useful if you installed something in the <prefix_path> using
+# $(./configure --prefix=<prefix_path> && make install) and want to use it in
+# the project.
+#
+# Variables set:
+#
+#    CPATH
+#    LD_LIBRARY_PATH
+#    LIBRARY_PATH
+#    MANPATH
+#    PATH
+#    PKG_CONFIG_PATH
+#
+# Example:
+#
+#    ./configure --prefix=$HOME/rubies/ruby-1.9.3
+#    make && make install
+#    # Then in the .envrc
+#    load_prefix ~/rubies/ruby-1.9.3
+#
+load_toolchain_prefix() {
+  local REPLY
+  realpath.absolute "$1"
+  path_add CPATH "$REPLY/include"
+  path_add LD_LIBRARY_PATH "$REPLY/lib"
+  path_add LIBRARY_PATH "$REPLY/lib"
+  path_add PATH "$REPLY/bin"
+  if [[ "$#" -gt 1 ]]; then
+    shift
+    while (($#)); do
+      case $1 in
+        opt/**/bin | usr/local/bin)
+          log_status "added addional path prefix $1"
+          PATH_add "$REPLY/$1"
+          shift
+          ;;
+        man)
+          MANPATH_add "$REPLY/man"
+          MANPATH_add "$REPLY/share/man"
+          shift
+          ;;
+        pkg)
+          path_add PKG_CONFIG_PATH "$REPLY/lib/pkgconfig"
+          shift
+          ;;
+        *)
+          log_status "Unrecognized additional prefix $1. Skipping"
+          shift
+          ;;
+      esac
+    done
   fi
-
-  # Python codebase add python llm memory
-  local llm_rules_dir="$XDG_CONFIG_HOME/direnv/res/llm_memory/${1:-"python"}"
-  if [[ -d "$llm_rules_dir" ]]; then
-    export LLM_MEMORY_DIR="$llm_rules_dir"
-  fi
-
 }
+############## Envs ###################################
 
 use_developer_envs() {
 

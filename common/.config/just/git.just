@@ -1,5 +1,6 @@
-@_:
-    just --list
+[default]
+@list:
+    just --list --justfile {{ source_file() }}
 
 submodule-sync:
     @git submodule update --init --recursive

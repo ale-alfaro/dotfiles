@@ -6,8 +6,9 @@ basedpyright_args := "--level error " + if concise == "1" { "" } else { "" }
 pyrefly_args := " " + if concise == "1" { "--output-format min-text" } else { "" }
 commands := "ruff ty basedpyright pyrefly"
 
-@_:
-    just --list
+[default]
+@list:
+    just --list --justfile {{ source_file() }}
 
 noop *args:
     @echo "No-op for {{ args }}"

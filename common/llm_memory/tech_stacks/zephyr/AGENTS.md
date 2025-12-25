@@ -17,14 +17,6 @@ LED wearables to sophisticated smart watches and IoT wireless gateways.
 - Automated tests: `tests/` (Twister suites) and scenario-specific assets in `snippets/`
 - Build and tooling scripts: `scripts/`, CMake glue in `cmake/`, docs in `doc/`
 
-## Overview - Build, Test, and Development Commands
-
-- Configure & build: `west build -b <board> samples/hello_world` (out in `build/`)
-- Reconfigure build type: `west build -t menuconfig` to adjust Kconfig options
-- Flash: `west flash` (uses board defaults); debug: `west debug`
-- Run test suites: `./scripts/twister -p native_posix -T tests/kernel` (select port and tree)
-- Lint/format check: `./scripts/checkpatch.pl -g HEAD` for recent commits; `west build -t run` for emulated targets where supported
-
 # Embedded C
 
 ## Embedded C - Software Coding Style & Naming Conventions
@@ -32,7 +24,36 @@ LED wearables to sophisticated smart watches and IoT wireless gateways.
 - C code follows Zephyr’s Linux-aligned style: tabs for indent (8), braces on new lines for functions, `snake_case` for functions/vars, `UPPER_SNAKE_CASE` for macros and Kconfig symbols.
 - Keep public APIs in `include/` with `zephyr/`-prefixed headers; internal headers stay near implementation.
 - Use `const` pointers over macros where possible; prefer `ARRAY_SIZE()` and `BIT()` helpers.
-- Run `clang-format` (LLVM style) for touched files: `west build -t clang-format` or `./scripts/format/clang-format.py`.
+  - Place the `*` or `&` next to the type (e.g., `int* number`).
+- **Preprocessor Macros:**
+  - Use macros only when they significantly improve the code.
+  - Standalone statement macros must require a semicolon.
+  - function should be used in preference to a function-like macro where they are interchangeable
+- **Unsigned Integers:** Permitted, but be careful when mixing with signed
+  integers.
+- **C and C++ Standard Libraries:**
+  - A limited subset of the C++ Standard Library is permitted. Dynamic memory
+    allocation, streams, and exceptions are disallowed.
+  - Use Zephyr's own libraries (`<zephyr/sys/util.h>` for low-level utilities like bit shifts, `<zephyr/kernel.h>` for synchronization primitives, etc)
+- **Comments:**
+  - Sections of code should not be “commented out”
+  - Code in comments should be indented with two additional spaces.
+- **Control Statements:**
+  - Always use braces for loops and conditionals.
+  - Prefer early exits with `return` and `continue`.
+  - Do not use `else` after a `return` or `continue`.
+- **Header Files and Include Guards:**
+  - Use C header guards unless the header is clearly using C++ (i.e has `hpp` `hh` suffix), int that case use `#pragma once`.
+  - Precautions shall be taken in order to prevent the contents of a header file being included more than once
+- **Logging:**
+  - Use the `<zephyr/logging/log.h>` module for logging. A file should always register a new logging module using `LOG_MODULE_REGISTER(<NAME>, <LOG_LEVEL>);`
+  - Log errors as soon as they are unambiguously determined to be errors.
+  - Log at the appropriate level (`LOG_DBG`, `LOG_INF`, `LOG_WRN`,
+    `LOG_ERR`).
+- **Memory Allocation:** No dynamic memory allocation in driver or any low level code.
+- **C++ Standard:** All C++ code must compile with `-std=c++17`. C++20 features
+  can be used if the code remains C++17 compatible.
+- **Formatting:** Code is automatically formatted with `clang-format`.
 
 ## Embedded C - Testing Guidelines
 
@@ -42,6 +63,12 @@ LED wearables to sophisticated smart watches and IoT wireless gateways.
 - Aim to keep PRs Twister-clean on at least `native_posix` and the target board family.
 
 # Build System and Tooling
+
+## West: Zephyr Meta Tool
+
+- Used for most if not all tasks and workflows done in Zephyr. Most importantly it does:
+  - Configure & build: `west build --board <board>  -s <app_dir>` (out in `build/`)
+  - Run test suites: `west twister --platform native_posix --test-root tests/kernel` (select port and tree)
 
 ## Build System Topology (High-Level)
 

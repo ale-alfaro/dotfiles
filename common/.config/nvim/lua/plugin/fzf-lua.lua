@@ -95,7 +95,7 @@ require('fzf-lua').setup {
     winopts = {
       preview = { hidden = true },
     },
-    -- no_ignore = true, -- enable hidden files by default
+    no_ignore = false, -- enable hidden files by default
   },
   grep = {
     -- Search in hidden files by default.

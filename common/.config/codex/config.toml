@@ -33,7 +33,7 @@ model_provider = "openai"
 ################################################################################
 
 # Reasoning effort: minimal | low | medium | high (default: medium)
-model_reasoning_effort = "medium"
+model_reasoning_effort = "high"
 
 # Reasoning summary: auto | concise | detailed | none (default: auto)
 model_reasoning_summary = "concise"
@@ -270,16 +270,13 @@ profile = "default"
 [profiles]
 
 [profiles.default]
-approval_policy = "untrusted"
+approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 
-[profiles.full_auto]
-approval_policy = "on-request"
-sandbox_mode    = "workspace-write"
-
-[profiles.readonly_quiet]
-approval_policy = "never"
+[profiles.untrusted]
+approval_policy = "untrusted"
 sandbox_mode    = "read-only"
+
 
 [profiles.o3]
 model = "o3"

@@ -70,6 +70,16 @@ fi
 # Link: https://github.com/junegunn/fzf
 if has fzf; then
   alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
+  vf(){
+    fd --type file |
+      fzf --prompt 'Files> ' \
+          --header 'ALT-D: Switch between Files/Directories' \
+          --bind 'alt-d:transform:[[ ! $FZF_PROMPT =~ Files ]] &&
+                  echo "change-prompt(Files> )+reload(fd --type file)" ||
+                  echo "change-prompt(Directories> )+reload(fd --type directory)"' \
+          --preview '[[ $FZF_PROMPT =~ Files ]] && bat --color=always {} || tree -C {}' \
+          --bind 'enter:become(nvim {})'
+  }
 fi
 if has zoxide; then
   zv(){ 

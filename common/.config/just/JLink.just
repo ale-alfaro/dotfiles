@@ -19,8 +19,9 @@ jlink-verify-command := '''
     mem32 VTOR_ADDR
     '''
 
-@_:
-    just --list
+[default]
+@list:
+    just --list --justfile {{ source_file() }}
 
 ##### J-Link Documentation #####
 
