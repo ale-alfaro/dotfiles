@@ -1,7 +1,3 @@
-[default]
-@list:
-    just --list --justfile {{ source_file() }}
-
 [group('pacman')]
 list-orphans:
     pacman -Qdtq

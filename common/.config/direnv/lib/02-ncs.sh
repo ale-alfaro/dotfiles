@@ -20,7 +20,7 @@ use_ncs_toolchain() {
     return 1
   fi
 
-  json="$(nrfutil sdk-manager toolchain env --json --skip-overhead --ncs-version v3.2.1)"
+  json=$(nrfutil sdk-manager toolchain env --json --skip-overhead --ncs-version "$ncs_version")
 
   zephyr_sdk_install_dir="$(jq -r '.env_variables[] | select(.key=="ZEPHYR_SDK_INSTALL_DIR") | .value' <<<"$json")"
 

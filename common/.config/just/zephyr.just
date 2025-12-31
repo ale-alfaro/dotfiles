@@ -27,12 +27,6 @@ zephyr_just := x'${JUST_HOME}/zephyr'
 # West Manifest and Workspace Recipes
 ####################################
 
-[group('workspace')]
-[no-cd]
-add:
-    cp {{ zephyr_just / "Justfile.template" }} {{ invocation_directory() / "Justfile" }}
-    just -g agents::ln_file zephyr {{ invocation_directory() / "AGENTS.md" }}
-
 # initialize west
 [group('workspace')]
 [no-cd]
@@ -40,6 +34,18 @@ init west_yaml:
     {{ west }} init -l {{ west_yaml }}
     {{ west }} update --fetch-opt=--filter=blob:none
     {{ west }} zephyr-export
+
+[group('workspace')]
+[no-cd]
+setup:
+    cp {{ f'{{zephyr_just}}/Justfile.template' }} {{ invocation_directory() / 'Justfile' }}
+    echo ''' \
+        WEST_TOPDIR="{{ `west topdir` }}" \
+        ZEPHYR_BASE="{{ env('ZEPHYR_BASE') }}" \
+        APP_NAME="app" \
+        #DEFAULT_BOARD="" \
+    ''' >> {{ invocation_directory() / '.env' }}
+    just -g agents::ln_file zephyr {{ invocation_directory() / "AGENTS.md" }}
 
 # update west
 [group('workspace')]
@@ -177,14 +183,17 @@ zephyr_extra_bindings_dir := env('ZEPHYR_EXTRA_BINDINGS_DIR', '')
 dts_bindings_flags := if zephyr_extra_bindings_dir != '' { '-b ' + zephyr_bindings_dir + ' -b ' + zephyr_extra_bindings_dir } else { '' }
 dtsh_dir := x'${JUST_HOME}/zephyr/dtsh'
 dtsh_pref := dtsh_dir / "dtsh.ini"
-dtsh := require("dtsh")
+dtsh := if which("dtsh") == '' { 'dtsh is not in the PATH. Please install it' } else { require('dtsh') }
 
+[no-cd]
 _dtsh-cmd build_dir +cmds:
+    {{ if path_exists(dtsh) != 'true' { error(dtsh) } else { '' } }}
     {{ dtsh }} -c '{{ cmds }}' {{ join(build_dir, "zephyr", "zephyr.dts") }}
 
 [group('tools')]
 [no-cd]
 dtsh-sh build_dir *args:
+    {{ if path_exists(dtsh) != 'true' { error(dtsh) } else { '' } }}
     {{ dtsh }} {{ args }} {{ join(build_dir, "zephyr", "zephyr.dts") }}
 
 # Print tree with NYKC (Node name, bus info, labels/aliases, bindings compat str)
@@ -194,6 +203,9 @@ dtsh-tree build_dir: (_dtsh-cmd build_dir "tree --format NYKC --pager")
 # Print tree with NYKC (Node name, bus info, labels/aliases, bindings compat str)
 [group('tools')]
 dtsh-cat node build_dir: (_dtsh-cmd build_dir f"cat &{{node}} --format Bd --pager")
+
+[group('tools')]
+dtsh-ls build_dir: (_dtsh-cmd build_dir "ls -l NYKC")
 
 [group('tools')]
 dtsh-find build_dir dts-ord_num: (_dtsh-cmd build_dir f'find --with-dts-ord {{dts-ord_num}} --format psTd')

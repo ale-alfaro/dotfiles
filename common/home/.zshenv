@@ -55,4 +55,3 @@ export EDITOR=nvim
 export VISUAL=nvim
 export SUDO_EDITOR="$EDITOR"
 export FCEDIT=nvim
-export JUST_HOME=$XDG_CONFIG_HOME/just

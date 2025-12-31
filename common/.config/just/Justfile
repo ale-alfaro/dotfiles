@@ -6,10 +6,8 @@ justfile_home := config_dir() / 'just'
 
 mod agents
 mod python
-mod gnu-stow
 mod JLink
 mod openocd
-mod arch-linux
 mod git
 mod direnv
 mod zephyr
