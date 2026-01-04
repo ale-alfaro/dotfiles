@@ -1,4 +1,9 @@
-prefix_rule(pattern=["/usr/bin/zsh", "-lc", "rg -n ", decision="allow")
-prefix_rule(pattern=["/usr/bin/zsh", "-lc", "fd", decision="allow")
-prefix_rule(pattern=["/usr/bin/zsh", "-lc", "bat", decision="allow")
+prefix_rule(
+    pattern = ["rg",["-n", "-v", "-i"], "$1"],
+    decision = "allow",  # allow | prompt | forbidden
+    match = [["rg", "-n", "$1"]],  # examples that must match
+    not_match = [["rg", "-r", "$1"]],              # examples that must not match
+)
+prefix_rule(pattern=["fd"], decision="allow")
+prefix_rule(pattern=["bat"], decision="allow")
 prefix_rule(pattern=["sort", "-u"], decision="allow")

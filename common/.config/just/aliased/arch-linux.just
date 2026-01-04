@@ -1,12 +1,25 @@
-[group('pacman')]
+pkgs-dump-all:
+    pacman -Qqe 
+
+pkgs-dump-arch:
+    pacman -Qqen
+
+pkgs-dump-aur:
+    pacman -Qqem
+
+install-file file:
+    mapfile -t packages < <(grep -v '^#' {{ file }} | grep -v '^$') \
+    sudo pacman -S --noconfirm --needed "${packages[@]}"
+
+[group('clean')]
 list-orphans:
     pacman -Qdtq
 
-[group('pacman')]
+[group('clean')]
 list-optional-orphans:
     pacman -Qdttq
 
-[group('pacman')]
+[group('clean')]
 remove-orphans:
     pacman -Qdtq | sudo pacman -Rns -
 

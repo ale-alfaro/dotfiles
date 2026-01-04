@@ -57,7 +57,7 @@ model_reasoning_summary_format = "none"
 # - on-failure: auto-run in sandbox; prompt only on failure for escalation
 # - on-request: model decides when to ask (default)
 # - never: never prompt (risky)
-approval_policy = "untrusted"
+approval_policy = "on-failure"
 
 # Filesystem/network sandbox policy for tool calls:
 # - read-only (default)
@@ -70,6 +70,8 @@ sandbox_mode = "read-only"
 network_access = true
 writable_roots = [
     "/home/alealfaro/.cache",
+    "/home/alealfaro/.cache/ccache",
+    "/run/user/1000/ccache-tmp"
 ]
 # Exclude $TMPDIR from writable roots. Default: false
 exclude_tmpdir_env_var = false
@@ -95,14 +97,18 @@ include_only = []
 experimental_use_profile = false
 
 ################################################################################
+# Projects and context
+################################################################################
+# Treat a directory as the project root when it contains any of these markers.
+project_root_markers = [".west",".git"]
+################################################################################
 # History & File Opener
 ################################################################################
 
 [history]
 # save-all (default) | none
 persistence = "save-all"
-# Maximum bytes for history file (currently not enforced). Example: 5242880
-# max_bytes = 0
+max_bytes = 104857600 # 100 MiB
 
 # URI scheme for clickable citations: vscode (default) | vscode-insiders | windsurf | cursor | none
 file_opener = "nvim"
@@ -120,13 +126,13 @@ notifications = true
 animations = false
 
 # Suppress internal reasoning events from output. Default: false
-hide_agent_reasoning = false
+hide_agent_reasoning = true
 
 # Show raw reasoning content when available. Default: false
 show_raw_agent_reasoning = false
 
 # Disable burst-paste detection in the TUI. Default: false
-disable_paste_burst = false
+disable_paste_burst = true
 
 
 # External notifier program (argv array). When unset: disabled.
@@ -310,8 +316,11 @@ model_provider = "openai-chat-completions"
 
 # Mark specific worktrees as trusted. Only "trusted" is recognized.
 [projects]
-# [projects."/absolute/path/to/project"]
-# trust_level = "trusted"
+[projects."/home/alealfaro/sibel/eng/fw/dragonfly"]
+trust_level = "trusted"
+
+[projects."/home/alealfaro/sibel/eng/fw/bengal-tiger"]
+trust_level = "trusted"
 
 ################################################################################
 # OpenTelemetry (OTEL) – disabled by default

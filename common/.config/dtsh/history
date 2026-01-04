@@ -1,0 +1,68 @@
+ls
+ls -al
+ls -l
+ls -d
+tree
+cd &flash
+cd &flash0
+ls
+tree
+cd ..
+tree --format NYKC
+tree --format NYKCo
+cd ..
+tree --format NYKCo
+q
+tree --format NYKCo
+cat soc/spi@4002f000/mt29f8g01ad@0
+cat soc/spi@4002f000
+cat
+ls soc/spi@4002f000/mt29f8g01ad@0
+ls soc/spi@4002f00
+ls soc/spi@4002f000
+ls &soc/spi@4002f000
+cat &flash0
+cat 
+tree /soc/flash-controller@4001e000
+tree /soc/flash0
+tree &flash0
+cat &mt29
+cat &mt29 -Bl
+cat -Bl &mt29
+cat -D &mt29
+cat -Bl &mt29 
+cd &mt29
+cat
+cat mcuboot
+cat $mcu*
+cat $mcuboot-api
+q
+cat $mcuboot-api
+cd &mt29
+cat $mcuboot-api
+cd /
+tree /soc/flash0,
+tree &flash0
+tree
+tree --enabled-only
+tree --enabled-only --format NYKCo
+cat &flash_controller -A --pager
+cat &mt29 -A --pager
+cat &mt29 -A
+q
+tree --enabled-only --format NYKCo
+tree --format NYKCo
+cat &mt29 -A
+cat &nand -A
+cat &mt29f -A
+cat &mt29f
+ls aliases
+q
+tree --format NYKCo
+q
+tree --format NYKCo
+cat /soc/i2c@40003000/pca9430@70 -A
+cat &pca9430@70 -A
+cat pca9430 -A
+cat &pca9430 -A
+q

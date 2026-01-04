@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-use_ncs_toolchain() {
+use_ncs_toolchain_nrfutil() {
 
   if [[ ! "$#" -eq 1 ]]; then
     log_error "use zephyr requires a version to be specified as an argument"
@@ -41,6 +41,33 @@ use_ncs_toolchain() {
   #   log_error "Couldn't derive a valid python version to use $py_version"
   #   return 1
   # fi
+}
+
+use_ncs_toolchain() {
+
+  if [[ ! "$#" -eq 1 ]]; then
+    log_error "use zephyr requires a version to be specified as an argument"
+    return 1
+  fi
+  local ncs_version
+  ncs_version="$1"
+  echo "Using NCS version $ncs_version"
+  local toolchain_path
+  toolchain_root_dir="${HOME}/ncs/sdk/toolchains/$ncs_version"
+  zephyr_sdk_install_dir="${toolchain_root_dir}/opt/zephyr-sdk"
+
+  if [[ ! -d "$zephyr_sdk_install_dir" ]]; then
+    log_error "Toolchain install dir is not a directory $zephyr_sdk_install_dir"
+    return 1
+  fi
+  toolchain_path="$zephyr_sdk_install_dir/arm-zephyr-eabi/bin"
+  if [[ ! -d "$toolchain_path" ]]; then
+    log_error "Toolchain path is not a directory $toolchain_path"
+    return 1
+  fi
+  PATH_add "$toolchain_path"
+  export ZEPHYR_TOOLCHAIN_VARIANT="zephyr"
+  export ZEPHYR_SDK_INSTALL_DIR="${zephyr_sdk_install_dir}"
 }
 
 layout_ncs() {

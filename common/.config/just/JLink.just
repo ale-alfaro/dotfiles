@@ -20,8 +20,8 @@ jlink-verify-command := '''
     '''
 
 [default]
-@list:
-    just --list --justfile {{ source_file() }}
+@_:
+    just --list --justfile {{ source_file() }} --list-heading '{{ BOLD + BLUE }}{{ "\n  " + file_stem(source_file()) + ":\n" }}{{ NORMAL }}' --list-prefix '{{ "\t" }}' --list
 
 ##### J-Link Documentation #####
 

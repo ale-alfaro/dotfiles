@@ -11,38 +11,57 @@ download_sdk type version:
     @wget  {{ sdk-download-url-base / type / version / "src.tar.gz" }} -O {{ f'{{version}}.tar.gz' }}
     @tar -xzf {{ f'{{version}}.tar.gz' }} {{ version }}
 
+nrfutil_executable_platform := if os() == "linux" { "x86_64-unknown-linux-gnu" } else if os() == "macos" { "universal-apple-darwin" } else { "x86_64-pc-windows-msvc" }
+artifactory_base_url := "https://files.nordicsemi.com/artifactory"
+toolchain_base_url := "https://files.nordicsemi.com/NCS/external/bundles/v3"
+toolchain_index_url := toolchain_base_url / f"index-{{os()}}-{{arch()}}.json"
+toolchain_pkg_prefix := f"ncs-toolchain-{{arch()}}-{{os()}}"
+nrfutil_base_url := artifactory_base_url / "swtools" / "external" / "nrfutil"
+nrfutil_url := "nrfutil_base_url" / "executables" / "nrfutil_executable_platform" / "nrfutil"
+package_index_url := f'{{nrfutil_base_url}}/index/init.json'
+package_index_config := "nordic-external-production"
+
+# nrfutil_install:
+#     curl $_retry --proto '=https' --tlsv1.2 --show-error --silent --fail --location "{{url}}" --output "{{temp_output}}"
+#     local nrfutil="{{nrfutil_dir}}/nrfutil${ext}"
+#   https://files.nordicsemi.com/artifactory/NCS/external/bundles/v3/ncs-toolchain-x86_64-linux-11349092be.tar.gz
+#     chmod u+x {nrfutil} https://files.nordicsemi.com/artifactory/NCS/external/bundles/v3/ncs-toolchain-aarch64-macos-8934b18d70.tar.gz
+#     rm $HOME/.nrfutil/bin/nrfutil > /dev/null 2>&1 || true
+
+tmp_index := / "tmp" / "toolchain_index.json"
+
+toolchain_index_ls:
+    curl -s {{ toolchain_index_url }} | jq -r '.[] | select(has("key")).key | scan("v\\d.\\d.\\d")[0:]'
+
+toolchain_index_jqp:
+    curl -s {{ toolchain_index_url }} | jqp
+
+ncs_base_dir := home_dir() / 'ncs' / 'sdk'
+toolchain_base_dir := ncs_base_dir / 'toolchains'
+ncs_download_dir := ncs_base_dir / 'downloads'
+version := 'v3.0.2'
+toolchain_tarball := ncs_download_dir / f'{{toolchain_pkg_prefix}}-v{{version}}.tar.gz'
+toolchain_dst_dir := toolchain_base_dir / f'v{{version}}'
+jq_query := f'.[] | select(has("key")) | select(.key|test("v\\d.\\d.\\d$")) | {version:.key[1:], hash: .metadata.version} | select(.version == "{{version}}").hash'
+
+toolchain_download:
+    {{ if path_exists(toolchain_tarball) == 'true' { f'echo  {{BOLD}}"Toolchain already downloaded at {{toolchain_tarball}}"{{NORMAL}}' } else { 'wget ' + shell('curl -s $1', f" ,{{toolchain_index_url}} | jq -r '{{jq_query}}'") + ' -O ' + toolchain_tarball } }}
+
+# toolchain_download: && toolchain_decompress
+#     curl -s {{ toolchain_index_url }} | \
+#       jq -r '.[] | select(has("key")) | select(.key|test("v\\d.\\d.\\d$")) | {version:.key[1:], hash: .metadata.version} | select(.version == "{{ version }}").hash' | \
+#       xargs -I '{}' wget "{{ toolchain_base_url / toolchain_pkg_prefix }}-{}.tar.gz" -O {{ toolchain_tarball }}
+
+toolchain_decompress: toolchain_download
+    {{ if path_exists(toolchain_dst_dir) == 'true' { error('Toolchain already installed at ' + toolchain_dst_dir) } else { 'mkdir ' + toolchain_dst_dir } }}
+    tar -xzf {{ toolchain_tarball }} -C {{ toolchain_dst_dir }}
+
 [arg('version', pattern='^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9A-Za-z-][0-9A-Za-z-]*)(?:\.(0|[1-9A-Za-z-][0-9A-Za-z-]*))* marshal)?(?:\+(0|[1-9A-Za-z-][0-9A-Za-z-]*)(?:\.(0|[1-9A-Za-z-][0-9A-Za-z-]*))* marshal)?$')]
 toolchain_install version:
-    {{ shell(f'{{nrfutil}} sdk-manager toolchain install --version {{version}}') }}
+    just --justfile {{ source_file() }} version={{ version }} toolchain_decompress
 
-[group('nrfutil')]
-flash hex_file snr:
-    @{{ nrfutil }} device program --serial-number {{ snr }} --firmware {{ join(invocation_directory(), hex_file) }} --options chip_erase_mode=ERASE_ALL,reset=RESET_SYSTEM
-
-[group('nrfutil')]
-list-snr:
-    @{{ nrfutil }} device list --json --skip-overhead | jq -r '.devices[].serialNumber'
-
-[group('nrfutil')]
-reset:
-    @{{ nrfutil }} device reset
-
-addr2line-bat-awk := '''
-  {
-      file_line = $NF
-      if (match(file_line, /:[0-9]+$/)) {
-          line = substr(file_line, RSTART + 1)
-          file = substr(file_line, 1, RSTART - 1)
-          start = line - 10
-          if (start < 1)
-              start = 1
-          end = line + 10
-          system("bat --line-range " start ":" end " --highlight-line " line " " file)
-      }
-  }
-
-  '''
-
-[group('binutils')]
-addr2line-bat elf addr:
-    @{{ require('arm-none-eabi-addr2line') }} -p -e {{ elf }} {{ addr }} | awk -- '{{ addr2line-bat-awk }}'
+toolchain_custom:
+    {{ nrfutil }} config package-index remove {{ package_index_config }}
+    {{ nrfutil }} config package-index add {{ package_index_config }} {{ package_index_url }}
+    {{ nrfutil }} install --force --package-index-name {{ package_index_config }} toolchain-manager device
+    {{ nrfutil }} toolchain-manager config --set toolchain-index="{{ toolchain_index_url }}"

@@ -17,11 +17,15 @@ SEGGER/
 linux/.config/hypr/hyprland/hw
 btop.conf
 *target.wants
-common/.config/codex/sessions/2025
-common/.config/codex/history.jsonl
-common/.config/codex/version.json
-common/.config/codex/auth.json
-linux/.config/SEGGERJLinkRTTViewerSettings.ini
-common/.config/dtsh/history
-common/.config/codex/shell_snapshots
+# common/.config/codex/sessions/2025
+# common/.config/codex/history.jsonl
+# common/.config/codex/version.json
+# common/.config/codex/auth.json
+SEGGERJLinkRTTViewerSettings.ini
+# dtsh/history
 linux/.config/ly/save.txt
+**/codex/shell_snapshots
+**/codex/sessions*
+**/codex/history*
+**/codex/version*
+**/codex/auth*

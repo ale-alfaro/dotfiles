@@ -1,10 +1,10 @@
 ### General ###
-*cache/
+.cache
 *.log
 help.txt
-scratc*/
-build*
-out*
+scratch
+build
+out
 
 *.*db
 
