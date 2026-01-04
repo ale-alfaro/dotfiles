@@ -54,6 +54,12 @@ update:
     {{ west }} update --fetch-opt=--filter=blob:none
 
 ####################################
+# Configuration through west recipes
+
+# ###################################
+mod conf x'${JUST_HOME}/zephyr/westconfig.just'
+
+####################################
 # Toolchain and SDK related recipes
 ####################################
 

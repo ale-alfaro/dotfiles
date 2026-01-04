@@ -100,7 +100,7 @@ fi
 if has just; then
   alias j='just'
   # alias .j='just --justfile ~/.config/just/Justfile --working-directory .'
-  alias .j='just -g --working-directory .'
+  alias .j='just -g'
   for file in ~/.config/just/aliased/*.just; do
     for recipe in $(just --justfile $file --summary); do
         alias $recipe="just --justfile $file --working-directory . $recipe"
