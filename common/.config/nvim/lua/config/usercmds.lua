@@ -121,19 +121,25 @@ command('PackReload', function(opts)
 end, pack_usercmd_opts 'Reload plugin')
 
 command('PackSync', function()
-  ---@type VimPackPlugin[]
-  local plugins = vim.pack.get()
+  -- local to_delete = {}
+  --- @type string[]
+  local active_plugins_name = {}
 
-  local to_delete = {}
-  for _, plugin in ipairs(plugins) do
-    table.insert(to_delete, plugin.name)
+  --- @type string[]
+  local active_plugins_src = {}
+  for _, plugin in ipairs(vim.pack.get()) do
+    if plugin.active then
+      active_plugins_name[#active_plugins_name + 1] = plugin.spec.name
+      active_plugins_src[#active_plugins_src + 1] = plugin.spec.src
+    end
+    -- table.insert(to_delete, plugin.name)
   end
 
-  local ok, _ = pcall(vim.pack.del, to_delete)
+  local ok, _ = pcall(vim.pack.del, active_plugins_name)
   if not ok then
     _G.error 'Failed to delete plugins with vim.pack.del'
   end
-  ok, _ = pcall(vim.pack.add, plugins)
+  ok, _ = pcall(vim.pack.add, active_plugins_src)
   if not ok then
     _G.error 'Failed to add plugins with vim.pack.add'
   end
@@ -145,5 +151,6 @@ command('PackClean', function()
 end, { desc = 'Clean unactive plugins' })
 
 command('PackUpdate', function()
+  local plugins = vim.pack.get()
   VimRc.pack_update()
 end, pack_usercmd_opts 'Update active plugins')

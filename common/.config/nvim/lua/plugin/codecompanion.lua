@@ -18,11 +18,11 @@ _G.keymaps_define({
 local cc = augroup 'dotfiles.codecompanion'
 _G.new_user_autocmd(function()
   vim.lsp.buf.format()
-end, 'CodeCompanionInlineFinished', { desc = 'CodeCompanion Inline Format' })
+end, 'CodeCompanionInlineFinished', 'CodeCompanion Inline Format')
 
 _G.new_user_autocmd(function(args)
   vim.treesitter.start(args.data.bufnr, 'markdown')
-end, 'CodeCompanionChatCreated', { desc = 'CodeCompanion Chat Treesitter start' })
+end, 'CodeCompanionChatCreated', 'CodeCompanion Chat Treesitter start')
 
 local diff = require 'mini.diff'
 diff.setup {

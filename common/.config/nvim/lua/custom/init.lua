@@ -27,110 +27,56 @@ function _G.info(msg)
 end
 
 ---@param msg string|string[]
-function _G.error(msg)
-  return notify(msg, 'ERROR')
+function _G.error(msg, var)
+  local ret = notify(msg, 'ERROR')
+  if var then
+    return notify(var, 'ERROR')
+  end
+  return ret
 end
 
----@param cmd string|string[]
----@param cb fun(output: string[], code: number)
----@param opts? {env?: table<string, string>, cwd?: string}
-function _G.run_cmd(cmd, cb, opts)
-  local output = {} ---@type string[]
-  local id = vim.fn.jobstart(
-    cmd,
-    vim.tbl_extend('force', opts or {}, {
-      on_stdout = function(_, data)
-        output[#output + 1] = table.concat(data, '\n')
-      end,
-      on_exit = function(_, code)
-        cb(output, code)
-        if code ~= 0 then
-          vim.notify(
-            ('Terminal **cmd** `%s` failed with code `%d`:\n- `vim.o.shell = %q`\n\nOutput:\n%s'):format(
-              cmd,
-              code,
-              vim.o.shell,
-              vim.trim(table.concat(output, '')),
-              'error'
-            )
-          )
-        end
-      end,
-    })
-  )
-  if id <= 0 then
-    _G.error(('Failed to start job `%s`'):format(cmd))
-  end
-  return id > 0 and id or nil
+function _G.fetch_env(env_name, fallback)
+  fallback = fallback or ''
+  local env = vim.fn.getenv(env_name)
+  return env ~= vim.v.null and env or fallback
 end
-
---- Runs a system command or throws an error if {cmd} cannot be run.
----
---- The command runs directly (not in 'shell') so shell builtins such as "echo" in cmd.exe, cmdlets
---- in powershell, or "help" in bash, will not work unless you actually invoke a shell:
---- `vim.system({'bash', '-c', 'help'})`.
----
---- Examples:
----
---- ```lua
---- local on_exit = function(obj)
----   print(obj.code)
----   print(obj.signal)
----   print(obj.stdout)
----   print(obj.stderr)
---- end
----
---- -- Runs asynchronously:
---- vim.system({'echo', 'hello'}, { text = true }, on_exit)
----
---- -- Runs synchronously:
---- local obj = vim.system({'echo', 'hello'}, { text = true }):wait()
---- -- { code = 0, signal = 0, stdout = 'hello\n', stderr = '' }
----
---- ```
----
---- See |uv.spawn()| for more details. Note: unlike |uv.spawn()|, vim.system
---- throws an error if {cmd} cannot be run.
----
----@param cmd string[]
----@param stdout_cb fun( data: string?, lines: string[])
----@param sync boolean
----@param cwd? string
-function M.run_command_with_output(cmd, stdout_cb, sync, cwd)
-  if cwd == nil then
-    cwd = M.get_project_root()
-  end
-
-  local on_exit = function(obj)
-    if obj.code == 0 and obj.stdout then
-      _G.info 'Command completed successfully'
-      local data = obj.stdout
-      if data and data:match '%S' then
-        local line_output = vim.split(data, '\n') or {}
-        _G.info('comand output: ' .. data)
-        if stdout_cb then
-          stdout_cb(data, line_output)
+local env_vars = {
+  ZEPHYR_BASE = { '.' },
+  XDG_CONFIG_HOME = { 'hypr', 'direnv', 'zsh', 'just' },
+  OBSIDIAN_HOME = { 'Sibel-Work' },
+}
+function _G.fetch_env_paths()
+  local res = {}
+  for env, paths in pairs(env_vars) do
+    local expanded_env = fetch_env(env, nil)
+    if expanded_env then
+      for _, p in ipairs(paths) do
+        if p == '.' then
+          res[env] = expanded_env
+        else
+          res[p] = expanded_env .. '/' .. p
         end
-      else
-        _G.error 'Command failed'
       end
     end
   end
-  if sync then
-    ---@type vim.SystemOpts
-    local opts = {
-      cwd = cwd,
-      text = true,
-    }
-    local obj = vim.system(cmd, opts):wait()
-    on_exit(obj)
-  else
-    --- @type fun(out: vim.SystemCompleted)
-    -- Run command in background and capture output
-    vim.system(cmd, on_exit)
-  end
+  return res
 end
 
+---@param json string
+---@return string[]
+function _G.fmt_json(json)
+  local indent = vim.bo.expandtab and (' '):rep(vim.o.shiftwidth) or '\t'
+  ---@type string
+  -- local lines = vim.islist(json) and table.concat(json, '\n') or json
+  local content = json:gsub('\n', '')
+  local o = vim.json.decode(content)
+  vim.print(o)
+  return o
+  -- local stringified = vim.json.encode(o, { indent = indent, sort_keys = true })
+  -- return vim.split(stringified, '\n')
+end
+
+M.exec = require 'custom.executables'
 ---@class KeymapSpec
 ---@field lhs string
 ---@field rhs string|fun(args:table)
@@ -282,7 +228,7 @@ function M.pack_add(spec)
   vim.pack.add(plug_spec)
   if spec.config then
     spec.config()
-  else
+  elseif spec.opts and type(spec.opts) == 'table' then
     require(spec.name).setup(spec.opts)
   end
   if spec.keys then
@@ -344,7 +290,7 @@ local function create_plugin_build_hook(build_hook)
   vim.validate('type', type, 'string')
   local cmd = build_hook.build_cmd
   vim.validate('cmd', cmd, 'string')
-
+  _G.info('Creating ' .. type .. ' build hook for ' .. plugin .. ' with cmd: ' .. cmd)
   local hooks = function(ev)
     -- Use available |event-data|
     local name, kind = ev.data.spec.name, ev.data.kind
@@ -383,6 +329,7 @@ function _G.plug(p, opts)
   local plug_name = p:match '%S+/(%S+)'
   if opts and opts.build_hook then
     create_plugin_build_hook(opts.build_hook)
+    plug_name = opts.plugin or plug_name
   end
   ---@type vim.pack.Spec
   local plug = {
@@ -483,65 +430,6 @@ function M.pack_list()
     lines[#lines + 1] = (' %s - `%s`'):format(plug.spec.name, plug.spec.version)
   end
   _G.info(lines)
-end
-
-Direction = {
-  left = 'left',
-  right = 'right',
-  up = 'up',
-  down = 'down',
-}
-local dir_keys_wezterm_splits = {
-  [Direction.left] = '--left',
-  [Direction.right] = '--right',
-  [Direction.up] = '--top',
-  [Direction.down] = '--bottom',
-}
-local wezterm_cli_path = 'wezterm'
-
-local function wezterm_exec(cmd)
-  local command = vim.deepcopy(cmd)
-  table.insert(command, 1, wezterm_cli_path)
-  table.insert(command, 2, 'cli')
-  return vim.fn.system(command)
-end
-
----@class wezterm_spanw_args
----@field cwd string
----@field percentage number
----@field program string
-
-local function wezterm_split_pane(direction, cwd, size, program_args)
-  local args = { 'split-pane', dir_keys_wezterm_splits[direction], '--cwd', cwd }
-  if size then
-    table.insert(args, '--percent')
-    table.insert(args, size)
-  end
-  if program_args and type(program_args) == 'table' and #program_args > 0 then
-    table.insert(args, '--')
-    vim.list_extend(args, program_args)
-  end
-  local ok, _ = pcall(wezterm_exec, args)
-  return ok
-end
-
-function M.wezterm_spawn_terminal()
-  local bufname = vim.api.nvim_buf_get_name(0)
-  local cwd
-  if bufname == '' or bufname == nil then
-    cwd = vim.fn.getcwd()
-  else
-    cwd = vim.fn.expand '%:p:h'
-  end
-  local ok = wezterm_split_pane(Direction.down, cwd, 30)
-  return ok
-end
-
-function M.wezterm_spawn_nvim_inst(direction, file)
-  local cwd = vim.fn.fnamemodify(file, ':h')
-  local program_args = { 'nvim', file }
-  local ok = wezterm_split_pane(direction, cwd, nil, program_args)
-  return ok
 end
 
 function M.require_config_dir(dir)

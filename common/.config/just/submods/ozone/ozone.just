@@ -1,7 +1,6 @@
-template := x'${JUST_HOME}/ozone/TEMPLATE.jdebug'
+template := source_file() / 'TEMPLATE.jdebug'
 
-[default]
-@list:
+@_:
     just --list --justfile {{ source_file() }}
 
 # Creates a .jdebug file from the template

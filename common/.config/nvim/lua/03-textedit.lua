@@ -70,9 +70,9 @@ if ok then
   VimRc.pack_add(luasnip)
 end
 
-local ok, blink = pcall(require, 'plugin.blink-cmp')
-if ok then
-  VimRc.pack_add(blink)
+local ok, _ = pcall(require, 'plugin.blink-cmp')
+if not ok then
+  _G.error("Failed to load blink.cmp")
 end
 ---@type VimPackBuildHooks
 -- local blink_build_hook = {

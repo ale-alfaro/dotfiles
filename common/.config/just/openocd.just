@@ -6,7 +6,7 @@ openocd_setup_commands := "adapter speed 5000; init; targets; reset init; "
 openocd_shutdown_commands := "reset run; shutdown"
 
 @_:
-    just --list
+    just --list --justfile {{ source_file() }}
 
 flash-openocd hex_file target=openocd_default_target_mcu interface=openocd_default_interface:
     @echo "Flashing {{ hex_file }} to {{ target }} with {{ interface }}"

@@ -20,22 +20,7 @@ vim.pack.add(_G.plug_spec {
 local ok, render_md = pcall(require, 'render-markdown')
 if ok then
   render_md.setup {
-    restart_highlighter = false,
-    file_types = { 'markdown', 'codecompanion' },
-    code = {
-      sign = false,
-      width = 'block',
-      right_pad = 1,
-    },
-    heading = {
-      sign = false,
-      icons = {},
-    },
-    checkbox = {
-      enabled = false,
-    },
-    { ui = { enable = false } },
-    { latex = { enabled = false } },
+    preset = 'obsidian',
     completions = { lsp = { enabled = true } },
   }
 else

@@ -25,11 +25,11 @@ function _G.new_autocmd(event, callback, pattern, desc)
     group = gr,
     pattern = pattern,
     callback = callback,
-    desc = desc
+    desc = desc,
   }
   ok, _ = pcall(vim.api.nvim_create_autocmd, event, opts)
   if not ok then
-    _G.error("Failed to create autocmd " .. event)
+    _G.error('Failed to create autocmd ' .. vim.print(pattern) .. ' ' .. vim.print(desc))
   end
 end
 
@@ -37,8 +37,8 @@ end
 ---@param pattern? string|string[]
 ---@param desc? string|string[]
 function _G.new_user_autocmd(callback, pattern, desc)
-  pattern = pattern or "*"
-  _G.new_autocmd("User", callback, pattern, desc)
+  pattern = pattern or '*'
+  _G.new_autocmd('User', callback, pattern, desc)
 end
 -- Format Options
 -- new_autocmd('FileType', function()
@@ -75,36 +75,34 @@ end, 'Go to last location on buffer open')
 
 -- Close some filetypes with <q>
 new_autocmd('FileType', function(event)
-    vim.bo[event.buf].buflisted = false
-    vim.schedule(function()
-      vim.keymap.set('n', 'q', function()
-        vim.cmd 'close'
-        pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
-      end, {
-        buffer = event.buf,
-        silent = true,
-        desc = 'Quit buffer',
-      })
-    end)
-  end,
-  {
-    'PlenaryTestPopup',
-    'checkhealth',
-    'dbout',
-    'gitsigns-blame',
-    'grug-far',
-    'help',
-    'lspinfo',
-    'neotest-output',
-    'neotest-output-panel',
-    'neotest-summary',
-    'notify',
-    'qf',
-    'spectre_panel',
-    'startuptime',
-    'tsplayground',
-  },
-  'Close special filetypes with <q>')
+  vim.bo[event.buf].buflisted = false
+  vim.schedule(function()
+    vim.keymap.set('n', 'q', function()
+      vim.cmd 'close'
+      pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
+    end, {
+      buffer = event.buf,
+      silent = true,
+      desc = 'Quit buffer',
+    })
+  end)
+end, {
+  'PlenaryTestPopup',
+  'checkhealth',
+  'dbout',
+  'gitsigns-blame',
+  'grug-far',
+  'help',
+  'lspinfo',
+  'neotest-output',
+  'neotest-output-panel',
+  'neotest-summary',
+  'notify',
+  'qf',
+  'spectre_panel',
+  'startuptime',
+  'tsplayground',
+}, 'Close special filetypes with <q>')
 
 -- Wrap and check for spell in text filetypes
 new_autocmd('FileType', function()
@@ -196,5 +194,5 @@ end, ft_autoclose, 'Auto-close special windows on quit')
 --
 -- -- Open Trouble for qflist
 new_autocmd('QuickFixCmdPost', function()
-  vim.cmd([[Trouble qflist open]])
+  vim.cmd [[Trouble qflist open]]
 end, 'Open Trouble for qflist')

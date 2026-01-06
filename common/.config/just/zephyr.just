@@ -19,9 +19,9 @@ west := if which('west') != '' { require('west') } else { f'{{uvx}} west' }
 [default]
 @list:
     just --list --color=always --justfile {{ source_file() }}
-    just --list --color=always --justfile {{ source_dir() / "zephyr" / "twister.just" }}
+    just --list --color=always --justfile {{ source_dir() / 'submods' / "zephyr" / "twister.just" }}
 
-zephyr_just := x'${JUST_HOME}/zephyr'
+zephyr_just := f'{{source_file()}}/zephyr'
 
 ####################################
 # West Manifest and Workspace Recipes
@@ -55,9 +55,10 @@ update:
 
 ####################################
 # Configuration through west recipes
-
 # ###################################
-mod conf x'${JUST_HOME}/zephyr/westconfig.just'
+
+# mod conf x'${JUST_HOME}/zephyr/westconfig.just'
+mod conf 'submods/zephyr/westconfig.just'
 
 ####################################
 # Toolchain and SDK related recipes
@@ -79,24 +80,23 @@ zephyr_artifacts := "zephyr.hex,zephyr.bin,zephyr.elf,.config,zephyr.dts"
 
 [group('build')]
 [no-cd]
-build app_dir=invocation_directory() board=env('BOARD', ''):
-    {{ west }} build --pristine=always -b {{ board }}  -s {{ app_dir }}
-    ln -sf {{ shell('fd "$1" "$2"', 'compile_commands.json', f'{{app_dir}}/build/{{board}}') }} {{ env('WEST_TOPDIR', f'{{app_dir}}') / "compile_commands.json" }}
+build dir=invocation_dir() *args:
+    {{ if `west config alias.bd 2>/dev/null` != '' { f'west bd {{args}}' } else { f'west build -s {{dir}}}' } }}
 
 [group('build')]
 [no-cd]
-build_full app_dir artifact snippet="":
-    {{ west }} build --pristine=always -s {{ app_dir }} -d {{ app_dir / "build_" + artifact }}  \
-                  {{ if snippet != "" { '--snippet ' + snippet } else { "" } }}
+build_clean dir=join(invocation_dir(), 'build') *args: && (build args)
+    {{ if dir && path_exists(dir) == 'true' { f'rm -r {{dir}}' } else { error(f"Build dir {{dir}} doesn't exist") } }}
 
-[group('build')]
+[group('tools')]
 [no-cd]
-menuconfig $DOTCONF:
-    {{ menuconfig }}
+config dir=join(invocation_dir(), 'build'): (conf::set 'target=menuconfig')
+    {{ if `west config alias.tgt 2>/dev/null` != '' { f'west tgt menuconfig' } else { f'{{west}} build -d {{dir}} -t menuconfig' } }}
 
 zephyr-mod-script := zephyr_scripts / "zephyr_module.py"
 
 [group('build')]
+[group('tools')]
 inspect-zephyr-modules:
     {{ zephyr-mod-script }} --cmake-out mod.cmake
     {{ zephyr-mod-script }} --kconfig-out mod.kconfig
@@ -122,102 +122,13 @@ rtt build_dir:
 # Twister, Pytest and Testing Recipes
 ####################################
 
-# import? x'${JUST_HOME}/zephyr/twister.just'
-mod twister x'${JUST_HOME}/zephyr/twister.just'
+mod twister 'submods/zephyr/twister.just'
 
 ####################################
 # Devicetree (dts,dtsi)
 # ###################################
-# Add custom bindings directory to dtsh
-# custom_bindings_dir := join(app_dir, 'dts', 'bindings')
-# shell-like interface with Devicetree
-#
-# user files:
-#   -u, --user-files    initialize per-user configuration files and exit
-#   --preferences FILE  load additional preferences file
-#   --theme FILE        load additional styles file
-#
-# session control:
-#   -c CMD              execute CMD at startup (may be repeated)
-#   -f FILE             execute batch commands from FILE at startup
-#   -i, --interactive   enter interactive loop after batch command
-#
-#   * - a - unit address
-#   * - A - node aliases
-#   * - b - bus of appearance
-#   * - B -supported bus protocols
-#   * - c - compatible strings
-#   * - C
-# binding's compatible or headline
-#   * - d
-# binding's description
-#   * - D
-# node dependencies
-#   * - i
-# generated interrupts
-#   * - K
-# all labels and aliases
-#   * - l
-# device label
-#   * - L
-# DTS labels
-#   * - N
-# node name
-#   * - n
-# unit name
-#   * - o
-# dependency ordinal (aka ``dts_ord``)
-#   * - p
-# path name
-#   * - r
-# registers (base address and size)
-#   * - R
-# registers (address range)
-#   * - s
-# status string
-#   * - T
-# dependent nodes
-#   * - v
-# vendor name
-#   * - X
-# child-binding depth
-#   * - Y
-# bus information
 
-zephyr_bindings_dir := join(zephyr_base, "dts", "bindings")
-zephyr_extra_bindings_dir := env('ZEPHYR_EXTRA_BINDINGS_DIR', '')
-dts_bindings_flags := if zephyr_extra_bindings_dir != '' { '-b ' + zephyr_bindings_dir + ' -b ' + zephyr_extra_bindings_dir } else { '' }
-dtsh_dir := x'${JUST_HOME}/zephyr/dtsh'
-dtsh_pref := dtsh_dir / "dtsh.ini"
-dtsh := if which("dtsh") == '' { 'dtsh is not in the PATH. Please install it' } else { require('dtsh') }
-
-[no-cd]
-_dtsh-cmd build_dir +cmds:
-    {{ if path_exists(dtsh) != 'true' { error(dtsh) } else { '' } }}
-    {{ dtsh }} -c '{{ cmds }}' {{ join(build_dir, "zephyr", "zephyr.dts") }}
-
-[group('tools')]
-[no-cd]
-dtsh-sh build_dir *args:
-    {{ if path_exists(dtsh) != 'true' { error(dtsh) } else { '' } }}
-    {{ dtsh }} {{ args }} {{ join(build_dir, "zephyr", "zephyr.dts") }}
-
-# Print tree with NYKC (Node name, bus info, labels/aliases, bindings compat str)
-[group('tools')]
-dtsh-tree build_dir: (_dtsh-cmd build_dir "tree --format NYKC --pager")
-
-# Print tree with NYKC (Node name, bus info, labels/aliases, bindings compat str)
-[group('tools')]
-dtsh-cat node build_dir: (_dtsh-cmd build_dir f"cat &{{node}} --format Bd --pager")
-
-[group('tools')]
-dtsh-ls build_dir: (_dtsh-cmd build_dir "ls -l NYKC")
-
-[group('tools')]
-dtsh-find build_dir dts-ord_num: (_dtsh-cmd build_dir f'find --with-dts-ord {{dts-ord_num}} --format psTd')
-
-[group('tools')]
-dtsh-mem build_dir: (_dtsh-cmd build_dir f' -f {{dtsh_dir}}/partitions.dtsh')
+mod dtsh 'submods/zephyr/dtsh.just'
 
 ####################################
 # Misc

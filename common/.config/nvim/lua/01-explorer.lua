@@ -93,14 +93,26 @@ _G.keymaps_define({
   { lhs = prefix .. 'R', rhs = make_select_path(false, 0.5),                   opts = { desc = 'Frecent visits (cwd)' } },
 }, { prefix = prefix, group = 'Visits' })
 
--- Smart Splits
-require('smart-splits').setup {
-  ignored_buftypes = { 'codecompanion' },
-  ignored_filetypes = { 'codecompanion' },
-  default_amount = 3,
-  move_cursor_same_row = true,
-}
-_G.keymaps_define {
+local term = vim.fn.getenv 'TERM'
+local term_env = term ~= vim.v.null and term or ''
+if term_env == 'xterm-ghostty' then
+  _G.keymaps_define {
+  -- stylua: ignore start
+  { lhs = '<C-h>',      rhs = '<C-w>h',  opts = { desc = 'Focus window left' } },
+  { lhs = '<C-j>',      rhs = '<C-w>j',  opts = { desc = 'Focus window down' } },
+  { lhs = '<C-k>',      rhs = '<C-w>k',    opts = { desc = 'Focus window up' } },
+  { lhs = '<C-l>',      rhs = '<C-w>l', opts = { desc = 'Focus window right' } },
+    -- stylua: ignore end
+  }
+elseif term_env == 'wezterm' then
+  -- Smart Splits
+  require('smart-splits').setup {
+    ignored_buftypes = { 'codecompanion' },
+    ignored_filetypes = { 'codecompanion' },
+    default_amount = 3,
+    move_cursor_same_row = true,
+  }
+  _G.keymaps_define {
   -- stylua: ignore start
   { lhs = '<A-h>',      rhs = function() require('smart-splits').resize_left() end,       opts = { desc = 'Resize left' } },
   { lhs = '<A-j>',      rhs = function() require('smart-splits').resize_down() end,       opts = { desc = 'Resize down' } },
@@ -111,5 +123,6 @@ _G.keymaps_define {
   { lhs = '<C-k>',      rhs = function() require('smart-splits').move_cursor_up() end,    opts = { desc = 'Move window up' } },
   { lhs = '<C-l>',      rhs = function() require('smart-splits').move_cursor_right() end, opts = { desc = 'Move window right' } },
   { lhs = '<leader>wt', rhs = function() VimRc.wezterm_spawn_terminal() end,              opts = { desc = 'Spawn wezterm terminal' } },
-  -- stylua: ignore end
-}
+    -- stylua: ignore end
+  }
+end

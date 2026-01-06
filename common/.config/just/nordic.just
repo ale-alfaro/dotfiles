@@ -2,8 +2,7 @@ sdk-download-url-base := 'https://files.nordicsemi.com/artifactory/ncs-src-mirro
 sdk-types := "sdk-nrf-bm sdk-nrf"
 nrfutil := require('nrfutil')
 
-[default]
-@list:
+@_:
     just --list --justfile {{ source_file() }}
 
 [arg('type', pattern='baremetal|zephyr')]

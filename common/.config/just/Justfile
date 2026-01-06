@@ -4,20 +4,16 @@ set shell := ["zsh", "-uc"]
 
 justfile_home := config_dir() / 'just'
 
-mod python
 mod JLink
 mod openocd
-mod git
 mod direnv
 mod zephyr
 mod nordic
-mod ozone
+
+# @_:
+#     just --list-heading '{{ BOLD + RED }}{{ "\n" + file_stem(source_directory()) + ":\n" }}{{ NORMAL }}' --list
 
 @_:
-    just --list-heading '{{ BOLD + RED }}{{ "\n" + file_stem(justfile_directory()) + ":\n" }}{{ NORMAL }}' --list
-    just list
-
-@list_mods:
     fd . {{ justfile_home }} --extension=just -d 1 -x \
       just --color=always \
       --list {/.} \

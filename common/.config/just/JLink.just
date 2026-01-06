@@ -19,9 +19,8 @@ jlink-verify-command := '''
     mem32 VTOR_ADDR
     '''
 
-[default]
 @_:
-    just --list --justfile {{ source_file() }} --list-heading '{{ BOLD + BLUE }}{{ "\n  " + file_stem(source_file()) + ":\n" }}{{ NORMAL }}' --list-prefix '{{ "\t" }}' --list
+    just --list --justfile {{ source_file() }}
 
 ##### J-Link Documentation #####
 

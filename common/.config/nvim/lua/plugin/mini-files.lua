@@ -1,4 +1,23 @@
 ---@module "mini.nvim"
+---
+-- Add common bookmarks for every explorer. Example usage inside explorer:
+-- - `'c` to navigate into your config directory
+-- - `g?` to see available bookmarks
+local add_marks = function()
+  local env_paths = _G.fetch_env_paths()
+  for name, p in pairs(env_paths) do
+    if name and vim.uv.fs_stat(p) ~= nil then
+      local key = vim.fn.slice(name, 0, 1)
+      MiniFiles.set_bookmark(key, p, { desc = name })
+    end
+  end
+  MiniFiles.set_bookmark('c', vim.fn.stdpath 'config', { desc = 'Config' })
+  local plugin_dir = vim.fn.stdpath 'data' .. '/site/pack/core/opt'
+  MiniFiles.set_bookmark('p', plugin_dir, { desc = 'Plugins' })
+  MiniFiles.set_bookmark('.', vim.fn.expand '$HOME' .. '/dotfiles', { desc = 'Dotfiles' })
+  MiniFiles.set_bookmark('w', vim.fn.getcwd, { desc = 'Working directory' })
+end
+_G.new_user_autocmd(add_marks, 'MiniFilesExplorerOpen', 'Add bookmarks')
 
 require('mini.files').setup {
   windows = {
@@ -19,35 +38,38 @@ require('mini.files').setup {
     permanent_delete = false,
     use_as_default_explorer = true,
   },
+
   mappings = {
     close = 'q',
+    -- go_in       = 'l',
     go_in = '<Right>',
     go_in_plus = 'L',
-    go_out = 'H',
+    go_out = 'h',
+    -- go_out_plus = 'H',
     go_out_plus = '<Left>',
-    mark_goto = '<C-g>',
-    mark_set = '<C-m>',
+    mark_goto = "'",
+    mark_set = 'm',
     reset = '<BS>',
-    reveal_cwd = '<C-d>',
-    show_help = '?',
-    synchronize = '<C-s>',
+    reveal_cwd = '@',
+    show_help = 'g?',
+    synchronize = '=',
     trim_left = '<',
     trim_right = '>',
   },
 }
-local show_dotfiles = true
-local filter_show = function(fs_entry)
-  return true
-end
-local filter_hide = function(fs_entry)
-  return not vim.startswith(fs_entry.name, '.')
-end
-
-local toggle_dotfiles = function()
-  show_dotfiles = not show_dotfiles
-  local new_filter = show_dotfiles and filter_show or filter_hide
-  require('mini.files').refresh { content = { filter = new_filter } }
-end
+-- local show_dotfiles = true
+-- local filter_show = function(fs_entry)
+--   return true
+-- end
+-- local filter_hide = function(fs_entry)
+--   return not vim.startswith(fs_entry.name, '.')
+-- end
+--
+-- local toggle_dotfiles = function()
+--   show_dotfiles = not show_dotfiles
+--   local new_filter = show_dotfiles and filter_show or filter_hide
+--   require('mini.files').refresh { content = { filter = new_filter } }
+-- end
 
 -- Yank in register full path of entry under cursor
 local yank_path = function()
@@ -67,16 +89,16 @@ end
 -- However, some parts (like window title and height) of window config are later
 -- updated internally. Use `MiniFilesWindowUpdate` event for them: >lua
 
-_G.new_autocmd('User', function(args)
+_G.new_user_autocmd(function(args)
   vim.g.minifiles_active = true
   local buf_id = args.data.buf_id
-  vim.keymap.set('n', '.', toggle_dotfiles, { buffer = buf_id, desc = 'Toggle hidden files' })
+  -- vim.keymap.set('n', '.', toggle_dotfiles, { buffer = buf_id, desc = 'Toggle hidden files' })
   vim.keymap.set('n', 'gy', yank_path, { buffer = buf_id, desc = 'Yank path' })
   vim.keymap.set('n', 'gX', ui_open, { buffer = buf_id, desc = 'OS open' })
 end, 'MiniFilesBufferCreate', 'MiniFiles local keymaps')
 
 --
-_G.new_autocmd('User', function(event)
+_G.new_user_autocmd(function(event)
   local from = event.data.from
   local to = event.data.to
   local changes = {

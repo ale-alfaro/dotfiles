@@ -21,8 +21,7 @@ with_entries(
 '''
 
 # TODO report this upstream to direnv, this is an insane workaround :/
-[default]
-@list:
+@_:
     just --list --justfile {{ source_file() }}
 
 # target a specific .env file (supports direnv features!) for export as a JSON blob
