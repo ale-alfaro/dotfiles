@@ -26,38 +26,14 @@ gui:
       - "#db4b4b"
     defaultFgColor:
       - "#c0caf5"
-
 customCommands:
   # 1) Quick commit with dynamic prefix username/YYYY/M/
   - key: "Y"
-    description: "Commit: prefix username/YYYY/M/"
-    context: global
+    command: "uvx --from=commitizen cz c"
+    description: "commit with commitizen"
+    context: "files"
+    loadingText: "opening commitizen commit tool"
     output: terminal
-    prompts:
-      - type: input
-        title: "Msg:"
-        key: CommitMsg
-        initialValue: ""
-    command: |
-      #!/usr/bin/env bash
-      set -euo pipefail
-
-      prefix="username/$(date +%Y/%-m)/"
-      msg="{{ .Form.CommitMsg }}"
-
-      if [[ -z "$msg" ]]; then
-        echo "Error: empty commit message"
-        exit 1
-      fi
-
-      if [[ "$msg" == username/* ]]; then
-        final="$msg"
-      else
-        final="${prefix}${msg}"
-      fi
-
-      git commit -m "$final"
-
   # 3) Author + date range log (since/until prompts)
   - key: "U"
     description: "Log: author + date range (pretty)"
@@ -93,7 +69,6 @@ customCommands:
         --graph --decorate --date=short \
         --pretty=format:'%C(auto)%h%d%Creset %C(blue)%ad%Creset %C(green)%an%Creset %s' \
       | less -FRX
-
   # 4) Selected file history with --follow + optional date range (run from files panel)
   - key: "H"
     description: "File history: --follow + date range (selected file)"
@@ -129,7 +104,6 @@ customCommands:
         --graph --decorate --oneline \
         -- "$file" \
       | less -FRX
-
   # 5) Pickaxe (-S) diff-content search + optional path + optional dates
   - key: "S"
     description: "Search diffs: pickaxe (-S exact string), optional path"
@@ -182,7 +156,6 @@ customCommands:
           --pretty=format:'%C(auto)%h%d%Creset %C(blue)%ad%Creset %C(green)%an%Creset %s' \
         | less -FRX
       fi
-
   # 6) Regex-in-diff search (-G) + optional path + optional dates
   - key: "R"
     description: "Search diffs: regex (-G), optional path"
