@@ -2,10 +2,7 @@ return {
   on_init = function(client)
     if client.workspace_folders then
       local path = client.workspace_folders[1].name
-      if
-          path ~= vim.fn.stdpath('config')
-          and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc'))
-      then
+      if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then
         return
       end
     end
@@ -29,9 +26,8 @@ return {
           vim.env.VIMRUNTIME,
           -- Depending on the usage, you might want to add additional paths
           -- here.
-          '${3rd}/luv/library'
-          -- '${3rd}/busted/library'
-        }
+          '${3rd}/luv/library',
+        },
         -- Or pull in all of 'runtimepath'.
         -- NOTE: this is a lot slower and will cause issues when working on
         -- your own configuration.
@@ -39,13 +35,13 @@ return {
         -- library = {
         --   vim.api.nvim_get_runtime_file('', true),
         -- }
-      }
+      },
     })
   end,
   settings = {
     Lua = {
       codeLens = {
-        enable = true,
+        enable = false,
       },
       completion = {
         callSnippet = 'Replace',
@@ -62,5 +58,5 @@ return {
         arrayIndex = 'Disable',
       },
     },
-  }
+  },
 }

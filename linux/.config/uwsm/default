@@ -1,7 +1,7 @@
 # Changes require a restart to take effect.
 
+
 export TERMINAL=xdg-terminal-exec
-export TERMINAL=wezterm
-export EDITOR=nvim
+export EDITOR=$HOME/.local/bin/nvim
 
 export OMARCHY_SCREENSHOT_DIR="$HOME/Pictures/Screenshots"

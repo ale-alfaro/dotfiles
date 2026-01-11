@@ -230,7 +230,7 @@ require('mini.bracketed').setup()
 -- - `<Leader>bW` - completely wipeout current buffer even if it has changes
 -- - `<Leader>bd` - delete current buffer (see `:h :bdelete`)
 require('mini.bufremove').setup()
-_G.keymaps_define {
+KEYS.define {
   { lhs = '<leader>bd', rhs = '<Cmd>lua MiniBufremove.delete()<CR>', opts = { desc = 'Delete' } },
   { lhs = '<leader>bD', rhs = '<Cmd>lua MiniBufremove.delete(0, true)<CR>', opts = { desc = 'Delete!' } },
   { lhs = '<leader>bw', rhs = '<Cmd>lua MiniBufremove.wipeout()<CR>', opts = { desc = 'Wipeout' } },
@@ -294,7 +294,7 @@ require('mini.operators').setup { replace = { prefix = 'cr' } }
 -- - It overrides `:h (` and `:h )`.
 -- Explanation: `gx`-`ia`-`gx`-`ila` <=> exchange current and last argument
 -- Usage: when on `a` in `(aa, bb)` press `)` followed by `(`.
-_G.keymaps_define {
+KEYS.define {
   { lhs = '(', rhs = 'gxiagxila', opts = { remap = true, desc = 'Swap arg left' } },
   { lhs = ')', rhs = 'gxiagxina', opts = { remap = true, desc = 'Swap arg right' } },
 }

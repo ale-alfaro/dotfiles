@@ -164,7 +164,7 @@ require('fzf-lua').setup {
   },
 }
 local wkey_prefix = '<leader>f'
-_G.keymaps_define({
+KEYS.define({
   { lhs = '<leader><leader>', rhs = '<cmd>FzfLua buffers<cr>', opts = { desc = 'Buffers' } },
   {
     mode = { 'n', 'x' },

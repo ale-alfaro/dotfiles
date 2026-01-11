@@ -1,5 +1,6 @@
 [grep]
 tool = ripgrep
+ripgrep.tool-args = '--max-count=10'
 
 [update]
 narrow = true
@@ -11,5 +12,6 @@ base-prefer = "env"
 update = update -o=--depth=1 -n
 run = build --pristine=never --target run
 menuconfig = build --pristine=never --target menuconfig
-boards_show = boards --format "{name}: {qualifiers} dir:{dir}"
-
+boards = boards --format "{name:30} | {qualifiers:30} | {dir}"
+list = list -f " {name:30} | {path:50} "
+rg = grep --tool-path /bin/rg

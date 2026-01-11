@@ -3,10 +3,10 @@
 #######################################################
 # Set up default editor
 # ------------------------------------------------------------------------------
-export EDITOR=nvim
-export VISUAL=nvim
+#
+export VISUAL="$EDITOR"
 export SUDO_EDITOR="$EDITOR"
-export FCEDIT=nvim
+export FCEDIT="$EDITOR"
 export NVIM_HOME="$HOME/.local/nvim"
 #
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -19,10 +19,6 @@ else
   if [[ -z "${SSH_CONNECTION}" ]]; then
     export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
   fi
-  # export PICO_HOME=$HOME/.pico-sdk
-  # export PICO_SDK_PATH=$PICO_HOME/sdk
-  # export PICO_EXAMPLES_PATH=$PICO_HOME/examples
-  # export PICO_OPENOCD_PATH=$PICO_HOME/openocd
   export NCS_SDK_HOME="$HOME/ncs"
 fi
 

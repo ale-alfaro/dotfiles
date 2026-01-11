@@ -1,7 +1,5 @@
 {
-  "diagnostics.globals": [
-    "vim"
-  ],
+  "diagnostics.globals": ["vim"],
   "workspace.library": [
     "$VIMRUNTIME",
     "/home/alealfaro/.local/share/nvim/site/pack/core/opt/tiny-code-action.nvim",
@@ -29,10 +27,8 @@
     "/home/alealfaro/.local/share/nvim/site/pack/core/opt/fzf-lua",
     "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim-notify",
     "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nui.nvim",
-    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/smart-splits.nvim",
     "/home/alealfaro/.local/share/nvim/site/pack/core/opt/which-key.nvim",
     "/home/alealfaro/.local/share/nvim/site/pack/core/opt/bufferline.nvim",
-    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/noice.nvim",
     "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim",
     "/home/alealfaro/.local/share/nvim/site/pack/core/opt/mini.nvim",
     "/home/alealfaro/.local/share/nvim/site/pack/core/opt/plenary.nvim",

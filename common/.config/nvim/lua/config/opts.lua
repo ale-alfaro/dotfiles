@@ -1,10 +1,10 @@
 -- General ====================================================================
 vim.g.mapleader = ' ' -- Use `<Space>` as <Leader> key
 vim.g.maplocalleader = ','
--- vim.o.mouse = 'a'                  -- Enable mouse
+vim.o.mouse = 'a' -- Enable mouse
 vim.o.mousescroll = 'ver:25,hor:6' -- Customize mouse scroll
 vim.o.switchbuf = 'usetab' -- Use already opened buffers when switching
--- vim.o.undofile = true              -- Enable persistent undo
+vim.o.undofile = true -- Enable persistent undo
 
 vim.opt.number = true
 vim.o.shada = "'100,<50,s10,:1000,/100,@100,h" -- Limit ShaDa file (for startup)
@@ -26,8 +26,7 @@ vim.o.formatlistpat = [[^\s*[0-9\-\+\*]\+\([\.\)]\)*\s\+]]
 --
 -- -- Built-in completion
 vim.o.complete = '.,w,b,kspell' -- Use less sources
-vim.opt.clipboard = vim.env.SSH_TTY and '' or 'unnamedplus' -- Sync with system clipboard
--- vim.opt.completevim.o = "menu,menuone,noselect"
+vim.opt.clipboard = 'unnamedplus' -- Sync with system clipboard
 vim.opt.conceallevel = 2 -- Hide * markup for bold and italic, but not markers with substitutions
 vim.opt.cursorline = true -- Enable highlighting of the current line
 vim.opt.expandtab = true -- Use spaces instead of tabs
@@ -39,6 +38,8 @@ vim.opt.fillchars = {
   diff = '╱',
   eob = ' ',
 }
+vim.o.dict = '/home/alealfaro/.config/obsidian/Custom Dictionary.txt'
+vim.o.gdefault = true -- g is on by default when substituting with s/pattern/replace
 vim.o.grepformat = '%f:%l:%c:%m'
 vim.o.grepprg = 'rg --vimgrep'
 vim.o.inccommand = 'nosplit' -- preview incremental substitute

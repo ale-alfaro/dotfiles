@@ -439,3 +439,42 @@ convert_rst_to_md_dir(){
   #   convert_rst_to_md f
   # done
 }
+
+
+_err() {
+    echo "Do not understand: ${1}" >&2
+    echo "Arguments need to be files, names of arrays, or standard input." >&2
+    echo 'Arrays must be referenced by name, so use `array` instead of `$array`.' >&2
+    return 1
+}
+
+arr2quotes(){
+  emulate -L zsh
+  typeset -U ar
+  local ar=()
+
+  if [[ $# == 0 ]]; then
+      # Listen to STDIN if no arguments are provided
+      ar=( ${(f)$(<&0)} )
+  fi
+
+  while [[ $# > 0 ]]; do
+      if [[ -r "$1" && -f "$1" ]]; then
+          # A readable file.
+          ar=(
+              $ar[@]
+              "${(fq)$(<$1)}"
+          )
+      elif [[ ${(Pt)1} = "array" ]]; then
+          ar=(
+              $ar[@]
+              ${(Pq)1}
+          )
+      else
+          _err
+      fi
+      shift
+  done
+
+  print ${(j:, :)${(qq)ar[@]}}
+}

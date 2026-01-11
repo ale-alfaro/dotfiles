@@ -14,7 +14,10 @@ shell_integrations="$ZDOTDIR/shell_integrations"
 source "$shell_integrations/plugin_helper.zsh"
 # ---- Editor -----
 alias v="n"
-
+# Array to quoted list of strings
+a2q () {
+    print ${(j:, :)${(Pqq)1}[@]}
+}
 n() {
   if [[ "$#" -eq 0 ]]; then nvim; fi
   if [[ "$#" -eq 1 ]]; then
@@ -117,7 +120,7 @@ alias -s json=jless
 alias -s md=bat
 alias -s txt=bat
 alias -s log=bat
-alias -s py='$EDITOR'
+# alias -s py='$EDITOR'
 alias -s c='$EDITOR'
 alias -s h='$EDITOR'
 alias -s hpp='$EDITOR'

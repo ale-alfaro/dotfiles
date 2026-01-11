@@ -7,13 +7,29 @@ setmetatable(M, {
     return t[k]
   end,
 })
-
+--[[
+--  Global short_hands or small utilities
+--]]
 ---@param msg string|string[]
 ---@param level string
 local function notify(msg, level)
-  msg = type(msg) == 'table' and table.concat(msg, '\n') or msg --[[@as string]]
-  msg = vim.trim(msg)
-  vim.notify(msg, level)
+  if type(msg) == 'string' then
+    local id = MiniNotify.add(msg, level)
+    if level == 'DEBUG' or level == 'INFO' then
+      local timeout = level == 'INFO' and 5000 or 1000
+      vim.defer_fn(function()
+        MiniNotify.remove(id)
+      end, timeout)
+    end
+  elseif type(msg) == 'table' then
+    local id = MiniNotify.add('Msg containing table: ', level, nil, { object = msg })
+    if level == 'DEBUG' or level == 'INFO' then
+      local timeout = level == 'INFO' and 10000 or 4000
+      vim.defer_fn(function()
+        MiniNotify.remove(id)
+      end, timeout)
+    end
+  end
 end
 
 ---@param msg string|string[]
@@ -35,48 +51,40 @@ function _G.error(msg, var)
   return ret
 end
 
-function _G.fetch_env(env_name, fallback)
-  fallback = fallback or ''
-  local env = vim.fn.getenv(env_name)
-  return env ~= vim.v.null and env or fallback
+---@param base table|nil
+---@param extra table|nil
+---@return table
+function _G.merge_tables(base, extra)
+  return vim.tbl_deep_extend('force', base or {}, extra or {})
 end
-local env_vars = {
-  ZEPHYR_BASE = { '.' },
-  XDG_CONFIG_HOME = { 'hypr', 'direnv', 'zsh', 'just' },
-  OBSIDIAN_HOME = { 'Sibel-Work' },
-}
-function _G.fetch_env_paths()
-  local res = {}
-  for env, paths in pairs(env_vars) do
-    local expanded_env = fetch_env(env, nil)
-    if expanded_env then
-      for _, p in ipairs(paths) do
-        if p == '.' then
-          res[env] = expanded_env
-        else
-          res[p] = expanded_env .. '/' .. p
-        end
-      end
-    end
+
+function _G.setTimeout(timeout, callback)
+  local timer = vim.uv.new_timer()
+  if timer ~= nil then
+    timer:start(timeout, 0, function()
+      timer:stop()
+      timer:close()
+      callback()
+    end)
+    return timer
   end
-  return res
+end
+local function _fetch_env(env_name)
+  local env = vim.fn.getenv(env_name)
+  if env ~= vim.v.null then
+    return env
+  end
+  return nil
+end
+-- 'WEST_TOPDIR'
+function _G.ENV(name, fallback)
+  return vim.fn.has_key(vim.fn.environ(), name) and _fetch_env(name) or fallback
 end
 
----@param json string
----@return string[]
-function _G.fmt_json(json)
-  local indent = vim.bo.expandtab and (' '):rep(vim.o.shiftwidth) or '\t'
-  ---@type string
-  -- local lines = vim.islist(json) and table.concat(json, '\n') or json
-  local content = json:gsub('\n', '')
-  local o = vim.json.decode(content)
-  vim.print(o)
-  return o
-  -- local stringified = vim.json.encode(o, { indent = indent, sort_keys = true })
-  -- return vim.split(stringified, '\n')
-end
-
-M.exec = require 'custom.executables'
+--[[
+--  Global keymaps object for defining and toggling keys 
+--]]
+_G.KEYS = {}
 ---@class KeymapSpec
 ---@field lhs string
 ---@field rhs string|fun(args:table)
@@ -85,32 +93,12 @@ M.exec = require 'custom.executables'
 ---
 -- Tracks defined keymaps to prevent duplicates.
 -- Key is a unique string like "n:<leader>ff".
-M.keymap_registry = {}
+KEYS.registry = {}
 
 ---@param lhs string
 ---@param mode string
 local function keymap_encode(lhs, mode)
   return mode .. ':' .. lhs
-end
-
----@param lhs string
----@param mode? string
-function M.keymap_have(lhs, mode)
-  local check_mode = mode or 'n'
-  return M.keymap_registry[keymap_encode(lhs, check_mode)] ~= nil
-end
-
-function M.add_ft_keymaps(keys)
-  vim.api.nvim_create_autocmd('FileType', {
-    pattern = keys.ft,
-    callback = function(event)
-      if keys.rhs then
-        local opts = vim.deepcopy(keys.opts or {})
-        opts.buffer = event.buf
-        M.safe_keymap_set(keys.mode, keys.lhs, keys.rhs, opts)
-      end
-    end,
-  })
 end
 
 ---@class WhichKeyGroupSpec
@@ -120,7 +108,7 @@ end
 --- Defines a list of keymaps, preventing duplicates and handling conditions.
 ---@param keymaps KeymapSpec[]
 ---@param wkey_group WhichKeyGroupSpec?
-function _G.keymaps_define(keymaps, wkey_group)
+function KEYS.define(keymaps, wkey_group)
   local wkey_spec = {}
   if wkey_group then
     wkey_spec[#wkey_spec + 1] = { wkey_group.prefix, group = wkey_group.group }
@@ -131,7 +119,7 @@ function _G.keymaps_define(keymaps, wkey_group)
     local modes = vim._ensure_list(spec.mode or 'n')
     for _, mode in ipairs(modes) do
       local id = keymap_encode(spec.lhs, mode)
-      if M.keymap_registry[id] then
+      if KEYS.registry[id] then
         vim.notify('Keymap already defined and was skipped: ' .. id, vim.log.levels.WARN)
         goto continue_inner
       end
@@ -144,7 +132,7 @@ function _G.keymaps_define(keymaps, wkey_group)
       end
 
       -- Mark this keymap as handled
-      M.keymap_registry[id] = true
+      KEYS.registry[id] = true
       ::continue_inner::
     end
   end
@@ -156,7 +144,7 @@ end
 
 ---@param keymaps KeymapSpec[]
 ---@param enable boolean
-function _G.keymaps_toggle(keymaps, enable)
+function KEYS.toggle(keymaps, enable)
   for _, spec in ipairs(keymaps) do
     ---@type table
     local modes = vim._ensure_list(spec.mode or 'n')
@@ -173,26 +161,19 @@ function _G.keymaps_toggle(keymaps, enable)
     end
   end
 end
+--[[
+--  Global envs table and utilities
+--]]
 
-function M.setTimeout(timeout, callback)
-  local timer = vim.uv.new_timer()
-  if timer ~= nil then
-    timer:start(timeout, 0, function()
-      timer:stop()
-      timer:close()
-      callback()
-    end)
-    return timer
-  end
-end
-
-M.packpath = vim.fn.expand '$XDG_DATA_HOME' .. '/nvim/site/pack/core/opt'
+-- M.serial = require 'custom.serialization'
+M.exec = require 'custom.executables'
 
 ---@return table<string>
 function M.get_packpath_dirs()
   local paths = {}
+  local packpath = vim.fn.expand '$XDG_DATA_HOME' .. '/nvim/site/pack/core/opt'
   for name, type in
-    vim.fs.dir(M.packpath, {
+    vim.fs.dir(packpath, {
       skip = function(dir_name)
         if not string.match(dir_name, '^nvim') then
           return true
@@ -214,7 +195,7 @@ end
 ---@field plugin vim.pack.Spec
 ---@field dependencies vim.pack.Spec?
 ---@field opts table?
----@field config fun(opts: table)?
+---@field config fun()?
 ---@field keys KeymapSpec[]?
 ---@field wkey_group WhichKeyGroupSpec?
 ---@type VimPackPlugin[]
@@ -232,42 +213,9 @@ function M.pack_add(spec)
     require(spec.name).setup(spec.opts)
   end
   if spec.keys then
-    _G.keymaps_define(spec.keys, spec.wkey_group)
+    KEYS.define(spec.keys, spec.wkey_group)
   end
   M.added_plugins[#M.added_plugins + 1] = spec
-end
-
----@param cmd string|string[]
----@param cb fun(output: string[], code: number)
----@param opts? {env?: table<string, string>, cwd?: string}
-local function run_build_cmd(cmd, cb, opts)
-  local output = {} ---@type string[]
-  local id = vim.fn.jobstart(
-    cmd,
-    vim.tbl_extend('force', opts or {}, {
-      on_stdout = function(_, data)
-        output[#output + 1] = table.concat(data, '\n')
-      end,
-      on_exit = function(_, code)
-        cb(output, code)
-        if code ~= 0 then
-          vim.notify(
-            ('Terminal **cmd** `%s` failed with code `%d`:\n- `vim.o.shell = %q`\n\nOutput:\n%s'):format(
-              cmd,
-              code,
-              vim.o.shell,
-              vim.trim(table.concat(output, '')),
-              'error'
-            )
-          )
-        end
-      end,
-    })
-  )
-  if id <= 0 then
-    _G.error(('Failed to start job `%s`'):format(cmd))
-  end
-  return id > 0 and id or nil
 end
 
 ---@alias BuildHookCmdTypes 'shell' | 'user'
@@ -432,54 +380,7 @@ function M.pack_list()
   _G.info(lines)
 end
 
-function M.require_config_dir(dir)
-  -- ~/.config/nvim/lua/
-  dir = dir or 'lua'
-  local base_lua_path = vim.fs.joinpath(vim.fn.stdpath 'config', 'lua')
-  -- i.e. ~/.config/nvim/lua/plugins/*.lua
-  local glob_path = vim.fs.joinpath(base_lua_path, '[^0-9]*.lua')
-
-  local paths_str = vim.fn.glob(glob_path)
-  local paths_tbl = vim.split(paths_str, '\n')
-
-  for _, path in pairs(paths_tbl) do
-    -- convert absolute filename to relative
-    -- ~/.config/nvim/lua/plugins/config_file.lua -> plugins/config_file
-    local relfilename = vim.fs.relpath(base_lua_path, path):gsub('.lua', '')
-    _G.info('Requiring: ' .. relfilename)
-    require(relfilename)
-  end
-end
-
 --
 --
-
----@param what string|number|nil
----@param query? string
----@overload fun(buf?:number):boolean
----@overload fun(ft:string):boolean
----@return boolean
-function M.treesitter_have(what, query)
-  what = what or vim.api.nvim_get_current_buf()
-  what = type(what) == 'number' and vim.bo[what].filetype or what --[[@as string]]
-  local lang = vim.treesitter.language.get_lang(what)
-
-  local parsers = require('nvim-treesitter').get_installed()
-  if lang == nil or parsers[lang] == nil then
-    return false
-  end
-  -- if query and not M.have_query(lang, query) then
-  --   return false
-  -- end
-  return true
-end
-
-function M.treesitter_foldexpr()
-  return M.treesitter_have(nil, 'folds') and vim.treesitter.foldexpr() or '0'
-end
-
-function M.tresitter_indentexpr()
-  return M.treesitter_have(nil, 'indents') and require('nvim-treesitter').indentexpr() or -1
-end
 
 return M

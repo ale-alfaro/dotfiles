@@ -142,8 +142,8 @@ end
 ---@param bufnr number?
 ---@return string|nil output
 function M.west_topdir(bufnr)
-  local rootdir = vim.fs.root(bufnr or 0, { '.west', 'Justfile', 'zephyr', '.git' }) or vim.fn.getcwd()
-  local topdir = vim.fs.normalize(M.west 'topdir' or rootdir)
+  local rootdir = vim.fs.root(bufnr or 0, { '.west', 'zephyr' })
+  local topdir = M.west 'topdir' or rootdir
   if not topdir or not vim.uv.fs_stat(topdir) then
     _G.error 'No west topdir found'
     return nil

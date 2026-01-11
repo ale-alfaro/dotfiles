@@ -39,7 +39,7 @@ end, {
   desc = 'Re-enable lint-on-save',
 })
 local prefix = '<leader>l'
-_G.keymaps_define({
+KEYS.define({
   { lhs = prefix .. 'l', rhs = '<cmd>Lint<cr>', opts = { desc = 'Lint' } },
   { lhs = prefix .. 'f', rhs = '<cmd>Format<cr>', opts = { desc = 'Format' } },
   { lhs = prefix .. 'd', rhs = '<cmd>FormatDisable! <cr>', opts = { desc = 'FormatDisable (buffer)' } },

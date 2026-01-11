@@ -1,5 +1,8 @@
 ## For zsh configuration related needs go to https://thevaluable.dev/zsh-install-configure-mouseless/
 
+# If not running interactively, don't do anything (leave this at the top of this file)
+[[ $- != *i* ]] && return
+
 echo ".zshrc start"
 if [[ -o login ]]; then
   echo "Welcome $USER zsh"

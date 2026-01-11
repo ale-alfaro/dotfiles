@@ -72,13 +72,5 @@ end
 
 local ok, _ = pcall(require, 'plugin.blink-cmp')
 if not ok then
-  _G.error("Failed to load blink.cmp")
+  _G.error 'Failed to load blink.cmp'
 end
----@type VimPackBuildHooks
--- local blink_build_hook = {
---   plugin = 'blink.cmp',
---   build_cmd_type = 'shell',
---   build_cmd = 'cargo build --release',
--- }
--- vim.pack.add { _G.plug('Saghen/blink.cmp', { build_hook = blink_build_hook }) }
--- require 'plugin.blink-cmp'

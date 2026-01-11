@@ -33,7 +33,7 @@ local function dap_keymap_toggle(enable)
   }
   if enable ~= vim.g.dap_keymaps_enabled then
     vim.g.dap_keymaps_enabled = enable
-    _G.keymaps_toggle(dap_keymaps, enable)
+    KEYS.toggle(dap_keymaps, enable)
   end
 end
 

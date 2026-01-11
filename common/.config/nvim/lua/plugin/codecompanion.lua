@@ -6,7 +6,7 @@ vim.pack.add {
 -- CodeCompanion
 require 'custom.ai'
 local wkey_prefix = '<leader>a'
-_G.keymaps_define({
+KEYS.define({
   { mode = { 'n', 'v' }, lhs = wkey_prefix .. 'r', rhs = '<cmd>CodeCompanionChat RefreshCache<cr>', opts = { desc = 'CodeCompanion RefreshCache' } },
   { mode = { 'n', 'v' }, lhs = wkey_prefix .. 'a', rhs = '<cmd>CodeCompanionActions<cr>', opts = { desc = 'CodeCompanion Actions' } },
   { mode = { 'n', 'v' }, lhs = wkey_prefix .. 't', rhs = '<cmd>CodeCompanionChat Toggle<cr>', opts = { desc = 'CodeCompanionChat Toggle' } },

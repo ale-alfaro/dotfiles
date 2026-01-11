@@ -20,12 +20,13 @@ cursor-style = "block"
 cursor-style-blink = true
 
 # env = ZDOTDIR="/home/alealfaro/.config/zsh"
-command= "zsh -l"
+# command= "zsh -l"
 initial-command= "zsh -l"
 
 selection-clear-on-copy = true
 copy-on-select = true
 quick-terminal-size = 30%
+link-previews = true
 # Slowdown mouse scrolling
 # mouse-scroll-multiplier = 2.0
 # Cursor styling + SSH session terminfo

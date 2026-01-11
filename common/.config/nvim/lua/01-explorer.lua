@@ -2,7 +2,7 @@ require 'plugin.mini-files'
 
 -- stylua:ignore
 local wkey_prefix = '<leader>e'
-_G.keymaps_define({
+KEYS.define({
   { lhs = wkey_prefix .. 'x', rhs = '<Cmd>lua MiniFiles.open()<CR>', opts = { desc = 'File Explorer (cwd)' } },
   { lhs = wkey_prefix .. 'c', rhs = '<Cmd>lua MiniFiles.open(vim.api.nvim_buf_get_name(0))<CR>', opts = { desc = 'File Explorer' } },
   {
@@ -84,7 +84,7 @@ require('mini.visits').setup()
 local prefix = '<leader>v'
 
 -- stylua: ignore
-_G.keymaps_define({
+KEYS.define({
   { lhs = prefix .. 'l', rhs = '<Cmd>lua MiniVisits.add_label("core")<CR>',    opts = { desc = 'Add to core' }, },
   { lhs = prefix .. 'L', rhs = '<Cmd>lua MiniVisits.remove_label("core")<CR>', opts = { desc = 'Remove from core' }, },
   { lhs = prefix .. 'c', rhs = make_pick_core('', 'Core visits (all)'),        opts = { desc = 'Core visits (all)' } },
@@ -96,7 +96,7 @@ _G.keymaps_define({
 local term = vim.fn.getenv 'TERM'
 local term_env = term ~= vim.v.null and term or ''
 if term_env == 'xterm-ghostty' then
-  _G.keymaps_define {
+  KEYS.define {
   -- stylua: ignore start
   { lhs = '<C-h>',      rhs = '<C-w>h',  opts = { desc = 'Focus window left' } },
   { lhs = '<C-j>',      rhs = '<C-w>j',  opts = { desc = 'Focus window down' } },
@@ -112,7 +112,7 @@ elseif term_env == 'wezterm' then
     default_amount = 3,
     move_cursor_same_row = true,
   }
-  _G.keymaps_define {
+  KEYS.define {
   -- stylua: ignore start
   { lhs = '<A-h>',      rhs = function() require('smart-splits').resize_left() end,       opts = { desc = 'Resize left' } },
   { lhs = '<A-j>',      rhs = function() require('smart-splits').resize_down() end,       opts = { desc = 'Resize down' } },

@@ -21,7 +21,8 @@ west := if which('west') != '' { require('west') } else { f'{{uvx}} west' }
     just --list --color=always --justfile {{ source_file() }}
     just --list --color=always --justfile {{ source_dir() / 'submods' / "zephyr" / "twister.just" }}
 
-zephyr_just := f'{{source_file()}}/zephyr'
+zephyr_submods := f'{{source_dir()}}/submods/zephyr'
+zephyr_res := f'{{zephyr_submods}}/res'
 
 ####################################
 # West Manifest and Workspace Recipes
@@ -37,15 +38,8 @@ init west_yaml:
 
 [group('workspace')]
 [no-cd]
-setup:
-    cp {{ f'{{zephyr_just}}/Justfile.template' }} {{ invocation_directory() / 'Justfile' }}
-    echo ''' \
-        WEST_TOPDIR="{{ `west topdir` }}" \
-        ZEPHYR_BASE="{{ env('ZEPHYR_BASE') }}" \
-        APP_NAME="app" \
-        #DEFAULT_BOARD="" \
-    ''' >> {{ invocation_directory() / '.env' }}
-    just -g agents::ln_file zephyr {{ invocation_directory() / "AGENTS.md" }}
+setup dir=invocation_directory():
+    cp {{ f'{{zephyr_res}}/Justfile.template' }} {{ dir / 'Justfile' }}
 
 # update west
 [group('workspace')]

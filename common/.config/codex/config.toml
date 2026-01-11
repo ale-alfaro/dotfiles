@@ -186,7 +186,7 @@ project_doc_fallback_filenames = ["TECH_STACK.md"]
 [features]
 # Leave this table empty to accept defaults. Set explicit booleans to opt in/out.
 unified_exec = true
-rmcp_client = false
+rmcp_client = true
 apply_patch_freeform = true
 view_image_tool = true
 web_search_request = true
@@ -198,9 +198,9 @@ shell_snapshot= true
 [mcp_servers]
 
 # --- Example: STDIO transport ---
-# [mcp_servers.docs]
-# command = "docs-server"                 # required
-# args = ["--port", "4000"]               # optional
+[mcp_servers.just]
+command = "uvx"                 # required
+args = ["just-mcp", "--stdio"]               # optional
 # env = { "API_KEY" = "value" }           # optional key/value pairs copied as-is
 # env_vars = ["ANOTHER_SECRET"]            # optional: forward these from the parent env
 # cwd = "/path/to/server"                 # optional working directory override
@@ -243,14 +243,6 @@ shell_snapshot= true
 # # http_headers = { "X-Example" = "value" }
 # # env_http_headers = { "OpenAI-Organization" = "OPENAI_ORGANIZATION", "OpenAI-Project" = "OPENAI_PROJECT" }
 
-# --- Example: Azure (Chat/Responses depending on endpoint) ---
-# [model_providers.azure]
-# name = "Azure"
-# base_url = "https://YOUR_PROJECT_NAME.openai.azure.com/openai"
-# wire_api = "responses"                          # or "chat" per endpoint
-# query_params = { api-version = "2025-04-01-preview" }
-# env_key = "AZURE_OPENAI_API_KEY"
-# # env_key_instructions = "Set AZURE_OPENAI_API_KEY in your environment"
 
 # --- Example: Local OSS (e.g., Ollama-compatible) ---
 [model_providers.ollama]

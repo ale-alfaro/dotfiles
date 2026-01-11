@@ -16,13 +16,14 @@
 -- See `:h mini.nvim-buffer-local-config` and `:h mini.nvim-disabling-recipes`.
 
 -- Enable spelling and wrap for window
-vim.cmd 'setlocal spell wrap'
+-- vim.cmd 'setlocal spell wrap'
 
 -- Fold with tree-sitter
--- vim.cmd 'setlocal foldmethod=expr foldexpr=v:lua.vim.treesitter.foldexpr()'
+vim.cmd 'setlocal foldmethod=expr foldexpr=v:lua.vim.treesitter.foldexpr() foldlevelstart=4'
+vim.cmd 'setlocal nowrap'
 
 -- Disable built-in `gO` mapping in favor of 'mini.basics'
--- vim.keymap.del('n', 'gO', { buffer = 0 })
+vim.keymap.del('n', 'gO', { buffer = 0 })
 
 -- Set markdown-specific surrounding in 'mini.surround'
 vim.b.minisurround_config = {

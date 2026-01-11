@@ -54,6 +54,14 @@ setopt hist_ignore_dups
 setopt hist_find_no_dups
 
 ## Push and pop directories into a stack to go back to them quickly!
-setopt AUTO_PUSHD           # Push the current directory visited on the stack.
-setopt PUSHD_IGNORE_DUPS    # Do not store duplicates in the stack.
-setopt PUSHD_SILENT         # Do not print the directory stack after pushd or popd
+setopt AUTO_PUSHD        # Push the current directory visited on the stack.
+setopt PUSHD_IGNORE_DUPS # Do not store duplicates in the stack.
+setopt PUSHD_SILENT      # Do not print the directory stack after pushd or popd
+#Used for chaining together glob operators
+#Example:
+# `print -rC1 b*.pro(#q:s/pro/shmo/)(#q.:s/builtin/shmiltin/)`
+# This first those the glob 'b*.pro'
+# Then substitutes the substring 'pro' with 'shmo'
+# And lastly substitutes 'builtin' with 'shmiltin'
+
+setopt EXTENDED_GLOB

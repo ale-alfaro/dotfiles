@@ -1,9 +1,17 @@
 # Neovim Configuration Commands
 # Run with: just <recipe-name>
-
 # Check configuration for build errors
+
+# Show available recipes
+@_:
+    just --list
+
 check-config:
     nvim --headless -c '5sleep' -c ':q' .
+
+# Simple headless command for quick LSP/settings checks
+print-hello:
+    nvim --headless -c ":lua vim.print('hello')" -c ":q"
 
 # Run Neovim health check
 check-health:
@@ -17,7 +25,3 @@ format:
 check-all: check-config check-health
 
 # Open Neovim with this configuration
-
-# Show available recipes
-default:
-    just --list

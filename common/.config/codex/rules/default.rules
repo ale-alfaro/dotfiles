@@ -4,6 +4,6 @@ prefix_rule(
     match = [["rg", "-n", "$1"]],  # examples that must match
     not_match = [["rg", "-r", "$1"]],              # examples that must not match
 )
-prefix_rule(pattern=["fd"], decision="allow")
+prefix_rule(pattern=["just", "--justfile", ["$CODEX_HOME/skills/zephyr-workspace-explorer/scripts"]], decision="allow")
 prefix_rule(pattern=["bat"], decision="allow")
 prefix_rule(pattern=["sort", "-u"], decision="allow")

@@ -4,7 +4,7 @@
 --
 -- The next part (until `-- stylua: ignore end`) is aligned manually for easier
 -- reading. Consider preserving this or remove `-- stylua` lines to autoformat.
-_G.keymaps_define {
+KEYS.define {
   -- General & Navigation
   -- stylua: ignore start
   { lhs = "<leader>bb",            rhs = "<cmd>b#<cr>",                      opts = { desc = "Switch to Other Buffer" } },
@@ -38,7 +38,7 @@ _G.keymaps_define {
   {
     mode = { 'n' },
     lhs = '<C-g>',
-    rhs = '<Cmd>let @*=expand("%:p") <CR>',
+    rhs = '<Cmd>let @+=expand("%:p") <CR>',
     opts = { desc = 'Copy path of current filename  to clipboard', noremap = true },
   },
   -- Save
@@ -117,8 +117,8 @@ _G.keymaps_define {
   { lhs = ']q', rhs = vim.cmd.cnext, opts = { desc = 'Next Quickfix' } },
   -- Diagnostics
   { lhs = "<leader>cd", rhs = vim.diagnostic.open_float,                                                            opts = { desc = "Line Diagnostics" } },
-  { lhs = "]e",         rhs = function() vim.diagnostic.get_next({ severity = vim.diagnostic.severity.ERROR }) end, opts = { desc = "Next Error" } },
-  { lhs = "[e",         rhs = function() vim.diagnostic.get_prev({ severity = vim.diagnostic.severity.ERROR }) end, opts = { desc = "Prev Error" } },
+  { lhs = "]d",         rhs = function() vim.diagnostic.get_next({ severity = vim.diagnostic.severity.ERROR }) end, opts = { desc = "Next Error" } },
+  { lhs = "[d",         rhs = function() vim.diagnostic.get_prev({ severity = vim.diagnostic.severity.ERROR }) end, opts = { desc = "Prev Error" } },
   { lhs = "]w",         rhs = function() vim.diagnostic.get_next({ severity = vim.diagnostic.severity.WARN }) end,  opts = { desc = "Next Warning" } },
   { lhs = "[w",         rhs = function() vim.diagnostic.get_prev({ severity = vim.diagnostic.severity.WARN }) end,  opts = { desc = "Prev Warning" } },
   -- stylua: ignore end

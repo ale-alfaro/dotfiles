@@ -1,29 +1,29 @@
 # Don't let ripgrep vomit really long lines to my terminal, and show a preview.
 --max-columns=150
 --max-columns-preview
-
+--hyperlink-format=file://{host}/{path}
 # Search hidden files / directories (e.g. dotfiles) by default
---hidden
-
+# --hidden
 # Using glob patterns to include/exclude files or folders
---glob=!.git/*
+# --glob=!.git/*
 
 --type-add
-dts:*.dts*
+zdts:include:dts,yaml
 
 --type-add
-dts:**/bindings/**/*.y{a,}ml
+zdts:**/dts/bindings/**/*
 
 --type-add
-kconf:*.conf*
+zdts:*.overlay
 
 --type-add
-kconf:Kconfig*
+zsrc:include:c,cpp,py
 
+--type-add
+zbuild:include:kconfig,zdts,cmake
 
-# Set the colors.
---color=always
---colors=line:style:bold
+# Alias for --color=always --heading -n
+--pretty
 
 # Because who cares about case!?
 --smart-case

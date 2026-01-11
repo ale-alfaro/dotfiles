@@ -1,0 +1,50 @@
+#!/usr/bin/env -S just --working-directory . --justfile
+
+set unstable := true
+
+zephyr_base := env('ZEPHYR_BASE') || error("ZEPHYR_BASE not set! Please either run this in a west workspace or set the environment variable")
+topdir := `west topdir` || error("Couldn't retrieve the workspace topdir. Are you in a west workspace or have ZEPHYR_BASE set?")
+
+@_:
+    alias justw='{{ source_file() }}'
+    just --justfile {{ source_file() }} --list
+
+# List projects
+[group('projects')]
+proj_list:
+    @west list
+
+# Find boards with name pattern (can be regex)
+[group('boards')]
+find_board name_pattern:
+    @west boards -n {{ name_pattern }}
+
+[arg('file_flags', pattern='|-tzdts|-tzsrc|-tzbuild|-tkconfig')]
+[doc('Search the west workspace using ripgrep
+ Required parameters:
+ - keyword - word(s) or pattern to search for.
+ - file_flags - type of file to search in. Glob pattern is applied to search
+   Allowed flags:
+   - blank: when left empty no filter is applied by file type
+   - zbuild: **/dts/bindings/**/*, *.cmake, *.dts, *.dtsi, *.overlay, *.yaml, *.yml, CMakeLists.txt, Kconfig, Kconfig.*
+   - zsrc: *.[ChH], *.[ChH].in, *.[chH], *.[chH].in, *.[ch]pp, *.[ch]pp.in, *.[ch]xx, *.[ch]xx.in, *.cats, *.cc, *.cc.in, *.hh, *.hh.in, *.inl, *.py, *.pyi
+   - zdts: **/dts/bindings/**/*, *.dts, *.dtsi, *.overlay, *.yaml, *.yml
+   - kconfig: Kconfig, Kconfig.*
+')]
+[group('grep')]
+[no-cd]
+search keyword file_flags *extra_flags:
+    @west rg '{{ keyword }}' {{ file_flags }} {{ extra_flags }}
+
+# Search and output number of matches per file instead of the lines with matches
+[arg('file_flags', pattern='|-tzdts|-tzsrc|-tzbuild|-tkconfig')]
+[group('grep')]
+search_summary keyword file_flags *extra_flags: (search keyword file_flags f'--count-matches {{extra_flags}}')
+
+# Shortcut Search source files for keyword (C,C++,Python)
+[group('grep')]
+search_src keyword *flags: (search keyword '-tzsrc' flags)
+
+# Shortcut: Search CMake files, Devicetree and Kconfig files
+[group('grep')]
+search_build keyword *flags: (search keyword f'-tzbuild' flags)

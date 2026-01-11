@@ -46,8 +46,8 @@ return {
     config.defaults.actions.files['ctrl-t'] = actions.open
   end,
   keys = {
-    { lhs = '<leader>xD', rhs = '<cmd>Trouble diagnostics toggle<cr>', opts = { desc = 'Diagnostics (Trouble)' } },
-    { lhs = '<leader>xb', rhs = '<cmd>Trouble diagnostics toggle filter.buf=0<cr>', opts = { desc = 'Buffer Diagnostics (Trouble)' } },
+    { lhs = '<leader>xD', rhs = '<cmd>Trouble diagnostics toggle filter.severity=1<cr>', opts = { desc = 'Diagnostics (Trouble)' } },
+    { lhs = '<leader>xb', rhs = '<cmd>Trouble diagnostics toggle filter.buf=0 filter.severity=2<cr>', opts = { desc = 'Buffer Diagnostics (Trouble)' } },
     { lhs = '<leader>xs', rhs = '<cmd>Trouble symbols toggle<cr>', opts = { desc = 'Symbols (Trouble)' } },
     { lhs = '<leader>xr', rhs = '<cmd>Trouble lsp toggle<cr>', opts = { desc = 'LSP references/definitions  (Trouble)' } },
     { lhs = '<leader>xL', rhs = '<cmd>Trouble loclist toggle<cr>', opts = { desc = 'Location List (Trouble)' } },
