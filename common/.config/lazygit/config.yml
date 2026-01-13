@@ -27,12 +27,22 @@ gui:
     defaultFgColor:
       - "#c0caf5"
 customCommands:
-  # 1) Quick commit with dynamic prefix username/YYYY/M/
+  # Better commit messages
   - key: "Y"
     command: "uvx --from=commitizen cz c"
     description: "commit with commitizen"
     context: "files"
     loadingText: "opening commitizen commit tool"
+    output: terminal
+  # commit with date prefix
+  - key: "<c-d>"
+    context: "files"
+    description: "Commit with date prefix"
+    command: 'git commit -m "$(date +''[%Y-%m-%d]'') {{.Form.Message}}"'
+    prompts:
+      - type: "input"
+        title: "Add Commit Message"
+        key: "Message"
     output: terminal
   # 3) Author + date range log (since/until prompts)
   - key: "U"

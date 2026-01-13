@@ -1,36 +1,36 @@
-pkgs-dump-all:
-    pacman -Qqe 
+set shell := ['zsh', '-uc']
 
-pkgs-dump-arch:
+dotfiles_pkg_file := home_dir() / 'dotfiles' / os() / 'install' / 'pkglist.txt'
+
+arch-pkgs-dump:
     pacman -Qqen
 
-pkgs-dump-aur:
+arch-pkgs-dump-aur:
     pacman -Qqem
 
-install-file file:
-    mapfile -t packages < <(grep -v '^#' {{ file }} | grep -v '^$') \
-    sudo pacman -S --noconfirm --needed "${packages[@]}"
+arch-pkgs-dump-all:
+    pacman -Qqe
 
-[group('clean')]
-list-orphans:
+arch-pkgs-install file=dotfiles_pkg_file *args:
+    yay {{ f'-S{{args}}' }} "${(@f)"$(<{{ file }})"}"
+
+arch-pkgs-install-no-confirm file: (arch-pkgs-install '--noconfirm --needed')
+
+arch-pkgs-list-orphans:
+    echo '{{ BOLD + RED }}Orphans:{{ NORMAL }}'
     pacman -Qdtq
-
-[group('clean')]
-list-optional-orphans:
+    echo '{{ BOLD + RED }}Optional orphans:{{ NORMAL }} (remove this for a more aggresive clean)'
     pacman -Qdttq
 
-[group('clean')]
-remove-orphans:
+arch-remove-orphans:
     pacman -Qdtq | sudo pacman -Rns -
 
-[group('diagnostics')]
-systemd-diagnostics:
-    @systemctl status --full --no-pager > systemd-status.log
-    @systemctl --failed --no-pager > systemd-failed.log
-    @awk 'NR==2 {print $2}' systemd-status.log | xargs systemctl status --full --no-pager
-    @awk 'NR==2 {print $2}' systemd-status.log | xargs journalctl --no-pager
+@systemd-diagnostics:
+    systemctl status --full --no-pager > systemd-status.log
+    systemctl --failed --no-pager > systemd-failed.log
+    awk 'NR==2 {print $2}' systemd-status.log | xargs systemctl status --full --no-pager
+    awk 'NR==2 {print $2}' systemd-status.log | xargs journalctl --no-pager
 
-[group('udev')]
-install-udev-rules rules_file:
-    @sudo cp {{ rules_file }} /etc/udev/rules.d/
-    @sudo udevadm control --reload
+@udev-rules-install rules_file:
+    sudo cp {{ rules_file }} /etc/udev/rules.d/
+    sudo udevadm control --reload
