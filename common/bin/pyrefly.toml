@@ -1,5 +1,5 @@
-site-package-path = [".west-toml-build.venv/lib/python3.14/site-packages"]
+site-package-path = [".venv/lib/python3.14/site-packages"]
 skip-interpreter-query = true
 python-platform = "linux"
 python-version = "3.14"
-python-interpreter-path = ".west-toml-build.venv/bin/python3"
+python-interpreter-path = ".venv/bin/python3"

@@ -7,56 +7,6 @@ setmetatable(M, {
     return t[k]
   end,
 })
---[[
---  Global short_hands or small utilities
---]]
----@param msg string|string[]
----@param level string
-local function notify(msg, level)
-  if type(msg) == 'string' then
-    local id = MiniNotify.add(msg, level)
-    if level == 'DEBUG' or level == 'INFO' then
-      local timeout = level == 'INFO' and 5000 or 1000
-      vim.defer_fn(function()
-        MiniNotify.remove(id)
-      end, timeout)
-    end
-  elseif type(msg) == 'table' then
-    local id = MiniNotify.add('Msg containing table: ', level, nil, { object = msg })
-    if level == 'DEBUG' or level == 'INFO' then
-      local timeout = level == 'INFO' and 10000 or 4000
-      vim.defer_fn(function()
-        MiniNotify.remove(id)
-      end, timeout)
-    end
-  end
-end
-
----@param msg string|string[]
-function _G.warn(msg)
-  return notify(msg, 'WARN')
-end
-
----@param msg string|string[]
-function _G.info(msg)
-  return notify(msg, 'INFO')
-end
-
----@param msg string|string[]
-function _G.error(msg, var)
-  local ret = notify(msg, 'ERROR')
-  if var then
-    return notify(var, 'ERROR')
-  end
-  return ret
-end
-
----@param base table|nil
----@param extra table|nil
----@return table
-function _G.merge_tables(base, extra)
-  return vim.tbl_deep_extend('force', base or {}, extra or {})
-end
 
 function _G.setTimeout(timeout, callback)
   local timer = vim.uv.new_timer()
@@ -69,6 +19,29 @@ function _G.setTimeout(timeout, callback)
     return timer
   end
 end
+
+---@param msg string|string[]
+function _G.info(msg)
+  if M.notify then M.notify(msg, 'INFO') end
+end
+
+---@param msg string|string[]
+function _G.warn(msg)
+  if M.notify then M.notify(msg, 'WARN') end
+end
+
+---@param msg string|string[]
+function _G.error(msg, var)
+  if M.notify then M.notify(msg, 'ERROR') end
+end
+
+---@param base table|nil
+---@param extra table|nil
+---@return table
+function _G.merge_tables(base, extra)
+  return vim.tbl_deep_extend('force', base or {}, extra or {})
+end
+
 local function _fetch_env(env_name)
   local env = vim.fn.getenv(env_name)
   if env ~= vim.v.null then
@@ -82,7 +55,7 @@ function _G.ENV(name, fallback)
 end
 
 --[[
---  Global keymaps object for defining and toggling keys 
+--  Global keymaps object for defining and toggling keys
 --]]
 _G.KEYS = {}
 ---@class KeymapSpec
@@ -161,6 +134,7 @@ function KEYS.toggle(keymaps, enable)
     end
   end
 end
+
 --[[
 --  Global envs table and utilities
 --]]
@@ -173,15 +147,15 @@ function M.get_packpath_dirs()
   local paths = {}
   local packpath = vim.fn.expand '$XDG_DATA_HOME' .. '/nvim/site/pack/core/opt'
   for name, type in
-    vim.fs.dir(packpath, {
-      skip = function(dir_name)
-        if not string.match(dir_name, '^nvim') then
-          return true
-        else
-          return false
-        end
-      end,
-    })
+  vim.fs.dir(packpath, {
+    skip = function(dir_name)
+      if not string.match(dir_name, '^nvim') then
+        return true
+      else
+        return false
+      end
+    end,
+  })
   do
     if type == 'directory' then
       table.insert(paths, name)
@@ -295,11 +269,11 @@ end
 function _G.plug_spec(spec)
   table.insert(M.added_plugins, spec)
   return vim
-    .iter(spec)
-    :map(function(p)
-      return _G.plug(p)
-    end)
-    :totable()
+      .iter(spec)
+      :map(function(p)
+        return _G.plug(p)
+      end)
+      :totable()
 end
 
 --- @class PluginFilter
@@ -310,18 +284,18 @@ local function get_plugins(active_only)
   local plugins = vim.pack.get()
   if #plugins > 0 then
     return vim
-      .iter(plugins)
-      :filter(function(plug)
-        if active_only then
-          return plug.active
-        else
-          return true
-        end
-      end)
-      :map(function(plug)
-        return plug.name
-      end)
-      :totable()
+        .iter(plugins)
+        :filter(function(plug)
+          if active_only then
+            return plug.active
+          else
+            return true
+          end
+        end)
+        :map(function(plug)
+          return plug.name
+        end)
+        :totable()
   end
 end
 --- Updates one or more plugins.

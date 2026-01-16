@@ -3,11 +3,7 @@
 
 vim.pack.add(_G.plug_spec {
   'catppuccin/nvim',
-  -- 'folke/noice.nvim',
   'folke/which-key.nvim',
-  -- 'mrjones2014/smart-splits.nvim',
-  'MunifTanjim/nui.nvim',
-  'rcarriga/nvim-notify',
 })
 
 -- Set up to not prefer extension-based icon for some extensions
@@ -91,7 +87,8 @@ end
 
 -- Add LSP kind icons. Useful for 'mini.completion'.
 mini_icons.tweak_lsp_kind 'append'
-require('mini.notify').setup {
+local mini_notify = require('mini.notify')
+mini_notify.setup {
   content = {
     -- Use notification message as is for LSP progress
     format = notif_format_default,
@@ -118,6 +115,48 @@ require('mini.notify').setup {
   },
 }
 
+--stylua: ignore
+local vim_notify_opts = {
+  ERROR = { duration = 3000, hl_group = 'DiagnosticError' },
+  WARN  = { duration = 3000, hl_group = 'DiagnosticWarn' },
+  INFO  = { duration = 1000, hl_group = 'DiagnosticInfo' },
+  DEBUG = { duration = 0, hl_group = 'DiagnosticHint' },
+  TRACE = { duration = 0, hl_group = 'DiagnosticOk' },
+  OFF   = { duration = 0, hl_group = 'MiniNotifyNormal' },
+}
+
+
+vim.notify = mini_notify.make_notify(vim_notify_opts)
+vim.api.nvim_set_hl(0, "VimRcError", { link = "StderrMsg" })
+vim.api.nvim_set_hl(0, "VimRcWarn", { link = "WarningMsg" })
+vim.api.nvim_set_hl(0, "VimRcNormal", { link = "StdoutMsg" })
+--stylua: ignore
+VimRc.notify_opts = {
+  ERROR = { duration = 5000, hl_group = 'VimRcError' },
+  WARN  = { duration = 5000, hl_group = 'VimRcWarn' },
+  INFO  = { duration = 5000, hl_group = 'VimRcNormal' },
+  DEBUG = { duration = 5000, hl_group = 'ComplHint' },
+  TRACE = { duration = 0, hl_group = 'LineNr' },
+  OFF   = { duration = 0, hl_group = 'LineNr' },
+}
+VimRc.notify = function()
+  local level_names = {}
+  for k, v in pairs(vim.log.levels) do
+    level_names[v] = k
+  end
+
+  return vim.schedule_wrap(function(msg, level)
+    level = level or vim.log.levels.OFF
+    local level_name = level_names[level]
+    if level_name == nil then _G.error('Only valid values of `vim.log.levels` are supported.') end
+
+    local level_data = VimRc.opts[level_name]
+    if level_data.duration <= 0 then return end
+
+    local id = mini_notify.add(msg, level_name, level_data.hl_group, { source = 'VimRc' })
+    vim.defer_fn(function() mini_notify.remove(id) end, level_data.duration)
+  end)
+end
 local set_buf_name = function(buf_id, name)
   vim.api.nvim_buf_set_name(buf_id, 'mininotify://' .. buf_id .. '/' .. name)
 end
@@ -247,7 +286,7 @@ require('mini.statusline').setup()
 require('mini.tabline').setup()
 require('catppuccin').setup {
   flavour = 'macchiato', -- latte, frappe, macchiato, mocha
-  background = { -- :h background
+  background = {         -- :h background
     light = 'latte',
     dark = 'mocha',
   },
@@ -273,11 +312,11 @@ require('which-key').setup {
     mode = { 'n', 'v' },
     { '<leader>c', group = 'Code' },
     { '<leader>x', group = 'diagnostics/quickfix' },
-    { '[', group = 'prev' },
-    { ']', group = 'next' },
-    { 'g', group = 'goto' },
-    { 'gs', group = 'surround' },
-    { 'z', group = 'fold' },
+    { '[',         group = 'prev' },
+    { ']',         group = 'next' },
+    { 'g',         group = 'goto' },
+    { 'gs',        group = 'surround' },
+    { 'z',         group = 'fold' },
     {
       '<leader>b',
       group = 'buffer',

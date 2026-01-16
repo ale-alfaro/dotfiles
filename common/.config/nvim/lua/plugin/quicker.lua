@@ -17,8 +17,11 @@ return {
       -- use_default_opts = true,
       -- Keymaps to set for the quickfix buffer
       keys = {
-        { '>', "<cmd>lua require('quicker').expand()<CR>", desc = 'Expand quickfix content' },
-        { '<', "<cmd>lua require('quicker').collapse()<CR>", desc = 'Collapse quickfix content' },
+        { '>',                "<cmd>lua require('quicker').expand()<CR>",   desc = 'Expand quickfix content' },
+        { '<',                "<cmd>lua require('quicker').collapse()<CR>", desc = 'Collapse quickfix content' },
+        { 'z',                mode = 'n',                                   "<cmd>lua require('quicker').toggle_expand()<CR>", desc = 'Expand/Collapse quickfix content toggle' },
+        { 'r',                mode = 'n',                                   "<cmd>lua require('quicker').refresh()<CR>",       desc = 'Refresh quickfix content' },
+        { '<leader><leader>', mode = 'n',                                   "<cmd>lua require('quicker').toggle()<CR>",        desc = 'Toggle between qf and loclist' },
       },
       -- Callback function to run any custom logic or keymaps for the quickfix buffer
       on_qf = function(bufnr) end,
@@ -46,12 +49,12 @@ return {
     config.defaults.actions.files['ctrl-t'] = actions.open
   end,
   keys = {
-    { lhs = '<leader>xD', rhs = '<cmd>Trouble diagnostics toggle filter.severity=1<cr>', opts = { desc = 'Diagnostics (Trouble)' } },
+    { lhs = '<leader>xD', rhs = '<cmd>Trouble diagnostics toggle filter.severity=1<cr>',              opts = { desc = 'Diagnostics (Trouble)' } },
     { lhs = '<leader>xb', rhs = '<cmd>Trouble diagnostics toggle filter.buf=0 filter.severity=2<cr>', opts = { desc = 'Buffer Diagnostics (Trouble)' } },
-    { lhs = '<leader>xs', rhs = '<cmd>Trouble symbols toggle<cr>', opts = { desc = 'Symbols (Trouble)' } },
-    { lhs = '<leader>xr', rhs = '<cmd>Trouble lsp toggle<cr>', opts = { desc = 'LSP references/definitions  (Trouble)' } },
-    { lhs = '<leader>xL', rhs = '<cmd>Trouble loclist toggle<cr>', opts = { desc = 'Location List (Trouble)' } },
-    { lhs = '<leader>xQ', rhs = '<cmd>Trouble qflist toggle<cr>', opts = { desc = 'Quickfix List (Trouble)' } },
+    { lhs = '<leader>xs', rhs = '<cmd>Trouble symbols toggle<cr>',                                    opts = { desc = 'Symbols (Trouble)' } },
+    { lhs = '<leader>xr', rhs = '<cmd>Trouble lsp toggle<cr>',                                        opts = { desc = 'LSP references/definitions  (Trouble)' } },
+    { lhs = '<leader>xL', rhs = '<cmd>Trouble loclist toggle<cr>',                                    opts = { desc = 'Location List (Trouble)' } },
+    { lhs = '<leader>xQ', rhs = '<cmd>Trouble qflist toggle<cr>',                                     opts = { desc = 'Quickfix List (Trouble)' } },
     {
       lhs = '<leader>xq',
       rhs = function()
