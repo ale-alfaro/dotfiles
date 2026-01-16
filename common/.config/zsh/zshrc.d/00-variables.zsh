@@ -1,3 +1,4 @@
+#!/bin/zsh
 #######################################################
 # Environment Variables
 #######################################################
@@ -22,28 +23,5 @@ else
   export NCS_SDK_HOME="$HOME/ncs"
 fi
 
-export JUST_HOME=$XDG_CONFIG_HOME/just
-export BAT_THEME=ansi
 export MANPAGER="sh -c 'awk '\''{ gsub(/\x1B\[[0-9;]*m/, \"\", \$0); gsub(/.\x08/, \"\", \$0); print }'\'' | bat -p -lman'"
 export PAGER=bat
-export RIPGREP_CONFIG_PATH="${XDG_CONFIG_HOME}/ripgrep/ripgreprc"
-export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
-    --info=default\
-    --ansi \
-    --layout=reverse \
-    --border=rounded \
-    --color=border:#27a1b9 \
-    --color=fg:#c0caf5 \
-    --color=gutter:#16161e \
-    --color=header:#ff9e64 \
-    --color=hl+:#2ac3de \
-    --color=hl:#2ac3de \
-    --color=info:#545c7e \
-    --color=marker:#ff007c \
-    --color=pointer:#ff007c \
-    --color=prompt:#2ac3de \
-    --color=query:#c0caf5:regular \
-    --color=scrollbar:#27a1b9 \
-    --color=separator:#ff9e64 \
-    --color=spinner:#ff007c \
-    "

@@ -1,3 +1,4 @@
+require 'plugin.git'
 require 'plugin.codecompanion'
 
 local ok, quicker = pcall(require, 'plugin.quicker')

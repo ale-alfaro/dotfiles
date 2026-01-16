@@ -44,20 +44,17 @@ toolchain_dst_dir := toolchain_base_dir / f'v{{version}}'
 jq_query := f'.[] | select(has("key")) | select(.key|test("v\\d.\\d.\\d$")) | {version:.key[1:], hash: .metadata.version} | select(.version == "{{version}}").hash'
 
 toolchain_download:
-    {{ if path_exists(toolchain_tarball) == 'true' { f'echo  {{BOLD}}"Toolchain already downloaded at {{toolchain_tarball}}"{{NORMAL}}' } else { 'wget ' + shell('curl -s $1', f" ,{{toolchain_index_url}} | jq -r '{{jq_query}}'") + ' -O ' + toolchain_tarball } }}
+    {{ if path_exists(toolchain_tarball) == 'true' { f'echo  {{BOLD}}"Toolchain already downloaded at {{toolchain_tarball}}"{{NORMAL}}' } else { 'wget ' + shell(f"curl -s {{toolchain_index_url}} | jq -r '{{jq_query}}'") + ' -O ' + toolchain_tarball } }}
 
-# toolchain_download: && toolchain_decompress
-#     curl -s {{ toolchain_index_url }} | \
-#       jq -r '.[] | select(has("key")) | select(.key|test("v\\d.\\d.\\d$")) | {version:.key[1:], hash: .metadata.version} | select(.version == "{{ version }}").hash' | \
-#       xargs -I '{}' wget "{{ toolchain_base_url / toolchain_pkg_prefix }}-{}.tar.gz" -O {{ toolchain_tarball }}
-
-toolchain_decompress: toolchain_download
-    {{ if path_exists(toolchain_dst_dir) == 'true' { error('Toolchain already installed at ' + toolchain_dst_dir) } else { 'mkdir ' + toolchain_dst_dir } }}
-    tar -xzf {{ toolchain_tarball }} -C {{ toolchain_dst_dir }}
-
-[arg('version', pattern='^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9A-Za-z-][0-9A-Za-z-]*)(?:\.(0|[1-9A-Za-z-][0-9A-Za-z-]*))* marshal)?(?:\+(0|[1-9A-Za-z-][0-9A-Za-z-]*)(?:\.(0|[1-9A-Za-z-][0-9A-Za-z-]*))* marshal)?$')]
-toolchain_install version:
-    just --justfile {{ source_file() }} version={{ version }} toolchain_decompress
+[arg('ver', pattern='^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9A-Za-z-][0-9A-Za-z-]*)(?:\.(0|[1-9A-Za-z-][0-9A-Za-z-]*))* marshal)?(?:\+(0|[1-9A-Za-z-][0-9A-Za-z-]*)(?:\.(0|[1-9A-Za-z-][0-9A-Za-z-]*))* marshal)?$')]
+toolchain_install ver:
+    if [[ ! -f {{ ncs_download_dir / f'{{toolchain_pkg_prefix}}-v{{ver}}.tar.gz' }} ]]; then \
+      curl -s {{ toolchain_index_url }} | \
+        jq -r '.[] | select(has("key")) | select(.key|test("v\\d.\\d.\\d$")) | {version:.key[1:], hash: .metadata.version} | select(.version == "{{ ver }}").hash' | \
+        xargs -I '{}' wget "{{ toolchain_base_url / toolchain_pkg_prefix }}-{}.tar.gz" -O {{ ncs_download_dir / f'{{toolchain_pkg_prefix}}-v{{ver}}.tar.gz' }}; \
+    fi
+    if [[ ! -d  {{ toolchain_base_dir / f'v{{ver}}' }} ]]; then mkdir {{ toolchain_base_dir / f'v{{ver}}' }}; else echo '{{ BOLD }}"Toolchain already downloaded at {{ toolchain_base_dir }}. If you want to reinstall the toolchain, delete or move the toolchain folder v{{ ver }} in {{ toolchain_base_dir }}"{{ NORMAL }}' && exit 0; fi
+    tar -xzf {{ ncs_download_dir / f'{{toolchain_pkg_prefix}}-v{{ver}}.tar.gz' }} -C {{ toolchain_base_dir / f'v{{ver}}' }}
 
 toolchain_custom:
     {{ nrfutil }} config package-index remove {{ package_index_config }}

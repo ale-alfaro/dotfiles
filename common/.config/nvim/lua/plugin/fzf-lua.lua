@@ -21,7 +21,7 @@ require('fzf-lua').setup {
       -- neovim `:tmap` mappings for the fzf win
       -- true,        -- uncomment to inherit all the below in your custom config
       ['<M-Esc>'] = 'hide', -- hide fzf-lua, `:FzfLua resume` to continue
-      ['alt-h'] = 'toggle-help',
+      ['ctrl-?'] = 'toggle-help',
       ['alt-f'] = 'toggle-fullscreen',
       -- Only valid with the 'builtin' previewer
       ['<F3>'] = 'toggle-preview-wrap',
@@ -46,12 +46,10 @@ require('fzf-lua').setup {
       ['ctrl-z'] = 'abort',
       ['ctrl-d'] = 'half-page-down',
       ['ctrl-u'] = 'half-page-up',
-      ['ctrl-a'] = 'beginning-of-line',
-      ['ctrl-e'] = 'end-of-line',
-      ['ctrl-q'] = 'select-all+accept',
-      ['alt-a'] = 'toggle-all',
-      ['alt-g'] = 'first',
-      ['alt-G'] = 'last',
+      ['ctrl-A'] = 'select-all+accept',
+      ['ctrl-a'] = 'toggle-all',
+      ['ctrl-g'] = 'first',
+      ['ctrl-G'] = 'last',
       -- Only valid with fzf previewers (bat/cat/git/etc)
       ['f3'] = 'toggle-preview-wrap',
       ['f4'] = 'toggle-preview',
@@ -88,6 +86,13 @@ require('fzf-lua').setup {
       layout = 'vertical',
       vertical = 'up:40%',
     },
+    -- on_create = function()
+    -- called once upon creation of the fzf main window
+    -- can be used to add custom fzf-lua mappings, e.g:
+    --   vim.keymap.set("t", "<C-j>", "<Down>", { silent = true, buffer = true })
+    -- end,
+    -- called once _after_ the fzf interface is closed
+    -- on_close = function() ... end
   },
   defaults = { git_icons = false },
   -- Configuration for specific commands.
@@ -102,6 +107,10 @@ require('fzf-lua').setup {
     hidden = true,
     -- no_ignore = true, -- respect ".gitignore"  by default
     header_prefix = VimRc.icons.misc.search .. ' ',
+    rg_glob = true, -- default to glob parsing with `rg`
+    glob_flag = '--iglob', -- for case sensitive globs use '--glob'
+    glob_separator = '%s%-%-', -- query separator pattern (lua): ' --'
+
     rg_glob_fn = function(query, opts)
       local regex, flags = query:match(string.format('^(.*)%s(.*)$', opts.glob_separator))
       -- Return the original query if there's no separator.
@@ -168,7 +177,7 @@ KEYS.define({
   { lhs = '<leader><leader>', rhs = '<cmd>FzfLua buffers<cr>', opts = { desc = 'Buffers' } },
   {
     mode = { 'n', 'x' },
-    lhs = '/',
+    lhs = '<leader>/',
     rhs = function()
       local opts = {
         winopts = {
@@ -215,7 +224,6 @@ KEYS.define({
   { lhs = wkey_prefix .. 'd', rhs = '<cmd>FzfLua lsp_document_diagnostics<cr>', opts = { desc = 'Document diagnostics' } },
   { lhs = wkey_prefix .. 'f', rhs = '<cmd>FzfLua files<cr>', opts = { desc = 'Find files' } },
   { lhs = wkey_prefix .. 'G', rhs = '<cmd>FzfLua grep_project<cr>', opts = { desc = 'Grep Project' } },
-  { lhs = wkey_prefix .. 'c', rhs = '<cmd>FzfLua changes<cr>', opts = { desc = 'Changes' } },
   { lhs = wkey_prefix .. 'h', rhs = '<cmd>FzfLua help_tags<cr>', opts = { desc = 'Help' } },
   { lhs = wkey_prefix .. 'o', rhs = '<cmd>FzfLua oldfiles<cr>', opts = { desc = 'Recently opened files' } },
   { lhs = wkey_prefix .. 'r', rhs = '<cmd>FzfLua resume<cr>', opts = { desc = 'Resume last fzf command' } },

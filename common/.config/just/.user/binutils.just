@@ -1,3 +1,6 @@
+set shell := ['zsh', '-uc', '--extendedglob']
+set unstable := true
+
 nrfutil := require('nrfutil')
 addr2line-bat-awk := '''
   {
@@ -14,6 +17,10 @@ addr2line-bat-awk := '''
   }
 
   '''
+dotfiles_dir := home_dir() / "dotfiles"
+
+dots-bin *args:
+    -print -rC1 {{ dotfiles_dir }}/**/bin/*(.x) | fzf  --prompt 'Executables> ' --preview '[[ -r {} ]] && bat --color=always {}' --bind 'enter:become({} {{ args }} )'
 
 [group('binutils')]
 addr2line-bat elf addr:

@@ -40,7 +40,7 @@ vim.ui.select = function(items, opts, on_choice)
   end
 end
 require 'plugin.fzf-lua'
-require 'plugin.mini-pick'
+-- require 'plugin.mini-pick'
 
 local ok, grug = pcall(require, 'plugin.grug')
 if ok then

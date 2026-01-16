@@ -1,17 +1,11 @@
 #!/usr/bin/env zsh
 
-# ---- zsh-compatible Direnv stdlib helpers + other utilities for zsh scripts -----
-source "$ZDOTDIR/functions/stdlib.zsh"
 
 compress(){
   tar -czf "${1%/}.tar.gz" "${1%/}"
 }
 
 alias decompress="tar -xzf"
-shell_integrations="$ZDOTDIR/shell_integrations"
-# Plugin Helper
-# ------------------------------------------------------------------------------
-source "$shell_integrations/plugin_helper.zsh"
 # ---- Editor -----
 alias v="n"
 # Array to quoted list of strings
@@ -46,72 +40,6 @@ alias d='dirs -v'
 for index ({1..9}) alias "$index"="cd +${index}"; unset index
 
 # ---- Eza (better ls) -----
-if has eza; then
-  alias lt='eza --tree --level=3 --long --icons --git'
-  alias lta='lt -a'
-  alias ls="eza --icons=always --oneline --no-git --all"
-fi
-# Alias For bat
-# Link: https://github.com/sharkdp/bat
-if has bat; then
-  alias cat='bat'
-fi
-if has batman; then
-  alias man='batman'
-fi
-# Alias for lazygit
-# Link: https://github.com/jesseduffield/lazygit
-if has lazygit; then
-  alias lg='lazygit'
-fi
-# Alias for FZF
-# Link: https://github.com/junegunn/fzf
-if has fzf; then
-  alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
-  vf(){
-    fd --type file |
-      fzf --prompt 'Files> ' \
-          --header 'ALT-D: Switch between Files/Directories' \
-          --bind 'alt-d:transform:[[ ! $FZF_PROMPT =~ Files ]] &&
-                  echo "change-prompt(Files> )+reload(fd --type file)" ||
-                  echo "change-prompt(Directories> )+reload(fd --type directory)"' \
-          --preview '[[ $FZF_PROMPT =~ Files ]] && bat --color=always {} || tree -C {}' \
-          --bind 'enter:become(nvim {})'
-  }
-fi
-if has zoxide; then
-  zv(){ 
-    zoxide query -l $1 |  fzf --bind 'enter:become(nvim {})'
-  }
-  alias cd="zd"
-  zd() {
-    if [ $# -eq 0 ]; then
-      builtin cd ~ && return
-    elif [ -d "$1" ]; then
-      builtin cd "$1"
-    else
-      z "$@" && printf "\U000F17A9 " && pwd || echo "Error: Directory not found"
-    fi
-  }
-fi
-# Alias for just (command runner)
-if has just; then
-  alias j='just'
-  if [[ ! -z "${JUST_HOME}" ]]; then
-    # alias .j='just --justfile ~/.config/just/Justfile --working-directory .'
-    alias .j='just -g'
-    user_justfiles="${JUST_HOME}/.user"
-    if [[ -d "$user_justfiles" ]]; then
-      for file in $user_justfiles/*.just; do
-        for recipe in $(just --justfile $file --summary); do
-            alias $recipe="just --justfile $file --working-directory . $recipe"
-        done
-      done
-    fi
-  fi
-fi
-
-
 # -------------------------------------------
 # 5. Suffix Aliases - Open Files by Extension
 # -------------------------------------------

@@ -20,6 +20,12 @@ zdts:*.overlay
 zsrc:include:c,cpp,py
 
 --type-add
+ch:*.h
+
+--type-add
+csrc:*.c
+
+--type-add
 zbuild:include:kconfig,zdts,cmake
 
 # Alias for --color=always --heading -n

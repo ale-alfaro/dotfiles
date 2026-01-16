@@ -1,0 +1,5 @@
+add-auto-load-safe-path ~/sibel/eng/fw/bsim-workspace
+set debuginfod enabled on
+# fix up our python path first since GDB is likely linked with system (not brewed) python
+source ~/.config/gdb/pebble_gdb_scripts/gdb_python_path_fix.py
+source ~/.config/gdb/pebble_gdb_scripts/gdb_utils.py

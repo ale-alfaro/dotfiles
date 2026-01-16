@@ -23,11 +23,13 @@ require('mini.git').setup()
 -- - `:h MiniDiff.gen_source` - available built-in sources
 require('mini.diff').setup()
 
-KEYS.define {
+local wkey_prefix = '<leader>d'
+KEYS.define({
   -- General & Navigation
   -- stylua:ignore
-  { lhs = '<leader>dt', rhs = '<Cmd>lua MiniDiff.toogle_overlay()<CR>', opts = { desc = 'Diff Toggle Overlay' } },
-  { lhs = '<leader>dc', rhs = '<Cmd>lua MiniGit.show_at_cursor()<CR>', opts = { desc = 'Diff Showw at Cursor' } },
-  { lhs = '<leader>dd', rhs = '<Cmd>Git diff<CR>', opts = { desc = 'Diff' } },
-  { lhs = '<leader>da', rhs = '<Cmd>Git diff --cached<CR>', opts = { desc = 'Added Diff' } },
-}
+  { lhs = wkey_prefix .. 'c', rhs = '<cmd>FzfLua changes<cr>', opts = { desc = 'Search Git Diff (file-only)' } },
+  { lhs = wkey_prefix .. 'h', rhs = '<cmd>FzfLua git_hunks<cr>', opts = { desc = 'Git Hunks' } },
+  { lhs = wkey_prefix .. 's', rhs = '<cmd>FzfLua git_diff<cr>', opts = { desc = 'Search Git Diff' } },
+  { lhs = wkey_prefix .. 't', rhs = '<Cmd>lua MiniDiff.toogle_overlay()<CR>', opts = { desc = 'Diff Toggle Overlay' } },
+  { lhs = wkey_prefix .. 'd', rhs = '<Cmd>Git diff<CR>', opts = { desc = 'Diff' } },
+}, { prefix = wkey_prefix, group = 'Diff' })

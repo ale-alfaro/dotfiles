@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+fzf --prompt 'Apps> ' \
+  --header 'Select App' \
+  --bind 'enter:transform:[[ ! $FZF_PROMPT =~ Recipe ]] && 
+          echo "change-prompt(Recipe> )+reload(just --list --justfile {})" ||
+          echo "change-prompt(Apps> )+reload(print -rC1 ./**/Justfile)"' \
+  --preview '[[ ! $FZF_PROMPT =~ Recipes ]] && bat --color=always {q} || just --justfile {1} --show {2}' \
+  --bind 'enter:execute(just --justfile {1} +{2})'

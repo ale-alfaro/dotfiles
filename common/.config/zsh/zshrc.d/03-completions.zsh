@@ -1,3 +1,4 @@
+#!/bin/zsh
 # Set Up Completion
 #   Amazing Article going over the Zsh completion system https://thevaluable.dev/zsh-completion-guide-examples/
 #   To see the zsh completion help either call _complete_help in the shell or use CTRL+X h
@@ -20,45 +21,17 @@
 #   - <tag> - Apply the style to a specific tag.
 # ------------------------------------------------------------------------------
 #
-# Initialize First plguin, this plugin only adds more completions to the fpath so we call it before compload init
-plugins=(
-  zsh-users/zsh-completions
-)
-__init_plugins "${plugins[@]}"
-# --- MAN Completion generator ---
-ZSH_GEN_COMPLETIONS_FROM_MANPAGES_PATH="$HOME/.local/share/zsh/site"
-fpath+=("$ZSH_GEN_COMPLETIONS_FROM_MANPAGES_PATH" $fpath)
-
-# Load my custom or generated manually completions
-fpath=($ZDOTDIR/completions/src $fpath)
 # Load more completions from other sources of fpath
-
-# Homebrew completions (MacOS)
-# ------------------------------------------------------------------------------
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  if has brew; then
-    FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
-  fi
-fi
-if has nrfutil; then
-  [[ -r "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh" ]] && . "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh"
-fi
 
 # --- Initialize completion system ---
 autoload -U compinit
 compinit
-_comp_options+=(globdots) # With hidden files
 
 # +---------+
 # | Options |
 # +---------+
 
-# setopt GLOB_COMPLETE      # Show autocompletion menu with globs
-setopt MENU_COMPLETE    # Automatically highlight first element of completion menu
-setopt AUTO_LIST        # Automatically list choices on ambiguous completion.
-setopt COMPLETE_IN_WORD # Complete from both ends of a word.
 autoload -Uz compinit && compinit -d ${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump
-
 
 # ------------------------------------------------------------------------------
 # Define the completers to use. The completers are  listed below and their definitions
@@ -66,8 +39,7 @@ autoload -Uz compinit && compinit -d ${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdu
 # _approximate - This one is similar to _complete, except that it will try to correct what you’ve typed already (the context) if no match is found.
 # _expand_alias - Expand an alias you’ve typed. It needs to be declared before _complete.
 # _extensions - Complete the glob *. with the possible file extensions.
-zstyle ':completion:*' completer _extensions _complete _approximate
-
+# zstyle ':completion:*' completer _extensions _complete _approximate
 
 # zstyle ':completion:*' completer _complete _ignored _approximate
 # Problems with insecure directories under macOS?
@@ -83,75 +55,51 @@ zstyle ':completion:*' complete true
 
 # Use CTRL+X + A to expand an alias
 zle -C alias-expension complete-word _generic
-bindkey '^Xa' alias-expension
+# bindkey '^Xa' alias-expension
 zstyle ':completion:alias-expension:*' completer _expand_alias
 
 #Select in a menu
-zstyle ':completion:*' menu select
+# zstyle ':completion:*' menu select
 
 # Autocomplete options for cd instead of directory stack
-zstyle ':completion:*' complete-options true
+# zstyle ':completion:*' complete-options true
 
-zstyle ':completion:*' file-sort modification
+# zstyle ':completion:*' file-sort modification
 # --- Completion styles ---
-zstyle ':completion:*:*:*:*:corrections' format '%F{yellow}!- %d (errors: %e) -!%f'
-zstyle ':completion:*:*:*:*:descriptions' format '%F{blue}-- %D %d --%f'
-zstyle ':completion:*:*:*:*:messages' format ' %F{purple} -- %d --%f'
-zstyle ':completion:*:*:*:*:warnings' format ' %F{red}-- no matches found --%f'
+## disable sort when completing `git checkout`
+zstyle ':completion:*:git-checkout:*' sort false
+# set descriptions format to enable group support
+# NOTE: don't use escape sequences (like '%F{red}%d%f') here, fzf-tab will ignore them
+# zstyle ':completion:*:descriptions' format '[%d]'
+# set list-colors to enable filename colorizing
+# zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+# force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
+zstyle ':completion:*' menu no
+
+setopt GLOB_COMPLETE # Show autocompletion menu with globs
+# setopt MENU_COMPLETE    # Automatically highlight first element of completion menu
+# setopt AUTO_LIST        # Automatically list choices on ambiguous completion.
+setopt COMPLETE_IN_WORD # Complete from both ends of a word.
+
+# zstyle ':completion:*:*:*:*:corrections' format '%F{yellow}!- %d (errors: %e) -!%f'
+# zstyle ':completion:*:*:*:*:descriptions' format '%F{blue}-- %D %d --%f'
+# zstyle ':completion:*:*:*:*:messages' format ' %F{purple} -- %d --%f'
+# zstyle ':completion:*:*:*:*:warnings' format ' %F{red}-- no matches found --%f'
 
 # zstyle ':completion:*:default' list-prompt '%S%M matches%s'
 # Colors for files and directory
-zstyle ':completion:*:*:*:*:default' list-colors ${(s.:.)LS_COLORS}
+# zstyle ':completion:*:*:*:*:default' list-colors ${(s.:.)LS_COLORS}
 
 # Only display some tags for the command cd
-zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack path-directories
+# zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack path-directories
 # zstyle ':completion:*:complete:git:argument-1:' tag-order !aliases
 
 # Required for completion to be in good groups (named after the tags)
-zstyle ':completion:*' group-name ''
+# zstyle ':completion:*' group-name ''
 
-zstyle ':completion:*:*:-command-:*:*' group-order aliases builtins functions commands
-
+# zstyle ':completion:*:*:-command-:*:*' group-order aliases builtins functions commands
 
 ## These were created by `compinstall`
 # zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]} r:|[._-]=* r:|=*' 'm:{[:lower:]}={[:upper:]}' 'm:{[:lower:]}={[:upper:]}' 'm:{[:lower:]}={[:upper:]}'
 # zstyle ':completion:*' max-errors 2
 # zstyle :compinstall filename "$ZDOTDIR/.zshrc"
-
-# ------------------------------------------------------------------------------
-## fzf
-# ------------------------------------------------------------------------------
-if has fzf; then
-  source <(fzf --zsh)
-
-  export FZF_CTRL_R_OPTS="
-  --color header:italic
-  --height=80%
-  --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
-  --header 'CTRL-Y: Copy command into clipboard, CTRL-/: Toggle line wrapping, CTRL-R: Toggle sorting by relevance'
-  "
-
-  export FZF_CTRL_T_OPTS="
-  --walker-skip .git,node_modules,target
-  --preview 'bat -n --color=always {}'
-  --height=80%
-  --bind 'ctrl-/:change-preview-window(down|hidden|)'
-  --header 'CTRL-/: Toggle preview window position'
-  "
-
-  export FZF_ALT_C_OPTS="
-  --walker-skip .git,node_modules,target
-  --preview 'tree -C {}'
-  --height=80%
-  --bind 'ctrl-/:change-preview-window(down|hidden|)'
-  --header 'CTRL-/: Toggle preview window position'
-  "
-  # FZF-tab completion helper
-  plugins=(
-    Aloxaf/fzf-tab
-  )
-  __init_plugins "${plugins[@]}"
-
-  zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
-  zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
-fi

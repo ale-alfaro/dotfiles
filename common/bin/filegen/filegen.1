@@ -1,0 +1,153 @@
+.TH FILEGEN 1 "January 2026" "filegen" "User Commands"
+.SH NAME
+filegen \- generate files from templates
+.SH SYNOPSIS
+.B filegen
+.I NAME
+.I DEST
+.RI [ options ]
+.br
+.B filegen
+.BR shell
+.br
+.B filegen
+.BR help
+.SH DESCRIPTION
+filegen generates files from templates located in a repo-specific templates
+directory. If no file-type flags are provided, all discovered types are
+generated. It was built with C source/header generation in mind, but can be
+extended to any file type by adding templates.
+.SH INSTALLATION
+Install uv:
+.nf
+.RS
+curl -LsSf https://astral.sh/uv/install.sh | sh
+.RE
+.fi
+One way to install (not the only way):
+.nf
+.RS
+chmod +x filegen
+mv filegen ~/.local/bin/filegen
+.RE
+.fi
+Install the man page:
+.nf
+.RS
+install -m 644 filegen.1 ~/\.local/share/man/man1/
+.RE
+.fi
+If your MANPATH does not include ~/.local/share/man, add it:
+.nf
+.RS
+export MANPATH="${MANPATH}:$HOME/.local/share/man"
+.RE
+.fi
+.SH CONFIGURATION
+Template directory resolution order:
+.IP 1.
+--template-dir
+.IP 2.
+FILEGEN_TEMPLATES
+.IP 3.
+<repo-root>/templates (repo-root detected by a .git directory)
+.PP
+You can set the environment variable:
+.nf
+.RS
+export FILEGEN_TEMPLATES=/path/to/templates
+.RE
+.fi
+.SH TEMPLATE DISCOVERY
+Templates are resolved in this order:
+.IP 1.
+--template-dir
+.IP 2.
+FILEGEN_TEMPLATES
+.IP 3.
+<repo-root>/templates (repo-root detected by a .git directory)
+.PP
+Templates must include YAML-style frontmatter with a filetype field:
+.nf
+.RS
+---
+filetype: c
+---
+.RE
+.fi
+Template file extensions must match the type:
+.IP \[bu] 2
+*.ctf for C source (filetype: c)
+.IP \[bu] 2
+*.htf for C header (filetype: h)
+.PP
+Required template variables:
+.IP \[bu] 2
+Header (.htf): ${file_name}, ${header_guard}, ${year}
+.IP \[bu] 2
+Source (.ctf): ${file_name}, ${year}
+.PP
+Other file types are discoverable but generation is currently limited to c/h.
+.SH OPTIONS
+.TP
+.BR -t , " " --type " " TYPE
+Generate files matching TYPE (repeatable, supports TYPE=all).
+.TP
+.BR --type-add " " PATH
+Add a template file for this run (repeatable).
+.TP
+.BR -t , " " --template-dir " " DIR
+Use DIR for templates (overrides FILEGEN_TEMPLATES and repo templates).
+.TP
+.BR -r , " " --root " " DIR
+Root directory for header guards (defaults to DEST parent).
+.TP
+.BR -f , " " --force
+Overwrite existing files without prompting.
+.SH INTERACTIVE SHELL
+.B filegen shell
+starts an interactive session where you can run multiple generate commands
+without reloading the script.
+.SH EXAMPLES
+Generate all discovered types (default):
+.nf
+.RS
+filegen my_module ./src
+.RE
+.fi
+Generate only a header:
+.nf
+.RS
+filegen my_module ./include -t h
+.RE
+.fi
+Generate only a source file:
+.nf
+.RS
+filegen my_module ./src -t c
+.RE
+.fi
+Use repo templates:
+.nf
+.RS
+filegen my_module ./src
+.RE
+.fi
+Use explicit template directory:
+.nf
+.RS
+filegen my_module ./src --template-dir ./templates
+.RE
+.fi
+Interactive shell for batch creation:
+.nf
+.RS
+filegen shell
+# then run: generate my_module ./src -t c -t h
+.RE
+.fi
+.SH SEE ALSO
+.BR uv (1)
+.SH AUTHOR
+Internal tool.
+." vim: set filetype=man :

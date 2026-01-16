@@ -308,9 +308,9 @@ KEYS.define {
 --   'mini.pairs' doesn't provide particularly smart behavior, like auto balancing
 -- Create pairs not only in Insert, but also in Command line mode
 
-require('mini.pairs').setup {
-  modes = { insert = true, command = true, terminal = false },
-}
+-- require('mini.pairs').setup {
+--   modes = { insert = true, command = true, terminal = false },
+-- }
 
 -- Split and join arguments (regions inside brackets between allowed separators).
 -- It uses Lua patterns to find arguments, which means it works in comments and

@@ -35,6 +35,7 @@ export PATH="$PATH:$HOME/.cargo/bin"
 # ------------------------------------------------------------------------------
 export GOROOT="/usr/local/go"
 export GOPATH="$HOME/go"
+export JUST_HOME=$XDG_CONFIG_HOME/just
 
 # Go
 # ------------------------------------------------------------------------------

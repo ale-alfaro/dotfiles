@@ -1,35 +1,73 @@
 ---
-name:just-command-runner 
-description: Use when working with Just for Zephyr development creating or extending project Justfiles, applying the user’s preferred patterns, wiring west builds/flash/run, and understanding just settings, recipes, and modules. Includes a Zephyr-focused Justfile template and a concise Just reference.
+name: just-recipe-authoring
+description: Create build,test,run recipes and integrate shell and python scripts with Just. Use when automating any set of shell commands, trigerring a software development lifecycle activity and general scripting of short but deterministic command recipes.
 ---
 
-# Zephyr Justfile Usage
+# Just Recipe Authoring
 
-Use this skill to create or extend Justfiles for Zephyr applications, following the preferred patterns and conventions.
+Expert guidance for Just, a command runner with syntax inspired by make. Use this skill for creating justfiles, writing recipes, configuring settings, and implementing task automation workflows.
 
-## 1) Start from the reference
+**Key capabilities:**
 
-- Use `references/just-quick-reference.md` as the default baseline.
-- Pull missing details from `references/just-manual.md` only when needed.
-- Use `references/zephyr-justfile-template.just` as the starting template for new apps.
+- Create and organize justfiles with proper structure
+- Write recipes with attributes, dependencies, and parameters
+- Configure settings for shell, modules, and imports
+- Use built-in constants for terminal formatting
+- Implement check/write patterns for code quality tools
 
-## 2) Establish core settings
+# Workflows
 
-- Prefer `set shell := ['zsh', '-uc']` and `set unstable := true` to match the template.
-- Use `require('west')` to enforce tool availability.
-- Derive `app` from `source_dir()` and `board` from `west config build.board` with a fallback.
+## 1) Boilerplate, variables and default recipe at the top
+
+- Add `set shell := ['zsh', '-uc']` and `set unstable := true` always. Other settings that are accepted are:
+
+| Name                 | Value              | Default                     | Description                                                                                                          |
+| -------------------- | ------------------ | --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `dotenv-load`        | boolean            | `false`                     | Load a `.env` file, if present.                                                                                      |
+| `dotenv-path`        | string             | -                           | Load a `.env` file from a custom path and error if not present. Overrides `dotenv-filename`.                         |
+| `quiet`              | boolean            | `false`                     | Disable echoing recipe lines before executing.                                                                       |
+| `script-interpreter` | `[COMMAND, ARGS…]` | `['uv', 'run', '--script']` | Set command used to invoke recipes with empty `[script]` attribute. Use uv unless instructed                         |
+| `working-directory`  | string             | -                           | Set the working directory for recipes and backticks, relative to the default working directory. **USE WITH CAUTION** |
+
+- Any executable used in the recipes should be referenced with `require('west')` to enforce tool availability. If the recipe is optional you can use which
+- Declare all paths up-fron using `source_dir()` to get the Justfile directory absolute path and using `home_dir()` or other Just provided path functions for user directories and other common paths.
 - Keep variables at the top; expose knobs via env/vars, not long argument lists.
+- Add a default listing recipe:
 
-## 3) Default + discoverability
+```just
+@_:
+    just --list
+```
 
-- Use a default listing recipe that formats the app name.
-- Prefer `just --list-heading` to keep a consistent UI.
+## 2) Recipe groups and attributes
 
-## 4) Validate Justfile formatting (must)
+- Define the recipe groups by themes or the stages of the workflow to automate. Use a word or two words max hyphonated for the name of the recipe group
+- Section out the recipe group with a simple page break `--- RECIPE_GROUP ---`
+- If a relative order exist, put the recipe groups that should be run first or are dependencies of the ones below first
+- Attributes that are useful to use not only to group recipe but to add specialized behavior to a recipe. All accepted attributes are listed below:
 
-- Always run `just --fmt --check --unstable --justfile path/to/Justfile` after edits. This will return 0 if all is good or return 1 if there's any errors and additionally a diff with the suggested changes in another file with the name Justfile.fmt or {FILENAME}.fmt if not called Justfile
+| Name                                         | Type           | Description                                                                                                                                 |
+| -------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[confirm]`<sup>1.17.0</sup>                 | recipe         | Require confirmation prior to executing recipe.                                                                                             |
+| `[confirm(PROMPT)]`<sup>1.23.0</sup>         | recipe         | Require confirmation prior to executing recipe with a custom prompt.                                                                        |
+| `[doc(DOC)]`<sup>1.27.0</sup>                | module, recipe | Set recipe or module's [documentation comment](#documentation-comments) to `DOC`.                                                           |
+| `[extension(EXT)]`<sup>1.32.0</sup>          | recipe         | Set shebang recipe script's file extension to `EXT`. `EXT` should include a period if one is desired.                                       |
+| `[group(NAME)]`<sup>1.27.0</sup>             | module, recipe | Put recipe or module in in [group](#groups) `NAME`.                                                                                         |
+| `[linux]`<sup>1.8.0</sup>                    | recipe         | Enable recipe on Linux.                                                                                                                     |
+| `[macos]`<sup>1.8.0</sup>                    | recipe         | Enable recipe on MacOS.                                                                                                                     |
+| `[no-cd]`<sup>1.9.0</sup>                    | recipe         | Don't change directory before executing recipe.                                                                                             |
+| `[parallel]`<sup>1.42.0</sup>                | recipe         | Run this recipe's dependencies in parallel.                                                                                                 |
+| `[script]`<sup>1.33.0</sup>                  | recipe         | Execute recipe as script. See [script recipes](#script-recipes) for more details.                                                           |
+| `[script(COMMAND)]`<sup>1.32.0</sup>         | recipe         | Execute recipe as a script interpreted by `COMMAND`. See [script recipes](#script-recipes) for more details.                                |
+| `[working-directory(PATH)]`<sup>1.38.0</sup> | recipe         | Set recipe working directory. `PATH` may be relative or absolute. If relative, it is interpreted relative to the default working directory. |
 
-## 5) Justfile lessons (must)
+## 3) Recipe creation
+
+- Add private helpers recipes prefixed with `_` first and any private variables that aren't meant to be set by the user. No doc string required for this
+- Add the main recipes with a doc string using the attribute `[doc('...')]` and distinguish clearly the arguments that are required vs optional and if a '*extra' or '*args' catch all requirement is used and why
+- Follow the rules, tips and encouraged usage patterns below
+
+### Rules
 
 1. NEVER use "bash -lc '...'" or such commands in a justfile. It is redundant. If you really need to execute a bash script like recipe use a shebang recipe which is composed of a
    shebang on the first line of the recipe. Example:
@@ -89,28 +127,86 @@ Use this skill to create or extend Justfiles for Zephyr applications, following 
     ...
 ```
 
-## 6) Zephyr build workflow
+### Tips
 
-- Provide `configure` to set `west config` defaults (board, build dir format, pristine).
-- Provide `build`, `build_clean`, and `clean` with `build_dir` derived from west config.
-- Use `board`, `snippet`, `target`, and `clean` as overridable knobs.
+1. Use `@` prefix to suppress command echo: `@echo "quiet"`
+2. Use `+` for variadic parameters: `test +args`
+3. Use `*` for optional variadic: `build *flags`
+4. Quote glob patterns in variables: `GLOBS := "\"**/*.json\""`
+5. Use `[no-cd]` in monorepos to stay in current directory
+6. Private recipes start with `_` or use `[private]`
+7. For cross-platform linewise recipes, set both `set shell := [...]` and `set windows-shell := [...]` so Windows uses a Windows-appropriate shell while other OSes use the default shell.
 
-## 7) Flash/run tooling
+### Encouraged Advanced Patterns
 
-- Provide a `flash` recipe that depends on `build`.
+#### Recipe Argument Flags (v1.46.0+)
 
-## 8) Devicetree tooling (dtsh)
+The `[arg()]` attribute configures parameters as CLI-style options:
 
-- Provide `_dtsh` guard + helpers: `dts_tree`, `dts_ls`, `dts_cat`, `dtsh_out_html`, `dts_find`.
+```just
+# Long option (--target)
+[arg("target", long)]
+build target:
+    cargo build --target {{ target }}
 
-## 9) Extend safely
+# Short option (-v)
+[arg("verbose", short="v")]
+run verbose="false":
+    echo "Verbose: {{ verbose }}"
 
-- Group recipes by workflow stage: `config`, `build`, `run`, `tools`.
-- Keep private helpers prefixed with `_`.
-- Quote interpolations when values may include spaces.
-- Use `--justfile {{ source_file() }}` for self-invocations.
+# Combined long + short
+[arg("output", long, short="o")]
+compile output:
+    gcc main.c -o {{ output }}
 
-## References
+# Flag without value (presence sets to "true")
+[arg("release", long, value="true")]
+build release="false":
+    cargo build {{ if release == "true" { "--release" } else { "" } }}
+
+# Help string (shown in `just --usage`)
+[arg("target", long, help="Build target architecture")]
+build target:
+    cargo build --target {{ target }}
+```
+
+**Usage examples:**
+
+```bash
+just build --target x86_64
+just build --target=x86_64
+just compile -o main
+just build --release
+just --usage build    # Show recipe argument help
+```
+
+Multiple attributes can be combined:
+
+```just
+[no-cd, private]
+[group("checks")]
+recipe:
+    echo "hello"
+```
+
+#### Modules
+
+Load recipes from other files using submodule (requires `set unstable`):
+
+```just
+mod foo                   # Loads foo.just or foo/justfile
+mod bar "path/to/bar"     # Custom path
+mod? optional             # Optional module
+
+# Call module recipes
+just foo::build
+```
+
+## 4) Validate Justfile formatting
+
+- Always run `just --fmt --check --unstable --justfile path/to/Justfile` after edits. This will return 0 if all is good or return 1 if there's any errors and additionally a diff with the suggested changes in another file with the name Justfile.fmt or {FILENAME}.fmt if not called Justfile
+
+# Full References
 
 - `references/just-quick-reference.md` — concise just patterns
 - `references/just-manual.md` — baseline manual details
