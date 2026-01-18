@@ -87,7 +87,7 @@ end
 
 -- Add LSP kind icons. Useful for 'mini.completion'.
 mini_icons.tweak_lsp_kind 'append'
-local mini_notify = require('mini.notify')
+local mini_notify = require 'mini.notify'
 mini_notify.setup {
   content = {
     -- Use notification message as is for LSP progress
@@ -125,11 +125,10 @@ local vim_notify_opts = {
   OFF   = { duration = 0, hl_group = 'MiniNotifyNormal' },
 }
 
-
 vim.notify = mini_notify.make_notify(vim_notify_opts)
-vim.api.nvim_set_hl(0, "VimRcError", { link = "StderrMsg" })
-vim.api.nvim_set_hl(0, "VimRcWarn", { link = "WarningMsg" })
-vim.api.nvim_set_hl(0, "VimRcNormal", { link = "StdoutMsg" })
+vim.api.nvim_set_hl(0, 'VimRcError', { link = 'StderrMsg' })
+vim.api.nvim_set_hl(0, 'VimRcWarn', { link = 'WarningMsg' })
+vim.api.nvim_set_hl(0, 'VimRcNormal', { link = 'StdoutMsg' })
 --stylua: ignore
 VimRc.notify_opts = {
   ERROR = { duration = 5000, hl_group = 'VimRcError' },
@@ -148,13 +147,19 @@ VimRc.notify = function()
   return vim.schedule_wrap(function(msg, level)
     level = level or vim.log.levels.OFF
     local level_name = level_names[level]
-    if level_name == nil then _G.error('Only valid values of `vim.log.levels` are supported.') end
+    if level_name == nil then
+      _G.error 'Only valid values of `vim.log.levels` are supported.'
+    end
 
     local level_data = VimRc.opts[level_name]
-    if level_data.duration <= 0 then return end
+    if level_data.duration <= 0 then
+      return
+    end
 
     local id = mini_notify.add(msg, level_name, level_data.hl_group, { source = 'VimRc' })
-    vim.defer_fn(function() mini_notify.remove(id) end, level_data.duration)
+    vim.defer_fn(function()
+      mini_notify.remove(id)
+    end, level_data.duration)
   end)
 end
 local set_buf_name = function(buf_id, name)
@@ -230,7 +235,7 @@ KEYS.define({
     rhs = function()
       -- Get active notifications
       local notifs = get_notif_arr(function(notif)
-        return notif.ts_remove == nil
+        return notif.ts_remove ~= nil
       end)
       show_notifications(notifs)
     end,
@@ -251,7 +256,7 @@ KEYS.define({
     rhs = function()
       -- Get active notifications
       local err_notifs = get_notif_arr(function(notif)
-        return notif.level ~= 'ERROR'
+        return notif.level == 'ERROR'
       end)
       show_notifications(err_notifs)
     end,
@@ -286,7 +291,7 @@ require('mini.statusline').setup()
 require('mini.tabline').setup()
 require('catppuccin').setup {
   flavour = 'macchiato', -- latte, frappe, macchiato, mocha
-  background = {         -- :h background
+  background = { -- :h background
     light = 'latte',
     dark = 'mocha',
   },
@@ -312,11 +317,11 @@ require('which-key').setup {
     mode = { 'n', 'v' },
     { '<leader>c', group = 'Code' },
     { '<leader>x', group = 'diagnostics/quickfix' },
-    { '[',         group = 'prev' },
-    { ']',         group = 'next' },
-    { 'g',         group = 'goto' },
-    { 'gs',        group = 'surround' },
-    { 'z',         group = 'fold' },
+    { '[', group = 'prev' },
+    { ']', group = 'next' },
+    { 'g', group = 'goto' },
+    { 'gs', group = 'surround' },
+    { 'z', group = 'fold' },
     {
       '<leader>b',
       group = 'buffer',

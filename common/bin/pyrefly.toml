@@ -2,4 +2,6 @@ site-package-path = [".venv/lib/python3.14/site-packages"]
 skip-interpreter-query = true
 python-platform = "linux"
 python-version = "3.14"
+
 python-interpreter-path = ".venv/bin/python3"
+project-includes = ["filegen/filegen"]

@@ -45,6 +45,5 @@ KEYS.define({
   { lhs = prefix .. 'd', rhs = '<cmd>FormatDisable! <cr>', opts = { desc = 'FormatDisable (buffer)' } },
   { lhs = prefix .. 't', rhs = '<cmd>LintToggle<cr>', opts = { desc = 'LintToggle' } },
   { lhs = prefix .. 'v', rhs = '<cmd>ViewLinter<cr>', opts = { desc = 'View Linter(s)' } },
-  { lhs = prefix .. 'f', rhs = '<cmd>Format<cr>', opts = { desc = 'Format' } },
 }, { prefix = prefix, group = 'Lint/Format' })
 -- Linting

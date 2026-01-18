@@ -231,8 +231,18 @@ require('mini.bracketed').setup()
 -- - `<Leader>bd` - delete current buffer (see `:h :bdelete`)
 require('mini.bufremove').setup()
 KEYS.define {
-  { lhs = '<leader>bd', rhs = '<Cmd>lua MiniBufremove.delete()<CR>', opts = { desc = 'Delete' } },
-  { lhs = '<leader>bD', rhs = '<Cmd>lua MiniBufremove.delete(0, true)<CR>', opts = { desc = 'Delete!' } },
+
+  { lhs = '<leader>bb', rhs = '<cmd>b#<cr>', opts = { desc = 'Switch to Other Buffer' } },
+  {
+    lhs = '<leader>bs',
+    rhs = function()
+      vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(true, true))
+    end,
+    opts = { desc = 'Scratch Buffer' },
+  },
+  { lhs = '<leader>bd', rhs = '<Cmd>lua MiniBufremove.delete(0, true)<CR>', opts = { desc = 'Delete!' } },
+  { lhs = '<leader>bD', rhs = '<cmd>:%bdelete|edit #|normal`<cr>', opts = { desc = 'Close all Other Buffers' } },
+  { lhs = '<C-x>', mode = 'n', rhs = '<Cmd>lua MiniBufremove.delete()<CR>', opts = { desc = 'Delete' } },
   { lhs = '<leader>bw', rhs = '<Cmd>lua MiniBufremove.wipeout()<CR>', opts = { desc = 'Wipeout' } },
   { lhs = '<leader>bW', rhs = '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', opts = { desc = 'Wipeout!' } },
 }

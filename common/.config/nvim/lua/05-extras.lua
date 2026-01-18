@@ -27,6 +27,7 @@ if ok then
 else
   _G.error "Couldn't load render-markdown.nvim plugin"
 end
-
-local dap = require 'plugin.dap'
-VimRc.pack_add(dap)
+if vim.g.dap_debugging then
+  local dap = require 'plugin.dap'
+  VimRc.pack_add(dap)
+end

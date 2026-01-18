@@ -5,7 +5,7 @@ vim.pack.add(_G.plug_spec {
 })
 
 local diagnostics = require 'lsp.diagnostics'
-local lsp_servers = { 'lua_ls', 'clangd', 'neocmake', 'bashls', 'taplo', 'yamls', 'jsonls', 'marksman', 'ruff', 'pyrefly' }
+local lsp_servers = { 'lua_ls', 'esbonio', 'clangd', 'neocmake', 'bashls', 'taplo', 'yamls', 'jsonls', 'marksman', 'ruff', 'pyrefly' }
 local lspau = vim.api.nvim_create_augroup('vimrc.lsp', {})
 vim.api.nvim_create_autocmd('LspAttach', {
   group = lspau,
@@ -93,11 +93,22 @@ vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
 vim.api.nvim_create_user_command('LspInfo', ':checkhealth vim.lsp', { desc = 'Alias to `:checkhealth vim.lsp`' })
 
 vim.api.nvim_create_user_command('LspLog', function()
-  vim.cmd(string.format('tabnew %s', vim.lsp.log.get_filename()))
+  local logfile = vim.lsp.log.get_filename()
+  if vim.uv.fs_stat(logfile) then
+    VimRc.exec.run_cmd { 'touch', vim.lsp.log.get_filename() }
+  end
+
+  vim.cmd(string.format('tabnew %s', logfile))
 end, {
   desc = 'Opens the Nvim LSP client log.',
 })
 
+vim.api.nvim_create_user_command('LspLogClean', function()
+  VimRc.exec.run_cmd { 'rm', vim.lsp.log.get_filename() }
+  VimRc.exec.run_cmd { 'touch', vim.lsp.log.get_filename() }
+end, {
+  desc = 'Opens the Nvim LSP client log.',
+})
 local complete_client = function(arg)
   return vim
     .iter(vim.lsp.get_clients())
@@ -110,41 +121,90 @@ local complete_client = function(arg)
     :totable()
 end
 
-local complete_config = function(arg)
+local get_local_lsp_dir = function()
+  local vim_proj_folder = vim.fs.find({ '.vim' }, { path = vim.fn.getcwd(), type = 'directory', upward = true, stop = vim.fn.expand '$HOME' })[1]
+  if not vim_proj_folder then
+    return nil
+  end
+  local lsp_dir = vim_proj_folder .. '/lsp'
+  local stat = vim.uv.fs_stat(lsp_dir)
+  if stat and stat.type == 'directory' then
+    return lsp_dir
+  end
+  return nil
+end
+
+local list_local_lsp_configs = function()
+  local lsp_dir = get_local_lsp_dir()
+  if not lsp_dir then
+    return {}
+  end
+  local configs = {}
+  for name, type in vim.fs.dir(lsp_dir) do
+    if type == 'file' and name:sub(-4) == '.lua' then
+      configs[name:sub(1, -5)] = lsp_dir .. '/' .. name
+    end
+  end
+  return configs
+end
+
+local apply_local_lsp_configs = function()
+  local configs = list_local_lsp_configs()
+  local loaded = {}
+  for server, path in pairs(configs) do
+    local chunk, load_err = loadfile(path)
+    if not chunk then
+      vim.notify(("Failed to load local LSP config '%s': %s"):format(path, load_err), vim.log.levels.WARN)
+    else
+      local ok, config = pcall(chunk)
+      if not ok then
+        vim.notify(("Error running local LSP config '%s': %s"):format(path, config), vim.log.levels.WARN)
+      elseif type(config) ~= 'table' then
+        vim.notify(("Local LSP config '%s' must return a table"):format(path), vim.log.levels.WARN)
+      else
+        vim.lsp.config(server, config)
+        table.insert(loaded, server)
+      end
+    end
+  end
+  table.sort(loaded)
+  return loaded
+end
+
+local unique_list = function(items)
+  local seen = {}
+  local out = {}
+  for _, item in ipairs(items) do
+    if not seen[item] then
+      seen[item] = true
+      table.insert(out, item)
+    end
+  end
+  return out
+end
+
+local complete_configured = function(arg)
+  local names = {}
+  local configs = vim.lsp.config._configs or {}
+  for name, _ in pairs(configs) do
+    if type(name) == 'string' and name ~= '*' then
+      table.insert(names, name)
+    end
+  end
+  for name, _ in pairs(list_local_lsp_configs()) do
+    table.insert(names, name)
+  end
   return vim
-    .iter(vim.api.nvim_get_runtime_file(('lsp/%s*.lua'):format(arg), true))
-    :map(function(path)
-      local file_name = path:match '[^/]*.lua$'
-      return file_name:sub(0, #file_name - 4)
+    .iter(unique_list(names))
+    :filter(function(name)
+      return name:sub(1, #arg) == arg
     end)
     :totable()
 end
 
-vim.api.nvim_create_user_command('LspStart', function(info)
-  local servers = info.fargs
-
-  -- Default to enabling all servers matching the filetype of the current buffer.
-  -- This assumes that they've been explicitly configured through `vim.lsp.config`,
-  -- otherwise they won't be present in the private `vim.lsp.config._configs` table.
-  if #servers == 0 then
-    local filetype = vim.bo.filetype
-    for name, _ in pairs(vim.lsp.config()) do
-      local filetypes = vim.lsp.config[name].filetypes
-      if filetypes and vim.tbl_contains(filetypes, filetype) then
-        table.insert(servers, name)
-      end
-    end
-  end
-
-  vim.lsp.enable(servers)
-end, {
-  desc = 'Enable and launch a language server',
-  nargs = '?',
-  complete = complete_config,
-})
-
-vim.api.nvim_create_user_command('LspRestart', function(info)
+vim.api.nvim_create_user_command('LspReconfigure', function(info)
   local client_names = info.fargs
+  apply_local_lsp_configs()
 
   -- Default to restarting all active servers
   if #client_names == 0 then
@@ -155,17 +215,14 @@ vim.api.nvim_create_user_command('LspRestart', function(info)
       end)
       :totable()
   end
-
   for name in vim.iter(client_names) do
     if vim.lsp.config[name] == nil then
       vim.notify(("Invalid server name '%s'"):format(name))
     else
       vim.lsp.enable(name, false)
-      if info.bang then
-        vim.iter(vim.lsp.get_clients { name = name }):each(function(client)
-          client:stop(true)
-        end)
-      end
+      vim.iter(vim.lsp.get_clients { name = name }):each(function(client)
+        client:stop(true)
+      end)
     end
   end
 
@@ -179,37 +236,65 @@ end, {
   desc = 'Restart the given client',
   nargs = '?',
   bang = true,
-  complete = complete_client,
+  complete = complete_configured,
 })
+vim.api.nvim_create_user_command('LspLocalStart', function(info)
+  local servers = info.fargs
+  local local_loaded = apply_local_lsp_configs()
 
-vim.api.nvim_create_user_command('LspStop', function(info)
-  local client_names = info.fargs
-
-  -- Default to disabling all servers on current buffer
-  if #client_names == 0 then
-    client_names = vim
-      .iter(vim.lsp.get_clients())
-      :map(function(client)
-        return client.name
-      end)
-      :totable()
-  end
-
-  for name in vim.iter(client_names) do
-    if vim.lsp.config[name] == nil then
-      vim.notify(("Invalid server name '%s'"):format(name))
+  -- Default to enabling all servers matching the filetype of the current buffer.
+  -- This assumes that they've been explicitly configured through `vim.lsp.config`,
+  -- otherwise they won't be present in the private `vim.lsp.config._configs` table.
+  if #servers == 0 then
+    if #local_loaded > 0 then
+      servers = local_loaded
     else
-      vim.lsp.enable(name, false)
-      if info.bang then
-        vim.iter(vim.lsp.get_clients { name = name }):each(function(client)
-          client:stop(true)
-        end)
+      local filetype = vim.bo.filetype
+      for name, _ in pairs(vim.lsp.config()) do
+        local filetypes = vim.lsp.config[name].filetypes
+        if filetypes and vim.tbl_contains(filetypes, filetype) then
+          table.insert(servers, name)
+        end
       end
     end
   end
+
+  vim.lsp.enable(unique_list(servers))
 end, {
-  desc = 'Disable and stop the given client',
+  desc = 'Enable and launch a language server',
   nargs = '?',
-  bang = true,
-  complete = complete_client,
+  complete = complete_configured,
 })
+--
+
+-- vim.api.nvim_create_user_command('LspStop', function(info)
+--   local client_names = info.fargs
+--
+--   -- Default to disabling all servers on current buffer
+--   if #client_names == 0 then
+--     client_names = vim
+--   .    .iter(vim.lsp.get_clients())
+--       :map(function(client)
+--         return client.name
+--       end)
+--       :totable()
+--   end
+--
+--   for name in vim.iter(client_names) do
+--     if vim.lsp.config[name] == nil then
+--       vim.notify(("Invalid server name '%s'"):format(name))
+--     else
+--       vim.lsp.enable(name, false)
+--       if info.bang then
+--         vim.iter(vim.lsp.get_clients { name = name }):each(function(client)
+--           client:stop(true)
+--         end)
+--       end
+--     end
+--   end
+-- end, {
+--   desc = 'Disable and stop the given client',
+--   nargs = '?',
+--   bang = true,
+--   complete = complete_client,
+-- })

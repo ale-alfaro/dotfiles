@@ -7,9 +7,6 @@
 KEYS.define {
   -- General & Navigation
   -- stylua: ignore start
-  { lhs = "<leader>bb",            rhs = "<cmd>b#<cr>",                      opts = { desc = "Switch to Other Buffer" } },
-  {lhs = "<leader>bs", rhs = function() vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(true, true)) end, opts = { desc = "Scratch Buffer"}},
-  { lhs = "<leader>bD",            rhs = "<cmd>:%bdelete|edit #|normal`<cr>", opts = { desc = "Close all Other Buffers" } },
   { lhs = "q",                     rhs = "<nop>",                             opts = { noremap = true } },
   { lhs = "Q",                     rhs = "<nop>",                             opts = { noremap = true } },
   { lhs = '[p',                    rhs = '<Cmd>exe "put! " . v:register<CR>', opts = { desc = 'Paste Above' } },

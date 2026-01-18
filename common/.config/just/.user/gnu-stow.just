@@ -2,25 +2,24 @@ set unstable := true
 
 conf_home := if env('XDG_CONFIG_HOME', '') =~ '^/' { absolute_path(env('XDG_CONFIG_HOME')) } else { home_directory() / '.config' }
 dots := home_directory() / 'dotfiles'
-stow_sim := env('STOW_NO_SIM', '')
+stow_no_sim := env('STOW_NO_SIM', '')
+stow_sim_flag := if stow_no_sim != '' { '' } else { '--simulate' }
 verbose_lvl := "2"
-extra_args := ""
-stow_flags := f"--verbose={{verbose_lvl}} {{stow_sim && '-n'}} {{extra_args}}"
 
 [group('stow')]
-@sstow pkg_dir target_dir pkgs:
-    stow -d {{ pkg_dir }} -t {{ target_dir }} {{ stow_flags }} -S {{ pkgs }}
-    @echo {{ if stow_sim == '' { "Ran simulation successfully. To do the change run with STOW_NO_SIM=1" } else { f"✅ Stowed {{pkgs}} in {{pkg_dir}} on target dir {{target_dir}}" } }}
+@sstow pkg_dir target_dir pkgs *extra_args:
+    stow -d {{ pkg_dir }} -t {{ target_dir }} {{ f"--verbose={{verbose_lvl}} {{stow_sim_flag}} '{{extra_args}}'" }} -S {{ pkgs }}
+    echo {{ if stow_sim_flag == '--simulate' { "Ran simulation successfully. To do the change run with STOW_NO_SIM=1" } else { f"✅ Stowed {{pkgs}} in {{pkg_dir}} on target dir {{target_dir}}" } }}
 
 [group('stow')]
 @restow pkg_dir target_dir pkgs *extra_args:
-    stow -d {{ pkg_dir }} -t {{ target_dir }} {{ stow_flags }} -R {{ pkgs }}
-    @echo "✅ Stow refresh complete."
+    stow -d {{ pkg_dir }} -t {{ target_dir }} {{ f"--verbose={{verbose_lvl}} {{stow_sim_flag}} '{{extra_args}}'" }} -R {{ pkgs }}
+    echo {{ if stow_sim_flag == '--simulate' { "Ran restow simulation successfully. To do the change run with STOW_NO_SIM=1" } else { f"✅ Restowed {{pkgs}} in {{pkg_dir}} on target dir {{target_dir}}" } }}
 
 [group('stow')]
-@unstow pkg_dir target_dir pkgs:
-    stow -d {{ pkg_dir }} -t {{ target_dir }} {{ stow_flags }} -D {{ pkgs }}
-    echo "✅ Unstowed all packages."
+@unstow pkg_dir target_dir pkgs *extra_args:
+    stow -d {{ pkg_dir }} -t {{ target_dir }} {{ f"--verbose={{verbose_lvl}} {{stow_sim_flag}} '{{extra_args}}'" }} -D {{ pkgs }}
+    echo {{ if stow_sim_flag == '--simulate' { "Ran unstow simulation successfully. To do the change run with STOW_NO_SIM=1" } else { f"✅ Unstowed {{pkgs}} in {{pkg_dir}} on target dir {{target_dir}}" } }}
 
 [group('stow')]
 @stow-check-bogus target_dir:
@@ -35,7 +34,7 @@ restow-user-home: (restow dots / "common" home_dir() 'home')
 
 [group('maintanance')]
 @restow-user-bin:
-    just --justfile {{ justfile() }} extra_args=--ignore='/*.venv'  restow {{ dots / "common" }} {{ executable_dir() }} "bin"
+    just --justfile {{ justfile() }} restow {{ dots / "common" }} {{ executable_dir() }} bin --ignore='.*\.(md|lock|venv|direnv|python-version|toml|envrc)$'
 
 [group('maintanance')]
 @restow-common-dotfiles:

@@ -62,9 +62,9 @@ zstyle ':completion:alias-expension:*' completer _expand_alias
 # zstyle ':completion:*' menu select
 
 # Autocomplete options for cd instead of directory stack
-# zstyle ':completion:*' complete-options true
+zstyle ':completion:*' complete-options true
 
-# zstyle ':completion:*' file-sort modification
+zstyle ':completion:*' file-sort modification
 # --- Completion styles ---
 ## disable sort when completing `git checkout`
 zstyle ':completion:*:git-checkout:*' sort false
@@ -76,9 +76,8 @@ zstyle ':completion:*:git-checkout:*' sort false
 # force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
 zstyle ':completion:*' menu no
 
-setopt GLOB_COMPLETE # Show autocompletion menu with globs
-# setopt MENU_COMPLETE    # Automatically highlight first element of completion menu
-# setopt AUTO_LIST        # Automatically list choices on ambiguous completion.
+setopt GLOB_COMPLETE    # Show autocompletion menu with globs
+setopt AUTO_LIST        # Automatically list choices on ambiguous completion.
 setopt COMPLETE_IN_WORD # Complete from both ends of a word.
 
 # zstyle ':completion:*:*:*:*:corrections' format '%F{yellow}!- %d (errors: %e) -!%f'
@@ -86,13 +85,13 @@ setopt COMPLETE_IN_WORD # Complete from both ends of a word.
 # zstyle ':completion:*:*:*:*:messages' format ' %F{purple} -- %d --%f'
 # zstyle ':completion:*:*:*:*:warnings' format ' %F{red}-- no matches found --%f'
 
-# zstyle ':completion:*:default' list-prompt '%S%M matches%s'
+zstyle ':completion:*:default' list-prompt '%S%M matches%s'
 # Colors for files and directory
 # zstyle ':completion:*:*:*:*:default' list-colors ${(s.:.)LS_COLORS}
 
 # Only display some tags for the command cd
-# zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack path-directories
-# zstyle ':completion:*:complete:git:argument-1:' tag-order !aliases
+zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack path-directories
+zstyle ':completion:*:complete:git:argument-1:' tag-order !aliases
 
 # Required for completion to be in good groups (named after the tags)
 # zstyle ':completion:*' group-name ''

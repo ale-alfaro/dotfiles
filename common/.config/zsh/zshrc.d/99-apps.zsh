@@ -70,6 +70,15 @@ export FZF_ALT_C_OPTS="
   --header 'CTRL-/: Toggle preview window position'
   "
 
+#Initialize Node Version manager
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$(brew --prefix nvm)/nvm.sh" ] && \. "$(brew --prefix nvm)/nvm.sh"                                       # This loads nvm
+  [ -s "$(brew --prefix nvm)/etc/bash_completion.d/nvm" ] && \. "$(brew --prefix nvm)/etc/bash_completion.d/nvm" # This loads nvm bash_completion
+else
+  export NVM_DIR="$XDG_CONFIG_HOME/nvm"
+  source "$ZDOTDIR/shell_integrations/zsh-nvm.zsh"
+fi
 export npm_config_prefix="$HOME/.local"
 export OBSIDIAN_HOME="${HOME}/Documents/Obsidian"
 if has codex && test -z "${CODEX_HOME}"; then
@@ -237,16 +246,6 @@ fi
 #   fi
 # else
 #   echo "Unsupported TERM_PROGRAM=$TERM_PROGRAM"
-# fi
-
-# Initialize Node Version manager
-# if [[ "$OSTYPE" == "darwin"* ]]; then
-#   export NVM_DIR="$HOME/.nvm"
-#   [ -s "$(brew --prefix nvm)/nvm.sh" ] && \. "$(brew --prefix nvm)/nvm.sh"                                       # This loads nvm
-#   [ -s "$(brew --prefix nvm)/etc/bash_completion.d/nvm" ] && \. "$(brew --prefix nvm)/etc/bash_completion.d/nvm" # This loads nvm bash_completion
-# else
-#   export NVM_DIR="$XDG_CONFIG_HOME/nvm"
-#   source "$ZDOTDIR/shell_integrations/zsh-nvm.zsh"
 # fi
 
 nvimv use nightly

@@ -1,0 +1,468 @@
+#!/usr/bin/env -S uv run --script
+#
+# /// script
+# requires-python = ">=3.13"
+# dependencies = [
+#     "cattrs",
+#     "attrs",
+#     "cyclopts",
+#     "python-dotenv",
+#     "rich",
+# ]
+# ///
+import re
+import shlex
+import string
+import subprocess
+from collections.abc import Generator, Mapping, Sequence
+from datetime import date
+from enum import StrEnum
+from functools import cached_property
+from pathlib import Path
+from typing import Annotated, ClassVar, Protocol, override, runtime_checkable
+
+import attrs
+import cyclopts
+from dotenv import dotenv_values
+from rich.console import Console
+
+console = Console()
+error_console = Console(stderr=True, style="bold red")
+
+DOTENV_VALUES = dotenv_values()
+
+
+class FileType(StrEnum):
+    C = "c"
+    H = "h"
+    Custom = ""
+
+
+def ensure_snake_case(name: str) -> str:
+    # Insert an underscore before any uppercase letter that follows a lowercase letter or digit
+    s1 = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", name)
+    # Insert an underscore before any uppercase letter that follows another uppercase letter
+    # but is at the end of an acronym (e.g., HTMLParser becomes html_parser)
+    s2 = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", s1)
+    # Convert the entire string to lowercase
+    return s2.lower()
+
+
+TEMPLATE_DIR_ENV = "FILEGEN_TEMPLATES"
+
+
+def confirm_overwrite(path: Path) -> bool:
+    while True:
+        reply = input(f"{path} exists. Overwrite? [y/N]: ").strip().lower()
+        if not reply or reply in {"n", "no"}:
+            return False
+        if reply in {"y", "yes"}:
+            return True
+        error_console.print("Please answer 'y' or 'n'.")
+
+
+def find_repo_root(start: Path | None = None) -> Path:
+    try:
+        proc = subprocess.run(
+            shlex.split("git rev-parse --show-toplevel"),
+            capture_output=True,
+            check=True,
+            shell=False,
+        )
+        if (repo_root_raw := proc.stdout) and (
+            repo_root_path := Path(bytes.decode(repo_root_raw).strip())
+        ):
+            return repo_root_path
+    except subprocess.CalledProcessError:
+        console.print("Failed to get git repo root. Are you inside a repository?")
+        start = start or Path.cwd()
+        for parent in start.parents:
+            if (parent / ".git").exists():
+                return parent
+
+    return Path.cwd()
+
+
+def find_template_dir_in_repo_root(start: Path | None = None) -> Path | None:
+    root = find_repo_root(start)
+    tdir = root / "templates"
+    return tdir if tdir.is_dir() else None
+
+
+def parse_template(path: Path) -> tuple[Mapping[str, str], str]:
+    metadata_fields = {}
+    template_body = ""
+    start_frontmatter = False
+    end_frontmatter = False
+    with path.open(encoding="utf-8") as f:
+        for line in f.readlines():
+            if "---" in line:
+                if not start_frontmatter:
+                    console.print("Found start of frontmatter")
+                    start_frontmatter = True
+                elif not end_frontmatter:
+                    console.print("Found end of frontmatter")
+                    end_frontmatter = True
+                else:
+                    raise ValueError(
+                        "Found '---' outside the template frontmatter metadata section",
+                    )
+            elif ":" in line and not end_frontmatter:
+                match line.rstrip().split(":", maxsplit=1):
+                    case [key, val]:
+                        if start_frontmatter and not end_frontmatter:
+                            console.print(f"Found metadata: {key} : {val}")
+                            metadata_fields[key] = val.strip()
+                        else:
+                            msg = f"Found metadata field outside frontmatter section: '{line}'"
+                            raise ValueError(
+                                msg,
+                            )
+
+                    case _:
+                        msg = f"Invalid line found: '{line}' "
+                        raise ValueError(msg)
+            else:
+                template_body = f"{template_body}{line}"
+
+    return metadata_fields, template_body
+
+
+def parse_template_from_file(path: Path) -> tuple[FileType, string.Template]:
+
+    metadata, content = parse_template(path)
+    if not metadata or not content:
+        msg = f"{'No metadata found' if metadata else 'No template body'} found in template: {path}"
+        raise ValueError(msg)
+    if not metadata.get("filetype"):
+        msg = f"'Invalid metadata: {metadata}' found in template: {path}"
+        raise ValueError(msg)
+    ft_raw = metadata["filetype"].strip()
+    valid_filetypes = {ft.value for ft in FileType}
+    if ft_raw not in valid_filetypes:
+        msg = f"ft_raw: {ft_raw} not in {list(FileType)}. Assuming custom filetype"
+        ft = FileType.Custom
+    else:
+        ft = FileType(ft_raw)
+    return ft, string.Template(content)
+
+
+def load_templates_from_dir_generator(
+    tdir: Path,
+) -> Generator[tuple[FileType, string.Template]]:
+    console.print(f"Template dir found: {tdir}")
+    if not tdir.is_dir():
+        msg = f"{tdir} is not a directory"
+        error_console.print(msg)
+        raise NotADirectoryError(msg)
+    for path in filter(lambda f: f.is_file(), tdir.iterdir()):
+        console.print(f"Template at: {path}")
+        filetype, template_content = parse_template_from_file(path)
+        # ext = path.suffix.lstrip(".")
+        # expected = f"{filetype.value}tf"
+        yield (filetype, template_content)
+
+
+def _template_dir_from_env() -> Path | None:
+    env_dir = DOTENV_VALUES.get(TEMPLATE_DIR_ENV)
+    if env_dir:
+        return Path(env_dir).expanduser().resolve()
+
+    cwd_templates = Path.cwd() / "templates"
+    if cwd_templates.exists():
+        return cwd_templates.resolve()
+    return find_template_dir_in_repo_root()
+
+
+_FILETYPE_GENERATORS = []
+
+
+@runtime_checkable
+class TemplateFileGenerator(Protocol):
+    @classmethod
+    def normalize_name(cls, dst: Path) -> Path: ...
+
+    @classmethod
+    def filetype_interpolation(
+        cls,
+        dst: Path,
+        *,
+        user_values: Mapping[str, str] | None = None,
+    ) -> dict[str, str]: ...
+    @classmethod
+    def render_template(
+        cls,
+        _raw_dst: Path,
+        template: string.Template,
+        *,
+        user_values: Mapping[str, str] | None = None,
+        force: bool = False,
+    ) -> None:
+        dst = Path(cls.normalize_name(_raw_dst)).absolute()
+        template_interpolations = {
+            "file_name": dst.stem,
+            "year": date.today().year,
+            **cls.filetype_interpolation(dst, user_values=user_values),
+        }
+        contents = template.substitute(template_interpolations)
+        if not dst.parent.is_dir():
+            dst.parent.mkdir(parents=True, exist_ok=True)
+        elif dst.is_file():
+            if force or confirm_overwrite(dst):
+                dst.write_text(contents, encoding="utf-8")
+                console.print(f"[green]Overwrote[/green] {dst}")
+            else:
+                msg = f"{dst} already exists; overwrite canceled"
+                raise FileExistsError(msg)
+        else:
+            dst.write_text(contents, encoding="utf-8")
+            console.print(f"[green]Created[/green] {dst}")
+
+    @classmethod
+    def __attrs_init_subclass__(cls) -> None:
+        _FILETYPE_GENERATORS.append(cls)
+        console.print(f"{_FILETYPE_GENERATORS}")
+
+
+def get_template_generator_for_ft(ft: str) -> TemplateFileGenerator:
+    for generator in _FILETYPE_GENERATORS:
+        if (genft := getattr(generator, "filetype", None)) and (genft == ft):
+            return generator
+        console.print(f"Generator:{attrs.fields_dict(generator)}")
+    msg = f"Couldn't not find generator for filetype {ft}"
+    raise TypeError(msg)
+
+
+@attrs.define
+class CSourceFileGen(TemplateFileGenerator):
+    filetype: ClassVar[str] = "c"
+
+    @classmethod
+    def normalize_name(cls, dst: Path) -> Path:
+        name = dst.stem or dst.name or dst.parent.name
+        return dst.with_name(f"{ensure_snake_case(name)}.{cls.filetype}")
+
+    @classmethod
+    def filetype_interpolation(
+        cls,
+        dst: Path,
+        *,
+        user_values: Mapping[str, str] | None = None,
+    ) -> dict[str, str]:
+        return {}
+
+
+@attrs.define
+class CHeaderFileGen(TemplateFileGenerator):
+    filetype: ClassVar[str] = "h"
+
+    @classmethod
+    def normalize_name(cls, dst: Path) -> Path:
+        name = dst.stem or dst.name or dst.parent.name
+        return dst.with_name(f"{ensure_snake_case(name)}.{cls.filetype}")
+
+    @override
+    @classmethod
+    def filetype_interpolation(
+        cls,
+        dst: Path,
+        *,
+        user_values: Mapping[str, str] | None = None,
+    ) -> dict[str, str]:
+        root_dir = find_repo_root(dst)
+        if not dst.is_relative_to(root_dir):
+            msg = f"{root_dir} and {dst}"
+            raise FileNotFoundError(msg)
+        header_guard = (
+            str(dst.relative_to(root_dir).with_suffix("")).upper().replace("/", "_")
+        )
+        return {
+            "header_guard": f"__{header_guard}_H__",
+        }
+
+
+app = cyclopts.App()
+
+
+def _dst_converter(filename: str) -> Path:
+    if Path(filename).absolute():
+        return Path(filename)
+    return Path(Path.cwd(), filename)
+
+
+def _proj_root_default() -> Path:
+    return Path.cwd().parent
+
+
+def _template_dir_default() -> Path:
+    return Path(Path.cwd(), "templates")
+
+
+def filetype_flag_converter(type_, tokens: Sequence[cyclopts.Token]) -> set[FileType]:
+    # type_ is ``int``,
+    valid_filetypes = {ft.value for ft in FileType}
+    return {FileType(tk.value) for tk in tokens if tk.value in valid_filetypes}
+
+
+@cyclopts.Parameter(name="*")
+@attrs.define
+class FileGen:
+    dst: Annotated[
+        Path,
+        cyclopts.Parameter(
+            help="Destination of output file",
+            validator=cyclopts.validators.Path(exists=True),
+        ),
+    ] = attrs.field(converter=_dst_converter)
+
+    proj_root: Annotated[
+        Path,
+        cyclopts.Parameter(
+            ["-r", "--root"],
+            help="Project root",
+            validator=cyclopts.validators.Path(exists=True),
+        ),
+    ] = attrs.field(kw_only=True, factory=_proj_root_default)
+
+    template_dir: Annotated[
+        Path,
+        cyclopts.Parameter(
+            help="Template directory given by the user",
+            validator=cyclopts.validators.Path(exists=True),
+        ),
+    ] = attrs.field(kw_only=True, factory=_template_dir_default)
+
+    requested_filetypes: Annotated[
+        set[FileType],
+        cyclopts.Parameter(
+            ["-t", "--type"],
+            converter=filetype_flag_converter,
+            negative_iterable="all-",
+            help="Generate files matching TYPE (repeatable, supports TYPE=all)",
+        ),
+    ]
+
+    @property
+    def fname(self) -> str:
+        return self.dst.stem
+
+    @cached_property
+    def templates(self) -> dict[FileType, string.Template]:
+        tdir = self.template_dir or _template_dir_from_env()
+        if not tdir or not tdir.is_dir():
+            msg = f"{tdir} is not a directory"
+            error_console.print(msg)
+            raise cyclopts.ValidationError(msg)
+        return dict(load_templates_from_dir_generator(tdir))
+
+    @cached_property
+    def filetypes(self) -> list[FileType]:
+        available = set(self.templates)
+        if not self.requested_filetypes:
+            return sorted(available)
+        unknown = self.requested_filetypes - available
+        if unknown:
+            known = ", ".join(ft.value for ft in sorted(available)) or "none"
+            msg = (
+                "Unknown type(s): "
+                f"{', '.join(ft.value for ft in sorted(unknown))}. Available: {known}"
+            )
+            error_console.print(msg)
+            raise cyclopts.ValidationError(msg)
+        return sorted(self.requested_filetypes)
+
+    def render(self, *, force: bool = False) -> None:
+        for ft in self.filetypes:
+            template = self.templates[ft]
+            get_template_generator_for_ft(ft).render_template(
+                self.dst,
+                template,
+                force=force,
+            )
+
+
+@app.command(name="gen")
+def generate(
+    fgen: FileGen,
+    *,
+    force: Annotated[
+        bool,
+        cyclopts.Parameter(
+            ["-f", "--force"],
+            negative="",
+            help="Overwrite existing files without prompting",
+        ),
+    ] = False,
+) -> None:
+    """
+    Generate C header/source files from templates.
+
+    Defaults to generating all discovered file types when no type flags are provided.
+    File-type flags can be repeated, e.g. "-t c -t h" or "-t all".
+    Use the `shell` command for an interactive session when generating many files.
+    Template directory resolution order: --template-dir, $FILEGEN_TEMPLATES,
+    then <repo-root>/templates (repo-root detected by .git).
+    Templates must include frontmatter with a "filetype" entry.
+    Template frontmatter example:
+        ---
+        filetype: c
+        ---
+    Required template fields:
+        Header (.htf): ${file_name}, ${header_guard}, ${year}
+        Source (.ctf): ${file_name}, ${year}
+    Other file types are discoverable, but generation is currently limited to c/h.
+    """
+    resolved_types: list[FileType] = fgen.filetypes
+    console.print(
+        f"[bold]Generating[/bold] [cyan]{fgen.fname}[/cyan] in {fgen.dst}",
+    )
+    console.print(
+        f"[dim]Templates:[/dim] {fgen.template_dir}",
+    )
+    console.print(
+        f"[dim]Types:[/dim] {', '.join(ft.value for ft in resolved_types)}",
+    )
+    fgen.render(force=force)
+
+
+@app.command(name="ft")
+def filetype(
+    *,
+    template_dir: Annotated[
+        Path | None,
+        cyclopts.Parameter(
+            ["--template-dir"],
+            help=(
+                "Template directory to use (defaults to $FILEGEN_TEMPLATES "
+                "or <repo>/templates)"
+            ),
+            validator=cyclopts.validators.Path(exists=True),
+        ),
+    ] = None,
+) -> None:
+    """Manage template filetypes. Subcommands: list."""
+    template_dir = template_dir or _template_dir_from_env()
+    if not template_dir:
+        raise ValueError("No tdir specified")
+    console.print("Discovered templates:")
+
+    for ft, template in load_templates_from_dir_generator(template_dir):
+        console.print(f"Filetype: {ft} \n Template: \n\t {template}")
+
+
+@app.command
+def shell() -> None:
+    """Interactive shell for running multiple generate commands quickly."""
+    app.interactive_shell()
+
+
+@app.command(name="help")
+def help_txt():
+    """Display the help and usage text."""
+    app.help_print()
+
+
+if __name__ == "__main__":
+    app()
+
+# vim:ft=python
