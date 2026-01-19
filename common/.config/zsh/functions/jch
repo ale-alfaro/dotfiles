@@ -1,9 +1,11 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
-fzf --prompt 'Apps> ' \
-  --header 'Select App' \
-  --bind 'enter:transform:[[ ! $FZF_PROMPT =~ Recipe ]] && 
-          echo "change-prompt(Recipe> )+reload(just --list --justfile {})" ||
-          echo "change-prompt(Apps> )+reload(print -rC1 ./**/Justfile)"' \
-  --preview '[[ ! $FZF_PROMPT =~ Recipes ]] && bat --color=always {q} || just --justfile {1} --show {2}' \
-  --bind 'enter:execute(just --justfile {1} +{2})'
+
+just_summary(){ [[ -f "$REPLY" ]] && reply=$(just --summary  --justfile "$REPLY")}
+print -rl -- ./**/[Jj]ustfile(+just_summary) | \
+    fzf \
+  --with-nth 2..\
+  --prompt 'Justfiles> ' \
+  --header 'Enter (edit) ╱ CTRL-O (choose recipe)' \
+  --preview '[[ $FZF_PROMPT =~ Justfiles ]] && bat {1} || just --unstable --justfile={1} --show {q}'
+

@@ -12,63 +12,79 @@ plugins=(
   zsh-users/zsh-syntax-highlighting
   zsh-users/zsh-autosuggestions
   Aloxaf/fzf-tab
+  jeffreytse/zsh-vi-mode
 )
 __init_plugins "${plugins[@]}"
+has fzf && zvm_after_init_commands+=(fzf_init)
+# Alias for FZF
+# Link: https://github.com/junegunn/fzf
+fzf_init() {
+  source <(fzf --zsh)
+  export FZF_CTRL_R_OPTS="
+    --color header:italic
+    --height=80%
+    --bind 'ctrl-y:execute-silent(fc -l {2..} | wl-copy)+abort'
+    --header 'CTRL-Y: Copy command into clipboard, CTRL-/: Toggle line wrapping, CTRL-R: Toggle sorting by relevance'
+    "
 
-# preview directory's content with eza when completing cd
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
-# custom fzf flags
-# NOTE: fzf-tab does not follow FZF_DEFAULT_OPTS by default
-zstyle ':fzf-tab:*' fzf-flags --color=fg:1,fg+:2 --bind=tab:accept
+  export FZF_CTRL_T_OPTS="
+    --walker-skip .git,node_modules,target
+    --preview 'bat -n --color=always {}'
+    --height=80%
+    "
+
+  export FZF_ALT_C_OPTS="
+    --walker-skip .git,node_modules,target
+    --preview 'eza -lh --group-directories-first --icons=auto'
+    --height=80%
+    --bind 'ctrl-/:change-preview-window(down|hidden|)'
+    --header 'CTRL-/: Toggle preview window position'
+    "
+  export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
+      --info=default\
+      --ansi \
+      --layout=reverse \
+      --border=rounded \
+      --color=bg+:#3B4252, \
+      --color=bg:#2E3440,\
+      --color=spinner:#81A1C1,\
+      --color=hl:#616E88,\
+      --color=fg:#D8DEE9,\
+      --color=header:#616E88,\
+      --color=info:#81A1C1,\
+      --color=pointer:#81A1C1,\
+      --color=marker:#81A1C1,\
+      --color=fg+:#D8DEE9,\
+      --color=prompt:#81A1C1,\
+      --color=hl+:#81A1C1"
+  if has eza; then
+    fzf_preview_cmd='eza -lh --group-directories-first --icons=auto'
+  else
+    fzf_preview_cmd='ls --color $realpath'
+  fi
+
+  # zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --icons=always --oneline --no-git --all'
+  # zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza --icons=always --oneline --no-git --all'
+  if has fd && has rg; then
+    ff() {
+      fd --type file |
+        fzf --prompt 'Files> ' \
+          --header 'ALT-D: Switch between Files/Directories' \
+          --bind 'alt-d:transform:[[ ! $FZF_PROMPT =~ Files ]] &&
+                      echo "change-prompt(Files> )+reload(fd --type file)" ||
+                      echo "change-prompt(Directories> )+reload(fd --type directory)"' \
+          --preview '[[ $FZF_PROMPT =~ Files ]] && bat --color=always {} || tree -C {}' \
+          --bind 'enter:become(nvim {})'
+    }
+  else
+    alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
+  fi
+}
 #######################################################
 # App Environment Variables
 #######################################################
 #
-export BAT_THEME=ansi
 export RIPGREP_CONFIG_PATH="${XDG_CONFIG_HOME}/ripgrep/ripgreprc"
-export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
-    --info=default\
-    --ansi \
-    --layout=reverse \
-    --border=rounded \
-    --color=border:#27a1b9 \
-    --color=fg:#c0caf5 \
-    --color=gutter:#16161e \
-    --color=header:#ff9e64 \
-    --color=hl+:#2ac3de \
-    --color=hl:#2ac3de \
-    --color=info:#545c7e \
-    --color=marker:#ff007c \
-    --color=pointer:#ff007c \
-    --color=prompt:#2ac3de \
-    --color=query:#c0caf5:regular \
-    --color=scrollbar:#27a1b9 \
-    --color=separator:#ff9e64 \
-    --color=spinner:#ff007c \
-    "
-
-export FZF_CTRL_R_OPTS="
-  --color header:italic
-  --height=80%
-  --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
-  --header 'CTRL-Y: Copy command into clipboard, CTRL-/: Toggle line wrapping, CTRL-R: Toggle sorting by relevance'
-  "
-
-export FZF_CTRL_T_OPTS="
-  --walker-skip .git,node_modules,target
-  --preview 'bat -n --color=always {}'
-  --height=80%
-  --bind 'ctrl-/:change-preview-window(down|hidden|)'
-  --header 'CTRL-/: Toggle preview window position'
-  "
-
-export FZF_ALT_C_OPTS="
-  --walker-skip .git,node_modules,target
-  --preview 'tree -C {}'
-  --height=80%
-  --bind 'ctrl-/:change-preview-window(down|hidden|)'
-  --header 'CTRL-/: Toggle preview window position'
-  "
 
 #Initialize Node Version manager
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -80,15 +96,10 @@ else
   source "$ZDOTDIR/shell_integrations/zsh-nvm.zsh"
 fi
 export npm_config_prefix="$HOME/.local"
-export OBSIDIAN_HOME="${HOME}/Documents/Obsidian"
-if has codex && test -z "${CODEX_HOME}"; then
-  eval "$(codex completion zsh)"
-  export CODEX_HOME="${XDG_CONFIG_HOME}/codex"
-fi
 
-if has gemini && test -z "${GEMINI_CLI_SYSTEM_SETTINGS_PATH}"; then
-  export GEMINI_CLI_SYSTEM_SETTINGS_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/gemini/settings.json"
-fi
+# if has gemini && test -z "${GEMINI_CLI_SYSTEM_SETTINGS_PATH}"; then
+#   export GEMINI_CLI_SYSTEM_SETTINGS_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/gemini/settings.json"
+# fi
 #######################################################
 # App Aliases
 #######################################################
@@ -100,34 +111,15 @@ fi
 # Alias For bat
 # Link: https://github.com/sharkdp/bat
 if has bat; then
-  alias cat='bat'
+  export BAT_THEME=ansi
 fi
-if has wikiman; then
-  alias man='wikiman'
-elif has batman; then
-  alias man='batman'
-fi
+has wikiman && alias wman='wikiman'
+# has batman && alias man='batman'
 # Alias for lazygit
 # Link: https://github.com/jesseduffield/lazygit
-if has lazygit; then
-  alias lg='lazygit'
-fi
-# Alias for FZF
-# Link: https://github.com/junegunn/fzf
-if has fzf; then
-  alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
-  vf() {
-    fd --type file |
-      fzf --prompt 'Files> ' \
-        --header 'ALT-D: Switch between Files/Directories' \
-        --bind 'alt-d:transform:[[ ! $FZF_PROMPT =~ Files ]] &&
-                  echo "change-prompt(Files> )+reload(fd --type file)" ||
-                  echo "change-prompt(Directories> )+reload(fd --type directory)"' \
-        --preview '[[ $FZF_PROMPT =~ Files ]] && bat --color=always {} || tree -C {}' \
-        --bind 'enter:become(nvim {})'
-  }
-fi
+has lazygit && alias lg='lazygit'
 if has zoxide; then
+  safe_source zoxide init zsh
   zv() {
     zoxide query -l $1 | fzf --bind 'enter:become(nvim {})'
   }
@@ -145,6 +137,7 @@ fi
 # Alias for just (command runner)
 if has just; then
   alias j='just'
+  export JUST_CHOOSER="fzf --exact"
   if [[ ! -z "${JUST_HOME}" ]]; then
     # alias .j='just --justfile ~/.config/just/Justfile --working-directory .'
     alias .j='just -g'
@@ -172,29 +165,24 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
   fi
 fi
-eval "$(fzf --zsh)"
-
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
-zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 # --- Completion from CLI tools ---
 # if has prek; then
 #   eval "$(COMPLETE=zsh prek completion)"
 # fi
 
+export OBSIDIAN_HOME="${HOME}/Documents/Obsidian"
+if has codex && test -z "${CODEX_HOME}"; then
+  eval "$(codex completion zsh)"
+  export CODEX_HOME="${XDG_CONFIG_HOME}/codex"
+fi
 # --- Optional completions from CLI tools ---
 if [[ ! -z "$JJ_COMPLETIONS" ]]; then
   if has jj; then
     eval "$(jj util completion zsh)"
   fi
 fi
-if [[ ! -z "$BW_CLI_COMPLETIONS" ]]; then
-  if has bw; then
-    eval "$(bw completion --shell zsh)"
-  fi
-fi
-if has nrfutil; then
-  [[ -r "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh" ]] && . "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh"
-fi
+[[ ! -z "$BW_CLI_COMPLETIONS" ]] && has bw && eval "$(bw completion --shell zsh)"
+has nrfutil && [[ -r "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh" ]] && . "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh"
 
 # Load custom generated manually or through MAN pages
 fpath+=("$HOME/.local/share/zsh/site" "$ZDOTDIR/completions/src" $fpath)
@@ -202,38 +190,16 @@ fpath+=("$HOME/.local/share/zsh/site" "$ZDOTDIR/completions/src" $fpath)
 #######################################################
 # Shell integrations
 #######################################################
-
-# Quickly go back to a specific parent directory instead of typing cd ../../.. redundantly
-# Example usage:
-# $ mkdir -p a/b/c/d
-# $ cd a/b/c/d
-# $ bd b
-# $ ls
-# c
-# $ cd c/d
-# $ bd 2
-# $ ls
-# c
-
 bd_zsh="$ZDOTDIR/shell_integrations/bd.zsh"
-if [[ -f "$bd_zsh" ]]; then
-  source "$bd_zsh"
-fi
+[[ -f "$bd_zsh" ]] && source "$bd_zsh"
 # ---- Atuin (better shell command history) -----
-eval "$(atuin init zsh)"
+safe_source atuin init zsh
 
 # ---- Starship (better prompt) -----
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
-eval "$(starship init zsh)"
+safe_source starship init zsh
 # ---- Direnv (.envrc auto-loading) -----
-eval "$(direnv hook zsh)"
-
-# ---- zoxide (better cd) -----
-if has zoxide; then
-  eval "$(zoxide init zsh --cmd zd)"
-else
-  echo ERROR: Could not load zoxide shell integration.
-fi
+safe_source direnv hook zsh
 
 # ---- Wezterm (terminal emulator) ---
 # if [[ $TERM_PROGRAM == "WezTerm" ]]; then

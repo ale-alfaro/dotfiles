@@ -53,6 +53,15 @@ has() {
   return 0
 }
 
+safe_source() {
+  cmd="$1"
+  type "$cmd" &>/dev/null
+  if (( $? != 0 )); then
+        error "Command not found: $cmd "
+  fi
+  shift
+  source <($cmd "$@")
+}
 # Usage: join_args [args...]
 #
 # Joins all the passed arguments into a single string that can be evaluated by bash

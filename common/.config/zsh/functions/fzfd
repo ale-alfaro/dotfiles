@@ -15,18 +15,9 @@ TRANSFORMER='
   echo "+search:$fzf_pat"
 '
 fzf --ansi --disabled --query "$INITIAL_QUERY" \
-    --with-shell 'bash -c' \
-    --bind "start,change:transform:$TRANSFORMER" \
-    --color "hl:-1:underline,hl+:-1:underline:reverse" \
-    --delimiter : \
-    --preview 'bat --color=always {1} --highlight-line {2}' \
-    --preview-window 'up,60%,border-line'
-
-# fd --type file |
-#     fzf --prompt 'Files> ' \
-#         --header 'ALT-D: Switch between Files/Directories' \
-#         --bind 'alt-d:transform:[[ ! $FZF_PROMPT =~ Files ]] &&
-#               echo "change-prompt(Files> )+reload(fd --type file)" ||
-#               echo "change-prompt(Directories> )+reload(fd --type directory)"' \
-#         --preview '[[ $FZF_PROMPT =~ Files ]] && bat --color=always {} || tree -C {}'
-#
+  --with-shell 'bash -c' \
+  --bind "start,change:transform:$TRANSFORMER" \
+  --color "hl:-1:underline,hl+:-1:underline:reverse" \
+  --delimiter : \
+  --preview 'bat --color=always {1} --highlight-line {2}' \
+  --preview-window 'up,60%,border-line'

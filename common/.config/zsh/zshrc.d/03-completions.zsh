@@ -23,15 +23,9 @@
 #
 # Load more completions from other sources of fpath
 
-# --- Initialize completion system ---
-autoload -U compinit
-compinit
-
 # +---------+
 # | Options |
 # +---------+
-
-autoload -Uz compinit && compinit -d ${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump
 
 # ------------------------------------------------------------------------------
 # Define the completers to use. The completers are  listed below and their definitions
@@ -102,3 +96,4 @@ zstyle ':completion:*:complete:git:argument-1:' tag-order !aliases
 # zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]} r:|[._-]=* r:|=*' 'm:{[:lower:]}={[:upper:]}' 'm:{[:lower:]}={[:upper:]}' 'm:{[:lower:]}={[:upper:]}'
 # zstyle ':completion:*' max-errors 2
 # zstyle :compinstall filename "$ZDOTDIR/.zshrc"
+autoload -Uz compinit && compinit -d ${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump

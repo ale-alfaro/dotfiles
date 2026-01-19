@@ -78,10 +78,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 elif [[ "$OSTYPE" == "macos"* ]]; then
   alias -g C='| pbcopy'
 fi
-# Copy output to clipboard (macOS)
 
-# Copy output to clipboard (Linux with xclip)
-# alias -g C='| xclip -selection clipboard'
 
 # -------------------------------------------
 # 7. zmv - Advanced Batch Rename/Move
