@@ -144,7 +144,7 @@ return {
         vim.cmd.redraw { bang = true }
         local stat = vim.uv.fs_stat(dir)
         if not (stat and stat.type == 'directory') then
-          _G.error('Directory not found: ' .. dir, vim.log.levels.ERROR)
+          VimRc.err('Directory not found: ' .. dir, vim.log.levels.ERROR)
           return
         end
 

@@ -1,46 +1,5 @@
-local M = {}
+local M = require 'custom.utils'
 M.icons = require 'custom.icons'
-setmetatable(M, {
-  __index = function(t, k)
-    ---@diagnostic disable-next-line: no-unknown
-    t[k] = require('utils.' .. k)
-    return t[k]
-  end,
-})
-
-function _G.setTimeout(timeout, callback)
-  local timer = vim.uv.new_timer()
-  if timer ~= nil then
-    timer:start(timeout, 0, function()
-      timer:stop()
-      timer:close()
-      callback()
-    end)
-    return timer
-  end
-end
-
----@param msg string|string[]
-function _G.info(msg)
-  if M.notify then M.notify(msg, 'INFO') end
-end
-
----@param msg string|string[]
-function _G.warn(msg)
-  if M.notify then M.notify(msg, 'WARN') end
-end
-
----@param msg string|string[]
-function _G.error(msg, var)
-  if M.notify then M.notify(msg, 'ERROR') end
-end
-
----@param base table|nil
----@param extra table|nil
----@return table
-function _G.merge_tables(base, extra)
-  return vim.tbl_deep_extend('force', base or {}, extra or {})
-end
 
 local function _fetch_env(env_name)
   local env = vim.fn.getenv(env_name)
@@ -147,15 +106,15 @@ function M.get_packpath_dirs()
   local paths = {}
   local packpath = vim.fn.expand '$XDG_DATA_HOME' .. '/nvim/site/pack/core/opt'
   for name, type in
-  vim.fs.dir(packpath, {
-    skip = function(dir_name)
-      if not string.match(dir_name, '^nvim') then
-        return true
-      else
-        return false
-      end
-    end,
-  })
+    vim.fs.dir(packpath, {
+      skip = function(dir_name)
+        if not string.match(dir_name, '^nvim') then
+          return true
+        else
+          return false
+        end
+      end,
+    })
   do
     if type == 'directory' then
       table.insert(paths, name)
@@ -205,14 +164,14 @@ BuildHookCmdTypes = {
 
 ---@param build_hook VimPackBuildHooks
 local function create_plugin_build_hook(build_hook)
-  vim.validate('build_hook', build_hook, 'table')
+  VimRc.check_type('build_hook', build_hook, 'table')
   local plugin = build_hook.plugin
-  vim.validate('plugin', plugin, 'string')
+  VimRc.check_type('plugin', plugin, 'string')
   local type = build_hook.build_cmd_type
   vim.validate('type', type, 'string')
   local cmd = build_hook.build_cmd
   vim.validate('cmd', cmd, 'string')
-  _G.info('Creating ' .. type .. ' build hook for ' .. plugin .. ' with cmd: ' .. cmd)
+  VimRc.info(string.format('Creating build hook for %s plugin %s with cmd %s', type, plugin, cmd))
   local hooks = function(ev)
     -- Use available |event-data|
     local name, kind = ev.data.spec.name, ev.data.kind
@@ -232,7 +191,7 @@ local function create_plugin_build_hook(build_hook)
         require(plugin).after_update()
       end
     else
-      _G.error('Invalid build cmd type ' .. type)
+      VimRc.err 'Invalid build cmd type'
     end
   end
 
@@ -269,53 +228,45 @@ end
 function _G.plug_spec(spec)
   table.insert(M.added_plugins, spec)
   return vim
-      .iter(spec)
-      :map(function(p)
-        return _G.plug(p)
-      end)
-      :totable()
+    .iter(spec)
+    :map(function(p)
+      return _G.plug(p)
+    end)
+    :totable()
 end
+---@class FilterOpts
+---@field names string[]?
+---@field filter_fn fun(p:vim.pack.PlugData):boolean|nil
+---@field output_names boolean?
+---
+---@param opts FilterOpts?
+---@return string[]
+M.get_plugins = function(opts)
+  vim.validate('opts', opts, 'table', true, 'FilterOpts')
+  opts = vim.tbl_extend('force', { names = nil, filter_fn = nil, output_names = true }, opts or {})
+  ---@type FilterOpts
 
---- @class PluginFilter
---- @field active boolean Whether plugin was added via |vim.pack.add()| to current session.
-
----@param active_only boolean?
-local function get_plugins(active_only)
-  local plugins = vim.pack.get()
-  if #plugins > 0 then
-    return vim
-        .iter(plugins)
-        :filter(function(plug)
-          if active_only then
-            return plug.active
-          else
-            return true
-          end
-        end)
-        :map(function(plug)
-          return plug.name
-        end)
-        :totable()
-  end
-end
---- Updates one or more plugins.
---- If omitted, all plugins will be updated.
-function M.pack_update()
-  local plugins = get_plugins(true)
-  if plugins then
-    vim.pack.update(plugins)
-  end
+  return vim
+    .iter(vim.pack.get(opts.names))
+    :map(function(p)
+      local pname = opts.output_names and p.spec.name or p
+      if type(opts.filter_fn) == 'callable' then
+        return pname and opts.filter_fn(p) or nil
+      end
+      return pname
+    end)
+    :totable()
 end
 
 --- @param plugins string[] Optional: A single plugin name or a list of plugin names to update.
 function M.pack_reload(plugins)
   local ok, _ = pcall(vim.pack.del, plugins)
   if not ok then
-    _G.error 'Failed to delete plugins with vim.pack.del'
+    VimRc.err 'Failed to delete plugins with vim.pack.del'
   end
   ok, _ = pcall(vim.pack.add, _G.plug_spec(plugins))
   if not ok then
-    _G.error 'Failed to add plugins with vim.pack.add'
+    VimRc.err 'Failed to add plugins with vim.pack.add'
   end
 end
 
@@ -347,11 +298,11 @@ end
 function M.pack_list()
   local lines = { 'Vim.pack list:' }
   --- @type vim.pack.PlugData[]
-  local plugins = vim.pack.get()
+  local plugins = M.get_plugins { output_names = false }
   for _, plug in ipairs(plugins) do
     lines[#lines + 1] = (' %s - `%s`'):format(plug.spec.name, plug.spec.version)
   end
-  _G.info(lines)
+  VimRc.info(lines)
 end
 
 --

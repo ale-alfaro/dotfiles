@@ -25,7 +25,7 @@ if ok then
     completions = { lsp = { enabled = true } },
   }
 else
-  _G.error "Couldn't load render-markdown.nvim plugin"
+  VimRc.error "Couldn't load render-markdown.nvim plugin"
 end
 if vim.g.dap_debugging then
   local dap = require 'plugin.dap'

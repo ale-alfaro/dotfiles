@@ -72,16 +72,16 @@ function M.run_command_with_output(cmd, stdout_cb, sync, cwd)
 
   local on_exit = function(obj)
     if obj.code == 0 and obj.stdout then
-      _G.info 'Command completed successfully'
+      VimRc.info 'Command completed successfully'
       local data = obj.stdout
       if data and data:match '%S' then
         local line_output = vim.split(data, '\n') or {}
-        _G.info('comand output: ' .. data)
+        VimRc.info('comand output: ' .. data)
         if stdout_cb then
           stdout_cb(data, line_output)
         end
       else
-        _G.error 'Command failed'
+        VimRc.err 'Command failed'
       end
     end
   end
@@ -127,13 +127,13 @@ function M.west(cmd)
       table.insert(full, c)
     end
   else
-    _G.error('Invalid type fed to west: ' .. type(cmd))
+    VimRc.err('Invalid type fed to west: ' .. type(cmd))
     return nil
   end
   vim.print('Running west cmd: ' .. table.concat(full, ' '))
   local out, ret = M.run_cmd(full)
   if ret ~= 0 then
-    _G.error('Non-zero ret code: ' .. tostring(ret))
+    VimRc.err('Non-zero ret code: ' .. tostring(ret))
     return nil
   end
   return out
@@ -145,7 +145,7 @@ function M.west_topdir(bufnr)
   local rootdir = vim.fs.root(bufnr or 0, { '.west', 'zephyr' })
   local topdir = M.west 'topdir' or rootdir
   if not topdir or not vim.uv.fs_stat(topdir) then
-    _G.error 'No west topdir found'
+    VimRc.err 'No west topdir found'
     return nil
   end
   return topdir
@@ -156,11 +156,11 @@ end
 function M.west_config(config, set_val)
   local cmd = { 'config', config }
   if set_val ~= nil then
-    _G.info('west config set ' .. config .. ' to ' .. set_val)
+    VimRc.info('west config set ' .. config .. ' to ' .. set_val)
     cmd = table.insert(cmd, set_val)
     return M.west(cmd)
   else
-    _G.info('west config get ' .. config)
+    VimRc.info('west config get ' .. config)
     return M.west(cmd)
   end
 end

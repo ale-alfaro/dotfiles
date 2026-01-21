@@ -56,7 +56,7 @@ _G.new_autocmd('FileType', function(ev)
   -- highlighting
   local ok, _ = pcall(vim.treesitter.start)
   if not ok then
-    _G.error("Couldn't not start treesitter for filetype: " .. ft .. ' lang: ' .. lang)
+    VimRc.error("Couldn't not start treesitter for filetype: " .. ft .. ' lang: ' .. lang)
     return
   end
   -- indents
@@ -72,5 +72,5 @@ end
 
 local ok, _ = pcall(require, 'plugin.blink-cmp')
 if not ok then
-  _G.error 'Failed to load blink.cmp'
+  VimRc.error 'Failed to load blink.cmp'
 end

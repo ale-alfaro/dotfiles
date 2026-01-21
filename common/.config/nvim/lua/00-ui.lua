@@ -21,11 +21,6 @@ mini_icons.setup {
 mini_icons.mock_nvim_web_devicons()
 
 -- Example for showing notifications in bottom right corner: >lua
-local win_config = function()
-  local has_statusline = vim.o.laststatus > 0
-  local pad = vim.o.cmdheight + (has_statusline and 1 or 0)
-  return { anchor = 'SE', col = vim.o.columns, row = vim.o.lines - pad }
-end
 
 --- # Notification specification ~
 ---
@@ -58,20 +53,6 @@ local notif_format_basic = function(notif)
   return string.format('[%s]: %s │ %s', notif.level, time, notif.msg)
 end
 
----@return string
-local function vim_print_modified(...)
-  local msg = {}
-  for i = 1, select('#', ...) do
-    local o = select(i, ...)
-    if type(o) == 'string' then
-      table.insert(msg, o)
-    else
-      table.insert(msg, vim.inspect(o, { newline = '\n', indent = '  ' }))
-    end
-  end
-  return table.concat(msg, '\n')
-end
-
 ---@param notif Notification
 ---@return string
 local notif_format_default = function(notif)
@@ -79,7 +60,7 @@ local notif_format_default = function(notif)
     return notif.msg
   elseif notif.data.object then
     local prefix = notif_format_basic(notif)
-    return string.format('%s \n %s', prefix, vim_print_modified(notif.data.object))
+    return string.format('%s \n %s', prefix, VimRc.print(notif.data.object))
   else
     return notif_format_basic(notif)
   end
@@ -87,8 +68,7 @@ end
 
 -- Add LSP kind icons. Useful for 'mini.completion'.
 mini_icons.tweak_lsp_kind 'append'
-local mini_notify = require 'mini.notify'
-mini_notify.setup {
+require('mini.notify').setup {
   content = {
     -- Use notification message as is for LSP progress
     format = notif_format_default,
@@ -105,65 +85,55 @@ mini_notify.setup {
   -- Window options
   window = {
     -- Floating window config
-    config = win_config,
+    -- config = function()
+    --   local has_statusline = vim.o.laststatus > 0
+    --   local pad = vim.o.cmdheight + (has_statusline and 1 or 0)
+    --   return { anchor = 'NE', col = vim.o.columns, row = vim.o.lines - pad }
+    -- end,
 
-    -- Maximum window width as share (between 0 and 1) of available columns
+    -- -- Maximum window width as share (between 0 and 1) of available columns
     max_width_share = 0.6,
-
-    -- Value of 'winblend' option
+    --
+    -- -- Value of 'winblend' option
     winblend = 25,
   },
 }
 
 --stylua: ignore
-local vim_notify_opts = {
-  ERROR = { duration = 3000, hl_group = 'DiagnosticError' },
-  WARN  = { duration = 3000, hl_group = 'DiagnosticWarn' },
-  INFO  = { duration = 1000, hl_group = 'DiagnosticInfo' },
-  DEBUG = { duration = 0, hl_group = 'DiagnosticHint' },
-  TRACE = { duration = 0, hl_group = 'DiagnosticOk' },
-  OFF   = { duration = 0, hl_group = 'MiniNotifyNormal' },
-}
+-- local vim_notify_opts = {
+--   ERROR = { duration = 3000, hl_group = 'DiagnosticError' },
+--   WARN  = { duration = 3000, hl_group = 'DiagnosticWarn' },
+--   INFO  = { duration = 1000, hl_group = 'DiagnosticInfo' },
+--   DEBUG = { duration = 0, hl_group = 'DiagnosticHint' },
+--   TRACE = { duration = 0, hl_group = 'DiagnosticOk' },
+--   OFF   = { duration = 0, hl_group = 'MiniNotifyNormal' },
+-- }
 
-vim.notify = mini_notify.make_notify(vim_notify_opts)
+vim.notify = MiniNotify.make_notify()
 vim.api.nvim_set_hl(0, 'VimRcError', { link = 'StderrMsg' })
 vim.api.nvim_set_hl(0, 'VimRcWarn', { link = 'WarningMsg' })
-vim.api.nvim_set_hl(0, 'VimRcNormal', { link = 'StdoutMsg' })
+vim.api.nvim_set_hl(0, 'VimRcNormal', { link = 'PmenuKindSel' })
 --stylua: ignore
-VimRc.notify_opts = {
+VimRc.loglvl_opts= {
   ERROR = { duration = 5000, hl_group = 'VimRcError' },
   WARN  = { duration = 5000, hl_group = 'VimRcWarn' },
-  INFO  = { duration = 5000, hl_group = 'VimRcNormal' },
-  DEBUG = { duration = 5000, hl_group = 'ComplHint' },
+  INFO  = { duration = 5000, hl_group = 'PmenuMatch' },
+  DEBUG = { duration = 0, hl_group = 'ComplHint' },
   TRACE = { duration = 0, hl_group = 'LineNr' },
   OFF   = { duration = 0, hl_group = 'LineNr' },
 }
-VimRc.notify = function()
-  local level_names = {}
-  for k, v in pairs(vim.log.levels) do
-    level_names[v] = k
+
+VimRc.notify = function(msg, lvl)
+  VimRc.check_type('msg', msg, 'string')
+  local level_data = VimRc.loglvl_opts[lvl]
+  if not level_data or level_data.duration <= 0 then
+    return
   end
 
-  return vim.schedule_wrap(function(msg, level)
-    level = level or vim.log.levels.OFF
-    local level_name = level_names[level]
-    if level_name == nil then
-      _G.error 'Only valid values of `vim.log.levels` are supported.'
-    end
-
-    local level_data = VimRc.opts[level_name]
-    if level_data.duration <= 0 then
-      return
-    end
-
-    local id = mini_notify.add(msg, level_name, level_data.hl_group, { source = 'VimRc' })
-    vim.defer_fn(function()
-      mini_notify.remove(id)
-    end, level_data.duration)
-  end)
-end
-local set_buf_name = function(buf_id, name)
-  vim.api.nvim_buf_set_name(buf_id, 'mininotify://' .. buf_id .. '/' .. name)
+  local id = MiniNotify.add(msg, lvl, level_data.hl_group, { source = 'VimRc' })
+  vim.defer_fn(function()
+    MiniNotify.remove(id)
+  end, level_data.duration)
 end
 ---@param notif_arr Notification[]
 local show_notifications = function(notif_arr)
@@ -171,14 +141,14 @@ local show_notifications = function(notif_arr)
 
   local buf_id
   for _, id in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.bo[id].filetype == 'mininotify-history' then
+    if vim.bo[id].filetype == 'vimrc-notify' then
       buf_id = id
     end
   end
   if buf_id == nil then
     buf_id = vim.api.nvim_create_buf(true, true)
-    set_buf_name(buf_id, 'history')
-    vim.bo[buf_id].filetype = 'mininotify-history'
+    VimRc.set_buf_name(buf_id, 'notify')
+    vim.bo[buf_id].filetype = 'vimrc-notify'
   end
   -- Ensure clear buffer
   vim.api.nvim_buf_clear_namespace(buf_id, ns_id, 0, -1)
@@ -222,7 +192,7 @@ local get_notif_arr = function(pred, format)
   for _, notif in ipairs(notif_arr) do
     local res = format(notif)
     if type(res) ~= 'string' then
-      _G.error 'Output of `content.format` should be string.'
+      VimRc.error 'Output of `content.format` should be string.'
     end
     notif.msg = res
   end
@@ -273,18 +243,57 @@ local MiniStarter = require 'mini.starter'
 MiniStarter.setup {
   evaluate_single = true,
   items = {
-    MiniStarter.sections.builtin_actions(),
     MiniStarter.sections.recent_files(10, false),
     MiniStarter.sections.recent_files(10, true),
     MiniStarter.sections.pick(),
   },
-  content_hooks = {
-    MiniStarter.gen_hook.adding_bullet(),
-    MiniStarter.gen_hook.indexing('all', { 'Builtin actions' }),
-    MiniStarter.gen_hook.padding(3, 2),
-  },
 }
 require('mini.statusline').setup()
+require('mini.cmdline').setup {
+
+  -- Autocompletion: show `:h 'wildmenu'` as you type
+  autocomplete = {
+    enable = true,
+
+    -- Delay (in ms) after which to trigger completion
+    -- Neovim>=0.12 is recommended for positive values
+    delay = 100,
+
+    -- Custom rule of when to trigger completion
+    -- predicate = nil,
+
+    -- Whether to map arrow keys for more consistent wildmenu behavior
+    map_arrows = true,
+  },
+
+  -- Autocorrection: adjust non-existing words (commands, options, etc.)
+  autocorrect = {
+    enable = true,
+
+    -- Custom autocorrection rule
+    func = nil,
+  },
+
+  -- Autopeek: show command's target range in a floating window
+  autopeek = {
+    enable = true,
+
+    -- Number of lines to show above and below range lines
+    n_context = 5,
+
+    -- Custom rule of when to show peek window
+    predicate = nil,
+
+    -- Window options
+    window = {
+      -- Floating window config
+      config = {},
+
+      -- Function to render statuscolumn
+      statuscolumn = nil,
+    },
+  },
+}
 
 -- Tabline. Sets `:h 'tabline'` to show all listed buffers in a line at the top.
 -- Buffers are ordered as they were created. Navigate with `[b` and `]b`.
@@ -296,6 +305,7 @@ require('catppuccin').setup {
     dark = 'mocha',
   },
 }
+
 vim.cmd 'colorscheme catppuccin'
 -- It is not enabled by default because it is not really needed on a daily basis.
 -- Uncomment next line (use `gcc`) to enable.

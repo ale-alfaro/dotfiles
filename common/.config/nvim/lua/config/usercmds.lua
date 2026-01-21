@@ -3,6 +3,57 @@ local command = vim.api.nvim_create_user_command --[[@type function]]
 --[[
 --
 
+Completion behavior ~
+				*:command-completion* *E179* *E180* *E181*
+				*:command-complete*
+By default, the arguments of user defined commands do not undergo completion.
+However, by specifying one or the other of the following attributes, argument
+completion can be enabled:
+
+	-complete=arglist	file names in argument list
+	-complete=augroup	autocmd groups
+	-complete=breakpoint	|:breakadd| suboptions
+	-complete=buffer	buffer names
+	-complete=color		color schemes
+	-complete=command	Ex command (and arguments)
+	-complete=compiler	compilers
+	-complete=diff_buffer	diff buffer names
+	-complete=dir		directory names
+	-complete=dir_in_path	directory names in 'cdpath'
+	-complete=environment	environment variable names
+	-complete=event		autocommand events
+	-complete=expression	Vim expression
+	-complete=file		file and directory names
+	-complete=file_in_path	file and directory names in 'path'
+	-complete=filetype	filetype names 'filetype'
+	-complete=function	function name
+	-complete=help		help subjects
+	-complete=highlight	highlight groups
+	-complete=history	|:history| suboptions
+	-complete=keymap	keyboard mappings
+	-complete=locale	locale names (as output of locale -a)
+	-complete=lua		Lua expression |:lua|
+	-complete=mapclear	buffer argument
+	-complete=mapping	mapping name
+	-complete=menu		menus
+	-complete=messages	|:messages| suboptions
+	-complete=option	options
+	-complete=packadd	optional package |pack-add| names
+	-complete=retab		|:retab| suboptions
+	-complete=runtime	file and directory names in 'runtimepath'
+	-complete=scriptnames	sourced script names
+	-complete=shellcmd	Shell command
+	-complete=shellcmdline	First is a shell command and subsequent ones
+				are filenames.  The same behavior as |:!cmd|
+	-complete=sign		|:sign| suboptions
+	-complete=syntax	syntax file names 'syntax'
+	-complete=syntime	|:syntime| suboptions
+	-complete=tag		tags
+	-complete=tag_listfiles	tags, file names are shown when CTRL-D is hit
+	-complete=user		user names
+	-complete=var		user variables
+	-complete=custom,{func} custom completion, defined via {func}
+	-complete=customlist,{func} custom completion, defined via {func}
 Lua functions are called with a single table argument containing arguments and
 modifiers. The most important are:
 • `name`: a string with the command name
@@ -94,9 +145,9 @@ local function pack_usercmd_opts(desc)
   return {
     desc = desc,
     nargs = 1,
+    ---@type fun(args: vim.api.keyset.create_user_command.command_args)
     complete = function(ArgLead, CmdLine, CursorPos)
-      -- return completion candidates as a list-like table
-      return VimRc.get_packpath_dirs()
+      return VimRc.get_plugins()
     end,
   }
 end
@@ -137,20 +188,35 @@ command('PackSync', function()
 
   local ok, _ = pcall(vim.pack.del, active_plugins_name)
   if not ok then
-    _G.error 'Failed to delete plugins with vim.pack.del'
+    VimRc.error 'Failed to delete plugins with vim.pack.del'
   end
   ok, _ = pcall(vim.pack.add, active_plugins_src)
   if not ok then
-    _G.error 'Failed to add plugins with vim.pack.add'
+    VimRc.error 'Failed to add plugins with vim.pack.add'
   end
   vim.pack.update()
 end, { desc = 'Sync plugins' })
 
-command('PackClean', function()
+command('PackDel', function(plugins)
   VimRc.pack_clean()
-end, { desc = 'Clean unactive plugins' })
+end, {
+  desc = 'Clean unactive plugins',
+  nargs = '*',
+  complete = function(ArgLead, CmdLine, CursorPos)
+    -- return completion candidates as a list-like table
+    return VimRc.get_plugins()
+  end,
+})
 
 command('PackUpdate', function()
-  local plugins = vim.pack.get()
-  VimRc.pack_update()
-end, pack_usercmd_opts 'Update active plugins')
+  local plugins = VimRc.get_plugins {
+    filter_fn = function(pspec)
+      return pspec.active
+    end,
+  }
+  if plugins then
+    VimRc.info(string.format('Plugins count: %d', #plugins))
+    VimRc.info(table.concat(plugins, '\n'))
+    vim.pack.update(plugins)
+  end
+end, { desc = 'Update active plugins' })

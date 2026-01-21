@@ -48,7 +48,7 @@ end
 function D.add_diagnostics(diags, source, ns_id)
   vim.validate('diags', diags, 'table')
   if #diags > 0 then
-    _G.error 'Zero diags were matched'
+    VimRc.error 'Zero diags were matched'
   end
 
   source = vim.F.if_nil(source, 'custom')
@@ -268,7 +268,7 @@ local get_workspace_files = function()
     if vim.uv.fs_stat(workspace_root .. '/.git') then
       workspace_files = vim.fn.split(vim.fn.system('git ls-files ' .. workspace_root), '\n')
     else
-      _G.warn "Workspace is not a git repo. Cant' get files"
+      VimRc.warn "Workspace is not a git repo. Cant' get files"
     end
   else
     local gitPath = vim.fn.systemlist('git rev-parse --show-toplevel')[1]

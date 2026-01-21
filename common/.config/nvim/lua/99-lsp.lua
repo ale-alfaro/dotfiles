@@ -46,8 +46,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end
     if client:supports_method 'workspace/diagnostic' then
       local folders = vim.lsp.buf.list_workspace_folders()
-      _G.info 'LSP Client supports workspace diagnostics. Adding user command to fetch them. Current workspace folder: '
-      _G.info(folders)
+      VimRc.info 'LSP Client supports workspace diagnostics. Adding user command to fetch them. Current workspace folder: '
+      VimRc.info(folders)
       diagnostics.setup_workspace_diagnostics(client, bufnr)
     end
 

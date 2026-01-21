@@ -19,13 +19,14 @@ end
 ---     - For file try to use `get_icon()` from 'nvim-tree/nvim-web-devicons'.
 ---       If missing, return fixed icon and 'MiniFilesFile' group name.
 ---
+vim.api.nvim_set_hl(0, 'MiniFilesSymLink', { link = 'PmenuExtra' })
 ---@param fs_entry MiniFilesFsEntry
 ---@return string, string
 local prefix = function(fs_entry)
   -- Prefer 'mini.icons'
   local filetype = vim.fn.getftype(fs_entry.path)
   if filetype == 'link' then
-    return VimRc.icons.os.Interface, 'MiniFilesFile'
+    return VimRc.icons.os.Interface .. ' ', 'MiniFilesSymLink'
   else
     local category = fs_entry.fs_type == 'directory' and 'directory' or 'file'
     if category == 'directory' then
@@ -87,9 +88,6 @@ local sort = function(entries)
     return { name = x.name, fs_type = x.fs_type, path = x.path }
   end, sorted)
 end
--- Add common bookmarks for every explorer. Example usage inside explorer:
--- - `'c` to navigate into your config directory
--- - `g?` to see available bookmarks
 local add_marks = function()
   --
   MiniFiles.set_bookmark('c', vim.fn.stdpath 'config', { desc = 'Config' })
@@ -148,53 +146,26 @@ require('mini.files').setup {
   },
 }
 
--- Yank in register full path of entry under cursor
-local yank_path = function(path)
-  vim.fn.setreg(vim.v.register, path)
-end
-
 vim.api.nvim_create_autocmd('User', {
   pattern = 'MiniFilesBufferCreate',
   callback = function(args)
     local b = args.data.buf_id
-    local cur_line = vim.fn.line '.'
-    -- local buf = vim.api.nvim_get_current_buf()
-    local fs_entry
-    if b == nil or b == 0 then
-      b = vim.api.nvim_get_current_buf()
-      fs_entry = MiniFiles.get_fs_entry(b, cur_line)
-    else
-      fs_entry = MiniFiles.get_fs_entry()
-    end
-    -- if fs_entry then
-    --   vim.notify('fs_entry_buf: ' .. fs_entry.path)
-    -- end
-    -- local fs_entry = MiniFiles.get_fs_entry()
-    if not fs_entry or not vim.uv.fs_stat(fs_entry.path) then
-      return
-    end
-    -- vim.notify('fs_entry: ' .. fs_entry.path)
-
-    local file = nil
-    local dir = nil
-    if fs_entry.fs_type == 'file' then
-      file = fs_entry.path
-      dir = vim.fs.dirname(file)
-    elseif fs_entry.fs_type == 'directory' then
-      dir = fs_entry.path
-    else
-      return
-    end
     vim.keymap.set('n', 'g~', function()
-      if dir then
-        vim.fn.chdir(dir)
+      local path = (MiniFiles.get_fs_entry() or {}).path
+      if path == nil then
+        return vim.notify 'Cursor is not on valid entry'
       end
+      vim.fn.chdir(vim.fs.dirname(path))
     end, { buffer = b, desc = 'Set cwd' })
     vim.keymap.set('n', 'gy', function()
-      yank_path(file or dir)
+      local path = (MiniFiles.get_fs_entry() or {}).path
+      if path == nil then
+        return vim.notify 'Cursor is not on valid entry'
+      end
+      vim.fn.setreg(vim.v.register, path)
     end, { buffer = b, desc = 'Yank path' })
     vim.keymap.set('n', 'gX', function()
-      vim.ui.open(file or dir)
+      vim.ui.open(MiniFiles.get_fs_entry().path)
     end, { buffer = b, desc = 'OS open' })
   end,
 })

@@ -174,7 +174,7 @@ function C.initialize()
                 content = f:read '*a'
                 f:close()
               else
-                _G.error "Couldn't read sysprompt"
+                VimRc.err "Couldn't read sysprompt"
               end
               return content
             end

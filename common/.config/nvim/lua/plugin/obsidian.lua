@@ -29,7 +29,7 @@ if ok then
     }
   )
 else
-  _G.error "Couldn't load obsidian.nvim plugin"
+  VimRc.error "Couldn't load obsidian.nvim plugin"
 end
 
 _G.new_autocmd('User', function(ev)

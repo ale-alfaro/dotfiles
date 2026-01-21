@@ -1,27 +1,18 @@
-local actions = require 'fzf-lua.actions'
--- Picker, finder, etc.
+---@module 'fzf-lua'
+local toggle_only_sources = function(_, opts)
+  require('fzf-lua.actions').toggle_opt(opts, 'tzsrc')
+end
 require('fzf-lua').setup {
   { 'border-fused', 'hide' },
   -- Make stuff better combine with the editor.
-  fzf_colors = {
-    bg = { 'bg', 'Normal' },
-    gutter = { 'bg', 'Normal' },
-    info = { 'fg', 'Conditional' },
-    scrollbar = { 'bg', 'Normal' },
-    separator = { 'fg', 'Comment' },
-  },
-  fzf_opts = {
-    ['--info'] = 'default',
-    ['--layout'] = 'reverse-list',
-  },
   keymap = {
     -- Below are the default binds, setting any value in these tables will override
     -- the defaults, to inherit from the defaults change [1] from `false` to `true`
     builtin = {
       -- neovim `:tmap` mappings for the fzf win
       -- true,        -- uncomment to inherit all the below in your custom config
-      ['<M-Esc>'] = 'hide', -- hide fzf-lua, `:FzfLua resume` to continue
-      ['ctrl-?'] = 'toggle-help',
+      ['<alt-q>'] = 'hide', -- hide fzf-lua, `:FzfLua resume` to continue
+      ['alt-?'] = 'toggle-help',
       ['alt-f'] = 'toggle-fullscreen',
       -- Only valid with the 'builtin' previewer
       ['<F3>'] = 'toggle-preview-wrap',
@@ -81,16 +72,15 @@ require('fzf-lua').setup {
   winopts = {
     height = 0.7,
     width = 0.55,
-    preview = {
-      scrollbar = false,
-      layout = 'vertical',
-      vertical = 'up:40%',
-    },
-    -- on_create = function()
-    -- called once upon creation of the fzf main window
-    -- can be used to add custom fzf-lua mappings, e.g:
-    --   vim.keymap.set("t", "<C-j>", "<Down>", { silent = true, buffer = true })
-    -- end,
+    on_create = function()
+      -- called once upon creation of the fzf main window
+      -- can be used to add custom fzf-lua mappings, e.g:
+      vim.keymap.set('t', '<C-j>', '<Down>', { silent = true, buffer = true })
+
+      vim.keymap.set({ 'n', 'v', 'i' }, '<C-x><C-f>', function()
+        FzfLua.complete_path()
+      end, { silent = true, buffer = true })
+    end,
     -- called once _after_ the fzf interface is closed
     -- on_close = function() ... end
   },
@@ -101,6 +91,10 @@ require('fzf-lua').setup {
       preview = { hidden = true },
     },
     no_ignore = false, -- enable hidden files by default
+    actions = {
+
+      ['ctrl-z'] = toggle_only_sources,
+    },
   },
   grep = {
     -- Search in hidden files by default.
@@ -110,25 +104,21 @@ require('fzf-lua').setup {
     rg_glob = true, -- default to glob parsing with `rg`
     glob_flag = '--iglob', -- for case sensitive globs use '--glob'
     glob_separator = '%s%-%-', -- query separator pattern (lua): ' --'
-
-    rg_glob_fn = function(query, opts)
-      local regex, flags = query:match(string.format('^(.*)%s(.*)$', opts.glob_separator))
-      -- Return the original query if there's no separator.
-      return (regex or query), flags
-    end,
     actions = {
       -- actions inherit from 'actions.files' and merge
       -- this action toggles between 'grep' and 'live_grep'
-      ['ctrl-g'] = { actions.grep_lgrep },
-      -- uncomment to enable '.gitignore' toggle for grep
-      ['ctrl-i'] = { actions.toggle_ignore },
-      ['ctrl-h'] = { actions.toggle_hidden },
     },
   },
   helptags = {
     actions = {
       -- Open help pages in a vertical split.
-      ['enter'] = actions.help_vert,
+      ['enter'] = FzfLua.actions.help_vert,
+    },
+  },
+  manpages = {
+    actions = {
+      -- Open help pages in a vertical split.
+      ['enter'] = FzfLua.actions.help_vert,
     },
   },
   lsp = {
@@ -155,7 +145,7 @@ require('fzf-lua').setup {
             -- Else only show errors.
             opts.severity_only = vim.diagnostic.severity.ERROR
           end
-          require('fzf-lua').resume(opts)
+          FzfLua.actions.resume(opts)
         end,
         noclose = true,
         desc = 'toggle-all-only-errors',
@@ -200,9 +190,9 @@ KEYS.define({
       -- See https://github.com/ibhagwan/fzf-lua/issues/2051
       local mode = vim.api.nvim_get_mode().mode
       if vim.startswith(mode, 'n') then
-        require('fzf-lua').lgrep_curbuf(opts)
+        FzfLua.lgrep_curbuf(opts)
       else
-        require('fzf-lua').blines(opts)
+        FzfLua.blines(opts)
       end
     end,
     opts = { desc = 'Search current buffer', noremap = true },
@@ -211,19 +201,17 @@ KEYS.define({
     lhs = wkey_prefix .. 'g',
     rhs = function()
       ---@type fzf-lua.config.Grep
-      local opts = {
-        cwd = vim.fn.expand '%:p:h',
-      }
-      require('fzf-lua').live_grep(opts)
+      FzfLua.live_grep(opts)
     end,
-    opts = { desc = '[S]earch [/] in Open Files' },
+    opts = { desc = '[S]earch Open Buffer Dir' },
   },
   { mode = 'x', lhs = '<leader>,', rhs = '<cmd>FzfLua grep_visual<cr>', opts = { desc = 'Grep' } },
 
   { lhs = wkey_prefix .. 'b', rhs = '<cmd>FzfLua blines<cr>', opts = { desc = 'Buffer Lines' } },
   { lhs = wkey_prefix .. 'd', rhs = '<cmd>FzfLua lsp_document_diagnostics<cr>', opts = { desc = 'Document diagnostics' } },
   { lhs = wkey_prefix .. 'f', rhs = '<cmd>FzfLua files<cr>', opts = { desc = 'Find files' } },
-  { lhs = wkey_prefix .. 'G', rhs = '<cmd>FzfLua grep_project<cr>', opts = { desc = 'Grep Project' } },
+  { lhs = wkey_prefix .. 'm', rhs = '<cmd>FzfLua manpages<cr>', opts = { desc = 'Find Man' } },
+  { lhs = wkey_prefix .. 'G', rhs = '<cmd>FzfLua live_grep<cr>', opts = { desc = 'Grep (cwd)' } },
   { lhs = wkey_prefix .. 'h', rhs = '<cmd>FzfLua help_tags<cr>', opts = { desc = 'Help' } },
   { lhs = wkey_prefix .. 'o', rhs = '<cmd>FzfLua oldfiles<cr>', opts = { desc = 'Recently opened files' } },
   { lhs = wkey_prefix .. 'r', rhs = '<cmd>FzfLua resume<cr>', opts = { desc = 'Resume last fzf command' } },

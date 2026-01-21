@@ -14,7 +14,7 @@ local function create_cmd(_, config)
     if toolchain_variant == 'zephyr' then
       local compiler = vim.fn.executable 'arm-zephyr-eabi-g++' and vim.fn.exepath 'arm-zephyr-eabi-g++' or ''
       if compiler then
-        _G.info 'Clangd query-driver'
+        VimRc.info 'Clangd query-driver'
         vim.print(compiler)
         config.cmd[#config.cmd + 1] = '--query-driver=' .. compiler
       end
@@ -32,7 +32,7 @@ local function create_cmd(_, config)
   --     local compdb = vim.fn.glob(vim.fs.joinpath(build_dir, 'compile_commands.json'))
   --     if vim.uv.fs_stat(compdb) then
   --       local compdb_dir = vim.fs.abspath(vim.fs.dirname(compdb))
-  --       _G.info('Setting compdb_dir to ' .. compdb_dir)
+  --       VimRc.info('Setting compdb_dir to ' .. compdb_dir)
   --
   --       config.cmd[#config.cmd + 1] = '--compile-commands-dir=' .. compdb_dir
   --     end

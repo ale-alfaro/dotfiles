@@ -39,7 +39,7 @@ VimRc.codecompanion = codecompanion
 function VimRc.CodeCompanionConfig.add_context(files)
   local chat = VimRc.codecompanion.last_chat() or VimRc.codecompanion.chat()
   if not chat then
-    _G.warn 'Could not get cc chat '
+    VimRc.warn 'Could not get cc chat '
     return
   end
   for _, file in ipairs(files) do
@@ -50,7 +50,7 @@ function VimRc.CodeCompanionConfig.add_context(files)
       f:close()
     end
     if not content then
-      _G.error('Could not read file: ' .. file)
+      VimRc.err('Could not read file: ' .. file)
     else
       chat:add_context({
         role = 'user',

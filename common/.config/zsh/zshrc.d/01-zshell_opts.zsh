@@ -79,3 +79,4 @@ setopt pushd_silent      # Do not print the directory stack after pushd or popd
 # And lastly substitutes 'builtin' with 'shmiltin'
 
 setopt extended_glob
+KEYTIMEOUT=1

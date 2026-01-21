@@ -44,7 +44,7 @@ function VimRc.do_lint()
   names = vim.tbl_filter(function(name)
     local linter = lint.linters[name]
     if not linter then
-      _G.warn('Linter not found: ' .. name, { title = 'nvim-lint' })
+      VimRc.warn('Linter not found: ' .. name, { title = 'nvim-lint' })
       return false
     end
     return true

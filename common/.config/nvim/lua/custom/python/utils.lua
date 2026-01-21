@@ -36,16 +36,16 @@ local function run_command(cmd, output_cb, cwd, text_output)
   --- @type fun(out: vim.SystemCompleted)
   local on_exit = function(obj)
     if obj.code == 0 and obj.stdout then
-      _G.info 'Command completed successfully'
+      VimRc.info 'Command completed successfully'
       if output_cb then
         if obj.stdout and obj.stdout:match '%S' then
           local line_output = text_output and vim.split(obj.stdout, '\n') or {}
-          _G.info('comand output: ' .. obj.stdout)
+          VimRc.info('comand output: ' .. obj.stdout)
           output_cb(obj.stdout, line_output)
         end
       end
     else
-      _G.error 'Command failed'
+      VimRc.err 'Command failed'
     end
   end
   -- Run command in background and capture output
@@ -102,10 +102,10 @@ function M.run_diagostics_with_tools(tool, cwd)
     if M.registered_tools[tool_name] ~= nil then
       local tool_table = M.registered_tools[tool_name]
       -- Add the filepath to the arguments for the tool
-      _G.info('Running diagnostic tool: ' .. tool_name)
+      VimRc.info('Running diagnostic tool: ' .. tool_name)
       run_command(tool_table.base_cmd, tool_table.postprocess, cwd)
     else
-      _G.warn('Unknown diagostic tool: ' .. tool_name)
+      VimRc.warn('Unknown diagostic tool: ' .. tool_name)
     end
   end
 end

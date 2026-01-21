@@ -58,3 +58,69 @@ if ok then
     end, { buffer = true })
   end, 'grug-far*', 'Keep one instance of grug')
 end
+
+local make_select_path = function(select_global, recency_weight)
+  local visits = require 'mini.visits'
+  local sort = visits.gen_sort.default { recency_weight = recency_weight }
+  local select_opts = { sort = sort }
+  return function()
+    local cwd = select_global and '' or vim.fn.getcwd()
+    visits.select_path(cwd, select_opts)
+  end
+end
+
+local make_pick_core = function(cwd, desc)
+  return function()
+    local sort_latest = MiniVisits.gen_sort.default { recency_weight = 1 }
+    local local_opts = { cwd = cwd, filter = 'core', sort = sort_latest }
+    MiniExtra.pickers.visit_paths(local_opts, { source = { name = desc } })
+  end
+end
+-- - `:h MiniVisits-overview` - overview of how module works
+-- - `:h MiniVisits-examples` - examples of common setups
+require('mini.visits').setup()
+-- v is for 'Visits'. Common usage:
+local prefix = '<leader>v'
+
+local search_visit_paths = function(cwd)
+  local fzf_lua = require 'fzf-lua'
+  -- local has_visits, visits = pcall(require, 'mini.visits')
+  -- if not has_visits then
+  --   VimRc.error [[`pickers.visit_labels` requires 'mini.visits' which can not be found.]]
+  -- end
+
+  cwd = cwd or vim.fn.getcwd()
+  -- NOTE: Use separate cwd to allow `cwd = ''` to not mean "current directory"
+  local picker_cwd = VimRc.normalize_path(cwd == '' and vim.fn.getcwd() or VimRc.full_path(cwd))
+
+  local filter = MiniVisits.gen_filter.default()
+  -- local items = MiniVisits.list_labels(local_opts.path, local_opts.cwd, { filter = filter })
+
+  -- Define source
+  local new_filter = function(path_data)
+    return filter(path_data) and type(path_data.labels) == 'table'
+  end
+  local all_paths = MiniVisits.list_paths(cwd, { filter = new_filter, sort = nil })
+  local all_labels = vim.tbl_map(function(x)
+    return VimRc.normalize_path(VimRc.short_path(x, picker_cwd))
+  end, all_paths)
+  local opts = {}
+  opts.prompt = 'MinVisit Paths > '
+  opts.actions = {
+    ['default'] = function(selected)
+      vim.cmd('cd ..' .. selected[1])
+    end,
+  }
+  fzf_lua.fzf_exec(vim.tbl_filter(new_filter, all_labels), opts)
+end
+-- stylua: ignore
+KEYS.define({
+  { lhs = prefix .. 's', rhs = function() search_visit_paths() end,    opts = { desc = 'Search visits' }, },
+  { lhs = prefix .. 'l', rhs = '<Cmd>lua MiniVisits.add_label("core")<CR>',    opts = { desc = 'Add to core' }, },
+  { lhs = prefix .. 'L', rhs = '<Cmd>lua MiniVisits.remove_label("core")<CR>', opts = { desc = 'Remove from core' }, },
+  { lhs = prefix .. 'c', rhs = make_pick_core('', 'Core visits (all)'),        opts = { desc = 'Core visits (all)' } },
+  { lhs = prefix .. 'C', rhs = make_pick_core(nil, 'Core visits (cwd)'),       opts = { desc = 'Core visits (cwd)' } },
+  { lhs = prefix .. 'r', rhs = make_select_path(true, 0.5),                    opts = { desc = 'Frecent visits (all)' } },
+  { lhs = prefix .. 'R', rhs = make_select_path(false, 0.5),                   opts = { desc = 'Frecent visits (cwd)' } },
+}, { prefix = prefix, group = 'Visits' })
+---

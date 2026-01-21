@@ -29,7 +29,7 @@ function _G.new_autocmd(event, callback, pattern, desc)
   }
   local ok, _ = pcall(vim.api.nvim_create_autocmd, event, opts)
   if not ok then
-    _G.error('Failed to create autocmd ' .. vim.print(pattern) .. ' ' .. vim.print(desc))
+    VimRc.error('Failed to create autocmd ' .. vim.print(pattern) .. ' ' .. vim.print(desc))
   end
 end
 
