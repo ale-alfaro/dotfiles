@@ -1,5 +1,26 @@
 #!bin/env zsh
 #
+
+fjust() {
+  fd '^[Jj]ustfile$|\..*just$' -tf --strip-cwd-prefix |
+    fzf \
+      --query="$1" \
+      --ansi \
+      --reverse \
+      --no-sort \
+      --preview-label '[ Justfiles ]' \
+      --preview 'just --list -f {}' \
+      --header-first \
+      --prompt "Justfiles > " \
+      --preview-window up:60%
+}
+
+# List tracking spreadsheets (productivity, money ...)
+# # Find in File using ripgrep
+# # Search through all man pages
+function fman() {
+  man -k . | fzf -q "$1" --prompt='man> ' --preview $'echo {} | tr -d \'()\' | awk \'{printf "%s ", $2} {print $1}\' | xargs -r man' | tr -d '()' | awk '{printf "%s ", $2} {print $1}' | xargs -r man
+}
 #
 fpkg_pacman() {
   fzf_args=(
@@ -49,21 +70,22 @@ ff() {
 
 _fzf_compgen_path() {
   fd -tf --strip-cwd-prefix "$1" 2>/dev/null
+  # rg --files --glob "!.git" "$1"
 }
 
 _fzf_compgen_dir() {
-  fd -td --strip-cwd-prefix "$1" 2>/dev/null
+  fd --hidden -td --strip-cwd-prefix "$1" 2>/dev/null
+  # fd --type d --hidden --follow --exclude ".git" --strip-cwd-prefix "$1"
 }
 
 _fzf_compgen_run() {
   cmd="$1"
   shift
   case "$cmd" in
-    pacman | yay)
-      fpkg_pacman "$@"
-      ;;
-    *)
-      fzf "$@"
-      ;;
+    pacman | yay) fpkg_pacman "$@" ;;
+    man) fman "$@" ;;
+    just) fjust "$@" ;;
+    export | unset) fzf --preview "eval 'echo \${}'" "$@" ;;
+    *) fzf "$@" ;;
   esac
 }

@@ -5,11 +5,6 @@
 # Set up default editor
 # ------------------------------------------------------------------------------
 #
-export VISUAL="$EDITOR"
-export SUDO_EDITOR="$EDITOR"
-export FCEDIT="$EDITOR"
-export NVIM_HOME="$HOME/.local/nvim"
-#
 if [[ "$OSTYPE" == "darwin"* ]]; then
   export BROWSER=arc
   export SDKROOT="$(xcrun --show-sdk-path)"
@@ -23,10 +18,8 @@ else
   export NCS_SDK_HOME="$HOME/ncs"
 fi
 
-PRE_MAN_CMD="sh -c 'awk '\''{ gsub(/\x1B\[[0-9;]*m/, \"\", \$0); gsub(/.\x08/, \"\", \$0); print }'\''"
-
-# export MANPAGER="sh -c 'awk '\''{ gsub(/\x1B\[[0-9;]*m/, \"\", \$0); gsub(/.\x08/, \"\", \$0); print }'\'' | bat -p -lman'"
-# export MANPAGER="bat -p -lman --strip-ansi=always"
+export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/ripgreprc"
+export BAT_THEME=ansi
 export MANPAGER="nvim +Man!"
 export PAGER='bat'
 
@@ -67,3 +60,8 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
       --color=fg+:#D8DEE9,\
       --color=prompt:#81A1C1,\
       --color=hl+:#81A1C1"
+export OBSIDIAN_HOME="$HOME/Documents/Obsidian"
+export CODEX_HOME="$XDG_CONFIG_HOME/codex"
+export STARSHIP_CONFIG="$XDG_CONFIG_HOME/starship/starship.toml"
+#Nvim version manager. Vendored bash script to mantain different neovim versions
+nvimv use nightly

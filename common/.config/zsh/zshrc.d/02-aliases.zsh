@@ -1,9 +1,12 @@
 #!/usr/bin/env zsh
 
 # ---- zsh-compatible Direnv stdlib helpers + other utilities for zsh scripts -----
-source "$ZDOTDIR/helpers/stdlib.zsh"
+[[ -r "$ZDOTDIR/helpers/stdlib.zsh" ]] && source "$ZDOTDIR/helpers/stdlib.zsh"
 # Plugin Helper
-source "$ZDOTDIR/helpers/plugin_helper.zsh"
+[[ -r "$ZDOTDIR/helpers/plugin_helper.zsh" ]] && source "$ZDOTDIR/helpers/plugin_helper.zsh"
+
+
+
 
 compress(){
   tar -czf "${1%/}.tar.gz" "${1%/}"
@@ -13,9 +16,6 @@ alias decompress="tar -xzf"
 # ---- Editor -----
 alias v="n"
 # Array to quoted list of strings
-a2q () {
-    print ${(j:, :)${(Pqq)1}[@]}
-}
 n() {
   if [[ "$#" -eq 0 ]]; then nvim; fi
   if [[ "$#" -eq 1 ]]; then
@@ -43,7 +43,60 @@ n() {
 alias d='dirs -v'
 for index ({1..9}) alias "$index"="cd +${index}"; unset index
 
+#######################################################
+# CLI Aliases
+#######################################################
 # ---- Eza (better ls) -----
+if has eza; then
+  alias lt='eza --tree --level=3 --long --icons --git'
+  alias lta='lt -a'
+  alias ls="eza --icons=always --oneline --no-git --all"
+fi
+# Alias For bat
+# Link: https://github.com/sharkdp/bat
+has wikiman && alias wman='wikiman'
+# has batman && alias man='batman'
+# Alias for lazygit
+# Link: https://github.com/jesseduffield/lazygit
+has lazygit && alias lg='lazygit'
+safe_source zoxide init zsh
+# Fuzzy (fzf) cd based on:
+#   - visited locations (bookmarks) OR
+#   - indexed files (locate/mdfind)
+#
+# Usage: c [fuzzy pattern]
+#        c -s (show statistics)
+alias cd='zd'
+zd(){
+  if [ $# -eq 0 ]; then
+    builtin cd ~ && return
+  elif [ -d "$1" ]; then
+    builtin cd "$1"
+  else
+    local dir="$(zoxide query --all --list --score | fzf +s -0 -1 -q"$*" || echo $pipestatus[2])"
+    if [[ -d $dir ]]; then
+      z $dir
+    else
+      z "$@" && printf "\U000F17A9 " && pwd || echo "Error: Directory not found"
+    fi
+  fi
+}
+
+
+# Alias for just (command runner)
+alias j='just'
+if [[ ! -z "${JUST_HOME}" ]]; then
+  alias .j='just --justfile ~/.config/just/Justfile --working-directory .'
+  # alias .j='just -g'
+  user_justfiles="${JUST_HOME}/.user"
+  if [[ -d "$user_justfiles" ]]; then
+    for file in $user_justfiles/*.just; do
+      for recipe in $(just --justfile $file --summary); do
+        alias $recipe="just --justfile $file --working-directory . $recipe"
+      done
+    done
+  fi
+fi
 # -------------------------------------------
 # 5. Suffix Aliases - Open Files by Extension
 # -------------------------------------------

@@ -1,9 +1,0 @@
-#!/usr/bin/env zsh
-
-
-just_summary(){ [[ -f "$REPLY" ]] && reply=$(just --summary  --justfile "$REPLY")}
-print -rl -- ./**/[Jj]ustfile(+just_summary) | \
-    fzf --with-nth 2.. --prompt 'Justfiles> ' \
-  --header 'Enter (edit) ╱ CTRL-O (choose recipe)' \
-  --preview '[[ $FZF_PROMPT =~ Justfiles ]] && bat {1} || just --unstable --justfile={1} --show {q}'
-

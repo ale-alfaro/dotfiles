@@ -45,20 +45,19 @@ error() {
 #    fi
 #
 has() {
-  type "$1" &>/dev/null
-  if (( $? != 0 )); then
-        error "Command not found: $1 "
-  fi
-
+  type "$1" &>/dev/null || {
+    error "Command not found: $1 "
+    return 1
+  }
   return 0
 }
 
 safe_source() {
   cmd="$1"
-  type "$cmd" &>/dev/null
-  if (( $? != 0 )); then
-        error "Command not found: $cmd "
-  fi
+  type "$cmd" &>/dev/null || {
+    error "Command not found: $cmd "
+    return 1
+  }
   shift
   source <($cmd "$@")
 }

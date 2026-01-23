@@ -58,14 +58,8 @@ setopt hist_ignore_space
 setopt hist_verify
 
 ## Max number of history lines in memory
-HISTSIZE=25001
 
 # Set up history file
-HISTFILE="$XDG_DATA_HOME/zsh/history"
-
-if [[ ! -f "$HISTFILE" ]]; then
-  [[ ! -d $(dirname $HISTFILE) ]] && mkdir -p $(dirname $HISFILE)
-fi
 
 ## Push and pop directories into a stack to go back to them quickly!
 setopt auto_pushd        # Push the current directory visited on the stack.
