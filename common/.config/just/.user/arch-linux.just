@@ -11,7 +11,9 @@ arch-pkgs-dump-aur:
 arch-pkgs-dump-all:
     pacman -Qqe
 
+[confirm('Are you sure you want to install the pkgs in ')]
 arch-pkgs-install file=dotfiles_pkg_file *args:
+    sudo pacman {{ f'-S{{args}}' }} "${(@f)"$(<{{ file }})"}"
     yay {{ f'-S{{args}}' }} "${(@f)"$(<{{ file }})"}"
 
 arch-pkgs-install-no-confirm file: (arch-pkgs-install '--noconfirm --needed')

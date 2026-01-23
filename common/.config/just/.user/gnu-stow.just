@@ -30,9 +30,13 @@ verbose_lvl := "2"
     echo "Stowed {{ os() }} packages"
 
 [group('maintanance')]
-restow-user-home: (restow dots / "common" home_dir() 'home')
+[macos]
+restow-zshenv: (restow dots / "common/home" home_dir() '.')
 
-[group('maintanance')]
+[linux]
+restow-zshenv:
+    sudo ln -sf {{ dots / "common" / "home" / "zshenv" }}  /etc/zsh/zshenv
+
 @restow-user-bin:
     just --justfile {{ justfile() }} restow {{ dots / "common" }} {{ executable_dir() }} bin --ignore='.*\.(md|lock|venv|direnv|python-version|toml|envrc)$'
 

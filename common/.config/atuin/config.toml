@@ -38,7 +38,7 @@ key_path = "~/.config/direnv/envs/ATUIN_KEY"
 
 ## which search mode to use
 ## possible values: prefix, fulltext, fuzzy, skim
-# search_mode = "fuzzy"
+search_mode = "prefix"
 
 ## which filter mode to use by default
 ## possible values: "global", "host", "session", "directory", "workspace"
@@ -56,7 +56,7 @@ workspaces = true
 ## which filter mode to use when atuin is invoked from a shell up-key binding
 ## the accepted values are identical to those of "filter_mode"
 ## leave unspecified to use same mode set in "filter_mode"
-# filter_mode_shell_up_key_binding = "global"
+filter_mode_shell_up_key_binding = "global"
 
 ## which search mode to use when atuin is invoked from a shell up-key binding
 ## the accepted values are identical to those of "search_mode"
@@ -65,7 +65,7 @@ workspaces = true
 
 ## which style to use
 ## possible values: auto, full, compact
-# style = "auto"
+style = "compact"
 
 ## the maximum number of lines the interface should take up
 ## set it to 0 to always go full screen
@@ -80,7 +80,7 @@ workspaces = true
 
 ## what to do when the escape key is pressed when searching
 ## possible values: return-original, return-query
-# exit_mode = "return-original"
+exit_mode = "return-query"
 
 ## possible values: emacs, subl
 # word_jump_mode = "emacs"
