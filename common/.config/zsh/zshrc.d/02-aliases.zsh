@@ -1,5 +1,9 @@
 #!/usr/bin/env zsh
 
+# ---- zsh-compatible Direnv stdlib helpers + other utilities for zsh scripts -----
+source "$ZDOTDIR/helpers/stdlib.zsh"
+# Plugin Helper
+source "$ZDOTDIR/helpers/plugin_helper.zsh"
 
 compress(){
   tar -czf "${1%/}.tar.gz" "${1%/}"

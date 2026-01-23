@@ -1,13 +1,4 @@
 ---@return VimPackPlugin
-vim.pack.add {
-  _G.plug('Saghen/blink.cmp', {
-    build_hook = {
-      plugin = 'blink.cmp',
-      build_cmd_type = 'shell',
-      build_cmd = 'cargo build --release',
-    },
-  }),
-}
 
 require('blink.cmp').setup {
   keymap = {
@@ -31,8 +22,8 @@ require('blink.cmp').setup {
       draw = {
         gap = 2,
         columns = {
-          { 'kind_icon', 'kind', gap = 1 },
-          { 'label', 'label_description', gap = 1 },
+          { 'kind_icon', 'kind',              gap = 1 },
+          { 'label',     'label_description', gap = 1 },
         },
       },
     },

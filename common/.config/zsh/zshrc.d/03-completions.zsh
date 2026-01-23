@@ -33,12 +33,15 @@
 # _approximate - This one is similar to _complete, except that it will try to correct what you’ve typed already (the context) if no match is found.
 # _expand_alias - Expand an alias you’ve typed. It needs to be declared before _complete.
 # _extensions - Complete the glob *. with the possible file extensions.
-# zstyle ':completion:*' completer _extensions _complete _approximate
+# Load custom generated manually or through MAN pages
+fpath=("$XDG_STATE_HOME/zsh/plugins/zsh-users/zsh-completions/src" "$ZDOTDIR/completions/src" $fpath)
 
 # zstyle ':completion:*' completer _complete _ignored _approximate
 # Problems with insecure directories under macOS?
 # -> see https://stackoverflow.com/a/13785716/149220 for a solution
 cache_directory="$XDG_CACHE_HOME/zsh"
+autoload -Uz compinit && compinit -d $cache_directory
+zstyle ':completion:*' completer _extensions _complete _approximate
 
 ## Use cache
 zstyle ':completion:*' use-cache on
@@ -63,37 +66,40 @@ zstyle ':completion:*' file-sort modification
 ## disable sort when completing `git checkout`
 zstyle ':completion:*:git-checkout:*' sort false
 # set descriptions format to enable group support
-# NOTE: don't use escape sequences (like '%F{red}%d%f') here, fzf-tab will ignore them
-# zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':completion:*:descriptions' format '[%d]'
 # set list-colors to enable filename colorizing
-# zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 # force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
 zstyle ':completion:*' menu no
 
-setopt GLOB_COMPLETE    # Show autocompletion menu with globs
-setopt AUTO_LIST        # Automatically list choices on ambiguous completion.
-setopt COMPLETE_IN_WORD # Complete from both ends of a word.
 
 # zstyle ':completion:*:*:*:*:corrections' format '%F{yellow}!- %d (errors: %e) -!%f'
 # zstyle ':completion:*:*:*:*:descriptions' format '%F{blue}-- %D %d --%f'
 # zstyle ':completion:*:*:*:*:messages' format ' %F{purple} -- %d --%f'
 # zstyle ':completion:*:*:*:*:warnings' format ' %F{red}-- no matches found --%f'
 
-zstyle ':completion:*:default' list-prompt '%S%M matches%s'
 # Colors for files and directory
-# zstyle ':completion:*:*:*:*:default' list-colors ${(s.:.)LS_COLORS}
 
 # Only display some tags for the command cd
-zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack path-directories
-zstyle ':completion:*:complete:git:argument-1:' tag-order !aliases
+zstyle ':completion:*:*:(z|cd|zd):*' tag-order local-directories directory-stack path-directories
 
-# Required for completion to be in good groups (named after the tags)
-# zstyle ':completion:*' group-name ''
+#######################################################
+# Zsh Plugins
+#######################################################
 
-# zstyle ':completion:*:*:-command-:*:*' group-order aliases builtins functions commands
+bd_zsh="$ZDOTDIR/shell_integrations/bd.zsh"
+[[ -f "$bd_zsh" ]] && source "$bd_zsh"
 
-## These were created by `compinstall`
-# zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]} r:|[._-]=* r:|=*' 'm:{[:lower:]}={[:upper:]}' 'm:{[:lower:]}={[:upper:]}' 'm:{[:lower:]}={[:upper:]}'
-# zstyle ':completion:*' max-errors 2
-# zstyle :compinstall filename "$ZDOTDIR/.zshrc"
-autoload -Uz compinit && compinit -d ${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump
+# Initialize First plguin, this plugin only adds more completions to the fpath so we call it before compload init
+plugins=(
+  Aloxaf/fzf-tab
+)
+__init_plugins "${plugins[@]}"
+
+# force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
+zstyle ':fzf-tab:*' switch-group ',' '.'
+zstyle ':fzf-tab:complete:(z|cd|zd):*' fzf-preview 'eza --icons=always --oneline --no-git --all'
+source "/usr/share/fzf/completion.zsh"
+source "$ZDOTDIR/completions/fzf.zsh"
+source "/usr/share/fzf/key-bindings.zsh"

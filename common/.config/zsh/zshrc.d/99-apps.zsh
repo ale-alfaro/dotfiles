@@ -1,6 +1,5 @@
 # Alias for FZF
 # Link: https://github.com/junegunn/fzf
-
 #######################################################
 # App Environment Variables
 #######################################################
@@ -105,14 +104,9 @@ fi
 [[ ! -z "$BW_CLI_COMPLETIONS" ]] && has bw && eval "$(bw completion --shell zsh)"
 has nrfutil && [[ -r "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh" ]] && . "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh"
 
-# Load custom generated manually or through MAN pages
-fpath+=("$HOME/.local/share/zsh/site" "$ZDOTDIR/completions/src" $fpath)
-
 #######################################################
 # Shell integrations
 #######################################################
-bd_zsh="$ZDOTDIR/shell_integrations/bd.zsh"
-[[ -f "$bd_zsh" ]] && source "$bd_zsh"
 # ---- Atuin (better shell command history) -----
 safe_source atuin init zsh
 
@@ -122,17 +116,9 @@ safe_source starship init zsh
 # ---- Direnv (.envrc auto-loading) -----
 safe_source direnv hook zsh
 
-# ---- Wezterm (terminal emulator) ---
-# if [[ $TERM_PROGRAM == "WezTerm" ]]; then
-#   echo "Enabling wezterm shell integration"
-#   . "$ZDOTDIR/shell_integrations/wezterm.sh"
-# elif [[ $TERM_PROGRAM == "ghostty" ]]; then
-#   if [[ -n $GHOSTTY_RESOURCES_DIR ]]; then
-#     echo "Enabling ghostty shell integration"
-#     source "$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
-#   fi
-# else
-#   echo "Unsupported TERM_PROGRAM=$TERM_PROGRAM"
-# fi
-
-nvimv use nightly
+# Initialize First plguin, this plugin only adds more completions to the fpath so we call it before compload init
+plugins=(
+  zsh-users/zsh-syntax-highlighting
+  zsh-users/zsh-autosuggestions
+)
+__init_plugins "${plugins[@]}"

@@ -1,7 +1,7 @@
 -- Treesitter
 require 'plugin.mini-textedit'
 
-vim.pack.add {
+vim.pack.add({
   _G.plug('nvim-treesitter/nvim-treesitter', {
     version = 'main',
     build_hook = {
@@ -9,8 +9,16 @@ vim.pack.add {
       build_cmd = 'TSUpdate',
       build_cmd_type = 'user',
     },
+  }), _G.plug('L3MON4D3/LuaSnip'),
+
+  _G.plug('Saghen/blink.cmp', {
+    build_hook = {
+      plugin = 'blink.cmp',
+      build_cmd_type = 'shell',
+      build_cmd = 'cargo build --release',
+    },
   }),
-}
+})
 
 local ensure_installed = {
   'bash',
@@ -65,9 +73,11 @@ _G.new_autocmd('FileType', function(ev)
   vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
 end, 'Nvim-Treesitter start')
 
-local ok, luasnip = pcall(require, 'plugin.luasnip')
+local ok, luasnip = pcall(require, 'luasnip')
 if ok then
-  VimRc.pack_add(luasnip)
+  luasnip.setup({ enable_autosnippets = true })
+  require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets/" })
+  -- VimRc.pack_add(luasnip)
 end
 
 local ok, _ = pcall(require, 'plugin.blink-cmp')

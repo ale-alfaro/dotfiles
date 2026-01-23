@@ -79,4 +79,6 @@ setopt pushd_silent      # Do not print the directory stack after pushd or popd
 # And lastly substitutes 'builtin' with 'shmiltin'
 
 setopt extended_glob
-KEYTIMEOUT=1
+setopt GLOB_COMPLETE    # Show autocompletion menu with globs
+setopt AUTO_LIST        # Automatically list choices on ambiguous completion.
+setopt COMPLETE_IN_WORD # Complete from both ends of a word.

@@ -5,7 +5,8 @@ vim.pack.add(_G.plug_spec {
 })
 
 local diagnostics = require 'lsp.diagnostics'
-local lsp_servers = { 'lua_ls', 'esbonio', 'clangd', 'neocmake', 'bashls', 'taplo', 'yamls', 'jsonls', 'marksman', 'ruff', 'pyrefly' }
+local lsp_servers = { 'lua_ls', 'tinymyst', 'esbonio', 'clangd', 'neocmake', 'bashls', 'taplo', 'yamls', 'jsonls',
+  'marksman', 'ruff', 'pyrefly' }
 local lspau = vim.api.nvim_create_augroup('vimrc.lsp', {})
 vim.api.nvim_create_autocmd('LspAttach', {
   group = lspau,
@@ -111,18 +112,19 @@ end, {
 })
 local complete_client = function(arg)
   return vim
-    .iter(vim.lsp.get_clients())
-    :map(function(client)
-      return client.name
-    end)
-    :filter(function(name)
-      return name:sub(1, #arg) == arg
-    end)
-    :totable()
+      .iter(vim.lsp.get_clients())
+      :map(function(client)
+        return client.name
+      end)
+      :filter(function(name)
+        return name:sub(1, #arg) == arg
+      end)
+      :totable()
 end
 
 local get_local_lsp_dir = function()
-  local vim_proj_folder = vim.fs.find({ '.vim' }, { path = vim.fn.getcwd(), type = 'directory', upward = true, stop = vim.fn.expand '$HOME' })[1]
+  local vim_proj_folder = vim.fs.find({ '.vim' },
+    { path = vim.fn.getcwd(), type = 'directory', upward = true, stop = vim.fn.expand '$HOME' })[1]
   if not vim_proj_folder then
     return nil
   end
@@ -195,11 +197,11 @@ local complete_configured = function(arg)
     table.insert(names, name)
   end
   return vim
-    .iter(unique_list(names))
-    :filter(function(name)
-      return name:sub(1, #arg) == arg
-    end)
-    :totable()
+      .iter(unique_list(names))
+      :filter(function(name)
+        return name:sub(1, #arg) == arg
+      end)
+      :totable()
 end
 
 vim.api.nvim_create_user_command('LspReconfigure', function(info)
@@ -209,11 +211,11 @@ vim.api.nvim_create_user_command('LspReconfigure', function(info)
   -- Default to restarting all active servers
   if #client_names == 0 then
     client_names = vim
-      .iter(vim.lsp.get_clients())
-      :map(function(client)
-        return client.name
-      end)
-      :totable()
+        .iter(vim.lsp.get_clients())
+        :map(function(client)
+          return client.name
+        end)
+        :totable()
   end
   for name in vim.iter(client_names) do
     if vim.lsp.config[name] == nil then
