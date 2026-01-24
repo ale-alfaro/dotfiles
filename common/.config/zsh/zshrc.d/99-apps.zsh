@@ -15,7 +15,7 @@ else
   export NVM_DIR="$XDG_CONFIG_HOME/nvm"
   source "$ZDOTDIR/shell_integrations/zsh-nvm.zsh"
 fi
-export npm_config_prefix="$HOME/.local"
+[[ ! -f "$HOME/.npmrc" ]] && npm set prefix="$HOME/.local"
 
 # if has gemini && test -z "${GEMINI_CLI_SYSTEM_SETTINGS_PATH}"; then
 #   export GEMINI_CLI_SYSTEM_SETTINGS_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/gemini/settings.json"
