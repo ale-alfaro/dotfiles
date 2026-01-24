@@ -3,7 +3,7 @@ local function create_tinymist_command(command_name, client, bufnr)
   local function run_tinymist_command()
     local arguments = { vim.api.nvim_buf_get_name(bufnr) }
     return client:exec_cmd({
-      title = "Export " .. cmd_display,
+      title = 'Export ' .. cmd_display,
       command = command_name,
       arguments = arguments,
     }, { bufnr = bufnr })
@@ -16,7 +16,17 @@ return {
   filetypes = { 'typst' },
   root_markers = { '.git' },
   settings = {
-    formatterMode = "typstyle"
+    formatterMode = 'typstyle',
+    formatterProseWrap = true,
+
+    formatterPrintWidth = 80, -- limit line length to 80 if possible
+
+    formatterIndentSize = 4, -- indentation width
+    lint = {
+      enabled = true,
+      when = 'onSave',
+    },
+    outputPath = 'res/tinymyst/$name',
   },
   on_attach = function(client, bufnr)
     for _, command in ipairs {

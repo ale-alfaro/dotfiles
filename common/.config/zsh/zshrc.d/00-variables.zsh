@@ -23,43 +23,6 @@ export BAT_THEME=ansi
 export MANPAGER="nvim +Man!"
 export PAGER='bat'
 
-export FZF_CTRL_R_OPTS="
-    --color header:italic
-    --height=80%
-    --bind 'ctrl-y:execute-silent(fc -l {2..} | wl-copy)+abort'
-    --header 'CTRL-Y: Copy command into clipboard, CTRL-/: Toggle line wrapping, CTRL-R: Toggle sorting by relevance'
-    "
-
-export FZF_CTRL_T_OPTS="
-    --walker-skip .git,node_modules,target
-    --preview 'bat -n --color=always {}'
-    --height=80%
-    "
-
-export FZF_ALT_C_OPTS="
-    --walker-skip .git,node_modules,target
-    --preview 'eza -lh --group-directories-first --icons=auto'
-    --height=80%
-    --bind 'ctrl-/:change-preview-window(down|hidden|)'
-    --header 'CTRL-/: Toggle preview window position'
-    "
-export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
-      --info=default\
-      --ansi \
-      --layout=reverse \
-      --border=rounded \
-      --color=bg+:#3B4252, \
-      --color=bg:#2E3440,\
-      --color=spinner:#81A1C1,\
-      --color=hl:#616E88,\
-      --color=fg:#D8DEE9,\
-      --color=header:#616E88,\
-      --color=info:#81A1C1,\
-      --color=pointer:#81A1C1,\
-      --color=marker:#81A1C1,\
-      --color=fg+:#D8DEE9,\
-      --color=prompt:#81A1C1,\
-      --color=hl+:#81A1C1"
 export OBSIDIAN_HOME="$HOME/Documents/Obsidian"
 export CODEX_HOME="$XDG_CONFIG_HOME/codex"
 export STARSHIP_CONFIG="$XDG_CONFIG_HOME/starship/starship.toml"
