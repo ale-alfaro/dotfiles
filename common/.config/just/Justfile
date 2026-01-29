@@ -4,7 +4,6 @@ set shell := ["zsh", "-uc"]
 
 justfile_home := config_dir() / 'just'
 
-mod JLink
 mod openocd
 mod direnv
 mod zephyr

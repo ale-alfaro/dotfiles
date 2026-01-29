@@ -84,7 +84,26 @@ zd(){
 
 
 # Alias for just (command runner)
-alias j='just'
+fj() {
+  local selection=$(
+    fd '[Jj]ustfile|\..*just' -tf --strip-cwd-prefix |
+      fzf \
+        --ansi \
+        --reverse \
+        --no-sort \
+        --preview-label '[ Justfiles ]' \
+        --preview 'just --list -f {}' \
+        --header-first \
+        --prompt "Justfiles > " \
+        --preview-window up:60% \
+        --header '
+    > ENTER to choose recipe to run
+    '
+  )
+  if [[ -n "$selection" ]]; then
+      just  -f $selection -d ${selection%%/*} --choose
+  fi
+}
 if [[ ! -z "${JUST_HOME}" ]]; then
   alias .j='just --justfile ~/.config/just/Justfile --working-directory .'
   # alias .j='just -g'

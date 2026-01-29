@@ -1,7 +1,7 @@
 -- Treesitter
 require 'plugin.mini-textedit'
 
-vim.pack.add({
+vim.pack.add {
   _G.plug('nvim-treesitter/nvim-treesitter', {
     version = 'main',
     build_hook = {
@@ -9,7 +9,7 @@ vim.pack.add({
       build_cmd = 'TSUpdate',
       build_cmd_type = 'user',
     },
-  }), _G.plug('L3MON4D3/LuaSnip'),
+  }),
 
   _G.plug('Saghen/blink.cmp', {
     build_hook = {
@@ -18,7 +18,7 @@ vim.pack.add({
       build_cmd = 'cargo build --release',
     },
   }),
-})
+}
 
 local ensure_installed = {
   'bash',
@@ -29,7 +29,6 @@ local ensure_installed = {
   'devicetree',
   'jsdoc',
   'json',
-  'jsonc',
   'json5',
   'just',
   'kconfig',
@@ -73,12 +72,39 @@ _G.new_autocmd('FileType', function(ev)
   vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
 end, 'Nvim-Treesitter start')
 
-local ok, luasnip = pcall(require, 'luasnip')
-if ok then
-  luasnip.setup({ enable_autosnippets = true })
-  require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets/" })
-  -- VimRc.pack_add(luasnip)
+-- Setup
+local gen_loader = require('mini.snippets').gen_loader
+require('mini.snippets').setup {
+  snippets = {
+    -- Load custom file with global snippets first
+    gen_loader.from_file '~/.config/nvim/snippets/global.json',
+
+    -- Load snippets based on current language by reading files from
+    -- "snippets/" subdirectories from 'runtimepath' directories.
+    gen_loader.from_lang(),
+  },
+  mappings = {
+    -- Expand snippet at cursor position. Created globally in Insert mode.
+    expand = '<C-j>',
+
+    -- Interact with default `expand.insert` session.
+    -- Created for the duration of active session(s)
+    jump_next = '<C-l>',
+    jump_prev = '<C-h>',
+    stop = '<C-c>',
+  },
+}
+
+local rhs = function()
+  MiniSnippets.expand { match = false }
 end
+vim.keymap.set('i', '<C-g><C-g>', rhs, { desc = 'Expand all' })
+-- local ok, luasnip = pcall(require, 'luasnip')
+-- if ok then
+--   luasnip.setup({ enable_autosnippets = true })
+--   require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets/" })
+--   -- VimRc.pack_add(luasnip)
+-- end
 
 local ok, _ = pcall(require, 'plugin.blink-cmp')
 if not ok then

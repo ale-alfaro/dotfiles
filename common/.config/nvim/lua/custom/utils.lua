@@ -75,14 +75,6 @@ end
 H.normalize_path = function(path)
   return path
 end
-if H.is_windows then
-  H.full_path = function(path)
-    return (vim.fn.fnamemodify(path, ':p'):gsub('(.)[\\/]$', '%1'))
-  end
-  H.normalize_path = function(path)
-    return path:gsub('\\', '/')
-  end
-end
 
 H.short_path = function(path, cwd)
   cwd = cwd or vim.fn.getcwd()

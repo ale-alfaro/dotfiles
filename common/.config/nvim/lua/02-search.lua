@@ -39,88 +39,99 @@ vim.ui.select = function(items, opts, on_choice)
     return vim.ui.select(items, opts, on_choice)
   end
 end
+
 require 'plugin.fzf-lua'
 -- require 'plugin.mini-pick'
 
-local ok, grug = pcall(require, 'plugin.grug')
-if ok then
-  VimRc.pack_add(grug)
-  -- grug-far main buffers will have `filetype=grug-far`.
-  -- grug-far history buffers will have `filetype=grug-far-history`
-  -- grug-far help buffers will have `filetype=grug-far-help`
-  _G.new_autocmd('FileType', function()
-    vim.keymap.set('n', '<C-enter>', function()
-      local inst = require('grug-far').get_instance(0)
-      if inst then
-        inst:open_location()
-        inst:close()
-      end
-    end, { buffer = true })
-  end, 'grug-far*', 'Keep one instance of grug')
-end
-
-local make_select_path = function(select_global, recency_weight)
-  local visits = require 'mini.visits'
-  local sort = visits.gen_sort.default { recency_weight = recency_weight }
-  local select_opts = { sort = sort }
-  return function()
-    local cwd = select_global and '' or vim.fn.getcwd()
-    visits.select_path(cwd, select_opts)
-  end
-end
-
-local make_pick_core = function(cwd, desc)
-  return function()
-    local sort_latest = MiniVisits.gen_sort.default { recency_weight = 1 }
-    local local_opts = { cwd = cwd, filter = 'core', sort = sort_latest }
-    MiniExtra.pickers.visit_paths(local_opts, { source = { name = desc } })
-  end
-end
 -- - `:h MiniVisits-overview` - overview of how module works
 -- - `:h MiniVisits-examples` - examples of common setups
 require('mini.visits').setup()
 -- v is for 'Visits'. Common usage:
 local prefix = '<leader>v'
-
-local search_visit_paths = function(cwd)
+---@param only_cwd boolean?
+---@param filter string|function|nil
+local search_visit_paths = function(only_cwd, filter)
   local fzf_lua = require 'fzf-lua'
-  -- local has_visits, visits = pcall(require, 'mini.visits')
-  -- if not has_visits then
-  --   VimRc.error [[`pickers.visit_labels` requires 'mini.visits' which can not be found.]]
-  -- end
-
-  cwd = cwd or vim.fn.getcwd()
-  -- NOTE: Use separate cwd to allow `cwd = ''` to not mean "current directory"
-  local picker_cwd = VimRc.normalize_path(cwd == '' and vim.fn.getcwd() or VimRc.full_path(cwd))
-
-  local filter = MiniVisits.gen_filter.default()
-  -- local items = MiniVisits.list_labels(local_opts.path, local_opts.cwd, { filter = filter })
-
+  local cwd = only_cwd and '' or nil
+  local sort = MiniVisits.gen_sort.default { recency_weight = 1 }
+  local all_paths = {}
   -- Define source
-  local new_filter = function(path_data)
-    return filter(path_data) and type(path_data.labels) == 'table'
+  if filter and vim.is_callable(filter) then
+    all_paths = MiniVisits.list_paths(cwd, {
+      filter = function(path_data)
+        return filter(path_data) and type(path_data.labels) == 'table'
+      end,
+      sort = sort,
+    })
+  elseif type(filter) == 'string' then
+    -- Path
+    all_paths = MiniVisits.list_paths(cwd, { filter = filter, sort = sort })
+  else
+    if cwd then
+      if not vim.uv.fs_stat(cwd) then
+        -- CWD, no filter
+        all_paths = MiniVisits.list_paths('', { sort = sort })
+      else
+        all_paths = MiniVisits.list_paths(cwd, { sort = sort })
+      end
+    else
+      -- Global , no filter
+      all_paths = MiniVisits.list_paths(nil, { sort = sort })
+    end
   end
-  local all_paths = MiniVisits.list_paths(cwd, { filter = new_filter, sort = nil })
-  local all_labels = vim.tbl_map(function(x)
-    return VimRc.normalize_path(VimRc.short_path(x, picker_cwd))
-  end, all_paths)
+  local all_labels = {}
+  if cwd ~= '' then
+    all_labels = vim.tbl_map(function(x)
+      return vim.fs.abspath(x)
+    end, all_paths)
+  else
+    all_labels = vim.tbl_map(function(x)
+      return vim.fs.normalize(x)
+    end, all_paths)
+  end
   local opts = {}
   opts.prompt = 'MinVisit Paths > '
   opts.actions = {
     ['default'] = function(selected)
-      vim.cmd('cd ..' .. selected[1])
+      vim.cmd('e ..' .. selected[1])
     end,
   }
-  fzf_lua.fzf_exec(vim.tbl_filter(new_filter, all_labels), opts)
+  -- vim.tbl_filter(new_filter, all_labels)
+  fzf_lua.fzf_exec(all_labels, opts)
 end
+
+
 -- stylua: ignore
 KEYS.define({
-  { lhs = prefix .. 's', rhs = function() search_visit_paths() end,    opts = { desc = 'Search visits' }, },
+  { lhs = prefix .. 's', rhs = function() search_visit_paths(nil) end,    opts = { desc = 'Search visits' }, },
+  { lhs = prefix .. 'S', rhs = function() search_visit_paths(true) end,    opts = { desc = 'Search visits' }, },
   { lhs = prefix .. 'l', rhs = '<Cmd>lua MiniVisits.add_label("core")<CR>',    opts = { desc = 'Add to core' }, },
   { lhs = prefix .. 'L', rhs = '<Cmd>lua MiniVisits.remove_label("core")<CR>', opts = { desc = 'Remove from core' }, },
-  { lhs = prefix .. 'c', rhs = make_pick_core('', 'Core visits (all)'),        opts = { desc = 'Core visits (all)' } },
-  { lhs = prefix .. 'C', rhs = make_pick_core(nil, 'Core visits (cwd)'),       opts = { desc = 'Core visits (cwd)' } },
-  { lhs = prefix .. 'r', rhs = make_select_path(true, 0.5),                    opts = { desc = 'Frecent visits (all)' } },
-  { lhs = prefix .. 'R', rhs = make_select_path(false, 0.5),                   opts = { desc = 'Frecent visits (cwd)' } },
+  { lhs = prefix .. 'c', rhs = function() search_visit_paths(nil, 'core') end,        opts = { desc = 'Core visits (all)' } },
+  { lhs = prefix .. 'C', rhs = function() search_visit_paths(true, 'core')end,       opts = { desc = 'Core visits (cwd)' } },
 }, { prefix = prefix, group = 'Visits' })
 ---
+---
+---
+local find_justfiles_cmd = "fd '[Jj]ustfile|\\..*just' -tf --strip-cwd-prefix"
+VimRc.fzf_just = function(opts)
+  local fzf_lua = require 'fzf-lua'
+  opts = opts or {}
+  opts.prompt = 'Just Recipes> '
+  opts.fn_transform = function(justfile)
+    -- fzf_jobstart(get_justfile_recipes_cmd .. justfile, {})
+    -- return fzf_lua.utils.ansi_codes.magenta(x)
+    return FzfLua.make_entry.file(justfile, { file_icons = true, color_icons = true })
+  end
+  opts.actions = {
+    ['default'] = function(selected)
+      VimRc.info(selected)
+      -- local get_justfile_recipes_cmd = { 'just', '-f ', selected[1], '--summary', '--unsorted' }
+      -- local recipes = VimRc.exec.run_cmd(et_justfile_recipes_cmd)
+      -- VimRc.info(selected[1] .. ' \n Recipes: ' .. recipes)
+    end,
+  }
+  fzf_lua.fzf_exec(find_justfiles_cmd, opts)
+end
+
+vim.cmd [[command! -nargs=* Just lua _G.VimRc.fzf_just()]]

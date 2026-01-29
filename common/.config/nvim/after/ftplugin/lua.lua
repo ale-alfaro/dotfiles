@@ -15,6 +15,19 @@ vim.b.minisplitjoin_config = {
   split = { hooks_post = { add_comma_curly } },
   join = { hooks_post = { del_comma_curly, pad_curly } },
 }
+vim.b.minisurround_config = vim.tbl_deep_extend('force', vim.b.minisurround_config or {}, {
+  custom_surroundings = {
+    s = {
+      input = { '%[%[().-()%]%]' },
+      output = { left = '[[', right = ']]' },
+    },
+  },
+})
 
+vim.b.miniai_config = vim.tbl_deep_extend('force', vim.b.miniai_config or {}, {
+  custom_textobjects = {
+    s = { '%[%[().-()%]%]' },
+  },
+})
 -- For setting the project root automatically
-MiniMisc.setup_auto_root({ '.luarc.json' })
+MiniMisc.setup_auto_root { '.luarc.json' }

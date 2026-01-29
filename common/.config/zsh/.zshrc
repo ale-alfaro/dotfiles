@@ -6,3 +6,6 @@
 for file in $ZDOTDIR/zshrc.d/*.zsh; do
   source "$file"
 done
+
+# embedder
+export PATH="/home/alealfaro/.embedder/bin:$PATH"

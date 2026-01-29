@@ -1,12 +1,13 @@
 [grep]
 tool = ripgrep
+ripgrep.tool-path=/bin/rg
 ripgrep.tool-args = '--max-count=10'
 
 [update]
 narrow = true
 
 [zephyr]
-base-prefer = "env"
+base-prefer = env
 
 [alias]
 update = update -o=--depth=1 -n
@@ -14,4 +15,3 @@ run = build --pristine=never --target run
 menuconfig = build --pristine=never --target menuconfig
 boards = boards --format "{name:30} | {qualifiers:30} | {dir}"
 list = list -f " {name:30} | {path:50} "
-rg = grep --tool-path /bin/rg

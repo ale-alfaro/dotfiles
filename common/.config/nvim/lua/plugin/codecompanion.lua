@@ -1,10 +1,13 @@
 vim.pack.add {
-  { src = 'https://github.com/olimorris/codecompanion.nvim', version = 'main' },
+  { src = 'https://github.com/olimorris/codecompanion.nvim', version = vim.version.range '^18.0.0' },
   { src = 'https://github.com/lalitmee/codecompanion-spinners.nvim' },
   { src = 'https://github.com/ravitemer/codecompanion-history.nvim' },
 }
 -- CodeCompanion
-require 'custom.ai'
+--
+local codecompanion = require 'codecompanion'
+local config = require 'custom.ai'
+codecompanion.setup(config)
 local wkey_prefix = '<leader>a'
 KEYS.define({
   { mode = { 'n', 'v' }, lhs = wkey_prefix .. 'r', rhs = '<cmd>CodeCompanionChat RefreshCache<cr>', opts = { desc = 'CodeCompanion RefreshCache' } },
@@ -15,17 +18,6 @@ KEYS.define({
   { mode = { 'n', 'v' }, lhs = wkey_prefix .. 's', rhs = '<cmd>CodeCompanionSummaries<cr>', opts = { desc = 'Browse CodeCompanionSummaries' } },
 }, { prefix = wkey_prefix, group = 'AI' })
 
-local cc = augroup 'dotfiles.codecompanion'
-_G.new_user_autocmd(function()
-  vim.lsp.buf.format()
-end, 'CodeCompanionInlineFinished', 'CodeCompanion Inline Format')
-
 _G.new_user_autocmd(function(args)
   vim.treesitter.start(args.data.bufnr, 'markdown')
 end, 'CodeCompanionChatCreated', 'CodeCompanion Chat Treesitter start')
-
-local diff = require 'mini.diff'
-diff.setup {
-  -- Disabled by default
-  source = diff.gen_source.none(),
-}

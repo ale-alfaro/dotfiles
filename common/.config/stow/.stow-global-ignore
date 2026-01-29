@@ -29,6 +29,11 @@ _darcs
 \.envrc
 \.env
 *\.bak
-.*venv
 scratch
 \.direnv
+.*\.lock
+.*\.venv
+.*\.direnv
+.*\.python-version
+.*\.envrc
+chromium

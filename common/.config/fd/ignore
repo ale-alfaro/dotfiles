@@ -70,3 +70,6 @@ cython_debug/
 
 # Local History for Visual Studio Code
 .history/
+
+.cache/
+.cipd-cache-dir/

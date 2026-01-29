@@ -2,8 +2,9 @@
 ---@module "which-key"
 
 vim.pack.add(_G.plug_spec {
+  'nvim-lua/plenary.nvim',
+  'nvim-mini/mini.nvim',
   'catppuccin/nvim',
-  'folke/which-key.nvim',
 })
 
 -- Set up to not prefer extension-based icon for some extensions
@@ -98,16 +99,6 @@ require('mini.notify').setup {
     winblend = 25,
   },
 }
-
---stylua: ignore
--- local vim_notify_opts = {
---   ERROR = { duration = 3000, hl_group = 'DiagnosticError' },
---   WARN  = { duration = 3000, hl_group = 'DiagnosticWarn' },
---   INFO  = { duration = 1000, hl_group = 'DiagnosticInfo' },
---   DEBUG = { duration = 0, hl_group = 'DiagnosticHint' },
---   TRACE = { duration = 0, hl_group = 'DiagnosticOk' },
---   OFF   = { duration = 0, hl_group = 'MiniNotifyNormal' },
--- }
 
 vim.notify = MiniNotify.make_notify()
 vim.api.nvim_set_hl(0, 'VimRcError', { link = 'StderrMsg' })
@@ -211,11 +202,6 @@ KEYS.define({
     end,
     opts = { desc = '[N]otification [A]ll' },
   },
-  -- {
-  --   lhs = '<leader>nf',
-  --   rhs = '<Cmd>Noice fzf<CR>',
-  --   opts = { desc = '[N]otification [F]ind' },
-  -- },
   {
     lhs = '<leader>nh',
     rhs = '<Cmd>lua MiniNotify.show_history()<CR>',
@@ -238,26 +224,16 @@ KEYS.define({
     opts = { desc = '[N]otification [D]ismiss' },
   },
 }, { prefix = '<leader>n', group = 'Notification' })
--- Similar to 'mhinz/vim-startify' ~
-local MiniStarter = require 'mini.starter'
-MiniStarter.setup {
-  evaluate_single = true,
-  items = {
-    MiniStarter.sections.recent_files(10, false),
-    MiniStarter.sections.recent_files(10, true),
-    MiniStarter.sections.pick(),
-  },
-}
 require('mini.statusline').setup()
 require('mini.cmdline').setup {
 
   -- Autocompletion: show `:h 'wildmenu'` as you type
   autocomplete = {
-    enable = true,
+    enable = false,
 
     -- Delay (in ms) after which to trigger completion
     -- Neovim>=0.12 is recommended for positive values
-    delay = 100,
+    delay = 10,
 
     -- Custom rule of when to trigger completion
     -- predicate = nil,
@@ -318,34 +294,49 @@ require('mini.hipatterns').setup {
     hex_color = require('mini.hipatterns').gen_highlighter.hex_color(),
   },
 }
+local miniclue = require 'mini.clue'
+miniclue.setup {
+  -- Define which clues to show. By default shows only clues for custom mappings
+  -- (uses `desc` field from the mapping; takes precedence over custom clue).
+  window = {
 
--- Which-key
-require('which-key').setup {
-  preset = 'helix',
-  defaults = {},
-  spec = {
-    mode = { 'n', 'v' },
-    { '<leader>c', group = 'Code' },
-    { '<leader>x', group = 'diagnostics/quickfix' },
-    { '[', group = 'prev' },
-    { ']', group = 'next' },
-    { 'g', group = 'goto' },
-    { 'gs', group = 'surround' },
-    { 'z', group = 'fold' },
-    {
-      '<leader>b',
-      group = 'buffer',
-      expand = function()
-        return require('which-key.extras').expand.buf()
-      end,
-    },
-    {
-      '<leader>w',
-      group = 'windows',
-      proxy = '<c-w>',
-      expand = function()
-        return require('which-key.extras').expand.win()
-      end,
-    },
+    -- Delay before showing clue window
+    delay = 500,
+
+    -- Keys to scroll inside the clue window
+    scroll_down = '<C-d>',
+    scroll_up = '<C-u>',
+  },
+  -- Explicitly opt-in for set of common keys to trigger clue window
+  triggers = {
+    { mode = { 'n', 'x' }, keys = '<Leader>' }, -- Leader triggers
+    { mode = 'n', keys = '\\' }, -- mini.basics
+    { mode = { 'n', 'x' }, keys = '[' }, -- mini.bracketed
+    { mode = { 'n', 'x' }, keys = ']' },
+    { mode = 'i', keys = '<C-x>' }, -- Built-in completion
+    { mode = { 'n', 'x' }, keys = 'g' }, -- `g` key
+    { mode = { 'n', 'x' }, keys = "'" }, -- Marks
+    { mode = { 'n', 'x' }, keys = '`' },
+    { mode = { 'n', 'x' }, keys = '"' }, -- Registers
+    { mode = { 'i', 'c' }, keys = '<C-r>' },
+    { mode = 'n', keys = '<C-w>' }, -- Window commands
+    -- { mode = { 'n', 'x' }, keys = 's' },        -- `s` key (mini.surround, etc.)
+    { mode = { 'n', 'x' }, keys = 'z' }, -- `z` key
+  },
+  clues = {
+    -- This is defined in 'plugin/20_keymaps.lua' with Leader group descriptions
+    miniclue.gen_clues.builtin_completion(),
+    miniclue.gen_clues.g(),
+    miniclue.gen_clues.marks(),
+    miniclue.gen_clues.registers(),
+    miniclue.gen_clues.square_brackets(),
+    -- This creates a submode for window resize mappings. Try the following:
+    -- - Press `<C-w>s` to make a window split.
+    -- - Press `<C-w>+` to increase height. Clue window still shows clues as if
+    --   `<C-w>` is pressed again. Keep pressing just `+` to increase height.
+    --   Try pressing `-` to decrease height.
+    -- - Stop submode either by `<Esc>` or by any key that is not in submode.
+    miniclue.gen_clues.windows { submode_resize = true },
+    miniclue.gen_clues.z(),
   },
 }

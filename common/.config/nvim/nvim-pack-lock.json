@@ -5,7 +5,7 @@
       "src": "https://github.com/L3MON4D3/LuaSnip"
     },
     "blink.cmp": {
-      "rev": "820f1ddf634ec267412e403711bf74be26cac677",
+      "rev": "b137f63d89d0285ca76eed12e1923220e0aff8c1",
       "src": "https://github.com/Saghen/blink.cmp"
     },
     "clangd_extensions.nvim": {
@@ -13,7 +13,7 @@
       "src": "https://github.com/p00f/clangd_extensions.nvim"
     },
     "codecompanion-history.nvim": {
-      "rev": "8c6ca9f998aeef89f3543343070f8562bf911fb4",
+      "rev": "bc1b4fe06eaaf0aa2399be742e843c22f7f1652a",
       "src": "https://github.com/ravitemer/codecompanion-history.nvim"
     },
     "codecompanion-spinners.nvim": {
@@ -21,9 +21,9 @@
       "src": "https://github.com/lalitmee/codecompanion-spinners.nvim"
     },
     "codecompanion.nvim": {
-      "rev": "c873ef7235687904e77da7b7656ec50602e8f2cd",
+      "rev": "f61dbb22439386585a514d15be713c355f830e49",
       "src": "https://github.com/olimorris/codecompanion.nvim",
-      "version": "'main'"
+      "version": "18.0.0 - 19.0.0"
     },
     "conform.nvim": {
       "rev": "c2526f1cde528a66e086ab1668e996d162c75f4f",
@@ -34,15 +34,15 @@
       "src": "https://github.com/folke/flash.nvim"
     },
     "fzf-lua": {
-      "rev": "696f8c071723f845b904af2f99a798650210355e",
+      "rev": "d59f857c76eb474ec00debcf043f14fd001805cc",
       "src": "https://github.com/ibhagwan/fzf-lua"
     },
     "grug-far.nvim": {
-      "rev": "794f03c97afc7f4b03fb6ec5111be507df1850cf",
+      "rev": "1f7a722a9b9f0206a345377c13e62542f484398a",
       "src": "https://github.com/MagicDuck/grug-far.nvim"
     },
     "mini.nvim": {
-      "rev": "c163117900c17d4abf30bc09452a261c8536060c",
+      "rev": "9b935c218ddba02e5dc75c94f90143bce1f7c646",
       "src": "https://github.com/nvim-mini/mini.nvim"
     },
     "nvim": {
@@ -54,16 +54,16 @@
       "src": "https://github.com/mfussenegger/nvim-lint"
     },
     "nvim-lspconfig": {
-      "rev": "92ee7d42320edfbb81f3cad851314ab197fa324a",
+      "rev": "ff9c0af8f9b2097fdd2695058db7e04c193908aa",
       "src": "https://github.com/neovim/nvim-lspconfig"
     },
     "nvim-treesitter": {
-      "rev": "ec034813775d7e2974c7551c8c34499a828963f8",
+      "rev": "f8bbc3177d929dc86e272c41cc15219f0a7aa1ac",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter",
       "version": "'main'"
     },
     "obsidian.nvim": {
-      "rev": "acd73830fe2e8a2e0c234073ca2cb6387d59f37b",
+      "rev": "844b95b7770a7792c5081245d73b476bda18a5e4",
       "src": "https://github.com/obsidian-nvim/obsidian.nvim"
     },
     "plenary.nvim": {
@@ -79,7 +79,7 @@
       "src": "https://github.com/MeanderingProgrammer/render-markdown.nvim"
     },
     "schemastore.nvim": {
-      "rev": "a0375eb6f7f944723162ef41c200ac6b364f53ac",
+      "rev": "9afa445602e6191917b4d32f1355e77b4525f905",
       "src": "https://github.com/b0o/schemastore.nvim"
     },
     "tiny-code-action.nvim": {

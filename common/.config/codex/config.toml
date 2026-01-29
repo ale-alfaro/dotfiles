@@ -33,7 +33,7 @@ model_provider = "openai"
 ################################################################################
 
 # Reasoning effort: minimal | low | medium | high (default: medium)
-model_reasoning_effort = "medium"
+model_reasoning_effort = "high"
 
 # Reasoning summary: auto | concise | detailed | none (default: auto)
 model_reasoning_summary = "concise"

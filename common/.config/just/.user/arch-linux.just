@@ -36,3 +36,25 @@ arch-remove-orphans:
 @udev-rules-install rules_file:
     sudo cp {{ rules_file }} /etc/udev/rules.d/
     sudo udevadm control --reload
+
+osdclient +args:
+    swayosd-client --monitor "$(hyprctl monitors -j | jq -r '.[] | select(.focused == true).name')" {{ args }}
+
+# Laptop multimedia keys for volume and LCD brightness (with OSD)
+arch_raise_vol: (osdclient '--output-volume raise')
+
+arch_lower_vol: (osdclient '--output-volume lower')
+
+arch_mute_out: (osdclient '--output-volume mute-toggle')
+
+arch_mute_in: (osdclient '--input-volume mute-toggle')
+
+arch_raise_bright: (osdclient '--brightness raise')
+
+arch_lower_bright: (osdclient '--brightness lower')
+
+arch_play_next: (osdclient '--playerctl next')
+
+arch_play_pause: (osdclient '--playerctl play-pause')
+
+arch_play_prev: (osdclient '--playerctl previous')

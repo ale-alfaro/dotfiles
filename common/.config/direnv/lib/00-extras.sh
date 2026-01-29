@@ -91,25 +91,6 @@ use_developer_envs() {
   use_env_dir "$XDG_CONFIG_HOME/direnv/envs/${env_type}"
 }
 ############## Python ###################################
-layout_uv_venv() {
-  if [ $# -ne 1 ]; then
-    log_fatal "Need to specify python version"
-  fi
-  python_version="--python=$1"
-
-  if [[ -d ".venv" ]]; then
-    VIRTUAL_ENV="$(pwd)/.venv"
-  fi
-  if [[ -z $VIRTUAL_ENV || ! -d $VIRTUAL_ENV ]]; then
-    log_status "No virtual environment exists. Executing uv venv to create one."
-    uv venv "$python_version"
-    VIRTUAL_ENV="$(pwd)/.venv"
-  fi
-  PATH_add "$VIRTUAL_ENV/bin"
-  export UV_ACTIVE=1 # or VENV_ACTIVE=1
-  export VIRTUAL_ENV
-  export UV_PYTHON="$VIRTUAL_ENV/bin/python"
-}
 
 use_uv() {
   local pyver="${1:-3.11}"

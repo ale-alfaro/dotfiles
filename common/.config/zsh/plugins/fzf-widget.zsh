@@ -2,28 +2,17 @@
 #
 [[ -r /usr/share/fzf/key-bindings.zsh ]] && source /usr/share/fzf/key-bindings.zsh
 # Rebind ALT-c to CTRL-e
-bindkey -rM emacs '\ec'
-bindkey -rM vicmd '\ec'
-bindkey -rM viins '\ec'
-
-zle -N fzf-cd-widget
-bindkey -M emacs '\C-e' fzf-cd-widget
-bindkey -M vicmd '\C-e' fzf-cd-widget
-bindkey -M viins '\C-e' fzf-cd-widget
+# bindkey -rM emacs '\ec'
+# bindkey -rM vicmd '\ec'
+# bindkey -rM viins '\ec'
 #
-#
-# Rebind ALT-c to CTRL-e
-bindkey -rM emacs '\ec'
-bindkey -rM vicmd '\ec'
-bindkey -rM viins '\ec'
+# zle -N fzf-cd-widget
+# bindkey -M emacs '\C-e' fzf-cd-widget
+# bindkey -M vicmd '\C-e' fzf-cd-widget
+# bindkey -M viins '\C-e' fzf-cd-widget
 
-zle -N fzf-cd-widget
-bindkey -M emacs '\C-e' fzf-cd-widget
-bindkey -M vicmd '\C-e' fzf-cd-widget
-bindkey -M viins '\C-e' fzf-cd-widget
-fzf-just-widget() {
-
-  local -a selection=($(
+fjust() {
+  local file="$(
     fd '[Jj]ustfile|\..*just' -tf --strip-cwd-prefix |
       fzf \
         --ansi \
@@ -33,31 +22,17 @@ fzf-just-widget() {
         --preview 'just --list -f {}' \
         --header-first \
         --prompt "Justfiles > " \
-        --preview-window up:60% \
-        --expect=ctrl-e \
-        --header '
-		> CTRL-E to edit justfile to edit
-    > ENTER to choose recipe to run
-    '
-  ))
-  # print "arr: ${selection[@]}"
-  # print "len: ${#selection}"
-  #
-  if (("${#selection}" == 2)); then
-    eval "just --edit -f ${selection[1]}"
-    LBUFFER="${LBUFFER}"
-    zle redisplay
-  elif (("${#selection}" == 1)); then
-    ret="$(just --choose -f ${selection[0]} &>2)"
-    LBUFFER="${LBUFFER}${ret}"
-    zle redisplay
-  else
+        --preview-window up:60%
+  )"
+
+  if [[ -n "$file" ]]; then
+    LBUFFER+="just -f $file --choose"
     zle reset-prompt
   fi
-
 }
-bindkey '^j' fzf-just-widget
-zle -N fzf-just-widget
+bindkey '^j' fjust
+zle -N fjust
+
 #
 
 fzf-man-widget() {

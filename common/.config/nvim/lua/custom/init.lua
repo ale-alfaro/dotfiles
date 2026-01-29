@@ -26,7 +26,7 @@ _G.KEYS = {}
 -- Tracks defined keymaps to prevent duplicates.
 -- Key is a unique string like "n:<leader>ff".
 KEYS.registry = {}
-
+KEYS.leader_clues = {}
 ---@param lhs string
 ---@param mode string
 local function keymap_encode(lhs, mode)
@@ -41,9 +41,8 @@ end
 ---@param keymaps KeymapSpec[]
 ---@param wkey_group WhichKeyGroupSpec?
 function KEYS.define(keymaps, wkey_group)
-  local wkey_spec = {}
   if wkey_group then
-    wkey_spec[#wkey_spec + 1] = { wkey_group.prefix, group = wkey_group.group }
+    KEYS.leader_clues[#KEYS.leader_clues + 1] = { mode = 'n', keys = wkey_group.prefix, desc = wkey_group.group }
   end
 
   for _, spec in ipairs(keymaps) do
@@ -59,18 +58,10 @@ function KEYS.define(keymaps, wkey_group)
       ---@type vim.keymap.set.Opts
       local opts = spec.opts or {}
       vim.keymap.set(mode, spec.lhs, spec.rhs, opts)
-      if wkey_group then
-        wkey_spec[#wkey_spec + 1] = { spec.lhs, desc = opts.desc or wkey_group.prefix }
-      end
-
       -- Mark this keymap as handled
       KEYS.registry[id] = true
       ::continue_inner::
     end
-  end
-
-  if #wkey_spec > 1 then
-    require('which-key').add(wkey_spec)
   end
 end
 

@@ -2,6 +2,13 @@
 
 require('blink.cmp').setup {
   keymap = {
+
+    -- show with a list of providers
+    ['<C-space>'] = {
+      function(cmp)
+        cmp.show { providers = { 'snippets' } }
+      end,
+    },
     ['<CR>'] = { 'accept', 'fallback' },
     ['<C-\\>'] = { 'hide', 'fallback' },
     ['<C-n>'] = { 'select_next', 'show' },
@@ -22,48 +29,18 @@ require('blink.cmp').setup {
       draw = {
         gap = 2,
         columns = {
-          { 'kind_icon', 'kind',              gap = 1 },
-          { 'label',     'label_description', gap = 1 },
+          { 'kind_icon', 'kind', gap = 1 },
+          { 'label', 'label_description', gap = 1 },
         },
       },
     },
   },
   signature = { enabled = true },
-  snippets = { preset = 'luasnip' },
-  cmdline = {
-    enabled = true,
-    keymap = { preset = 'cmdline' },
-    completion = {
-      list = { selection = { preselect = false } },
-      menu = {
-        auto_show = function(ctx)
-          return false
-          -- return vim.fn.getcmdtype() == ':'
-        end,
-      },
-      -- ghost_text = { enabled = true },
-    },
-  },
+
+  snippets = { preset = 'mini_snippets' },
   sources = {
     -- Disable some sources in comments and strings.
-    default = function()
-      local sources = { 'lsp', 'snippets', 'buffer' }
-      local ok, node = pcall(vim.treesitter.get_node)
-
-      if ok and node then
-        if not vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }, node:type()) then
-          table.insert(sources, 'path')
-        end
-        if node:type() ~= 'string' then
-          table.insert(sources, 'snippets')
-        end
-      end
-
-      return sources
-    end,
-    per_filetype = {
-      codecompanion = { 'codecompanion', 'buffer' },
-    },
+    default = { 'lsp', 'path', 'snippets', 'buffer' },
   },
   appearance = {
     kind_icons = VimRc.icons.symbol_kinds,

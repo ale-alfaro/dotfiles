@@ -103,9 +103,9 @@ the remaining arguments are the same as for |nvim_create_user_command()|:
 
 
 
-command('CopyMessage', function()
-  vim.cmd [[let @+ = execute('messages')]]
-end, { desc = 'Copy message output' })
+command('CopyCwd', function()
+  vim.cmd [[let @+=expand("%:p")]]
+end, { desc = 'Copy Cwd Path' })
 
 command('FindAndReplace', function(opts)
   vim.api.nvim_command(string.format('silent cdo s/%s/%s', opts.fargs[1], opts.fargs[2]))
@@ -194,3 +194,23 @@ command('PackUpdate', function()
     vim.pack.update(plugins)
   end
 end, { desc = 'Update active plugins' })
+
+vim.api.nvim_create_user_command('LspInfo', ':checkhealth vim.lsp', { desc = 'Alias to `:checkhealth vim.lsp`' })
+
+vim.api.nvim_create_user_command('LspLog', function()
+  local logfile = vim.lsp.log.get_filename()
+  if vim.uv.fs_stat(logfile) then
+    VimRc.exec.run_cmd { 'touch', vim.lsp.log.get_filename() }
+  end
+
+  vim.cmd(string.format('tabnew %s', logfile))
+end, {
+  desc = 'Opens the Nvim LSP client log.',
+})
+
+vim.api.nvim_create_user_command('LspLogClean', function()
+  VimRc.exec.run_cmd { 'rm', vim.lsp.log.get_filename() }
+  VimRc.exec.run_cmd { 'touch', vim.lsp.log.get_filename() }
+end, {
+  desc = 'Opens the Nvim LSP client log.',
+})

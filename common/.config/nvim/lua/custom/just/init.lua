@@ -53,38 +53,31 @@ M.setup = function(_)
     complete = completeRecipe,
   })
 end
-M.fzf_dirs = function(opts)
-  local fzf_lua = require 'fzf-lua'
-  opts = opts or {}
-  opts.prompt = 'Just Recipes> '
-  opts.fn_transform = function(x)
-    return fzf_lua.utils.ansi_codes.magenta(x)
-  end
-  opts.actions = {
-    ['default'] = function(selected)
-      vim.cmd('just ' .. selected[1])
-    end,
-  }
-  fzf_lua.fzf_exec("just --summary --unsorted | tr ' ' '\n' ", opts)
-end
-M.recipePicker = function(opts)
-  opts = opts or {}
 
-  pickers
-    .new(opts, {
-      prompt_tile = 'Just Recipes',
-      finder = finders.new_table(jobs.justSummary()),
-      sorter = config.generic_sorter(opts),
-      attach_mappings = function(prompt_bufnr, _)
-        -- Select Default
-        actions.select_default:replace(function()
-          actions.close(prompt_bufnr)
-          local selection = action_state.get_selected_entry()
-          jobs.justRunAsync(selection[1])
-        end)
-        return true
-      end,
-    })
-    :find()
-end
+require('fzf-lua').live_grep {
+  cmd = 'git grep --ignore-case --extended-regexp --line-number --column --color=always --untracked',
+  fn_transform_cmd = function(query, cmd, _)
+    -- Extract search query and glob string separated by '--'
+    local search_query, glob_str = query:match '(.-)%s-%-%-(.*)'
+
+    if not glob_str then
+      return -- Fallback to original command if no glob string
+    end
+
+    -- Convert glob string into git-compatible pathspecs
+    local pathspecs = {}
+    for pattern in glob_str:gmatch '%S+' do
+      if pattern:sub(1, 1) == '!' then
+        -- Convert '!pattern' to git's exclude pathspec
+        table.insert(pathspecs, string.format("':(exclude)%s'", pattern:sub(2)))
+      else
+        table.insert(pathspecs, string.format("'%s'", pattern))
+      end
+    end
+
+    -- Compose the final git grep command
+    local new_cmd = string.format('%s %s %s', cmd, vim.fn.shellescape(search_query), table.concat(pathspecs, ' '))
+    return new_cmd, search_query
+  end,
+}
 return M

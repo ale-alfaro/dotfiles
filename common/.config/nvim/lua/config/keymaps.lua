@@ -161,7 +161,7 @@ local keymaps = {}
 ---@param mode (string|string[])?
 ---@param lhs string
 ---@param rhs string|fun(args:table)
----@param opts vim.keymap.set.Opts?
+----@param opts vim.keymap.set.Opts?
 local function map(lhs, rhs, mode, opts)
   vim.validate('mode', mode, { 'string', 'table' }, true)
   vim.validate('lhs', lhs, 'string')
@@ -176,14 +176,12 @@ local function map(lhs, rhs, mode, opts)
 end
 map('q', '<nop>', nil, { noremap = true })
 map('Q', '<Cmd>qall<CR>', nil, { noremap = true })
-map('o', '<Cmd>let @+=expand("%:p") <CR>', nil, { noremap = true })
+-- map('o', '<Cmd>let @+=expand("%:p") <CR>', nil, { noremap = true })
 
 vim.keymap.set({ 'n', 'x' }, 'j', 'gj', { desc = 'Navigate down (visual line)' })
 vim.keymap.set({ 'n', 'x' }, 'k', 'gk', { desc = 'Navigate up (visual line)' })
 vim.keymap.set({ 'n', 'x' }, '<Down>', 'gj', { desc = 'Navigate down (visual line)' })
 vim.keymap.set({ 'n', 'x' }, '<Up>', 'gk', { desc = 'Navigate up (visual line)' })
-vim.keymap.set('i', '<Down>', '<C-\\><C-o>gj', { desc = 'Navigate down (visual line)' })
-vim.keymap.set('i', '<Up>', '<C-\\><C-o>gk', { desc = 'Navigate up (visual line)' })
 
 -- Move Lines
 vim.keymap.set({ 'n', 'x' }, '<M-S-Up>', ':move -2<cr>', { desc = 'Move Line Up' })
@@ -199,15 +197,16 @@ map('so', '<Cmd>source %<CR>', nil, { noremap = true, desc = 'Source Current buf
 map('oo', '<Cmd>source $MYVIMRC<CR>', nil, { noremap = true, desc = 'Source ' .. vim.fn.expand '$MYVIMRC' })
 map('<leader>cd', vim.diagnostic.open_float, nil, { desc = 'Line Diagnostics' })
 map('<leader>q', '<Cmd>copen<CR>', nil, { desc = 'Quickfix', noremap = true })
-map(',', ',<c-g>u', 'i')
-map('.', '.<c-g>u', 'i')
-map(';', ';<c-g>u', 'i')
 map('<', '<gv', 'v')
 map('>', '>gv', 'v')
-map('<S-Left>', '<C-w>h', nil, { desc = 'Focus window left' })
-map('<S-Right>', '<C-w>l', nil, { desc = 'Focus window right' })
--- map('<C-w><Up>', '<C-w>k', nil, { desc = 'Focus window up' })
-map('<C-w><Down>', '<C-w>j', nil, { desc = 'Focus window down' })
+map('<C-Left>', '<C-w>h', nil, { desc = 'Focus window left' })
+map('<C-Right>', '<C-w>l', nil, { desc = 'Focus window right' })
+map('<C-Up>', '<C-w>k', nil, { desc = 'Focus window up' })
+map('<C-Down>', '<C-w>j', nil, { desc = 'Focus window up' })
+map('[b', '<cmd>bprevious<cr>', { desc = 'Prev Buffer' })
+map(']b', '<cmd>bnext<cr>', { desc = 'Prev Buffer' })
+map('<C-s>', '<cmd>bnext<cr>', { desc = 'Prev Buffer' })
+map('gba', '<cmd>b#<cr>', { desc = 'Alternate buffer' })
 -- { lhs = '<C-h>',      rhs = '<C-w>h',  opts = { desc = 'Focus window left' } },
 -- { lhs = '<C-j>',      rhs = '<C-w>j',  opts = { desc = 'Focus window down' } },
 -- { lhs = '<C-k>',      rhs = '<C-w>k',    opts = { desc = 'Focus window up' } },
@@ -215,13 +214,6 @@ map('<C-w><Down>', '<C-w>j', nil, { desc = 'Focus window down' })
 -- The next part (until `-- stylua: ignore end`) is aligned manually for easier
 -- reading. Consider preserving this or remove `-- stylua` lines to autoformat.
 vim.tbl_deep_extend('force', keymaps, {
-  -- Buffers
-  -- stylua: ignore start
-  { lhs = "[b",                    rhs = "<cmd>bprevious<cr>",                opts = { desc = "Prev Buffer" } },
-  { lhs = "]b",                    rhs = "<cmd>bnext<cr>",                    opts = { desc = "Next Buffer" } },
-  { lhs = '<leader>ba',            rhs = '<Cmd>b#<CR>',                       opts = { desc = 'Alternate' } },
-  -- stylua: ignore end
-
   -- Quickfix
   -- stylua: ignore start
   { lhs = '[q', rhs = vim.cmd.cprev, opts = { desc = 'Previous Quickfix' } },
