@@ -42,7 +42,7 @@ restow-zshenv:
 
 [group('maintanance')]
 @restow-common-dotfiles:
-    just --justfile {{ justfile() }} extra_args=--ignore='chromium'  restow {{ dots / "common" }} {{ conf_home }} ".config"
+    just --justfile {{ justfile() }} restow {{ dots / "common" }} {{ conf_home }} ".config" --ignore='chromium'
     echo "Stowed common packages"
 
 [group('maintanance')]

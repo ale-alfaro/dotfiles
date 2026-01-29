@@ -35,26 +35,45 @@ toolchain_index_ls:
 toolchain_index_jqp:
     curl -s {{ toolchain_index_url }} | jqp
 
-ncs_base_dir := home_dir() / 'ncs' / 'sdk'
+ncs_base_dir := env('NCS_SDK_HOME', join(home_dir(), 'ncs', 'sdk'))
 toolchain_base_dir := ncs_base_dir / 'toolchains'
 ncs_download_dir := ncs_base_dir / 'downloads'
 version := 'v3.0.2'
 toolchain_tarball := ncs_download_dir / f'{{toolchain_pkg_prefix}}-v{{version}}.tar.gz'
-toolchain_dst_dir := toolchain_base_dir / f'v{{version}}'
 jq_query := f'.[] | select(has("key")) | select(.key|test("v\\d.\\d.\\d$")) | {version:.key[1:], hash: .metadata.version} | select(.version == "{{version}}").hash'
+master_toolchain_has_query := 'jq .. | .ncs_versions?|arrays[] | contains("$1")'
+master_toolchain_add_entry := f'jq [.[].toolchains[] | ., {"identifier": {"bundle_id" : "$1" },  ncs_versions": [ "$2" ] } ]'
 
 toolchain_download:
     {{ if path_exists(toolchain_tarball) == 'true' { f'echo  {{BOLD}}"Toolchain already downloaded at {{toolchain_tarball}}"{{NORMAL}}' } else { 'wget ' + shell(f"curl -s {{toolchain_index_url}} | jq -r '{{jq_query}}'") + ' -O ' + toolchain_tarball } }}
 
 [arg('ver', pattern='^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9A-Za-z-][0-9A-Za-z-]*)(?:\.(0|[1-9A-Za-z-][0-9A-Za-z-]*))* marshal)?(?:\+(0|[1-9A-Za-z-][0-9A-Za-z-]*)(?:\.(0|[1-9A-Za-z-][0-9A-Za-z-]*))* marshal)?$')]
 toolchain_install ver:
-    if [[ ! -f {{ ncs_download_dir / f'{{toolchain_pkg_prefix}}-v{{ver}}.tar.gz' }} ]]; then \
-      curl -s {{ toolchain_index_url }} | \
-        jq -r '.[] | select(has("key")) | select(.key|test("v\\d.\\d.\\d$")) | {version:.key[1:], hash: .metadata.version} | select(.version == "{{ ver }}").hash' | \
-        xargs -I '{}' wget "{{ toolchain_base_url / toolchain_pkg_prefix }}-{}.tar.gz" -O {{ ncs_download_dir / f'{{toolchain_pkg_prefix}}-v{{ver}}.tar.gz' }}; \
+    #!/usr/bin/env zsh
+    local version="v{{ ver }}"
+    local toolchain_hash=$( curl -s {{ toolchain_index_url }} | \
+        jq -r '.[] | select(has("key")) | select(.key|test("v\\d.\\d.\\d$")) | {version:.key[1:], hash: .metadata.version} | select(.version == "{{ ver }}").hash' )
+    [[ -z $toolchain_hash ]] && echo "{{ style('error') }}Failed to obtain toolchain hash with version $version{{ NORMAL }}" && exit 0
+    echo "{{ f'{{BOLD + GREEN}} Found toolchain with hash: ' + "$toolchain_hash" + f' {{NORMAL}}' }}"
+
+    local toolchain_download_path="{{ ncs_download_dir }}/{{ toolchain_pkg_prefix + '-${toolchain_hash}.tar.gz' }}"
+    local toolchain_install_path="{{ toolchain_base_dir }}/${toolchain_hash}/"
+    if [[ -f $toolchain_download_path ]]; then
+      echo '{{ BOLD + MAGENTA }} Toolchain already downloaded {{ NORMAL }}'
+    else
+      print '{{ BOLD + MAGENTA }} Downloading toolchain in {{ NORMAL }}: ' $toolchain_download_path
+      wget {{ f"{{toolchain_base_url}}/{{toolchain_pkg_prefix}}-${toolchain_hash}.tar.gz" }} -O $toolchain_download_path
     fi
-    if [[ ! -d  {{ toolchain_base_dir / f'v{{ver}}' }} ]]; then mkdir {{ toolchain_base_dir / f'v{{ver}}' }}; else echo '{{ BOLD }}"Toolchain already downloaded at {{ toolchain_base_dir }}. If you want to reinstall the toolchain, delete or move the toolchain folder v{{ ver }} in {{ toolchain_base_dir }}"{{ NORMAL }}' && exit 0; fi
-    tar -xzf {{ ncs_download_dir / f'{{toolchain_pkg_prefix}}-v{{ver}}.tar.gz' }} -C {{ toolchain_base_dir / f'v{{ver}}' }}
+    if [[ ! -f ${toolchain_install_path}/manifest.json ]]; then
+      echo '{{ BOLD + MAGENTA }} Installing toolchain at $toolchain_install_path {{ NORMAL }}'
+      [[ ! -d $toolchain_install_path ]] && mkdir $toolchain_install_path
+      tar -xzf $toolchain_download_path -C $toolchain_install_path
+      echo '{{ BOLD + MAGENTA }} Installed toolchain! {{ NORMAL }}'
+    else
+      echo '{{ style('error') }}"Toolchain already installed at $toolchain_install_path. If you want to reinstall the toolchain, delete or move the toolchain folder to {{ toolchain_base_dir }}"{{ NORMAL }}'
+    fi
+
+    jq {{ master_toolchain_has_query }}
 
 toolchain_custom:
     {{ nrfutil }} config package-index remove {{ package_index_config }}

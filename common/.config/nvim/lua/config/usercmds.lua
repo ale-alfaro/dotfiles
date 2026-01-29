@@ -101,20 +101,7 @@ the remaining arguments are the same as for |nvim_create_user_command()|:
       { nargs = 1 })
 --]]
 
-local function ToggleLineNumbers()
-  if vim.wo.relativenumber then
-    vim.wo.relativenumber = false
-  else
-    vim.wo.relativenumber = true
-  end
-end
-command('LineNumbers', function()
-  ToggleLineNumbers()
-end, { desc = 'Toggle line numbers' })
 
--- command('ChangeFiletype', function()
---   om.ChangeFiletype()
--- end, { desc = 'Change filetype of current buffer' })
 
 command('CopyMessage', function()
   vim.cmd [[let @+ = execute('messages')]]
@@ -129,15 +116,6 @@ command('FindAndReplaceUndo', function(opts)
   vim.api.nvim_command 'silent cdo undo'
 end, { desc = 'Undo Find and Replace' })
 
--- command("GitBranchList", function()
---   om.ListBranches()
--- end, { desc = "List the Git branches in this repo" })
---
--- command("GitRemoteSync", function()
---   om.GitRemoteSync()
--- end, { desc = "Git sync remote repo" })
-
-command('New', ':enew', { desc = 'New buffer' })
 
 ---@param desc string
 ---@return vim.api.keyset.user_command
@@ -172,27 +150,23 @@ command('PackReload', function(opts)
 end, pack_usercmd_opts 'Reload plugin')
 
 command('PackSync', function()
-  -- local to_delete = {}
   --- @type string[]
-  local active_plugins_name = {}
-
+  local plugins_name = {}
   --- @type string[]
   local active_plugins_src = {}
   for _, plugin in ipairs(vim.pack.get()) do
+    plugins_name[#plugins_name + 1] = plugin.spec.name
     if plugin.active then
-      active_plugins_name[#active_plugins_name + 1] = plugin.spec.name
       active_plugins_src[#active_plugins_src + 1] = plugin.spec.src
     end
-    -- table.insert(to_delete, plugin.name)
   end
-
-  local ok, _ = pcall(vim.pack.del, active_plugins_name)
+  local ok, _ = pcall(vim.pack.del, plugins_name)
   if not ok then
-    VimRc.error 'Failed to delete plugins with vim.pack.del'
+    VimRc.err 'Failed to delete plugins with vim.pack.del'
   end
   ok, _ = pcall(vim.pack.add, active_plugins_src)
   if not ok then
-    VimRc.error 'Failed to add plugins with vim.pack.add'
+    VimRc.err 'Failed to add plugins with vim.pack.add'
   end
   vim.pack.update()
 end, { desc = 'Sync plugins' })

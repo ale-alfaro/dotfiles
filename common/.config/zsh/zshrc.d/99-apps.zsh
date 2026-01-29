@@ -11,11 +11,6 @@ else
   export NVM_DIR="$XDG_CONFIG_HOME/nvm"
   [[ -r "$ZDOTDIR/plugins/zsh-nvm.zsh" ]] && source "$ZDOTDIR/plugins/zsh-nvm.zsh"
 fi
-[[ ! -f "$HOME/.npmrc" ]] && npm set prefix="$HOME/.local"
-
-# if has gemini && test -z "${GEMINI_CLI_SYSTEM_SETTINGS_PATH}"; then
-#   export GEMINI_CLI_SYSTEM_SETTINGS_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/gemini/settings.json"
-# fi
 
 if has codex && test -z "${CODEX_HOME}"; then
   eval "$(codex completion zsh)"
@@ -27,7 +22,9 @@ if [[ ! -z "$JJ_COMPLETIONS" ]]; then
   fi
 fi
 [[ ! -z "$BW_CLI_COMPLETIONS" ]] && has bw && eval "$(bw completion --shell zsh)"
-has nrfutil && [[ -r "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh" ]] && . "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh"
+# if has gemini && test -z "${GEMINI_CLI_SYSTEM_SETTINGS_PATH}"; then
+#   export GEMINI_CLI_SYSTEM_SETTINGS_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/gemini/settings.json"
+# fi
 
 #######################################################
 # Shell integrations
