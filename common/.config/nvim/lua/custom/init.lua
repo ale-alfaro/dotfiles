@@ -12,7 +12,7 @@ end
 function _G.ENV(name, fallback)
   return vim.fn.has_key(vim.fn.environ(), name) and _fetch_env(name) or fallback
 end
-
+M.THEME = 'matte-black'
 --[[
 --  Global keymaps object for defining and toggling keys
 --]]
@@ -90,8 +90,32 @@ end
 --]]
 
 -- M.serial = require 'custom.serialization'
-M.exec = require 'custom.executables'
+M.exec = require 'custom.exec'
+---@param lines string[]
+---@param bufname string
+M.write_to_buffer = function(lines, bufname)
+  local bufnr = vim.api.nvim_create_buf(true, true)
+  vim.api.nvim_buf_set_name(bufnr, bufname .. '#' .. bufnr)
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+  vim.cmd.sbuffer { bufnr, mods = { tab = vim.fn.tabpagenr() } }
+end
 
+--- @param p vim.pack.PlugData
+--- @return string
+local function write_plug_info(p)
+  local active_suffix = p.active and '' or ' (not active)'
+
+  local parts = { ('## %s%s\n'):format(p.spec.name, active_suffix) }
+  local version_suffix = p.spec.version == '' and '' or (' (%s)'):format(p.spec.version)
+
+  parts[#parts + 1] = table.concat({
+    'Path:     ' .. p.path,
+    'Source:   ' .. p.spec.src,
+    'Revision: ' .. p.rev .. version_suffix,
+  }, '\n')
+
+  return table.concat(parts, '')
+end
 ---@return table<string>
 function M.get_packpath_dirs()
   local paths = {}
@@ -287,16 +311,47 @@ function M.pack_clean()
 end
 
 function M.pack_list()
-  local lines = { 'Vim.pack list:' }
-  --- @type vim.pack.PlugData[]
+  ---@type vim.pack.PlugData[]
   local plugins = M.get_plugins { output_names = false }
-  for _, plug in ipairs(plugins) do
-    lines[#lines + 1] = (' %s - `%s`'):format(plug.spec.name, plug.spec.version)
-  end
-  VimRc.info(lines)
+  ---@type string[]
+  local active = vim
+    .iter(plugins)
+    :filter(function(p)
+      return p.active
+    end)
+    :map(function(plug)
+      return write_plug_info(plug)
+    end)
+    :totable()
+  active = vim.list_extend({ 'Active Plugins List:' }, active)
+  local inactive = vim
+    .iter(plugins)
+    :filter(function(p)
+      return not p.active
+    end)
+    :map(function(plug)
+      return write_plug_info(plug)
+    end)
+    :totable()
+  local lines = vim.list_extend(active, vim.list_extend({ 'INACTIVE Plugins List:' }, inactive))
+  VimRc.write_to_buffer(vim.split(table.concat(lines, '\n ------ \n'), '\n'), 'VimRc-packlist')
 end
 
---
---
+function M.treesitter_list()
+  ---@type vim.pack.PlugData[]
+  local installed = require('nvim-treesitter').get_installed()
+  local available = vim
+    .iter(require('nvim-treesitter.config').get_available())
+    :filter(function(parser)
+      return not vim.list_contains(installed, parser)
+    end)
+    :totable()
+  ---@type string[]
+  local lines = vim
+    .iter({ 'Installed Parser/Grammars:', '--------------------', installed, 'Available Parser/Grammars:', '-------------------- ', available })
+    :flatten(2)
+    :totable()
+  VimRc.write_to_buffer(lines, 'VimRc-treesitter-list')
+end
 
 return M

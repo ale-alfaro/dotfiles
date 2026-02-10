@@ -61,6 +61,8 @@ local ft_easy_quit = {
   'dap-repl',
   'codecompanion',
   'mini-files',
+  'Overseer*',
+  'VimRc*',
 }
 
 vim.api.nvim_create_autocmd('FileType', {
@@ -68,25 +70,19 @@ vim.api.nvim_create_autocmd('FileType', {
   desc = 'Close with <q>',
   pattern = ft_easy_quit,
   callback = function(args)
-    if args.match ~= 'help' or not vim.bo[args.buf].modifiable then
-      vim.keymap.set('n', 'q', '<cmd>quit<cr>', { buffer = args.buf })
-    end
+    vim.bo[args.buf].buflisted = false
+    vim.schedule(function()
+      vim.keymap.set('n', 'q', function()
+        vim.cmd 'close'
+        pcall(vim.api.nvim_buf_delete, args.buf, { force = true })
+      end, {
+        buffer = args.buf,
+        silent = true,
+        desc = 'Quit buffer',
+      })
+    end)
   end,
 })
--- Close some filetypes with <q>
--- new_autocmd('FileType', function(event)
---   vim.bo[event.buf].buflisted = false
---   vim.schedule(function()
---     vim.keymap.set('n', 'q', function()
---       vim.cmd 'close'
---       -- pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
---     end, {
---       buffer = event.buf,
---       silent = true,
---       desc = 'Quit buffer',
---     })
---   end)
--- end, ft_easy_quit, 'Close special filetypes with <q>')
 
 -- Wrap and check for spell in text filetypes
 new_autocmd('FileType', function()

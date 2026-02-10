@@ -2,30 +2,26 @@ set shell := ['zsh', '-uc']
 
 dotfiles_pkg_file := home_dir() / 'dotfiles' / os() / 'install' / 'pkglist.txt'
 
-arch-pkgs-dump:
+pacman-dump:
     pacman -Qqen
 
-arch-pkgs-dump-aur:
+pacman-dump-aur:
     pacman -Qqem
 
-arch-pkgs-dump-all:
-    pacman -Qqe
-
-[confirm('Are you sure you want to install the pkgs in ')]
-arch-pkgs-install file=dotfiles_pkg_file *args:
+pacman-S-file file=dotfiles_pkg_file *args:
     sudo pacman {{ f'-S{{args}}' }} "${(@f)"$(<{{ file }})"}"
     yay {{ f'-S{{args}}' }} "${(@f)"$(<{{ file }})"}"
 
-arch-pkgs-install-no-confirm file: (arch-pkgs-install '--noconfirm --needed')
+[confirm('Are you sure you want to install with --noconfirm and --needed')]
+pacman-S-file-noconfirm file: (pacman-S-file '--noconfirm --needed')
 
-arch-pkgs-list-orphans:
-    echo '{{ BOLD + RED }}Orphans:{{ NORMAL }}'
-    pacman -Qdtq
-    echo '{{ BOLD + RED }}Optional orphans:{{ NORMAL }} (remove this for a more aggresive clean)'
+pacman-ls-orphans:
+    @echo '{{ BOLD + RED }} Orphans:{{ NORMAL }}'
     pacman -Qdttq
 
-arch-remove-orphans:
-    pacman -Qdtq | sudo pacman -Rns -
+[confirm]
+pacman-rm-orphans: pacman-ls-orphans
+    pacman -Qdttq | sudo pacman -Rns -
 
 @systemd-diagnostics:
     systemctl status --full --no-pager > systemd-status.log

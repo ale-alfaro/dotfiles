@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Reminders
+Comment=Tasks and Reminders through Obsidian
+Exec=/usr/bin/obsidian %U
+Icon=obsidian
+Terminal=false
+Type=Application
+MimeType=x-scheme-handler/obsidian;
+Categories=Office;
+StartupNotify=true
+DBusActivatable=true
+X-GNOME-UsesNotifications=true

@@ -11,25 +11,36 @@ vim.pack.add {
     },
   }),
 
-  _G.plug('Saghen/blink.cmp', {
-    build_hook = {
-      plugin = 'blink.cmp',
-      build_cmd_type = 'shell',
-      build_cmd = 'cargo build --release',
-    },
-  }),
+  -- _G.plug('Saghen/blink.cmp', {
+  --   build_hook = {
+  --     plugin = 'blink.cmp',
+  --     build_cmd_type = 'shell',
+  --     build_cmd = 'cargo build --release',
+  --   },
+  -- }),
 }
-
-local ensure_installed = {
+-- if not MiniCompletion then
+--   local ok, _ = pcall(require, 'plugin.blink-cmp')
+--   if not ok then
+--     VimRc.error 'Failed to load blink.cmp'
+--   end
+-- end
+if not MiniSnippets then
+  -- local ok, luasnip = pcall(require, 'luasnip')
+  -- if ok then
+  --   luasnip.setup { enable_autosnippets = true }
+  --   require('luasnip.loaders.from_lua').load { paths = '~/.config/nvim/snippets/' }
+  --   -- VimRc.pack_add(luasnip)
+  -- end
+end
+local tresitter_ft = {
   'bash',
   'c',
   'cpp',
   'cmake',
   'diff',
   'devicetree',
-  'jsdoc',
   'json',
-  'json5',
   'just',
   'kconfig',
   'lua',
@@ -44,69 +55,41 @@ local ensure_installed = {
   'regex',
   'rst',
   'toml',
+  'tera',
   'vim',
   'vimdoc',
   'xml',
   'yaml',
 }
 
-require('nvim-treesitter').setup {
-  ensure_installed = ensure_installed,
-  highlighter = true,
-}
+require('nvim-treesitter').setup()
+require('nvim-treesitter').install(tresitter_ft)
+vim.g.treesitter_folds = true
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = tresitter_ft,
+  callback = function()
+    vim.treesitter.start()
+    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+    if vim.g.treesitter_folds then
+      vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+      vim.wo[0][0].foldmethod = 'expr'
+    end
+  end,
+  desc = 'Nvim-treesitter activation',
+})
+local query = vim.treesitter.query
 
-_G.new_autocmd('FileType', function(ev)
-  local ft, lang = ev.match, vim.treesitter.language.get_lang(ev.match)
-  -- if not VimRc.treesitter_have(ft) then
-  --   return
-  -- end
-  -- highlighting
-  local ok, _ = pcall(vim.treesitter.start)
-  if not ok then
-    VimRc.error("Couldn't not start treesitter for filetype: " .. ft .. ' lang: ' .. lang)
-    return
-  end
-  -- indents
-  vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
-  -- indentation, provided by nvim-treesitter
-  vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-end, 'Nvim-Treesitter start')
+-- register custom predicates (overwrite existing; needed for CI)
 
--- Setup
-local gen_loader = require('mini.snippets').gen_loader
-require('mini.snippets').setup {
-  snippets = {
-    -- Load custom file with global snippets first
-    gen_loader.from_file '~/.config/nvim/snippets/global.json',
-
-    -- Load snippets based on current language by reading files from
-    -- "snippets/" subdirectories from 'runtimepath' directories.
-    gen_loader.from_lang(),
-  },
-  mappings = {
-    -- Expand snippet at cursor position. Created globally in Insert mode.
-    expand = '<C-j>',
-
-    -- Interact with default `expand.insert` session.
-    -- Created for the duration of active session(s)
-    jump_next = '<C-l>',
-    jump_prev = '<C-h>',
-    stop = '<C-c>',
-  },
-}
-
-local rhs = function()
-  MiniSnippets.expand { match = false }
-end
-vim.keymap.set('i', '<C-g><C-g>', rhs, { desc = 'Expand all' })
--- local ok, luasnip = pcall(require, 'luasnip')
--- if ok then
---   luasnip.setup({ enable_autosnippets = true })
---   require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets/" })
---   -- VimRc.pack_add(luasnip)
--- end
-
-local ok, _ = pcall(require, 'plugin.blink-cmp')
-if not ok then
-  VimRc.error 'Failed to load blink.cmp'
-end
+---@param match table<integer,TSNode[]>,
+---@param pattern integer
+---@param bufnr integer|string
+---@param pred any[]
+---@param metadata vim.treesitter.query.TSMetadata
+---@return boolean?
+query.add_predicate('is-mise?', function(match, pattern, bufnr, pred, metadata)
+  local filepath = vim.api.nvim_buf_get_name(tonumber(bufnr) or 0)
+  local filename = vim.fn.fnamemodify(filepath, ':t')
+  return string.match(filename, '.*mise.*%.toml$') ~= nil
+end, { force = true, all = false })
+require 'custom.treesitter'

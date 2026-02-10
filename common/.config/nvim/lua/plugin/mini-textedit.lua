@@ -83,87 +83,60 @@ end
 -- - `:h MiniAi-builtin-textobjects` - list of all supported textobjects
 -- - `:h MiniAi-textobject-specification` - examples of custom textobjects
 
-require('mini.extra').setup()
+-- require('mini.extra').setup()
+
 local gen_ai_spec = require('mini.extra').gen_ai_spec
-local ai = require 'mini.ai'
-local mini_ai_opts = {
-  n_lines = 500,
+
+-- local builtin_textobjects = {
+--   -- Use balanced pair for brackets. Use opening ones to possibly remove edge
+--   -- whitespace from `i` textobject.
+--   ['('] = { '%b()', '^.%s*().-()%s*.$' },
+--   [')'] = { '%b()', '^.().*().$' },
+--   ['['] = { '%b[]', '^.%s*().-()%s*.$' },
+--   [']'] = { '%b[]', '^.().*().$' },
+--   ['{'] = { '%b{}', '^.%s*().-()%s*.$' }%,
+--   ['}'] = { '%b{}', '^.().*().$' },
+--   ['<'] = { '%b<>', '^.%s*().-()%s*.$' },
+--   ['>'] = { '%b<>', '^.().*().$' },
+--   -- Use special "same balanced" pattern to select quotes in pairs
+--   ["'"] = { "%b''", '^.().*().$' },
+--   ['"'] = { '%b""', '^.().*().$' },
+--   ['`'] = { '%b``', '^.().*().$' },
+--   -- Derived from user prompt
+--   ['?'] = MiniAi.gen_spec.user_prompt(),
+--   -- Argument
+--   ['a'] = MiniAi.gen_spec.argument(),
+--   -- Brackets
+--   ['b'] = { { '%b()', '%b[]', '%b{}' }, '^.().*().$' },
+--   -- Function call
+--   ['f'] = MiniAi.gen_spec.function_call(),
+--   -- Tag
+--   ['t'] = { '<(%w-)%f[^<%w][^<>]->.-</%1>', '^<.->().*()</[^/]->$' },
+--   -- Quotes
+--   ['q'] = { { "%b''", '%b""', '%b``' }, '^.().*().$' },
+-- }
+
+local spec_treesitter = require('mini.ai').gen_spec.treesitter
+local spec_user_prompt = require('mini.ai').gen_spec.user_prompt
+local spec_pair = require('mini.ai').gen_spec.pair
+local spec_func = require('mini.ai').gen_spec.function_call
+require('mini.ai').setup {
   custom_textobjects = {
-
-    -- Make `aB` / `iB` act on around/inside whole *b*uffer
     B = gen_ai_spec.buffer(),
-
     D = gen_ai_spec.diagnostic(),
     I = gen_ai_spec.indent(),
     L = gen_ai_spec.line(),
-    N = gen_ai_spec.number(), -- For more complicated textobjects that require structural awareness,
-    -- use tree-sitter. This example makes `aF`/`iF` mean around/inside function
-    -- definition (not call). See `:h MiniAi.gen_spec.treesitter()` for details.
-    F = ai.gen_spec.treesitter { a = '@function.outer', i = '@function.inner' },
-    U = ai.gen_spec.function_call { name_pattern = '[%w_]' }, -- without dot in function name
+    N = gen_ai_spec.number(),
+    F = spec_treesitter { a = '@function.outer', i = '@function.inner' },
+    o = spec_treesitter {
+      a = { '@conditional.outer', '@loop.outer' },
+      i = { '@conditional.inner', '@loop.inner' },
+    },
+    f = spec_func { name_pattern = '[%w_%.%>%<]' },
+    p = spec_user_prompt(),
+    ['|'] = spec_pair('|', '|', { type = 'non-balanced' }),
   },
-  -- 'mini.ai' by default mostly mimics built-in search behavior: first try
-  -- to find textobject covering cursor, then try to find to the right.
-  -- Although this works in most cases, some are confusing. It is more robust to
-  -- always try to search only covering textobject and explicitly ask to search
-  -- for next (`an`/`in`) or last (`an`/`il`).
-  -- Try this. If you don't like it - delete next line and this comment.
-  search_method = 'cover_or_nearest',
 }
-ai.setup(mini_ai_opts)
--- local objects = {
---   { ' ', desc = 'whitespace' },
---   { '"', desc = '" string' },
---   { "'", desc = "' string" },
---   { '(', desc = '() block' },
---   { ')', desc = '() block with ws' },
---   { '<', desc = '<> block' },
---   { '>', desc = '<> block with ws' },
---   { '?', desc = 'user prompt' },
---   { 'U', desc = 'use/call without dot' },
---   { '[', desc = '[] block' },
---   { ']', desc = '[] block with ws' },
---   { '_', desc = 'underscore' },
---   { '`', desc = '` string' },
---   { 'a', desc = 'argument' },
---   { 'b', desc = ')]} block' },
---   { 'c', desc = 'class' },
---   { 'd', desc = 'digit(s)' },
---   { 'e', desc = 'CamelCase / snake_case' },
---   { 'f', desc = 'function' },
---   { 'g', desc = 'entire file' },
---   { 'i', desc = 'indent' },
---   { 'o', desc = 'block, conditional, loop' },
---   { 'q', desc = 'quote `"\'' },
---   { 't', desc = 'tag' },
---   { 'u', desc = 'use/call' },
---   { '{', desc = '{} block' },
---   { '}', desc = '{} with ws' },
--- }
---
--- local ret = { mode = { 'o', 'x' } }
--- local mappings = {
---   around = 'a',
---   inside = 'i',
---   around_next = 'an',
---   inside_next = 'in',
---   around_last = 'al',
---   inside_last = 'il',
--- }
--- mappings.goto_left = nil
--- mappings.goto_right = nil
---
--- for name, prefix in pairs(mappings) do
---   name = name:gsub('^around_', ''):gsub('^inside_', '')
---   ret[#ret + 1] = { prefix, group = name }
---   for _, obj in ipairs(objects) do
---     local desc = obj.desc
---     if prefix:sub(1, 1) == 'i' then
---       desc = desc:gsub(' with ws', '')
---     end
---     ret[#ret + 1] = { prefix .. obj[1], desc = obj.desc }
---   end
--- end
 
 -- Align text interactively. Example usage:
 -- - `gaip,` - `ga` (align operator) *i*nside *p*aragraph by comma
@@ -243,6 +216,11 @@ require('mini.comment').setup()
 -- - `:h MiniIndentscope.gen_animation` - available animation rules
 require('mini.indentscope').setup()
 
+require('mini.keymap').setup()
+-- Navigate 'mini.completion' menu with `<Tab>` /  `<S-Tab>`
+MiniKeymap.map_multistep('i', '<Tab>', { 'pmenu_next' })
+MiniKeymap.map_multistep('i', '<S-Tab>', { 'pmenu_prev' })
+-- On `<CR>` try to accept current completion item, fall back to accounting
 -- Move any selection in any direction. Example usage in Normal mode:
 -- - `<M-j>`/`<M-k>` - move current line down / up
 -- - `<M-h>`/`<M-l>` - decrease / increase indent of current line
@@ -263,6 +241,95 @@ require('mini.move').setup {
   },
 }
 
+require('mini.jump').setup {
+
+  -- Module mappings. Use `''` (empty string) to disable one.
+  mappings = {
+    forward = 'f',
+    backward = 'F',
+    forward_till = 't',
+    backward_till = 'T',
+    repeat_jump = ';',
+  },
+
+  -- Delay values (in ms) for different functionalities. Set any of them to
+  -- a very big number (like 10^7) to virtually disable.
+  delay = {
+    -- Delay between jump and highlighting all possible jumps
+    highlight = 250,
+
+    -- Delay between jump and automatic stop if idle (no jump is done)
+    idle_stop = 10000000,
+  },
+
+  -- Whether to disable showing non-error feedback
+  -- This also affects (purely informational) helper messages shown after
+  -- idle time if user input is required.
+  silent = false,
+}
+
+require('mini.jump2d').setup {
+  -- Function producing jump spots (byte indexed) for a particular line.
+  -- For more information see |MiniJump2d.start()|.
+  -- If `nil` (default) - use |MiniJump2d.default_spotter()|
+  spotter = nil,
+
+  -- Characters used for labels of jump spots (in supplied order)
+  labels = 'abcdefghijklmnopqrstuvwxyz',
+
+  -- Options for visual effects
+  view = {
+    -- Whether to dim lines with at least one jump spot
+    dim = true,
+
+    -- How many steps ahead to show. Set to big number to show all steps.
+    n_steps_ahead = 5,
+  },
+
+  -- Which lines are used for computing spots
+  allowed_lines = {
+    blank = false, -- Blank line (not sent to spotter even if `true`)
+    cursor_before = true, -- Lines before cursor line
+    cursor_at = true, -- Cursor line
+    cursor_after = true, -- Lines after cursor line
+    fold = false, -- Start of fold (not sent to spotter even if `true`)
+  },
+
+  -- Which windows from current tabpage are used for visible lines
+  -- allowed_windows = {
+  --   current = true,
+  --   not_current = true,
+  -- },
+  --
+  -- -- Functions to be executed at certain events
+  -- hooks = {
+  --   before_start = nil, -- Before jump start
+  --   after_jump = nil, -- After jump was actually done
+  -- },
+
+  -- Module mappings. Use `''` (empty string) to disable one.
+  mappings = {
+    start_jumping = '<CR>',
+  },
+
+  -- Whether to disable showing non-error feedback
+  -- This also affects (purely informational) helper messages shown after
+  -- idle time if user input is required.
+  silent = false,
+}
+vim.api.nvim_create_user_command('JumpC', function()
+  MiniJump2d.start(MiniJump2d.builtin_opts.single_character)
+end, { desc = 'Jump to single char' })
+vim.api.nvim_create_user_command('JumpW', function()
+  MiniJump2d.start(MiniJump2d.builtin_opts.word_start)
+end, { desc = 'Jump to Word Start' })
+
+vim.api.nvim_create_user_command('JumpL', function()
+  MiniJump2d.start(MiniJump2d.builtin_opts.line_start)
+end, { desc = 'Jump to Line Start' })
+vim.api.nvim_create_user_command('JumpQ', function()
+  MiniJump2d.start(MiniJump2d.builtin_opts.query)
+end, { desc = 'Jump to Query' })
 -- Text edit operators. All operators have mappings for:
 -- - Regular operator (waits for motion/textobject to use)
 -- - Current line action (repeat second character of operator to activate)
@@ -354,7 +421,63 @@ require('mini.surround').setup {
   },
 }
 
+-- Completion and signature help. Implements async "two stage" autocompletion:
+-- - Based on attached LSP servers that support completion.
+-- - Fallback (based on built-in keyword completion) if there is no LSP candidates.
+--
+-- Example usage in Insert mode with attached LSP:
+-- - Start typing text that should be recognized by LSP (like variable name).
+-- - After 100ms a popup menu with candidates appears.
+-- - Press `<Tab>` / `<S-Tab>` to navigate down/up the list. These are set up
+--   in 'mini.keymap'. You can also use `<C-n>` / `<C-p>`.
+-- - During navigation there is an info window to the right showing extra info
+--   that the LSP server can provide about the candidate. It appears after the
+--   candidate stays selected for 100ms. Use `<C-f>` / `<C-b>` to scroll it.
+-- - Navigating to an entry also changes buffer text. If you are happy with it,
+--   keep typing after it. To discard completion completely, press `<C-e>`.
+-- - After pressing special trigger(s), usually `(`, a window appears that shows
+--   the signature of the current function/method. It gets updated as you type
+--   showing the currently active parameter.
+--
+-- Example usage in Insert mode without an attached LSP or in places not
+-- supported by the LSP (like comments):
+-- - Start typing a word that is present in current or opened buffers.
+-- - After 100ms popup menu with candidates appears.
+-- - Navigate with `<Tab>` / `<S-Tab>` or `<C-n>` / `<C-p>`. This also updates
+--   buffer text. If happy with choice, keep typing. Stop with `<C-e>`.
+--
+-- It also works with snippet candidates provided by LSP server. Best experience
+-- when paired with 'mini.snippets' (which is set up in this file).
+-- Customize post-processing of LSP responses for a better user experience.
+-- Don't show 'Text' suggestions (usually noisy) and show snippets last.
+local process_items_opts = { kind_priority = { Text = -1, Snippet = 99 } }
+local process_items = function(items, base)
+  return MiniCompletion.default_process_items(items, base, process_items_opts)
+end
+require('mini.completion').setup {
+  lsp_completion = {
+    -- Without this config autocompletion is set up through `:h 'completefunc'`.
+    -- Although not needed, setting up through `:h 'omnifunc'` is cleaner
+    -- (sets up only when needed) and makes it possible to use `<C-u>`.
+    source_func = 'omnifunc',
+    auto_setup = false,
+    process_items = process_items,
+  },
+}
+
+-- Set 'omnifunc' for LSP completion only when needed.
+local on_attach = function(ev)
+  vim.bo[ev.buf].omnifunc = 'v:lua.MiniCompletion.completefunc_lsp'
+end
+vim.api.nvim_create_autocmd('LspAttach', { pattern = nil, callback = on_attach, desc = "Set 'omnifunc'" })
+-- Advertise to servers that Neovim now supports certain set of completion and
+-- signature features through 'mini.completion'.
 -- Highlight and remove trailspace. Temporarily stops highlighting in Insert mode
 -- to reduce noise when typing. Example usage:
 -- - `<Leader>ot` - trim all trailing whitespace in a buffer
 require('mini.trailspace').setup()
+
+local rhs = function()
+  MiniSnippets.expand { match = false }
+end
+vim.keymap.set('i', '<C-Space>', rhs, { desc = 'Expand all' })

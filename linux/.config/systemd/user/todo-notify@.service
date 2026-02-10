@@ -1,0 +1,6 @@
+[Unit]
+Description=Notify about TODO.md tasks (%i)
+
+[Service]
+Type=oneshot
+ExecStart=/home/alealfaro/Documents/Obsidian/scripts/todo_notify.py --mode %i

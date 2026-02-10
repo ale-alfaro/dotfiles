@@ -1,3 +1,56 @@
+--[[
+--
+      formatters = {
+        my_formatter = {
+          -- This can be a string or a function that returns a string.
+          -- When defining a new formatter, this is the only field that is required
+          command = "my_cmd",
+          -- A list of strings, or a function that returns a list of strings
+          -- Return a single string instead of a list to run the command in a shell
+          args = { "--stdin-from-filename", "$FILENAME" },
+          -- If the formatter supports range formatting, create the range arguments here
+          range_args = function(self, ctx)
+            return { "--line-start", ctx.range.start[1], "--line-end", ctx.range["end"][1] }
+          end,
+          -- Send file contents to stdin, read new contents from stdout (default true)
+          -- When false, will create a temp file (will appear in "$FILENAME" args). The temp
+          -- file is assumed to be modified in-place by the format command.
+          stdin = true,
+          -- A function that calculates the directory to run the command in
+          cwd = require("conform.util").root_file({ ".editorconfig", "package.json" }),
+          -- When cwd is not found, don't run the formatter (default false)
+          require_cwd = true,
+          -- When stdin=false, use this template to generate the temporary file that gets formatted
+          tmpfile_format = ".conform.$RANDOM.$FILENAME",
+          -- When returns false, the formatter will not be used
+          condition = function(self, ctx)
+            return vim.fs.basename(ctx.filename) ~= "README.md"
+          end,
+          -- Exit codes that indicate success (default { 0 })
+          exit_codes = { 0, 1 },
+          -- Environment variables. This can also be a function that returns a table.
+          env = {
+            VAR = "value",
+          },
+          -- Set to false to disable merging the config with the base definition.
+          -- Can also be set to the name of the formatter to merge with (e.g. inherit = "black")
+          inherit = true,
+          -- When inherit = true, add these additional arguments to the beginning of the command.
+          -- This can also be a function, like args
+          prepend_args = { "--use-tabs" },
+          -- When inherit = true, add these additional arguments to the end of the command.
+          -- This can also be a function, like args
+          append_args = { "--trailing-comma" },
+        },
+        -- These can also be a function that returns the formatter
+        other_formatter = function(bufnr)
+          return {
+            command = "my_cmd",
+          }
+        end,
+      },
+--]]
+--
 --- Recipes taken from https://github.com/stevearc/conform.nvim/blob/master/doc/recipes.md
 local function user_cmd_create()
   -- Command for async formatting
@@ -70,6 +123,35 @@ local function setup_formatting()
           JUST_UNSTABLE = 1,
         },
       },
+      ruff_unsafe = {
+        inherit = 'ruff_fix',
+        append_args = {
+          '--unsafe-fixes',
+          '--select=I001',
+        },
+      },
+      pyrefly = {
+        command = 'pyrefly',
+        exit_codes = { 0, 1 },
+        args = function(_, ctx)
+          local args = { 'infer' }
+
+          -- Find uncrustify.cfg in the project if it exists
+          local cfg_path = vim.fs.find('pyrefly.toml', { upward = true, path = ctx.dirname })[1]
+          if cfg_path then
+            table.insert(args, cfg_path)
+            table.insert(args, '-c')
+          end
+          return args
+        end,
+        stdin = false,
+        -- require_cwd = true,
+        -- cwd = function()
+        --   local bufnr = vim.api.nvim_buf_get_name(0)
+        --   return vim.fs.root(bufnr, { 'pyrefly.toml' })
+        -- end,
+      },
+
       prettier = {
         options = {
           ft_parsers = {
@@ -80,27 +162,26 @@ local function setup_formatting()
             yaml = 'yaml',
             markdown = 'markdown',
             typst = 'typst',
+            kconfig = 'kconfig',
             ['markdown.mdx'] = 'mdx',
           },
         },
       },
     },
     formatters_by_ft = {
-      c = { name = 'clangd', timeout_ms = 500, lsp_format = 'prefer' },
+      -- c = { name = 'clangd', timeout_ms = 500, lsp_format = 'prefer' },
+      c = { 'clang-format', 'uncrustify' }, -- try out uncrustify
       cpp = { name = 'clangd', timeout_ms = 500, lsp_format = 'prefer' },
       cmake = { 'cmake_format' },
       lua = { 'stylua' },
-      fish = { 'fish_indent' },
       sh = { 'shfmt' },
       just = { 'just' },
       -- # Example of using shfmt with extra args
       python = {
         -- To fix auto-fixable lint errors.
-        'ruff_fix',
+        'ruff_unsafe',
         -- To run the Ruff formatter.
         'ruff_format',
-        -- To organize the imports.
-        'ruff_organize_imports',
       },
       zsh = { 'shfmt' },
       markdown = { 'prettier' },
@@ -108,6 +189,7 @@ local function setup_formatting()
       jsonc = { 'prettier' },
       yaml = { 'prettier' },
       typst = { 'typstyle' },
+      kconfig = { 'prettier' },
       -- yaml = { 'yamlfmt' },
       -- ['*'] = { 'codespell' },
       ['_'] = { 'trim_whitespace' },

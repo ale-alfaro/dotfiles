@@ -51,22 +51,22 @@ _zsh_nvm_load() {
   # Wrap nvm in our own function
   nvm() {
     case $1 in
-    'upgrade')
-      _zsh_nvm_upgrade
-      ;;
-    'revert')
-      _zsh_nvm_revert
-      ;;
-    'use')
-      _zsh_nvm_nvm "$@"
-      export NVM_AUTO_USE_ACTIVE=false
-      ;;
-    'install' | 'i')
-      _zsh_nvm_install_wrapper "$@"
-      ;;
-    *)
-      _zsh_nvm_nvm "$@"
-      ;;
+      'upgrade')
+        _zsh_nvm_upgrade
+        ;;
+      'revert')
+        _zsh_nvm_revert
+        ;;
+      'use')
+        _zsh_nvm_nvm "$@"
+        export NVM_AUTO_USE_ACTIVE=false
+        ;;
+      'install' | 'i')
+        _zsh_nvm_install_wrapper "$@"
+        ;;
+      *)
+        _zsh_nvm_nvm "$@"
+        ;;
     esac
   }
 }
@@ -186,21 +186,21 @@ _zsh_nvm_auto_use() {
 
 _zsh_nvm_install_wrapper() {
   case $2 in
-  'rc')
-    NVM_NODEJS_ORG_MIRROR=https://nodejs.org/download/rc/ nvm install node && nvm alias rc "$(node --version)"
-    echo "Clearing mirror cache..."
-    nvm ls-remote >/dev/null 2>&1
-    echo "Done!"
-    ;;
-  'nightly')
-    NVM_NODEJS_ORG_MIRROR=https://nodejs.org/download/nightly/ nvm install node && nvm alias nightly "$(node --version)"
-    echo "Clearing mirror cache..."
-    nvm ls-remote >/dev/null 2>&1
-    echo "Done!"
-    ;;
-  *)
-    _zsh_nvm_nvm "$@"
-    ;;
+    'rc')
+      NVM_NODEJS_ORG_MIRROR=https://nodejs.org/download/rc/ nvm install node && nvm alias rc "$(node --version)"
+      echo "Clearing mirror cache..."
+      nvm ls-remote >/dev/null 2>&1
+      echo "Done!"
+      ;;
+    'nightly')
+      NVM_NODEJS_ORG_MIRROR=https://nodejs.org/download/nightly/ nvm install node && nvm alias nightly "$(node --version)"
+      echo "Clearing mirror cache..."
+      nvm ls-remote >/dev/null 2>&1
+      echo "Done!"
+      ;;
+    *)
+      _zsh_nvm_nvm "$@"
+      ;;
   esac
 }
 

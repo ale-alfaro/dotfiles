@@ -171,30 +171,26 @@ local function map(lhs, rhs, mode, opts)
   if mode then
     keymaps[#keymaps + 1] = { mode = mode, lhs = lhs, rhs = rhs, opts = opts }
   else
-    keymaps[#keymaps + 1] = { lhs = lhs, rhs = rhs, opts = opts }
+    keymaps[#keymaps + 1] = { mode = 'n', lhs = lhs, rhs = rhs, opts = opts }
   end
 end
 map('q', '<nop>', nil, { noremap = true })
-map('Q', '<Cmd>qall<CR>', nil, { noremap = true })
--- map('o', '<Cmd>let @+=expand("%:p") <CR>', nil, { noremap = true })
-
-vim.keymap.set({ 'n', 'x' }, 'j', 'gj', { desc = 'Navigate down (visual line)' })
-vim.keymap.set({ 'n', 'x' }, 'k', 'gk', { desc = 'Navigate up (visual line)' })
-vim.keymap.set({ 'n', 'x' }, '<Down>', 'gj', { desc = 'Navigate down (visual line)' })
-vim.keymap.set({ 'n', 'x' }, '<Up>', 'gk', { desc = 'Navigate up (visual line)' })
-
--- Move Lines
-vim.keymap.set({ 'n', 'x' }, '<M-S-Up>', ':move -2<cr>', { desc = 'Move Line Up' })
-vim.keymap.set({ 'n', 'x' }, '<M-S-Down>', ':move +1<cr>', { desc = 'Move Line Down' })
-vim.keymap.set('i', '<M-S-Up>', '<C-o>:move -2<cr>', { desc = 'Move Line Up' })
-vim.keymap.set('i', '<M-S-Down>', '<C-o>:move +1<cr>', { desc = 'Move Line Down' })
-map('<C-S>', '<Cmd>silent! update | redraw<CR>', nil, { desc = 'Save', noremap = true })
-map('<C-S>', '<Esc><Cmd>silent! update | redraw<CR>', { 'x', 'i' }, { desc = 'Save and go to Normal mode', noremap = true })
+map('Q', ':qm', nil, { noremap = true, desc = 'Record macro to register m' })
+map('o', '<Cmd>let @+=expand("%:p") <CR>', nil, { noremap = true })
+--
+-- map('j', 'gj', { 'n', 'x' }, { desc = 'Navigate down (visual line)' })
+map('k', 'gk', { 'n', 'x' }, { desc = 'Navigate up (visual line)' })
+map('<Down>', 'gj', { 'n', 'x' }, { desc = 'Navigate down (visual line)' })
+map('gk', '<Up>', { 'n', 'x' }, { desc = 'Navigate up (visual line)' })
+map('<C-\\><C-N>', 'q', 't', { noremap = true })
+map('<M-Up>', '<C-o>:move -2<cr>', 'i', { desc = 'Move Line Up' })
+map('<M-Down>', '<C-o>:move +1<cr>', 'i', { desc = 'Move Line Down' })
+map('<C-s>', '<Cmd>silent! update | redraw<CR>', nil, { desc = 'Save', noremap = true })
+map('<C-s>', '<Esc><Cmd>silent! update | redraw<CR>', { 'x', 'i' }, { desc = 'Save and go to Normal mode', noremap = true })
 map('<M-r>', '<Cmd>restart<CR>', nil, { desc = 'Restart', noremap = true })
 map('<C-q>', '<Cmd>q<CR>', nil, { desc = 'Quit', noremap = true })
 map('<C-f>', ':<C-f>', nil, { desc = 'Search Command History', noremap = true })
-map('so', '<Cmd>source %<CR>', nil, { noremap = true, desc = 'Source Current buffer' })
-map('oo', '<Cmd>source $MYVIMRC<CR>', nil, { noremap = true, desc = 'Source ' .. vim.fn.expand '$MYVIMRC' })
+map('<leader>so', '<Cmd>source %<CR>', nil, { noremap = true, desc = 'Source Current buffer' })
 map('<leader>cd', vim.diagnostic.open_float, nil, { desc = 'Line Diagnostics' })
 map('<leader>q', '<Cmd>copen<CR>', nil, { desc = 'Quickfix', noremap = true })
 map('<', '<gv', 'v')
@@ -207,23 +203,4 @@ map('[b', '<cmd>bprevious<cr>', { desc = 'Prev Buffer' })
 map(']b', '<cmd>bnext<cr>', { desc = 'Prev Buffer' })
 map('<C-s>', '<cmd>bnext<cr>', { desc = 'Prev Buffer' })
 map('gba', '<cmd>b#<cr>', { desc = 'Alternate buffer' })
--- { lhs = '<C-h>',      rhs = '<C-w>h',  opts = { desc = 'Focus window left' } },
--- { lhs = '<C-j>',      rhs = '<C-w>j',  opts = { desc = 'Focus window down' } },
--- { lhs = '<C-k>',      rhs = '<C-w>k',    opts = { desc = 'Focus window up' } },
--- { lhs = '<C-l>',      rhs = '<C-w>l', opts = { desc = 'Focus window right' } },
--- The next part (until `-- stylua: ignore end`) is aligned manually for easier
--- reading. Consider preserving this or remove `-- stylua` lines to autoformat.
-vim.tbl_deep_extend('force', keymaps, {
-  -- Quickfix
-  -- stylua: ignore start
-  { lhs = '[q', rhs = vim.cmd.cprev, opts = { desc = 'Previous Quickfix' } },
-  { lhs = ']q', rhs = vim.cmd.cnext, opts = { desc = 'Next Quickfix' } },
-  -- Diagnostics
-  { lhs = "]d",         rhs = function() vim.diagnostic.get_next({ severity = vim.diagnostic.severity.ERROR }) end, opts = { desc = "Next Error" } },
-  { lhs = "[d",         rhs = function() vim.diagnostic.get_prev({ severity = vim.diagnostic.severity.ERROR }) end, opts = { desc = "Prev Error" } },
-  { lhs = "]w",         rhs = function() vim.diagnostic.get_next({ severity = vim.diagnostic.severity.WARN }) end,  opts = { desc = "Next Warning" } },
-  { lhs = "[w",         rhs = function() vim.diagnostic.get_prev({ severity = vim.diagnostic.severity.WARN }) end,  opts = { desc = "Prev Warning" } },
-  -- stylua: ignore end
-})
-
 KEYS.define(keymaps)

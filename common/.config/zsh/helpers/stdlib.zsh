@@ -33,7 +33,7 @@ log_status() {
 
 error() {
   print "error: $*"
-  # exit 1
+  exit 1
 }
 # Returns 0 if the <command> is available. Returns 1 otherwise. It can be a
 # binary in the PATH or a shell function.
@@ -486,3 +486,4 @@ arr2quotes(){
 
   print ${(j:, :)${(qq)ar[@]}}
 }
+

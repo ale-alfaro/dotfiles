@@ -1,3 +1,16 @@
+-- vim.cmd [[let g:floaterm_borderchars = "─│─│╭╮╯╰"]]
+-- vim.cmd [[let s:width = "1.0"]]
+-- vim.cmd [[let s:height = "1.0"]]
+-- vim.cmd [[let s:autoclose = "1"]]
+-- vim.cmd [[let s:command = 'lazygit']]
+--
+-- local function open_lazygit_popup()
+--   vim.api.nvim_exec2('FloatermNew --height=1.0 --width=1.0 --autoclose=1 ', { 'lazygit' })
+--   -- vim.cmd [[execute "FloatermNew --height=1.0 --width=1.0 --autoclose=1 " . s:command]]
+-- end
+--
+-- vim.keymap.set('n', '<leader>lg', open_lazygit_popup, { silent = true })
+
 -- Git integration for more straightforward Git actions based on Neovim's state.
 -- It is not meant as a fully featured Git client, only to provide helpers that
 -- integrate better with Neovim. Example usage:

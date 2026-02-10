@@ -61,7 +61,7 @@ keybind = alt++=increase_font_size:1
 keybind = alt+enter=toggle_fullscreen
 keybind = alt+-=decrease_font_size:1
 
-keybind = alt+shift+p=toggle_command_palette
+keybind = alt+p=toggle_command_palette
 keybind = global:alt+backquote=toggle_quick_terminal
 keybind = alt+shift+arrow_up=scroll_to_top
 keybind = alt+shift+arrow_down=scroll_to_bottom
@@ -69,9 +69,11 @@ keybind = alt+page_up=scroll_page_up
 keybind = alt+page_down=scroll_page_down
 keybind = alt+arrow_up=scroll_page_fractional:0.5
 keybind = alt+arrow_down=scroll_page_fractional:-0.5
+keybind = alt+shift+c=write_screen_file:copy
+keybind = alt+shift+v=write_screen_file:paste
+keybind = alt+shift+a=write_scrollback_file:copy
 
 
-keybind = alt+shift+a=select_all
 keybind = ctrl+shift+c=copy_to_clipboard
 keybind = ctrl+shift+v=paste_from_clipboard
 

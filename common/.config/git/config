@@ -19,3 +19,7 @@ tool = nvimdiff
 
 [difftool "nvimdiff"]
 cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
+[rebase]
+	updateRefs = true
+[rerere]
+	enabled = true

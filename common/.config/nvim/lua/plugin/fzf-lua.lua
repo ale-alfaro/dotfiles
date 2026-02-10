@@ -179,19 +179,17 @@ require('fzf-lua').setup {
 KEYS.define {
   { lhs = '<C-b>', rhs = '<cmd>FzfLua buffers<cr>', opts = { desc = 'Buffers', noremap = true } },
   { lhs = '<C-\\>', rhs = '<cmd>FzfLua global<cr>', opts = { desc = 'Global', noremap = true } },
-  { lhs = '<C-e>', rhs = '<cmd>FzfLua zoxide<cr>', opts = { desc = 'Zoxide', noremap = true } },
+  { lhs = '<C-e>', rhs = '<cmd>FzfLua files<cr>', opts = { desc = 'Files', noremap = true } },
   { lhs = '<C-g>', rhs = '<cmd>FzfLua live_grep<cr>', opts = { desc = 'Grep (cwd)' } },
-  { mode = 'x', lhs = '<C-f>', rhs = '<cmd>FzfLua grep_visual<cr>', opts = { desc = 'Grep' } },
+  { lhs = '<C-r>', rhs = '<cmd>FzfLua resume<cr>', opts = { desc = 'Resume' } },
 }
 local wkey_prefix = '<leader>f'
 KEYS.define({
   { lhs = wkey_prefix .. 'b', rhs = '<cmd>FzfLua blines<cr>', opts = { desc = 'Buffer Lines' } },
-  { lhs = wkey_prefix .. 'f', rhs = '<cmd>FzfLua files<cr>', opts = { desc = 'Find files' } },
   { lhs = wkey_prefix .. 'm', rhs = '<cmd>FzfLua manpages<cr>', opts = { desc = 'Find Man' } },
   { lhs = wkey_prefix .. 'h', rhs = '<cmd>FzfLua help_tags<cr>', opts = { desc = 'Help' } },
   { lhs = wkey_prefix .. 'o', rhs = '<cmd>FzfLua oldfiles<cr>', opts = { desc = 'Recently opened files' } },
-  { lhs = wkey_prefix .. 's', rhs = '<cmd>FzfLua search_history<cr>', opts = { desc = 'FZF search-history' } },
-  { lhs = wkey_prefix .. 'r', rhs = '<cmd>FzfLua resume<cr>', opts = { desc = 'Resume last fzf command' } },
+  { lhs = wkey_prefix .. 'r', rhs = '<cmd>FzfLua history<cr>', opts = { desc = 'History' } },
   { lhs = wkey_prefix .. 'k', rhs = '<Cmd>FzfLua keymaps<CR>', opts = { desc = 'Keymaps' } },
 }, { prefix = wkey_prefix, group = 'Find' })
 

@@ -1,0 +1,624 @@
+
+
+
+Treesitter integration                                 *treesitter*
+
+Nvim integrates the `tree-sitter` library for incremental parsing of buffers:
+https://tree-sitter.github.io/tree-sitter/
+
+WARNING: Treesitter support is still experimental and subject to frequent
+changes. This documentation may also not fully reflect the latest changes.
+
+                                      Type |gO| to see the table of contents.
+
+==============================================================================
+PARSER FILES                                              *treesitter-parsers*
+
+Parsers are the heart of treesitter. They are libraries that treesitter will
+search for in the `parser` runtime directory.
+
+Nvim includes these parsers:
+
+- C
+- Lua
+- Markdown
+- Vimscript
+- Vimdoc
+- Treesitter query files |ft-query-plugin|
+
+You can install more parsers manually, or with a plugin like
+https://github.com/nvim-treesitter/nvim-treesitter .
+
+Parsers are searched for as `parser/{lang}.*` in any 'runtimepath' directory.
+If multiple parsers for the same language are found, the first one is used.
+(NOTE: This typically implies the priority "user config > plugins > bundled".)
+
+To load a parser from its filepath: >lua
+
+    vim.treesitter.language.add('python', { path = "/path/to/python.so" })
+<
+Parser names are assumed to be lower case if the file system is
+case-sensitive.
+
+To associate certain |filetypes| with a treesitter language (name of parser),
+use |vim.treesitter.language.register()|. For example, to use the `xml`
+treesitter parser for buffers with filetype `svg` or `xslt`, use: >lua
+
+    vim.treesitter.language.register('xml', { 'svg', 'xslt' })
+<
+                                                    *treesitter-parsers-wasm*
+
+If Nvim is built with `ENABLE_WASMTIME`, then wasm parsers can also be
+loaded: >lua
+
+    vim.treesitter.language.add('python', { path = "/path/to/python.wasm" })
+<
+
+==============================================================================
+TREESITTER QUERIES                                          *treesitter-query*
+
+Treesitter queries are a way to extract information about a parsed |TSTree|,
+e.g., for the purpose of highlighting. Briefly, a `query` consists of one or
+more patterns. A `pattern` is defined over node types in the syntax tree. A
+`match` corresponds to specific elements of the syntax tree which match a
+pattern. Patterns may optionally define captures and predicates. A `capture`
+allows you to associate names with a specific node in a pattern. A `predicate`
+adds arbitrary metadata and conditional data to a match.
+
+Queries are written in a lisp-like language documented in
+https://tree-sitter.github.io/tree-sitter/using-parsers/queries/1-syntax.html
+Note: The predicates listed there differ from those Nvim supports. See
+|treesitter-predicates| for a complete list of predicates supported by Nvim.
+
+Nvim looks for queries as `*.scm` files in a `queries` directory under
+`runtimepath`, where each file contains queries for a specific language and
+purpose, e.g., `queries/lua/highlights.scm` for highlighting Lua files.
+By default, the first query on `runtimepath` is used (which usually implies
+that user config takes precedence over plugins, which take precedence over
+queries bundled with Nvim). If a query should extend other queries instead
+of replacing them, use |treesitter-query-modeline-extends|.
+
+The Lua interface is described at |lua-treesitter-query|.
+
+
+TREESITTER QUERY PREDICATES                            *treesitter-predicates*
+
+Predicates are special scheme nodes that are evaluated to conditionally capture
+nodes. For example, the `eq?` predicate can be used as follows: >query
+
+    ((identifier) @variable.builtin
+      (#eq? @variable.builtin "self"))
+<
+to only match identifier corresponding to the `"self"` text. Such queries can
+be used to highlight built-in functions or variables differently, for instance.
+
+The following predicates are built in:
+
+    `eq?`                                            *treesitter-predicate-eq?*
+        Match a string against the text corresponding to a node: >query
+            ((identifier) @variable.builtin (#eq? @variable.builtin "self"))
+            ((node1) @left (node2) @right (#eq? @left @right))
+<
+    `any-eq?`                                    *treesitter-predicate-any-eq?*
+        Like `eq?`, but for quantified patterns only one captured node must
+        match.
+
+    `match?`                                      *treesitter-predicate-match?*
+    `vim-match?`                              *treesitter-predicate-vim-match?*
+         Match a |regexp| against the text corresponding to a node: >query
+            ((identifier) @constant (#match? @constant "^[A-Z_]+$"))
+<
+         Note: The `^` and `$` anchors will match the start and end of the
+               node's text.
+
+    `any-match?`                              *treesitter-predicate-any-match?*
+    `any-vim-match?`                      *treesitter-predicate-any-vim-match?*
+        Like `match?`, but for quantified patterns only one captured node must
+        match.
+
+    `lua-match?`                              *treesitter-predicate-lua-match?*
+         Match |lua-pattern|s against the text corresponding to a node,
+         similar to `match?`
+
+    `any-lua-match?`                      *treesitter-predicate-any-lua-match?*
+         Like `lua-match?`, but for quantified patterns only one captured node
+         must match.
+
+    `contains?`                                *treesitter-predicate-contains?*
+        Match a string against parts of the text corresponding to a node: >query
+            ((identifier) @foo (#contains? @foo "foo"))
+            ((identifier) @foo-bar (#contains? @foo-bar "foo" "bar"))
+<
+    `any-contains?`                        *treesitter-predicate-any-contains?*
+        Like `contains?`, but for quantified patterns only one captured node
+        must match.
+
+    `any-of?`                                    *treesitter-predicate-any-of?*
+        Match any of the given strings against the text corresponding to
+        a node: >query
+            ((identifier) @foo (#any-of? @foo "foo" "bar"))
+<
+        This is the recommended way to check if the node matches one of many
+        keywords, as it has been optimized for this.
+
+    `has-ancestor?`                        *treesitter-predicate-has-ancestor?*
+        Match any of the given node types against all ancestors of a node: >query
+            ((identifier) @variable.builtin
+              (#any-of? @variable.builtin "begin" "end")
+              (#has-ancestor? @variable.builtin range_expression))
+<
+    `has-parent?`                            *treesitter-predicate-has-parent?*
+        Match any of the given node types against the direct ancestor of a
+        node: >query
+            (((field_expression
+                 (field_identifier) @method)) @_parent
+             (#has-parent? @_parent template_method function_declarator))
+<
+                                                    *treesitter-predicate-not*
+Each predicate has a `not-` prefixed predicate that is just the negation of
+the predicate.
+
+                                                    *treesitter-predicate-all*
+                                                    *treesitter-predicate-any*
+Queries can use quantifiers to capture multiple nodes. When a capture contains
+multiple nodes, predicates match only if ALL nodes contained by the capture
+match the predicate. Some predicates (`eq?`, `match?`, `lua-match?`,
+`contains?`) accept an `any-` prefix to instead match if ANY of the nodes
+contained by the capture match the predicate.
+
+As an example, consider the following Lua code: >lua
+
+  -- TODO: This is a
+  -- very long
+  -- comment (just imagine it)
+<
+using the following predicated query:
+>query
+    (((comment)+ @comment)
+     (#match? @comment "TODO"))
+<
+This query will not match because not all of the nodes captured by @comment
+match the predicate. Instead, use:
+>query
+    (((comment)+ @comment)
+     (#any-match? @comment "TODO"))
+<
+
+Further predicates can be added via |vim.treesitter.query.add_predicate()|.
+Use |vim.treesitter.query.list_predicates()| to list all available predicates.
+
+
+TREESITTER QUERY DIRECTIVES                            *treesitter-directives*
+
+Treesitter directives store metadata for a node or match and perform side
+effects. For example, the `set!` directive sets metadata on the match or node: >query
+
+        ((identifier) @foo (#set! type "parameter"))
+<
+The following directives are built in:
+
+    `set!`                                          *treesitter-directive-set!*
+        Sets key/value metadata for a specific match or capture. Value is
+        accessible as either `metadata[key]` (match specific) or
+        `metadata[capture_id][key]` (capture specific).
+
+        Parameters: ~
+            {capture_id} (optional)
+            {key}
+            {value}
+
+        Examples: >query
+            ((identifier) @foo (#set! @foo kind "parameter"))
+            ((node1) @left (node2) @right (#set! type "pair"))
+            ((codeblock) @markup.raw.block (#set! priority 90))
+<
+    `offset!`                                      *treesitter-directive-offset!*
+        Takes the range of the captured node and applies an offset. This will
+        set a new range in the form of a list like { {start_row}, {start_col},
+        {end_row}, {end_col} } for the captured node with `capture_id` as
+        `metadata[capture_id].offset`. This offset will be applied to the
+        range returned in |vim.treesitter.get_range()|. Useful for
+        |treesitter-language-injections|.
+
+        Parameters: ~
+            {capture_id}
+            {start_row}
+            {start_col}
+            {end_row}
+            {end_col}
+
+        Example: >query
+            ((identifier) @constant (#offset! @constant 0 1 0 -1))
+<
+    `gsub!`                                          *treesitter-directive-gsub!*
+        Transforms the content of the node using a |lua-pattern|. This will set
+        a new `metadata[capture_id].text`.
+
+        Parameters: ~
+            {capture_id}
+            {pattern}
+            {replacement}
+
+        Example: >query
+            (#gsub! @_node ".*%.(.*)" "%1")
+<
+    `trim!`                                          *treesitter-directive-trim!*
+        Trims whitespace from the node. Sets a new
+        `metadata[capture_id].range`. Takes a capture ID and, optionally, four
+        integers to customize trimming behavior (`1` meaning trim, `0` meaning
+        don't trim). When only given a capture ID, trims blank lines (lines
+        that contain only whitespace, or are empty) from the end of the node
+        (for backwards compatibility). Can trim all whitespace from both sides
+        of the node if parameters are given.
+
+        Examples: >query
+            ; only trim blank lines from the end of the node
+            ; (equivalent to (#trim! @fold 0 0 1 0))
+            (#trim! @fold)
+
+            ; trim blank lines from both sides of the node
+            (#trim! @fold 1 0 1 0)
+
+            ; trim all whitespace around the node
+            (#trim! @fold 1 1 1 1)
+<
+        Parameters: ~
+            {capture_id}
+            {trim_start_linewise}
+            {trim_start_charwise}
+            {trim_end_linewise} (default `1` if only given {capture_id})
+            {trim_end_charwise}
+
+Further directives can be added via |vim.treesitter.query.add_directive()|.
+Use |vim.treesitter.query.list_directives()| to list all available directives.
+
+
+TREESITTER QUERY MODELINES                          *treesitter-query-modeline*
+
+Nvim supports to customize the behavior of the queries using a set of
+"modelines", that is comments in the queries starting with `;`. Here are the
+currently supported modeline alternatives:
+
+    `inherits: {lang}...`                     *treesitter-query-modeline-inherits*
+        Specifies that this query should inherit the queries from {lang}.
+        This will recursively descend in the queries of {lang} unless wrapped
+        in parentheses: `({lang})`.
+        Note: This is meant to be used to include queries from another
+        language. If you want your query to extend the queries of the same
+        language, use `extends`.
+
+    `extends`                                  *treesitter-query-modeline-extends*
+        Specifies that this query should be used as an extension for the
+        query, i.e. that it should be merged with the others.
+        Note: The order of the extensions, and the query that will be used as
+        a base depends on your 'runtimepath' value.
+
+Note: These modeline comments must be at the top of the query, but can be
+repeated, for example, the following two modeline blocks are both valid:
+>query
+    ;; inherits: typescript,jsx
+    ;; extends
+<
+>query
+    ;; extends
+    ;;
+    ;; inherits: css
+<
+==============================================================================
+TREESITTER SYNTAX HIGHLIGHTING                          *treesitter-highlight*
+
+Syntax highlighting is specified through queries named `highlights.scm`,
+which match a |TSNode| in the parsed |TSTree| to a `capture` that can be
+assigned a highlight group. For example, the query >query
+
+    (parameters (identifier) @variable.parameter)
+<
+matches any `identifier` node inside a function `parameters` node to the
+capture named `@variable.parameter`. For example, for a Lua code >lua
+
+    function f(foo, bar) end
+<
+which will be parsed as (see |:InspectTree|): >query
+
+    (function_declaration ; [1:1 - 24]
+      name: (identifier) ; [1:10 - 10]
+      parameters: (parameters ; [1:11 - 20]
+        name: (identifier) ; [1:12 - 14]
+        name: (identifier))) ; [1:17 - 19]
+<
+the above query will highlight `foo` and `bar` as `@variable.parameter`.
+
+It is also possible to match literal expressions (provided the parser returns
+them):
+>query
+    [
+      "if"
+      "else"
+    ] @keyword.conditional
+<
+Assuming a suitable parser and `highlights.scm` query is found in runtimepath,
+treesitter highlighting for the current buffer can be enabled simply via
+|vim.treesitter.start()|.
+
+                                                 *treesitter-highlight-groups*
+The capture names, prefixed with `@`, are directly usable as highlight groups.
+For many commonly used captures, the corresponding highlight groups are linked
+to Nvim's standard |highlight-groups| by default (e.g., `@comment` links to
+`Comment`) but can be overridden in colorschemes.
+
+A fallback system is implemented, so that more specific groups fallback to
+more generic ones. For instance, in a language that has separate doc comments
+(e.g., c, java, etc.), `@comment.documentation` could be used. If this group
+is not defined, the highlighting for an ordinary `@comment` is used. This way,
+existing color schemes already work out of the box, but it is possible to add
+more specific variants for queries that make them available.
+
+As an additional rule, capture highlights can always be specialized by
+language, by appending the language name after an additional dot. For
+instance, to highlight comments differently per language: >vim
+
+    hi @comment.c guifg=Blue
+    hi @comment.lua guifg=DarkBlue
+    hi link @comment.documentation.java String
+<
+The following is a list of standard captures used in queries for Nvim,
+highlighted according to the current colorscheme (use |:Inspect| on one to see
+the exact definition):
+
+@variable                       various variable names
+@variable.builtin               built-in variable names (e.g. `this`, `self`)
+@variable.parameter             parameters of a function
+@variable.parameter.builtin     special parameters (e.g. `_`, `it`)
+@variable.member                object and struct fields
+
+@constant               constant identifiers
+@constant.builtin       built-in constant values
+@constant.macro         constants defined by the preprocessor
+
+@module                 modules or namespaces
+@module.builtin         built-in modules or namespaces
+@label                  `GOTO` and other labels (e.g. `label:` in C), including heredoc labels
+
+@string                 string literals
+@string.documentation   string documenting code (e.g. Python docstrings)
+@string.regexp          regular expressions
+@string.escape          escape sequences
+@string.special         other special strings (e.g. dates)
+@string.special.symbol  symbols or atoms
+@string.special.path    filenames
+@string.special.url     URIs (e.g. hyperlinks)
+
+@character              character literals
+@character.special      special characters (e.g. wildcards)
+
+@boolean                boolean literals
+@number                 numeric literals
+@number.float           floating-point number literals
+
+@type                   type or class definitions and annotations
+@type.builtin           built-in types
+@type.definition        identifiers in type definitions (e.g. `typedef <type> <identifier>` in C)
+
+@attribute              attribute annotations (e.g. Python decorators, Rust lifetimes)
+@attribute.builtin      builtin annotations (e.g. `@property` in Python)
+@property               the key in key/value pairs
+
+@function               function definitions
+@function.builtin       built-in functions
+@function.call          function calls
+@function.macro         preprocessor macros
+
+@function.method        method definitions
+@function.method.call   method calls
+
+@constructor            constructor calls and definitions
+@operator               symbolic operators (e.g. `+`, `*`)
+
+@keyword                keywords not fitting into specific categories
+@keyword.coroutine      keywords related to coroutines (e.g. `go` in Go, `async/await` in Python)
+@keyword.function       keywords that define a function (e.g. `func` in Go, `def` in Python)
+@keyword.operator       operators that are English words (e.g. `and`, `or`)
+@keyword.import         keywords for including or exporting modules (e.g. `import`, `from` in Python)
+@keyword.type           keywords describing namespaces and composite types (e.g. `struct`, `enum`)
+@keyword.modifier       keywords modifying other constructs (e.g. `const`, `static`, `public`)
+@keyword.repeat         keywords related to loops (e.g. `for`, `while`)
+@keyword.return         keywords like `return` and `yield`
+@keyword.debug          keywords related to debugging
+@keyword.exception      keywords related to exceptions (e.g. `throw`, `catch`)
+
+@keyword.conditional         keywords related to conditionals (e.g. `if`, `else`)
+@keyword.conditional.ternary ternary operator (e.g. `?`, `:`)
+
+@keyword.directive           various preprocessor directives and shebangs
+@keyword.directive.define    preprocessor definition directives
+
+@punctuation.delimiter  delimiters (e.g. `;`, `.`, `,`)
+@punctuation.bracket    brackets (e.g. `()`, `{}`, `[]`)
+@punctuation.special    special symbols (e.g. `{}` in string interpolation)
+
+@comment                line and block comments
+@comment.documentation  comments documenting code
+
+@comment.error          error-type comments (e.g. `ERROR`, `FIXME`, `DEPRECATED`)
+@comment.warning        warning-type comments (e.g. `WARNING`, `FIX`, `HACK`)
+@comment.todo           todo-type comments (e.g. `TODO`, `WIP`)
+@comment.note           note-type comments (e.g. `NOTE`, `INFO`, `XXX`)
+
+@markup.strong          bold text
+@markup.italic          italic text
+@markup.strikethrough   struck-through text
+@markup.underline       underlined text (only for literal underline markup!)
+
+@markup.heading         headings, titles (including markers)
+@markup.heading.1       top-level heading
+@markup.heading.2       section heading
+@markup.heading.3       subsection heading
+@markup.heading.4       and so on
+@markup.heading.5       and so forth
+@markup.heading.6       six levels ought to be enough for anybody
+
+@markup.quote           block quotes
+@markup.math            math environments (e.g. `$ ... $` in LaTeX)
+
+@markup.link            text references, footnotes, citations, etc.
+@markup.link.label      link, reference descriptions
+@markup.link.url        URL-style links
+
+@markup.raw             literal or verbatim text (e.g. inline code)
+@markup.raw.block       literal or verbatim text as a stand-alone block
+
+@markup.list            list markers
+@markup.list.checked    checked todo-style list markers
+@markup.list.unchecked  unchecked todo-style list markers
+
+@diff.plus              added text (for diff files)
+@diff.minus             deleted text (for diff files)
+@diff.delta             changed text (for diff files)
+
+@tag                    XML-style tag names (e.g. in XML, HTML, etc.)
+@tag.builtin            builtin tag names (e.g. HTML5 tags)
+@tag.attribute          XML-style tag attributes
+@tag.delimiter          XML-style tag delimiters
+
+                                                  *treesitter-highlight-spell*
+The special `@spell` capture can be used to indicate that a node should be
+spell checked by Nvim's builtin |spell| checker. For example, the following
+capture marks comments as to be checked: >query
+
+    (comment) @spell
+<
+
+There is also `@nospell` which disables spellchecking regions with `@spell`.
+
+                                                *treesitter-highlight-conceal*
+Treesitter highlighting supports |conceal| via the `conceal` and `conceal_lines`
+metadata. By convention, nodes to be concealed are captured as `@conceal`, but
+any capture can be used. For example, the following query can be used to hide
+code block delimiters in Markdown: >query
+
+    ((fenced_code_block_delimiter) @conceal (#set! conceal ""))
+<
+It is also possible to replace a node with a single character, which (unlike
+legacy syntax) can be given a custom highlight. For example, the following
+(ill-advised) query replaces the `!=` operator by a Unicode glyph, which is
+still highlighted the same as other operators: >query
+
+    "!=" @operator (#set! conceal "≠")
+<
+To conceal an entire line (do not draw it at all), a query with `conceal_lines`
+metadata can be used: >query
+
+    ((comment) @comment @spell
+      (#set! conceal_lines ""))
+<
+Conceals specified in this way respect 'conceallevel' and 'concealcursor'.
+
+Note that although you can use any string for `conceal`, only the first
+character will be used: >query
+
+    ; identifiers will be concealed with 'f'.
+    ((identifier) @conceal (#set! conceal "foo"))
+<
+
+                                               *treesitter-highlight-priority*
+Treesitter uses |nvim_buf_set_extmark()| to set highlights with a default
+priority of 100. This enables plugins to set a highlighting priority lower or
+higher than treesitter. It is also possible to change the priority of an
+individual query pattern manually by setting its `"priority"` metadata
+attribute: >query
+
+    ((super_important_node) @superimportant (#set! priority 105))
+<
+
+                                          *treesitter-highlight-commentstring*
+Treesitter highlighting supports finer-grained 'commentstring's, used by the
+built-in |commenting| plugin. When the cursor is within a node that sets the
+`bo.commentstring` metadata property (|treesitter-directive-set!|), that
+property defines the comment delimiter (where "innermost wins"). This is
+useful for languages like `JSX` that have different comment syntax depending
+on the code region, for example: >query
+
+    ((jsx_element) @_tag (#set! @_tag bo.commentstring "{/* %s */}"))
+<
+When multiple captures set this metadata over a region, only the innermost
+(most specific) one is applied to a given area.
+
+==============================================================================
+TREESITTER LANGUAGE INJECTIONS                *treesitter-language-injections*
+<
+
+Note the following information is adapted from:
+https://tree-sitter.github.io/tree-sitter/3-syntax-highlighting.html#language-injection
+
+Some source files contain code written in multiple different languages.
+Examples include:
+
+    • HTML files, which can contain JavaScript inside of `<script>` tags and
+      CSS inside of `<style>` tags
+    • ERB files, which contain Ruby inside of `<%` `%>` tags, and HTML outside of
+      those tags
+    • PHP files, which can contain HTML between the `<php` tags
+    • JavaScript files, which contain regular expression syntax within regex
+      literals
+    • Ruby, which can contain snippets of code inside of heredoc literals,
+      where the heredoc delimiter often indicates the language
+    • Lua, which can contain snippets of Vimscript inside |vim.cmd()| calls.
+    • Vimscript, which can contain snippets of Lua inside |:lua-heredoc|
+      blocks.
+
+All of these examples can be modeled in terms of a parent syntax tree and one
+or more injected syntax trees, which reside inside of certain nodes in the
+parent tree. The language injection query allows you to specify these
+“injections” using the following captures:
+
+    • `@injection.content` - indicates that the captured node should have its
+      contents re-parsed using another language. If there are multiple
+      `@injection.content` captures in one pattern, all ranges will be
+      collected and parsed as one tree. This allows query authors to create
+      "scoped" injections with injection query quantifiers.
+    • `@injection.language` - indicates that the captured node’s text may
+      contain the name of a language that should be used to re-parse the
+      `@injection.content`.
+    • `@injection.filename` - indicates that the captured node’s text may
+      contain a filename; the corresponding filetype is then looked-up up via
+      |vim.filetype.match()| and treated as the name of a language that should
+      be used to re-parse the `@injection.content`.
+
+The language injection behavior can also be configured by some properties
+associated with patterns:
+
+    • `injection.language` - can be used to hard-code the name of a specific
+    language.
+    • `injection.combined` - indicates that all of the matching nodes in the
+    tree should have their content parsed as one nested document.
+    • `injection.include-children` - indicates that the `@injection.content`
+    node's entire text should be re-parsed, including the text of its child
+    nodes. By default, child nodes' text will be excluded from the injected
+    document.
+    • `injection.self` - indicates that the node's text should be parsed with
+      the same language as the node's LanguageTree.
+    • `injection.parent` - indicates that the captured node’s text should
+      be parsed with the same language as the node's parent LanguageTree.
+
+Injection queries are currently run over the entire buffer, which can be slow
+for large buffers. To disable injections for, e.g.,  `c`, just place an
+empty `queries/c/injections.scm` file in your 'runtimepath'.
+
+==============================================================================
+VIM.TREESITTER                                                *lua-treesitter*
+
+The remainder of this document is a reference manual for the `vim.treesitter`
+Lua module, which is the main interface for Nvim's treesitter integration.
+Most of the following content is automatically generated from the function
+documentation.
+
+
+                                             *vim.treesitter.language_version*
+The latest parser ABI version that is supported by the bundled treesitter
+library.
+
+                                     *vim.treesitter.minimum_language_version*
+The earliest parser ABI version that is supported by the bundled treesitter
+library.
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

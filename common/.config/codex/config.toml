@@ -47,6 +47,7 @@ model_supports_reasoning_summaries = false
 # Force reasoning summary format: none | experimental (default: none)
 model_reasoning_summary_format = "none"
 
+web_search= "cached"
 
 ################################################################################
 # Approval & Sandbox
@@ -63,7 +64,8 @@ approval_policy = "on-failure"
 # - read-only (default)
 # - workspace-write
 # - danger-full-access (no sandbox; extremely risky)
-sandbox_mode = "read-only"
+sandbox_mode = "workspace-write"
+personality = "pragmatic"
 
 # Extra settings used only when sandbox_mode = "workspace-write".
 [sandbox_workspace_write]
@@ -111,7 +113,7 @@ persistence = "save-all"
 max_bytes = 104857600 # 100 MiB
 
 # URI scheme for clickable citations: vscode (default) | vscode-insiders | windsurf | cursor | none
-file_opener = "nvim"
+file_opener = "None"
 
 ################################################################################
 # UI, Notifications, and Misc
@@ -163,17 +165,22 @@ chatgpt_base_url = "https://chatgpt.com/backend-api/"
 
 # Preferred store for MCP OAuth credentials: auto (default) | file | keyring
 mcp_oauth_credentials_store = "auto"
-
+# Treat a directory as the project root when it contains any of these markers.
+project_root_markers = [".west", ".git", "uv.lock"]
 ################################################################################
 # Project Documentation Controls
 ################################################################################
 
 # Max bytes from AGENTS.md to embed into first-turn instructions. Default: 32768
-project_doc_max_bytes = 32768
-
-# Ordered fallbacks when AGENTS.md is missing at a directory level. Default: []
-project_doc_fallback_filenames = ["TECH_STACK.md"]
-
+# ~/.codex/config.toml
+project_doc_fallback_filenames = ["EMBEDDER.md", "TECH_STACK.md"]
+project_doc_max_bytes = 65536
+[[skills.config]]
+path = "~/dotfiles/common/llm_memory/zephyr-driver-development/SKILL.md"
+enabled = true
+[[skills.config]]
+path = "~/dotfiles/common/llm_memory/zephyr-workspace-explorer/SKILL.md"
+enabled = true
 [notice.model_migrations]
 "gpt-5.1-codex-max" = "gpt-5.2-codex"
 
@@ -186,125 +193,9 @@ project_doc_fallback_filenames = ["TECH_STACK.md"]
 [features]
 # Leave this table empty to accept defaults. Set explicit booleans to opt in/out.
 unified_exec = true
-rmcp_client = true
 apply_patch_freeform = true
-view_image_tool = true
-web_search_request = true
-ghost_commit = true
 shell_snapshot= true
-
-
-# Define MCP servers under this table. Leave empty to disable.
-[mcp_servers]
-
-# --- Example: STDIO transport ---
-[mcp_servers.just]
-command = "uvx"                 # required
-args = ["just-mcp", "--stdio"]               # optional
-# env = { "API_KEY" = "value" }           # optional key/value pairs copied as-is
-# env_vars = ["ANOTHER_SECRET"]            # optional: forward these from the parent env
-# cwd = "/path/to/server"                 # optional working directory override
-# startup_timeout_sec = 10.0               # optional; default 10.0 seconds
-# # startup_timeout_ms = 10000              # optional alias for startup timeout (milliseconds)
-# tool_timeout_sec = 60.0                  # optional; default 60.0 seconds
-# enabled_tools = ["search", "summarize"]  # optional allow-list
-# disabled_tools = ["slow-tool"]           # optional deny-list (applied after allow-list)
-
-# --- Example: Streamable HTTP transport ---
-# [mcp_servers.github]
-# url = "https://github-mcp.example.com/mcp"  # required
-# bearer_token_env_var = "GITHUB_TOKEN"        # optional; Authorization: Bearer <token>
-# http_headers = { "X-Example" = "value" }    # optional static headers
-# env_http_headers = { "X-Auth" = "AUTH_ENV" } # optional headers populated from env vars
-# startup_timeout_sec = 10.0                   # optional
-# tool_timeout_sec = 60.0                      # optional
-# enabled_tools = ["list_issues"]             # optional allow-list
-
-################################################################################
-# Model Providers (extend/override built-ins)
-################################################################################
-
-# Built-ins include:
-# - openai (Responses API; requires login or OPENAI_API_KEY via auth flow)
-# - oss (Chat Completions API; defaults to http://localhost:11434/v1)
-
-[model_providers]
-
-# --- Example: override OpenAI with explicit base URL or headers ---
-# [model_providers.openai]
-# name = "OpenAI"
-# base_url = "https://api.openai.com/v1"         # default if unset
-# wire_api = "responses"                         # "responses" | "chat" (default varies)
-# # requires_openai_auth = true                    # built-in OpenAI defaults to true
-# # request_max_retries = 4                        # default 4; max 100
-# # stream_max_retries = 5                         # default 5;  max 100
-# # stream_idle_timeout_ms = 300000                # default 300_000 (5m)
-# # experimental_bearer_token = "sk-example"      # optional dev-only direct bearer token
-# # http_headers = { "X-Example" = "value" }
-# # env_http_headers = { "OpenAI-Organization" = "OPENAI_ORGANIZATION", "OpenAI-Project" = "OPENAI_PROJECT" }
-
-
-# --- Example: Local OSS (e.g., Ollama-compatible) ---
-[model_providers.ollama]
-name = "Ollama"
-base_url = "http://localhost:11434/v1"
-wire_api = "chat"
-
-oss_provider = "ollama"
-
-[model_providers.openai-chat-completions]
-name = "OpenAI using Chat Completions"
-base_url = "https://api.openai.com/v1"
-# env_key = "OPENAI_API_KEY"
-wire_api = "chat"
-
-################################################################################
-# Profiles (named presets)
-################################################################################
-
-# Active profile name. When unset, no profile is applied.
-profile = "default"
-
-[profiles]
-
-[profiles.default]
-approval_policy = "on-request"
-sandbox_mode = "workspace-write"
-
-[profiles.untrusted]
-approval_policy = "untrusted"
-sandbox_mode    = "read-only"
-
-
-[profiles.o3]
-model = "o3"
-model_provider = "openai"
-approval_policy = "on-failure"
-model_reasoning_effort = "high"
-model_reasoning_summary = "detailed"
-
-[profiles.gpt3]
-model = "gpt-3.5-turbo"
-model_provider = "openai-chat-completions"
-
-
-# model_reasoning_effort = "medium"
-# model_reasoning_summary = "auto"
-# model_verbosity = "medium"
-# chatgpt_base_url = "https://chatgpt.com/backend-api/"
-# # experimental_compact_prompt_file = "compact_prompt.txt"
-# include_apply_patch_tool = false
-# experimental_use_unified_exec_tool = true
-# experimental_use_rmcp_client = false
-# experimental_use_freeform_apply_patch = false
-# experimental_sandbox_command_assessment = true
-# tools_web_search = true
-# tools_view_image = true
-# features = { unified_exec = true}
-
-################################################################################
-# Projects (trust levels)
-################################################################################
+undo = true
 
 # Mark specific worktrees as trusted. Only "trusted" is recognized.
 [projects]
@@ -313,43 +204,3 @@ trust_level = "trusted"
 
 [projects."/home/alealfaro/sibel/eng/fw/bengal-tiger"]
 trust_level = "trusted"
-
-################################################################################
-# OpenTelemetry (OTEL) – disabled by default
-################################################################################
-
-[otel]
-# Include user prompt text in logs. Default: false
-log_user_prompt = false
-# Environment label applied to telemetry. Default: "dev"
-environment = "dev"
-# Exporter: none (default) | otlp-http | otlp-grpc
-exporter = "none"
-
-# Example OTLP/HTTP exporter configuration
-# [otel]
-# exporter = { otlp-http = {
-#   endpoint = "https://otel.example.com/v1/logs",
-#   protocol = "binary",                      # "binary" | "json"
-#   headers = { "x-otlp-api-key" = "${OTLP_TOKEN}" }
-# }}
-
-# Example OTLP/gRPC exporter configuration
-# [otel]
-# exporter = { otlp-grpc = {
-#   endpoint = "https://otel.example.com:4317",
-#   headers = { "x-otlp-meta" = "abc123" }
-# }}
-
-# Example OTLP exporter with mutual TLS
-# [otel]
-# exporter = { otlp-http = {
-#   endpoint = "https://otel.example.com/v1/logs",
-#   protocol = "binary",
-#   headers = { "x-otlp-api-key" = "${OTLP_TOKEN}" },
-#   tls = {
-#     ca-certificate = "certs/otel-ca.pem",
-#     client-certificate = "/etc/codex/certs/client.pem",
-#     client-private-key = "/etc/codex/certs/client-key.pem",
-#   }
-# }}

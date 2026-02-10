@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily Reminders
+
+
+[Timer]
+OnCalendar=daily
+AccuracySec=12h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

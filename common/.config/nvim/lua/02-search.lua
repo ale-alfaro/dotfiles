@@ -110,28 +110,3 @@ KEYS.define({
   { lhs = prefix .. 'c', rhs = function() search_visit_paths(nil, 'core') end,        opts = { desc = 'Core visits (all)' } },
   { lhs = prefix .. 'C', rhs = function() search_visit_paths(true, 'core')end,       opts = { desc = 'Core visits (cwd)' } },
 }, { prefix = prefix, group = 'Visits' })
----
----
----
-local find_justfiles_cmd = "fd '[Jj]ustfile|\\..*just' -tf --strip-cwd-prefix"
-VimRc.fzf_just = function(opts)
-  local fzf_lua = require 'fzf-lua'
-  opts = opts or {}
-  opts.prompt = 'Just Recipes> '
-  opts.fn_transform = function(justfile)
-    -- fzf_jobstart(get_justfile_recipes_cmd .. justfile, {})
-    -- return fzf_lua.utils.ansi_codes.magenta(x)
-    return FzfLua.make_entry.file(justfile, { file_icons = true, color_icons = true })
-  end
-  opts.actions = {
-    ['default'] = function(selected)
-      VimRc.info(selected)
-      -- local get_justfile_recipes_cmd = { 'just', '-f ', selected[1], '--summary', '--unsorted' }
-      -- local recipes = VimRc.exec.run_cmd(et_justfile_recipes_cmd)
-      -- VimRc.info(selected[1] .. ' \n Recipes: ' .. recipes)
-    end,
-  }
-  fzf_lua.fzf_exec(find_justfiles_cmd, opts)
-end
-
-vim.cmd [[command! -nargs=* Just lua _G.VimRc.fzf_just()]]

@@ -13,9 +13,20 @@
 -- Another approach would be to have just output a unified error format and set the error format in neovim to that...
 local jobs = require 'custom.just.jobs'
 
-local utils = require 'custom.just.utils'
-
 local M = {}
+
+---Clears the quickfix window.
+local function clearQuickfix()
+  vim.fn.setqflist({}, 'r')
+end
+
+---Sets the quickfix list title.
+---@param arg any Title of the quickfix window.
+local function setQuickfixTitle(arg)
+  vim.fn.setqflist({}, 'a', {
+    title = arg,
+  })
+end
 
 local function completeRecipe(args)
   -- Match the command line arguments to all the available recipes and sugges
@@ -38,46 +49,36 @@ M.setup = function(_)
   vim.api.nvim_create_user_command('Just', function(args)
     -- No parameter passed
     if not args.fargs[1] then
-      utils.printTable(jobs.justList())
+      VimRc.info(jobs.justList())
       return
     end
 
     -- TODO handle multiple arguments
     local recipeName = args.fargs[1]
 
-    utils.clearQuickfix()
-    utils.setQuickfixTitle('Just recipe: ' .. args.fargs[1])
+    clearQuickfix()
+    setQuickfixTitle('Just recipe: ' .. args.fargs[1])
     jobs.justRunAsync(recipeName, true)
   end, {
     nargs = '*',
     complete = completeRecipe,
   })
+
+  vim.api.nvim_create_user_command('J', function(args)
+    local justRecipes = jobs.justSummary()
+    if not justRecipes then
+      return
+    end
+    FzfLua.fzf_exec(justRecipes, {
+      cwd_only = true,
+      actions = {
+        ['default'] = function(selected)
+          jobs.justRunAsync(selected[1], true)
+        end,
+      },
+      complete = true,
+    })
+  end, { desc = 'Just Recipe' })
 end
 
-require('fzf-lua').live_grep {
-  cmd = 'git grep --ignore-case --extended-regexp --line-number --column --color=always --untracked',
-  fn_transform_cmd = function(query, cmd, _)
-    -- Extract search query and glob string separated by '--'
-    local search_query, glob_str = query:match '(.-)%s-%-%-(.*)'
-
-    if not glob_str then
-      return -- Fallback to original command if no glob string
-    end
-
-    -- Convert glob string into git-compatible pathspecs
-    local pathspecs = {}
-    for pattern in glob_str:gmatch '%S+' do
-      if pattern:sub(1, 1) == '!' then
-        -- Convert '!pattern' to git's exclude pathspec
-        table.insert(pathspecs, string.format("':(exclude)%s'", pattern:sub(2)))
-      else
-        table.insert(pathspecs, string.format("'%s'", pattern))
-      end
-    end
-
-    -- Compose the final git grep command
-    local new_cmd = string.format('%s %s %s', cmd, vim.fn.shellescape(search_query), table.concat(pathspecs, ' '))
-    return new_cmd, search_query
-  end,
-}
 return M

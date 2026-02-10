@@ -1,9 +1,11 @@
+---@module 'flash'
 -- Jump around with search labels
 -- https://github.com/folke/flash.nvim
 ---@type  VimPackPlugin
 return {
   name = 'flash',
   plugin = _G.plug_spec { 'folke/flash.nvim' },
+  ---@type Flash.Config
   opts = {
     labels = 'asdfqwerzxcv', -- Limit labels to left side of the keyboard
     modes = {
@@ -34,13 +36,11 @@ return {
         row = -3,
       },
     },
-    jump = { nohlsearch = true },
+    jump = { enabled = false },
   },
   -- stylua: ignore
   keys = {
     { mode = { 'n', 'o', 'x' }, lhs = 'o',     rhs = function() require('flash').treesitter() end,        opts = { desc = 'Flash Treesitter' } },
-    { mode = 'o',               lhs = 'r',     rhs = function() require('flash').treesitter_search() end, opts = { desc = 'Treesitter Search' } },
-    { mode = 'o',               lhs = 'R',     rhs = function() require('flash').remote() end,            opts = { desc = 'Remote Flash' } },
     { mode = 'c',               lhs = '<c-s>', rhs = function() require('flash').toggle() end,            opts = { desc = 'Flash Toggle' } },
     { mode = { 'n', 'o', 'x' }, lhs = '<c-space>', rhs = function() require('flash').treesitter { actions = { ['<c-space>'] = 'next', ['<BS>'] = 'prev', }, } end, { desc = 'Treesitter Incremental Selection' } },
   }

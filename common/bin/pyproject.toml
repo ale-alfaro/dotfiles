@@ -6,6 +6,7 @@ dependencies = []
 
 [dependency-groups]
 dev = [
+    "cattrs>=25.3.0",
     "cyclopts>=4.4.6",
     "dotenv>=0.9.9",
 ]

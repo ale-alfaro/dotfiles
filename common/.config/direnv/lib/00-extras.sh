@@ -152,6 +152,10 @@ git_update_submodules() {
   done
 }
 
+############## MISE ###################################
+use_mise() {
+  direnv_load mise direnv exec
+}
 ############## Nix ###################################
 source_nix_url() {
   if ! has nix_direnv_version || ! nix_direnv_version 3.1.0; then

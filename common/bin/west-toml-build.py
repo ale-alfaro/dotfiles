@@ -13,50 +13,41 @@
 #     "python-dotenv"
 # ]
 # ///
-
-import sys
-from functools import partial
-from pathlib import Path
-from typing import overload
-
-import attrs
-import cattrs
-from rich.pretty import pprint
-
-EXAMPLE_TOML = """
-
-[common]
-board = "nice_nano_v2"
-app_dir = "zmk/app"
-cmake_args = ["-DCONFIG_ZMK_STUDIO=y" ,"-DCONFIG_ZMK_STUDIO_LOCKING=n" , '-DBOARD_ROOT=/home/alealfaro/dotfiles/common/zmk-config/zmk/app' ,'-DZMK_CONFIG=/home/alealfaro/dotfiles/common/zmk-config/config']
-snippets = "studio-rpc-usb-uart"
-
-[[apps]]
-id = "corne_left"
-cmake_args = [ '-DSHIELD=corne_left' ]
-
-[[apps]]
-id = "corne_right"
-cmake_args = [ '-DSHIELD=corne_right' ]
-
-"""
 import io
 import logging
 import os
+import re
 import shlex
+import sys
+import tomllib
 from collections import defaultdict
-from functools import cached_property
+from functools import partial
+from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Annotated, Any, Self, cast, override
+from typing import (
+    Annotated,
+    Any,
+    Callable,
+    ClassVar,
+    Literal,
+    Mapping,
+    Optional,
+    Union,
+)
 
 import anyio
-import attr
+import attrs
+import cattrs
 import cyclopts
-from attr import AttrsInstance
-from cattrs.preconf.tomlkit import TomlkitConverter
+import tomlkit
+from cattrs import override
+from cattrs.gen import make_dict_structure_fn
+from cattrs.preconf.tomlkit import TomlkitConverter, make_converter
+from cyclopts.argument import ArgumentCollection
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.panel import Panel
+from rich.pretty import pprint
 from rich.progress import (
     Progress,
     SpinnerColumn,
@@ -64,185 +55,186 @@ from rich.progress import (
     TextColumn,
 )
 
+EXAMPLE_TOML = """
+
+  [common]
+  app_dir = "shell_module"
+
+  [common.build_flags]
+  pristine = "always"
+  sysbuild = true
+  dry_run = false
+  build_opt = ["-j4", "-v"]
+
+  [common.cmake_vars]
+  EXTRA_CONF_FILE = ["foo.conf", "bar.conf"]
+  FILE_SUFFIX = "dbg"
+
+  [[apps]]
+  id = "bt_nus"
+  app_dir = "shell_bt_nus"
+  conf_file = "bt_nus"
+
+  [apps.build_flags]
+  force = true
+
+  [apps.cmake_vars]
+  CONF_FILE = "rtt_uart.conf"
+
+"""
 print_console = Console()
 error_console = Console(stderr=True, style="bold red")
 FORMAT = "%(message)s"
 logger = logging.getLogger(__name__)
+
+
 # logger = logging.getLogger("rich")
 # log_handler = RichHandler()
+@attrs.frozen()
+class WestFlagBuilder:
+    flag: str
+    long: bool = attrs.field(default=False)
+    takes_value: bool = attrs.field(default=True)
+    repeatable: bool = attrs.field(default=False)
+
+    def render(self) -> str:
+        return f"{'--' if self.long else '-'}{self.flag}"
+
+    def __call__(self, raw_opt: Any) -> list[str]:
+        if raw_opt is None:
+            return []
+        if not self.takes_value:
+            if isinstance(raw_opt, bool) and not raw_opt:
+                return []
+            return [self.render()]
+        if isinstance(raw_opt, list):
+            if not self.repeatable:
+                return [self.render(), " ".join(str(x) for x in raw_opt)]
+            return [item for x in raw_opt for item in (self.render(), str(x))]
+        return [self.render(), str(raw_opt)]
 
 
-BuildSpecDefaultDict = defaultdict[str, str | Path | list[str]]
-DEFAULT_WEST_BUILD_CMD = ["build", "--pristine=always"]
+type CMakeVariableValueType = str | int | Path | list[str] | bool
+
+
+@attrs.frozen()
+class CMakeVariableBuilder:
+    var: str
+    valid_regex: ClassVar[re.Pattern] = re.compile(r"[yn\d+\w+]")
+
+    def __call__(self, value: CMakeVariableValueType) -> str | None:
+        if isinstance(value, bool):
+            return f"-D{self.var}={'y' if value else 'n'}"
+        elif isinstance(value, list):
+            joined = ";".join(str(x) for x in value)
+            return f"-D{self.var}={joined}"
+        elif isinstance(value, (str, int)):
+            return f"-D{self.var}={str(value)}"
+        else:
+            return None
+
+
+class CMakeFlags:
+    name: Literal[
+        "FILE_SUFFIX",
+        "SB_CONF_FILE",
+        "CONF_FILE",
+        "DTC_OVERLAY_FILE",
+        "PM_STATIC_YML_FILE",
+        "EXTRA_CONF_FILE",
+        "EXTRA_DTC_OVERLAY_FILE",
+        "SHIELD",
+    ]
+
+
+DEFAULT_WEST_BUILD_CMD = ["build"]
 DEFAULT_TWISTER_FLAGS = ["--clobber-output", "-W", "-i"]
-flags_for_field_map: dict[str, str] = {
-    "board": "-b",
-    "app_dir": "-s",
-    "build_dir": "-d",
-    "conf_file": "--extra-conf",
-    "dtc_overlay": "--extra-dtc-overlay",
-    "snippets": "--snippet",
-    "shield": "--shield",
-    "cmake_args": "--",
+TARGET_BUILD_COMMANDS: set[str] = {
+    "flash",
+    "run",
+    "menuconfig",
+    "guiconfig",
+    "pahole",
+    "puncover",
+    "ram_report",
+    "rom_report",
+    "footprint",
+    "initlevels",
 }
 
-
-@attrs.define
-class CommonCfg:
-    board: str | None = None
-    app_dir: Path | None = None
-    conf_file: str | None = None
-    dtc_overlay: str | None = None
-    snippets: str | None = None
-    shield: str | None = None
-    cmake_args: list[str] | None = None
-
-
-@attrs.define
-class AppCfg(CommonCfg):
-    id: str | None = None
-
-
-@attrs.define
-class FileSpec:
-    common: CommonCfg = attrs.field(factory=CommonCfg)
-    apps: list[AppCfg] = attrs.field(factory=list)
-
-
-@attrs.define
-class ZephyrAppBuildArgs:
-    id: str
-    cwd: Path
-    app_dir: Path
-    board: str
-    conf_file: str | None = None
-    dtc_overlay: str | None = None
-    snippets: str | None = None
-    shield: str | None = None
-    cmake_args: list[str] | None = None
-
-    @classmethod
-    def from_cfg(cls, cfg: AppCfg, cwd: Path) -> Self:
-        if cfg.app_dir is None:
-            raise ValueError("app_dir is required (set in [common] or each [[apps]])")
-        if cfg.board is None:
-            raise ValueError("board is required (set in [common] or each [[apps]])")
-
-        app_id = cfg.id or f"{cfg.board[:5]}_{cfg.app_dir.name}"
-        return cls(
-            id=app_id,
-            cwd=cwd,
-            app_dir=cfg.app_dir,
-            board=cfg.board,
-            conf_file=cfg.conf_file,
-            dtc_overlay=cfg.dtc_overlay,
-            snippets=cfg.snippets,
-            shield=cfg.shield,
-            cmake_args=cfg.cmake_args,
+CMakeFlags = attrs.make_class(
+    "CMakeFlags",
+    {
+        flag_name: attrs.field(
+            default=None,
+            type=Optional[str],
+            converter=builder,
+            kw_only=True,
         )
+        for flag_name, builder in _CMakeFlags.items()
+    },
+)
+_WestFlags: dict[str, WestFlagBuilder] = {
+    "board": WestFlagBuilder("b"),
+    "app_dir": WestFlagBuilder("s"),
+    "build_dir": WestFlagBuilder("d"),
+    "snippets": WestFlagBuilder("S"),
+    "target": WestFlagBuilder("t"),
+    "domain": WestFlagBuilder("domain", long=True),
+    "extra_conf_file": WestFlagBuilder("extra-conf", long=True, repeatable=True),
+    "extra_dtc_overlay": WestFlagBuilder(
+        "extra-dtc-overlay", long=True, repeatable=True
+    ),
+    "shield": WestFlagBuilder("shield", long=True, repeatable=True),
+    "pristine": WestFlagBuilder("pristine", long=True),
+    "force": WestFlagBuilder("force", long=True, takes_value=False),
+    "cmake": WestFlagBuilder("cmake", long=True, takes_value=False),
+    "cmake_only": WestFlagBuilder("cmake-only", long=True, takes_value=False),
+    "sysbuild": WestFlagBuilder("sysbuild", long=True, takes_value=False),
+    "no_sysbuild": WestFlagBuilder("no-sysbuild", long=True, takes_value=False),
+    "dry_run": WestFlagBuilder("dry-run", long=True, takes_value=False),
+    "build_opt": WestFlagBuilder("build-opt", long=True, repeatable=True),
+    "test_item": WestFlagBuilder("test-item", long=True),
+}
+WestFlags = attrs.make_class(
+    "WestFlags",
+    {
+        flag_name: attrs.field(
+            default=None, type=Optional[list[str]], converter=builder, kw_only=True
+        )
+        for flag_name, builder in _WestFlags.items()
+    },
+)
 
-    @property
-    def build_dir(self) -> Path:
-        return self.app_dir / f"build_{self.id}"
+
+@attrs.frozen
+class AppCfg:
+    flags = attrs.field(type=WestFlags)
+    cmake = attrs.field(type=CMakeFlags)
+    cmake_vars: Mapping[str, CMakeVariableValueType] = attrs.field(factory=dict)
 
     @property
     def west_command(self) -> list[str]:
-        west_args: list[str] = list(DEFAULT_WEST_BUILD_CMD)
-        west_args.extend(["-d", str(self.build_dir.absolute())])
-        west_args.extend(["-s", str(self.app_dir.absolute())])
-
-        for field in ("board", "conf_file", "dtc_overlay", "snippets", "shield"):
-            if value := getattr(self, field):
-                west_args.extend([flags_for_field_map[field], value])
-
-        if self.cmake_args:
-            west_args.extend(["--", *self.cmake_args])
-        return west_args
+        west_cmd: list[str] = [
+            "build",
+            *self.flags.values(),
+            *self.west_extra_args,
+            "--",
+            *self.cmake.values(),
+        ]
+        return west_cmd
 
 
-def _make_file_spec(text: str, spec_dir: Path) -> FileSpec:
-    converter = TomlkitConverter()
-
-    @converter.register_structure_hook
-    def resolve_path(val, _) -> Path:
-        # Accept tomlkit nodes, strings, or Paths and make them absolute against spec_dir.
-        p = val if isinstance(val, Path) else Path(str(val))
-        return p if p.is_absolute() else (spec_dir / p).resolve()
-
-    file_spec = converter.loads(text, FileSpec)
-
-    return file_spec
+# def from_toml(apps: dict[str, Any]) -> AppCfg:
+#     return cattrs.structure_attrs_fromdict(
 
 
-@overload
-def load_spec(
-    *,
-    file: Path,
-    text: None = ...,
-    spec_dir: None = ...,
-) -> tuple[list[ZephyrAppBuildArgs], Path]: ...
-
-
-@overload
-def load_spec(
-    *,
-    file: None = ...,
-    text: str,
-    spec_dir: Path,
-) -> tuple[list[ZephyrAppBuildArgs], Path]: ...
-
-
-def load_spec(
-    *,
-    file: Path | None = None,
-    text: str | None = None,
-    spec_dir: Path | None = None,
-) -> tuple[list[ZephyrAppBuildArgs], Path]:
-    if text and spec_dir:
-        logger.info(f"Got text{text} and spec_dir{spec_dir}")  # noqa: G004
-    elif file:
-        spec_dir = file.parent
-        text = file.read_text()
-    else:
-        raise ValueError
-
-    file_spec = _make_file_spec(text, spec_dir)
-    cmake_args: list[str] = file_spec.common.cmake_args or []
-    common_dict = attrs.asdict(
-        file_spec.common,
-        recurse=False,
-        filter=attrs.filters.exclude(list),
-    )
-    merged_apps: list[ZephyrAppBuildArgs] = []
-
-    def app_dict_serializer(inst: type, field: attr.Attribute, value: Any) -> Any:
-        match value:
-            case [*args] if cmake_args:
-                return [*cmake_args, *args]
-            case Path() as path if field.name == "app_dir":
-                return spec_dir / path
-            case None if val := common_dict.get(field.name):
-                return val
-            case _:
-                return value
-
-    for raw_app in file_spec.apps:
-        merged = attrs.asdict(
-            raw_app,
-            value_serializer=app_dict_serializer,
-        )
-        # breakpoint()
-
-        merged_cfg = cattrs.global_converter.structure_attrs_fromdict(merged, AppCfg)
-        merged_apps.append(ZephyrAppBuildArgs.from_cfg(merged_cfg, spec_dir))
-
-    return merged_apps, spec_dir
-
-
-@attrs.define
-class WestSpec:
-    apps: list[ZephyrAppBuildArgs]
-    cwd: Path
+@attrs.frozen
+class Config:
+    base: AppCfg = attrs.field()
+    apps: dict[str, AppCfg] = attrs.field(factory=dict)
+    # zephyr_base: Path
+    # cwd: Path
 
 
 async def run_west_cmd(
@@ -342,231 +334,286 @@ Running:
             sys.exit(1)
 
 
-app = cyclopts.App()
+# async def run_build(
+#     app: AppCfg,
+#     cwd: Path,
+#     zephyr_base: Path | None = None,
+#     target: str | None = None,
+# ) -> None:
+#     if target:
+#         build_flags_override: dict[str, Any] = {"pristine": "never", "target": target}
+#         sysbuild_setting = (app.flags or {}).get("sysbuild")
+#         if sysbuild_setting is not False:
+#             domain = (app.flags or {}).get("domain")
+#             if not domain:
+#                 domain = app.app_dir.name
+#             build_flags_override["domain"] = domain
+#     else:
+#         west_args = app.west_command
+#     await run_west_cmd(west_args, cwd, zephyr_base)
+#
+#
+# async def run_test(
+#     app: AppCfg,
+#     twister_extra_args: list[str],
+#     cwd: Path,
+#     zephyr_base: Path | None = None,
+# ) -> None:
+#     west_args = [
+#         "twister",
+#         "-T",
+#         str(app.app_dir),
+#         "-p",
+#         app.board,
+#         *DEFAULT_TWISTER_FLAGS,
+#     ]
+#     if twister_extra_args:
+#         west_args.extend(twister_extra_args)
+#
+#     await run_west_cmd(west_args, cwd, zephyr_base)
 
 
-@attrs.frozen(kw_only=True)
-class OptionalPathValidator(cyclopts.validators.Path):
-    @override
-    def __call__(self, type_: Any, path: Any) -> Any:
-        if isinstance(type_, Path | None):
-            if path is None:
-                return None
-
-            return super().__call__(Path, cast("Path", path))
-
-        return super().__call__(type_, path)
-
-
-def complicated(
-    value: int | str | None,
-    self: AttrsInstance,
-) -> ZephyrAppBuildArgs | None:
-    build = cast("Common", self)
-    spec = build.spec
-    app: ZephyrAppBuildArgs | None = None
-    match value:
-        case int(x) if len(spec.apps) > x:
-            app = spec.apps[x]
-        case str(app_name):
-            app = next((app for app in spec.apps if app.id == app_name), None)
-            if not app:
-                app = next(
-                    (app for app in spec.apps if app.id.startswith(app_name)),
-                    None,
-                )
-        case _:
-            return None
-
-    if not app:
-        return None
-
-    return app
-
-
-@cyclopts.Parameter(name="*")
-@attrs.define
-class Common:
-    spec_file: Annotated[
-        Path,
-        cyclopts.Parameter(validator=cyclopts.validators.Path(exists=True)),
-    ]
-    """Specification file for running west commands"""
-    verbose: Annotated[bool, cyclopts.Parameter(negative="")] = attrs.field(
-        kw_only=True,
-        default=False,
-    )
-    """Enable verbose logging"""
-    test: Annotated[bool, cyclopts.Parameter(negative="")] = attrs.field(
-        kw_only=True,
-        default=False,
-    )
-    """Enable test mode"""
-    cwd: Annotated[
-        Path | None,
-        cyclopts.Parameter(validator=OptionalPathValidator(exists=True)),
-    ] = None
-    """Current working directory to run the west commands on"""
-    zephyr_base: Annotated[
-        Path | None,
-        cyclopts.Parameter(validator=OptionalPathValidator(exists=True)),
-    ] = None
-    """ Zephyr Base environment variable pointing to the zephyr project in use"""
-    dotenv: Annotated[
-        Path | None,
-        cyclopts.Parameter(validator=OptionalPathValidator(exists=True)),
-    ] = None
-    """.env file to load environment variables"""
-    single_app: ZephyrAppBuildArgs | None = attrs.field(
-        kw_only=True,
-        converter=attrs.Converter(
-            complicated,
-            takes_self=True,
-        ),
-        default=None,
-    )
-    """Single app to complete the action on."""
-
-    @cached_property
-    def spec(self) -> WestSpec:
-        if not self.spec_file.exists():
-            raise cyclopts.ValidationError("Spec file path doesnt exist")
-        return WestSpec(*load_spec(file=self.spec_file))
-
-    def __attrs_post_init__(self):
-        if dotenv := self.dotenv:
-            if dotenv.exists():
-                load_dotenv(dotenv)
-            else:
-                msg = f".env file not found at {dotenv}"
-                raise FileNotFoundError(msg)
-
-        log_level = logging.DEBUG if self.verbose else logging.INFO
-        logging.basicConfig(
-            level=log_level,
-            format=FORMAT,
-            datefmt="[%X]",
-            # handlers=[log_handler],
+async def symlink_compdb(app: AppCfg) -> None:
+    async for file in anyio.Path(app.build_dir / app.app_dir.stem).glob(
+        "compile_commands.json",
+    ):
+        compile_commands = anyio.Path(
+            app.app_dir / "compile_commands.json",
         )
+        try:
+            logger.info(
+                "unlinking first in case compile_commands.json is present at %s",
+                compile_commands,
+            )
+            await compile_commands.unlink(missing_ok=True)
+
+            logger.info(
+                "symlinking compile_commands.json, to %s from %s",
+                compile_commands,
+                file,
+            )
+            await compile_commands.symlink_to(file)
+
+        except FileExistsError as e:
+            logger.info("compile_commands.json alredy symlinked")
+            raise StopAsyncIteration from e
 
 
-async def run_build(
-    app: ZephyrAppBuildArgs,
-    west_extra_args: list[str],
-    cwd: Path,
-    zephyr_base: Path | None = None,
-) -> None:
-    west_args = app.west_command
-    if west_extra_args:
-        west_args.extend(west_extra_args)
-    await run_west_cmd(west_args, cwd, zephyr_base)
+def find_build_toml():
+
+    p: Path | None = next(Path(Path.cwd()).glob("build.toml"))
+    if not p:
+        raise FileNotFoundError
+    return p.read_text() if p else Path.cwd()
 
 
-async def run_test(
-    app: ZephyrAppBuildArgs,
-    twister_extra_args: list[str],
-    cwd: Path,
-    zephyr_base: Path | None = None,
-) -> None:
-    west_args = [
-        "twister",
-        "-T",
-        str(app.app_dir),
-        "-p",
-        app.board,
-        *DEFAULT_TWISTER_FLAGS,
-    ]
-    if twister_extra_args:
-        west_args.extend(twister_extra_args)
-
-    await run_west_cmd(west_args, cwd, zephyr_base)
+# SPEC_ENV_VAR = "WEST_BUILD_SPEC"
+# SPEC_DEFAULT_NAME = "build.toml"
+#
+#
+# @attrs.define
+# class EnvVars
+#     names: list[str] = attrs.field(factory=list)
+#
+#     def _prefix(self, commands: tuple[str, ...]) -> str:
+#         prefix = self.prefix
+#         if self.command and commands:
+#             prefix += "_".join(x.upper() for x in commands) + "_"
+#
+#         return prefix
+#
+#     def __call__(
+#         self,
+#         app: cyclopts.App,
+#         commands: tuple[str, ...],
+#         arguments: ArgumentCollection,
+#     ):
+#         added_tokens = set()
+#
+#         candidate_env_keys = {
+#             name: val for name, val in os.environ.items() if name in self.names
+#         }
+#         candidate_env_keys.sort()
+#         delimiter = "_"
+#         for candidate_env_key in candidate_env_keys:
+#             try:
+#                 argument, remaining_keys, _ = arguments.match(
+#                     candidate_env_key,
+#                     delimiter=delimiter,
+#                 )
+#             except ValueError:
+#                 continue
+#             if set(argument.tokens) - added_tokens:
+#                 # Skip if there are any tokens from another source.
+#                 continue
+#
+#             # There's inherently an ambiguity because we use "_" as the key-delimiter.
+#             # However, we can somewhat resolve this ambiguity by checking if the argument
+#             # accepts subkeys. If there are no children arguments, then just re-combine the
+#             # remaining_keys.
+#             if not argument.children and remaining_keys:
+#                 remaining_keys = (delimiter.join(remaining_keys),)
+#
+#             remaining_keys = tuple(x.lower() for x in remaining_keys)
+#             for i, value in enumerate(
+#                 argument.env_var_split(os.environ[candidate_env_key])
+#             ):
+#                 token = cyclopts.Token(
+#                     keyword=candidate_env_key,
+#                     value=value,
+#                     source=self.source,
+#                     index=i,
+#                     keys=remaining_keys,
+#                 )
+#                 argument.append(token)
+#                 added_tokens.add(token)
+#
+#
+app = cyclopts.App()
+#     name="west-toml-build",
+#     config=[
+#         EnvVars(["ZEPHYR_BASE", "WEST_TOPDIR"]),
+#         cyclopts.config.Toml(
+#             "build.toml",  # Name of the TOML File
+#             root_keys=[
+#                 "apps",
+#             ],  # The project's namespace in the TOML.
+#             # If "pyproject.toml" is not found in the current directory,
+#             # then iteratively search parenting directories until found.
+#             search_parents=True,
+#             use_commands_as_keys=False,
+#         ),
+#     ],
+# )
 
 
 @app.command
-async def build(common: Common, target: str | None = None) -> None:
-    west_extra_args = []
-
-    if common.test:
-        west_extra_args.append("--dry-run")
-    if target:
-        west_extra_args.extend(["-t", target])
-    cwd: Path = common.cwd or common.spec.cwd
-    if app := common.single_app:
-        await run_build(app, west_extra_args, cwd, common.zephyr_base)
-    else:
-        for app in common.spec.apps:
-            await run_build(app, west_extra_args, cwd, common.zephyr_base)
-            async for file in anyio.Path(app.build_dir / app.app_dir.stem).glob(
-                "compile_commands.json",
-            ):
-                compile_commands = anyio.Path(
-                    app.app_dir / "compile_commands.json",
-                )
-                try:
-                    logger.info(
-                        "unlinking first in case compile_commands.json is present at %s",
-                        compile_commands,
-                    )
-                    await compile_commands.unlink(missing_ok=True)
-
-                    logger.info(
-                        "symlinking compile_commands.json, to %s from %s",
-                        compile_commands,
-                        file,
-                    )
-                    await compile_commands.symlink_to(file)
-
-                except FileExistsError as e:
-                    logger.info("compile_commands.json alredy symlinked")
-                    raise StopAsyncIteration from e
-
-
-@app.command
-async def test(common: Common) -> None:
-    """Run twister for each app in the spec (or a single app if selected)."""
-    twister_extra_args: list[str] = []
-    if common.verbose:
-        twister_extra_args.append("-v")
-
-    cwd: Path = common.cwd or common.spec.cwd
-    if app := common.single_app:
-        await run_test(app, twister_extra_args, cwd, common.zephyr_base)
-    else:
-        for app in common.spec.apps:
-            await run_test(app, twister_extra_args, cwd, common.zephyr_base)
-
-
-@app.command
-async def flash(
-    common: Common,
+async def build(
     *,
-    clean: Annotated[bool, cyclopts.Parameter(negative="")] = False,
+    app: Annotated[AppCfg, cyclopts.Parameter(parse=False)],
+    cwd: Annotated[Path | None, cyclopts.Parameter(parse=False)] = None,
+    zephyr_base: Annotated[Path | None, cyclopts.Parameter(parse=False)] = None,
+    target: Annotated[str, cyclopts.Parameter(parse=False)] = "",
+    dry_run: bool = False,
 ) -> None:
-    spec = common.spec
-    app = spec.apps[0]
-    if single_app := common.single_app:
-        app = single_app
+    """Build apps from the spec or run a supported build target with -t.
 
-    if not app.build_dir.exists() or clean:
-        build_cmd = app.west_command
-        await run_west_cmd(build_cmd, spec.cwd, common.zephyr_base)
-        if not app.build_dir.exists():
-            msg = f"{app.build_dir} not found. app build dir couldn't be found after executing the build. "
-            raise cyclopts.ValidationError(msg)
-
-    await run_west_cmd(
-        ["flash", "-d", str(app.build_dir)],
-        spec.cwd,
-        common.zephyr_base,
-    )
+    Supported targets: menuconfig, guiconfig, pahole, puncover, ram_report,
+    rom_report, footprint, initlevels, flash, run.
+    """
+    if dry_run:
+        app.west_extra_args.append("--dry-run")
+    pprint(app.west_command)
+    # await run_west_cmd(app.west_command, cwd, zephyr_base)
+    # apps = [a for a in spec.apps if app_id == app.id] if app_id else spec.apps
+    # for idx, app in enumerate(apps):
+    # await run_build(app, cwd or Path.cwd(), zephyr_base, target=target)
+    # Only symlink_compdb for the first app
+    # if idx == 0:
+    # await symlink_compdb(app)
 
 
-@app.command
-def demo():
-    """Print resolved west build commands using the embedded EXAMPLE_TOML."""
-    apps, _spec_dir = load_spec(text=EXAMPLE_TOML, spec_dir=Path.cwd())
-    for _app in apps:
-        pprint(_app)
+#
+# @app.command
+# async def test(spec: BuildConfig) -> None:
+#     """Run twister for each app in the spec (or a single app if selected)."""
+#     twister_extra_args: list[str] = []
+#     if common.verbose:
+#         twister_extra_args.append("-v")
+#
+#     cwd: Path = common.cwd or common.spec.cwd
+#     if app := common.single_app:
+#         await run_test(app, twister_extra_args, cwd, common.zephyr_base)
+#     else:
+#         for app in common.spec.apps:
+#             await run_test(app, twister_extra_args, cwd, common.zephyr_base)
+
+
+# @app.command
+# async def config(
+#     spec: BuildConfig,
+#     app_id: str,
+#     *,
+#     gui: Annotated[bool, cyclopts.Parameter(negative="")] = False,
+# ) -> None:
+#     """Run Kconfig UI. Defaults to menuconfig, or guiconfig with --gui."""
+#     target = "guiconfig" if gui else "menuconfig"
+#     app: AppCfg = next((a for a in spec.apps if app_id == a.id), None)
+#     await run_build(
+#         app,
+#         [],
+#         app.cwd,
+#         app.zephyr_base,
+#         target=target,
+#         is_target_build=True,
+#         ignore_spec_flags=True,
+#     )
+
+
+# @app.command
+# async def analyze_mem(
+#     spec: BuildConfig,
+#     app_id: str,
+#     *,
+#     pahole: Annotated[bool, cyclopts.Parameter(negative="")] = False,
+#     puncover: Annotated[bool, cyclopts.Parameter(negative="")] = False,
+#     ram_report: Annotated[bool, cyclopts.Parameter(negative="")] = False,
+#     rom_report: Annotated[bool, cyclopts.Parameter(negative="")] = False,
+#     footprint: Annotated[bool, cyclopts.Parameter(negative="")] = False,
+# ) -> None:
+#     """Analyze memory usage. Defaults to footprint unless a flag is selected."""
+#     selected = [
+#         name
+#         for name, enabled in (
+#             ("pahole", pahole),
+#             ("puncover", puncover),
+#             ("ram_report", ram_report),
+#             ("rom_report", rom_report),
+#             ("footprint", footprint),
+#         )
+#         if enabled
+#     ]
+#     target = selected[0] if selected else "footprint"
+#     app: AppCfg = next((a for a in spec.apps if app_id == a.id), None)
+#     await run_build(
+#         app,
+#         [],
+#         app.cwd,
+#         app.zephyr_base,
+#         target=target,
+#         is_target_build=True,
+#         ignore_spec_flags=True,
+#     )
+#
+#
+# @app.command
+# async def analyze_init(spec: BuildConfig, app_id: str) -> None:
+#     """Display initialization sequence (initlevels target)."""
+#     app: AppCfg = next((a for a in spec.apps if app_id == a.id), None)
+#     await run_build(
+#         app,
+#         [],
+#         app.cwd,
+#         app.zephyr_base,
+#         target="initlevels",
+#         is_target_build=True,
+#         ignore_spec_flags=True,
+#     )
+#
+#
+# @app.command
+# async def run(spec: BuildConfig, app_id: str) -> None:
+#     """Run the app on the target hardware (currently uses flash)."""
+#     app: AppCfg = next((a for a in spec.apps if app_id == a.id), None)
+#     await run_build(
+#         app,
+#         [],
+#         app.cwd,
+#         app.zephyr_base,
+#         target="flash",
+#         is_target_build=True,
+#         ignore_spec_flags=True,
+# )
 
 
 @app.command
@@ -579,5 +626,49 @@ async def main_loop():
     await app.run_async()
 
 
+@app.meta.default
+def launcher(
+    *tokens: Annotated[str, cyclopts.Parameter(show=False, allow_leading_hyphen=True)],
+    verbose: bool = False,
+):
+    additional_kwargs = {}
+    command, bound, _ = app.parse_args(tokens)
+    # "ignored" is a dict mapping python-variable-name to it's type annotation for parameters with "parse=False".
+    # toml: dict[str, Any] = cyclopts.config.Toml("build.toml")
+    toml = find_build_toml()
+
+    load_dotenv()
+
+    log_level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(
+        level=log_level,
+        format=FORMAT,
+        datefmt="[%X]",
+        # handlers=[log_handler],
+    )
+    logger.info(f"Toml: f{toml}")
+    # if appflags := cattrs.structure_attrs_fromdict(tomllib.loads(toml), AppCfg):
+    cfg_converter: TomlkitConverter = make_converter()
+
+    # cfg_converter.register_structure_hook_factory(
+    #     attrs.has,
+    #     lambda cl: cattrs.gen.make_dict_structure_fn(
+    #         cl, cfg_converter, _cattrs_forbid_extra_keys=True
+    #     ),
+    # )
+    cfg_converter.register_structure_hook(
+        AppCfg,
+        make_dict_structure_fn(AppCfg, cfg_converter, cmake_vars=override(omit=True)),
+    )
+    cfg = cfg_converter.loads(toml, Config)
+    logger.info(f"Running command: f{command}, {cfg}")
+
+    def launch():
+        # app.run_async(["build"], backend="asyncio")
+        anyio.run(partial(build, app=cfg), backend="asyncio")
+
+    return launch
+
+
 if __name__ == "__main__":
-    anyio.run(partial(main_loop), backend="asyncio")
+    app.meta()

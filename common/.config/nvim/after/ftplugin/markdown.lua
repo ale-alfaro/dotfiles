@@ -19,11 +19,8 @@
 -- vim.cmd 'setlocal spell wrap'
 
 -- Fold with tree-sitter
-vim.cmd 'setlocal foldmethod=expr foldexpr=v:lua.vim.treesitter.foldexpr() foldlevelstart=4'
-vim.cmd 'setlocal nowrap'
-
--- Disable built-in `gO` mapping in favor of 'mini.basics'
-vim.keymap.del('n', 'gO', { buffer = 0 })
+-- vim.cmd 'setlocal foldmethod=expr foldexpr=v:lua.vim.treesitter.foldexpr() foldlevelstart=4'
+-- vim.cmd 'setlocal nowrap'
 
 -- Set markdown-specific surrounding in 'mini.surround'
 vim.b.minisurround_config = {
@@ -45,8 +42,8 @@ vim.b.minisurround_config = {
     },
   },
 }
-local obsidian_dir = vim.fs.root(0, { '.obsidian' })
-local obsidian_home = vim.fn.expand '$OBSIDIAN_HOME' or 'w+/Obsidian/'
-if obsidian_dir or vim.fn.getcwd():match(obsidian_home) then
-  require 'plugin.obsidian'
+
+local ok, _ = pcall(require, 'plugin.markdown')
+if not ok then
+  VimRc.error "Couldn't load render-markdown.nvim plugin"
 end

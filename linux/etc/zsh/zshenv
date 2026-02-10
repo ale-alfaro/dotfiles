@@ -70,6 +70,6 @@ export FZF_ALT_C_OPTS="
 export GOROOT="/usr/local/go"
 export GOPATH="$HOME/go"
 export JUST_HOME="$XDG_CONFIG_HOME/just"
-
+export EMBEDDER_BIN="/home/alealfaro/.embedder"
 # PATH
-export PATH="$GOROOT/bin:$GOPATH/bin:$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+export PATH="$GOROOT/bin:$GOPATH/bin:$HOME/.local/bin:$HOME/.cargo/bin:$PATH:$EMBEDDER_BIN/bin"

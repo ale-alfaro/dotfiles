@@ -72,8 +72,71 @@ end
 H.full_path = function(path)
   return (vim.fn.fnamemodify(path, ':p'):gsub('(.)/$', '%1'))
 end
-H.normalize_path = function(path)
-  return path
+---@return string[]
+H.get_workspace_files = function()
+  local workspace_files = {}
+  local folders = vim.lsp.buf.list_workspace_folders()
+  if #folders > 0 and vim.uv.fs_stat(folders[0]) then
+    local workspace_root = folders[0]
+    if vim.uv.fs_stat(workspace_root .. '/.git') then
+      workspace_files = vim.fn.split(vim.fn.system('git ls-files ' .. workspace_root), '\n')
+    else
+      VimRc.warn "Workspace is not a git repo. Cant' get files"
+    end
+  else
+    local gitPath = vim.fn.systemlist('git rev-parse --show-toplevel')[1]
+    workspace_files = vim.fn.split(vim.fn.system('git ls-files ' .. gitPath), '\n')
+  end
+
+  workspace_files = vim.tbl_filter(function(path)
+    return vim.fn.filereadable(path) == 1
+  end, workspace_files)
+
+  workspace_files = vim.tbl_map(function(path)
+    return vim.fn.fnamemodify(path, ':p')
+  end, workspace_files)
+  return workspace_files
+end
+
+local function _detect_filetype(path)
+  local filetype = vim.filetype.match { filename = path }
+
+  -- vim.filetype.match is not guaranteed to work on filename alone (see https://github.com/neovim/neovim/issues/27265)
+  if not filetype then
+    for _, buf in ipairs(vim.fn.getbufinfo()) do
+      if vim.fn.fnamemodify(buf.name, ':p') == path then
+        return vim.filetype.match { buf = buf.bufnr }
+      end
+    end
+
+    local bufn = vim.fn.bufadd(path)
+    vim.fn.bufload(bufn)
+
+    filetype = vim.filetype.match { buf = bufn }
+
+    vim.api.nvim_buf_delete(bufn, { force = true })
+  end
+
+  return filetype
+end
+
+local _detected_filetypes = {}
+local _dont_cache_these_extensions = { 'conf' }
+H.get_filetype = function(path)
+  local ext = vim.fn.fnamemodify(path, ':e')
+
+  if rawget(_detected_filetypes, ext) ~= nil then
+    return _detected_filetypes[ext]
+  end
+
+  local filetype = _detect_filetype(path)
+
+  -- some file types share the same extension (see https://github.com/artemave/workspace-diagnostics.nvim/issues/3)
+  -- so we never want to cache detection results for those ones.
+  if not vim.tbl_contains(_dont_cache_these_extensions, ext) then
+    _detected_filetypes[ext] = filetype or false
+  end
+  return filetype
 end
 
 H.short_path = function(path, cwd)

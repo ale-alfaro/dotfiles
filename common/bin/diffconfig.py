@@ -22,9 +22,13 @@ from __future__ import annotations
 
 import os
 import re
+import subprocess
+import sys
 from contextlib import nullcontext
 from dataclasses import dataclass
+from functools import cached_property
 from pathlib import Path
+from shlex import shlex
 from typing import TYPE_CHECKING, Annotated
 
 import cyclopts
@@ -35,11 +39,61 @@ from rich.text import Text
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+zephyr_base = os.environ.get("ZEPHYR_BASE", Path.cwd())
+sys.path.insert(0, str(Path(zephyr_base) / "scripts" / "west_commands"))
+
+try:
+    from build_helpers import find_build_dir as zephyr_build_dir
+
+except ImportError:
+    print("Couldn't find the Zephyr build helpers. Is ZEPHYR_BASE set?")
+    sys.exit(1)
 ConfigMap = dict[str, str]
 
 console = Console()
 error_console = Console(stderr=True, style="bold red")
 app = cyclopts.App()
+
+
+@cyclopts.Parameter(name="*")
+@dataclass
+class ZephyrApp:
+    path: Path
+
+    @cached_property
+    def build_dir(self) -> Path | None:
+        if build_dir := zephyr_build_dir(self.path, guess=True):
+            return Path(build_dir)
+        return None
+
+    @cached_property
+    def domains(self) -> list[str] | None:
+        if build_dir := self.build_dir:
+            domains_yaml = build_dir / "domains.yaml"
+            if domains_yaml.is_file():
+                domains: subprocess.CompletedProcess = subprocess.run(
+                    shlex.split(f"yq e '.domains[].name' {domains_yaml} -r"),
+                    check=True,
+                    capture_output=True,
+                    encoding="utf-8",
+                )
+                # We should get two lines with the names of the two domains
+                return domains.stdout.splitlines()
+        # if domains := zephyr_load_domains(self.build_dir):
+        #     return domains
+        raise NotADirectoryError
+
+    @cached_property
+    def artifacts_dirs(self) -> dict[str, Path]:
+        if (build_dir := self.build_dir) and (domains := self.domains):
+            return dict(
+                filter(
+                    lambda _, p: p.is_dir(),
+                    ((domain, Path(build_dir, domain, "zephyr")) for domain in domains),
+                )
+            )
+
+        raise NotADirectoryError
 
 
 def resolve_base_dir(kbuild_output: Path | None) -> Path:
@@ -95,34 +149,6 @@ def resolve_from_domains(build_dir: Path) -> tuple[Path, Path]:
 
     config_base = domain_build_dir / "zephyr"
     return config_base / ".config.old", config_base / ".config"
-
-
-def resolve_paths(
-    prev: Path | None,
-    curr: Path | None,
-    kbuild_output: Path | None,
-    build_dir: Path | None,
-) -> tuple[Path, Path]:
-    """Determine which files to compare, honoring defaults and env vars."""
-    if build_dir and (prev or curr):
-        msg = "Provide explicit config paths or --build-dir, not both"
-        raise cyclopts.ValidationError(msg)
-
-    if build_dir:
-        return resolve_from_domains(build_dir)
-
-    if (prev is None) != (curr is None):
-        msg = "Provide both config paths or omit both to use .config.old and .config"
-        raise cyclopts.ValidationError(msg)
-
-    if prev is None and curr is None:
-        base_dir = resolve_base_dir(kbuild_output)
-        return base_dir / ".config.old", base_dir / ".config"
-
-    # At this point both are not None because the XOR check above passed.
-    assert prev is not None
-    assert curr is not None
-    return prev.expanduser(), curr.expanduser()
 
 
 def read_config(path: Path) -> ConfigMap:
@@ -222,11 +248,7 @@ def render_config(
             error_console.print(f"Invalid regex for --find: {exc}")
             raise SystemExit(1)
 
-        match_rows = {
-            idx
-            for idx, line in enumerate(lines)
-            if pattern.search(line)
-        }
+        match_rows = {idx for idx, line in enumerate(lines) if pattern.search(line)}
         if not match_rows:
             error_console.print(f"No matches for pattern: {find!r}")
             raise SystemExit(1)
@@ -257,18 +279,17 @@ def render_config(
 
 @app.command
 def cmp(
-    prev: Annotated[
-        Path | None,
+    app_dir: Annotated[
+        ZephyrApp,
+        cyclopts.Parameter(
+            help="Build directory containing domains.yaml to derive config paths",
+        ),
+    ],
+    prev_and_curr: Annotated[
+        tuple[Path, Path] | None,
         cyclopts.Parameter(
             name="prev",
             help="Baseline .config file (defaults to .config.old when omitted)",
-        ),
-    ] = None,
-    curr: Annotated[
-        Path | None,
-        cyclopts.Parameter(
-            name="curr",
-            help="Updated .config file (defaults to .config when omitted)",
         ),
     ] = None,
     *,
@@ -280,37 +301,20 @@ def cmp(
             help="Emit output in merge style (only new config lines)",
         ),
     ] = False,
-    kbuild_output: Annotated[
-        Path | None,
-        cyclopts.Parameter(
-            ["-o", "--kbuild-output"],
-            help="Directory to use when resolving default config paths",
-        ),
-    ] = None,
-    build_dir: Annotated[
-        Path | None,
-        cyclopts.Parameter(
-            ["-b", "--build-dir"],
-            help="Build directory containing domains.yaml to derive config paths",
-        ),
-    ] = None,
 ) -> None:
     """Compare .config files and show sorted differences."""
-    prev_path, curr_path = resolve_paths(prev, curr, kbuild_output, build_dir)
-
-    missing = [path for path in (prev_path, curr_path) if not path.exists()]
-    if missing:
-        for path in missing:
-            error_console.print(f"Config file not found: {path}")
-        raise SystemExit(1)
-
-    try:
-        prev_config = read_config(prev_path)
-        curr_config = read_config(curr_path)
-    except OSError as exc:
-        error_console.print(f"Error opening config files: {exc}")
-        raise SystemExit(1)
-
+    if not prev_and_curr:
+        artifacts_dir: dict[str, Path] = app_dir.artifacts_dirs
+        if not artifacts_dir:
+            error_console.print(f"Config file not found: {app_dir.path}")
+            raise SystemExit(1)
+        if app_artifacts_path := artifacts_dir.get(app_dir.path.stem):
+            prev_path = app_artifacts_path / ".config.old"
+            curr_path = app_artifacts_path / ".config"
+            prev_config = read_config(prev_path)
+            curr_config = read_config(curr_path)
+    else:
+        prev_config, curr_config = prev_and_curr
     diff = diff_configs(prev_config, curr_config)
     print_diff(diff, merge=merge)
 

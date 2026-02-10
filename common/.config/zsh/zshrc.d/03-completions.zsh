@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
 # Set Up Completion
 #   Amazing Article going over the Zsh completion system https://thevaluable.dev/zsh-completion-guide-examples/
 #   To see the zsh completion help either call _complete_help in the shell or use CTRL+X h
@@ -47,16 +47,13 @@
 
 # Complete the alias when _expand_alias is used as a function
 
-
 fpath=($fpath "$ZDOTDIR/completions/src" "$XDG_DATA_HOME/zsh/generated_man_completions" "$XDG_STATE_HOME/zsh/plugins/zsh-users/zsh-completions/src")
 cache_directory="$XDG_CACHE_HOME/zsh"
 autoload -Uz compinit && compinit -d $cache_directory
 
+zstyle ':completion:*' completer _complete _extensions _approximate _history
 
-
-zstyle ':completion:*' completer _extensions _complete _approximate _history
-
-zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+# zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 ## Auto complete with case insenstivity and allowing some characters to be
 #forgotten at the start like a .
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
@@ -67,13 +64,11 @@ zstyle ':completion:*:options' description 'yes'
 zstyle ':completion:*' group-name ''
 zstyle ':completion:*' verbose yes
 
-
 # Only display some tags for the command cd
-# zstyle ':completion:*:*:(z|cd|zd):*' tag-order local-directories directory-stack path-directories
+zstyle ':completion:*:*:(z|cd|zd):*' tag-order local-directories directory-stack path-directories
 # zstyle ':completion:*:*:nvim:*' file-patterns '%p:globbed-files' '*(-/):directories' '*:all-files'
 ## Use cache
 # Complete the alias when _expand_alias is used as a function
-
 
 #Select in a menu
 
@@ -85,7 +80,6 @@ zstyle ':completion:*' verbose yes
 # force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
 zstyle ':completion:*' menu select # can be no
 
-
 zstyle -d ':completion:*' format
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*:corrections' format '%d (errors: %e) %f'
@@ -95,36 +89,3 @@ zstyle ':completion:*:default' list-prompt '%S%M matches%s'
 # zstyle ':completion:*:*:*:*:descriptions' format '%F{blue}-- %D %d --%f'
 # zstyle ':completion:*:*:*:*:messages' format ' %F{purple} -- %d --%f'
 # zstyle ':completion:*:*:*:*:warnings' format ' %F{red}-- no matches found --%f'
-
-
-
-
-source <(fzf --zsh)
-plugins=(
-  Aloxaf/fzf-tab
-)
-__init_plugins "${plugins[@]}"
-
-# fzf-tab
-# preview directory's content with eza when completing cd
-# Fix colors for light terminal screens
-zstyle ':fzf-tab:complete:(v|n|nvim):*' fzf-preview '[[ -d $realpath ]] && eza --tree --color=always $realpath | head -200 || bat -n --color=always --line-range :500 $realpath'
-zstyle ':fzf-tab:complete:(z|cd|zd):*' fzf-preview 'eza --tree --color=always $realpath | head -200'
-# zstyle ':fzf-tab:complete:(z|cd|zd):*' fzf-preview 'eza --icons=always --oneline --no-git --all $realpath'
-# To make fzf-tab follow FZF_DEFAULT_OPTS.
-# NOTE: This may lead to unexpected behavior since some flags break this plugin. See Aloxaf/fzf-tab#455.
-zstyle ':fzf-tab:*' use-fzf-default-opts yes
-
-# Enable multi select in tab completions using tab and shift tab
-zstyle ':fzf-tab:complete:*' fzf-bindings 'tab:toggle+down,shift-tab:toggle+up'
-
-# switch group using `<` and `>`
-zstyle ':fzf-tab:*' switch-group ',' '.'
-
-# Do continious completion for traversing paths with ` key
-zstyle ':fzf-tab:*' continuous-trigger '`'
-export LISTMAX=-1
-# force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
-# source "$ZDOTDIR/completions/fzf.zsh"
-bd_zsh="$ZDOTDIR/shell_integrations/bd.zsh"
-[[ -f "$bd_zsh" ]] && source "$bd_zsh"

@@ -7,10 +7,9 @@ stow_sim_msg := stow_no_sim || f'{{style("warning")}}Ran restow simulation succe
 stow_sim_flag := if stow_no_sim != '' { '' } else { '--simulate' }
 verbose_lvl := "2"
 
-@sstow target_dir pkg pkg_dir='.':
-    {{ if path_exists(absolute_path(pkg_dir)) != 'true' { error('Package dir doesnt exist: {{pkg_dir}') } else if path_exists(absolute_path(pkg_dir) / pkg) != 'true' { error('Package: {{pkg}} doesnt exist in {{pkg_dir}') } else { '' } }}
-    stow -d {{ absolute_path(pkg_dir) }} -t {{ absolute_path(target_dir) }} {{ f"--verbose={{verbose_lvl}} {{stow_sim_flag}} " }} -S {{ pkg }}
-    echo '{{ stow_sim_msg || f"✅ Stowed {{pkg}} in {{pkg_dir}} on target dir {{target_dir}}" }}'
+@sstow pkg_dir target_dir pkgs:
+    stow -d {{ absolute_path(pkg_dir) }} -t {{ absolute_path(target_dir) }} {{ f"--verbose={{verbose_lvl}} {{stow_sim_flag}} " }} -S {{ pkgs }}
+    echo '{{ stow_sim_msg || f"✅ Restowed {{pkgs}} in {{pkg_dir}} on target dir {{target_dir}}" }}'
 
 @restow pkg_dir target_dir pkgs:
     stow -d {{ absolute_path(pkg_dir) }} -t {{ absolute_path(target_dir) }} {{ f"--verbose={{verbose_lvl}} {{stow_sim_flag}} " }} -R {{ pkgs }}
@@ -41,11 +40,19 @@ restow-etc:
     sudo ln -sf -t /etc/zsh $(realpath zsh/*)
     sudo ln -sf -t /etc/nix $(realpath nix/*)
 
+[linux]
+restow-applications: (restow dots / os() data_local_dir() 'applications')
+
 @restow-user-bin: (restow dots / "common" executable_dir() 'bin')
 
 @restow-common-dotfiles: (restow dots / 'common' conf_home '.config')
 
 restow-dotfiles: restow-common-dotfiles restow-platform-dotfiles
+
+agents_skills_src_dir := dots / 'common' / 'llm_memory' / 'skills'
+agents_skills_target_dir := home_dir() / '.agents' / 'skills'
+
+@stow-agents-skills: (sstow agents_skills_src_dir agents_skills_target_dir '.')
 
 # clean-bogus: Find and automatically remove all broken symlinks
 [group('stow')]

@@ -1,11 +1,18 @@
----@module "nvim-lint"
 ---
 
 vim.pack.add(_G.plug_spec {
   'stevearc/conform.nvim',
+  'stevearc/overseer.nvim',
   'mfussenegger/nvim-lint',
   'b0o/schemastore.nvim',
+  'MeanderingProgrammer/render-markdown.nvim',
 })
+
+require 'plugin.overseer'
+local ok, quicker = pcall(require, 'plugin.quicker')
+if ok then
+  VimRc.pack_add(quicker)
+end
 -- Formatting
 -- See also:
 -- - `:h Conform`
@@ -41,16 +48,18 @@ end, {
 require 'plugin.git'
 require 'plugin.codecompanion'
 
-local ok, quicker = pcall(require, 'plugin.quicker')
-if ok then
-  VimRc.pack_add(quicker)
-end
--- Flash
+--[[
 --
-local flash
-ok, flash = pcall(require, 'plugin.flash')
-if ok then
-  VimRc.pack_add(flash)
+--  OPTIONAL PLUGINS (DISABLED BY DEFAULT)
+--]]
+--
+-- Flash
+if vim.g.flash then
+  local flash
+  ok, flash = pcall(require, 'plugin.flash')
+  if ok then
+    VimRc.pack_add(flash)
+  end
 end
 if vim.g.grug then
   local grug
@@ -71,22 +80,7 @@ if vim.g.grug then
     end, 'grug-far*', 'Keep one instance of grug')
   end
 end
-vim.pack.add(_G.plug_spec {
-  'obsidian-nvim/obsidian.nvim',
-  'MeanderingProgrammer/render-markdown.nvim',
-})
--- Obsidian is loaded in after/ftplugin/markdown.lua
 
-local render_md
-ok, render_md = pcall(require, 'render-markdown')
-if ok then
-  render_md.setup {
-    preset = 'obsidian',
-    completions = { lsp = { enabled = true } },
-  }
-else
-  VimRc.error "Couldn't load render-markdown.nvim plugin"
-end
 if vim.g.dap_debugging then
   local dap = require 'plugin.dap'
   VimRc.pack_add(dap)

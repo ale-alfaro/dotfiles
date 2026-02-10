@@ -35,3 +35,10 @@ ls\040
 tree
 tree\040--format\040Nd
 q
+ls\040
+tree
+w
+q
+ls
+tree
+q

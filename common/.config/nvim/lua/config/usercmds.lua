@@ -101,8 +101,6 @@ the remaining arguments are the same as for |nvim_create_user_command()|:
       { nargs = 1 })
 --]]
 
-
-
 command('CopyCwd', function()
   vim.cmd [[let @+=expand("%:p")]]
 end, { desc = 'Copy Cwd Path' })
@@ -115,7 +113,6 @@ end, { desc = 'Find and Replace (after quickfix)', nargs = '*' })
 command('FindAndReplaceUndo', function(opts)
   vim.api.nvim_command 'silent cdo undo'
 end, { desc = 'Undo Find and Replace' })
-
 
 ---@param desc string
 ---@return vim.api.keyset.user_command
@@ -213,4 +210,10 @@ vim.api.nvim_create_user_command('LspLogClean', function()
   VimRc.exec.run_cmd { 'touch', vim.lsp.log.get_filename() }
 end, {
   desc = 'Opens the Nvim LSP client log.',
+})
+
+vim.api.nvim_create_user_command('TSList', function()
+  VimRc.treesitter_list()
+end, {
+  desc = 'View log messages',
 })

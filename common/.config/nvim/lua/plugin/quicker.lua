@@ -60,27 +60,28 @@ return {
     config.defaults.actions.files['ctrl-t'] = actions.open
   end,
   keys = {
-    { lhs = '<leader>xD', rhs = '<cmd>Trouble diagnostics toggle filter.severity=1<cr>', opts = { desc = 'Diagnostics (Trouble)' } },
+
+    { lhs = '<leader>xd', rhs = '<cmd>Trouble diagnostics toggle filter.severity=2<cr>', opts = { desc = 'Diagnostics (Trouble)' } },
     { lhs = '<leader>xb', rhs = '<cmd>Trouble diagnostics toggle filter.buf=0 filter.severity=2<cr>', opts = { desc = 'Buffer Diagnostics (Trouble)' } },
     { lhs = '<leader>xs', rhs = '<cmd>Trouble symbols toggle<cr>', opts = { desc = 'Symbols (Trouble)' } },
     {
-      lhs = '<leader>xr',
+      lhs = '<leader>xl',
       rhs = '<cmd>Trouble lsp toggle<cr>',
       opts = { desc = 'LSP references/definitions  (Trouble)' },
     },
-    {
-      lhs = '<leader>xd',
-      rhs = function()
-        local quicker = require 'quicker'
+  },
+  {
+    lhs = '<leader>xq',
+    rhs = function()
+      local quicker = require 'quicker'
 
-        if quicker.is_open() then
-          quicker.close()
-        else
-          vim.diagnostic.setqflist()
-        end
-      end,
-      opts = { desc = 'Toggle diagnostics (quicker)' },
-    },
+      if quicker.is_open() then
+        quicker.close()
+      else
+        vim.diagnostic.setqflist()
+      end
+    end,
+    opts = { desc = 'Toggle diagnostics (quicker)' },
   },
   { prefix = '<leader>x', group = 'QuickFix' },
 }
