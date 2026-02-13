@@ -180,16 +180,19 @@ KEYS.define {
   { lhs = '<C-b>', rhs = '<cmd>FzfLua buffers<cr>', opts = { desc = 'Buffers', noremap = true } },
   { lhs = '<C-\\>', rhs = '<cmd>FzfLua global<cr>', opts = { desc = 'Global', noremap = true } },
   { lhs = '<C-e>', rhs = '<cmd>FzfLua files<cr>', opts = { desc = 'Files', noremap = true } },
-  { lhs = '<C-g>', rhs = '<cmd>FzfLua live_grep<cr>', opts = { desc = 'Grep (cwd)' } },
-  { lhs = '<C-r>', rhs = '<cmd>FzfLua resume<cr>', opts = { desc = 'Resume' } },
+  { lhs = '<C-g>', rhs = '<cmd>FzfLua live_grep<cr>', opts = { desc = 'Grep (cwd)', noremap = true } },
+  { lhs = '<C-Tab>', rhs = '<cmd>FzfLua resume<cr>', opts = { desc = 'Resume', noremap = true } },
+  { lhs = '<C-f>', rhs = '<cmd>FzfLua command_history<cr>', opts = { desc = 'Search Command History', noremap = true } },
+  { lhs = '<C-/>', rhs = '<cmd>FzfLua blines<cr>', opts = { desc = 'Buffer Lines' } },
+  { lhs = '<M-o>', rhs = '<cmd>FzfLua oldfiles<cr>', opts = { desc = 'Recently opened files' } },
 }
 local wkey_prefix = '<leader>f'
 KEYS.define({
-  { lhs = wkey_prefix .. 'b', rhs = '<cmd>FzfLua blines<cr>', opts = { desc = 'Buffer Lines' } },
+  { lhs = wkey_prefix .. 'b', rhs = '<cmd>FzfLua builtins<cr>', opts = { desc = 'Find Fzf pickers' } },
   { lhs = wkey_prefix .. 'm', rhs = '<cmd>FzfLua manpages<cr>', opts = { desc = 'Find Man' } },
   { lhs = wkey_prefix .. 'h', rhs = '<cmd>FzfLua help_tags<cr>', opts = { desc = 'Help' } },
-  { lhs = wkey_prefix .. 'o', rhs = '<cmd>FzfLua oldfiles<cr>', opts = { desc = 'Recently opened files' } },
-  { lhs = wkey_prefix .. 'r', rhs = '<cmd>FzfLua history<cr>', opts = { desc = 'History' } },
+  { lhs = wkey_prefix .. 'o', rhs = '<cmd>FzfLua history<cr>', opts = { desc = 'History' } },
+  { lhs = wkey_prefix .. 'O', rhs = '<cmd>FzfLua search_history<cr>', opts = { desc = 'History' } },
   { lhs = wkey_prefix .. 'k', rhs = '<Cmd>FzfLua keymaps<CR>', opts = { desc = 'Keymaps' } },
 }, { prefix = wkey_prefix, group = 'Find' })
 
@@ -201,28 +204,22 @@ KEYS.define {
     rhs = function()
       FzfLua.lsp_workspace_diagnostics { severity_limit = vim.diagnostic.severity.ERROR }
     end,
-    opts = { desc = '[L]sp Workspace Diagnostics' },
+    opts = { desc = 'Workspace Diagnostics' },
   },
   {
-    lhs = lsp_wkey_prefix .. 's',
-    rhs = function()
-      FzfLua.lsp_document_symbols()
-    end,
-    opts = { desc = '[L]sp Document Symbols' },
+    lhs = lsp_wkey_prefix .. 'r',
+    rhs = '<cmd>FzfLua lsp_references<cr>',
+    opts = { desc = 'References' },
   },
   {
     lhs = lsp_wkey_prefix .. 'f',
-    rhs = function()
-      FzfLua.lsp_finder()
-    end,
-    opts = { desc = '[L]sp Find' },
+    rhs = '<cmd>FzfLua lsp_definitions<cr>',
+    opts = { desc = 'Definitions' },
   },
   {
-    lhs = lsp_wkey_prefix .. 'l',
-    rhs = function()
-      FzfLua.lsp_finder()
-    end,
-    opts = { desc = '[L]sp Live Document Symbols' },
+    lhs = lsp_wkey_prefix .. 's',
+    rhs = '<cmd>FzfLua lsp_live_document_symbols<cr>',
+    opts = { desc = 'Live Document Symbols' },
   },
-  { lhs = wkey_prefix .. 'd', rhs = '<cmd>FzfLua lsp_document_diagnostics<cr>', opts = { desc = '[L]sp Document diagnostics' } },
+  { lhs = wkey_prefix .. 'd', rhs = '<cmd>FzfLua lsp_document_diagnostics<cr>', opts = { desc = 'Document diagnostics' } },
 }

@@ -2,7 +2,7 @@ vim.pack.add(_G.plug_spec {
   'nvim-lua/plenary.nvim',
   'nvim-mini/mini.nvim',
 })
-require('plugin.theme')
+require 'plugin.theme'
 -- Set up to not prefer extension-based icon for some extensions
 local ext3_blocklist = { scm = true, txt = true, yml = true }
 local ext4_blocklist = { json = true, yaml = true }
@@ -13,7 +13,26 @@ mini_icons.setup {
   end,
 }
 
+local starter = require 'mini.starter'
+starter.setup {
+  items = {
+    { action = 'FzfLua global', name = 'Browser', section = 'Fzf' },
+    { action = 'FzfLua history', name = 'Command history', section = 'Fzf' },
+    { action = 'FzfLua files', name = 'Files', section = 'Fzf' },
+    { action = 'FzfLua helptags', name = 'Help tags', section = 'Fzf' },
+    { action = 'FzfLua live_grep', name = 'Live grep', section = 'Fzf' },
+    { action = 'FzfLua oldfiles', name = 'Old files', section = 'Fzf' },
+  },
+  content_hooks = {
+    starter.gen_hook.adding_bullet(),
+    starter.gen_hook.aligning('center', 'center'),
+  },
+}
 
+-- Mock 'nvim-tree/nvim-web-devicons' for plugins without 'mini.icons' support.
+-- Not needed for 'mini.nvim' or MiniMax, but might be useful for others.
+mini_icons.mock_nvim_web_devicons()
+require('mini.statusline').setup()
 -- Tabline. Sets `:h 'tabline'` to show all listed buffers in a line at the top.
 -- Buffers are ordered as they were created. Navigate with `[b` and `]b`.
 require('mini.tabline').setup()
@@ -28,20 +47,6 @@ require('mini.hipatterns').setup {
     hex_color = require('mini.hipatterns').gen_highlighter.hex_color(),
   },
 }
-require('mini.starter').setup {
-  sections = {
-    { action = 'FzfLua global', name = 'Browser', section = 'Fzf' },
-    { action = 'FzfLua history', name = 'Command history', section = 'Fzf' },
-    { action = 'FzfLua files', name = 'Files', section = 'Fzf' },
-    { action = 'FzfLua helptags', name = 'Help tags', section = 'Fzf' },
-    { action = 'FzfLua live_grep', name = 'Live grep', section = 'Fzf' },
-    { action = 'FzfLua oldfiles', name = 'Old files', section = 'Fzf' },
-  },
-}
--- Mock 'nvim-tree/nvim-web-devicons' for plugins without 'mini.icons' support.
--- Not needed for 'mini.nvim' or MiniMax, but might be useful for others.
-mini_icons.mock_nvim_web_devicons()
-
 -- Example for showing notifications in bottom right corner: >lua
 
 --- # Notification specification ~
@@ -245,104 +250,3 @@ KEYS.define({
     opts = { desc = '[N]otification [D]ismiss' },
   },
 }, { prefix = '<leader>n', group = 'Notification' })
-require('mini.statusline').setup()
-local block_compltype = { shellcmd = true }
-
-local mini_cmdline = require 'mini.cmdline'
-mini_cmdline.setup {
-
-  -- Autocompletion: show `:h 'wildmenu'` as you type
-  autocomplete = {
-    enable = true,
-
-    -- Delay (in ms) after which to trigger completion
-    -- Neovim>=0.12 is recommended for positive values
-    delay = 0,
-
-    -- Custom rule of when to trigger completion
-    -- predicate = nil,
-
-    -- Whether to map arrow keys for more consistent wildmenu behavior
-    map_arrows = true,
-    predicate = function()
-      return not block_compltype[vim.fn.getcmdcompltype()] -- MiniCmdline.default_autocomplete_predicate
-    end,
-  },
-
-  -- Autocorrection: adjust non-existing words (commands, options, etc.)
-  autocorrect = {
-    enable = true,
-
-    -- Custom autocorrection rule
-  },
-
-  -- Autopeek: show command's target range in a floating window
-  autopeek = {
-    enable = true,
-
-    -- Number of lines to show above and below range lines
-    n_context = 5,
-
-    -- Custom rule of when to show peek window
-    predicate = mini_cmdline.default_autopeek_predicate,
-
-    -- Window options
-    window = {
-
-      -- Function to render statuscolumn
-      statuscolumn = function(data)
-        local n, l, r = vim.v.lnum, data.left, data.right
-        local s = n == l and (n == r and '* ' or '< ') or n == r and '> ' or ''
-        -- Needs explicit highlighting via `:h 'statusline'` syntax
-        return '%#MiniCmdlinePeekSign#' .. s
-      end,
-    },
-  },
-}
-local miniclue = require 'mini.clue'
-miniclue.setup {
-  -- Define which clues to show. By default shows only clues for custom mappings
-  -- (uses `desc` field from the mapping; takes precedence over custom clue).
-  window = {
-
-    -- Delay before showing clue window
-    delay = 500,
-
-    -- Keys to scroll inside the clue window
-    scroll_down = '<C-d>',
-    scroll_up = '<C-u>',
-  },
-  -- Explicitly opt-in for set of common keys to trigger clue window
-  triggers = {
-    { mode = { 'n', 'x' }, keys = '<Leader>' }, -- Leader triggers
-    { mode = 'n', keys = '\\' }, -- mini.basics
-    { mode = { 'n', 'x' }, keys = '[' }, -- mini.bracketed
-    { mode = { 'n', 'x' }, keys = ']' },
-    { mode = 'i', keys = '<C-x>' }, -- Built-in completion
-    { mode = { 'n', 'x' }, keys = 'g' }, -- `g` key
-    { mode = { 'n', 'x' }, keys = "'" }, -- Marks
-    { mode = { 'n', 'x' }, keys = '`' },
-    { mode = { 'n', 'x' }, keys = '"' }, -- Registers
-    { mode = { 'i', 'c' }, keys = '<C-r>' },
-    { mode = 'n', keys = '<C-w>' }, -- Window commands
-    -- { mode = { 'n', 'x' }, keys = 's' },        -- `s` key (mini.surround, etc.)
-    { mode = { 'n', 'x' }, keys = 'z' }, -- `z` key
-  },
-  clues = {
-    -- This is defined in 'plugin/20_keymaps.lua' with Leader group descriptions
-    miniclue.gen_clues.builtin_completion(),
-    miniclue.gen_clues.g(),
-    miniclue.gen_clues.marks(),
-    miniclue.gen_clues.registers(),
-    miniclue.gen_clues.square_brackets(),
-    -- This creates a submode for window resize mappings. Try the following:
-    -- - Press `<C-w>s` to make a window split.
-    -- - Press `<C-w>+` to increase height. Clue window still shows clues as if
-    --   `<C-w>` is pressed again. Keep pressing just `+` to increase height.
-    --   Try pressing `-` to decrease height.
-    -- - Stop submode either by `<Esc>` or by any key that is not in submode.
-    miniclue.gen_clues.windows { submode_resize = true },
-    miniclue.gen_clues.z(),
-  },
-}
-vim.cmd [[au FileType minifiles lua MiniClue.ensure_buf_triggers()]]

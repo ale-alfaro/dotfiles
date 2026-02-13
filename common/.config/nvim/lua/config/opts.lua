@@ -72,9 +72,9 @@ vim.opt.spelllang = { 'en' }
 'foldclose'   'fcl':	When the folds not under the cursor are closed.
 --]]
 --
-vim.o.foldminlines = 20
+vim.o.foldminlines = 50
 vim.o.foldnestmax = 5
-
+vim.o.exrc = true
 -- vim.o.timeoutlen = 300
 -- vim.o.undolevels = 10000
 -- vim.o.updatetime = 200 -- Save swap file and trigger CursorHold

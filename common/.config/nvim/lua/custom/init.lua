@@ -1,4 +1,5 @@
 local M = require 'custom.utils'
+M.debug_mode = false
 M.icons = require 'custom.icons'
 
 local function _fetch_env(env_name)
@@ -12,7 +13,7 @@ end
 function _G.ENV(name, fallback)
   return vim.fn.has_key(vim.fn.environ(), name) and _fetch_env(name) or fallback
 end
-M.THEME = 'matte-black'
+M.THEME = 'kanagawa'
 --[[
 --  Global keymaps object for defining and toggling keys
 --]]
@@ -41,9 +42,9 @@ end
 ---@param keymaps KeymapSpec[]
 ---@param wkey_group WhichKeyGroupSpec?
 function KEYS.define(keymaps, wkey_group)
-  if wkey_group then
-    KEYS.leader_clues[#KEYS.leader_clues + 1] = { mode = 'n', keys = wkey_group.prefix, desc = wkey_group.group }
-  end
+  -- if wkey_group then
+  --   KEYS.leader_clues[#KEYS.leader_clues + 1] = { mode = 'n', keys = wkey_group.prefix, desc = wkey_group.group }
+  -- end
 
   for _, spec in ipairs(keymaps) do
     ---@type table
@@ -51,7 +52,7 @@ function KEYS.define(keymaps, wkey_group)
     for _, mode in ipairs(modes) do
       local id = keymap_encode(spec.lhs, mode)
       if KEYS.registry[id] then
-        vim.notify('Keymap already defined and was skipped: ' .. id, vim.log.levels.WARN)
+        Vim.warn('Keymap already defined and was skipped: ' .. id)
         goto continue_inner
       end
 
@@ -186,7 +187,6 @@ local function create_plugin_build_hook(build_hook)
   vim.validate('type', type, 'string')
   local cmd = build_hook.build_cmd
   vim.validate('cmd', cmd, 'string')
-  VimRc.info(string.format('Creating build hook for %s plugin %s with cmd %s', type, plugin, cmd))
   local hooks = function(ev)
     -- Use available |event-data|
     local name, kind = ev.data.spec.name, ev.data.kind

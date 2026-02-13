@@ -2,24 +2,43 @@
 	name = Ale Alfaro
 	email = alejandro.alfaro@sibelhealth.com
 [pull]
-	rebase = true
+  rebase = true
+[alias]
+  st = status -s
+  lol = log --oneline --graph --all
 [branch]
-	sort = committerdate
+	sort = -committerdate
 [credential "https://github.com"]
-	helper = 
+	helper =
 	helper = !/usr/bin/env gh auth git-credential
 [credential "https://gist.github.com"]
-	helper = 
+	helper =
 	helper = !/usr/bin/env gh auth git-credential
 [difftool]
-prompt = true
+  prompt = true
 
 [diff]
-tool = nvimdiff
-
+  tool = nvimdiff
+  algorithm = histogram
+  colorMoved = plain
+  mnemonicPrefix = true
+  renames = true
+[column]
+  ui = auto
 [difftool "nvimdiff"]
-cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
+  cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
 [rebase]
 	updateRefs = true
 [rerere]
 	enabled = true
+[init]
+	defaultBranch = main
+[merge]
+	conflictstyle = diff3
+[push]
+  default = simple
+	autoSetupRemote = true
+[fetch]
+	prune = true
+[advice]
+	skippedCherryPicks = false

@@ -4,7 +4,7 @@ local qf_toggle_expand = function()
 end
 -- Improved quickfix UI.
 ---@return VimPackPlugin
-return {
+VimRc.pack_add( {
   name = 'quicker',
   plugin = _G.plug_spec { 'stevearc/quicker.nvim', 'folke/trouble.nvim' },
   config = function()
@@ -84,4 +84,4 @@ return {
     opts = { desc = 'Toggle diagnostics (quicker)' },
   },
   { prefix = '<leader>x', group = 'QuickFix' },
-}
+})

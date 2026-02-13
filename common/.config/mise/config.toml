@@ -25,6 +25,7 @@ task_output = "prefix"        # see Tasks Runner for more information
 [tools]
 codex = "latest"
 node = "latest"
+"pipx:cmakelang" = { version = "latest", extras = "yaml,html-gen" }
 tree-sitter = "latest"
 uv = "latest"
 # [env]

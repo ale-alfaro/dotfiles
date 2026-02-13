@@ -1,16 +1,25 @@
 {
   "diagnostics.globals": ["vim"],
-  "workspace.library": [
-    "$VIMRUNTIME",
-    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim-lspconfig",
-    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim-lint",
-    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/conform.nvim",
-    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim-treesitter",
-    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/fzf-lua",
-    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/overseer.nvim",
-    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/mini.nvim",
-    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/plenary.nvim",
-    "/home/alealfaro/.local/share/nvim/site/pack/core/opt/nvim/after",
-    "/home/alealfaro/.config/nvim/after"
-  ]
+
+  "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
+  "runtime": {
+    "version": "LuaJIT"
+  },
+  "workspace": {
+    "checkThirdParty": false,
+    "library": [
+      "$VIMRUNTIME/lua",
+      "${3rd}/luv/library",
+      "lua/custom",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/nvim-lspconfig",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/nvim-lint",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/conform.nvim",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/nvim-treesitter",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/fzf-lua",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/overseer.nvim",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/mini.nvim",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/plenary.nvim",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/nvim/after"
+    ]
+  }
 }

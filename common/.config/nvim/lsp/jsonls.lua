@@ -1,18 +1,13 @@
-return {
+-- Install with: npm i -g vscode-langservers-extracted
 
-  filetypes = { 'json', 'jsonc', 'json5' },
-  root_markers = { '.json' },
-  -- lazy-load schemastore when needed
-  before_init = function(_, new_config)
-    new_config.settings.json.schemas = new_config.settings.json.schemas or {}
-    vim.list_extend(new_config.settings.json.schemas, require('schemastore').json.schemas())
-  end,
-  settings = {
-    json = {
-      format = {
-        enable = true,
-      },
-      validate = { enable = true },
+---@type vim.lsp.Config
+return {
+    cmd = { 'vscode-json-language-server', '--stdio' },
+    filetypes = { 'json', 'jsonc' },
+    settings = {
+        json = {
+            validate = { enable = true },
+            schemas = require('schemastore').json.schemas(),
+        },
     },
-  },
 }

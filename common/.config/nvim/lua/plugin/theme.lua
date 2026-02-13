@@ -1,4 +1,9 @@
-if VimRc.THEME == 'matte-black' then
+if VimRc.THEME == 'kanagawa' then
+  vim.pack.add(_G.plug_spec {
+    'rebelot/kanagawa.nvim',
+  })
+  vim.cmd 'colorscheme kanagawa'
+elseif VimRc.THEME == 'matte-black' then
   vim.pack.add(_G.plug_spec {
     'tahayvr/matteblack.nvim',
   })

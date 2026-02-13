@@ -52,50 +52,36 @@
 --]]
 --
 --- Recipes taken from https://github.com/stevearc/conform.nvim/blob/master/doc/recipes.md
-local function user_cmd_create()
-  -- Command for async formatting
-  vim.api.nvim_create_user_command('Format', function(args)
-    local range = nil
-    if args.count ~= -1 then
-      local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
-      range = {
-        start = { args.line1, 0 },
-        ['end'] = { args.line2, end_line:len() },
-      }
-    end
-    require('conform').format { async = true, lsp_format = 'fallback', range = range }
-  end, { range = true })
-end
 
-local function autocmd_create()
-  -- Run LSP command before formatting
-  vim.api.nvim_create_autocmd('BufWritePre', {
-    desc = 'Format before save',
-    pattern = 'python',
-    group = vim.api.nvim_create_augroup('FormatConfig', { clear = true }),
-    callback = function(ev)
-      local conform_opts = { bufnr = ev.buf, lsp_format = 'fallback', timeout_ms = 2000 }
-      local client = vim.lsp.get_clients({ name = 'ruff', bufnr = ev.buf })[1]
-
-      if not client then
-        require('conform').format(conform_opts)
-        return
-      end
-
-      local request_result = client:request_sync('workspace/executeCommand', {
-        command = 'ruff.organizeImports',
-        arguments = { vim.api.nvim_buf_get_name(ev.buf) },
-      })
-
-      if request_result and request_result.err then
-        vim.notify(request_result.err.message, vim.log.levels.ERROR)
-        return
-      end
-
-      require('conform').format(conform_opts)
-    end,
-  })
-end
+-- local function autocmd_create()
+-- Run LSP command before formatting
+-- vim.api.nvim_create_autocmd('BufWritePre', {
+--   desc = 'Format before save',
+--   pattern = 'python',
+--   group = vim.api.nvim_create_augroup('FormatConfig', { clear = true }),
+--   callback = function(ev)
+--     local conform_opts = { bufnr = ev.buf, lsp_format = 'fallback', timeout_ms = 2000 }
+--     local client = vim.lsp.get_clients({ name = 'ruff', bufnr = ev.buf })[1]
+--
+--     if not client then
+--       require('conform').format(conform_opts)
+--       return
+--     end
+--
+--     local request_result = client:request_sync('workspace/executeCommand', {
+--       command = 'ruff.organizeImports',
+--       arguments = { vim.api.nvim_buf_get_name(ev.buf) },
+--     })
+--
+--     if request_result and request_result.err then
+--       vim.notify(request_result.err.message, vim.log.levels.ERROR)
+--       return
+--     end
+--
+--     require('conform').format(conform_opts)
+--   end,
+-- })
+-- end
 
 local function setup_formatting()
   vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
@@ -173,6 +159,7 @@ local function setup_formatting()
       c = { 'clang-format', 'uncrustify' }, -- try out uncrustify
       cpp = { name = 'clangd', timeout_ms = 500, lsp_format = 'prefer' },
       cmake = { 'cmake_format' },
+      dts = { name = 'devicetree_ls', timeout_ms = 500, lsp_format = 'prefer' },
       lua = { 'stylua' },
       sh = { 'shfmt' },
       just = { 'just' },
@@ -196,8 +183,17 @@ local function setup_formatting()
     },
   }
 
-  user_cmd_create()
-  autocmd_create()
+  vim.api.nvim_create_user_command('Format', function(args)
+    local range = nil
+    if args.count ~= -1 then
+      local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
+      range = {
+        start = { args.line1, 0 },
+        ['end'] = { args.line2, end_line:len() },
+      }
+    end
+    require('conform').format { async = true, lsp_format = 'fallback', range = range }
+  end, { range = true })
 end
 
 return { setup = setup_formatting }

@@ -51,8 +51,6 @@ H.info = function(msg, lvl)
   end
   if VimRc.notify then
     VimRc.notify(msg, lvl)
-  else
-    vim.notify(msg, lvl)
   end
 end
 H.warn = function(msg)
@@ -60,6 +58,9 @@ H.warn = function(msg)
 end
 H.err = function(msg)
   H.info(msg, 'ERROR')
+end
+H.debug = function(msg)
+  H.info(msg, 'DEBUG')
 end
 H.set_buf_name = function(buf_id, name)
   vim.api.nvim_buf_set_name(buf_id, 'vimrc://' .. buf_id .. '/' .. name)
