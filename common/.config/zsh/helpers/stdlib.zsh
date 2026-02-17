@@ -349,64 +349,6 @@ semver_search() {
     head -1
 }
 
-# Usage: use node [<version>]
-#
-# Loads the specified NodeJS version into the environment.
-#
-# If a partial NodeJS version is passed (i.e. `4.2`), a fuzzy match
-# is performed and the highest matching version installed is selected.
-#
-# If no version is passed, it will look at the '.nvmrc' or '.node-version'
-# files in the current directory if they exist.
-#
-# Environment Variables:
-#
-# - $NODE_VERSIONS (required)
-#   Points to a folder that contains all the installed Node versions. That
-#   folder must exist.
-#
-# - $NODE_VERSION_PREFIX (optional) [default="node-v"]
-#   Overrides the default version prefix.
-#
-use_nvim() {
-  local version="$1"
-  local nvim_version_prefix="nvim-v"
-  local search_version
-  local nvim_prefix
-
-  if [[ -z ${NVIM_HOME} || ! -d ${NVIM_HOME} ]]; then
-    error "You must specify a $NVIM_HOME environment variable and the directory specified must exist!"
-  fi
-  #   ${var#pattern} - If the pattern match the beginning of the value of var, the match is deleted and the rest is expanded. Use ## to match larger matching pattern.
-  #   Aka we are removing the prefix 'v'
-  version=${version#v}
-
-  if [[ -z $version ]]; then
-    error "I do not know which NodeJS version to load because one has not been specified!"
-  fi
-
-  # Search for the highest version matching $version in the folder
-  search_version=$(semver_search "$NVIM_HOME" "${nvim_version_prefix}" "${version}")
-  nvim_prefix="${NVIM_HOME}/${nvim_version_prefix}${search_version}"
-
-  if [[ ! -d $nvim_prefix ]]; then
-      error "Unable to find NodeJS version ($version) in ($NVIM_HOME)!"
-  fi
-  nvim_exe=${nvim_prefix}/bin/nvim 
-  if [[ ! -x $nvim_exe ]]; then
-      error "Unable to load Neovim (nvim) for version ($version) in ($NVIM_HOME)!"
-  fi
-
-  load_prefix "$nvim_prefix"
-
-  version_read=$(nvim --version)
-
-  if [[ ! -z $version_read ]]; then
-    log_status "Successfully loaded Neovim $version_read, from prefix ($nvim_prefix)"
-  else
-    error "Failed to load Neovim $version_read, from prefix ($nvim_prefix)"
-  fi
-}
 
 # Transcode any image to JPG image that's great for shrinking wallpapers
 img2jpg() {

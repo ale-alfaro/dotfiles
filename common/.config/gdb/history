@@ -1,0 +1,45 @@
+bt
+info registers
+frame 5
+print esf
+x/8wx esf
+p/x *(uint32_t *)0xE000ED28
+p/x *(uint32_t *)0xE000ED2C
+p/x *(uint32_t *)0xE000ED30
+p/x *(uint32_t *)0xE000ED34
+p/x *(uint32_t *)0xE000ED38
+b z_arm_fault
+c
+mon reset
+c
+frame 6
+bt
+info locals
+info reg msp psp
+info reg psp
+info reg
+p esf
+x/8wx esf
+p/x esf_copy
+  p/x esf_copy.basic
+  p/x esf_copy.basic.r0
+  p/x esf_copy.basic.r1
+  p/x esf_copy.basic.r2
+  p/x esf_copy.basic.r3
+  p/x esf_copy.basic.r12
+  p/x esf_copy.basic.lr
+  p/x esf_copy.basic.pc
+  p/x esf_copy.basic.xpsr
+p/x esf
+p/x esf_copy.basic
+p/x esf_copy.basic.r0
+p/x esf_copy.basic.r1
+p/x $r0
+p/x $r1
+x/32wx 0x2002e080
+x/32wx 0x20030940
+set logging enabled on
+set logging file gdb_session.log
+set history save on
+set history filename ~/.config/gdb/history
+q

@@ -182,13 +182,14 @@ KEYS.define {
   { lhs = '<C-e>', rhs = '<cmd>FzfLua files<cr>', opts = { desc = 'Files', noremap = true } },
   { lhs = '<C-g>', rhs = '<cmd>FzfLua live_grep<cr>', opts = { desc = 'Grep (cwd)', noremap = true } },
   { lhs = '<C-Tab>', rhs = '<cmd>FzfLua resume<cr>', opts = { desc = 'Resume', noremap = true } },
-  { lhs = '<C-f>', rhs = '<cmd>FzfLua command_history<cr>', opts = { desc = 'Search Command History', noremap = true } },
+  { lhs = '<C-f>', rhs = '<cmd>FzfLua command_history<cr>', opts = { desc = 'Command History', noremap = true } },
+  { lhs = '<C-kEqual>', rhs = '<cmd>FzfLua register<cr>', opts = { desc = 'Registers', noremap = true } },
   { lhs = '<C-/>', rhs = '<cmd>FzfLua blines<cr>', opts = { desc = 'Buffer Lines' } },
-  { lhs = '<M-o>', rhs = '<cmd>FzfLua oldfiles<cr>', opts = { desc = 'Recently opened files' } },
+  { lhs = '<M-o>', rhs = '<cmd>FzfLua oldfiles<cr>', opts = { desc = 'Old Files' } },
 }
 local wkey_prefix = '<leader>f'
 KEYS.define({
-  { lhs = wkey_prefix .. 'b', rhs = '<cmd>FzfLua builtins<cr>', opts = { desc = 'Find Fzf pickers' } },
+  { lhs = wkey_prefix .. 'b', rhs = '<cmd>FzfLua builtin<cr>', opts = { desc = 'Find Fzf pickers' } },
   { lhs = wkey_prefix .. 'm', rhs = '<cmd>FzfLua manpages<cr>', opts = { desc = 'Find Man' } },
   { lhs = wkey_prefix .. 'h', rhs = '<cmd>FzfLua help_tags<cr>', opts = { desc = 'Help' } },
   { lhs = wkey_prefix .. 'o', rhs = '<cmd>FzfLua history<cr>', opts = { desc = 'History' } },

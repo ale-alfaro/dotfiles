@@ -52,7 +52,7 @@ function KEYS.define(keymaps, wkey_group)
     for _, mode in ipairs(modes) do
       local id = keymap_encode(spec.lhs, mode)
       if KEYS.registry[id] then
-        Vim.warn('Keymap already defined and was skipped: ' .. id)
+        VimRc.warn('Keymap already defined and was skipped: ' .. id)
         goto continue_inner
       end
 

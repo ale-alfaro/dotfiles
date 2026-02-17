@@ -15,13 +15,11 @@ return {
       cwd = '${workspaceFolder}',
       defaultBindingType = 'Zephyr',
       defaultZephyrBindings = {
+        './external/nrf/dts/bindings',
         './external/zephyr/dts/bindings',
       },
       autoChangeContext = true,
       allowAdhocContexts = true,
     },
   },
-  --     defaultBindingType = 'Zephyr',
-  --     autoChangeContext = true,
-  --     allowAdhocContexts = true,
 }

@@ -45,51 +45,33 @@ K._keys = {
 -- )
 
 ---@param method string|string[]
-function K.has(buffer, method)
+function K.has(client, buffer, method)
   if type(method) == 'table' then
     for _, m in ipairs(method) do
-      if K.has(buffer, m) then
+      if K.has(client, buffer, m) then
         return true
       end
     end
     return false
   end
   method = method:find '/' and method or 'textDocument/' .. method
-  local clients = vim.lsp.get_clients { bufnr = buffer }
-  for _, client in ipairs(clients) do
-    if client:supports_method(method) then
-      return true
-    end
+  if client:supports_method(method) then
+    return true
   end
   return false
 end
 
-local function resolve_lsp_keys_conflicts()
-  if vim.g.miniai_disable then
-    local map_lsp_selection = function(lhs, desc)
-      local s = vim.startswith(desc, 'Increase') and 1 or -1
-      local rhs = function()
-        vim.lsp.buf.selection_range(s * vim.v.count1)
-      end
-      vim.keymap.set('x', lhs, rhs, { desc = desc })
-    end
-    map_lsp_selection('<Leader>ls', 'Increase selection')
-    map_lsp_selection('<Leader>lS', 'Decrease selection')
-  end
-end
-
 --- Configures autocommands to update the code action lightbulb.
----@param bufnr integer
 ---@param client vim.lsp.Client
-K.on_attach = function(bufnr, _)
+---@param bufnr integer
+K.setup = function(client, bufnr)
   local keymaps = K._keys
   for _, keys in pairs(keymaps) do
-    local has = not keys.has or K.has(bufnr, keys.has)
+    local has = not keys.has or K.has(client, bufnr, keys.has)
     if has then
       vim.keymap.set(keys.mode or 'n', keys.lhs, keys.rhs, { buffer = bufnr, desc = keys.desc })
     end
   end
-  resolve_lsp_keys_conflicts()
 end
 
 return K

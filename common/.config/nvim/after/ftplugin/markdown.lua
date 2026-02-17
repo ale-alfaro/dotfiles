@@ -42,8 +42,3 @@ vim.b.minisurround_config = {
     },
   },
 }
-
-local ok, _ = pcall(require, 'plugin.markdown')
-if not ok then
-  VimRc.error "Couldn't load render-markdown.nvim plugin"
-end

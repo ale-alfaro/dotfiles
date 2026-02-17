@@ -9,6 +9,8 @@
 
 """UF2 runner (flash only) for UF2 compatible bootloaders."""
 
+from psutil import sdiskpart
+from psutil._common import sdiskpart
 import argparse
 import logging
 import sys
@@ -25,7 +27,7 @@ def get_uf2_info_path(part) -> Path:
     return Path(part.mountpoint) / "INFO_UF2.TXT"
 
 
-def is_uf2_partition(part):
+def is_uf2_partition(part: sdiskpart) -> bool:
     try:
         return (part.fstype in {"vfat", "FAT", "msdos"}) and get_uf2_info_path(
             part,
@@ -34,25 +36,25 @@ def is_uf2_partition(part):
         return False
 
 
-def get_uf2_info(part):
+def get_uf2_info(part: sdiskpart) -> dict[str, str]:
     lines = get_uf2_info_path(part).read_text().splitlines()
 
     lines = lines[1:]  # Skip the first summary line
 
-    def split_uf2_info(line: str):
+    def split_uf2_info(line: str) -> tuple[str, str]:
         k, _, val = line.partition(":")
         return k.strip(), val.strip()
 
     return {k: v for k, v in (split_uf2_info(line) for line in lines) if k and v}
 
 
-def match_board_id(part, board_id):
+def match_board_id(part: sdiskpart, board_id) -> bool:
     info = get_uf2_info(part)
 
     return info.get("Board-ID") == board_id
 
 
-def get_uf2_partitions(board_id=None):
+def get_uf2_partitions(board_id=None) -> list[sdiskpart]:
     parts = [part for part in psutil.disk_partitions() if is_uf2_partition(part)]
 
     if (board_id is not None) and parts:
@@ -66,7 +68,7 @@ def get_uf2_partitions(board_id=None):
     return parts
 
 
-def copy_uf2_to_partition(uf2_file, part):
+def copy_uf2_to_partition(uf2_file, part: sdiskpart) -> None:
     try:
         copy(uf2_file, part.mountpoint)
     except OSError as e:
@@ -76,7 +78,7 @@ def copy_uf2_to_partition(uf2_file, part):
             raise
 
 
-def list_devices(board_id=None):
+def list_devices(board_id=None) -> None:
     partitions = get_uf2_partitions(board_id)
     if not partitions:
         logging.info("No matching UF2 partitions found")
@@ -89,7 +91,7 @@ def list_devices(board_id=None):
         logging.info("    Board-ID: %s", info.get("Board-ID", "N/A"))
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Flash a UF2 file to a device or list available devices.",
     )

@@ -163,24 +163,6 @@ function D.concise_line_output_to_diag(lines, pattern, groups, source, ns_id)
     D.add_diagnostics(diags, source, ns_id)
   end)
 end
-D.setup_diagnostics_cursorhold = function(bufnr)
-  local diag_group = vim.api.nvim_create_augroup('diagnosis', { clear = false })
-  vim.api.nvim_create_autocmd('CursorHold', {
-    group = diag_group,
-    buffer = bufnr,
-    desc = '✨lsp show diagnostics on CursorHold',
-    callback = function()
-      local hover_opts = {
-        focusable = false,
-        close_events = { 'BufLeave', 'CursorMoved', 'InsertEnter', 'FocusLost' },
-        border = 'rounded',
-        source = 'always',
-        prefix = ' ',
-      }
-      vim.diagnostic.open_float(hover_opts)
-    end,
-  })
-end
 
 local _loaded_clients = {}
 

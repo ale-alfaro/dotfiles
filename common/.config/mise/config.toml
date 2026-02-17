@@ -10,7 +10,7 @@ plugin_autoupdate_last_check_duration = '1 week' # set to 0 to disable updates
 unix_default_file_shell_args = 'zsh -uc'
 unix_default_inline_shell_args = 'zsh -uc'
 # config files with these prefixes will be trusted by default
-trusted_config_paths = ['~/sibel/eng/fw']
+trusted_config_paths = ['~/sibel/eng/fw', '~/sibel/eng/tools']
 
 verbose = false      # set to true to see full installation output, see `MISE_VERBOSE`
 http_timeout = "30s" # set the timeout for http requests as duration string, see `MISE_HTTP_TIMEOUT`
@@ -23,9 +23,16 @@ task_output = "prefix"        # see Tasks Runner for more information
 
 
 [tools]
+claude-code = "latest"
 codex = "latest"
 node = "latest"
 "pipx:cmakelang" = { version = "latest", extras = "yaml,html-gen" }
+"pipx:ptpython" = "latest"
+"pipx:pudb" = "latest"
+"pipx:pyrefly" = "latest"
+"pipx:ruff" = "latest"
+"pipx:ty" = "latest"
+python = ["latest", "3.13"]
 tree-sitter = "latest"
 uv = "latest"
 # [env]

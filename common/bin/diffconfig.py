@@ -6,11 +6,35 @@
 #     "cyclopts",
 # ]
 # ///
+"""
+
+Installation instructions:
+1. Install uv using one of the methods listed here https://docs.astral.sh/uv/getting-started/installation/#__tabbed_1_2.
+
+    Example for Mac/Linux:
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+    Example for Windows:
+        powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+2. Once uv is installed and in your PATH install python through uv:
+    uv python install --default
+3. OPTIONAL. Make this script into an executable file by changing permissions:
+    chmod +x diffconfig.py.
+    With that you will be able to run the script as an executable. You can add it in your path or call it using './diffconfig.py .config .config.old'
+Usage instructions:
+
+Run with uv using:
+    `uv run --script diffconfig.py .config .config.old`
+    OR if you made it into an executable file:
+    `./diffconfig.py .config .config.old`
+If you want to output to a file insted of stdout use the -o flag:
+    `uv run --script diffconfig.py .config .config.old -o out.diff`
+
+
+"""
+
 from __future__ import annotations
 
 import os
-import re
-from contextlib import nullcontext
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Annotated
@@ -135,7 +159,7 @@ def render_diff(
         console.print(text)
 
 
-@app.command
+@app.default
 def cmp(
     prev: Annotated[
         Path,

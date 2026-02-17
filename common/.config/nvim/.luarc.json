@@ -11,12 +11,11 @@
       "$VIMRUNTIME/lua",
       "${3rd}/luv/library",
       "lua/custom",
-      "$XDG_DATA_HOME/nvim/site/pack/core/opt/nvim-lspconfig",
-      "$XDG_DATA_HOME/nvim/site/pack/core/opt/nvim-lint",
       "$XDG_DATA_HOME/nvim/site/pack/core/opt/conform.nvim",
       "$XDG_DATA_HOME/nvim/site/pack/core/opt/nvim-treesitter",
       "$XDG_DATA_HOME/nvim/site/pack/core/opt/fzf-lua",
       "$XDG_DATA_HOME/nvim/site/pack/core/opt/overseer.nvim",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/render-markdown.nvim",
       "$XDG_DATA_HOME/nvim/site/pack/core/opt/mini.nvim",
       "$XDG_DATA_HOME/nvim/site/pack/core/opt/plenary.nvim",
       "$XDG_DATA_HOME/nvim/site/pack/core/opt/nvim/after"

@@ -11,6 +11,9 @@ vim.pack.add(_G.plug_spec {
 require 'plugin.mini-clues'
 require 'plugin.overseer'
 require 'plugin.quicker'
+require('render-markdown').setup {
+  preset = 'obsidian',
+}
 -- Formatting
 -- See also:
 -- - `:h Conform`

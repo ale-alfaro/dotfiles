@@ -1,6 +1,7 @@
 return {
   cmd = { 'ruff', 'server' },
-  root_markers = { 'uv.lock', 'pyproject.toml', 'ruff.toml', '.ruff.toml', '.git' },
+  filetypes = { 'python' },
+  root_markers = { 'pyproject.toml', 'ruff.toml', '.ruff.toml', '.git' },
   settings = {
     init_options = {
       settings = {
@@ -8,8 +9,7 @@ return {
           '--extend-select',
           'I',
         },
-        logLevel = 'error',
-        -- fixAll = true,
+        fixAll = true,
         lint = {
           preview = true,
         },
@@ -17,7 +17,6 @@ return {
           preview = true,
           backend = 'uv',
         },
-        exclude = { '**/build/**' },
       },
     },
   },
