@@ -1,5 +1,3 @@
-add-auto-load-safe-path ~/sibel/eng/fw/playground_workspace
-add-auto-load-safe-path ~/sibel/eng/fw/anne_sensors_workspace
 
 define zfault_dump
     printf "\n=== z_arm_fault context ===\n"
@@ -34,6 +32,37 @@ define zfault_dump
     end
   end
 
+
+# --- Quality-of-life defaults ---
+set confirm off
+set pagination off
+set print pretty on
+# --- set the display radix to hexidecimal ---
+set output-radix 16
+# set print elements 0
+# set print repeats 0
+# set print asm-demangle on
+# set disassemble-next-line on
+# set breakpoint pending on
+
+# --- Persistent command history (across sessions) ---
+set history filename ~/.config/gdb/history
+set history save on
+set history size 10000
+set history remove-duplicates unlimited
+
+# --- Safer auto-loading (project-local .gdbinit/.gdb scripts) ---
+# Add trusted directories explicitly instead of disabling protection globally.
+# Example: add-auto-load-safe-path ~/src
+# (Keep reading below for why.)
+add-auto-load-safe-path ~/sibel/eng/fw
+add-auto-load-safe-path ~/sibel/eng/fw/playground_workspace
+add-auto-load-safe-path ~/sibel/eng/fw/anne_sensors_workspace
+
+# --- TUI (text UI) defaults ---
+tui enable
+layout regs
+focus cmd
 # add-auto-load-safe-path ~/sibel/eng/fw//
 # set debuginfod enabled on
 # # fix up our python path first since GDB is likely linked with system (not brewed) python
