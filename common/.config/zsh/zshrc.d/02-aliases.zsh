@@ -5,8 +5,7 @@
 # Plugin Helper
 [[ -r "$ZDOTDIR/helpers/plugin_helper.zsh" ]] && source "$ZDOTDIR/helpers/plugin_helper.zsh"
 
-
-safe_source mise activate zsh
+# source <(mise activate zsh)
 
 compress(){
   tar -czf "${1%/}.tar.gz" "${1%/}"
@@ -46,83 +45,13 @@ for index ({1..9}) alias "$index"="cd +${index}"; unset index
 #######################################################
 # CLI Aliases
 #######################################################
-# ---- Eza (better ls) -----
-if has eza; then
-  alias lt='eza --tree --level=3 --long --icons --git'
-  alias lta='lt -a'
-  alias ls="eza --icons=always --oneline --no-git --all"
-fi
 # Alias For bat
 # Link: https://github.com/sharkdp/bat
-has wikiman && alias wman='wikiman'
+alias wman='wikiman'
 # has batman && alias man='batman'
 # Alias for lazygit
 # Link: https://github.com/jesseduffield/lazygit
-has lazygit && alias lg='lazygit'
-safe_source zoxide init zsh
-# Fuzzy (fzf) cd based on:
-#   - visited locations (bookmarks) OR
-#   - indexed files (locate/mdfind)
-#
-# Usage: c [fuzzy pattern]
-#        c -s (show statistics)
-alias cd='zd'
-zd(){
-  if [ $# -eq 0 ]; then
-    builtin cd ~ && return
-  elif [ -d "$1" ]; then
-    builtin cd "$1"
-  else
-    local dir="$(zoxide query --all --list --score |
-      fzf +s -0 -1 \
-        --query="$1" \
-        --ansi \
-        --reverse \
-        --no-sort \
-        --prompt 'Dirs> ' \
-        --preview-window up:60% || echo $pipestatus[2])"
-    if [[ -d $dir ]]; then
-      z $dir
-    else
-      z "$@" && printf "\U000F17A9 " && pwd || echo "Error: Directory not found"
-    fi
-  fi
-}
-
-
-# Alias for just (command runner)
-# fj() {
-#   local selection=$(
-#     fd '[Jj]ustfile|\..*just' -tf --strip-cwd-prefix |
-#       fzf \
-#         --ansi \
-#         --reverse \
-#         --no-sort \
-#         --preview-label '[ Justfiles ]' \
-#         --preview 'just --list -f {}' \
-#         --header-first \
-#         --prompt "Justfiles > " \
-#         --preview-window up:60% \
-#         --header '
-#     > ENTER to choose recipe to run
-#     '
-#   )
-#   if [[ -n "$selection" ]]; then
-#       just  -f $selection -d ${selection%%/*} --choose
-#   fi
-# }
-if [[ ! -z "${JUST_HOME}" ]]; then
-  alias .j='just --justfile ~/.config/just/Justfile --working-directory .'
-  # alias .j='just -g'
-  user_justfiles="${JUST_HOME}/.user"
-  if [[ -d "$user_justfiles" ]]; then
-    for file in $user_justfiles/*.just; do
-      for recipe in $(just --justfile $file --summary); do
-        alias $recipe="just --justfile $file --working-directory . $recipe"
-      done
-    done
-  fi
-fi
+alias lg='lazygit'
 # -------------------------------------------
 # 5. Suffix Aliases - Open Files by Extension
 # -------------------------------------------

@@ -4,6 +4,11 @@ command_timeout = 200
 format = "[$directory$git_branch$git_status]($style)$character"
 palette = 'catppuccin_mocha'
 
+[hostname]
+ssh_only = true
+format = '[$ssh_symbol](bold blue) on [$hostname](bold red) '
+disabled = false
+
 [character]
 success_symbol = '[❯](bold fg:green)'
 error_symbol = '[❯](bold fg:red)'
