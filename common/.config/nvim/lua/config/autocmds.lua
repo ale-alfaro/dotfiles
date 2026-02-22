@@ -57,7 +57,6 @@ local ft_easy_quit = {
   'notify*',
   'qf',
   'dapui',
-  'trouble',
   'dap-repl',
   'codecompanion',
   'mini-files',

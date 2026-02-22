@@ -43,3 +43,237 @@ set logging file gdb_session.log
 set history save on
 set history filename ~/.config/gdb/history
 q
+p/x $lr
+info locals
+q
+q
+q
+c
+q
+mon reset
+c
+p/x $lr
+p/a *(uint32_t[8] *)$psp
+p/a *(uint32_t[8] *)$msp
+p/8wx $psp
+x/8wx $psp
+x/8wx psp
+l psp
+l *psp
+l 0x20032258
+l *0x20032258
+help print
+tui disable
+q
+c
+bt
+layout next
+layout reg
+p/x $lr
+p/x $lr&(1<<2)
+p/a *(uint32_t[8] *)$msp
+p/x $msp
+x/w $msp
+x/w msp
+x/4w msp
+x/4xw msp
+x/64xw msp
+x/64xw (0x2002ea00 - 0x100)
+x/64xw (0x2002ea00 - 0x10)
+x/64xw (0x2002ea00 - 0x20)
+x/64xw (0x2002ea00 - 0x30)
+q
+p/x *(uin32_t*)0x62a0f
+p/x *(uint32_t*)0x62a0f
+help list
+list *0x62a0f
+b nrf_rtc.h:349
+mon reset
+c
+by
+bt
+winheight -5
+help winheight 
+winheight - 5
+tui disable
+q
+c
+bt
+p/x $lr
+p $lr
+p lr
+p/x $lr
+x/w $lr
+q
+info locals
+l *0x20020930
+lis *0x20020930
+list *0x20020930
+x/w 0x20020930
+x/64w (0x20020930 - 0x10)
+x/64w (0x20020930 - 0x20)
+watch *(uint32_t*)(0x20020930 + 6*4)
+delete 3
+watch *(uint32_t*)(0x20020a00 + 6*4)
+mon reset
+bt
+c
+info symbol 0x000065c6
+list *0x000065c6
+q
+c
+bt
+l
+q
+c
+bt
+info locals
+l
+p $stack_frame
+p stack_frame
+up
+bengal_error_handler_dump esf reason
+bengal_error_handler_dump reason esf
+info symbol 0x5ea66
+list 0x5ea66
+list *0x5ea66
+q
+c
+info locals
+info symbol 0x5ee5e
+list *0x5ee5e
+x/8xw $sp_prior_to_exception 
+x/8xw sp_prior_to_exception 
+x/8xw exception_frame 
+x/64xw exception_frame 
+x/64xw (exception_frame - 0x100)
+x/64xw (exception_frame - 0x20)
+x/64xw (exception_frame - 0x10)
+bengal_error_handler_dump esf reason
+bengal_error_handler_dump reason esf
+p/x $lr&(1<<2)
+p/a *(uint32_t[8] *)$msp
+p/a (uint32_t[8] *)$msp
+p *(uint32_t[8] *)$msp
+x *(uint32_t[8] *)$msp
+x/w $msp
+x/w msp
+x/w *msp
+x/w *(uint32_t[8] *)$msp
+x/w *(uint32_t[8] *)msp
+p/a *(uint32_t[8] *)0x2002ba80
+p *(uint32_t[8] *)0x20032a28
+p/a *(uint32_t[8] *)0x20032a28
+q
+c
+q
+c
+info locals
+bengal_error_handler_dump reason esf
+info symbol $pc
+info symbol pc
+info symbol *pc
+
+info symbol stack_frame.pc
+list *stack_frame.pc
+q
+c
+q
+bt
+bengal_error_handler_dump reason esf
+up 3
+bengal_error_handler_dump esf reason
+q
+mon reset
+c
+l
+q
+mon reset
+c
+l
+q
+l sh_hardfault
+l sh_hardfault_handler.c
+l sh_hardfault_handler.c:32
+l sh_hardfault_handler.c:54
+info symbols
+q
+b sh_hardfault_error_handler
+delete 2
+delete 3
+info breakpoints 
+delete 1
+q
+b sh_hardfault_handler
+delete 3
+delete 2
+bt
+l
+q
+up 3
+down
+b z_arm_fatal_error
+bengal_error_handler_dump reason esf
+bengal_error_handler_dump esf reason
+l
+info locals
+list *0x57d2b
+x/8wx 0x57d2b
+x/8wx *(uint32_t*)0x200046d8
+x/64wx *(uint32_t*)0x200046d8
+x/64wx 0x200046d8
+x/64wx (0x200046d8 - 0x100)
+x/64wx (0x200046d8 - 0x10)
+mon reset
+c
+x/w *(uint32_t[8] *)$msp
+x/w $msp
+x/w msp
+x/w psp
+x/8w psp
+x/8w msp
+p/a psp
+p/a *(uint32_t[8] *)msp
+p/a *(uint32_t[8] *)psp
+info symbol 0x6b991
+l *0x6b991
+q
+c
+q
+c
+bt
+up 8
+l
+q
+up
+l
+info locals
+p/x est
+p/x esf
+p/a esf
+p (struct arch_esf*)esf
+p *(struct arch_esf*)esf
+p $lr
+p $lr&(2<<1)
+p $msp
+p $psp
+p/x psp
+info locals 0x7cfd0
+
+p *(struct arch_esf*)esf->extra_info->callee
+p *((struct arch_esf*)esf->extra_info->callee)
+p *(((struct arch_esf*)esf)->extra_info->exc_return)
+p *(((struct arch_esf*)esf)->extra_info->callee)
+p/w *(((struct arch_esf*)esf)->extra_info->callee->psp)
+p/x *(((struct arch_esf*)esf)->extra_info->callee->psp)
+p/x (((struct arch_esf*)esf)->extra_info->callee->psp)
+x/4wx (((struct arch_esf*)esf)->extra_info->callee->psp)
+x/16wx (((struct arch_esf*)esf)->extra_info->callee->psp)
+q
+mon reset
+c
+bt
+q
+c
+info threads
+q

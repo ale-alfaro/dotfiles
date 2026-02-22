@@ -6,6 +6,76 @@ vim.pack.add(_G.plug_spec {
 
 require('lsp.custom_diagnostics').diagnostics_setup()
 
+---@param lsp_names string[]
+local custom_lsp_caps_registration = function(lsp_names)
+  vim.iter(lsp_names):map(function(lsp_name)
+    if lsp_name == 'devicetree_ls' then
+      vim.lsp.config('devicetree_ls', {
+        capabilities = {
+          textDocument = {
+            semanticTokens = {
+              dynamicRegistration = false,
+              requests = {
+                range = false,
+                full = true,
+              },
+              tokenTypes = {
+                'namespace',
+                'class',
+                'enum',
+                'interface',
+                'struct',
+                'typeParameter',
+                'type',
+                'parameter',
+                'variable',
+                'property',
+                'enumMember',
+                'decorator',
+                'event',
+                'function',
+                'method',
+                'macro',
+                'label',
+                'comment',
+                'string',
+                'keyword',
+                'number',
+                'regexp',
+                'operator',
+              },
+              tokenModifiers = {
+                'declaration',
+                'definition',
+                'readonly',
+                'static',
+                'deprecated',
+                'abstract',
+                'async',
+                'modification',
+                'documentation',
+                'defaultLibrary',
+              },
+              formats = { 'relative' },
+            },
+
+            -- Enable formatting
+            formatting = {
+              dynamicRegistration = false,
+            },
+
+            -- Enable folding range support
+            foldingRange = {
+              dynamicRegistration = false,
+              lineFoldingOnly = true,
+            },
+          },
+        },
+      })
+    end
+  end)
+end
+
 -- Disable inlay hints initially (and enable if needed with my ToggleInlayHints command).
 vim.g.inlay_hints = false
 
@@ -103,46 +173,47 @@ local add_completion = function(client, bufnr)
   end
 end
 
+KEYS.define {
+  {
+    lhs = 'gd',
+    rhs = function()
+      require('fzf-lua').lsp_definitions { jump1 = true }
+    end,
+    opts = { desc = 'Goto Definition' },
+  },
+  {
+    lhs = 'gD',
+    rhs = function()
+      require('fzf-lua').lsp_definitions { jump1 = false }
+    end,
+    opts = { desc = 'Peek Definition' },
+  },
+  { lhs = 'gr', rhs = '<cmd>FzfLua lsp_references<cr>', opts = { desc = 'References' } },
+  { lhs = 'gI', rhs = '<cmd>FzfLua lsp_implementations<cr>', opts = { desc = 'Goto Implementation' } },
+  { lhs = 'gy', rhs = '<cmd>FzfLua lsp_typedefs<cr>', opts = { desc = 'Goto T[y]pe Definition' } },
+  { lhs = 'gD', rhs = '<cmd>FzfLua lsp_declarations<cr>', opts = { desc = 'Goto Declaration' } },
+  { lhs = '<leader>fs', rhs = '<cmd>FzfLua lsp_document_symbols<cr>', opts = { desc = 'Document Symbols' } },
+  {
+    lhs = 'grd',
+    rhs = function()
+      vim.lsp.document_color.color_presentation()
+    end,
+    opts = { desc = 'Document Color' },
+  },
+  {
+    lhs = 'K',
+    rhs = function()
+      return vim.lsp.buf.hover()
+    end,
+    opts = { desc = 'Hover' },
+  },
+}
 ---@param client vim.lsp.Client
 ---@param bufnr number
 local add_lsp_keymaps = function(client, bufnr)
-  local base_keys = {
-    {
-      lhs = 'gd',
-      rhs = function()
-        require('fzf-lua').lsp_definitions { jump1 = true }
-      end,
-      opts = { desc = 'Goto Definition' },
-    },
-    {
-      lhs = 'gD',
-      rhs = function()
-        require('fzf-lua').lsp_definitions { jump1 = false }
-      end,
-      opts = { desc = 'Peek Definition' },
-    },
-    { lhs = 'gr', rhs = '<cmd>FzfLua lsp_references<cr>', opts = { desc = 'References' } },
-    { lhs = 'gI', rhs = '<cmd>FzfLua lsp_implementations<cr>', opts = { desc = 'Goto Implementation' } },
-    { lhs = 'gy', rhs = '<cmd>FzfLua lsp_typedefs<cr>', opts = { desc = 'Goto T[y]pe Definition' } },
-    { lhs = 'gD', rhs = '<cmd>FzfLua lsp_declarations<cr>', opts = { desc = 'Goto Declaration' } },
-    { lhs = '<leader>fs', rhs = '<cmd>FzfLua lsp_document_symbols<cr>', opts = { desc = 'Document Symbols' } },
-    {
-      lhs = 'grd',
-      rhs = function()
-        vim.lsp.document_color.color_presentation()
-      end,
-      opts = { desc = 'Document Color' },
-    },
-    {
-      lhs = 'K',
-      rhs = function()
-        return vim.lsp.buf.hover()
-      end,
-      opts = { desc = 'Hover' },
-    },
-  }
+  local lsp_keys = {}
   if client:supports_method('textDocument/signatureHelp', bufnr) then
-    vim.tbl_extend('force', base_keys, {
+    vim.tbl_extend('force', lsp_keys, {
       {
         lhs = 'gK',
         rhs = function()
@@ -166,7 +237,7 @@ local add_lsp_keymaps = function(client, bufnr)
     })
   end
   if client:supports_method('textDocument/signatureHelp', bufnr) then
-    vim.tbl_extend('force', base_keys, {
+    vim.tbl_extend('force', lsp_keys, {
       {
         lhs = 'gK',
         rhs = function()
@@ -190,7 +261,7 @@ local add_lsp_keymaps = function(client, bufnr)
     })
   end
   if client:supports_method('textDocument/codeAction', bufnr) then
-    vim.tbl_extend('force', base_keys, {
+    vim.tbl_extend('force', lsp_keys, {
       {
         mode = { 'n', 'v' },
         lhs = '<leader>ca',
@@ -216,29 +287,45 @@ local add_lsp_keymaps = function(client, bufnr)
   end
 
   if client:supports_method('textDocument/rename', bufnr) then
-    vim.tbl_extend('force', base_keys, {
+    vim.tbl_extend('force', lsp_keys, {
       { lhs = '<leader>cr', rhs = vim.lsp.buf.rename, opts = { desc = 'Rename' }, has = 'rename' },
     })
   end
-  KEYS.define(base_keys)
+  for _, key in ipairs(lsp_keys) do
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', key.lhs, key.rhs, key.opts)
+  end
 end
+---@param client vim.lsp.Client
+---@param bufnr integer
+local on_attach = function(client, bufnr)
+  add_completion(client, bufnr)
+  add_document_highlight(client, bufnr)
+  add_inlay_hint_support(client, bufnr)
+
+  -- Don't check for the capability here to allow dynamic registration of the request.
+  vim.lsp.document_color.enable(true, bufnr)
+  add_lsp_keymaps(client, bufnr)
+  add_cursor_hold_diagnostics(client, bufnr)
+  if client:supports_method 'textDocument/codeAction' then
+    require('lsp.code_action').on_attach(bufnr, client)
+  end
+end
+
 -- Two ways shown to configure keymaps with LSP
 --- Dynamic registration of capabilities
-vim.lsp.handlers['client/registerCapability'] = (function(overridden)
+vim.lsp.handlers['client/registerCapability'] = (function(overridden_register_caps)
   return function(err, res, ctx)
-    local result = overridden(err, res, ctx)
     local client = vim.lsp.get_client_by_id(ctx.client_id)
     if not client then
       return
     end
 
     VimRc.info(string.format('[registerCapability] - Client %s', client.name))
-    -- VimRc.debug(client.capabilities)
-    -- for bufnr, _ in pairs(client.attached_buffers) do
-    --   -- Call your custom on_attach logic...
-    --   on_attach(client, bufnr)
+    VimRc.debug(client.capabilities)
+    -- Update mappings when registering dynamic capabilities.
+    on_attach(client, vim.api.nvim_get_current_buf())
     -- end
-    return result
+    return overridden_register_caps(err, res, ctx)
   end
 end)(vim.lsp.handlers['client/registerCapability'])
 
@@ -249,33 +336,13 @@ vim.api.nvim_create_autocmd('LspAttach', {
     local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
     local bufnr = args.buf
     VimRc.info(string.format('[LspAttach autocmd] - Client %s', client.name))
-    add_completion(client, bufnr)
-    add_document_highlight(client, bufnr)
-    add_inlay_hint_support(client, bufnr)
-
-    -- Don't check for the capability here to allow dynamic registration of the request.
-    vim.lsp.document_color.enable(true, bufnr)
-    add_lsp_keymaps(client, bufnr)
-    add_cursor_hold_diagnostics(client, bufnr)
-    if client:supports_method 'textDocument/codeAction' then
-      require('lsp.code_action').on_attach(bufnr, client)
-    end
+    on_attach(client, bufnr)
   end,
 })
 
 -- Set up LSP servers.
-local desired_lsp_servers = { 'lua_ls', 'tinymyst', 'esbonio', 'clangd', 'cmake', 'bashls', 'taplo', 'yamlls', 'jsonls', 'marksman', 'ruff' }
-local found_server_cfgs = vim
-  .iter(vim.api.nvim_get_runtime_file('lsp/*.lua', true))
-  :map(function(file)
-    return vim.fn.fnamemodify(file, ':t:r')
-  end)
-  :totable()
-for _, server in ipairs(desired_lsp_servers) do
-  if not vim.iter(found_server_cfgs):find(server) then
-    VimRc.warn(string.format("Couldn' find %s lsp server in configs in runtime path", server))
-  end
-end
+local desired_lsp_servers = { 'lua_ls', 'tinymyst', 'clangd', 'cmake', 'bashls', 'taplo', 'yamlls', 'jsonls', 'marksman', 'ruff' }
+local custom_caps_lsps = { 'devicetree_ls' }
 vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
   once = true,
   callback = function()
@@ -285,69 +352,7 @@ vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
     else
       vim.lsp.config('*', { capabilities = require('blink.cmp').get_lsp_capabilities(nil, true) })
     end
+    -- custom_lsp_caps_registration(custom_caps_lsps)
     vim.lsp.enable(desired_lsp_servers)
   end,
 })
-
--- vim.lsp.config('devicetree_ls', {
---   capabilities = {
---     textDocument = {
---       semanticTokens = {
---         dynamicRegistration = false,
---         requests = {
---           range = false,
---           full = true,
---         },
---         tokenTypes = {
---           'namespace',
---           'class',
---           'enum',
---           'interface',
---           'struct',
---           'typeParameter',
---           'type',
---           'parameter',
---           'variable',
---           'property',
---           'enumMember',
---           'decorator',
---           'event',
---           'function',
---           'method',
---           'macro',
---           'label',
---           'comment',
---           'string',
---           'keyword',
---           'number',
---           'regexp',
---           'operator',
---         },
---         tokenModifiers = {
---           'declaration',
---           'definition',
---           'readonly',
---           'static',
---           'deprecated',
---           'abstract',
---           'async',
---           'modification',
---           'documentation',
---           'defaultLibrary',
---         },
---         formats = { 'relative' },
---       },
---
---       -- Enable formatting
---       formatting = {
---         dynamicRegistration = false,
---       },
---
---       -- Enable folding range support
---       foldingRange = {
---         dynamicRegistration = false,
---         lineFoldingOnly = true,
---       },
---     },
---   },
--- })

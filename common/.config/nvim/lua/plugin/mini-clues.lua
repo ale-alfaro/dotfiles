@@ -1,5 +1,5 @@
 local miniclue = require 'mini.clue'
-
+miniclue.enable_all_triggers()
 miniclue.setup {
   triggers = {
     -- Builtins.
@@ -36,21 +36,5 @@ miniclue.setup {
   },
   window = {
     delay = 500,
-    scroll_down = '<C-f>',
-    scroll_up = '<C-b>',
-    config = function(bufnr)
-      local max_width = 0
-      for _, line in ipairs(vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)) do
-        max_width = math.max(max_width, vim.fn.strchars(line))
-      end
-
-      -- Keep some right padding.
-      max_width = max_width + 2
-
-      return {
-        -- Dynamic width capped at 70.
-        width = math.min(70, max_width),
-      }
-    end,
   },
 }

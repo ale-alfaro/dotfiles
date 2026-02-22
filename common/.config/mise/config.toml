@@ -1,15 +1,9 @@
 
 [settings]
 experimental = true
-python.uv_venv_auto = "source"
-# python.uv_venv_create_args = ['--clear']
-# configure how frequently (in minutes) to fetch updated plugin repository changes
-# this is updated whenever a new runtime is installed
-# (note: this isn't currently implemented but there are plans to add it: https://github.com/jdx/mise/discussions/6735)
-plugin_autoupdate_last_check_duration = '1 week' # set to 0 to disable updates
+python.uv_venv_auto = true
 unix_default_file_shell_args = 'zsh -uc'
 unix_default_inline_shell_args = 'zsh -uc'
-# config files with these prefixes will be trusted by default
 trusted_config_paths = ['~/sibel/eng/fw', '~/sibel/eng/tools']
 
 verbose = false      # set to true to see full installation output, see `MISE_VERBOSE`
@@ -21,19 +15,33 @@ yes = false          # set to true to automatically answer yes to all prompts
 not_found_auto_install = true # see MISE_NOT_FOUND_AUTO_INSTALL
 task_output = "prefix"        # see Tasks Runner for more information
 
+status = {
+  missing_tools = "if_other_versions_installed",
+  show_env = true,
+  show_tools = true,
+}
+env_shell_expand = true
+use_file_shell_for_executable_tasks = true
+task.show_full_cmd = true
+
 
 [tools]
+atuin = "latest"
 claude-code = "latest"
+cmake = "latest"
 codex = "latest"
+devcontainer-cli = "latest"
+"github:alltuner/mise-completions-sync" = "latest"
 node = "latest"
 "pipx:cmakelang" = { version = "latest", extras = "yaml,html-gen" }
+"pipx:docling" = "latest"
 "pipx:ptpython" = "latest"
 "pipx:pudb" = "latest"
 "pipx:pyrefly" = "latest"
 "pipx:ruff" = "latest"
 "pipx:ty" = "latest"
 python = ["latest", "3.13"]
+starship = "latest"
 tree-sitter = "latest"
 uv = "latest"
-# [env]
-# MISE_EXPERIMENTAL=1
+

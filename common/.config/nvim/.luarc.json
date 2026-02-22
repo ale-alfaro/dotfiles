@@ -17,6 +17,7 @@
       "$XDG_DATA_HOME/nvim/site/pack/core/opt/overseer.nvim",
       "$XDG_DATA_HOME/nvim/site/pack/core/opt/render-markdown.nvim",
       "$XDG_DATA_HOME/nvim/site/pack/core/opt/mini.nvim",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/oil.nvim",
       "$XDG_DATA_HOME/nvim/site/pack/core/opt/plenary.nvim",
       "$XDG_DATA_HOME/nvim/site/pack/core/opt/nvim/after"
     ]

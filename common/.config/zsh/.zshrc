@@ -1,8 +1,12 @@
 ## For zsh configuration related needs go to https://thevaluable.dev/zsh-install-configure-mouseless/
 
-# If not running interactively, don't do anything (leave this at the top of this file)
+if [[ -n ${NRFUTIL_TOOLCHAIN_MANAGER_PROMPT_PREFIX} ]]; then
+  echo "Running nrfutil!"
+  return
+fi
+
 if [[ $- != *i* ]]; then
-  export CODEX_HOME="$XDG_CONFIG_HOME/codex"
+  # export CODEX_HOME="$XDG_CONFIG_HOME/codex"
   source <(mise activate zsh --shims)
   return
 fi

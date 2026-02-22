@@ -1,257 +1,222 @@
----@module "mini.nvim"
----
----@alias FsType 'file'| 'directory' | 'symlink'
----@class MiniFilesFsEntry
----@field fs_type FsType
----@field path string  -full path of an entry.
----@field name string - - basename of an entry (including extension)
----
----@param entry MiniFilesFsEntry
----@return boolean
-local filter = function(entry)
-  return entry.fs_type ~= 'file' or entry.name ~= '.DS_Store'
-end
---- Default prefix of file system entries
----
---- - If set up |mini.icons|, use |MiniIcons.get()| for "directory"/"file" category.
---- - Otherwise:
----     - For directory return fixed icon and "MiniFilesDirectory" group name.
----     - For file try to use `get_icon()` from 'nvim-tree/nvim-web-devicons'.
----       If missing, return fixed icon and 'MiniFilesFile' group name.
----
-vim.api.nvim_set_hl(0, 'MiniFilesSymLink', { link = 'PmenuExtra' })
----@param fs_entry MiniFilesFsEntry
----@return string, string
-local prefix = function(fs_entry)
-  -- Prefer 'mini.icons'
-  local filetype = vim.fn.getftype(fs_entry.path)
-  if filetype == 'link' then
-    return VimRc.icons.os.Interface .. ' ', 'MiniFilesSymLink'
-  else
-    local category = fs_entry.fs_type == 'directory' and 'directory' or 'file'
-    if category == 'directory' then
-      return VimRc.icons.os.Folder .. ' ', 'MiniFilesDirectory'
-    else
-      if MiniIcons ~= nil then
-        local icon, hl = MiniIcons.get(category, fs_entry.path)
-        return icon .. ' ', hl
-      else
-        -- Try falling back to 'nvim-web-devicons'
-        return ' ', 'MiniFilesFile'
-      end
-    end
-  end
-end
-
---- Default sort of file system entries
----
---- Sort directories and files separately (alphabetically ignoring case) and
---- put directories first.
----@param entries MiniFilesFsEntry[]
----@return MiniFilesFsEntry[]
-local sort = function(entries)
-  local function compare_alphanumerically(e1, e2)
-    -- Put directories first.
-    if e1.is_dir and not e2.is_dir then
-      return true
-    end
-    if not e1.is_dir and e2.is_dir then
+---@module 'oil'
+vim.pack.add(_G.plug_spec { 'stevearc/oil.nvim' })
+require('oil').setup {
+  -- Oil will take over directory buffers (e.g. `vim .` or `:e src/`)
+  -- Set to false if you want some other plugin (e.g. netrw) to open when you edit directories.
+  default_file_explorer = true,
+  -- Id is automatically added at the beginning, and name at the end
+  -- See :help oil-columns
+  columns = {
+    'icon',
+    'permissions',
+    'size',
+    'mtime',
+  },
+  -- Buffer-local options to use for oil buffers
+  buf_options = {
+    buflisted = false,
+    bufhidden = 'hide',
+  },
+  -- Window-local options to use for oil buffers
+  win_options = {
+    wrap = false,
+    signcolumn = 'no',
+    cursorcolumn = false,
+    foldcolumn = '0',
+    spell = false,
+    list = false,
+    conceallevel = 3,
+    concealcursor = 'nvic',
+  },
+  -- Send deleted files to the trash instead of permanently deleting them (:help oil-trash)
+  delete_to_trash = true,
+  -- Skip the confirmation popup for simple operations (:help oil.skip_confirm_for_simple_edits)
+  skip_confirm_for_simple_edits = true,
+  -- Selecting a new/moved/renamed file or directory will prompt you to save changes first
+  -- (:help prompt_save_on_select_new_entry)
+  prompt_save_on_select_new_entry = true,
+  -- Oil will automatically delete hidden buffers after this delay
+  -- You can set the delay to false to disable cleanup entirely
+  -- Note that the cleanup process only starts when none of the oil buffers are currently displayed
+  cleanup_delay_ms = 2000,
+  lsp_file_methods = {
+    -- Enable or disable LSP file operations
+    enabled = true,
+    -- Time to wait for LSP file operations to complete before skipping
+    timeout_ms = 1000,
+    -- Set to true to autosave buffers that are updated with LSP willRenameFiles
+    -- Set to "unmodified" to only save unmodified buffers
+    autosave_changes = false,
+  },
+  -- Constrain the cursor to the editable parts of the oil buffer
+  -- Set to `false` to disable, or "name" to keep it on the file names
+  constrain_cursor = 'editable',
+  -- Set to true to watch the filesystem for changes and reload oil
+  watch_for_changes = true,
+  -- Keymaps in oil buffer. Can be any value that `vim.keymap.set` accepts OR a table of keymap
+  -- options with a `callback` (e.g. { callback = function() ... end, desc = "", mode = "n" })
+  -- Additionally, if it is a string that matches "actions.<name>",
+  -- it will use the mapping at require("oil.actions").<name>
+  -- Set to `false` to remove a keymap
+  -- See :help oil-actions for a list of all available actions
+  keymaps = {
+    ['g?'] = { 'actions.show_help', mode = 'n' },
+    ['<CR>'] = 'actions.select',
+    ['<Right>'] = { 'actions.select', mode = 'n' },
+    ['<C-v>'] = { 'actions.select', opts = { vertical = true } },
+    ['<C-s>'] = { 'actions.select', opts = { horizontal = true } },
+    ['gp'] = 'actions.preview',
+    ['q'] = { 'actions.close', mode = 'n' },
+    ['='] = 'actions.refresh',
+    ['<Left>'] = { 'actions.parent', mode = 'n' },
+    ['gw'] = { 'actions.open_cwd', mode = 'n' },
+    ['g~'] = { 'actions.cd', opts = { scope = 'tab' }, mode = 'n' },
+    ['gs'] = { 'actions.change_sort', mode = 'n' },
+    ['gx'] = 'actions.open_external',
+    ['<C-t>'] = 'actions.open_terminal',
+    ['g.'] = { 'actions.toggle_hidden', mode = 'n' },
+    ['g\\'] = { 'actions.toggle_trash', mode = 'n' },
+    ['gy'] = 'actions.yank_entry',
+    ['<M-q>'] = 'actions.send_to_qflist',
+  },
+  -- Set to false to disable all of the above keymaps
+  use_default_keymaps = false,
+  view_options = {
+    -- Show files and directories that start with "."
+    show_hidden = true,
+    -- This function defines what is considered a "hidden" file
+    is_hidden_file = function(name, bufnr)
+      local m = name:match '^%.'
+      return m ~= nil
+    end,
+    -- This function defines what will never be shown, even when `show_hidden` is set
+    is_always_hidden = function(name, bufnr)
       return false
-    end
-    -- Order numerically based on digits if the text before them is equal.
-    if e1.pre_digits == e2.pre_digits and e1.digits ~= nil and e2.digits ~= nil then
-      return e1.digits < e2.digits
-    end
-    -- Otherwise order alphabetically ignoring case.
-    return e1.lower_name < e2.lower_name
-  end
-
-  local sorted = vim.tbl_map(function(entry)
-    local pre_digits, digits = entry.name:match '^(%D*)(%d+)'
-    if digits ~= nil then
-      digits = tonumber(digits)
-    end
-
-    return {
-      fs_type = entry.fs_type,
-      name = entry.name,
-      path = entry.path,
-      lower_name = entry.name:lower(),
-      is_dir = entry.fs_type == 'directory',
-      pre_digits = pre_digits,
-      digits = digits,
-    }
-  end, entries)
-  table.sort(sorted, compare_alphanumerically)
-  -- Keep only the necessary fields.
-  return vim.tbl_map(function(x)
-    return { name = x.name, fs_type = x.fs_type, path = x.path }
-  end, sorted)
-end
-local add_marks = function()
-  --
-  MiniFiles.set_bookmark('c', vim.fn.stdpath 'config', { desc = 'Config' })
-  local plugin_dir = vim.fn.stdpath 'data' .. '/site/pack/core/opt'
-  MiniFiles.set_bookmark('p', plugin_dir, { desc = 'Plugins' })
-  MiniFiles.set_bookmark('w', vim.fn.getcwd, { desc = 'Working directory' })
-  local envs = { o = 'OBSIDIAN_HOME', C = 'XDG_CONFIG_HOME', z = 'ZEPHYR_BASE', W = 'WEST_TOPDIR' }
-  for key, name in pairs(envs) do
-    local env = ENV(name)
-    if env and vim.uv.fs_stat(env) then
-      MiniFiles.set_bookmark(key, env, { desc = name })
-    end
-  end
-end
-_G.new_user_autocmd(add_marks, 'MiniFilesExplorerOpen', 'Add bookmarks')
-
-require('mini.files').setup {
-  windows = {
-
-    -- Whether to show preview of file/directory under cursor
-    preview = true,
-    -- Width of focused window
-    width_focus = 50,
-    -- Width of non-focused window
-    width_nofocus = 15,
-    --
-    -- Width of preview window
-    width_preview = 25,
+    end,
+    -- Sort file names with numbers in a more intuitive order for humans.
+    -- Can be "fast", true, or false. "fast" will turn it off for large directories.
+    natural_order = 'fast',
+    -- Sort file and directory names case insensitive
+    case_insensitive = true,
+    sort = {
+      -- sort order can be "asc" or "desc"
+      -- see :help oil-columns to see which columns are sortable
+      { 'type', 'asc' },
+      { 'name', 'asc' },
+    },
+    -- Customize the highlight group for the file name
+    -- highlight_filename = function(entry, is_hidden, is_link_target, is_link_orphan)
+    --   return is_link_orphan or is_link_target
+    -- end,
   },
-  options = {
-    permanent_delete = false,
-    use_as_default_explorer = true,
+  -- EXPERIMENTAL support for performing file operations with git
+  -- git = {
+  --   -- Return true to automatically git add/mv/rm files
+  --   add = function(path)
+  --     return false
+  --   end,
+  --   mv = function(src_path, dest_path)
+  --     return false
+  --   end,
+  --   rm = function(path)
+  --     return false
+  --   end,
+  -- },
+  -- Configuration for the floating keymaps help window
+  keymaps_help = {
+    border = 'rounded',
   },
-  content = {
-
-    filter = filter,
-    sort = sort,
-    prefix = prefix,
+}
+---@type table<string,oil.OpenPreviewOpts>
+local oil_preview_opts = {
+  ['vsplit'] = {
+    preview = { vertical = true, horizontal = false, split = 'aboveleft' },
   },
-  mappings = {
-    close = 'q',
-    -- go_in       = 'l',
-    go_in = '<Right>',
-    go_in_plus = 'L',
-    go_out = 'h',
-    -- go_out_plus = 'H',
-    go_out_plus = '<Left>',
-    mark_goto = "'",
-    mark_set = 'm',
-    reset = '<BS>',
-    reveal_cwd = '@',
-    show_help = 'g?',
-    synchronize = '=',
-    trim_left = '<',
-    trim_right = '>',
+  ['hsplit'] = {
+    preview = { vertical = false, horizontal = true, split = 'botleft' },
   },
 }
 
-vim.api.nvim_create_autocmd('User', {
-  pattern = 'MiniFilesBufferCreate',
-  callback = function(args)
-    local b = args.data.buf_id
-    vim.keymap.set('n', 'g~', function()
-      local path = (MiniFiles.get_fs_entry() or {}).path
-      if path == nil then
-        return vim.notify 'Cursor is not on valid entry'
-      end
-      vim.fn.chdir(vim.fs.dirname(path))
-    end, { buffer = b, desc = 'Set cwd' })
-    vim.keymap.set('n', 'gy', function()
-      local path = (MiniFiles.get_fs_entry() or {}).path
-      if path == nil then
-        return vim.notify 'Cursor is not on valid entry'
-      end
-      vim.fn.setreg(vim.v.register, path)
-    end, { buffer = b, desc = 'Yank path' })
-    vim.keymap.set('n', 'gX', function()
-      vim.ui.open(MiniFiles.get_fs_entry().path)
-    end, { buffer = b, desc = 'OS open' })
-  end,
-})
+---Open oil browser for a directory
+---@param dir string?
+---@param preview? "hsplit"|"vsplit"
+local function create_oil_open_fn(dir, preview)
+  local opts = nil
+  if preview and oil_preview_opts[preview] then
+    opts = oil_preview_opts[preview]
+  end
+  return function()
+    require('oil').open(dir, opts, function()
+      MiniClue.disable_buf_triggers(0)
+    end)
+  end
+end
+local oil_open_current_buf = create_oil_open_fn(nil, 'vsplit')
 
-_G.new_user_autocmd(function(event)
-  local from = event.data.from
-  local to = event.data.to
-  local changes = {
-    files = { {
-      oldUri = vim.uri_from_fname(from),
-      newUri = vim.uri_from_fname(to),
-    } },
-  }
-
-  local clients = vim.lsp.get_clients()
-  for _, client in ipairs(clients) do
-    if client:supports_method 'workspace/willRenameFiles' then
-      local resp = client:request_sync('workspace/willRenameFiles', changes, 1000, 0)
-      if resp and resp.result ~= nil then
-        vim.lsp.util.apply_workspace_edit(resp.result, client.offset_encoding)
-      end
+---@comment create a oil open function
+---@param loc string
+---@return function
+local oil_open_loc = function(loc)
+  if type(loc) == 'string' and vim.uv.fs_stat(loc) then
+    return create_oil_open_fn(loc)
+  else
+    VimRc.err 'Location is not a valid path. Creating open cwd function'
+    return function()
+      VimRc.warn 'Location was not a valid path. Check your config!'
+      create_oil_open_fn(vim.fn.getcwd())
     end
   end
-  for _, client in ipairs(clients) do
-    if client:supports_method 'workspace/didRenameFiles' then
-      client:notify('workspace/didRenameFiles', changes)
-    end
-  end
-end, 'MiniFilesActionRename', 'Rename Files')
-
+end
+-- require 'plugin.mini-files'
 -- stylua:ignore
 local wkey_prefix = '<leader>e'
 KEYS.define({
-  { lhs = wkey_prefix .. 'x', rhs = '<Cmd>lua MiniFiles.open()<CR>', opts = { desc = 'File Explorer (cwd)' } },
-  { lhs = wkey_prefix .. 'c', rhs = '<Cmd>lua MiniFiles.open(vim.api.nvim_buf_get_name(0))<CR>', opts = { desc = 'File Explorer' } },
   {
     mode = { 'n', 'v', 'x' },
     lhs = wkey_prefix .. 'v',
-    rhs = '<Cmd>edit $MYVIMRC<CR>',
+    rhs = oil_open_loc(vim.fn.expand '$MYVIMRC'),
     opts = { desc = 'Edit $MYVIMRC' },
   },
   {
     mode = { 'n', 'v', 'x' },
     lhs = wkey_prefix .. 'z',
-    rhs = '<Cmd>e $ZDOTDIR<CR>',
+    rhs = oil_open_loc(vim.fn.getenv 'ZDOTDIR'),
     opts = { desc = 'Edit .zshrc' },
   },
   {
     mode = { 'n', 'v', 'x' },
     lhs = wkey_prefix .. 'o',
-    rhs = '<Cmd>e $OBSIDIAN_HOME<CR>',
+    rhs = oil_open_loc(vim.fn.getenv 'OBSIDIAN_HOME'),
     opts = { desc = 'Edit Obsidian' },
   },
   {
     mode = { 'n', 'v', 'x' },
     lhs = wkey_prefix .. '.',
-    rhs = '<Cmd>e $HOME/dotfiles<CR>',
+    rhs = oil_open_loc(vim.fs.joinpath(vim.fn.getenv 'HOME', 'dotfiles')),
     opts = { desc = 'Edit Dotfiles' },
   },
   {
     mode = { 'n', 'v', 'x' },
-    lhs = wkey_prefix .. 'j',
-    rhs = '<Cmd>e $JUST_HOME<CR>',
-    opts = { desc = 'Edit Global JustFiles' },
-  },
-  {
-    mode = { 'n', 'v', 'x' },
-    lhs = wkey_prefix .. 'd',
-    rhs = '<Cmd>e $XDG_CONFIG_HOME/direnv<CR>',
+    lhs = wkey_prefix .. 'm',
+    rhs = oil_open_loc(vim.fs.joinpath(vim.fn.getenv 'XDG_CONFIG_HOME', 'mise')),
     opts = { desc = 'Edit Direnv config' },
   },
-  {
-    mode = { 'n', 'v', 'x' },
-    lhs = wkey_prefix .. 'h',
-    rhs = '<Cmd>e $XDG_CONFIG_HOME/hypr/hyprland<CR>',
-    opts = { desc = 'Edit Hyprland Config' },
-  },
+  -- {
+  --   mode = { 'n', 'v', 'x' },
+  --   lhs = wkey_prefix .. 'c',
+  --   rhs = oil_open_loc(vim.fn.getenv 'XDG_CONFIG_HOME'),
+  --   opts = { desc = 'Edit Config Home' },
+  -- },
   {
     mode = { 'n', 'v', 'x' },
     lhs = wkey_prefix .. 'w',
-    rhs = '<Cmd>e $ZEPHYR_BASE<CR>',
-    opts = { desc = 'Explore Zephyr Base' },
+    rhs = oil_open_loc(vim.fs.joinpath(vim.fn.getenv 'HOME', 'sibel', 'eng')),
+    opts = { desc = 'Explore Sibel Work Dirs' },
   },
+  { lhs = '<leader><leader>', rhs = '<Cmd>Oil<CR>', opts = { desc = 'File Explorer (cwd)' } },
   {
     lhs = '\\',
-    rhs = '<Cmd>lua MiniFiles.open(vim.api.nvim_buf_get_name(0))<CR>',
+    rhs = oil_open_current_buf,
     opts = { desc = 'Open file explorer shortcut' },
   },
 }, { group = 'Explore/Edit', prefix = wkey_prefix })

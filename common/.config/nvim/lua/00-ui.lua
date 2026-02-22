@@ -35,7 +35,7 @@ mini_icons.mock_nvim_web_devicons()
 require('mini.statusline').setup()
 -- Tabline. Sets `:h 'tabline'` to show all listed buffers in a line at the top.
 -- Buffers are ordered as they were created. Navigate with `[b` and `]b`.
-require('mini.tabline').setup()
+--require('mini.tabline').setup()
 -- It is not enabled by default because it is not really needed on a daily basis.
 -- Uncomment next line (use `gcc`) to enable.
 require('mini.hipatterns').setup {

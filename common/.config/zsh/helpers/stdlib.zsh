@@ -94,44 +94,6 @@ append_path () {
       PATH="${PATH:+$PATH:}$1"
   esac
 }
-# --- vendored from https://github.com/bashup/realpaths
-# realpath.dirname() {
-#   REPLY=.
-#   ! [[ $1 =~ /+[^/]+/*$|^//$ ]] || REPLY="${1%"${BASH_REMATCH[0]}"}"
-#   REPLY=${REPLY:-/}
-# }
-# realpath.basename() {
-#   REPLY=/
-#   ! [[ $1 =~ /*([^/]+)/*$ ]] || REPLY="${BASH_REMATCH[1]}"
-# }
-#
-# realpath.absolute() {
-#   REPLY=$PWD
-#   # local eg=extglob
-#   # ! shopt -q $eg || eg=
-#   # ${eg:+shopt -s $eg}
-#   while (($#)); do case $1 in
-#     // | //[^/]*)
-#       REPLY=//
-#       set -- "${1:2}" "${@:2}"
-#       ;;
-#     /*)
-#       REPLY=/
-#       set -- "${1##+(/)}" "${@:2}"
-#       ;;
-#     */*) set -- "${1%%/*}" "${1##"${1%%/*}"+(/)}" "${@:2}" ;;
-#     '' | .) shift ;;
-#     ..)
-#       realpath.dirname "$REPLY"
-#       shift
-#       ;;
-#     *)
-#       REPLY="${REPLY%/}/$1"
-#       shift
-#       ;;
-#     esac done
-#   # ${eg:+shopt -u $eg}
-# }
 
 # Usage: PATH_add <path> [<path> ...]
 #

@@ -24,7 +24,7 @@ dots-bin *args:
 
 [group('binutils')]
 addr2line-bat elf addr:
-    {{ require('arm-none-eabi-addr2line') }} -p -e {{ elf }} {{ addr }} | awk -- '{{ addr2line-bat-awk }}'
+    {{ require('arm-zephyr-eabi-addr2line') }} -p -e {{ elf }} {{ addr }} | awk -- '{{ addr2line-bat-awk }}'
 
 [group('nrfutil')]
 nrf-flash hex_file snr:

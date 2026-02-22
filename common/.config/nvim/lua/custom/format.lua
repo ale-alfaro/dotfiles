@@ -138,6 +138,17 @@ local function setup_formatting()
         -- end,
       },
 
+      kconfigstyle = {
+        command = 'kconfigstyle',
+        args = { '--preset', 'zephyr', '-w', '$FILENAME' },
+        stdin = false,
+        -- require_cwd = true,
+        -- cwd = function()
+        --   local bufnr = vim.api.nvim_buf_get_name(0)
+        --   return vim.fs.root(bufnr, { 'pyrefly.toml' })
+        -- end,
+      },
+
       prettier = {
         options = {
           ft_parsers = {
@@ -148,7 +159,6 @@ local function setup_formatting()
             yaml = 'yaml',
             markdown = 'markdown',
             typst = 'typst',
-            kconfig = 'kconfig',
             ['markdown.mdx'] = 'mdx',
           },
         },
@@ -158,8 +168,9 @@ local function setup_formatting()
       -- c = { name = 'clangd', timeout_ms = 500, lsp_format = 'prefer' },
       c = { 'clang-format', 'uncrustify' }, -- try out uncrustify
       cpp = { name = 'clangd', timeout_ms = 500, lsp_format = 'prefer' },
-      cmake = { 'cmake_format' },
+      cmake = { command = 'cmake-format', args = { '-' } },
       dts = { name = 'devicetree_ls', timeout_ms = 500, lsp_format = 'prefer' },
+      kconfig = { 'kconfigstyle' },
       lua = { 'stylua' },
       sh = { 'shfmt' },
       just = { 'just' },
@@ -176,7 +187,6 @@ local function setup_formatting()
       jsonc = { 'prettier' },
       yaml = { 'prettier' },
       typst = { 'typstyle' },
-      kconfig = { 'prettier' },
       -- yaml = { 'yamlfmt' },
       -- ['*'] = { 'codespell' },
       ['_'] = { 'trim_whitespace' },

@@ -6,7 +6,7 @@
 [[ -r "$ZDOTDIR/helpers/plugin_helper.zsh" ]] && source "$ZDOTDIR/helpers/plugin_helper.zsh"
 
 
-
+safe_source mise activate zsh
 
 compress(){
   tar -czf "${1%/}.tar.gz" "${1%/}"
@@ -73,7 +73,14 @@ zd(){
   elif [ -d "$1" ]; then
     builtin cd "$1"
   else
-    local dir="$(zoxide query --all --list --score | fzf +s -0 -1 -q"$*" || echo $pipestatus[2])"
+    local dir="$(zoxide query --all --list --score |
+      fzf +s -0 -1 \
+        --query="$1" \
+        --ansi \
+        --reverse \
+        --no-sort \
+        --prompt 'Dirs> ' \
+        --preview-window up:60% || echo $pipestatus[2])"
     if [[ -d $dir ]]; then
       z $dir
     else
@@ -84,26 +91,26 @@ zd(){
 
 
 # Alias for just (command runner)
-fj() {
-  local selection=$(
-    fd '[Jj]ustfile|\..*just' -tf --strip-cwd-prefix |
-      fzf \
-        --ansi \
-        --reverse \
-        --no-sort \
-        --preview-label '[ Justfiles ]' \
-        --preview 'just --list -f {}' \
-        --header-first \
-        --prompt "Justfiles > " \
-        --preview-window up:60% \
-        --header '
-    > ENTER to choose recipe to run
-    '
-  )
-  if [[ -n "$selection" ]]; then
-      just  -f $selection -d ${selection%%/*} --choose
-  fi
-}
+# fj() {
+#   local selection=$(
+#     fd '[Jj]ustfile|\..*just' -tf --strip-cwd-prefix |
+#       fzf \
+#         --ansi \
+#         --reverse \
+#         --no-sort \
+#         --preview-label '[ Justfiles ]' \
+#         --preview 'just --list -f {}' \
+#         --header-first \
+#         --prompt "Justfiles > " \
+#         --preview-window up:60% \
+#         --header '
+#     > ENTER to choose recipe to run
+#     '
+#   )
+#   if [[ -n "$selection" ]]; then
+#       just  -f $selection -d ${selection%%/*} --choose
+#   fi
+# }
 if [[ ! -z "${JUST_HOME}" ]]; then
   alias .j='just --justfile ~/.config/just/Justfile --working-directory .'
   # alias .j='just -g'

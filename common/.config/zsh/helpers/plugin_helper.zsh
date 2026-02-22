@@ -1,4 +1,3 @@
-
 #!/usr/bin/env zsh
 
 # little ZSH plugin helper taken  https://github.com/mplusp/dotfiles/blob/main/zsh/.config/zsh/plugin_helper.zsh
