@@ -27,10 +27,7 @@ require('mini.surround').setup {
   },
 }
 
-local block_compltype = { shellcmd = true }
-
 local mini_cmdline = require 'mini.cmdline'
--- mini_cmdline.setup()
 mini_cmdline.setup {
 
   -- Autocompletion: show `:h 'wildmenu'` as you type
@@ -46,6 +43,7 @@ mini_cmdline.setup {
 
     -- Whether to map arrow keys for more consistent wildmenu behavior
     map_arrows = true,
+    predicate = mini_cmdline.default_autocomplete_predicate,
     -- predicate = function()
     --   return not block_compltype[vim.fn.getcmdcompltype()] -- MiniCmdline.default_autocomplete_predicate
     -- end,
@@ -56,6 +54,7 @@ mini_cmdline.setup {
     enable = true,
 
     -- Custom autocorrection rule
+    predicate = mini_cmdline.default_autocorrect_func,
   },
 
   -- Autopeek: show command's target range in a floating window
@@ -72,44 +71,10 @@ mini_cmdline.setup {
     window = {
 
       -- Function to render statuscolumn
-      statuscolumn = function(data)
-        local n, l, r = vim.v.lnum, data.left, data.right
-        local s = n == l and (n == r and '* ' or '< ') or n == r and '> ' or ''
-        -- Needs explicit highlighting via `:h 'statusline'` syntax
-        return '%#MiniCmdlinePeekSign#' .. s
-      end,
+      statuscolumn = mini_cmdline.default_autopeek_statuscolumn,
     },
   },
 }
--- Completion and signature help. Implements async "two stage" autocompletion:
--- - Based on attached LSP servers that support completion.
--- - Fallback (based on built-in keyword completion) if there is no LSP candidates.
---
--- Example usage in Insert mode with attached LSP:
--- - Start typing text that should be recognized by LSP (like variable name).
--- - After 100ms a popup menu with candidates appears.
--- - Press `<Tab>` / `<S-Tab>` to navigate down/up the list. These are set up
---   in 'mini.keymap'. You can also use `<C-n>` / `<C-p>`.
--- - During navigation there is an info window to the right showing extra info
---   that the LSP server can provide about the candidate. It appears after the
---   candidate stays selected for 100ms. Use `<C-f>` / `<C-b>` to scroll it.
--- - Navigating to an entry also changes buffer text. If you are happy with it,
---   keep typing after it. To discard completion completely, press `<C-e>`.
--- - After pressing special trigger(s), usually `(`, a window appears that shows
---   the signature of the current function/method. It gets updated as you type
---   showing the currently active parameter.
---
--- Example usage in Insert mode without an attached LSP or in places not
--- supported by the LSP (like comments):
--- - Start typing a word that is present in current or opened buffers.
--- - After 100ms popup menu with candidates appears.
--- - Navigate with `<Tab>` / `<S-Tab>` or `<C-n>` / `<C-p>`. This also updates
---   buffer text. If happy with choice, keep typing. Stop with `<C-e>`.
---
--- It also works with snippet candidates provided by LSP server. Best experience
--- when paired with 'mini.snippets' (which is set up in this file).
--- Customize post-processing of LSP responses for a better user experience.
--- Don't show 'Text' suggestions (usually noisy) and show snippets last.
 local process_items_opts = { kind_priority = { Text = -1, Snippet = 99 } }
 local process_items = function(items, base)
   return MiniCompletion.default_process_items(items, base, process_items_opts)
@@ -131,9 +96,58 @@ local on_attach = function(ev)
 end
 vim.api.nvim_create_autocmd('LspAttach', { pattern = nil, callback = on_attach, desc = "Set 'omnifunc'" })
 
-require('mini.snippets').setup()
-local rhs = function()
-  MiniSnippets.expand { match = false }
+local snippets = require 'mini.snippets'
+local match_strict = function(snips)
+  return snippets.default_match(snips, { pattern_fuzzy = '%S' })
 end
-vim.keymap.set('i', '<C-Space>', rhs, { desc = 'Expand all' })
+snippets.setup {
+  mappings = { expand = '', jump_next = '', jump_prev = '' },
+  expand = { match = match_strict },
+}
+
+local expand_or_jump = function()
+  local can_expand = #MiniSnippets.expand { insert = false } > 0
+  if can_expand then
+    vim.schedule(MiniSnippets.expand)
+    return ''
+  end
+  local is_active = MiniSnippets.session.get() ~= nil
+  if is_active then
+    MiniSnippets.session.jump 'next'
+    return ''
+  end
+  return '\t'
+end
+local jump_prev = function()
+  MiniSnippets.session.jump 'prev'
+end
+vim.keymap.set('i', '<Tab>', expand_or_jump, { expr = true })
+vim.keymap.set('i', '<S-Tab>', jump_prev)
+vim.keymap.set('i', '<C-Space>', function()
+  MiniSnippets.expand { match = false }
+end, { desc = 'Expand all' })
+
+-- Stop session immediately after jumping to final tabstop
+local fin_stop = function(args)
+  if args.data.tabstop_to == '0' then
+    MiniSnippets.session.stop()
+  end
+end
+vim.api.nvim_create_autocmd('User', { pattern = 'MiniSnippetsSessionJump', callback = fin_stop })
+-- # Stop all sessions on Normal mode exit ~
+-- Use |ModeChanged| and |MiniSnippets-events| events: >lua
+
+local make_stop = function()
+  vim.api.nvim_create_autocmd('ModeChanged', {
+    pattern = '*:n',
+    once = true,
+    callback = function()
+      while MiniSnippets.session.get() do
+        MiniSnippets.session.stop()
+      end
+    end,
+  })
+end
+vim.api.nvim_create_autocmd('User', { pattern = 'MiniSnippetsSessionStart', callback = make_stop })
+
 require 'plugin.mini-etc'

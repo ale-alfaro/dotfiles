@@ -9,10 +9,10 @@ vim.o.undofile = true -- Enable persistent undo
 vim.opt.number = true
 vim.o.shada = "'100,<50,s10,:1000,/100,@100,h" -- Limit ShaDa file (for startup)
 -- -- Enable all filetype plugins and syntax (if not enabled, for better startup)
--- vim.cmd 'filetype plugin indent on'
--- if vim.fn.exists 'syntax_on' ~= 1 then
---   vim.cmd 'syntax enable'
--- end
+vim.cmd 'filetype plugin indent on'
+if vim.fn.exists 'syntax_on' ~= 1 then
+  vim.cmd 'syntax enable'
+end
 --
 -- -- Editing ====================================================================
 vim.o.autoindent = true -- Use auto indent
@@ -20,11 +20,11 @@ vim.o.expandtab = true -- Convert tabs to spaces
 vim.o.iskeyword = '@,48-57,_,192-255,-' -- Treat dash as `word` textobject part
 vim.o.incsearch = true -- Show search matches while typing
 vim.o.infercase = true -- Infer case in built-in completion
-vim.o.shiftwidth = 2 -- Use this number of spaces for indentation
+vim.o.shiftwidth = 4 -- Use this number of spaces for indentation
 vim.o.smartcase = true -- Respect case if search pattern has upper case
 vim.o.smartindent = true -- Make indenting smart
 vim.o.spelloptions = 'camel' -- Treat camelCase word parts as separate words
-vim.o.tabstop = 2 -- Show tab as this number of spaces
+vim.o.tabstop = 4 -- Show tab as this number of spaces
 vim.o.virtualedit = 'block' -- Allow going past end of line in blockwise mode
 --
 -- -- Pattern for a start of numbered list (used in `gw`). This reads as

@@ -1,4 +1,3 @@
-
 -- Extend and create a/i textobjects, like `:h a(`, `:h a'`, and more).
 -- Contains not only `a` and `i` type of textobjects, but also their "next" and
 -- "last" variants that will explicitly search for textobjects after and before
@@ -114,13 +113,80 @@ require('nvim-treesitter').install(tresitter_ft)
 vim.g.treesitter_folds = true
 vim.api.nvim_create_autocmd('FileType', {
   pattern = tresitter_ft,
-  callback = function()
+  callback = function(args)
     vim.treesitter.start()
     vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
     if vim.g.treesitter_folds then
       vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
       vim.wo[0][0].foldmethod = 'expr'
     end
+    local buf = args.buf
+    local ok, parser = pcall(vim.treesitter.get_parser, buf)
+    if not ok or not parser then
+      VimRc.info 'Couldnt load treesitter incremental selection for buffer'
+      return
+    end
+    local language = parser:lang()
+    KEYS.define {
+      init_selection = {
+        'n',
+        '<C-Space>',
+        function()
+          require('custom.treesitter.incremenetal').init_selection(buf, language)
+        end,
+        'Start selecting nodes with treesitter-modules',
+      },
+      node_incremental = {
+        'x',
+        '<C-Space>',
+        function()
+          require('custom.treesitter.incremenetal').incremental(buf, language, function(_parser, node)
+            return node:parent()
+          end)
+        end,
+        'Increment selection to named node',
+      },
+      scope_incremental = {
+        'x',
+        '<M-Space>',
+        function()
+          local ts = require 'custom.treesitter.incremenetal'
+          ts.incremental(buf, language, function(parser, node)
+            if language ~= parser:lang() then
+              -- only handle scope for root language
+
+              return nil
+            end
+            local scopes = ts.scopes(buf, language, parser:trees()[1]:root())
+            if #scopes == 0 then
+              return nil
+            end
+            local result = node:parent()
+            while result and not vim.tbl_contains(scopes, result) do
+              result = result:parent()
+            end
+            assert(result ~= node, 'infinite loop')
+            return result
+          end)
+        end,
+        'Increment selection to surrounding scope',
+      },
+      node_decremental = {
+        'x',
+        '<C-S-Space>',
+        function()
+          local ts = require 'custom.treesitter.incremenetal'
+          -- NOTE: if a user does incremental selection, moves the cursor, enters
+          -- visual mode, then triggers this function, they will still jump back to
+          -- their previous selection, this behavior matches the original.
+          local node = ts.nodes:pop(buf)
+          if node then
+            ts.select(node)
+          end
+        end,
+        'Shrink selection to previous named node',
+      },
+    }
   end,
   desc = 'Nvim-treesitter activation',
 })
@@ -139,4 +205,3 @@ query.add_predicate('is-mise?', function(match, pattern, bufnr, pred, metadata)
   local filename = vim.fn.fnamemodify(filepath, ':t')
   return string.match(filename, '.*mise.*%.toml$') ~= nil
 end, { force = true, all = false })
-require 'custom.treesitter'
