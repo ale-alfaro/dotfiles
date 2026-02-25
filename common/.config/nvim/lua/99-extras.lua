@@ -1,5 +1,3 @@
----
-
 vim.pack.add(_G.plug_spec {
   'stevearc/conform.nvim',
   'stevearc/overseer.nvim',
@@ -47,4 +45,5 @@ end, {
   desc = 'Re-enable lint-on-save',
 })
 require 'plugin.git'
-require 'plugin.codecompanion'
+require 'plugin.optional.grug'
+-- require 'plugin.codecompanion'

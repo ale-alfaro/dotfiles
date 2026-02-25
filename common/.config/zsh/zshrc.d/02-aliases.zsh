@@ -7,8 +7,8 @@
 
 # source <(mise activate zsh)
 
-compress(){
-  tar -czf "${1%/}.tar.gz" "${1%/}"
+compress() {
+    tar -czf "${1%/}.tar.gz" "${1%/}"
 }
 
 alias decompress="tar -xzf"
@@ -16,31 +16,24 @@ alias decompress="tar -xzf"
 alias v="n"
 # Array to quoted list of strings
 n() {
-  if [[ "$#" -eq 0 ]]; then nvim; fi
-  if [[ "$#" -eq 1 ]]; then
-    case "$1" in
-      nvim | zsh | direnv | hypr | wezterm)
-        nvim "$XDG_CONFIG_HOME/$1"
-        ;;
-      sdk-ncs)
-        nvim "$HOME/ncs"
-        ;;
-      *)
-        if [[ -d "$1" ]]; then
-          zd "$1" && nvim .
-        else
-          nvim "$1"
-        fi
-        ;;
-    esac
-  else
-    nvim "$@"
-  fi
+    if [[ "$#" -eq 0 ]]; then nvim; fi
+    if [[ "$#" -eq 1 ]]; then
+        case "$1" in
+            nvim | zsh | mise | hypr | wezterm | hypr)
+                nvim "$XDG_CONFIG_HOME/$1"
+                ;;
+            *)
+                if [[ -d "$1" ]]; then
+                    zi "$1" && nvim .
+                else
+                    nvim "$1"
+                fi
+                ;;
+        esac
+    else
+        nvim "$@"
+    fi
 }
-
-# Navigate back to directories easily using the zsh directory stack feature
-alias d='dirs -v'
-for index ({1..9}) alias "$index"="cd +${index}"; unset index
 
 #######################################################
 # CLI Aliases
@@ -69,7 +62,7 @@ alias -s cpp='$EDITOR'
 # alias -s py='$EDITOR'
 alias -s conf='$EDITOR'
 alias -s dts='$EDITOR'
-alias -s html=open  # macOS: open in default browser
+alias -s html=open # macOS: open in default browser
 
 # -------------------------------------------
 # 6. Global Aliases - Use Anywhere in Commands
@@ -89,14 +82,13 @@ alias -g NUL='>/dev/null 2>&1'
 alias -g J='| jqp'
 
 if [[ "$OSTYPE" == "linux"* ]]; then
-  open() {
-    xdg-open "$@" >/dev/null 2>&1 &
-  }
-  alias -g C='| wlcopy'
+    open() {
+        xdg-open "$@" >/dev/null 2>&1 &
+    }
+    alias -g C='| wlcopy'
 elif [[ "$OSTYPE" == "macos"* ]]; then
-  alias -g C='| pbcopy'
+    alias -g C='| pbcopy'
 fi
-
 
 # -------------------------------------------
 # 7. zmv - Advanced Batch Rename/Move
@@ -112,42 +104,9 @@ autoload -Uz zmv
 
 # Helpful aliases for zmv
 alias mmv='noglob zmv -W'
-alias zcp='zmv -C'  # Copy with patterns
-alias zln='zmv -L'  # Link with patterns
+alias zcp='zmv -C' # Copy with patterns
+alias zln='zmv -L' # Link with patterns
 
-
-ai_commit(){
-diff=$(git diff --cached | head -n 10)
-if [ -z "$diff" ]; then
-  echo "No changes in staging. Add changes first."
-  exit 1
-fi
-
-local -r message=$(
-  cat <<-EOF
-  Please suggest a commit messages, given the following diff and using the template below,
-  this is a non-interactive session, the message you output will be the one written to the commit message editor
-  so be to the point and add any problems to the beggining of the message with a clear sign that something went wrong.
-
-  **Output Format**
-  Follow this output format and ONLY output raw commit messages without spacing, numbers or other decorations:
-  <type>(<scope>): <description>.
-
-  **Example**
-  fix(app): add password regex pattern
-  test(unit): add new test cases
-  style: remove unused imports
-  refactor(pages): extract common code to utils/wait.ts
-
-  **Changes to analyze:**
-  \$(git diff --cached --stat)
-  \$(git diff --cached)
-
-
-  **Recent Commits on Repo for Reference:**
-  \$(git log -n 10 --pretty=format:'%h %s')
-EOF
-  )
-  codex e -o /tmp/commit_msg "$message"
-  git commit -e -F /tmp/commit_msg
-}
+    # Navigate back to directories easily using the zsh directory stack feature
+alias d='dirs -v'
+for index ({1..9}) alias "$index"="cd +${index}"; unset index

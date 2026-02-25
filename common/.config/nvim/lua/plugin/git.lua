@@ -22,14 +22,15 @@ require('mini.git').setup()
 local git_log_cmd = [[Git log --pretty=format:\%h\ \%as\ │\ \%s --topo-order]]
 local git_log_buf_cmd = git_log_cmd .. ' --follow -- %'
 local wkey_git_prefix = '<leader>g'
-KEYS.define({
-  { lhs = wkey_git_prefix .. 'l', rhs = '<Cmd>' .. git_log_cmd .. '<CR>', opts = { desc = 'Git Log' } },
-  { lhs = wkey_git_prefix .. 'L', rhs = '<Cmd>' .. git_log_buf_cmd .. '<CR>', opts = { desc = 'Git Log buffer' } },
-  { mode = { 'n', 'x' }, lhs = wkey_git_prefix .. 's', rhs = '<Cmd>lua MiniGit.show_at_cursor()<CR>', opts = { desc = 'Git Show at cursor' } },
+KEYS.define {
+  -- { lhs = wkey_git_prefix .. 'l', rhs = '<Cmd>' .. git_log_cmd .. '<CR>', opts = { desc = 'Git Log' } },
+  -- { lhs = wkey_git_prefix .. 'L', rhs = '<Cmd>' .. git_log_buf_cmd .. '<CR>', opts = { desc = 'Git Log buffer' } },
+  -- { mode = { 'n', 'x' }, lhs = wkey_git_prefix .. 's', rhs = '<Cmd>lua MiniGit.show_at_cursor()<CR>', opts = { desc = 'Git Show at cursor' } },
+  { lhs = wkey_git_prefix .. 's', rhs = '<cmd>FzfLua git_diff<cr>', opts = { desc = 'Search Git Diff' } },
   { lhs = wkey_git_prefix .. 'd', rhs = '<Cmd>Git diff<CR>', opts = { desc = 'Git Diff' } },
-  { lhs = wkey_git_prefix .. 'c', rhs = '<cmd>FzfLua changes<cr>', opts = { desc = 'Search Git Diff (file-only)' } },
+  { lhs = wkey_git_prefix .. 'c', rhs = '<CMD>FzfLua changes<CR>', opts = { desc = 'Search Git Diff (file-only)' } },
   { lhs = wkey_git_prefix .. 'h', rhs = '<cmd>FzfLua git_hunks<cr>', opts = { desc = 'Git Hunks' } },
-}, { prefix = wkey_git_prefix, group = 'Git' })
+}
 
 local align_blame = function(au_data)
   if au_data.data.git_subcommand ~= 'blame' then
@@ -54,29 +55,3 @@ local format_summary = function(data)
 end
 
 vim.api.nvim_create_autocmd('User', { pattern = 'MiniGitUpdated', callback = format_summary })
-
--- Work with diff hunks that represent the difference between the buffer text and
--- some reference text set by a source. Default source uses text from Git index.
--- Also provides summary info used in developer section of 'mini.statusline'.
--- Example usage:
--- - `ghip` - apply hunks (`gh`) within *i*nside *p*aragraph
--- - `gHG` - reset hunks (`gH`) from cursor until end of buffer (`G`)
--- - `ghgh` - apply (`gh`) hunk at cursor (`gh`)
--- - `gHgh` - reset (`gH`) hunk at cursor (`gh`)
--- - `<Leader>go` - toggle overlay
---
--- See also:
--- - `:h MiniDiff-overview` - overview of how module works
--- - `:h MiniDiff-diff-summary` - available summary information
--- - `:h MiniDiff.gen_source` - available built-in sources
-
-local diff = require 'mini.diff'
--- Multiple sources (attempted to attach in order)
-diff.setup { source = { diff.gen_source.git(), diff.gen_source.save() } }
-local wkey_prefix = '<leader>d'
-KEYS.define({
-  -- General & Navigation
-  -- stylua:ignore
-  { lhs = wkey_prefix .. 's', rhs = '<cmd>FzfLua git_diff<cr>', opts = { desc = 'Search Git Diff' } },
-  { lhs = wkey_prefix .. 't', rhs = '<Cmd>lua MiniDiff.toggle_overlay()<CR>', opts = { desc = 'Diff Toggle Overlay' } },
-}, { prefix = wkey_prefix, group = 'Diff' })

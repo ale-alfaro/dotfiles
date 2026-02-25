@@ -277,3 +277,89 @@ q
 c
 info threads
 q
+b z_arm_fault
+mon reset
+c
+l
+info reg
+x/32wx $sp
+x/16i $pc
+q
+c
+info reg
+x/32wx $sp
+x/16i $pc
+q
+b assert_post_action 
+info break
+delet 5
+info b
+delete 6
+l __start
+b __start
+mon reset
+c
+n
+l
+q
+c
+l
+n
+q
+q
+c
+l
+q
+info b
+mon reset
+c
+q
+mon reset
+c
+q
+c
+q
+q
+mon reset
+c
+q
+c
+q
+b z_arm_fatal_error 
+mon reset
+c
+bt
+info locals
+info reg
+p *(((struct arch_esf*)esf)->extra_info->exc_return)
+q
+mon reset halt
+source ~/.config/gdb/cortex_m.py 
+faultdetails()
+b assert_post_action 
+mon reset
+mon halt
+c
+bt
+5
+up 5
+l
+info locals
+p/x data
+p/x (lsm6dsl_data*)data
+p/x (struct lsm6dsl_data*)data
+p/x *(struct lsm6dsl_data*)data
+p/x *(struct lsm6dsl_config*)config
+q
+q
+mon halt
+c
+q
+mon reset
+mon halt
+info reg
+file samples/build/hello_world/chest/zephyr/zephyr.elf 
+loadfile samples/build/hello_world/chest/zephyr/zephyr.elf 
+load samples/build/hello_world/chest/zephyr/zephyr.hex
+c
+q

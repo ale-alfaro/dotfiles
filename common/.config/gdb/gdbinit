@@ -24,19 +24,12 @@ set history remove-duplicates unlimited
 # Example: add-auto-load-safe-path ~/src
 # (Keep reading below for why.)
 add-auto-load-safe-path ~/sibel/eng/fw
-add-auto-load-safe-path ~/sibel/eng/fw/playground_workspace
 add-auto-load-safe-path ~/sibel/eng/fw/anne_sensors_workspace
 
 # --- TUI (text UI) defaults ---
-# tui enable
-# layout regs
-# focus cmd
-# add-auto-load-safe-path ~/sibel/eng/fw//
 # set debuginfod enabled on
 # # fix up our python path first since GDB is likely linked with system (not brewed) python
-# source ~/.config/gdb/pebble_gdb_scripts/gdb_python_path_fix.py
-# source ~/.config/gdb/pebble_gdb_scripts/gdb_utils.py
-define zfault_dump
+define z_fault_dump
     printf "\n=== z_arm_fault context ===\n"
     printf "msp=0x%x psp=0x%x exc_return=0x%x\n", $r0, $r1, $r2
 
@@ -57,3 +50,24 @@ define zfault_dump
     p/a *(uint32_t[8] *)$msp
     p/a *(uint32_t[8] *)$psp
 
+define z_esf_dump
+    # Dump stacked registers from esf_copy if available
+    if &esf_copy
+      printf "ESF: r0=0x%x r1=0x%x r2=0x%x r3=0x%x r12=0x%x lr=0x%x pc=0x%x xpsr=0x%x\n", \
+        esf_copy.basic.r0, esf_copy.basic.r1, esf_copy.basic.r2, esf_copy.basic.r3, \
+        esf_copy.basic.r12, esf_copy.basic.lr, esf_copy.basic.pc, esf_copy.basic.xpsr
+    end
+
+    #Print current thread stack info and name
+    if &_kernel
+      set $cur = _kernel.cpus[0].current
+      printf "current=0x%x\n", $cur
+      if $cur
+        printf "stack_start=0x%x stack_size=0x%x\n", $cur->stack_info.start, $cur->stack_info.size
+        # Uncomment if CONFIG_THREAD_NAME=y
+        printf "name=%s\n", $cur->name
+      end
+    end
+  end
+
+# source ~/.config/gdb/cortex_m.py

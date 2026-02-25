@@ -166,82 +166,6 @@ path_add() {
   export "$var_name=$joined_path"
 }
 
-# Usage: MANPATH_add <path>
-#
-# Prepends a path to the MANPATH environment variable while making sure that
-# `man` can still lookup the system manual pages.
-#
-# If MANPATH is not empty, man will only look in MANPATH.
-# So if we set MANPATH=$path, mpath_arrayan will only look in $path.
-# Instead, prepend to `man -w` (which outputs man's default paths).
-#
-MANPATH_add() {
-  local old_paths="${MANPATH:-$(man -w)}"
-  local dir
-  dir=$(expand_path "$1")
-  export "MANPATH=$dir:$old_paths"
-}
-
-# Usage: PATH_rm <pattern> [<pattern> ...]
-# Removes directories that match any of the given shell patterns from
-# the PATH environment variable. Order of the remaining directories is
-# preserved in the resulting PATH.
-#
-# Bash pattern syntax:
-#   https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html
-#
-# Example:
-#
-#   echo $PATH
-#   # output: /dontremove/me:/remove/me:/usr/local/bin/:...
-#   PATH_rm '/remove/*'
-#   echo $PATH
-#   # output: /dontremove/me:/usr/local/bin/:...
-#
-# PATH_rm() {
-#   path_rm PATH "$@"
-# }
-
-# Usage: path_rm <varname> <pattern> [<pattern> ...]
-#
-# Works like PATH_rm except that it's for an arbitrary <varname>.
-# path_rm() {
-#   local path i discard var_name="$1"
-#   # split existing paths into an array
-#   # typeset -a path_array
-#   declare -a path_array
-#   IFS=: read -ra path_array <<<"${!1}"
-#   shift
-#
-#   patterns=("$@")
-#   results=()
-#
-#   # iterate over path entries, discard entries that match any of the patterns
-#   # shellcheck disable=SC2068
-#   for path in ${path_array[@]+"${path_array[@]}"}; do
-#     discard=false
-#     # shellcheck disable=SC2068
-#     for pattern in ${patterns[@]+"${patterns[@]}"}; do
-#       if [[ "$path" == +($pattern) ]]; then
-#         discard=true
-#         break
-#       fi
-#     done
-#     if ! $discard; then
-#       results+=("$path")
-#     fi
-#   done
-#
-#   # join the result paths
-#   result=$(
-#     IFS=:
-#     echo "${results[*]}"
-#   )
-#
-#   # and finally export back the result to the original variable
-#   export "$var_name=$result"
-# }
-
 # Usage: load_prefix <prefix_path>
 #
 # Expands some common path variables for the given <prefix_path> prefix. This is
@@ -354,40 +278,6 @@ convert_rst_to_md_dir(){
 
 
 _err() {
-    echo "Do not understand: ${1}" >&2
-    echo "Arguments need to be files, names of arrays, or standard input." >&2
-    echo 'Arrays must be referenced by name, so use `array` instead of `$array`.' >&2
-    return 1
 }
 
-arr2quotes(){
-  emulate -L zsh
-  typeset -U ar
-  local ar=()
-
-  if [[ $# == 0 ]]; then
-      # Listen to STDIN if no arguments are provided
-      ar=( ${(f)$(<&0)} )
-  fi
-
-  while [[ $# > 0 ]]; do
-      if [[ -r "$1" && -f "$1" ]]; then
-          # A readable file.
-          ar=(
-              $ar[@]
-              "${(fq)$(<$1)}"
-          )
-      elif [[ ${(Pt)1} = "array" ]]; then
-          ar=(
-              $ar[@]
-              ${(Pq)1}
-          )
-      else
-          _err
-      fi
-      shift
-  done
-
-  print ${(j:, :)${(qq)ar[@]}}
-}
 

@@ -80,3 +80,6 @@ pyrightconfig.json
 .ionide
 
 **/.claude/settings.local.json
+
+.nvim.lua
+.nvim/*
