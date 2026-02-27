@@ -49,6 +49,7 @@
 fpath=($fpath ${XDG_DATA_HOME}/zsh/generated_man_completions ${XDG_STATE_HOME}/zsh/plugins/zsh-users/zsh-completions/src)
 fpath=(${XDG_DATA_HOME:-$HOME/.local/share}/mise-completions/zsh ${ZDOTDIR}/completions/src $fpath)
 cache_directory="$XDG_CACHE_HOME/zsh"
+[[ -r "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh" ]] && . "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh"
 autoload -Uz compinit && compinit -d $cache_directory
 
 zstyle ':completion:*' completer _complete _extensions _approximate _history

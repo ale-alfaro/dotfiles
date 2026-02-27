@@ -12,3 +12,11 @@ dev = [
     "kconfiglib==14.1.1a4",
     "west>=1.5.0",
 ]
+
+[tool.pyrefly]
+site-package-path = [".venv/lib/python3.14/site-packages"]
+skip-interpreter-query = true
+python-platform = "linux"
+python-version = "3.14"
+
+

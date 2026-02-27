@@ -11,7 +11,8 @@ base-prefer = env
 
 [alias]
 update = update -o=--depth=1 -n
-run = build --pristine=never --target run
-menuconfig = build --pristine=never --target menuconfig
+target = build --pristine=never --target
+menuconfig = build --pristine=never --target menuconfig -d
+initlevels = build --pristine=never --target initlevels -d
+build_resume = build --pristine=never --target all -d
 boards = boards --format "{name:30} | {qualifiers:30} | {dir}"
-list = list -f " {name:30} | {path:50} "

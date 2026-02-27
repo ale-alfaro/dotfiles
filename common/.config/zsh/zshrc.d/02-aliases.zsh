@@ -23,7 +23,7 @@ n() {
                 nvim "$XDG_CONFIG_HOME/$1"
                 ;;
             *)
-                if [[ -d "$1" ]]; then
+                if [[ ! -d "$1" && ! -f "$1" ]]; then
                     zi "$1" && nvim .
                 else
                     nvim "$1"
@@ -109,4 +109,4 @@ alias zln='zmv -L' # Link with patterns
 
     # Navigate back to directories easily using the zsh directory stack feature
 alias d='dirs -v'
-for index ({1..9}) alias "$index"="cd +${index}"; unset index
+for index ({1..9}) alias "$index"="builtin cd +${index}"; unset index

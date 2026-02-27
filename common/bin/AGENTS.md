@@ -1,1 +1,0 @@
-../llm_memory/tech_stacks/python/AGENTS.md

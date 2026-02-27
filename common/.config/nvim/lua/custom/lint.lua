@@ -58,35 +58,31 @@ end
 
 VimRc.autolint_events = { 'BufWritePost', 'BufReadPost', 'InsertLeave' }
 
-local function setup_linting()
-  local lint = require 'lint'
-  lint.linters_by_ft = VimRc.linters_by_ft
-  vim.g.disabled_autolinting = true
-  local aug = vim.api.nvim_create_augroup('Lint', { clear = true })
-  vim.api.nvim_create_autocmd(VimRc.autolint_events, {
-    desc = 'Lint on save',
-    pattern = '*',
-    group = aug,
-    callback = function(args)
-      if not vim.api.nvim_buf_is_valid(args.buf) or vim.bo[args.buf].buftype ~= '' then
-        return
-      end
-      if not vim.g.disabled_autolinting then
-        VimRc.setTimeout(100, VimRc.do_lint)
-      end
-    end,
-  })
+local lint = require 'lint'
+lint.linters_by_ft = VimRc.linters_by_ft
+vim.g.disabled_autolinting = true
+local aug = vim.api.nvim_create_augroup('Lint', { clear = true })
+vim.api.nvim_create_autocmd(VimRc.autolint_events, {
+  desc = 'Lint on save',
+  pattern = '*',
+  group = aug,
+  callback = function(args)
+    if not vim.api.nvim_buf_is_valid(args.buf) or vim.bo[args.buf].buftype ~= '' then
+      return
+    end
+    if not vim.g.disabled_autolinting then
+      VimRc.setTimeout(100, VimRc.do_lint)
+    end
+  end,
+})
 
-  vim.api.nvim_create_user_command('ViewLinter', function()
-    local cur = VimRc.current_linters()
-    local ft = VimRc.filetype_linters()
-    vim.notify('Current running linters: ' .. table.concat(cur, ', '))
-    vim.notify('ft linters: ' .. table.concat(ft, ', '))
-  end, { desc = 'View Running Linters' })
+vim.api.nvim_create_user_command('ViewLinter', function()
+  local cur = VimRc.current_linters()
+  local ft = VimRc.filetype_linters()
+  vim.notify('Current running linters: ' .. table.concat(cur, ', '))
+  vim.notify('ft linters: ' .. table.concat(ft, ', '))
+end, { desc = 'View Running Linters' })
 
-  vim.api.nvim_create_user_command('Lint', function()
-    VimRc.do_lint()
-  end, { desc = 'View Running Linters' })
-end
-
-return { setup = setup_linting }
+vim.api.nvim_create_user_command('Lint', function()
+  VimRc.do_lint()
+end, { desc = 'View Running Linters' })

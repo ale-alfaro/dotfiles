@@ -9,16 +9,29 @@ vim.pack.add(_G.plug_spec {
 require 'plugin.mini-clues'
 require 'plugin.overseer'
 require 'plugin.quicker'
-require('render-markdown').setup {
-  preset = 'obsidian',
-}
+require('render-markdown').setup(
+  ---@type render.md.Settings
+  {
+    preset = 'obsidian',
+    completions = {
+      lsp = {
+        enabled = true,
+      },
+    },
+    pipe_table = {
+      preset = 'round',
+    },
+  }
+)
 -- Formatting
 -- See also:
 -- - `:h Conform`
 -- - `:h conform-options`
 -- - `:h conform-formatters`
-require('custom.format').setup()
-require('custom.lint').setup()
+vim.g.disable_autoformat = false
+require 'custom.format'
+vim.g.disabled_autolinting = false
+require 'custom.lint'
 
 vim.api.nvim_create_user_command('FormatDisable', function(args)
   if args.bang then

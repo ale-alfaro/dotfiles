@@ -30,4 +30,5 @@ linux/.config/ly/save.txt
 **/codex/version*
 **/codex/auth*
 **/codex/tmp*
-/common/.config/codex/log
+log
+**/tmux/plugins

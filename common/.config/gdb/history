@@ -363,3 +363,18 @@ loadfile samples/build/hello_world/chest/zephyr/zephyr.elf
 load samples/build/hello_world/chest/zephyr/zephyr.hex
 c
 q
+mon halt
+c
+l
+q
+mon reset
+mon halt
+c
+info reg
+info symbol 
+info all-registers
+info vtbl
+info vector
+info stack
+info target
+q

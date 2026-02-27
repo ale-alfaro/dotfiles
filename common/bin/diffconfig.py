@@ -104,9 +104,13 @@ def diff_configs(prev: Mapping[str, str], curr: Mapping[str, str]) -> DiffResult
     return DiffResult(removed=removed, changed=changed, added=added)
 
 
-def create_merge_line(name: str, value: str) -> str:
+def create_merge_line(config_name: str, config_val: str) -> str:
     """Render a line in merge style (new config contents)."""
-    return f"# CONFIG_{name} is not set" if value == "n" else f"CONFIG_{name}={value}"
+    return (
+        f"# CONFIG_{config_name} is not set"
+        if config_val == "n"
+        else f"CONFIG_{config_name}={config_val}"
+    )
 
 
 def create_diff(diff: DiffResult, *, merge: bool) -> list[str]:
@@ -118,7 +122,7 @@ def create_diff(diff: DiffResult, *, merge: bool) -> list[str]:
 
     for name, (old, new) in diff.changed.items():
         if merge:
-            diff_res.append(create_merge_line(name, value))
+            diff_res.append(create_merge_line(name, new))
         else:
             diff_res.append(Text(f" {name} {old} -> {new}", style="yellow"))
 
@@ -164,15 +168,17 @@ def cmp(
     prev: Annotated[
         Path,
         cyclopts.Parameter(
+            "*",
             help="Baseline .config file (defaults to .config.old when omitted)",
         ),
-    ],
+    ] = ".config.old",
     curr: Annotated[
         Path,
         cyclopts.Parameter(
+            "*",
             help="Baseline .config file (defaults to .config.old when omitted)",
         ),
-    ],
+    ] = ".config",
     *,
     output: Annotated[
         Path | None,

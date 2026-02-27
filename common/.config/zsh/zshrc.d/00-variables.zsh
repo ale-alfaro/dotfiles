@@ -15,7 +15,7 @@ export SAVEHIST=25001 # Maximum events in history file
 # Man pages
 export MANPAGER='nvim +Man!'
 
-local -r FZF_PREVIEW="if [ -d {} ]; then eza --tree --color=always {} | head -200; else bat -n --color=always --line-range :500 {}; fi"
+FZF_PREVIEW="if [ -d {} ]; then eza --tree --color=always {} | head -200; else bat -n --color=always --line-range :500 {}; fi"
 
 FZF_COLORS="bg+:#3B4252, \
       bg:#2E3440,\
