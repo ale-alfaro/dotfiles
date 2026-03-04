@@ -24,6 +24,7 @@ return {
         checkThirdParty = false,
         library = {
           vim.env.VIMRUNTIME,
+          vim.env.MYVIMRC,
           '${3rd}/luv/library',
         },
       },

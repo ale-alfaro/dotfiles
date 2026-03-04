@@ -166,7 +166,6 @@ local oil_open_loc = function(loc)
     end
   end
 end
--- require 'plugin.mini-files'
 -- stylua:ignore
 local wkey_prefix = '<leader>e'
 KEYS.define({

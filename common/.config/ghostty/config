@@ -20,21 +20,20 @@ adjust-cursor-thickness = 150%
 cursor-color = F8F8F2
 cursor-style-blink = false
 cursor-text = 000000
-shell-integration-features = no-cursor
+shell-integration-features = cursor,ssh-env,ssh-terminfo,sudo
 
 # Splits:
 unfocused-split-opacity = 0.4
 split-divider-color = A7DFEF
 
-link-previews = true
-link-url = true
+# link-previews = true
+# link-url = true
 # Cursor styling
 # Window
 window-theme = ghostty
 window-padding-x = 14
 window-padding-y = 14
 confirm-close-surface=false
-quit-after-last-window-closed = true
 selection-clear-on-copy = true
 copy-on-select = true
 quick-terminal-size = 30%
@@ -83,3 +82,7 @@ keybind = ctrl+shift+v=paste_from_clipboard
 
 keybind = alt+w=close_surface
 keybind = alt+shift+w=close_tab
+
+
+# Fix general slowness on hyprland (https://github.com/ghostty-org/ghostty/discussions/3224)
+async-backend = epoll

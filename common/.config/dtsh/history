@@ -141,3 +141,12 @@ cat\040&pca9430
 cat\040-A\040&pca9430
 ls
 q
+ls
+aliases
+alias
+q
+tree
+cat\040-A\040&pca9430-mfd
+alias
+cat\040-A\040/soc/i2c@40003000/pca9430-mfd@70
+q

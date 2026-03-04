@@ -2,17 +2,6 @@ local M = require 'custom.utils'
 M.debug_mode = false
 M.icons = require 'custom.icons'
 
-local function _fetch_env(env_name)
-  local env = vim.fn.getenv(env_name)
-  if env ~= vim.v.null then
-    return env
-  end
-  return nil
-end
--- 'WEST_TOPDIR'
-function _G.ENV(name, fallback)
-  return vim.fn.has_key(vim.fn.environ(), name) and _fetch_env(name) or fallback
-end
 M.THEME = 'kanagawa'
 --[[
 --  Global keymaps object for defining and toggling keys
@@ -353,5 +342,5 @@ function M.treesitter_list()
     :totable()
   VimRc.write_to_buffer(lines, 'VimRc-treesitter-list')
 end
-
+M.lsp = require 'custom.lsp'
 return M

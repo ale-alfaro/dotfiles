@@ -7,7 +7,6 @@ import argparse
 import datetime as dt
 import os
 import re
-import subprocess
 from collections.abc import Generator, Iterable
 from dataclasses import dataclass
 from pathlib import Path
@@ -22,10 +21,10 @@ try:
 
 except ImportError or ValueError as exc:
     print("Error: Dependencies not met.", exc)
-    SystemExit(1)
+    raise SystemExit(1)
 
 
-def notify(title: str, message: str, urgency: str):
+def notify(title: str, message: str, urgency: str) -> None:
     if not Gio:
         return
     noti: Gio.Notification = Gio.Notification.new(title)
@@ -86,7 +85,7 @@ class Task:
     recurrence: str | None
 
     def is_active_on(self, day: dt.date) -> bool:
-        if self.due == day or self.scheduled == day or self.start == day:
+        if day in {self.due, self.scheduled, self.start}:
             return True
         if self.start and self.start < day and (self.due is None or self.due >= day):
             return True

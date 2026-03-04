@@ -4,78 +4,25 @@ vim.pack.add(_G.plug_spec {
   'p00f/clangd_extensions.nvim',
 })
 
-require('lsp.custom_diagnostics').diagnostics_setup()
+VimRc.lsp.diagnostics_setup()
 
----@param lsp_names string[]
-local custom_lsp_caps_registration = function(lsp_names)
-  vim.iter(lsp_names):map(function(lsp_name)
-    if lsp_name == 'devicetree_ls' then
-      vim.lsp.config('devicetree_ls', {
-        capabilities = {
-          textDocument = {
-            semanticTokens = {
-              dynamicRegistration = false,
-              requests = {
-                range = false,
-                full = true,
-              },
-              tokenTypes = {
-                'namespace',
-                'class',
-                'enum',
-                'interface',
-                'struct',
-                'typeParameter',
-                'type',
-                'parameter',
-                'variable',
-                'property',
-                'enumMember',
-                'decorator',
-                'event',
-                'function',
-                'method',
-                'macro',
-                'label',
-                'comment',
-                'string',
-                'keyword',
-                'number',
-                'regexp',
-                'operator',
-              },
-              tokenModifiers = {
-                'declaration',
-                'definition',
-                'readonly',
-                'static',
-                'deprecated',
-                'abstract',
-                'async',
-                'modification',
-                'documentation',
-                'defaultLibrary',
-              },
-              formats = { 'relative' },
-            },
-
-            -- Enable formatting
-            formatting = {
-              dynamicRegistration = false,
-            },
-
-            -- Enable folding range support
-            foldingRange = {
-              dynamicRegistration = false,
-              lineFoldingOnly = true,
-            },
-          },
-        },
-      })
-    end
-  end)
-end
-
+require('tiny-code-action').setup {
+  picker = {
+    'buffer',
+    opts = {
+      hotkeys = true,
+      -- Use numeric labels.
+      hotkeys_mode = function(titles)
+        return vim
+          .iter(ipairs(titles))
+          :map(function(i)
+            return tostring(i)
+          end)
+          :totable()
+      end,
+    },
+  },
+}
 -- Disable inlay hints initially (and enable if needed with my ToggleInlayHints command).
 vim.g.inlay_hints = false
 
@@ -170,6 +117,10 @@ local add_completion = function(client, bufnr)
     -- local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
     -- client.server_capabilities.completionProvider.triggerCharacters = chars
     vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = true })
+  end
+  if MiniCompletion then
+    -- Set 'omnifunc' for LSP completion only when needed.
+    vim.bo[bufnr].omnifunc = 'v:lua.MiniCompletion.completefunc_lsp'
   end
 end
 
@@ -341,18 +292,26 @@ vim.api.nvim_create_autocmd('LspAttach', {
 })
 
 -- Set up LSP servers.
-local desired_lsp_servers = { 'lua_ls', 'tinymyst', 'clangd', 'cmake', 'bashls', 'taplo', 'yamlls', 'jsonls', 'marksman', 'ruff' }
-local custom_caps_lsps = { 'devicetree_ls' }
 vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
   once = true,
   callback = function()
     -- Extend neovim's client capabilities with the completion ones.
+    local ok, blink = pcall(require, 'blink.cmp')
+    local capabilities = vim.lsp.protocol.make_client_capabilities()
     if MiniCompletion then
-      vim.lsp.config('*', { capabilities = MiniCompletion.get_lsp_capabilities() })
-    else
-      vim.lsp.config('*', { capabilities = require('blink.cmp').get_lsp_capabilities(nil, true) })
+      capabilities = MiniCompletion.get_lsp_capabilities()
+    elseif ok and blink then
+      capabilities = blink.make_client_capabilities()
     end
-    -- custom_lsp_caps_registration(custom_caps_lsps)
-    vim.lsp.enable(desired_lsp_servers)
+    capabilities.textDocument.completion.completionItem.snippetSupport = true
+    vim.lsp.config('*', { capabilities = capabilities })
+    local nvim_dir = vim.fs.dirname(vim.fn.expand '$MYVIMRC')
+    local lsps = VimRc.lsp.configs_get(nvim_dir)
+    if lsps and #lsps > 0 then
+      VimRc.info(string.format('Enabling lsps for MYVIMRC: \n %s', table.concat(lsps, ' ')))
+      vim.lsp.enable(lsps)
+    else
+      VimRc.err('Couldnt find any lsp configs in ' .. nvim_dir)
+    end
   end,
 })

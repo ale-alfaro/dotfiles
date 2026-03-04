@@ -1,35 +1,17 @@
 local M = {}
 
-function M.tbl_find(tbl, predicate)
-  for idx, value in ipairs(tbl) do
-    if predicate(value) then
-      return value, idx
-    end
+-- Prepend mise shims to PATH
+vim.env.PATH = vim.env.HOME .. '/.local/share/mise/shims:' .. vim.env.PATH
+local function _fetch_env(env_name)
+  local env = vim.fn.getenv(env_name)
+  if env ~= vim.v.null then
+    return env
   end
-
   return nil
 end
-
-Direction = {
-  left = 'left',
-  right = 'right',
-  up = 'up',
-  down = 'down',
-}
-local dir_keys_wezterm_splits = {
-  [Direction.left] = '--left',
-  [Direction.right] = '--right',
-  [Direction.up] = '--top',
-  [Direction.down] = '--bottom',
-}
-local wezterm_cli_path = 'wezterm'
----Check if a window is a floating window
----@param win_id number|nil window ID to check, defaults to current window (0)
----@return boolean
-function M.is_floating_window(win_id)
-  win_id = win_id or 0
-  local win_cfg = vim.api.nvim_win_get_config(win_id)
-  return win_cfg and (win_cfg.relative ~= '' or not win_cfg.relative)
+-- 'WEST_TOPDIR'
+function M.ENV(name, fallback)
+  return vim.fn.has_key(vim.fn.environ(), name) and _fetch_env(name) or fallback
 end
 
 local executables_cache = {}
@@ -163,50 +145,6 @@ function M.west_config(config, set_val)
     VimRc.info('west config get ' .. config)
     return M.west(cmd)
   end
-end
-
----@param cmd string[]
----@return string output, number exit_code the stderr/stdout and the exit code
-local function wezterm_exec(cmd)
-  return M.run_cmd { 'wezterm', 'cli', table.unpack(cmd) }
-end
-
----@class wezterm_spanw_args
----@field cwd string
----@field percentage number
----@field program string
-
-local function wezterm_split_pane(direction, cwd, size, program_args)
-  local args = { 'split-pane', dir_keys_wezterm_splits[direction], '--cwd', cwd }
-  if size then
-    table.insert(args, '--percent')
-    table.insert(args, size)
-  end
-  if program_args and type(program_args) == 'table' and #program_args > 0 then
-    table.insert(args, '--')
-    vim.list_extend(args, program_args)
-  end
-  local ok, _ = pcall(wezterm_exec, args)
-  return ok
-end
-
-function M.wezterm_spawn_terminal()
-  local bufname = vim.api.nvim_buf_get_name(0)
-  local cwd
-  if bufname == '' or bufname == nil then
-    cwd = vim.fn.getcwd()
-  else
-    cwd = vim.fn.expand '%:p:h'
-  end
-  local ok = wezterm_split_pane(Direction.down, cwd, 30)
-  return ok
-end
-
-function M.wezterm_spawn_nvim_inst(direction, file)
-  local cwd = vim.fn.fnamemodify(file, ':h')
-  local program_args = { 'nvim', file }
-  local ok = wezterm_split_pane(direction, cwd, nil, program_args)
-  return ok
 end
 
 return M

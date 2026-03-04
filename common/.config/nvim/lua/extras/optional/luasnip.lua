@@ -310,7 +310,7 @@ return {
   config = function()
     local types = require 'luasnip.util.types'
     ---@diagnostic disable: undefined-field
-    local ls = require 'luasnip'
+    local ls = require 'extras.optional.luasnip'
     markdown_snippets(ls)
     ls.setup {
       -- Check if the current snippet was deleted.

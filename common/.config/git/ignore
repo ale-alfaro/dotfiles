@@ -83,3 +83,5 @@ pyrightconfig.json
 
 .nvim.lua
 .nvim/*
+
+mise.local.toml

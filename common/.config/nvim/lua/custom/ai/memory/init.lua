@@ -8,7 +8,7 @@ local M = {}
 
 ---@return CodeCompanion.Chat|nil
 local function get_chat()
-  local codecompanion = require 'codecompanion'
+  local codecompanion = require 'extras.codecompanion'
   local chat = codecompanion.last_chat()
 
   -- Create chat if none exists
@@ -61,7 +61,7 @@ function M.setup(opts)
   vim.api.nvim_create_autocmd('User', {
     pattern = 'CodeCompanionChatCreated',
     callback = function(event)
-      local chat = require('codecompanion').buf_get_chat(event.data.bufnr)
+      local chat = require('extras.codecompanion').buf_get_chat(event.data.bufnr)
       if not chat then
         return
       end

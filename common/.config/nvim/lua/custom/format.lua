@@ -120,9 +120,10 @@ require('conform').setup {
       stdin = false,
     },
 
-    cmakeformat = {
+    cmakelang = {
       command = 'cmake-format',
       args = { '--in-place', '$FILENAME' },
+      stdin = false,
     },
     prettier = {
       options = {
@@ -143,7 +144,7 @@ require('conform').setup {
     -- c = { name = 'clangd', timeout_ms = 500, lsp_format = 'prefer' },
     c = { 'clang-format', 'uncrustify' }, -- try out uncrustify
     cpp = { name = 'clangd', timeout_ms = 500, lsp_format = 'prefer' },
-    cmakeformat = { 'cmakeformat', timeout = 500, lsp_format = 'fallback' },
+    cmake = { 'cmakelang' },
     dts = { name = 'devicetree_ls', timeout_ms = 500, lsp_format = 'prefer' },
     kconfig = { 'kconfigstyle' },
     lua = { 'stylua' },
@@ -162,8 +163,6 @@ require('conform').setup {
     jsonc = { 'prettier' },
     yaml = { 'prettier' },
     typst = { 'typstyle' },
-    -- yaml = { 'yamlfmt' },
-    -- ['*'] = { 'codespell' },
     ['_'] = { 'trim_whitespace' },
   },
 }

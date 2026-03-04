@@ -1,4 +1,3 @@
-require 'plugin.treesitter'
 require('mini.bufremove').setup()
 KEYS.define {
 
@@ -75,7 +74,40 @@ mini_cmdline.setup {
     },
   },
 }
-local process_items_opts = { kind_priority = { Text = -1, Snippet = 99 } }
+
+--[[
+--
+  CompletionItemKind = {
+    Text = 1,
+    Method = 2,
+    Function = 3,
+    Constructor = 4,
+    Field = 5,
+    Variable = 6,
+    Class = 7,
+    Interface = 8,
+    Module = 9,
+    Property = 10,
+    Unit = 11,
+    Value = 12,
+    Enum = 13,
+    Keyword = 14,
+    Snippet = 15,
+    Color = 16,
+    File = 17,
+    Reference = 18,
+    Folder = 19,
+    EnumMember = 20,
+    Constant = 21,
+    Struct = 22,
+    Event = 23,
+    Operator = 24,
+    TypeParameter = 25,
+  },
+
+]]
+--
+local process_items_opts = { kind_priority = { Text = -1, Color = 99, File = 99, Folder = 99 } }
 local process_items = function(items, base)
   return MiniCompletion.default_process_items(items, base, process_items_opts)
 end
@@ -88,13 +120,19 @@ require('mini.completion').setup {
     auto_setup = false,
     process_items = process_items,
   },
-}
 
--- Set 'omnifunc' for LSP completion only when needed.
-local on_attach = function(ev)
-  vim.bo[ev.buf].omnifunc = 'v:lua.MiniCompletion.completefunc_lsp'
-end
-vim.api.nvim_create_autocmd('LspAttach', { pattern = nil, callback = on_attach, desc = "Set 'omnifunc'" })
+  mappings = {
+    -- Force two-step/fallback completions
+    force_twostep = '<C-Space>',
+    force_fallback = '<A-Space>',
+
+    -- Scroll info/signature window down/up. When overriding, check for
+    -- conflicts with built-in keys for popup menu (like `<C-u>`/`<C-o>`
+    -- for 'completefunc'/'omnifunc' source function; or `<C-n>`/`<C-p>`).
+    scroll_down = '<C-f>',
+    scroll_up = '<C-b>',
+  },
+}
 
 local snippets = require 'mini.snippets'
 local match_strict = function(snips)
@@ -150,4 +188,4 @@ local make_stop = function()
 end
 vim.api.nvim_create_autocmd('User', { pattern = 'MiniSnippetsSessionStart', callback = make_stop })
 
-require 'plugin.mini-etc'
+require 'extras.mini-etc'

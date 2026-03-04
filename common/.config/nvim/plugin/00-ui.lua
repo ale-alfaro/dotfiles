@@ -1,8 +1,25 @@
-vim.pack.add(_G.plug_spec {
-  'nvim-lua/plenary.nvim',
-  'nvim-mini/mini.nvim',
-})
-require 'plugin.theme'
+if VimRc.THEME == 'kanagawa' then
+  vim.pack.add(_G.plug_spec {
+    'rebelot/kanagawa.nvim',
+  })
+  vim.cmd 'colorscheme kanagawa'
+elseif VimRc.THEME == 'matte-black' then
+  vim.pack.add(_G.plug_spec {
+    'tahayvr/matteblack.nvim',
+  })
+  require('matteblack').colorscheme()
+else
+  vim.pack.add(_G.plug_spec {
+    'catppuccin/nvim',
+  })
+  require('catppuccin').setup {
+    flavour = 'macchiato', -- latte, frappe, macchiato, mocha
+    background = { -- :h background
+      light = 'latte',
+      dark = 'mocha',
+    },
+  }
+end
 -- Set up to not prefer extension-based icon for some extensions
 local ext3_blocklist = { scm = true, txt = true, yml = true }
 local ext4_blocklist = { json = true, yaml = true }

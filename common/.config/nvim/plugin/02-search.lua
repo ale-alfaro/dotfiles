@@ -1,3 +1,5 @@
+vim.pack.add(_G.plug_spec { 'ibhagwan/fzf-lua' })
+
 ---@module 'fzf-lua'
 local toggle_only_sources = function(_, opts)
   require('fzf-lua.actions').toggle_opt(opts, 'tzsrc')
@@ -14,8 +16,10 @@ local hist_copy = function(selected, opts)
   end)
 end
 require('fzf-lua').setup {
-  { 'border-fused', 'hide' },
+  { 'fzf-native', 'hide' },
   -- Make stuff better combine with the editor.
+  --
+  ui_select = true,
   keymap = {
     -- Below are the default binds, setting any value in these tables will override
     -- the defaults, to inherit from the defaults change [1] from `false` to `true`
@@ -80,12 +84,14 @@ require('fzf-lua').setup {
   winopts = {
     height = 0.7,
     width = 0.7,
+
+    wrap = true, -- preview line wrap (fzf's 'wrap|nowrap')
     on_create = function()
       -- called once upon creation of the fzf main window
       -- can be used to add custom fzf-lua mappings, e.g:
       vim.keymap.set('t', '<C-j>', '<Down>', { silent = true, buffer = true })
 
-      vim.keymap.set({ 'n', 'v', 'i' }, '<C-n><C-f>', function()
+      vim.keymap.set({ 'n', 'v', 'i' }, '<C-x><C-f>', function()
         FzfLua.complete_path()
       end, { silent = true, buffer = true })
     end,
@@ -129,11 +135,11 @@ require('fzf-lua').setup {
       ['enter'] = FzfLua.actions.help_vert,
     },
   },
-  lsp = {
-    symbols = {
-      symbol_icons = VimRc.icons.symbol_kinds,
-    },
-  },
+  -- lsp = {
+  --   symbols = {
+  --     symbol_icons = VimRc.icons.symbol_kinds,
+  --   },
+  -- },
   diagnostics = {
     -- Remove the dashed line between diagnostic items.
     multiline = 1,
@@ -184,7 +190,7 @@ KEYS.define {
   { lhs = '<C-Tab>', rhs = '<cmd>FzfLua resume<cr>', opts = { desc = 'Resume', noremap = true } },
   { lhs = '<C-f>', rhs = '<cmd>FzfLua command_history<cr>', opts = { desc = 'Command History', noremap = true } },
   { lhs = '<C-kEqual>', rhs = '<cmd>FzfLua register<cr>', opts = { desc = 'Registers', noremap = true } },
-  { lhs = '<C-/>', rhs = '<cmd>FzfLua blines<cr>', opts = { desc = 'Buffer Lines' } },
+  { lhs = '<C-l>', rhs = '<cmd>FzfLua blines<cr>', opts = { desc = 'Buffer Lines' } },
   { lhs = '<M-o>', rhs = '<cmd>FzfLua oldfiles<cr>', opts = { desc = 'Old Files' } },
 }
 local wkey_prefix = '<leader>f'
@@ -219,7 +225,7 @@ KEYS.define {
   },
   {
     lhs = lsp_wkey_prefix .. 's',
-    rhs = '<cmd>FzfLua lsp_live_document_symbols<cr>',
+    rhs = '<cmd>FzfLua lsp_document_symbols<cr>',
     opts = { desc = 'Live Document Symbols' },
   },
   { lhs = wkey_prefix .. 'd', rhs = '<cmd>FzfLua lsp_document_diagnostics<cr>', opts = { desc = 'Document diagnostics' } },

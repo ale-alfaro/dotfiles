@@ -1,0 +1,10 @@
+# manually set the `sys.platform` Pyrefly will assume when type checking
+python-version = "3.14"
+python-platform = "linux"
+skip-interpreter-query = true
+project-includes = ["common/.config/gdb"]
+use-ignore-files = false
+disable-project-excludes-heuristics = false
+project-excludes = [".venv/**/*"]
+search-path = [ "common/.config/gdb","/opt/zephyr-sdk-custom/arm-zephyr-eabi/share/gdb/python/gdb"]
+

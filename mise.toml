@@ -1,0 +1,32 @@
+[env]
+# PYTHONPATH = "/opt/zephyr-sdk-custom/arm-zephyr-eabi/share/gdb/python/gdb"
+
+[tools]
+python = "3.14"
+uv = "latest"
+"pipx:pyrefly" = "latest"
+
+[settings]
+python.uv_venv_auto = "create|source"
+
+[prepare.python]
+auto = true
+
+[prepare.uv]
+auto = true
+
+[tasks.type_infer]
+description = "Pyrefly type infer and auto annotate types"
+run = "pyrefly infer"
+
+[tasks.lint_fix]
+description = "Ruff lint and fix"
+run = "ruff check --fix --exit-zero --output-format=concise --unsafe-fixes"
+
+[tasks.fix]
+dir = "{{config_root}}/common/.config/gdb"
+description = "Run pyrefly type infer and ruff check fix"
+run = [
+{ task = "lint_fix"},
+{ task = "type_infer"},
+]

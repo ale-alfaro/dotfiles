@@ -1,0 +1,18 @@
+
+[diffconfig]
+description = "Diffconfig after menucfg"
+dir = "{{cwd}}"
+usage = '''
+arg "[app]" help="Application" default="app" env="ZEPHYR_APP"
+flag "-d --domain [domain]" help="Domain"
+flag "-m --merge" help="Merge style"
+flag "-o --out <out>" help="Output to file"
+'''
+run = '''
+#!/usr/bin/env zsh
+
+build_dir="build_${usage_app?}/${usage_domain:-$usage_app}"
+diffconfig.py "${build_dir}/zephyr/.config.old" "${build_dir}/zephyr/.config" \
+    ${usage_merge:+-m} \
+    ${(z)${usage_out:+-o $usage_out}}
+'''

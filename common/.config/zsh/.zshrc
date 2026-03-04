@@ -9,6 +9,10 @@ for file in $ZDOTDIR/zshrc.d/*.zsh; do
     source "$file"
 done
 
+# Ghostty shell integration for Bash. This should be at the top of your bashrc!
+if [ -n "${GHOSTTY_RESOURCES_DIR}" ]; then
+    source "${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration"
+fi
 if [[ $- != *i* ]]; then
     source <(mise activate zsh --shims)
     echo "Non interactive mode"
@@ -56,3 +60,7 @@ __init_plugins "${plugins[@]}"
 
 source <(codex completion zsh)
 source <(ast-grep completions)
+if [[ ! -z ${ACLI_ENABLED:-} ]]; then
+    source <(acli completion zsh)
+    source $ZDOTDIR/helpers/acli.zsh
+fi

@@ -1,5 +1,3 @@
--- require 'plugin.mini-pick'
-
 -- - `:h MiniVisits-overview` - overview of how module works
 -- - `:h MiniVisits-examples` - examples of common setups
 require('mini.visits').setup()

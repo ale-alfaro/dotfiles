@@ -40,9 +40,9 @@ return {
   },
   -- stylua: ignore
   keys = {
-    { mode = { 'n', 'o', 'x' }, lhs = 'o',     rhs = function() require('flash').treesitter() end,        opts = { desc = 'Flash Treesitter' } },
-    { mode = 'c',               lhs = '<c-s>', rhs = function() require('flash').toggle() end,            opts = { desc = 'Flash Toggle' } },
-    { mode = { 'n', 'o', 'x' }, lhs = '<c-space>', rhs = function() require('flash').treesitter { actions = { ['<c-space>'] = 'next', ['<BS>'] = 'prev', }, } end, { desc = 'Treesitter Incremental Selection' } },
+    { mode = { 'n', 'o', 'x' }, lhs = 'o',     rhs = function() require('extras.optional.flash').treesitter() end,        opts = { desc = 'Flash Treesitter' } },
+    { mode = 'c',               lhs = '<c-s>', rhs = function() require('extras.optional.flash').toggle() end,            opts = { desc = 'Flash Toggle' } },
+    { mode = { 'n', 'o', 'x' }, lhs = '<c-space>', rhs = function() require('extras.optional.flash').treesitter { actions = { ['<c-space>'] = 'next', ['<BS>'] = 'prev', }, } end, { desc = 'Treesitter Incremental Selection' } },
   }
 ,
 }

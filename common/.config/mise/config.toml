@@ -1,10 +1,5 @@
 
 [settings]
-status = {
-  missing_tools = "if_other_versions_installed",
-show_env = true,
-show_tools = true,
-}
 experimental = true
 python.uv_venv_auto = "source"
 # unix_default_file_shell_args = 'zsh -uc'
@@ -20,9 +15,13 @@ env_shell_expand = true
 use_file_shell_for_executable_tasks = true
 # task.show_full_cmd = true
 
+[settings.status]
+missing_tools = "if_other_versions_installed"
+show_env = true
+show_tools = true
 
 [tools]
-python = ["latest", "3.13"]
+python = "3.14.3"
 uv = "latest"
 usage = "latest"
 atuin = "latest"
@@ -48,3 +47,12 @@ ast-grep = "latest"
 "pipx:clang-format" = "latest"
 "pipx:dtsh" = "0.2.5"
 tmux = "latest"
+ccache = "latest"
+"http:acli" = { version = "latest", url = "https://acli.atlassian.com/linux/latest/acli_linux_amd64/acli" }
+"cargo:neocmakelsp" = "latest"
+"pipx:gersemi" = "latest"
+taplo = "latest"
+
+[shell_alias]
+pygdb = "PYTHONHOME=/usr /opt/zephyr-sdk-custom/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb-py -ex 'target remote :2331'"
+jdbserver = "JLinkGDBServer -device NRF52840_XXAA -if SWD -speed 4000 -port 2331 -silent -singlerun"

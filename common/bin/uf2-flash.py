@@ -9,13 +9,14 @@
 
 """UF2 runner (flash only) for UF2 compatible bootloaders."""
 
-from psutil import sdiskpart
-from psutil._common import sdiskpart
 import argparse
 import logging
 import sys
 from pathlib import Path
 from shutil import copy
+
+from psutil import sdiskpart
+from psutil._common import sdiskpart
 
 try:
     import psutil

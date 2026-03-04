@@ -378,3 +378,133 @@ info vector
 info stack
 info target
 q
+mon reset
+mon halt
+c
+q
+mon reset
+mon halt
+c
+source ~/.config/gdb/pygdb/cortex_m.py 
+q
+source ~/.config/gdb/pygdb/cortex_m.py
+FaultDetails()
+dumpframe
+FaultDetails
+help
+aliases
+faultdetails 
+up 3
+up
+b 1283
+mon reset
+mon halt
+info locals
+l
+info locals m_sensor_list
+p m_sensor_list
+c
+p/x 0x2003c9c8
+x/w 0x2003c9c8
+q
+mon reset
+mon halt
+c
+p $msp
+p *(((struct arch_esf*)esf)->extra_info->exc_return)
+faultdetails()
+p/x *(((struct arch_esf*)esf)->extra_info->callee->psp)
+q
+mon halt
+c
+b
+delete 2
+p/a *(uint32_t[8])$msp
+p/a *(uint32_t[8]* )$msp
+p *(uint32_t[8]* )$msp
+p/x *(uint32_t[8]* )$msp
+p/w *(uint32_t[8]* )$msp
+pp *(uint32_t[8]* )$msp
+q
+mon reset
+mon halt
+c
+q
+p $lr
+p ($lr&(1<<2))
+p/a *(uint32_t[8] *)$msp
+info symbol 0x2002984c
+p/4wx 0x2002984c
+x/4wx 0x2002984c
+x/32wx (0x2002984c - (6*4))
+p sns::m_sensor_list 
+p sns::m_sensor_list[0]
+p *(class sensor_module*)sns::m_sensor_list[0]
+p *(sensor_module*)sns::m_sensor_list[0]
+p *(sensor_module*)sns::m_sensor_list[1]
+p *(sensor_module*)sns::m_sensor_list[2]
+x/32wx (0x20030d90 - (6*4))
+p
+p/a *(uint32_t[8] *)0x20030d90
+info symbol 0x53231
+l *0x53231
+p/a *(uint32_t[8] *)0x20030d98
+info symbol 0xa3dd4
+p/a *(uint32_t[8] *)0xa3dd4
+info symbol 0x00026f82
+l  *0x00026f82
+l *0x00065b25
+l *0x00023514
+b 0x00023514
+delete 2
+b /home/alealfaro/sibel/eng/fw/anne_sensors_workspace/bengal/app/src/sh_hardfault_handler.c:134
+mon reset
+mon halt
+c
+up 4
+l
+q
+mon halt
+c
+up 5
+l
+p dev
+info locals
+info variables 
+q
+mon reset
+mon halt
+c
+bt
+p ($lr&(1<<2))
+p/a *(uint32_t[8])$psp
+p/a *(uint32_t[8] *)$psp
+info symbol 0x493
+source ~/.config/gdb/pygdb/cortex_m.py 
+q
+python
+from struct import pack
+quit
+q
+q
+q
+show sysroot
+show commands
+show directories 
+show environment 
+q
+source ~/.config/gdb/pygdb/cortex_m.py
+q
+q
+q
+source ~/.config/gdb/pygdb/cortex_m.py
+l
+b z_arm_usage_fault
+mon reset
+mon halt
+c
+bt
+cortex-fault
+l *0x00000493
+cortex-frame
+q

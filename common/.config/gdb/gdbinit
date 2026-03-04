@@ -18,7 +18,7 @@ set history filename ~/.config/gdb/history
 set history save on
 set history size 10000
 set history remove-duplicates unlimited
-
+set data-directory /opt/zephyr-sdk-custom/arm-zephyr-eabi/share/gdb
 # --- Safer auto-loading (project-local .gdbinit/.gdb scripts) ---
 # Add trusted directories explicitly instead of disabling protection globally.
 # Example: add-auto-load-safe-path ~/src
@@ -49,6 +49,7 @@ define z_fault_dump
 
     p/a *(uint32_t[8] *)$msp
     p/a *(uint32_t[8] *)$psp
+end
 
 define z_esf_dump
     # Dump stacked registers from esf_copy if available
@@ -70,4 +71,4 @@ define z_esf_dump
     end
   end
 
-# source ~/.config/gdb/cortex_m.py
+source ~/.config/gdb/pygdb/cortex_m.py

@@ -117,88 +117,6 @@ PATH_add() {
   path_add PATH "$@"
 }
 
-# Usage: path_add <varname> <path> [<path> ...]
-#
-# Works like PATH_add except that it's for an arbitrary <varname>.
-path_add() {
-  local var_name="$1"
-  shift
-
-  # Get the current value of the variable and split it into an array
-  typeset -a current_paths
-  IFS=: read -r current_paths <<<"${(P)var_name}" # (P) parameter expansion to get value of var_name
-
-  local new_paths=()
-  for p in "$@"; do
-    local abs_path=$(realpath "$p")
-    # Add to new_paths only if it's not already in current_paths or new_paths
-    local found=0
-    for existing_path in "${current_paths[@]}"; do
-      if [[ "$existing_path" == "$abs_path" ]]; then
-        found=1
-        break
-      fi
-    done
-    if [[ "$found" -eq 0 ]]; then
-      for existing_new_path in "${new_paths[@]}"; do
-        if [[ "$existing_new_path" == "$abs_path" ]]; then
-          found=1
-          break
-        fi
-      done
-    fi
-
-    if [[ "$found" -eq 0 ]]; then
-      new_paths+=("$abs_path")
-    fi
-  done
-
-  # Prepend the new paths to the existing paths
-  local final_paths=("${new_paths[@]}" "${current_paths[@]}")
-
-  # Join back all the paths
-  local joined_path=$(
-    IFS=:
-    echo "${final_paths[*]}"
-  )
-
-  # And finally export back the result to the original variable
-  export "$var_name=$joined_path"
-}
-
-# Usage: load_prefix <prefix_path>
-#
-# Expands some common path variables for the given <prefix_path> prefix. This is
-# useful if you installed something in the <prefix_path> using
-# $(./configure --prefix=<prefix_path> && make install) and want to use it in
-# the project.
-#
-# Variables set:
-#
-#    CPATH
-#    LD_LIBRARY_PATH
-#    LIBRARY_PATH
-#    MANPATH
-#    PATH
-#    PKG_CONFIG_PATH
-#
-# Example:
-#
-#    ./configure --prefix=$HOME/rubies/ruby-1.9.3
-#    make && make install
-#    # Then in the .envrc
-#    load_prefix ~/rubies/ruby-1.9.3
-#
-load_prefix() {
-  abs=$(realpath "$1")
-  # MANPATH_add "$REPLY/man"
-  # MANPATH_add "$REPLY/share/man"
-  # path_add CPATH "$REPLY/include"
-  path_add LD_LIBRARY_PATH "$abs/lib"
-  path_add LIBRARY_PATH "$abs/lib"
-  PATH_add "$abs/bin"
-  # path_add PKG_CONFIG_PATH "$REPLY/lib/pkgconfig"
-}
 
 
 # Usage: semver_search <directory> <folder_prefix> <partial_version>
@@ -235,49 +153,36 @@ semver_search() {
     head -1
 }
 
+arr2quotes(){
+    emulate -L zsh
+    typeset -U ar
+    local ar=()
 
-# Transcode any image to JPG image that's great for shrinking wallpapers
-img2jpg() {
-  magick $1 -quality 95 -strip ${1%.*}.jpg
+    if [[ $# == 0 ]]; then
+        # Listen to STDIN if no arguments are provided
+        ar=( ${(f)$(<&0)} )
+    fi
+
+    while [[ $# > 0 ]]; do
+        if [[ -r "$1" && -f "$1" ]]; then
+            # A readable file.
+            ar=(
+                $ar[@]
+                "${(fq)$(<$1)}"
+            )
+        elif [[ ${(Pt)1} = "array" ]]; then
+            ar=(
+                $ar[@]
+                ${(Pq)1}
+            )
+        else
+            echo "Do not understand: $1" >&2
+            echo "Arguments need to be files, names of arrays, or standard input." >&2
+            echo 'Arrays must be referenced by name, so use `array` instead of `$array`.' >&2
+            return 1
+        fi
+        shift
+    done
+
+    print ${(j:, :)${(qq)ar[@]}}
 }
-
-# Transcode any image to JPG image that's great for sharing online without being too big
-img2jpg-small() {
-  magick $1 -resize 1080x\> -quality 95 -strip ${1%.*}.jpg
-}
-
-# Transcode any image to compressed-but-lossless PNG
-img2png() {
-  magick "$1" -strip -define png:compression-filter=5 \
-    -define png:compression-level=9 \
-    -define png:compression-strategy=1 \
-    -define png:exclude-chunk=all \
-    "${1%.*}.png"
-}
-
-convert_rst_to_md() {
-  filename="${1%.*}"
-  echo "Converting $1 to $filename.md"
-  pandoc "$1" -f rst -t markdown -o "${filename}.md"
-}
-
-convert_rst_to_md_dir(){
-
-  dir="${1:-$PWD}"
-  # Non-recursively
-  for rst in "${dir}/*.rst"; do pandoc "$rst" -f rst -t markdown -o "${rst%.*}.md"; done
-
-  # Recursively (if your shell supports double-star globs)
-  # for rst in **/*.rst; do pandoc "$rst" -f rst -t markdown -o "${rst%.*}.md"; done
-  # dir="${1:-$PWD}"
-  # FILES=dir/*.rst
-  # for f in $FILES; do
-  #   convert_rst_to_md f
-  # done
-}
-
-
-_err() {
-}
-
-
