@@ -1,16 +1,15 @@
 import json
+import pathlib
 import sys
 
-from pypdf import PdfReader, PdfWriter
-
 from extract_form_field_info import get_field_info
-
+from pypdf import PdfReader, PdfWriter
 
 # Fills fillable form fields in a PDF. See forms.md.
 
 
-def fill_pdf_fields(input_pdf_path: str, fields_json_path: str, output_pdf_path: str):
-    with open(fields_json_path) as f:
+def fill_pdf_fields(input_pdf_path: str, fields_json_path: str, output_pdf_path: str) -> None:
+    with pathlib.Path(fields_json_path).open(encoding="utf-8") as f:
         fields = json.load(f)
     # Group by page number.
     fields_by_page = {}
@@ -21,7 +20,7 @@ def fill_pdf_fields(input_pdf_path: str, fields_json_path: str, output_pdf_path:
             if page not in fields_by_page:
                 fields_by_page[page] = {}
             fields_by_page[page][field_id] = field["value"]
-    
+
     reader = PdfReader(input_pdf_path)
 
     has_error = False
@@ -35,12 +34,11 @@ def fill_pdf_fields(input_pdf_path: str, fields_json_path: str, output_pdf_path:
         elif field["page"] != existing_field["page"]:
             has_error = True
             print(f"ERROR: Incorrect page number for `{field['field_id']}` (got {field['page']}, expected {existing_field['page']})")
-        else:
-            if "value" in field:
-                err = validation_error_for_field_value(existing_field, field["value"])
-                if err:
-                    print(err)
-                    has_error = True
+        elif "value" in field:
+            err = validation_error_for_field_value(existing_field, field["value"])
+            if err:
+                print(err)
+                has_error = True
     if has_error:
         sys.exit(1)
 
@@ -51,8 +49,8 @@ def fill_pdf_fields(input_pdf_path: str, fields_json_path: str, output_pdf_path:
     # This seems to be necessary for many PDF viewers to format the form values correctly.
     # It may cause the viewer to show a "save changes" dialog even if the user doesn't make any changes.
     writer.set_need_appearances_writer(True)
-    
-    with open(output_pdf_path, "wb") as f:
+
+    with pathlib.Path(output_pdf_path).open("wb") as f:
         writer.write(f)
 
 
@@ -62,12 +60,12 @@ def validation_error_for_field_value(field_info, field_value):
     if field_type == "checkbox":
         checked_val = field_info["checked_value"]
         unchecked_val = field_info["unchecked_value"]
-        if field_value != checked_val and field_value != unchecked_val:
+        if field_value not in {checked_val, unchecked_val}:
             return f'ERROR: Invalid value "{field_value}" for checkbox field "{field_id}". The checked value is "{checked_val}" and the unchecked value is "{unchecked_val}"'
     elif field_type == "radio_group":
         option_values = [opt["value"] for opt in field_info["radio_options"]]
         if field_value not in option_values:
-            return f'ERROR: Invalid value "{field_value}" for radio group field "{field_id}". Valid values are: {option_values}' 
+            return f'ERROR: Invalid value "{field_value}" for radio group field "{field_id}". Valid values are: {option_values}'
     elif field_type == "choice":
         choice_values = [opt["value"] for opt in field_info["choice_options"]]
         if field_value not in choice_values:
@@ -88,12 +86,12 @@ def validation_error_for_field_value(field_info, field_value):
 # We call the original method and adjust the return value only if the argument to `get_inherited`
 # is `FA.Opt` and if the return value is a list of two-element lists.
 def monkeypatch_pydpf_method():
-    from pypdf.generic import DictionaryObject
     from pypdf.constants import FieldDictionaryAttributes
+    from pypdf.generic import DictionaryObject
 
     original_get_inherited = DictionaryObject.get_inherited
 
-    def patched_get_inherited(self, key: str, default = None):
+    def patched_get_inherited(self, key: str, default=None):
         result = original_get_inherited(self, key, default)
         if key == FieldDictionaryAttributes.Opt:
             if isinstance(result, list) and all(isinstance(v, list) and len(v) == 2 for v in result):

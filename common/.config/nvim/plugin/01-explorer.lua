@@ -9,8 +9,6 @@ require('oil').setup {
   columns = {
     'icon',
     'permissions',
-    'size',
-    'mtime',
   },
   -- Buffer-local options to use for oil buffers
   buf_options = {
@@ -46,7 +44,7 @@ require('oil').setup {
     timeout_ms = 1000,
     -- Set to true to autosave buffers that are updated with LSP willRenameFiles
     -- Set to "unmodified" to only save unmodified buffers
-    autosave_changes = false,
+    autosave_changes = true,
   },
   -- Constrain the cursor to the editable parts of the oil buffer
   -- Set to `false` to disable, or "name" to keep it on the file names
@@ -62,21 +60,60 @@ require('oil').setup {
   keymaps = {
     ['g?'] = { 'actions.show_help', mode = 'n' },
     ['<CR>'] = 'actions.select',
+
+    ['gp'] = {
+      'actions.paste_from_system_clipboard',
+      opts = {
+        delete_original = true,
+      },
+      desc = 'Paste and delete',
+    },
     ['<Right>'] = { 'actions.select', mode = 'n' },
-    ['<C-s>'] = { 'actions.select', opts = { vertical = true } },
-    ['gp'] = 'actions.preview',
+    ['gv'] = { 'actions.select', opts = { vertical = true } },
     ['q'] = { 'actions.close', mode = 'n' },
-    ['='] = 'actions.refresh',
+    ['gr'] = 'actions.refresh',
     ['<Left>'] = { 'actions.parent', mode = 'n' },
     ['gw'] = { 'actions.open_cwd', mode = 'n' },
     ['g~'] = { 'actions.cd', opts = { scope = 'tab' }, mode = 'n' },
     ['gs'] = { 'actions.change_sort', mode = 'n' },
     ['gx'] = 'actions.open_external',
-    ['<C-t>'] = 'actions.open_terminal',
+    ['gt'] = 'actions.open_terminal',
     ['g.'] = { 'actions.toggle_hidden', mode = 'n' },
     ['g\\'] = { 'actions.toggle_trash', mode = 'n' },
     ['gy'] = 'actions.yank_entry',
-    ['<M-q>'] = 'actions.send_to_qflist',
+    ['<C-q>'] = 'actions.send_to_qflist',
+
+    -- Mappings can be a function
+    ['gd'] = {
+      function()
+        require('oil').set_columns { 'icon', 'permissions', 'size', 'mtime' }
+      end,
+      desc = 'Show more info',
+    },
+    -- You can pass additional opts to vim.keymap.set by using
+    -- a table with the mapping as the first element.
+    ['<leader>ff'] = {
+      function()
+        require('fzf-lua').files {
+          cwd = require('oil').get_current_dir(),
+        }
+      end,
+      mode = 'n',
+      nowait = true,
+      desc = 'Find files in the current directory',
+    },
+    -- Mappings that are a string starting with "actions." will be
+    -- one of the built-in actions, documented below.
+    ['`'] = 'actions.tcd',
+    -- Some actions have parameters. These are passed in via the `opts` key.
+    ['<leader>:'] = {
+      'actions.open_cmdline',
+      opts = {
+        shorten_path = true,
+        modify = ':h',
+      },
+      desc = 'Open the command line with the current directory as an argument',
+    },
   },
   -- Set to false to disable all of the above keymaps
   use_default_keymaps = false,

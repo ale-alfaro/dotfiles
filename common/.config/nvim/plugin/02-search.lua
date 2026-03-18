@@ -187,9 +187,9 @@ KEYS.define {
   { lhs = '<C-\\>', rhs = '<cmd>FzfLua global<cr>', opts = { desc = 'Global', noremap = true } },
   { lhs = '<C-e>', rhs = '<cmd>FzfLua files<cr>', opts = { desc = 'Files', noremap = true } },
   { lhs = '<C-g>', rhs = '<cmd>FzfLua live_grep<cr>', opts = { desc = 'Grep (cwd)', noremap = true } },
-  { lhs = '<C-Tab>', rhs = '<cmd>FzfLua resume<cr>', opts = { desc = 'Resume', noremap = true } },
+  { lhs = '<C-c>', rhs = '<cmd>FzfLua resume<cr>', opts = { desc = 'Continue', noremap = true } },
   { lhs = '<C-f>', rhs = '<cmd>FzfLua command_history<cr>', opts = { desc = 'Command History', noremap = true } },
-  { lhs = '<C-kEqual>', rhs = '<cmd>FzfLua register<cr>', opts = { desc = 'Registers', noremap = true } },
+  { lhs = '<C-y>', rhs = '<cmd>FzfLua register<cr>', opts = { desc = 'Registers', noremap = true } },
   { lhs = '<C-l>', rhs = '<cmd>FzfLua blines<cr>', opts = { desc = 'Buffer Lines' } },
   { lhs = '<M-o>', rhs = '<cmd>FzfLua oldfiles<cr>', opts = { desc = 'Old Files' } },
 }

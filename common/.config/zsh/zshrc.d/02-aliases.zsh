@@ -34,7 +34,13 @@ n() {
         nvim "$@"
     fi
 }
-
+ssh_agent_start() {
+    eval "$(ssh-agent -s)"
+    # ssh-add ~/.ssh/id_ed25519_work
+    # ssh-add ~/.ssh/id_arch_linux
+    ssh-add ~/.ssh/id_ed25519_yubikey
+}
+alias sshstart="ssh_agent_start"
 #######################################################
 # CLI Aliases
 #######################################################

@@ -15,4 +15,4 @@ target = build --pristine=never --target
 menuconfig = build --pristine=never --target menuconfig -d
 initlevels = build --pristine=never --target initlevels -d
 build_resume = build --pristine=never --target all -d
-boards = boards --format "{name:30} | {qualifiers:30} | {dir}"
+find-board = boards --format "{name:30} | {qualifiers:30} | {dir}" --fuzzy-match

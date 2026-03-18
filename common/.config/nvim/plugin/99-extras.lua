@@ -48,6 +48,111 @@ miniclue.setup {
 }
 require 'extras.overseer'
 require 'extras.quicker'
+--[[
+--The table below shows all the highlight groups with their default link
+
+  -----------------------------------------------------------------------------------------
+  Highlight Group                 Default Group                        Description
+  ------------------------------- ------------------------------------ --------------------
+  RenderMarkdownH1                @markup.heading.1.markdown           H1 icons
+
+  RenderMarkdownH2                @markup.heading.2.markdown           H2 icons
+
+  RenderMarkdownH3                @markup.heading.3.markdown           H3 icons
+
+  RenderMarkdownH4                @markup.heading.4.markdown           H4 icons
+
+  RenderMarkdownH5                @markup.heading.5.markdown           H5 icons
+
+  RenderMarkdownH6                @markup.heading.6.markdown           H6 icons
+
+  RenderMarkdownH1Bg              DiffText                             H1 background line
+
+  RenderMarkdownH2Bg              DiffAdd                              H2 background line
+
+  RenderMarkdownH3Bg              DiffChange                           H3 background line
+
+  RenderMarkdownH4Bg              DiffDelete                           H4 background line
+
+  RenderMarkdownH5Bg              Visual                               H5 background line
+
+  RenderMarkdownH6Bg              CursorColumn                         H6 background line
+
+  RenderMarkdownCode              ColorColumn                          Code block
+                                                                       background
+
+  RenderMarkdownCodeInfo          @label                               Code info, after
+                                                                       language
+
+  RenderMarkdownCodeBorder        RenderMarkdownCode                   Code border
+                                                                       background
+
+  RenderMarkdownCodeFallback      Normal                               Fallback for code
+                                                                       language
+
+  RenderMarkdownCodeInline        RenderMarkdownCode                   Inline code
+                                                                       background
+
+  RenderMarkdownQuote             @markup.quote                        Default for block
+                                                                       quote
+
+  RenderMarkdownQuote1            RenderMarkdownQuote                  Level 1 block quote
+                                                                       marker
+
+  RenderMarkdownQuote2            RenderMarkdownQuote                  Level 2 block quote
+                                                                       marker
+
+  RenderMarkdownQuote3            RenderMarkdownQuote                  Level 3 block quote
+
+  RenderMarkdownInlineHighlight   RenderMarkdownCodeInline             Inline highlights
+                                                                       contents
+
+  RenderMarkdownBullet            Normal                               List item bullet
+                                                                       points
+
+  RenderMarkdownIndent            Whitespace                           Indent icon
+
+  RenderMarkdownHtmlComment       @comment                             HTML comment inline
+                                                                       text
+
+  RenderMarkdownLink              @markup.link.label.markdown_inline   Link icon
+
+  RenderMarkdownLinkTitle         @markup.link.markdown_inline         Link title
+
+  RenderMarkdownWikiLink          RenderMarkdownLink                   WikiLink icon
+
+  RenderMarkdownUnchecked         @markup.list.unchecked               Unchecked checkbox
+
+  RenderMarkdownChecked           @markup.list.checked                 Checked checkbox
+
+  RenderMarkdownTodo              @markup.raw                          Todo custom checkbox
+
+  RenderMarkdownTableHead         @markup.heading                      Pipe table heading
+                                                                       rows
+
+  RenderMarkdownTableRow          Normal                               Pipe table body rows
+
+  RenderMarkdownTableFill         Conceal                              Pipe table inline
+                                                                       padding
+
+  RenderMarkdownSuccess           DiagnosticOk                         Success related
+                                                                       callouts
+
+  RenderMarkdownInfo              DiagnosticInfo                       Info related
+                                                                       callouts
+
+  RenderMarkdownHint              DiagnosticHint                       Hint related
+                                                                       callouts
+
+  RenderMarkdownWarn              DiagnosticWarn                       Warning related
+                                                                       callouts
+
+  RenderMarkdownError             DiagnosticError                      Error related
+                                                                       callouts
+--
+--
+--]]
+--
 require('render-markdown').setup(
   ---@type render.md.Settings
   {
@@ -62,6 +167,10 @@ require('render-markdown').setup(
     },
   }
 )
+vim.api.nvim_set_hl(0, '@markup.heading.1.markdown', { fg = '#e46876' })
+vim.api.nvim_set_hl(0, '@markup.heading.2.markdown', { fg = '#ff9e3b' })
+vim.api.nvim_set_hl(0, '@markup.heading.3.markdown', { fg = '#e6c384' })
+vim.api.nvim_set_hl(0, '@markup.heading.4.markdown', { fg = '#7fb4ca' })
 -- Formatting
 -- See also:
 -- - `:h Conform`

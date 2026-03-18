@@ -290,7 +290,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     on_attach(client, bufnr)
   end,
 })
-
+-- This Lsps are better not enabled by default and enabled locally
 -- Set up LSP servers.
 vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
   once = true,
@@ -306,12 +306,15 @@ vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
     capabilities.textDocument.completion.completionItem.snippetSupport = true
     vim.lsp.config('*', { capabilities = capabilities })
     local nvim_dir = vim.fs.dirname(vim.fn.expand '$MYVIMRC')
+    ---@type string[]
     local lsps = VimRc.lsp.configs_get(nvim_dir)
-    if lsps and #lsps > 0 then
-      VimRc.info(string.format('Enabling lsps for MYVIMRC: \n %s', table.concat(lsps, ' ')))
-      vim.lsp.enable(lsps)
-    else
-      VimRc.err('Couldnt find any lsp configs in ' .. nvim_dir)
-    end
+    local lsps_to_not_enable = { 'ty', 'pyrefly', 'neocmake' }
+    VimRc.info(
+      string.format('Found lsp configs in MYVIMRC: \n %s \n Enabling all except for:\n %s \n', table.concat(lsps, ' '), table.concat(lsps_to_not_enable, ' '))
+    )
+
+    vim.iter(lsps):each(function(lsp)
+      vim.lsp.enable(lsps, not vim.tbl_contains(lsps_to_not_enable, lsp))
+    end)
   end,
 })

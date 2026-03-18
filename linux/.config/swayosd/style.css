@@ -9,7 +9,7 @@ window {
 }
 
 label {
-  font-family: 'FiraCode Nerd Font';
+  font-family: 'FiraCode Nerd Font Mono';
   font-size: 11pt;
 
   color: @label;

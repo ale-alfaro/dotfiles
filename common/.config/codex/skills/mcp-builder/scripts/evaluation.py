@@ -1,4 +1,5 @@
-"""MCP Server Evaluation Harness
+"""
+MCP Server Evaluation Harness.
 
 This script evaluates MCP servers by running test questions against them using Claude.
 """
@@ -15,7 +16,6 @@ from pathlib import Path
 from typing import Any
 
 from anthropic import Anthropic
-
 from connections import create_connection
 
 EVALUATION_PROMPT = """You are an AI assistant with access to tools.
@@ -116,7 +116,7 @@ async def agent_loop(
             tool_result = await connection.call_tool(tool_name, tool_input)
             tool_response = json.dumps(tool_result) if isinstance(tool_result, (dict, list)) else str(tool_result)
         except Exception as e:
-            tool_response = f"Error executing tool {tool_name}: {str(e)}\n"
+            tool_response = f"Error executing tool {tool_name}: {e!s}\n"
             tool_response += traceback.format_exc()
         tool_duration = time.time() - tool_start_ts
 
@@ -266,7 +266,7 @@ async def run_evaluation(
             summary=result["summary"] or "N/A",
             feedback=result["feedback"] or "N/A",
         )
-        for i, (qa_pair, result) in enumerate(zip(qa_pairs, results))
+        for i, (qa_pair, result) in enumerate(zip(qa_pairs, results, strict=False))
     ])
 
     return report

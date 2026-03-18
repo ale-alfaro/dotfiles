@@ -15,8 +15,7 @@ import sys
 from pathlib import Path
 from shutil import copy
 
-from psutil import sdiskpart
-from psutil._common import sdiskpart
+import psutil
 
 try:
     import psutil
@@ -28,7 +27,7 @@ def get_uf2_info_path(part) -> Path:
     return Path(part.mountpoint) / "INFO_UF2.TXT"
 
 
-def is_uf2_partition(part: sdiskpart) -> bool:
+def is_uf2_partition(part) -> bool:
     try:
         return (part.fstype in {"vfat", "FAT", "msdos"}) and get_uf2_info_path(
             part,
@@ -37,7 +36,7 @@ def is_uf2_partition(part: sdiskpart) -> bool:
         return False
 
 
-def get_uf2_info(part: sdiskpart) -> dict[str, str]:
+def get_uf2_info(part) -> dict[str, str]:
     lines = get_uf2_info_path(part).read_text().splitlines()
 
     lines = lines[1:]  # Skip the first summary line
@@ -49,13 +48,13 @@ def get_uf2_info(part: sdiskpart) -> dict[str, str]:
     return {k: v for k, v in (split_uf2_info(line) for line in lines) if k and v}
 
 
-def match_board_id(part: sdiskpart, board_id) -> bool:
+def match_board_id(part, board_id) -> bool:
     info = get_uf2_info(part)
 
     return info.get("Board-ID") == board_id
 
 
-def get_uf2_partitions(board_id=None) -> list[sdiskpart]:
+def get_uf2_partitions(board_id=None):
     parts = [part for part in psutil.disk_partitions() if is_uf2_partition(part)]
 
     if (board_id is not None) and parts:
@@ -69,7 +68,7 @@ def get_uf2_partitions(board_id=None) -> list[sdiskpart]:
     return parts
 
 
-def copy_uf2_to_partition(uf2_file, part: sdiskpart) -> None:
+def copy_uf2_to_partition(uf2_file, part) -> None:
     try:
         copy(uf2_file, part.mountpoint)
     except OSError as e:

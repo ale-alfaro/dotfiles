@@ -1,6 +1,3 @@
-[submodule "common/zmk-config"]
-	path = common/zmk-config
-	url = https://github.com/ale-alfaro/zmk-config
 [submodule "common/.config/tmux/tpm"]
 	path = common/.config/tmux/tpm
 	url = https://github.com/tmux-plugins/tpm

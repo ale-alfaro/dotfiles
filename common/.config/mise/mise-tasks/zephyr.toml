@@ -1,0 +1,58 @@
+
+[diffconfig]
+description = "Diffconfig after menucfg"
+dir = "{{cwd}}"
+usage = '''
+arg "[app]" help="Application" default="app" env="ZEPHYR_APP"
+flag "-d --domain [domain]" help="Domain"
+flag "-m --merge" help="Merge style"
+flag "-o --out <out>" help="Output to file"
+'''
+run = '''
+#!/usr/bin/env zsh
+
+build_dir="build_${usage_app?}/${usage_domain:-$usage_app}"
+diffconfig.py "${build_dir}/zephyr/.config.old" "${build_dir}/zephyr/.config" \
+    ${usage_merge:+-m} \
+    ${(z)${usage_out:+-o $usage_out}}
+'''
+
+
+[tools."github:zephyrproject-rtos/sdk-ng"]
+version = "0.16.0"
+strip_components = 0
+bin_paths = "arm-zephyr-eabi/bin"
+
+[tools."github:zephyrproject-rtos/sdk-ng".platforms]
+linux-x64 = {asset_pattern = "toolchain_linux-x86_64_arm-zephyr-eabi.tar.xz"}
+macos-arm64 = {asset_pattern = "toolchain_macos-aarch64_arm-zephyr-eabi.tar.xz"}
+
+
+[tasks.get_zephyr_sdk_tags]
+description = "Get Zephyr SDK release tags"
+usage = '''
+flag "--max [max_version]" help="Maximum version"
+flag "--min [min_version]" help="Minimum version"
+'''
+run = '''
+!#/usr/bin/env zsh
+set -euxo pipefail
+releases=( ${(f)"$(gh release list -R zephyrproject-rtos/sdk-ng --exclude-pre-releases --json tagName --jq '.[].tagName' -L 15)"} )
+print -rl $releases
+print -rl $releases > "${XDG_CACHE_HOME:-$HOME/cache}/.zephyr_sdk_releases"
+'''
+
+[tasks.zephyr_sdk_install]
+description = "Get Zephyr SDK release tags"
+usage = '''
+arg "[version]" help="Tag version"
+flag "-i --interactive" help="Pick version interactively"
+'''
+run = '''
+!#/usr/bin/env zsh
+set -euxo pipefail
+assets=( ${(f)"$(gh release view -R zephyrproject-rtos/sdk-ng "${version?}" --json assets --jq '.assets[].url')"} )
+filtered_assets=( ${(M)assets:#*arm-zephyr-eabi.tar.xz*} )
+mise use "github:zephyrproject-rtos/sdk-ng[asset_pattern='toolchain_linux_x86_64_arm-zephyr-eabi.tar.xz',bin_paths='arm-zephyr-eabi/bin',strip_components=0]@${version:?}"
+'''
+

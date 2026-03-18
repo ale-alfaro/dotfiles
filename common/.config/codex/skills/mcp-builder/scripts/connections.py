@@ -35,7 +35,8 @@ class MCPConnection(ABC):
             elif len(result) == 3:
                 read, write, _ = result
             else:
-                raise ValueError(f"Unexpected context result: {result}")
+                msg = f"Unexpected context result: {result}"
+                raise ValueError(msg)
 
             session_ctx = ClientSession(read, write)
             self.session = await self._stack.enter_async_context(session_ctx)
@@ -73,7 +74,7 @@ class MCPConnection(ABC):
 class MCPConnectionStdio(MCPConnection):
     """MCP connection using standard input/output."""
 
-    def __init__(self, command: str, args: list[str] = None, env: dict[str, str] = None):
+    def __init__(self, command: str, args: list[str] | None = None, env: dict[str, str] | None = None) -> None:
         super().__init__()
         self.command = command
         self.args = args or []
@@ -88,7 +89,7 @@ class MCPConnectionStdio(MCPConnection):
 class MCPConnectionSSE(MCPConnection):
     """MCP connection using Server-Sent Events."""
 
-    def __init__(self, url: str, headers: dict[str, str] = None):
+    def __init__(self, url: str, headers: dict[str, str] | None = None) -> None:
         super().__init__()
         self.url = url
         self.headers = headers or {}
@@ -100,7 +101,7 @@ class MCPConnectionSSE(MCPConnection):
 class MCPConnectionHTTP(MCPConnection):
     """MCP connection using Streamable HTTP."""
 
-    def __init__(self, url: str, headers: dict[str, str] = None):
+    def __init__(self, url: str, headers: dict[str, str] | None = None) -> None:
         super().__init__()
         self.url = url
         self.headers = headers or {}
@@ -111,13 +112,14 @@ class MCPConnectionHTTP(MCPConnection):
 
 def create_connection(
     transport: str,
-    command: str = None,
-    args: list[str] = None,
-    env: dict[str, str] = None,
-    url: str = None,
-    headers: dict[str, str] = None,
+    command: str | None = None,
+    args: list[str] | None = None,
+    env: dict[str, str] | None = None,
+    url: str | None = None,
+    headers: dict[str, str] | None = None,
 ) -> MCPConnection:
-    """Factory function to create the appropriate MCP connection.
+    """
+    Factory function to create the appropriate MCP connection.
 
     Args:
         transport: Connection type ("stdio", "sse", or "http")
@@ -129,6 +131,7 @@ def create_connection(
 
     Returns:
         MCPConnection instance
+
     """
     transport = transport.lower()
 
@@ -137,15 +140,15 @@ def create_connection(
             raise ValueError("Command is required for stdio transport")
         return MCPConnectionStdio(command=command, args=args, env=env)
 
-    elif transport == "sse":
+    if transport == "sse":
         if not url:
             raise ValueError("URL is required for sse transport")
         return MCPConnectionSSE(url=url, headers=headers)
 
-    elif transport in ["http", "streamable_http", "streamable-http"]:
+    if transport in {"http", "streamable_http", "streamable-http"}:
         if not url:
             raise ValueError("URL is required for http transport")
         return MCPConnectionHTTP(url=url, headers=headers)
 
-    else:
-        raise ValueError(f"Unsupported transport type: {transport}. Use 'stdio', 'sse', or 'http'")
+    msg = f"Unsupported transport type: {transport}. Use 'stdio', 'sse', or 'http'"
+    raise ValueError(msg)

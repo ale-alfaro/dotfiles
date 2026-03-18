@@ -508,3 +508,9 @@ cortex-fault
 l *0x00000493
 cortex-frame
 q
+up 7
+l
+q
+up 7
+l
+q

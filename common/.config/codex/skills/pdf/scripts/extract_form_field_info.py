@@ -1,8 +1,8 @@
 import json
+import pathlib
 import sys
 
 from pypdf import PdfReader
-
 
 # Extracts data for the fillable form fields in a PDF and outputs JSON that
 # Claude uses to fill the fields. See forms.md.
@@ -12,16 +12,16 @@ from pypdf import PdfReader
 def get_full_annotation_field_id(annotation):
     components = []
     while annotation:
-        field_name = annotation.get('/T')
+        field_name = annotation.get("/T")
         if field_name:
             components.append(field_name)
-        annotation = annotation.get('/Parent')
+        annotation = annotation.get("/Parent")
     return ".".join(reversed(components)) if components else None
 
 
 def make_field_dict(field, field_id):
     field_dict = {"field_id": field_id}
-    ft = field.get('/FT')
+    ft = field.get("/FT")
     if ft == "/Tx":
         field_dict["type"] = "text"
     elif ft == "/Btn":
@@ -82,12 +82,12 @@ def get_field_info(reader: PdfReader):
     radio_fields_by_id = {}
 
     for page_index, page in enumerate(reader.pages):
-        annotations = page.get('/Annots', [])
+        annotations = page.get("/Annots", [])
         for ann in annotations:
             field_id = get_full_annotation_field_id(ann)
             if field_id in field_info_by_id:
                 field_info_by_id[field_id]["page"] = page_index + 1
-                field_info_by_id[field_id]["rect"] = ann.get('/Rect')
+                field_info_by_id[field_id]["rect"] = ann.get("/Rect")
             elif field_id in possible_radio_names:
                 try:
                     # ann['/AP']['/N'] should have two items. One of them is '/Off',
@@ -130,17 +130,17 @@ def get_field_info(reader: PdfReader):
             rect = f.get("rect") or [0, 0, 0, 0]
         adjusted_position = [-rect[1], rect[0]]
         return [f.get("page"), adjusted_position]
-    
+
     sorted_fields = fields_with_location + list(radio_fields_by_id.values())
     sorted_fields.sort(key=sort_key)
 
     return sorted_fields
 
 
-def write_field_info(pdf_path: str, json_output_path: str):
+def write_field_info(pdf_path: str, json_output_path: str) -> None:
     reader = PdfReader(pdf_path)
     field_info = get_field_info(reader)
-    with open(json_output_path, "w") as f:
+    with pathlib.Path(json_output_path).open("w", encoding="utf-8") as f:
         json.dump(field_info, f, indent=2)
     print(f"Wrote {len(field_info)} fields to {json_output_path}")
 

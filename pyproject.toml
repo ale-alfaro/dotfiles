@@ -1,5 +1,9 @@
 [tool.uv]
 package = false
+
+[tool.uv.workspace]
+exclude = ["commom/zmk-config"]
+
 [project]
 name = "binutils"
 version = "0.1.0"
@@ -12,6 +16,7 @@ dev = [
     "cyclopts>=4.4.6",
     "dotenv>=0.9.9",
     "kconfiglib==14.1.1a4",
+    "psutil>=7.2.2",
     "west>=1.5.0",
 ]
 

@@ -2,12 +2,12 @@
 config-file = ?"~/.config/omarchy/current/theme/ghostty.conf"
 
 # Font
-font-family = "FiraCode Nerd Font"
+font-family = "FiraCode Nerd Font Mono"
 font-style = Regular
 font-size = 12
 
 # Font configuration:
-#arrow_right font-family = "Hasklug Nerd Font Mono Med"
+#arrow_right font-family = "FiraCode Nerd Font Mono"
 # font-family-italic = "Cartograph CF Italic"
 # font-family-bold-italic = "Cartograph CF Italic"
 adjust-cell-width = -5%

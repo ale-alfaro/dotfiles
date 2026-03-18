@@ -150,3 +150,15 @@ cat\040-A\040&pca9430-mfd
 alias
 cat\040-A\040/soc/i2c@40003000/pca9430-mfd@70
 q
+tree
+ls
+ls\040cpus
+ca
+cat\040-A\040i2c@40004000
+cat\040-A\040&i2c@40004000
+cat\040-A\040/soc/i2c@40004000
+q
+tree
+find\040-h
+find\040--with-dts-ord\04022
+q

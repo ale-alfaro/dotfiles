@@ -7,24 +7,23 @@ local function create_cmd(_, config)
     '--header-insertion=iwyu',
     '--completion-style=detailed',
     '--fallback-style=llvm',
+    '--log=error',
   }
+  local envs = vim.fn.environ()
   local compiler = vim.fn.executable 'arm-zephyr-eabi-gcc' and vim.fn.exepath 'arm-zephyr-eabi-gcc' or ''
-  if type(compiler) == 'string' and vim.uv.fs_stat(compiler) then
-    VimRc.info('Clangd query-driver' .. compiler)
-    config.cmd[#config.cmd + 1] = '--query-driver=' .. compiler:gsub('gcc$', 'g*')
+  local query_driver_flag = nil
+  -- 1. If ZEPHYR_SDK_INSTALL_DIR is set glob to find the arm-zephyr-eabi-gcc within the toolchain
+  if envs['ZEPHYR_SDK_INSTALL_DIR'] ~= nil then
+    query_driver_flag = string.format('--query-driver=%s/**/arm-zephyr-eabi-g*', envs['ZEPHYR_SDK_INSTALL_DIR'])
+  -- 2. Otherwise check if the arm-zephyr-eabi-gcc was found as an executable it PATH and use the exepath result for the exact location
+  elseif type(compiler) == 'string' and vim.uv.fs_stat(compiler) then
+    query_driver_flag = '--query-driver=' .. compiler:gsub('gcc$', 'g*')
   else
     VimRc.warn "Can't find compiler to query or is not a valid path"
   end
-  local clangd_debug_mode = vim.fn.getenv 'CLANGD_DEBUG'
-  if clangd_debug_mode ~= vim.v.null then
-    vim.tbl_extend('force', config.cmd, {
-      '--pretty',
-      '--log=verbose',
-    })
-  else
-    vim.tbl_extend('force', config.cmd, {
-      '--log=error',
-    })
+  if query_driver_flag then
+    VimRc.info('Clangd adding flag ' .. query_driver_flag)
+    config.cmd[#config.cmd + 1] = query_driver_flag
   end
 end
 ---@return vim.lsp.Config

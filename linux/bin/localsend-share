@@ -1,0 +1,36 @@
+#!/usr/bin/env zsh
+set -eu
+#MISE description="Share files or through localsend"
+#MISE dir="{{cwd}}"
+#USAGE arg "<path>" help="Path to file or folder to share through localsend"
+#USAGE flag "-d --dir" help="Path points to directory instead of file"
+#USAGE flag "-i --interactive" help="Interactively pick a file or directory"
+#USAGE flag "-c --clipboard" help="Use the clipboard content as path for the file or directory"
+
+if [[ ! -z ${usage_clipboard:-} ]]; then
+    path=$(wl-paste -n | tr --delete "[:space:]")
+elif [[ ! -z ${usage_interactive:-} ]]; then
+    path=$(fd --type ${${usage_dir:+-d}:--f} fzf)
+else
+    path="${usage_path:?}"
+fi
+
+typeset -a FILES
+if [[ -d $path ]]; then
+    # Pick a single folder from home directory
+    FILES=( ${(f)"$(eza --only-files --color=never --width=1 $path)"} )
+elif [[ -f $path ]]; then
+    # Pick one or more files from home directory
+    FILES+="$path"
+else
+    echo "ERROR: Path ${path?} not valid!"
+    exit 1
+fi
+[[ -z $FILES ]] && exit 0
+
+systemd-run --user --quiet --collect localsend --headless send "${FILES[@]}"
+
+# Note: Temporary file will remain until system cleanup for clipboard mode
+# This ensures the file content is available for the LocalSend GUI
+
+exit 0

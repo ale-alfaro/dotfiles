@@ -1,4 +1,5 @@
 [env]
+ZEPHYR_BASE = "/home/alealfaro/dotfiles/common/zmk-config/zephyr"
 # PYTHONPATH = "/opt/zephyr-sdk-custom/arm-zephyr-eabi/share/gdb/python/gdb"
 
 [tools]
@@ -30,3 +31,8 @@ run = [
 { task = "lint_fix"},
 { task = "type_infer"},
 ]
+
+[tasks.kboard_pdf]
+description = "Create pdf from keymap file"
+dir ="{{ config_root }}/kboard"
+run = "uvx --from=glove80-keymap-visualizer glove80-viz --linux ColemakDH-Glove80.keymap -o ColemakDH-Glove80.pdf"

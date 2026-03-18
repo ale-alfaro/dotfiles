@@ -1,7 +1,7 @@
-from dataclasses import dataclass
 import json
+import pathlib
 import sys
-
+from dataclasses import dataclass
 
 # Script to check that the `fields.json` file that Claude creates when analyzing PDFs
 # does not have overlapping bounding boxes. See forms.md.
@@ -27,8 +27,7 @@ def get_bounding_box_messages(fields_json_stream) -> list[str]:
 
     rects_and_fields = []
     for f in fields["form_fields"]:
-        rects_and_fields.append(RectAndField(f["label_bounding_box"], "label", f))
-        rects_and_fields.append(RectAndField(f["entry_bounding_box"], "entry", f))
+        rects_and_fields.extend((RectAndField(f["label_bounding_box"], "label", f), RectAndField(f["entry_bounding_box"], "entry", f)))
 
     has_error = False
     for i, ri in enumerate(rects_and_fields):
@@ -59,12 +58,13 @@ def get_bounding_box_messages(fields_json_stream) -> list[str]:
         messages.append("SUCCESS: All bounding boxes are valid")
     return messages
 
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: check_bounding_boxes.py [fields.json]")
         sys.exit(1)
     # Input file should be in the `fields.json` format described in forms.md.
-    with open(sys.argv[1]) as f:
+    with pathlib.Path(sys.argv[1]).open(encoding="utf-8") as f:
         messages = get_bounding_box_messages(f)
     for msg in messages:
         print(msg)
