@@ -3,7 +3,7 @@ os:
   editPreset: "nvim"
 # to skip without creating a new repo
 notARepository: "skip"
-
+services: {}
 # Config relating to the Lazygit UI
 gui:
   # See https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#custom-author-color
@@ -200,7 +200,7 @@ gui:
   # One of: 'auto' | 'always'
   # If 'auto', only split the main window when a file has both staged and unstaged
   # changes
-  splitDiff: always
+  splitDiff: auto
 
   # Default size for focused window. Can be changed from within Lazygit with '+'
   # and '_' (but this won't change the default).
@@ -305,6 +305,7 @@ git:
   mainBranches:
     - master
     - main
+    - develop
 
   # Prefix to use when skipping hooks. E.g. if set to 'WIP', then pre-commit hooks
   # will be skipped when the commit message starts with 'WIP'
@@ -333,12 +334,12 @@ git:
   autoStageResolvedConflicts: true
 
   # Command used when displaying the current branch git log in the main window
-  branchLogCmd: git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=medium {{branchName}} --
+  branchLogCmd: "git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=medium --oneline {{branchName}} --"
 
   # Commands used to display git log of all branches in the main window, they will
   # be cycled in order of appearance (array of strings)
   allBranchesLogCmds:
-    - git log --graph --all --color=always --abbrev-commit --decorate --date=relative  --pretty=medium
+    - "git log --graph --all --color=always --abbrev-commit --decorate --date=relative  --pretty=medium"
 
   # If true, git diffs are rendered with the `--ignore-all-space` flag, which
   # ignores whitespace changes. Can be toggled from within Lazygit with `<c-w>`.
@@ -346,7 +347,7 @@ git:
 
   # The number of lines of context to show around each diff hunk. Can be changed
   # from within Lazygit with the `{` and `}` keys.
-  diffContextSize: 3
+  diffContextSize: 5
 
   # The threshold for considering a file to be renamed, in percent. Can be changed
   # from within Lazygit with the `(` and `)` keys.
@@ -370,6 +371,8 @@ git:
   # See https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#predefined-commit-message-prefix
   commitPrefix:
     - pattern: "^\\w+\\/(\\w+-\\w+).*"
+      replace: "[$1] "
+    - pattern: "^(\\w{3}-\\d+).*"
       replace: "[$1] "
     - pattern: "^([^_]+)_.*" # Take all text prior to the first underscore
       replace: "($1) "

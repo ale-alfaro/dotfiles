@@ -36,8 +36,6 @@ n() {
 }
 ssh_agent_start() {
     eval "$(ssh-agent -s)"
-    # ssh-add ~/.ssh/id_ed25519_work
-    # ssh-add ~/.ssh/id_arch_linux
     ssh-add ~/.ssh/id_ed25519_yubikey
 }
 alias sshstart="ssh_agent_start"
@@ -113,6 +111,6 @@ alias mmv='noglob zmv -W'
 alias zcp='zmv -C' # Copy with patterns
 alias zln='zmv -L' # Link with patterns
 
-    # Navigate back to directories easily using the zsh directory stack feature
+# Navigate back to directories easily using the zsh directory stack feature
 alias d='dirs -v'
-for index ({1..9}) alias "$index"="builtin cd +${index}"; unset index
+for index in {1..9}; do alias "$index"="builtin cd +${index}"; done

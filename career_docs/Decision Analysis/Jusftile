@@ -1,0 +1,4 @@
+set shell = ["zsh", "-uc"]
+
+gen-mermaid:
+  mmdc -i report.md -a res/ --pdfFit --outputFormat "pdf"

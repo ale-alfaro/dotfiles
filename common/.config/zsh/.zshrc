@@ -9,6 +9,10 @@ for file in $ZDOTDIR/zshrc.d/*.zsh; do
     source "$file"
 done
 
+export PATH="$PATH:$ZDOTDIR/funcs"
+# funcs=( ${(f@)"$(print -r $ZDOTDIR/funcs/*(#q:t))"} )
+# print "Loading functions $funcs"
+# autoload "${funcs[@]}"
 # Ghostty shell integration for Bash. This should be at the top of your bashrc!
 if [ -n "${GHOSTTY_RESOURCES_DIR}" ]; then
     source "${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration"
@@ -64,3 +68,4 @@ if [[ ! -z ${ACLI_ENABLED:-} ]]; then
     source <(acli completion zsh)
     source $ZDOTDIR/helpers/acli.zsh
 fi
+source <(gh completion -s zsh)
