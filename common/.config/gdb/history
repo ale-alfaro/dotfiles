@@ -515,3 +515,41 @@ up 7
 l
 q
 q
+up 11
+up
+down
+locals
+local
+info locals 
+l
+p req
+up req.read_val
+q
+up 11
+l
+up
+p req
+p *req
+fg
+q
+up 134
+frame 13
+p req
+down
+l
+q
+up 12
+l
+p *req
+up
+p dev
+p *dev
+p *((struct max30208_config*)dev->config)
+p *((struct max30208_data*)dev->data)
+q
+b z_arm_fault
+mon reset
+mon halt
+c
+l
+q

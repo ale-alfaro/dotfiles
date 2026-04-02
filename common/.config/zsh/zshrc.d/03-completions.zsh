@@ -52,7 +52,7 @@ cache_directory="$XDG_CACHE_HOME/zsh"
 [[ -r "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh" ]] && . "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh"
 autoload -Uz compinit && compinit -d $cache_directory
 
-zstyle ':completion:*' completer _complete _extensions _approximate _history
+zstyle ':completion:*' completer _complete _expand_alias _extensions _approximate _history
 
 # zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 ## Auto complete with case insenstivity and allowing some characters to be

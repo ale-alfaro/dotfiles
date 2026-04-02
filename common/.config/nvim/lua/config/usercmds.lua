@@ -121,7 +121,7 @@ local function pack_usercmd_opts(desc)
     desc = desc,
     nargs = 1,
     ---@type fun(args: vim.api.keyset.create_user_command.command_args)
-    complete = function(ArgLead, CmdLine, CursorPos)
+    complete = function(args)
       return VimRc.get_plugins()
     end,
   }

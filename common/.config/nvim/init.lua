@@ -1,4 +1,16 @@
 _G.VimRc = require 'custom'
+VimRc.env = vim.fn.environ() or {}
+VimRc.getenv = function(name, default)
+  vim.validate('name', name, 'string')
+  vim.validate('default', default, 'string', true)
+  if VimRc.env[name] then
+    return VimRc.env[name]
+  elseif default then
+    return default
+  else
+    VimRc.err('Failed to get env: ' .. name)
+  end
+end
 require 'config.opts'
 require 'config.autocmds'
 require 'config.usercmds'
@@ -6,6 +18,7 @@ require 'config.keymaps'
 vim.pack.add(_G.plug_spec {
   'nvim-lua/plenary.nvim',
   'nvim-mini/mini.nvim',
+  'stevearc/oil.nvim',
 })
 
 -- Loading helpers used to organize config into fail-safe parts. Example usage:
@@ -47,9 +60,26 @@ end
 -- - `:h autocommand`
 -- - `:h nvim_create_augroup()`
 -- - `:h nvim_create_autocmd()`
-local gr = vim.api.nvim_create_augroup('custom-config', {})
-VimRc.new_autocmd = function(event, pattern, callback, desc)
+local gr = vim.api.nvim_create_augroup('vimrc', {})
+--- Buflocal autocmd
+---@param event string
+---@param callback function
+---@param pattern (string|string[])?
+---@param desc string?
+VimRc.new_autocmd = function(event, callback, pattern, desc)
+  pattern = pattern or '*'
   local opts = { group = gr, pattern = pattern, callback = callback, desc = desc }
+  vim.api.nvim_create_autocmd(event, opts)
+end
+
+local bufgr = vim.api.nvim_create_augroup('vimrc.buf', { clear = false })
+--- Buflocal autocmd
+---@param event string|string[]
+---@param bufnr integer
+---@param callback function
+---@param desc string?
+VimRc.new_buf_autocmd = function(event, bufnr, callback, desc)
+  local opts = { group = bufgr, callback = callback, buffer = bufnr, desc = desc or '' }
   vim.api.nvim_create_autocmd(event, opts)
 end
 
@@ -66,5 +96,5 @@ VimRc.on_packchanged = function(plugin_name, kinds, callback, desc)
     end
     callback()
   end
-  VimRc.new_autocmd('PackChanged', '*', f, desc)
+  VimRc.new_autocmd('PackChanged', f, '*', desc)
 end

@@ -1,6 +1,10 @@
 # Copied from https://github.com/folke/tokyonight.nvim/blob/main/extras/lazygit/tokyonight_night.conf
 os:
-  editPreset: "nvim"
+  edit: "mise x neovim@0.12 -- nvim  -- {{filename}}"
+  editAtLine: "mise x neovim@0.12 -- nvim  +{{line}} -- {{filename}}"
+  editAtLineAndWait: "mise x neovim@0.12 -- nvim  +{{line}} -- {{filename}}"
+  openDirInEditor: "mise x neovim@0.12 -- nvim  -- {{dir}}"
+  editInTerminal: true
 # to skip without creating a new repo
 notARepository: "skip"
 services: {}
@@ -11,9 +15,9 @@ gui:
 
   # See https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#custom-branch-color
   branchColorPatterns:
-    "^feature/": "#11aaff" # use a light blue for branches beginning with 'docs/'
-    "^refactor/": "#BC4009" # use a light blue for branches beginning with 'docs/'
-    '^bug\w+/': "#ff5733" # use a bright orange for branches containing starting with 'bug'
+    "^(feature|proto|wip)": "#7fb4ca" # use a light blue for branches beginning with 'docs/'
+    "(BEDR|CWP)-\\d+": "#dcd7ba" # use a light blue for branches beginning with 'docs/'
+    "(bug|fix)\\w+-\\d+": "#e82424" # use a bright orange for branches containing starting with 'bug'
 
   # Custom icons for filenames and file extensions
   # See https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#custom-files-icon--color
@@ -48,20 +52,20 @@ gui:
   mouseEvents: true
 
   # If true, do not show a warning when amending a commit.
-  skipAmendWarning: false
+  skipAmendWarning: true
 
   # If true, do not show a warning when discarding changes in the staging view.
   skipDiscardChangeWarning: false
 
   # If true, do not show warning when applying/popping the stash
-  skipStashWarning: false
+  skipStashWarning: true
 
   # If true, do not show a warning when attempting to commit without any staged
   # files; instead stage all unstaged files.
   skipNoStagedFilesWarning: false
 
   # If true, do not show a warning when rewording a commit via an external editor
-  skipRewordInEditorWarning: false
+  skipRewordInEditorWarning: true
 
   # If true, switch to a different worktree without confirmation when checking out
   # a branch that is checked out in that worktree
@@ -90,7 +94,7 @@ gui:
   # - 'vertical': split the window vertically
   # - 'flexible': (default) split the window horizontally if the window is wide
   # enough, otherwise split vertically
-  mainPanelSplitMode: "vertical"
+  mainPanelSplitMode: "flexible"
 
   # How the window is split when in half screen mode (i.e. after hitting '+'
   # once).
@@ -98,7 +102,7 @@ gui:
   # - 'left': split the window horizontally (side panel on the left, main view on
   # the right)
   # - 'top': split the window vertically (side panel on top, main view below)
-  enlargedSideViewLocation: left
+  enlargedSideViewLocation: top
 
   # If true, wrap lines in the staging view to the width of the view. This makes
   # it much easier to work with diffs that have long lines, e.g. paragraphs of
@@ -172,10 +176,10 @@ gui:
   showNumstatInFilesView: true
 
   # If true, show a random tip in the command log when Lazygit starts
-  showRandomTip: true
+  showRandomTip: false
 
   # If true, show the command log
-  showCommandLog: true
+  showCommandLog: false
 
   # If true, show the bottom line that contains keybinding info and useful
   # buttons. If false, this line will be hidden except to display a loader for an
@@ -205,11 +209,11 @@ gui:
   # Default size for focused window. Can be changed from within Lazygit with '+'
   # and '_' (but this won't change the default).
   # One of: 'normal' (default) | 'half' | 'full'
-  screenMode: normal
+  screenMode: half
 
   # Window border style.
   # One of 'rounded' (default) | 'single' | 'double' | 'hidden' | 'bold'
-  border: rounded
+  border: single
 
   # If true, show a seriously epic explosion animation when nuking the working
   # tree.
@@ -237,7 +241,7 @@ gui:
 
   # Status panel view.
   # One of 'dashboard' (default) | 'allBranchesLog'
-  statusPanelView: "allBranchesLog"
+  statusPanelView: "dashboard"
 
   # If true, jump to the Files panel after popping a stash
   switchToFilesAfterStashPop: true
@@ -250,6 +254,8 @@ gui:
   switchTabsWithPanelJumpKeys: true
 # Config relating to git
 git:
+  pagers:
+    - pager: delta --dark --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
   # Array of pagers. Each entry has the following format:
   #
   #   # Value of the --color arg in the git diff command. Some pagers want
@@ -263,7 +269,6 @@ git:
   #   pager: ""
   #
   #   # e.g. 'difft --color=always'
-  #   externalDiffCommand: ""
   #
   #   # If true, Lazygit will use git's `diff.external` config for paging.
   #   # The advantage over `externalDiffCommand` is that this can be
@@ -273,7 +278,6 @@ git:
   #
   # See https://github.com/jesseduffield/lazygit/blob/master/docs/Custom_Pagers.md
   # for more information.
-  pagers: []
 
   # Config relating to committing
   commit:
@@ -347,7 +351,7 @@ git:
 
   # The number of lines of context to show around each diff hunk. Can be changed
   # from within Lazygit with the `{` and `}` keys.
-  diffContextSize: 5
+  diffContextSize: 10
 
   # The threshold for considering a file to be renamed, in percent. Can be changed
   # from within Lazygit with the `(` and `)` keys.
@@ -416,47 +420,6 @@ customCommands:
         key: "Message"
     output: terminal
   # commit with date prefix
-  - key: "<c-a>"
-    context: "files"
-    description: "Pick AI commit"
-    command: |
-      #!/usr/bin/env zsh
-
-      diff=$(git diff --cached | head -n 10)
-      if [ -z "$diff" ]; then
-        echo "No changes in staging. Add changes first."
-        exit 1
-      fi
-
-      local -r message=$(
-        cat <<-EOF
-        Please suggest a commit messages, given the following diff and using the template below,
-        this is a non-interactive session, the message you output will be the one written to the commit message editor
-        so be to the point and add any problems to the beggining of the message with a clear sign that something went wrong.
-
-        **Output Format**
-        Follow this output format and ONLY output raw commit messages without spacing, numbers or other decorations:
-        <type>(<scope>): <description>.
-
-        **Example**
-        fix(app): add password regex pattern
-        test(unit): add new test cases
-        style: remove unused imports
-        refactor(pages): extract common code to utils/wait.ts
-
-        **Changes to analyze:**
-        \$(git diff --cached --stat)
-        \$(git diff --cached)
-
-
-        **Recent Commits on Repo for Reference:**
-        \$(git log -n 10 --pretty=format:'%h %s')
-      EOF
-        )
-        codex e -o /tmp/commit_msg "$message"
-        git commit -e -F /tmp/commit_msg
-
-  # 3) Author + date range log (since/until prompts)
   - key: "U"
     description: "Log: author + date range (pretty)"
     context: global

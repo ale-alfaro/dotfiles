@@ -14,6 +14,7 @@ task_output = "prefix"                                         # see Tasks Runne
 env_shell_expand = true
 use_file_shell_for_executable_tasks = true
 task.show_full_cmd = false
+disable_backends = ["asdf"]
 
 [settings.status]
 missing_tools = "if_other_versions_installed"
@@ -34,7 +35,6 @@ node = "latest"
 ast-grep = "latest"
 tmux = "latest"
 ccache = "latest"
-taplo = "latest"
 yq = "latest"
 "github:alltuner/mise-completions-sync" = "latest"
 "pipx:docling" = "latest"
@@ -49,7 +49,6 @@ yq = "latest"
 "npm:vscode-langservers-extracted" = "latest"
 "pipx:cmakelang" = { version = "latest", extras = "yaml,html-gen" }
 "pipx:clang-format" = "latest"
-"http:acli" = { version = "latest", url = "https://acli.atlassian.com/linux/latest/acli_linux_amd64/acli" }
 "cargo:neocmakelsp" = "latest"
 "pipx:gersemi" = "latest"
 "pipx:prek" = "latest"
@@ -64,7 +63,31 @@ rust = "latest"
 "cargo:tlrc" = "latest"
 gh = "latest"
 "npm:obsidian-headless" = "latest"
+shfmt = "latest"
+shellcheck = "latest"
+just = "latest"
+"github:TheBushidoCollective/han" = "latest"
+neovim = "latest"
+clang = "latest"
+"github:clangd/clangd" = "latest"
+"github:joshmedeski/sesh" = "latest"
+"vfox:clang" = "latest"
+meson = "latest"
+"github:dlvhdr/diffnav" = "latest"
+"github:dandavison/delta" = "latest"
+"cargo:taplo-cli" = "latest"
+lua = "latest"
+dprint = "latest"
+lua-language-server = "latest"
+stylua = "latest"
 
 [shell_alias]
 pygdb = "PYTHONHOME=/usr /opt/zephyr-sdk-custom/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb-py -ex 'target remote :2331'"
 jdbserver = "JLinkGDBServer -device NRF52840_XXAA -if SWD -speed 4000 -port 2331 -silent -singlerun"
+
+[env]
+_.path = [
+    # adds an absolute path
+    "~/dotfiles/common/bin",
+    "~/dotfiles/linux/bin",
+]

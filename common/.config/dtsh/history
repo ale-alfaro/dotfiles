@@ -166,3 +166,9 @@ tree
 q
 tree
 q
+tree
+cat\040-A\040crn120
+cat\040-A\040&crn120
+q
+find\040-h
+q

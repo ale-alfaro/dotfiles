@@ -1,262 +1,71 @@
-vim.pack.add(_G.plug_spec {
-  'neovim/nvim-lspconfig',
-  'rachartier/tiny-code-action.nvim',
-  'p00f/clangd_extensions.nvim',
-})
+-- local ok, blink = pcall(require, 'blink.cmp')
+-- local capabilities = vim.lsp.protocol.make_client_capabilities()
+-- if MiniCompletion then
+--   capabilities = MiniCompletion.get_lsp_capabilities()
+-- elseif ok and blink then
+--   capabilities = blink.make_client_capabilities()
+-- end
+-- Extend neovim's client capabilities with the completion ones.
 
-VimRc.lsp.diagnostics_setup()
-
-require('tiny-code-action').setup {
-  picker = {
-    'buffer',
-    opts = {
-      hotkeys = true,
-      -- Use numeric labels.
-      hotkeys_mode = function(titles)
-        return vim
-          .iter(ipairs(titles))
-          :map(function(i)
-            return tostring(i)
-          end)
-          :totable()
-      end,
-    },
-  },
-}
--- Disable inlay hints initially (and enable if needed with my ToggleInlayHints command).
-vim.g.inlay_hints = false
-
----@param client vim.lsp.Client
----@param bufnr number
-local add_inlay_hint_support = function(client, bufnr)
-  if client:supports_method 'textDocument/inlayHint' then
-    local inlay_hints_group = vim.api.nvim_create_augroup('mariasolos/toggle_inlay_hints', { clear = false })
-
-    if vim.g.inlay_hints then
-      -- Initial inlay hint display.
-      -- Idk why but without the delay inlay hints aren't displayed at the very start.
-      vim.defer_fn(function()
-        local mode = vim.api.nvim_get_mode().mode
-        vim.lsp.inlay_hint.enable(mode == 'n' or mode == 'v', { bufnr = bufnr })
-      end, 500)
-    end
-
-    vim.api.nvim_create_autocmd('InsertEnter', {
-      group = inlay_hints_group,
-      desc = 'Enable inlay hints',
-      buffer = bufnr,
-      callback = function()
-        if vim.g.inlay_hints then
-          vim.lsp.inlay_hint.enable(false, { bufnr = bufnr })
-        end
-      end,
-    })
-
-    vim.api.nvim_create_autocmd('InsertLeave', {
-      group = inlay_hints_group,
-      desc = 'Disable inlay hints',
-      buffer = bufnr,
-      callback = function()
-        if vim.g.inlay_hints then
-          vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-        end
-      end,
-    })
-  end
-end
-
----@param client vim.lsp.Client
----@param bufnr number
-local add_document_highlight = function(client, bufnr)
-  if client:supports_method 'textDocument/documentHighlight' then
-    local under_cursor_highlights_group = vim.api.nvim_create_augroup('mariasolos/cursor_highlights', { clear = false })
-    vim.api.nvim_create_autocmd({ 'CursorHold', 'InsertLeave' }, {
-      group = under_cursor_highlights_group,
-      desc = 'Highlight references under the cursor',
-      buffer = bufnr,
-      callback = vim.lsp.buf.document_highlight,
-    })
-    vim.api.nvim_create_autocmd({ 'CursorMoved', 'InsertEnter', 'BufLeave' }, {
-      group = under_cursor_highlights_group,
-      desc = 'Clear highlight references',
-      buffer = bufnr,
-      callback = vim.lsp.buf.clear_references,
-    })
-  end
-end
-
----@param client vim.lsp.Client
----@param bufnr number
-local add_cursor_hold_diagnostics = function(client, bufnr)
-  if client:supports_method('textDocument/diagnostic', bufnr) then
-    local diag_group = vim.api.nvim_create_augroup('diagnosis', { clear = false })
-    vim.api.nvim_create_autocmd('CursorHold', {
-      group = diag_group,
-      buffer = bufnr,
-      desc = '✨lsp show diagnostics on CursorHold',
-      callback = function()
-        local hover_opts = {
-          focusable = false,
-          close_events = { 'BufLeave', 'CursorMoved', 'InsertEnter', 'FocusLost' },
-          border = 'rounded',
-          source = 'always',
-          prefix = ' ',
-        }
-        vim.diagnostic.open_float(hover_opts)
-      end,
-    })
-  end
-end
-
----@param client vim.lsp.Client
----@param bufnr number
-local add_completion = function(client, bufnr)
-  -- Enable auto-completion. Note: Use CTRL-Y to select an item. |complete_CTRL-Y|
-  if client:supports_method 'textDocument/completion' then
-    -- Optional: trigger autocompletion on EVERY keypress. May be slow!
-    -- local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
-    -- client.server_capabilities.completionProvider.triggerCharacters = chars
-    vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = true })
-  end
-  if MiniCompletion then
-    -- Set 'omnifunc' for LSP completion only when needed.
-    vim.bo[bufnr].omnifunc = 'v:lua.MiniCompletion.completefunc_lsp'
-  end
-end
-
-KEYS.define {
-  {
-    lhs = 'gd',
-    rhs = function()
-      require('fzf-lua').lsp_definitions { jump1 = true }
-    end,
-    opts = { desc = 'Goto Definition' },
-  },
-  {
-    lhs = 'gD',
-    rhs = function()
-      require('fzf-lua').lsp_definitions { jump1 = false }
-    end,
-    opts = { desc = 'Peek Definition' },
-  },
-  { lhs = 'gr', rhs = '<cmd>FzfLua lsp_references<cr>', opts = { desc = 'References' } },
-  { lhs = 'gI', rhs = '<cmd>FzfLua lsp_implementations<cr>', opts = { desc = 'Goto Implementation' } },
-  { lhs = 'gy', rhs = '<cmd>FzfLua lsp_typedefs<cr>', opts = { desc = 'Goto T[y]pe Definition' } },
-  { lhs = 'gD', rhs = '<cmd>FzfLua lsp_declarations<cr>', opts = { desc = 'Goto Declaration' } },
-  { lhs = '<leader>fs', rhs = '<cmd>FzfLua lsp_document_symbols<cr>', opts = { desc = 'Document Symbols' } },
-  {
-    lhs = 'grd',
-    rhs = function()
-      vim.lsp.document_color.color_presentation()
-    end,
-    opts = { desc = 'Document Color' },
-  },
-  {
-    lhs = 'K',
-    rhs = function()
-      return vim.lsp.buf.hover()
-    end,
-    opts = { desc = 'Hover' },
-  },
-}
----@param client vim.lsp.Client
----@param bufnr number
-local add_lsp_keymaps = function(client, bufnr)
-  local lsp_keys = {}
-  if client:supports_method('textDocument/signatureHelp', bufnr) then
-    vim.tbl_extend('force', lsp_keys, {
-      {
-        lhs = 'gK',
-        rhs = function()
-          return vim.lsp.buf.signature_help()
-        end,
-        opts = { desc = 'Signature Help' },
-        has = 'signatureHelp',
-      },
-      {
-        lhs = '<C-k>',
-        rhs = function()
-          if require('blink.cmp.completion.windows.menu').win:is_open() then
-            require('blink.cmp').hide()
-          end
-          vim.lsp.buf.signature_help()
-        end,
-        mode = 'i',
-        opts = { desc = 'Signature Help' },
-        has = 'signatureHelp',
-      },
-    })
-  end
-  if client:supports_method('textDocument/signatureHelp', bufnr) then
-    vim.tbl_extend('force', lsp_keys, {
-      {
-        lhs = 'gK',
-        rhs = function()
-          return vim.lsp.buf.signature_help()
-        end,
-        opts = { desc = 'Signature Help' },
-        has = 'signatureHelp',
-      },
-      {
-        lhs = '<C-k>',
-        rhs = function()
-          if require('blink.cmp.completion.windows.menu').win:is_open() then
-            require('blink.cmp').hide()
-          end
-          vim.lsp.buf.signature_help()
-        end,
-        mode = 'i',
-        opts = { desc = 'Signature Help' },
-        has = 'signatureHelp',
-      },
-    })
-  end
-  if client:supports_method('textDocument/codeAction', bufnr) then
-    vim.tbl_extend('force', lsp_keys, {
-      {
-        mode = { 'n', 'v' },
-        lhs = '<leader>ca',
-        rhs = require('tiny-code-action').code_action,
-        opts = { desc = 'Code Action' },
-        has = 'codeAction',
-      },
-      {
-        lhs = '<leader>cc',
-        rhs = vim.lsp.codelens.run,
-        opts = { desc = 'Run Codelens' },
-        mode = { 'n', 'v' },
-        has = 'codeLens',
-      },
-      {
-        lhs = '<leader>cC',
-        rhs = vim.lsp.codelens.refresh,
-        opts = { desc = 'Refresh & Display Codelens' },
-        mode = { 'n' },
-        has = 'codeLens',
-      },
-    })
-  end
-
-  if client:supports_method('textDocument/rename', bufnr) then
-    vim.tbl_extend('force', lsp_keys, {
-      { lhs = '<leader>cr', rhs = vim.lsp.buf.rename, opts = { desc = 'Rename' }, has = 'rename' },
-    })
-  end
-  for _, key in ipairs(lsp_keys) do
-    vim.api.nvim_buf_set_keymap(bufnr, 'n', key.lhs, key.rhs, key.opts)
-  end
-end
+-- This Lsps are better not enabled by default and enabled locally
+-- Set up LSP servers.
+VimRc.now_if_args(function()
+  vim.pack.add(_G.plug_spec {
+    'neovim/nvim-lspconfig',
+  })
+end)
 ---@param client vim.lsp.Client
 ---@param bufnr integer
 local on_attach = function(client, bufnr)
-  add_completion(client, bufnr)
-  add_document_highlight(client, bufnr)
-  add_inlay_hint_support(client, bufnr)
+  -- Enable auto-completion. Note: Use CTRL-Y to select an item. |complete_CTRL-Y|
+  local under_cursor_highlights_group = vim.api.nvim_create_augroup('mariasolos/cursor_highlights', { clear = false })
+  VimRc.new_buf_autocmd({ 'CursorHold', 'InsertLeave' }, bufnr, vim.lsp.buf.document_highlight, 'Highlight references under the cursor')
+  VimRc.new_buf_autocmd({ 'CursorMoved', 'InsertEnter', 'BufLeave' }, bufnr, vim.lsp.buf.clear_references, 'Clear highlight references')
 
   -- Don't check for the capability here to allow dynamic registration of the request.
-  vim.lsp.document_color.enable(true, bufnr)
-  add_lsp_keymaps(client, bufnr)
-  add_cursor_hold_diagnostics(client, bufnr)
+  vim.lsp.document_color.enable(true, { bufnr = bufnr, style = 'virtual' })
+  --- Global lsp keymaps redefined to use Fzf-lua functions
+
+  local lsp_keys = {
+    {
+      lhs = 'grd',
+      rhs = '<cmd>FzfLua lsp_definitions jump1=false<cr>',
+      opts = { desc = 'Peek Definition' },
+    },
+    {
+      lhs = 'grD',
+      rhs = '<cmd>FzfLua lsp_definitions jump1=true<cr>',
+      opts = { desc = 'Goto Definition' },
+    },
+    { lhs = 'grr', rhs = '<cmd>FzfLua lsp_references<cr>', opts = { desc = 'References' } },
+    { lhs = 'gra', rhs = '<cmd>lua require("tiny-code-action").code_action()<cr>', opts = { desc = 'Code Action' } },
+    { lhs = 'grc', rhs = '<cmd>lua vim.lsp.codelens.run()<cr>', opts = { desc = 'Code Lens' } },
+    { lhs = 'gri', rhs = '<cmd>FzfLua lsp_implementations<cr>', opts = { desc = 'Goto Implementation' } },
+    { lhs = 'grt', rhs = '<cmd>FzfLua lsp_typedefs<cr>', opts = { desc = 'Goto T[y]pe Definition' } },
+    { lhs = 'gO', rhs = '<cmd>FzfLua lsp_document_symbols<cr>', opts = { desc = 'Document Symbols' } },
+    { lhs = '<C-k>', rhs = '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts = { desc = 'Signature Help' } },
+  }
+  for _, key in ipairs(lsp_keys) do
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', key.lhs, key.rhs, key.opts)
+  end
+
+  VimRc.new_buf_autocmd('CursorHold', bufnr, function()
+    local hover_opts = {
+      focusable = false,
+      close_events = { 'BufLeave', 'CursorMoved', 'InsertEnter', 'FocusLost' },
+      border = 'rounded',
+      source = 'always',
+      prefix = ' ',
+    }
+    vim.diagnostic.open_float(hover_opts)
+  end, '✨lsp show diagnostics on Cursorhold')
+  -- Auto-format ("lint") on save.
+  -- Usually not needed if server supports "textDocument/willSaveWaitUntil".
+  -- if FeatureFlags:get 'Format' and not client:supports_method 'textDocument/willSaveWaitUntil' and client:supports_method 'textDocument/formatting' then
+  --   VimRc.new_buf_autocmd('BufWritePre', bufnr, function()
+  --     vim.lsp.buf.format { bufnr = bufnr, id = client.id, timeout_ms = 1000 }
+  --   end)
+  -- end
   if client:supports_method 'textDocument/codeAction' then
     require('lsp.code_action').on_attach(bufnr, client)
   end
@@ -281,40 +90,163 @@ vim.lsp.handlers['client/registerCapability'] = (function(overridden_register_ca
 end)(vim.lsp.handlers['client/registerCapability'])
 
 --- During attach
-vim.api.nvim_create_autocmd('LspAttach', {
-  desc = 'Configure LSP keymaps',
-  callback = function(args)
-    local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
-    local bufnr = args.buf
-    VimRc.info(string.format('[LspAttach autocmd] - Client %s', client.name))
-    on_attach(client, bufnr)
-  end,
-})
--- This Lsps are better not enabled by default and enabled locally
--- Set up LSP servers.
+VimRc.new_autocmd('LspAttach', function(ev)
+  local bufnr = ev.buf
+
+  local client = assert(vim.lsp.get_client_by_id(ev.data.client_id))
+
+  VimRc.info(string.format('[LspAttach autocmd] - Client %s', client.name))
+  on_attach(client, bufnr)
+end, '*', 'LspAttach Configure Lsps')
+
 vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
   once = true,
   callback = function()
     -- Extend neovim's client capabilities with the completion ones.
-    local ok, blink = pcall(require, 'blink.cmp')
-    local capabilities = vim.lsp.protocol.make_client_capabilities()
-    if MiniCompletion then
-      capabilities = MiniCompletion.get_lsp_capabilities()
-    elseif ok and blink then
-      capabilities = blink.make_client_capabilities()
-    end
+    local capabilities = MiniCompletion.get_lsp_capabilities()
     capabilities.textDocument.completion.completionItem.snippetSupport = true
     vim.lsp.config('*', { capabilities = capabilities })
-    local nvim_dir = vim.fs.dirname(vim.fn.expand '$MYVIMRC')
-    ---@type string[]
-    local lsps = VimRc.lsp.configs_get(nvim_dir)
-    local lsps_to_not_enable = { 'ty', 'pyrefly', 'neocmake' }
-    VimRc.info(
-      string.format('Found lsp configs in MYVIMRC: \n %s \n Enabling all except for:\n %s \n', table.concat(lsps, ' '), table.concat(lsps_to_not_enable, ' '))
-    )
+    MiniSnippets.start_lsp_server()
 
-    vim.iter(lsps):each(function(lsp)
-      vim.lsp.enable(lsps, not vim.tbl_contains(lsps_to_not_enable, lsp))
-    end)
+    local servers = vim
+      .iter(vim.api.nvim_get_runtime_file('lsp/*.lua', true))
+      :map(function(file)
+        return vim.fn.fnamemodify(file, ':t:r')
+      end)
+      :totable()
+    VimRc.info(string.format('\nEnabling lsps: \n %s \n', table.concat(servers, '\n')))
+    vim.lsp.enable(servers)
   end,
 })
+
+-- HACK: Override buf_request to ignore notifications from LSP servers that don't implement a method.
+local buf_request = vim.lsp.buf_request
+---@diagnostic disable-next-line: duplicate-set-field
+vim.lsp.buf_request = function(bufnr, method, params, handler)
+  return buf_request(bufnr, method, params, handler, function() end)
+end
+
+VimRc.later(function()
+  vim.pack.add(_G.plug_spec {
+    'rachartier/tiny-code-action.nvim',
+  })
+  require('tiny-code-action').setup {
+    picker = {
+      'buffer',
+      opts = {
+        hotkeys = true,
+        -- Use numeric labels.
+        hotkeys_mode = function(titles)
+          return vim
+            .iter(ipairs(titles))
+            :map(function(i)
+              return tostring(i)
+            end)
+            :totable()
+        end,
+      },
+    },
+  }
+end)
+
+VimRc.on_filetype('yaml', function()
+  vim.pack.add {
+    'b0o/schemastore.nvim',
+  }
+
+  vim.lsp.config('yaml_ls', {
+    settings = {
+      yaml = {
+
+        schemaStore = {
+          -- You must disable built-in schemaStore support if you want to use
+          -- this plugin and its advanced options like `ignore`.
+          enable = false,
+          -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
+          url = '',
+        },
+        schemas = require('schemastore').yaml.schemas(),
+        validate = { enable = true },
+        format = { enable = true },
+      },
+    },
+  })
+end)
+
+VimRc.on_filetype('toml', function()
+  vim.pack.add {
+    'b0o/schemastore.nvim',
+  }
+  vim.lsp.config('taplo', {
+    settings = {
+      -- Use the defaults that the VSCode extension uses: https://github.com/tamasfe/taplo/blob/2e01e8cca235aae3d3f6d4415c06fd52e1523934/editors/vscode/package.json
+      taplo = {
+        configFile = { enabled = false },
+        schema = {
+          enabled = true,
+          catalogs = { 'https://www.schemastore.org/api/json/catalog.json' },
+          cache = {
+            memoryExpiration = 60,
+            diskExpiration = 600,
+          },
+        },
+      },
+    },
+  })
+end)
+VimRc.on_filetype('json', function()
+  vim.pack.add {
+    'b0o/schemastore.nvim',
+  }
+  local capabilities = vim.lsp.protocol.make_client_capabilities()
+  capabilities.textDocument.completion.completionItem.snippetSupport = true
+
+  vim.lsp.config('jsonls', {
+    capabilities = capabilities,
+    settings = {
+      json = {
+        schemas = require('schemastore').yaml.schemas(),
+        validate = { enable = true },
+      },
+    },
+  })
+end)
+VimRc.on_filetype('c', function()
+  vim.pack.add {
+    'p00f/clangd_extensions.nvim',
+  }
+  require('clangd_extensions').setup {
+    ast = {
+      role_icons = {
+        type = '🄣',
+        declaration = '🄓',
+        expression = '🄔',
+        statement = ';',
+        specifier = '🄢',
+        ['template argument'] = '🆃',
+      },
+
+      kind_icons = {
+        Compound = '🄲',
+        Recovery = '🅁',
+        TranslationUnit = '🅄',
+        PackExpansion = '🄿',
+        TemplateTypeParm = '🅃',
+        TemplateTemplateParm = '🅃',
+        TemplateParamObject = '🅃',
+      },
+
+      highlights = {
+        detail = 'Comment',
+      },
+    },
+
+    memory_usage = {
+      border = 'none',
+    },
+
+    symbol_info = {
+      border = 'none',
+    },
+  }
+end)

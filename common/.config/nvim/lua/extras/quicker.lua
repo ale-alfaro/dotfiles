@@ -1,10 +1,24 @@
+---@class QuickerCtxLineNoTweakArgs
+---@field lineno integer
+---@field add_to_existing boolean
+---
+---
+---@class QuickerCtxLineNoTweakArgs
+---@field before QuickerCtxLineNoTweakArgs
+---@field after QuickerCtxLineNoTweakArgs
 ---
 local qf_toggle_expand = function()
-  require('quicker').toggle_expand { before = 2, after = 2, add_to_existing = true }
+  vim.ui.select({ '5', '10', '15', '20', '25' }, { prompt = 'Expand by how many lines: ' }, function(lines)
+    local lineno = tonumber(lines)
+    if type(lineno) ~= 'number' then
+      error 'Line number must be an error'
+    end
+    require('quicker').toggle_expand { before = lineno, after = lineno, add_to_existing = true }
+  end)
 end
 -- Improved quickfix UI.
 ---@return VimPackPlugin
-VimRc.pack_add( {
+VimRc.pack_add {
   name = 'quicker',
   plugin = _G.plug_spec { 'stevearc/quicker.nvim', 'folke/trouble.nvim' },
   config = function()
@@ -15,17 +29,40 @@ VimRc.pack_add( {
         relativenumber = false,
         signcolumn = 'auto',
         winfixheight = true,
-        wrap = false,
+        wrap = true,
       },
       -- -- Set to false to disable the default options in `opts`
       -- use_default_opts = true,
       -- Keymaps to set for the quickfix buffer
       keys = {
-        { '>', "<cmd>lua require('quicker').expand()<CR>", desc = 'Expand quickfix content' },
+        { '>', qf_toggle_expand, desc = 'Expand quickfix content' },
         { '<', "<cmd>lua require('quicker').collapse()<CR>", desc = 'Collapse quickfix content' },
         {
-          'z',
-          qf_toggle_expand,
+          '-',
+          function()
+            require('quicker').expand { after = -3, before = 0, add_to_existing = true }
+          end,
+          desc = 'Expand/Collapse quickfix content toggle',
+        },
+        {
+          '_',
+          function()
+            require('quicker').expand { after = 0, before = -3, add_to_existing = true }
+          end,
+          desc = 'Expand/Collapse quickfix content toggle',
+        },
+        {
+          '=',
+          function()
+            require('quicker').expand { after = 0, before = 3, add_to_existing = true }
+          end,
+          desc = 'Expand/Collapse quickfix content toggle',
+        },
+        {
+          '+',
+          function()
+            require('quicker').expand { after = 3, before = 0, add_to_existing = true }
+          end,
           desc = 'Expand/Collapse quickfix content toggle',
         },
         {
@@ -35,7 +72,7 @@ VimRc.pack_add( {
         },
       },
       -- Callback function to run any custom logic or keymaps for the quickfix buffer
-      on_qf = function(bufnr) end,
+      -- on_qf = function(bufnr) end,
       edit = {
         -- Enable editing the quickfix like a normal buffer
         enabled = true,
@@ -84,4 +121,4 @@ VimRc.pack_add( {
     opts = { desc = 'Toggle diagnostics (quicker)' },
   },
   { prefix = '<leader>x', group = 'QuickFix' },
-})
+}

@@ -11,8 +11,9 @@ base-prefer = env
 
 [alias]
 update = update -o=--depth=1 -n
-target = build --pristine=never --target
-menuconfig = build --pristine=never --target menuconfig -d
-initlevels = build --pristine=never --target initlevels -d
-build_resume = build --pristine=never --target all -d
+target = build -p=never -t
+menuconfig = build -p=never -t menuconfig -d
+partitions = build -p=never -t partition_manager_report -d
+initlevels = build -p=never -t initlevels -d
+build_resume = build -p=never -t all -d
 find-board = boards --format "{name:30} | {qualifiers:30} | {dir}" --fuzzy-match

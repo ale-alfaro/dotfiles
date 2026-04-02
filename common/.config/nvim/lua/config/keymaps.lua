@@ -155,8 +155,6 @@
 --
 --
 -- ]--
----@type KeymapSpec[]
-local keymaps = {}
 
 ---@param mode (string|string[])?
 ---@param lhs string
@@ -168,21 +166,21 @@ local function map(lhs, rhs, mode, opts)
   vim.validate('rhs', rhs, { 'string', 'function' })
   vim.validate('opts', opts, 'table', true)
   opts = opts or {}
-  if mode then
-    keymaps[#keymaps + 1] = { mode = mode, lhs = lhs, rhs = rhs, opts = opts }
-  else
-    keymaps[#keymaps + 1] = { mode = 'n', lhs = lhs, rhs = rhs, opts = opts }
-  end
+  mode = mode or 'n'
+  vim.keymap.set(mode, lhs, rhs, opts)
+end
+local nmap_leader = function(key, cmd, desc)
+  map('<leader>' .. key, cmd, { desc = desc })
 end
 map('q', '<nop>', nil, { noremap = true })
-map('Q', ':qm', nil, { noremap = true, desc = 'Record macro to register m' })
-map('oo', '<Cmd>let @+=expand("%:p") <CR>', nil, { noremap = true })
+map('Q', '<Cmd>qm<CR>', nil, { noremap = true, desc = 'Record macro to register m' })
+map('oo', '<Cmd>CopyCwd<CR>', nil, { noremap = true })
 --
 map('j', 'gj', { 'n', 'x' }, { desc = 'Navigate down (visual line)' })
 map('k', 'gk', { 'n', 'x' }, { desc = 'Navigate up (visual line)' })
 map('<Down>', 'gj', { 'n', 'x' }, { desc = 'Navigate down (visual line)' })
 map('gk', '<Up>', { 'n', 'x' }, { desc = 'Navigate up (visual line)' })
-map('<C-\\><C-N>', 'q', 't', { noremap = true })
+-- map('<C-\\><C-N>', 'q', 't', { noremap = true })
 map('<M-Up>', '<C-o>:move -2<cr>', 'i', { desc = 'Move Line Up' })
 map('<M-Down>', '<C-o>:move +1<cr>', 'i', { desc = 'Move Line Down' })
 map('<C-s>', '<Cmd>silent! update | redraw<CR>', nil, { desc = 'Save', noremap = true })
@@ -201,4 +199,3 @@ map('<C-Left>', '<C-w>h', nil, { desc = 'Focus window left' })
 map('<C-Right>', '<C-w>l', nil, { desc = 'Focus window right' })
 map('<C-Up>', '<C-w>k', nil, { desc = 'Focus window up' })
 map('<C-Down>', '<C-w>j', nil, { desc = 'Focus window up' })
-KEYS.define(keymaps)

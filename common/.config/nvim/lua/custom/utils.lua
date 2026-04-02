@@ -147,7 +147,7 @@ H.short_path = function(path, cwd)
   return vim.startswith(path, cwd) and path:sub(cwd:len() + 1) or vim.fn.fnamemodify(path, ':~')
 end
 
-function _G.setTimeout(timeout, callback)
+H.setTimeout = function(timeout, callback)
   local timer = vim.uv.new_timer()
   if timer ~= nil then
     timer:start(timeout, 0, function()
@@ -158,4 +158,39 @@ function _G.setTimeout(timeout, callback)
     return timer
   end
 end
+
+---@class WatchFileOpts : table
+---@field debounce integer|nil # default: false
+---@field evt_flags uv.uv_fs_event_t|nil # default: false
+
+--- Watch a file for changes
+---@param fname string
+---@param on_change fun(any)
+---@param opts WatchFileOpts?
+H.watch_file = function(fname, on_change, opts)
+  opts = opts or {}
+  local fs_event = vim.uv.new_fs_event()
+  if not fs_event then
+    return
+  end
+  local fullpath = vim.api.nvim_call_function('fnamemodify', { fname, ':p' })
+  fs_event:start(
+    fullpath,
+    opts.evt_flags or { stat = true },
+    vim.schedule_wrap(function(...)
+      -- Do work...
+      on_change(...)
+      -- vim.api.nvim_command('checktime')
+      -- Debounce: stop/start.
+      if not fs_event then
+        return
+      end
+      fs_event:stop()
+      vim.defer_fn(function()
+        H.watch_file(fname, on_change, opts)
+      end, opts.debounce or 200)
+    end)
+  )
+end
+
 return H

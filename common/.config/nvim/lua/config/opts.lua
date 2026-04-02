@@ -20,11 +20,11 @@ vim.o.expandtab = true -- Convert tabs to spaces
 vim.o.iskeyword = '@,48-57,_,192-255,-' -- Treat dash as `word` textobject part
 vim.o.incsearch = true -- Show search matches while typing
 vim.o.infercase = true -- Infer case in built-in completion
-vim.o.shiftwidth = 4 -- Use this number of spaces for indentation
+vim.o.shiftwidth = 2 -- Use this number of spaces for indentation
 vim.o.smartcase = true -- Respect case if search pattern has upper case
 vim.o.smartindent = true -- Make indenting smart
 vim.o.spelloptions = 'camel' -- Treat camelCase word parts as separate words
-vim.o.tabstop = 4 -- Show tab as this number of spaces
+vim.o.tabstop = 2 -- Show tab as this number of spaces
 vim.o.virtualedit = 'block' -- Allow going past end of line in blockwise mode
 --
 -- -- Pattern for a start of numbered list (used in `gw`). This reads as
@@ -33,8 +33,11 @@ vim.o.virtualedit = 'block' -- Allow going past end of line in blockwise mode
 vim.o.formatlistpat = [[^\s*[0-9\-\+\*]\+\([\.\)]\)*\s\+]]
 --
 -- -- Built-in completion
+-- Built-in completion
 vim.o.complete = '.,w,b,kspell' -- Use less sources
 vim.o.completeopt = 'menuone,noselect,fuzzy,nosort' -- Use custom behavior
+vim.o.completetimeout = 100 -- Limit sources delay
+---
 vim.opt.clipboard = 'unnamedplus' -- Sync with system clipboard
 vim.opt.conceallevel = 2 -- Hide * markup for bold and italic, but not markers with substitutions
 vim.opt.cursorline = true -- Enable highlighting of the current line
@@ -73,10 +76,72 @@ vim.opt.spelllang = { 'en' }
 --]]
 --
 vim.o.foldminlines = 50
+vim.o.foldlevel = 4
 vim.o.foldnestmax = 5
+vim.o.foldcolumn = 'auto'
 vim.o.exrc = true
--- vim.o.timeoutlen = 300
--- vim.o.undolevels = 10000
--- vim.o.updatetime = 200 -- Save swap file and trigger CursorHold
--- vim.o.wildmode = 'longest:full,full' -- Command-line completion mode
--- vim.o.winminwidth = 5 -- Minimum window width
+vim.o.timeoutlen = 300
+vim.o.undolevels = 10000
+vim.o.updatetime = 200 -- Save swap file and trigger CursorHold
+vim.o.wildmode = 'longest:full,full' -- Command-line completion mode
+vim.o.winminwidth = 5 -- Minimum window width
+
+-- Diff mode settings.
+-- Setting the context to a very large number disables folding.
+vim.opt.diffopt:append 'vertical,context:99'
+
+vim.opt.shortmess:append {
+  w = true,
+  s = true,
+}
+
+-- Status line.
+vim.o.laststatus = 3
+vim.o.cmdheight = 1
+local diagnostic_icons = {
+  ERROR = '',
+  WARN = '',
+  HINT = '',
+  INFO = '',
+}
+
+-- Disable inlay hints initially (and enable if needed with my ToggleInlayHints command).
+-- Define the diagnostic signs.
+for severity, icon in pairs(diagnostic_icons) do
+  local hl = 'DiagnosticSign' .. severity:sub(1, 1) .. severity:sub(2):lower()
+  vim.fn.sign_define(hl, { text = icon, texthl = hl })
+end
+vim.diagnostic.config {
+  virtual_text = {
+    prefix = '',
+    spacing = 2,
+    format = function(diagnostic)
+      -- Use shorter, nicer names for some sources:
+      local special_sources = {
+        ['Lua Diagnostics.'] = 'lua',
+        ['Lua Syntax Check.'] = 'lua',
+      }
+
+      local message = diagnostic_icons[vim.diagnostic.severity[diagnostic.severity]]
+      if diagnostic.source then
+        message = string.format('%s %s', message, special_sources[diagnostic.source] or diagnostic.source)
+      end
+      if diagnostic.code then
+        message = string.format('%s[%s]', message, diagnostic.code)
+      end
+
+      return message .. ' '
+    end,
+  },
+  float = {
+    source = true, --'if_many',
+    -- Show severity icons as prefixes.
+    prefix = function(diag)
+      local level = vim.diagnostic.severity[diag.severity]
+      local prefix = string.format(' %s ', diagnostic_icons[level])
+      return prefix, 'Diagnostic' .. level:gsub('^%l', string.upper)
+    end,
+  },
+  -- Disable signs in the gutter.
+  signs = false,
+}

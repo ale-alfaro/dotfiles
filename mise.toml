@@ -1,20 +1,51 @@
-[env]
-ZEPHYR_BASE = "/home/alealfaro/dotfiles/common/zmk-config/zephyr"
-# PYTHONPATH = "/opt/zephyr-sdk-custom/arm-zephyr-eabi/share/gdb/python/gdb"
+[settings]
+experimental = true
+python.uv_venv_auto = "create|source"
+task_output = "interleave"
+
+[task_config]
+includes = [
+  "mise-tasks/stow.toml", # a task toml file
+]
+
 
 [tools]
 python = "3.14"
 uv = "latest"
 "pipx:pyrefly" = "latest"
 
-[settings]
-python.uv_venv_auto = "create|source"
 
 [prepare.python]
 auto = true
 
 [prepare.uv]
 auto = true
+
+[task_templates."stow:platform"]
+description = "Stow platform packages"
+env = { STOW_PKG_DIR = "{{config_root}}/{{os()}}" }
+run = { task = "stow_generic" }
+
+[tasks.stow_platform]
+env = { VERBOSE_LVL = "0" }
+extends = "stow:platform"
+
+[tasks.stow_platform_unsafe]
+env = { STOW_NO_SIM = "1", VERBOSE_LVL = "0" }
+extends = "stow:platform"
+
+
+[task_templates."stow:common"]
+vars = { pkg_dir = "{{config_root}}/common" }
+description = "Restow common dotfile packages"
+run = 'mise run stow_generic {{vars.pkg_dir}} {{vars.target_dir}} --op {{vars.stow_op}} {{vars.pkgs}}'
+
+[tasks.stow_common]
+extends = "stow:common"
+
+[tasks.stow_common_unsafe]
+env = { STOW_NO_SIM = "1" }
+extends = "stow:common"
 
 [tasks.type_infer]
 description = "Pyrefly type infer and auto annotate types"
@@ -27,12 +58,9 @@ run = "ruff check --fix --exit-zero --output-format=concise --unsafe-fixes"
 [tasks.fix]
 dir = "{{config_root}}/common/.config/gdb"
 description = "Run pyrefly type infer and ruff check fix"
-run = [
-{ task = "lint_fix"},
-{ task = "type_infer"},
-]
+run = [{ task = "lint_fix" }, { task = "type_infer" }]
 
 [tasks.kboard_pdf]
 description = "Create pdf from keymap file"
-dir ="{{ config_root }}/kboard"
+dir = "{{ config_root }}/kboard"
 run = "uvx --from=glove80-keymap-visualizer glove80-viz --linux ColemakDH-Glove80.keymap -o ColemakDH-Glove80.pdf"

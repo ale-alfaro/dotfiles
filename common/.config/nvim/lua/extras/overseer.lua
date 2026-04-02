@@ -16,7 +16,7 @@ overseer.setup {
       ['?'] = 'keymap.show_help',
       ['g?'] = 'keymap.show_help',
       -- Mappings can be a string
-      ['<CR>'] = "<CMD>lua require('overseer').run_action()<CR>",
+      ['<CR>'] = 'keymap.run_action',
       -- You can pass additional opts to vim.keymap.set by using
       -- a table with the mapping as the first element.
       gd = {
@@ -50,7 +50,7 @@ overseer.setup {
 }
 
 vim.cmd.cnoreabbrev 'OS OverseerShell'
-vim.api.nvim_create_user_command('Make', function(params)
+vim.api.nvim_create_user_command('OverseerMake', function(params)
   -- Insert args at the '$*' in the makeprg
   local cmd, num_subs = vim.o.makeprg:gsub('%$%*', params.args)
   if num_subs == 0 then
@@ -95,15 +95,15 @@ vim.api.nvim_create_user_command('OverseerRestartLast', function()
     ovr.run_action(most_recent, 'restart')
   end
 end, {})
-KEYS.define {
+local keys = {
   {
-    lhs = '<leader>or',
-    rhs = '<cmd>OverseerRun<cr>',
-    opts = { desc = 'OverseerRun' },
+    '<leader>or',
+    '<cmd>OverseerRun<cr>',
+    { desc = 'OverseerRun' },
   },
   {
-    lhs = '<leader>or',
-    rhs = function()
+    '<leader>ov',
+    function()
       local ovr = require 'overseer'
       ovr.run_task({ name = 'mise' }, function(task)
         if task then
@@ -111,32 +111,14 @@ KEYS.define {
         end
       end)
     end,
-    opts = { desc = 'OverseerRun (Custom' },
+    { desc = 'OverseerRun (Custom' },
   },
-  { lhs = '<leader>ot', rhs = '<cmd>OverseerToggle bottom<cr>', opts = { desc = 'OverseerToggle' } },
-  { lhs = '<leader>oq', rhs = '<cmd>OverseerRestartLast<cr>', opts = { desc = 'Action recent task' } },
-
-  {
-    lhs = '<leader>oo',
-    rhs = function()
-      local win_id = vim.api.nvim_open_win(0, false, {
-        split = 'left',
-        win = 0,
-      })
-      require('overseer').create_task_output_view(win_id, {
-        ---@param self overseer.TaskView
-        ---@param tasks  overseer.Task[]
-        ---@param task_under_cursor  overseer.Task?
-        select = function(self, tasks, task_under_cursor)
-          for _, task in ipairs(tasks) do
-            if string.match(task.name, '^mise') then
-              return task
-            end
-          end
-          self:dispose()
-        end,
-      })
-    end,
-    opts = { desc = 'OverseerOpen' },
-  },
+  { '<leader>ot', '<cmd>OverseerToggle bottom<cr>', { desc = 'OverseerToggle' } },
+  { '<leader>oq', '<cmd>OverseerRestartLast<cr>', { desc = 'Action recent task' } },
 }
+for _, key in ipairs(keys) do
+  local lhs, rhs, opts = unpack(key)
+  if type(lhs) == 'string' and (type(rhs) == 'string' or vim.is_callable(rhs)) and type(opts) == 'table' then
+    vim.keymap.set('n', lhs, rhs, opts)
+  end
+end

@@ -323,7 +323,7 @@ function M.pack_list()
     end)
     :totable()
   local lines = vim.list_extend(active, vim.list_extend({ 'INACTIVE Plugins List:' }, inactive))
-  VimRc.write_to_buffer(vim.split(table.concat(lines, '\n ------ \n'), '\n'), 'VimRc-packlist')
+  M.write_to_buffer(vim.split(table.concat(lines, '\n ------ \n'), '\n'), 'VimRc-packlist')
 end
 
 function M.treesitter_list()
@@ -340,7 +340,125 @@ function M.treesitter_list()
     .iter({ 'Installed Parser/Grammars:', '--------------------', installed, 'Available Parser/Grammars:', '-------------------- ', available })
     :flatten(2)
     :totable()
-  VimRc.write_to_buffer(lines, 'VimRc-treesitter-list')
+  M.write_to_buffer(lines, 'VimRc-treesitter-list')
 end
-M.lsp = require 'custom.lsp'
+
+---@class FeatureFlagOpts
+---@field local boolean?
+---@field toggle_hook fun(enabled: boolean, bufnr:integer, data:table)?
+---
+---
+---@class FeatureFlag
+---@field name string
+---@field gl_enabled boolean
+---@field opts FeatureFlagOpts?
+---
+---@type FeatureFlag
+FeatureFlag = {}
+---@method
+---@param o FeatureFlag
+function FeatureFlag:new(o)
+  o = o or {} -- create object if user does not provide one
+  setmetatable(o, self)
+  self.__index = self
+  return o
+end
+---@class vimrc.FeatureFlags
+---@field entries table<string, FeatureFlag>
+_G.FeatureFlags = {
+  entries = {},
+}
+FeatureFlags.__index = FeatureFlags
+
+---@param feature FeatureFlag|string
+---@return FeatureFlag
+function FeatureFlags:add(feature)
+  vim.validate('feature', feature, { 'table', 'string' })
+  local name
+  if type(feature) == 'string' then
+    name = feature
+    feature = FeatureFlag:new { name = name, gl_enabled = false }
+  else
+    name = feature.name
+  end
+
+  self.entries[name] = feature
+  local usercmd_name = name .. 'Toggle'
+  vim.api.nvim_create_user_command(usercmd_name, function(args)
+    local flag = FeatureFlags:get(name)
+    local enable = not flag.gl_enabled
+    local opts = flag.opts or {}
+    FeatureFlags:set(flag.name, enable)
+    if vim.is_callable(opts.toggle_hook) then
+      opts.toggle_hook(enable, vim.api.nvim_get_current_buf(), args)
+    end
+  end, {
+    desc = 'Toggle feature flag for ' .. name,
+  })
+  return feature
+end
+
+---@param name string
+---@return FeatureFlag
+function FeatureFlags:get(name)
+  -- clear nodes on change tick, calling any methods on invalid nodes causes
+  -- neovim to hard crash
+  local entry = self.entries[name]
+  if not entry then
+    return FeatureFlags:add { name = name, gl_enabled = false }
+  end
+  return entry
+end
+
+---@param name string
+---@param enable boolean?
+function FeatureFlags:set(name, enable)
+  local fflag = self:get(name)
+  fflag.gl_enabled = enable or false
+  self.entries[name] = fflag
+end
+
+---@comment Get the lsp configuration in the current working directory
+---@param loc string
+---@return string[]
+M.lsp_configs_get = function(loc)
+  local lsp_dir = ''
+  if type(loc) == 'string' and vim.uv.fs_stat(loc) then
+    lsp_dir = loc
+  else
+    lsp_dir = vim.fs.joinpath(vim.fn.getcwd(), 'lsp')
+  end
+  if not vim.uv.fs_stat(lsp_dir) then
+    VimRc.err('LSP folder ' .. lsp_dir .. ' doesnt contain a lsp directory!')
+    return {}
+  end
+  local lsps = {}
+  for name, type in vim.fs.dir(lsp_dir) do
+    if type == 'file' then
+      lsps[#lsps + 1] = name:gsub('(%w+)%.lua', '%1')
+    end
+  end
+  return lsps
+end
+
+M.enable_workspace_lsps = function(workspace_topdir)
+  local nvim_dir = vim.fs.joinpath(workspace_topdir, '.nvim')
+
+  -- local rtpaths = vim.api.nvim_list_runtime_paths()
+  -- if not vim.uv.fs_stat(nvim_dir) then
+  --   VimRc.err('Workspace folder ' .. workspace_topdir .. ' doesnt contain a .nvim directory!')
+  --   return
+  -- end
+  -- if vim.list_contains(rtpaths, nvim_dir) then
+  --   VimRc.warn 'Wokspace is already in the runtime path'
+  --   return
+  -- end
+  local lsps = M.local_configs_get(nvim_dir)
+  if lsps and #lsps > 0 then
+    VimRc.info(string.format('Enabling lsps in workspace %s :\n %s', workspace_topdir, table.concat(lsps, '\n')))
+    vim.lsp.enable(lsps)
+  else
+    VimRc.err('Couldnt find any lsp configs in ' .. nvim_dir)
+  end
+end
 return M

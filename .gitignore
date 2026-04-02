@@ -33,3 +33,4 @@ linux/.config/ly/save.txt
 log
 **/tmux/plugins
 /common/.config/codex/skills/.system
+/common/.config/codex
