@@ -43,7 +43,10 @@ defaults:
   issuesLimit: 20
 repoPaths:
   ale-alfaro/*: ~/Geekie-Stuff/*
-  sibelhealth/*: ~/sibel/eng/fw/anne_sensors_workspace/*
+  sibelhealth/DragonFly-Zephyr: ~/sibel/eng/fw/anne_sensors_workspace/dragonfly
+  sibelhealth/BengalTiger-Zephyr: ~/sibel/eng/fw/anne_sensors_workspace/bengal
+  sibelhealth/framework: ~/sibel/eng/fw/anne_sensors_workspace/framework
+  sibelhealth/sh_sdk_2.0: ~/sibel/eng/fw/anne_sensors_workspace/sh_sdk_2_0
   ale-alfaro/dotfiles: ~/dotfiles
 keybindings:
   universal:

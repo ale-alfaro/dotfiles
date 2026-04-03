@@ -58,10 +58,10 @@
 ; NOTE: on neovim >= 0.12, you can use the multi node pattern instead of
 ; combining injections:
 ;
-; ((comment)+ @injection.content
-;   (#lua-match? @injection.content "^#USAGE ")
-;   (#offset! @injection.content 0 7 0 1)
-;   (#set! injection.language "kdl"))
+((comment)+ @injection.content
+  (#lua-match? @injection.content "^#USAGE ")
+  (#offset! @injection.content 0 7 0 1)
+  (#set! injection.language "kdl"))
 ;
 ; this is the preferred way as combined injections have multiple
 ; limitations:

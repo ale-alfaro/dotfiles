@@ -2,4 +2,5 @@
 
 
 export TERMINAL=xdg-terminal-exec
+export EDITOR=nvim
 export OMARCHY_SCREENSHOT_DIR=$HOME/Pictures/Screenshots

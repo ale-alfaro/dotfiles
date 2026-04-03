@@ -4,13 +4,18 @@ experimental = true
 python.uv_venv_auto = "create|source"
 # unix_default_file_shell_args = 'zsh -uc'
 unix_default_inline_shell_args = 'zsh -uc'
-trusted_config_paths = ['~/sibel/eng/fw', '~/sibel/eng/tools']
-verbose = false                                                # set to true to see full installation output, see `MISE_VERBOSE`
-http_timeout = "30s"                                           # set the timeout for http requests as duration string, see `MISE_HTTP_TIMEOUT`
-jobs = 4                                                       # number of plugins or runtimes to install in parallel. The default is `4`.
-yes = false                                                    # set to true to automatically answer yes to all prompts
-not_found_auto_install = true                                  # see MISE_NOT_FOUND_AUTO_INSTALL
-task_output = "prefix"                                         # see Tasks Runner for more information
+trusted_config_paths = [
+  '~/sibel/eng/fw',
+  '~/sibel/eng/tools',
+  "~/sibel/Geekie-Stuff",
+  "~/sibel/Documents/Obsidian",
+]
+verbose = false # set to true to see full installation output, see `MISE_VERBOSE`
+http_timeout = "30s" # set the timeout for http requests as duration string, see `MISE_HTTP_TIMEOUT`
+jobs = 4 # number of plugins or runtimes to install in parallel. The default is `4`.
+yes = false # set to true to automatically answer yes to all prompts
+not_found_auto_install = true # see MISE_NOT_FOUND_AUTO_INSTALL
+task_output = "prefix" # see Tasks Runner for more information
 env_shell_expand = true
 use_file_shell_for_executable_tasks = true
 task.show_full_cmd = false
@@ -22,7 +27,6 @@ show_env = true
 show_tools = true
 
 [tools]
-python = ["3.12", "3.13", "3.14"]
 uv = "latest"
 usage = "latest"
 atuin = "latest"
@@ -53,9 +57,7 @@ yq = "latest"
 "pipx:gersemi" = "latest"
 "pipx:prek" = "latest"
 "pipx:commitizen" = "latest"
-"pipx:west" = "latest"
 marksman = "latest"
-lazygit = "latest"
 typst = "latest"
 typstyle = "latest"
 tinymist = "latest"
@@ -80,6 +82,7 @@ lua = "latest"
 dprint = "latest"
 lua-language-server = "latest"
 stylua = "latest"
+lazygit = "latest"
 
 [shell_alias]
 pygdb = "PYTHONHOME=/usr /opt/zephyr-sdk-custom/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb-py -ex 'target remote :2331'"
@@ -87,7 +90,7 @@ jdbserver = "JLinkGDBServer -device NRF52840_XXAA -if SWD -speed 4000 -port 2331
 
 [env]
 _.path = [
-    # adds an absolute path
-    "~/dotfiles/common/bin",
-    "~/dotfiles/linux/bin",
+  # adds an absolute path
+  "~/dotfiles/common/bin",
+  "~/dotfiles/linux/bin",
 ]

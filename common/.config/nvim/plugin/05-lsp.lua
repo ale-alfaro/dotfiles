@@ -106,14 +106,9 @@ vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
     local capabilities = MiniCompletion.get_lsp_capabilities()
     capabilities.textDocument.completion.completionItem.snippetSupport = true
     vim.lsp.config('*', { capabilities = capabilities })
-    MiniSnippets.start_lsp_server()
 
-    local servers = vim
-      .iter(vim.api.nvim_get_runtime_file('lsp/*.lua', true))
-      :map(function(file)
-        return vim.fn.fnamemodify(file, ':t:r')
-      end)
-      :totable()
+    local path = vim.fs.joinpath(vim.fn.expand '$XDG_CONFIG_HOME', 'nvim')
+    local servers = VimRc.lsp_configs_get(path)
     VimRc.info(string.format('\nEnabling lsps: \n %s \n', table.concat(servers, '\n')))
     vim.lsp.enable(servers)
   end,

@@ -424,7 +424,7 @@ end
 M.lsp_configs_get = function(loc)
   local lsp_dir = ''
   if type(loc) == 'string' and vim.uv.fs_stat(loc) then
-    lsp_dir = loc
+    lsp_dir = vim.fs.joinpath(loc, 'lsp')
   else
     lsp_dir = vim.fs.joinpath(vim.fn.getcwd(), 'lsp')
   end

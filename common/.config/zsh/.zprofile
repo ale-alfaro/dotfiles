@@ -6,8 +6,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   source ~/.zshenv
   if [[ -e "/opt/homebrew/bin/brew" ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
-  else
-    #    echo ERROR: Could not find brew. Skip setting up brew shellenv.
   fi
 fi
 # PATH extensions
@@ -21,11 +19,11 @@ fi
 # Spec: https://specifications.freedesktop.org/basedir-spec/latest/index.html
 # ------------------------------------------------------------------------------
 # Make sure directories actually exist
-user_specific_exe_dir="$HOME/.local/bin"
-if [[ ! -d "$user_specific_exe_dir" ]]; then
-  mkdir -p "$user_specific_exe_dir"
-fi
-export PATH="$user_specific_exe_dir:$PATH"
+# user_specific_exe_dir="$HOME/.local/bin"
+# if [[ ! -d "$user_specific_exe_dir" ]]; then
+#   mkdir -p "$user_specific_exe_dir"
+# fi
+# export PATH="$user_specific_exe_dir:$PATH"
 
 # cargo
 # ------------------------------------------------------------------------------
