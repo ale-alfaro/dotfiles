@@ -1,10 +1,3 @@
--- local ok, blink = pcall(require, 'blink.cmp')
--- local capabilities = vim.lsp.protocol.make_client_capabilities()
--- if MiniCompletion then
---   capabilities = MiniCompletion.get_lsp_capabilities()
--- elseif ok and blink then
---   capabilities = blink.make_client_capabilities()
--- end
 -- Extend neovim's client capabilities with the completion ones.
 
 -- This Lsps are better not enabled by default and enabled locally
@@ -18,7 +11,6 @@ end)
 ---@param bufnr integer
 local on_attach = function(client, bufnr)
   -- Enable auto-completion. Note: Use CTRL-Y to select an item. |complete_CTRL-Y|
-  local under_cursor_highlights_group = vim.api.nvim_create_augroup('mariasolos/cursor_highlights', { clear = false })
   VimRc.new_buf_autocmd({ 'CursorHold', 'InsertLeave' }, bufnr, vim.lsp.buf.document_highlight, 'Highlight references under the cursor')
   VimRc.new_buf_autocmd({ 'CursorMoved', 'InsertEnter', 'BufLeave' }, bufnr, vim.lsp.buf.clear_references, 'Clear highlight references')
 
@@ -59,13 +51,6 @@ local on_attach = function(client, bufnr)
     }
     vim.diagnostic.open_float(hover_opts)
   end, '✨lsp show diagnostics on Cursorhold')
-  -- Auto-format ("lint") on save.
-  -- Usually not needed if server supports "textDocument/willSaveWaitUntil".
-  -- if FeatureFlags:get 'Format' and not client:supports_method 'textDocument/willSaveWaitUntil' and client:supports_method 'textDocument/formatting' then
-  --   VimRc.new_buf_autocmd('BufWritePre', bufnr, function()
-  --     vim.lsp.buf.format { bufnr = bufnr, id = client.id, timeout_ms = 1000 }
-  --   end)
-  -- end
   if client:supports_method 'textDocument/codeAction' then
     require('lsp.code_action').on_attach(bufnr, client)
   end
@@ -244,4 +229,13 @@ VimRc.on_filetype('c', function()
       border = 'none',
     },
   }
+end)
+
+VimRc.on_filetype('cmake', function()
+  local capabilities = MiniCompletion.get_lsp_capabilities()
+  capabilities.textDocument.completion.completionItem.snippetSupport = true
+  vim.lsp.config('neocmake', {
+    capabilities = capabilities,
+  })
+  vim.lsp.enable 'neocmake'
 end)

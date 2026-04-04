@@ -34,11 +34,6 @@ require('conform').setup {
       stdin = false,
     },
 
-    cmakelang = {
-      command = 'cmake-format',
-      args = { '--in-place', '$FILENAME' },
-      stdin = false,
-    },
     prettier = {
       -- Require a Prettier configuration file to format.
       prettier = { require_cwd = true },
@@ -48,7 +43,7 @@ require('conform').setup {
     c = { name = 'clang-format', timeout_ms = 500, lsp_format = 'prefer' },
     -- c = { 'clang-format' }, -- try out uncrustify
     cpp = { name = 'clangd', timeout_ms = 500, lsp_format = 'prefer' },
-    cmake = { 'cmakelang' },
+    cmake = { 'gersemi', timeout_ms = 500, lsp_format = 'prefer' },
     dts = { name = 'devicetree_ls', timeout_ms = 500, lsp_format = 'prefer' },
     kconfig = { 'kconfigstyle' },
     lua = { 'stylua' },

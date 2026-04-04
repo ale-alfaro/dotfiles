@@ -1,0 +1,36 @@
+#!/usr/bin/env zsh
+
+# Using Firefox Progressive Web Apps (firefoxpwa) for Zen/firefox browser web apps.
+# The launching of such web apps works using site IDs so there's some parsing needed unfortunately
+
+# Site    | ID
+# -------------------------------------
+# Github  | (01KNAFWPZKDN4SDK61T08DYM5G)
+#...
+error() {
+  print "error: $*"
+  exit 1
+}
+
+# menu() {
+#   local prompt="$1"
+#   local options="$2"
+#   local extra="$3"
+#
+#   read -r -a args <<<"$extra"
+#
+#   echo -e "$options" | omarchy-launch-walker --dmenu --width 295 --minheight 1 --maxheight 630 -p "$prompt…" "${args[@]}" 2>/dev/null
+# }
+
+if ! command -v firefoxpwa; then
+  error "No firefoxpwa installed"
+fi
+
+if (($# == 0)); then
+  SITEID=$(firefoxpwa profile list | rg -N --color=never '^- ([[:alnum:]\s]+):.*(https://[^/\s]+).*\(([\w\d]+)\).*$' -r '$1 $2 $3' | fzf --with-nth '{1} - {2}' --accept-nth 3)
+else
+  regex="^- $1:.*(https://[^/\s]+).*\(([\w\d]+)\).*$"
+  SITEID=$(firefoxpwa profile list | rg -N --color=never ${regex} -r '$2')
+fi
+
+exec setsid uwsm-app -- firefoxpwa site launch "$SITEID"

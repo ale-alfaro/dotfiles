@@ -16,34 +16,65 @@ VimRc.now_if_args(function()
     mappings = {
       -- Force two-step/fallback completions
       force_twostep = '<M-Space>',
-      force_fallback = '<C-Space>',
-
-      -- Scroll info/signature window down/up. When overriding, check for
-      -- conflicts with built-in keys for popup menu (like `<C-u>`/`<C-o>`
-      -- for 'completefunc'/'omnifunc' source function; or `<C-n>`/`<C-p>`).
-      scroll_down = '<C-f>',
-      scroll_up = '<C-b>',
+      -- force_fallback = '<C-Space>',
     },
   }
 
-  -- local on_attach = function(ev)
-  --   local bufnr = ev.buf
-  --
-  --   local client = assert(vim.lsp.get_client_by_id(ev.data.client_id))
-  --
-  --   VimRc.info(string.format('[LspAttach autocmd] - Client %s', client.name))
-  --   if client:supports_method 'textDocument/completion' then
-  --     -- Optional: trigger autocompletion on EVERY keypress. May be slow!
-  --     local chars = {}
-  --     for i = 32, 126 do
-  --       table.insert(chars, string.char(i))
-  --     end
-  --     client.server_capabilities.completionProvider.triggerCharacters = chars
-  --     vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = true })
-  --     vim.bo[ev.buf].omnifunc = 'v:lua.MiniCompletion.completefunc_lsp'
-  --   end
-  -- end
-  -- VimRc.new_autocmd('LspAttach', on_attach, nil, "Set 'omnifunc'")
+  --- To use `<Tab>` and `<S-Tab>` for navigation through completion list, make
+  --- these mappings: >lua
+  local map_multistep = require('mini.keymap').map_multistep
+  local map_combo = require('mini.keymap').map_combo
+  map_combo({ 'n', 'x' }, '<S-Left><S-Left>', 'g^')
+  map_combo({ 'n', 'x' }, '<S-Right><S-Right>', 'g$')
+  map_combo({ 'n', 'x' }, '<S-Up><S-Up>', '{')
+  map_combo({ 'n', 'x' }, '<S-Down><S-Down>', '}')
+
+  -- map_multistep('i', '<Tab>', { 'pmenu_next' })
+  -- map_multistep('i', '<S-Tab>', { 'pmenu_prev' })
+  -- NOTE: this will never insert tab, press <C-v><Tab> for that
+  -- local tab_steps = {
+  --   'minisnippets_next',
+  --   'minisnippets_expand',
+  --   'pmenu_next',
+  --   'jump_after_tsnode',
+  --   'jump_after_close',
+  -- }
+  -- map_multistep('i', '<Tab>', tab_steps)
+
+  -- local shifttab_steps = {
+  --   'minisnippets_prev',
+  --   'pmenu_prev',
+  --   'jump_before_tsnode',
+  --   'jump_before_open',
+  -- }
+  -- map_multistep('i', '<S-Tab>', shifttab_steps)
+  map_multistep('i', '<CR>', { 'pmenu_accept', 'minipairs_cr' })
+  map_multistep('i', '<BS>', { 'minipairs_bs' })
+  --- <
+  --- To get more consistent behavior of `<CR>`, you can use this template in
+  --- your 'init.lua' to make customized mapping: >lua
+  ---
+  _G.cr_action = function()
+    -- If there is selected item in popup, accept it with <C-y>
+    if vim.fn.complete_info()['selected'] ~= -1 then
+      return '\25'
+    end
+    return '\r'
+  end
+
+  vim.keymap.set('i', '<CR>', 'v:lua.cr_action()', { expr = true })
+  local on_attach = function(ev)
+    local bufnr = ev.buf
+    vim.bo[bufnr].omnifunc = 'v:lua.MiniCompletion.completefunc_lsp'
+    --
+    local client = assert(vim.lsp.get_client_by_id(ev.data.client_id))
+    --
+    VimRc.info(string.format('[LspAttach autocmd] MiniCompletion.complefunc_lsp - Client %s', client.name))
+  end
+  -- Advertise to servers that Neovim now supports certain set of completion and
+  -- signature features through 'mini.completion'.
+  vim.lsp.config('*', { capabilities = MiniCompletion.get_lsp_capabilities() })
+  VimRc.new_autocmd('LspAttach', on_attach, nil, "Set 'omnifunc'")
 
   -- Advertise to servers that Neovim now supports certain set of completion and
   -- signature features through 'mini.completion'.
@@ -77,39 +108,24 @@ VimRc.now_if_args(function()
       snippets.gen_loader.from_lang { lang_patterns = lang_patterns },
     },
   }
-
-  local map_multistep = require('mini.keymap').map_multistep
-
-  -- NOTE: this will never insert tab, press <C-v><Tab> for that
-  local tab_steps = {
-    'minisnippets_next',
-    'minisnippets_expand',
-    'pmenu_next',
-    'jump_after_tsnode',
-    'jump_after_close',
-  }
-  map_multistep('i', '<Tab>', tab_steps)
-
-  local shifttab_steps = {
-    'minisnippets_prev',
-    'pmenu_prev',
-    'jump_before_tsnode',
-    'jump_before_open',
-  }
-  map_multistep('i', '<S-Tab>', shifttab_steps)
-
-  local make_stop = function()
-    vim.api.nvim_create_autocmd('ModeChanged', {
-      pattern = '*:n',
-      once = true,
-      callback = function()
-        while MiniSnippets.session.get() do
-          MiniSnippets.session.stop()
-        end
-      end,
-    })
+  local expand_or_jump = function()
+    local can_expand = #MiniSnippets.expand { insert = false } > 0
+    if can_expand then
+      vim.schedule(MiniSnippets.expand)
+      return ''
+    end
+    local is_active = MiniSnippets.session.get() ~= nil
+    if is_active then
+      MiniSnippets.session.jump 'next'
+      return ''
+    end
+    return '\t'
   end
-  vim.api.nvim_create_autocmd('User', { pattern = 'MiniSnippetsSessionStart', callback = make_stop })
+  local jump_prev = function()
+    MiniSnippets.session.jump 'prev'
+  end
+  vim.keymap.set('i', '<Tab>', expand_or_jump, { expr = true })
+  vim.keymap.set('i', '<S-Tab>', jump_prev)
 
   -- Define language patterns to work better with 'friendly-snippets'
 

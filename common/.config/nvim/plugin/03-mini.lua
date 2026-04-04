@@ -262,22 +262,29 @@ later(function()
 end)
 later(function()
   require('mini.operators').setup { replace = { prefix = 'cr' } }
-  vim.keymap.set('n', 'g(', 'gxiagxila', { remap = true, desc = 'Swap arg left' })
-  vim.keymap.set('n', 'g)', 'gxiagxina', { remap = true, desc = 'Swap arg right' })
+
+  local map_combo = require('mini.keymap').map_combo
+
+  -- In Insert mode pressing `x` followed by `x` within 1 second logs 'A'
+  -- and emulates extra pressing of `yy`
+  map_combo('n', 'g(', 'gxiagxila', { delay = 1000 })
+  map_combo('n', 'g)', 'gxiagxina', { delay = 1000 })
+  -- vim.keymap.set('n', 'g(', 'gxiagxila', { remap = true, desc = 'Swap arg left' })
+  -- vim.keymap.set('n', 'g)', 'gxiagxina', { remap = true, desc = 'Swap arg right' })
 end)
 
 later(function()
   require('mini.move').setup {
     mappings = {
-      left = '<S-left>',
-      right = '<S-right>',
-      down = '<S-down>',
-      up = '<S-up>',
+      left = '<M-left>',
+      right = '<M-right>',
+      down = '<M-down>',
+      up = '<M-up>',
 
-      line_left = '<S-left>',
-      line_right = '<S-right>',
-      line_down = '<S-down>',
-      line_up = '<S-up>',
+      line_left = '<M-left>',
+      line_right = '<M-right>',
+      line_down = '<M-down>',
+      line_up = '<M-up>',
     },
   }
 end)
@@ -421,4 +428,16 @@ end)
 -- - `<Leader>ot` - trim all trailing whitespace in a buffer
 later(function()
   require('mini.trailspace').setup()
+end)
+
+later(function()
+  require('mini.hipatterns').setup {
+    highlighters = {
+      fixme = require('mini.extra').gen_highlighter.words({ 'FIXME', 'Fixme', 'fixme' }, 'MiniHipatternsFixme'),
+      hack = require('mini.extra').gen_highlighter.words({ 'HACK', 'Hack', 'hack' }, 'MiniHipatternsHack'),
+      todo = require('mini.extra').gen_highlighter.words({ 'TODO', 'Todo', 'todo' }, 'MiniHipatternsTodo'),
+      note = require('mini.extra').gen_highlighter.words({ 'NOTE', 'Note', 'note' }, 'MiniHipatternsNote'),
+      hex_color = require('mini.hipatterns').gen_highlighter.hex_color(),
+    },
+  }
 end)

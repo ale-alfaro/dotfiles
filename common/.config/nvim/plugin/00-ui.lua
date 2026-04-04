@@ -59,22 +59,6 @@ end)
 now(function()
   require('mini.statusline').setup()
 end)
--- Tabline. Sets `:h 'tabline'` to show all listed buffers in a line at the top.
--- Buffers are ordered as they were created. Navigate with `[b` and `]b`.
---require('mini.tabline').setup()
--- It is not enabled by default because it is not really needed on a daily basis.
--- Uncomment next line (use `gcc`) to enable.
-now(function()
-  require('mini.hipatterns').setup {
-    highlighters = {
-      fixme = require('mini.extra').gen_highlighter.words({ 'FIXME', 'Fixme', 'fixme' }, 'MiniHipatternsFixme'),
-      hack = require('mini.extra').gen_highlighter.words({ 'HACK', 'Hack', 'hack' }, 'MiniHipatternsHack'),
-      todo = require('mini.extra').gen_highlighter.words({ 'TODO', 'Todo', 'todo' }, 'MiniHipatternsTodo'),
-      note = require('mini.extra').gen_highlighter.words({ 'NOTE', 'Note', 'note' }, 'MiniHipatternsNote'),
-      hex_color = require('mini.hipatterns').gen_highlighter.hex_color(),
-    },
-  }
-end)
 -- Example for showing notifications in bottom right corner: >lua
 
 --- # Notification specification ~
