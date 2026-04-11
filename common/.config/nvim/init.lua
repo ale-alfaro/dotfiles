@@ -1,6 +1,31 @@
 _G.VimRc = require 'custom'
 require 'config.opts'
+
+local gr = vim.api.nvim_create_augroup('vimrc', {})
+---@param event string
+---@param callback function
+---@param pattern (string|string[])?
+---@param desc string?
+VimRc.new_autocmd = function(event, callback, pattern, desc)
+  pattern = pattern or '*'
+  local opts = { group = gr, pattern = pattern, callback = callback, desc = desc }
+  vim.api.nvim_create_autocmd(event, opts)
+end
+
+local bufgr = vim.api.nvim_create_augroup('vimrc.buf', { clear = false })
+--- Buflocal autocmd
+---@param event string|string[]
+---@param bufnr integer
+---@param callback function
+---@param desc string?
+VimRc.new_buf_autocmd = function(event, bufnr, callback, desc)
+  local opts = { group = bufgr, callback = callback, buffer = bufnr, desc = desc or '' }
+  vim.api.nvim_create_autocmd(event, opts)
+end
 require 'config.autocmds'
+
+VimRc.user_cmd = vim.api.nvim_create_user_command --[[@type function]]
+VimRc.user_buf_cmd = vim.api.nvim_buf_create_user_command--[[@type function]]
 require 'config.usercmds'
 require 'config.keymaps'
 vim.pack.add(_G.plug_spec {
@@ -38,37 +63,6 @@ VimRc.on_event = function(ev, f)
 end
 VimRc.on_filetype = function(ft, f)
   misc.safely('filetype:' .. ft, f)
-end
-
--- Define custom autocommand group and helper to create an autocommand.
--- Autocommands are Neovim's way to define actions that are executed on events
--- (like creating a buffer, setting an option, etc.).
---
--- See also:
--- - `:h autocommand`
--- - `:h nvim_create_augroup()`
--- - `:h nvim_create_autocmd()`
-local gr = vim.api.nvim_create_augroup('vimrc', {})
---- Buflocal autocmd
----@param event string
----@param callback function
----@param pattern (string|string[])?
----@param desc string?
-VimRc.new_autocmd = function(event, callback, pattern, desc)
-  pattern = pattern or '*'
-  local opts = { group = gr, pattern = pattern, callback = callback, desc = desc }
-  vim.api.nvim_create_autocmd(event, opts)
-end
-
-local bufgr = vim.api.nvim_create_augroup('vimrc.buf', { clear = false })
---- Buflocal autocmd
----@param event string|string[]
----@param bufnr integer
----@param callback function
----@param desc string?
-VimRc.new_buf_autocmd = function(event, bufnr, callback, desc)
-  local opts = { group = bufgr, callback = callback, buffer = bufnr, desc = desc or '' }
-  vim.api.nvim_create_autocmd(event, opts)
 end
 
 -- Define custom `vim.pack.add()` hook helper. See `:h vim.pack-events`.

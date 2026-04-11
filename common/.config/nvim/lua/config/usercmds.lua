@@ -1,5 +1,3 @@
-local command = vim.api.nvim_create_user_command --[[@type function]]
-
 --[[
 --
 
@@ -101,18 +99,9 @@ the remaining arguments are the same as for |nvim_create_user_command()|:
       { nargs = 1 })
 --]]
 
-command('CopyCwd', function()
+VimRc.user_cmd('CopyCwd', function()
   vim.cmd [[let @+=expand("%:p")]]
 end, { desc = 'Copy Cwd Path' })
-
-command('FindAndReplace', function(opts)
-  vim.api.nvim_command(string.format('silent cdo s/%s/%s', opts.fargs[1], opts.fargs[2]))
-  vim.api.nvim_command 'silent cfdo update'
-end, { desc = 'Find and Replace (after quickfix)', nargs = '*' })
-
-command('FindAndReplaceUndo', function(opts)
-  vim.api.nvim_command 'silent cdo undo'
-end, { desc = 'Undo Find and Replace' })
 
 ---@param desc string
 ---@return vim.api.keyset.user_command
@@ -127,18 +116,18 @@ local function pack_usercmd_opts(desc)
   }
 end
 
-command('PackOpen', function(opts)
+VimRc.user_cmd('PackOpen', function(opts)
   local ok, plug = pcall(vim.pack.get, { opts.fargs[1] })
   if ok then
     vim.cmd('edit ' .. plug[1].path)
   end
 end, pack_usercmd_opts 'Open plugin repository in pack path')
 
-command('PackList', function()
+VimRc.user_cmd('PackList', function()
   VimRc.pack_list()
 end, { desc = 'List plugins installed with vim.pack' })
 
-command('PackReload', function(opts)
+VimRc.user_cmd('PackReload', function(opts)
   local plug = { opts.fargs[1] }
   local ok, _ = pcall(vim.pack.get, plug)
   if ok then
@@ -146,7 +135,7 @@ command('PackReload', function(opts)
   end
 end, pack_usercmd_opts 'Reload plugin')
 
-command('PackSync', function()
+VimRc.user_cmd('PackSync', function()
   --- @type string[]
   local plugins_name = {}
   --- @type string[]
@@ -168,7 +157,7 @@ command('PackSync', function()
   vim.pack.update()
 end, { desc = 'Sync plugins' })
 
-command('PackDel', function(plugins)
+VimRc.user_cmd('PackDel', function(plugins)
   VimRc.pack_clean()
 end, {
   desc = 'Clean unactive plugins',
@@ -179,7 +168,7 @@ end, {
   end,
 })
 
-command('PackUpdate', function()
+VimRc.user_cmd('PackUpdate', function()
   local plugins = VimRc.get_plugins {
     filter_fn = function(pspec)
       return pspec.active

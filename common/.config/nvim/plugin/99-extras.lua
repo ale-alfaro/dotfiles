@@ -118,7 +118,6 @@ VimRc.later(function()
 end)
 VimRc.on_filetype('markdown', function()
   vim.pack.add(_G.plug_spec {
-    'obsidian-nvim/obsidian.nvim',
     'MeanderingProgrammer/render-markdown.nvim',
   })
   require('render-markdown').setup(

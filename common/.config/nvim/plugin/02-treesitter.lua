@@ -29,27 +29,11 @@ VimRc.now_if_args(function()
   map_combo({ 'n', 'x' }, '<S-Up><S-Up>', '{')
   map_combo({ 'n', 'x' }, '<S-Down><S-Down>', '}')
 
-  -- map_multistep('i', '<Tab>', { 'pmenu_next' })
-  -- map_multistep('i', '<S-Tab>', { 'pmenu_prev' })
-  -- NOTE: this will never insert tab, press <C-v><Tab> for that
-  -- local tab_steps = {
-  --   'minisnippets_next',
-  --   'minisnippets_expand',
-  --   'pmenu_next',
-  --   'jump_after_tsnode',
-  --   'jump_after_close',
-  -- }
-  -- map_multistep('i', '<Tab>', tab_steps)
+  local tab_steps = { 'minisnippets_next', 'minisnippets_expand', 'pmenu_next' }
+  map_multistep('i', '<Tab>', tab_steps)
 
-  -- local shifttab_steps = {
-  --   'minisnippets_prev',
-  --   'pmenu_prev',
-  --   'jump_before_tsnode',
-  --   'jump_before_open',
-  -- }
-  -- map_multistep('i', '<S-Tab>', shifttab_steps)
-  map_multistep('i', '<CR>', { 'pmenu_accept', 'minipairs_cr' })
-  map_multistep('i', '<BS>', { 'minipairs_bs' })
+  local shifttab_steps = { 'minisnippets_prev', 'pmenu_prev' }
+  map_multistep('i', '<S-Tab>', shifttab_steps)
   --- <
   --- To get more consistent behavior of `<CR>`, you can use this template in
   --- your 'init.lua' to make customized mapping: >lua
@@ -108,24 +92,24 @@ VimRc.now_if_args(function()
       snippets.gen_loader.from_lang { lang_patterns = lang_patterns },
     },
   }
-  local expand_or_jump = function()
-    local can_expand = #MiniSnippets.expand { insert = false } > 0
-    if can_expand then
-      vim.schedule(MiniSnippets.expand)
-      return ''
-    end
-    local is_active = MiniSnippets.session.get() ~= nil
-    if is_active then
-      MiniSnippets.session.jump 'next'
-      return ''
-    end
-    return '\t'
-  end
-  local jump_prev = function()
-    MiniSnippets.session.jump 'prev'
-  end
-  vim.keymap.set('i', '<Tab>', expand_or_jump, { expr = true })
-  vim.keymap.set('i', '<S-Tab>', jump_prev)
+  -- local expand_or_jump = function()
+  --   local can_expand = #MiniSnippets.expand { insert = false } > 0
+  --   if can_expand then
+  --     vim.schedule(MiniSnippets.expand)
+  --     return ''
+  --   end
+  --   local is_active = MiniSnippets.session.get() ~= nil
+  --   if is_active then
+  --     MiniSnippets.session.jump 'next'
+  --     return ''
+  --   end
+  --   return '\t'
+  -- end
+  -- local jump_prev = function()
+  --   MiniSnippets.session.jump 'prev'
+  -- end
+  -- vim.keymap.set('i', '<Tab>', expand_or_jump, { expr = true })
+  -- vim.keymap.set('i', '<S-Tab>', jump_prev)
 
   -- Define language patterns to work better with 'friendly-snippets'
 

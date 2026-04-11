@@ -1,0 +1,231 @@
+[west_find]
+description = "Find file across west workspace and open it with neovim"
+raw = true
+alias = "wfd"
+usage = '''
+arg "<regex>" help="Regex to find file with"
+'''
+run = '''
+west -q forall -c "fd '{{usage.regex}}' . --absolute-path" | fzf --bind 'enter:become(nvim {})'
+'''
+
+
+[west_build]
+dir = "{{cwd}}"
+description = "Build a zephyr app with west"
+usage = '''
+arg "<app>" help="App to build" env="ZEPHYR_APP"
+flag "-b --board <board>"  {
+    help "Board to run sample on"
+    env "BOARD"
+}
+flag "-S --snippet <snippet>" {
+    help "Select a snippet to apply"
+    env "SNIPPET"
+}
+flag "-c --clean" help="Clean"
+flag "-i --interactive" help="Interactive"
+flag "-o --out <out>" {
+    help "Build directory name where to output the files when doing a clean rebuild"
+}
+arg "[cmake_opts]" var=#true
+'''
+run = '''
+#!/usr/bin/env zsh
+set -euxo pipefail
+is_sysbuild=$(west config build.sysbuild 2>1)
+if [[ ! -z ${usage_board:-} ]]; then
+    board="${usage_board:?}"
+elif [[ ! -z ${usage_interactive:-} ]]; then
+    board="$(west boards | fzf)"
+fi
+
+if [[ ! -z ${usage_snippet:-} ]]; then
+    snippet="${usage_snippet}"
+elif [[ ! -z ${usage_interactive:-} ]]; then
+    snippet=$(west -q forall -c "fd 'snippet.yml' . -x yq e '.name'" | fzf)
+fi
+
+eval "usage_cmake_args=(${usage_cmake_opts:-})"
+if [[ -n "${usage_cmake_args?}" ]]; then
+    for arg in ${usage_cmake_args?}; do
+        cmake_args+=" -D${arg?}"
+    done
+fi
+
+cmd=$(cat <<EOF
+west build \
+${=${usage_board:+-b ${usage_board?}}} \
+${usage_app?} \
+${(z)${usage_out:+-d ${usage_out?}}} \
+${usage_clean:+-p} \
+${(z)${cmake_args:+-- ${cmake_args[@]}}}
+EOF
+)
+echo "Running build cmd $cmd"
+eval "$cmd"
+echo "Successfull build. Output files written to ${usage_out:-build}/"
+'''
+
+[west_boards]
+description = "West configure the workspace for building the application"
+usage = '''
+flag "-r --regex [regex]" {
+    help "Regex for board name to filter boards"
+}
+'''
+run = '''
+    board=$(west boards ${(z)${usage_board_regex:+-n $usage_regex}} -f "{name} {dir}" \
+        | fzf \
+            --ansi \
+            --preview='tree -C {2}' \
+            --preview-window='45%,border-sharp' \
+            --prompt='Boards > ' \
+            --accept-nth 1 \
+            --with-nth 1)
+[[ -z ${board:-} ]] && echo "No board selected, exiting" && return 0
+echo "Selected board: ${board?}"
+west config build.board "${board?}"
+'''
+[west_config]
+description = "Configure West workspace"
+usage = '''
+flag "-p --pristine <value>" {
+  choices "always" "auto" "never"
+  default "auto"
+  help "Target"
+}
+flag "-b --board <board>" help="Board" env="BOARD"
+flag "--no-sysbuild" help="No Sysbuild"
+'''
+run = '''
+west config build.dir-fmt  build_{app}
+west config build.sysbuild ${${usage_no_sysbuild:+false}:-true}
+west config build.pristine ${usage_pristine?}
+[[ ! -z ${usage_board:-} ]] && west config build.board ${usage_board?}
+print "CONFIG SET TO:"
+west config -l
+'''
+
+
+[west_targets]
+dir = "{{cwd}}"
+description = "Run available build targets interactively"
+raw = true
+usage = '''
+arg "[build_dir]" help="Build directory to do post action on"
+flag "-d --domain [domain]" help="Build domain to do post action on"
+'''
+run = '''
+#!/usr/bin/env zsh
+if [[ -z ${usage_build_dir:-} ]]; then
+    build_dir="$(fd --strip-cwd-prefix=always --max-depth=1 --no-ignore 'build[_[:alnum:]]' | fzf)"
+else
+    build_dir="${usage_build_dir:?}"
+fi
+if [[ ! -d "${build_dir}" ]]; then
+  echo "Build directory '${build_dir}' does not exist. Run a build first."
+  exit 1
+fi
+if [[ ! -z ${usage_domain:-} ]]; then
+    domain="${usage_domain:?}"
+    dir="${build_dir:?}/${domain:?}"
+else
+    read -q "sysbuild?Sysbuild target? (y/n): "
+    echo # Add a newline after the single-character input
+    case "${sysbuild}" in
+        [yY])
+            echo "Proceeding with sysbuild"
+            dir="${build_dir:?}"
+            ;;
+        [nN])
+            domain=$(cat "${build_dir:?}/domains.yaml" | yq e -r '.domains[].name' | fzf)
+            dir="${build_dir:?}/${domain:?}"
+            ;;
+        *)
+            echo "'${sysbuild}' is not a valid response"
+            exit 1
+        ;;
+    esac
+fi
+if [[ ! -d "${dir}" ]]; then
+    echo "Domain directory '${dir}' does not exist."
+    exit 1
+fi
+
+typeset -a sysbuild_targets=(
+  sysbuild_menuconfig sysbuild_guiconfig
+  partition_manager_report all pristine
+)
+typeset -a west_cmd_targets=(
+    flash debug attach debugserver
+)
+# Domain-specific targets (need --domain=app|mcuboot)
+typeset -a domain_targets=(
+    menuconfig guiconfig hardenconfig
+    rom_report ram_report footprint
+    initlevels
+)
+all_targets=("${sysbuild_targets[@]}" "${west_cmd_targets[@]}" "${domain_targets[@]}")
+target="$(print -rl ${all_targets[@]} | fzf)"
+
+(( ${west_cmd_targets[(Ie)$target]} )) && print -v cmd "west ${target} -d ${build_dir?}"
+(( ${sysbuild_targets[(Ie)$target]} )) && print -v cmd "west build -t ${target} --pristine=never ${usage_app?}"
+(( ${domain_targets[(Ie)$target]} )) && print -v cmd "west build --domain=${domain:-$app_name} -t ${target} --pristine=never ${usage_app?}"
+
+if [[ ! -z ${cmd:-} ]]; then
+    echo "→ Running build target cmd: ${cmd?} "
+    eval "${cmd}"
+    return 0
+else
+    echo "ERROR: Couldn' create command based on target ${target?}"
+    exit 1
+fi
+# print -v cmd "ninja -C ${dir} ${target:?}"
+# echo "Running ninja cmd $cmd"
+# eval "$cmd"
+'''
+
+
+[west_test]
+description = "Run Zephyr twister test runner (use -- to pass twister flags)"
+dir = "{{config_root}}"
+usage = '''
+arg "[test_root]" help="Tests root directory where to search for test directories"
+flag "-b --board <board>" help="Board to test with. Will be used as the platform in Twister" env="BOARD"
+flag "-s --sim" help="Use emulation to test"
+arg "[twister_args]" help="Twister arguments" env="TWISTER_ARGS" var=#true double_dash="required"
+'''
+run = '''
+
+if [[ ! -z ${usage_test_root:-} ]]; then
+    test_dir="$(fd -e yaml -tf '(sample|testcase)\.' ${usage_test_root?} --format '{//} {}' \
+                | fzf --with-nth 1 --accept-nth 1 --preview='bat --color=always {2}')"
+elif [[ ! -z ${TWISTER_TEST_DIR:-} && -d ${TWISTER_TEST_DIR} ]]; then
+    test_dir="${TWISTER_TEST_DIR?}"
+fi
+test_dir_name=${test_dir:t}
+
+echo "Running twister test suite ${test_dir_name?} in ${test_dir?}"
+if [[ ! -z ${usage_sim:-}  ]]; then
+    echo "Emulation Test!"
+    platform_flags=("--emulation-only")
+elif [[ ! -z ${usage_board:-}  ]]; then
+    echo "Hardware Test!"
+    west_flash_flags='--west-flash="--erase"'
+    platform_flags=('--device-testing' '-p' ${usage_board?} ${(z)west_flash_flags})
+else
+    error "No board or simulator selected"
+    exit 1
+fi
+cmd=$(cat <<EOF
+west twister \
+-T ${test_dir} \
+${(z)platform_flags[@]} \
+--clobber-output -o twister_${test_dir_name?} --inline-logs \
+${(z)${usage_twister_args:+${usage_twister_args[@]}}}
+EOF
+)
+echo "Running build cmd $cmd"
+eval "$cmd"
+'''

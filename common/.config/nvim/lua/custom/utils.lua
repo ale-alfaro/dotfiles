@@ -17,6 +17,28 @@ H.sprintf = function(...)
   return table.concat(msg, '\n')
 end
 
+--- Print Lua objects in command line
+---
+---@param lvl string Log level of print function
+---@return fun(...):any print function
+local make_print_fn = function(lvl)
+  return function(...)
+    local objects = {}
+    -- Not using `{...}` because it removes `nil` input
+    for i = 1, select('#', ...) do
+      local v = select(i, ...)
+      table.insert(objects, vim.inspect(v))
+    end
+
+    if VimRc.notify then
+      VimRc.notify(table.concat(objects, '\n'), lvl)
+    else
+      print(table.concat(objects, '\n'))
+    end
+
+    return ...
+  end
+end
 H.print = function(...)
   H.info(H.sprintf(...))
 end
@@ -40,28 +62,11 @@ H.ensure_list = function(x)
   end
   error(string.format('`%s` should be a list or item, but it is empty', x), 0)
 end
-H.info = function(msg, lvl)
-  msg = type(msg) == 'string' and msg or H.sprintf(msg)
-  lvl = lvl or 'INFO'
-  if type(lvl) == 'number' then
-    lvl = H.log_level_names[lvl]
-  elseif type(lvl) ~= 'string' then
-    H.error 'Log level must be a string or a vim.log.levels number'
-    return
-  end
-  if VimRc.notify then
-    VimRc.notify(msg, lvl)
-  end
-end
-H.warn = function(msg)
-  H.info(msg, 'WARN')
-end
-H.err = function(msg)
-  H.info(msg, 'ERROR')
-end
-H.debug = function(msg)
-  H.info(msg, 'DEBUG')
-end
+H.info = make_print_fn 'INFO'
+H.warn = make_print_fn 'WARN'
+H.err = make_print_fn 'ERROR'
+H.debug = make_print_fn 'DEBUG'
+
 H.set_buf_name = function(buf_id, name)
   vim.api.nvim_buf_set_name(buf_id, 'vimrc://' .. buf_id .. '/' .. name)
 end

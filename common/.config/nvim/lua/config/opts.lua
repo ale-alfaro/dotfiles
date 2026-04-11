@@ -3,10 +3,10 @@ vim.g.mapleader = ' ' -- Use `<Space>` as <Leader> key
 vim.g.maplocalleader = ','
 vim.o.mouse = 'a' -- Enable mouse
 vim.o.mousescroll = 'ver:25,hor:6' -- Customize mouse scroll
-vim.o.switchbuf = 'usetab' -- Use already opened buffers when switching
+vim.opt.number = true
+-- vim.o.switchbuf = 'usetab' -- Use already opened buffers when switching
 vim.o.undofile = true -- Enable persistent undo
 
-vim.opt.number = true
 vim.o.shada = "'100,<50,s10,:1000,/100,@100,h" -- Limit ShaDa file (for startup)
 -- -- Enable all filetype plugins and syntax (if not enabled, for better startup)
 vim.cmd 'filetype plugin indent on'
@@ -34,10 +34,25 @@ vim.o.formatlistpat = [[^\s*[0-9\-\+\*]\+\([\.\)]\)*\s\+]]
 --
 -- -- Built-in completion
 -- Built-in completion
-vim.o.complete = '.,w,b,kspell' -- Use less sources
-vim.o.completeopt = 'menuone,noselect,fuzzy,nosort' -- Use custom behavior
+-- vim.o.complete = '.,w,b,kspell' -- Use less sources
+vim.o.autocomplete = true
+vim.o.autocompletedelay = 100
+--[
+-- .	scan the current buffer ('wrapscan' is ignored)
+-- w	scan buffers from other windows
+-- b	scan other loaded buffers that are in the buffer list
+-- u	scan the unloaded buffers that are in the buffer list
+-- ^5 limits the number of items to 5
+--]--
+vim.o.complete = '.,w,b,u^5'
+vim.o.pumborder = 'rounded'
+vim.o.pummaxwidth = 40
+vim.o.completeopt = 'menu,menuone,fuzzy,noselect,longest,popup' -- Use custom behavior
 vim.o.completetimeout = 100 -- Limit sources delay
 ---
+
+-- inoremap <silent><expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
+-- inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 vim.opt.clipboard = 'unnamedplus' -- Sync with system clipboard
 vim.opt.conceallevel = 2 -- Hide * markup for bold and italic, but not markers with substitutions
 vim.opt.cursorline = true -- Enable highlighting of the current line
@@ -96,8 +111,7 @@ vim.opt.shortmess:append {
 }
 
 -- Status line.
-vim.o.laststatus = 3
-vim.o.cmdheight = 1
+vim.o.cmdheight = 2
 local diagnostic_icons = {
   ERROR = '',
   WARN = '',
@@ -105,13 +119,8 @@ local diagnostic_icons = {
   INFO = '',
 }
 
--- Disable inlay hints initially (and enable if needed with my ToggleInlayHints command).
--- Define the diagnostic signs.
-for severity, icon in pairs(diagnostic_icons) do
-  local hl = 'DiagnosticSign' .. severity:sub(1, 1) .. severity:sub(2):lower()
-  vim.fn.sign_define(hl, { text = icon, texthl = hl })
-end
 vim.diagnostic.config {
+  severity_sort = true,
   virtual_text = {
     prefix = '',
     spacing = 2,
@@ -143,5 +152,15 @@ vim.diagnostic.config {
     end,
   },
   -- Disable signs in the gutter.
-  signs = false,
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = 'E',
+      [vim.diagnostic.severity.WARN] = 'W',
+      [vim.diagnostic.severity.INFO] = 'I',
+    },
+    numhl = {
+      [vim.diagnostic.severity.ERROR] = 'ErrorMsg',
+      [vim.diagnostic.severity.WARN] = 'WarningMsg',
+    },
+  },
 }

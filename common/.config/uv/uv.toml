@@ -1,0 +1,8 @@
+python-preference = "only-managed"
+python-downloads = "automatic"
+preview = true
+
+[pip]
+python-platform = "linux"
+python-version = "3.10"
+universal = false

@@ -53,7 +53,7 @@ local on_attach = function(client, bufnr)
     vim.diagnostic.open_float(hover_opts)
   end, '✨lsp show diagnostics on Cursorhold')
   if client:supports_method 'textDocument/codeAction' then
-    require('lsp.code_action').on_attach(bufnr, client)
+    require('vimrc_lsp.code_action').on_attach(bufnr, client)
   end
         -- Auto-format ("lint") on save.
         -- Usually not needed if server supports "textDocument/willSaveWaitUntil".
@@ -93,7 +93,7 @@ VimRc.new_autocmd('LspAttach', function(ev)
 
   local client = assert(vim.lsp.get_client_by_id(ev.data.client_id))
 
-  VimRc.info(string.format('[LspAttach autocmd] - Client %s', client.name))
+  VimRc.info('[LspAttach autocmd] - ', { Client = client.name })
   on_attach(client, bufnr)
 end, '*', 'LspAttach Configure Lsps')
 
@@ -124,12 +124,9 @@ vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
     capabilities.textDocument.completion.completionItem.snippetSupport = true
     vim.lsp.config('*', { capabilities = capabilities })
 
-    local path = vim.fs.joinpath(vim.fn.expand '$XDG_CONFIG_HOME', 'nvim')
-    local servers = VimRc.lsp_configs_get(path)
-    VimRc.info(string.format('\nEnabling lsps: \n %s \n', table.concat(servers, '\n')))
-    vim.lsp.enable(servers)
-  end,
-})
+local vimrc_lsp_servers = VimRc.lsp_setups_get()
+VimRc.info('Enabling lsps:', vimrc_lsp_servers)
+vim.lsp.enable(vimrc_lsp_servers)
 
 -- HACK: Override buf_request to ignore notifications from LSP servers that don't implement a method.
 local buf_request = vim.lsp.buf_request
@@ -223,51 +220,16 @@ VimRc.on_filetype('json', function()
     },
   })
 end)
-VimRc.on_filetype('c', function()
-  vim.pack.add {
-    'p00f/clangd_extensions.nvim',
-  }
-  require('clangd_extensions').setup {
-    ast = {
-      role_icons = {
-        type = '🄣',
-        declaration = '🄓',
-        expression = '🄔',
-        statement = ';',
-        specifier = '🄢',
-        ['template argument'] = '🆃',
-      },
-
-      kind_icons = {
-        Compound = '🄲',
-        Recovery = '🅁',
-        TranslationUnit = '🅄',
-        PackExpansion = '🄿',
-        TemplateTypeParm = '🅃',
-        TemplateTemplateParm = '🅃',
-        TemplateParamObject = '🅃',
-      },
-
-      highlights = {
-        detail = 'Comment',
-      },
-    },
-
-    memory_usage = {
-      border = 'none',
-    },
-
-    symbol_info = {
-      border = 'none',
-    },
-  }
-end)
 
 VimRc.on_filetype('cmake', function()
-  local capabilities = MiniCompletion.get_lsp_capabilities()
-  capabilities.textDocument.completion.completionItem.snippetSupport = true
   vim.lsp.config('neocmake', {
-    capabilities = capabilities,
+    capabilities = {
+      textDocument = {
+        completionItem = {
+          snippetSupport = true,
+        },
+      },
+    },
   })
   vim.lsp.enable 'neocmake'
 end)

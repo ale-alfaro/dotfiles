@@ -1,23 +1,30 @@
 # yaml-language-server: $schema=https://gh-dash.dev/schema.json
 prSections:
   - title: Mine
-    filters: is:open author:@me
+    filters: >-
+      is:open
+      author:@me
     layout:
       author:
         hidden: true
   - title: Review
-    filters: is:open review-requested:@me
+    filters: >-
+      is:open
+      review-requested:@me
     layout:
       repo:
         width: 6
-  - title: Involved
-    filters: is:open involves:@me -author:@me
+  - title: Personal
+    filters: >-
+      is:open
+      user:@me
   - title: Sibel Subscribed
-    filters: "\
-      repo:sibelhealth/sh_sdk_2_0 \
-      repo:sibelhealth/sensors-app \
-      repo:sibelhealth/DragonFly-Zephyr \
-      repo:sibelhealth/BengalTiger-Zephyr"
+    filters: >-
+      is:open
+      repo:sibelhealth/sh_sdk_2.0
+      repo:sibelhealth/sensors-app
+      repo:sibelhealth/BengalFly-Zephyr
+      repo:sibelhealth/BengalTiger-Zephyr
 issuesSections:
   - title: Creator
     filters: author:@me
@@ -42,7 +49,9 @@ defaults:
   prsLimit: 20
   issuesLimit: 20
 repoPaths:
-  ale-alfaro/*: ~/Geekie-Stuff/*
+  ale-alfaro/ale-alfaro.github.io: ~/Documents/Obsidian/blog
+  ale-alfaro/vfox-zephyr-sdk: ~/sibel/eng/tools/mise-zephyr-sdk-plugin
+  ale-alfaro/vfox-ncs: ~/sibel/eng/tools/mise-ncs-plugin
   sibelhealth/DragonFly-Zephyr: ~/sibel/eng/fw/anne_sensors_workspace/dragonfly
   sibelhealth/BengalTiger-Zephyr: ~/sibel/eng/fw/anne_sensors_workspace/bengal
   sibelhealth/framework: ~/sibel/eng/fw/anne_sensors_workspace/framework
@@ -59,12 +68,12 @@ keybindings:
       builtin: checkout
     - key: m
       command: gh pr merge --admin --repo {{.RepoName}} {{.PrNumber}}
-    - key: O
-      name: code review
-      command: >
-        tmux new-window -c {{.RepoPath}} -n "octo" '
-        nvim -c ":silent Octo pr edit {{.PrNumber}}"
-        '
+    # - key: O
+    #   name: code review
+    #   command: >
+    #     tmux new-window -c {{.RepoPath}} -n "octo" '
+    #     nvim -c ":silent Octo pr edit {{.PrNumber}}"
+    #     '
     - key: T
       command: >-
         tmux new-window -n "enhance" '
@@ -106,4 +115,4 @@ repo:
   branchesRefetchIntervalSeconds: 30
   prsRefetchIntervalSeconds: 60
 showAuthorIcons: true
-smartFilteringAtLaunch: true
+smartFilteringAtLaunch: false

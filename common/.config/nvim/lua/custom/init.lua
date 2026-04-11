@@ -441,24 +441,45 @@ M.lsp_configs_get = function(loc)
   return lsps
 end
 
+---@class VimRcLspSetup
+---@field on_attach fun(client:vim.lsp.Client,bufnr:number)
+---@field keymaps? table
+---
+
+---@return table<string, VimRcLspSetup?>
+M.lsp_setups_get = function()
+  local lsps = {}
+  local lsp_config_dir = vim.fs.joinpath(vim.fs.dirname(VimRc.env['MYVIMRC']), 'lsp')
+  for fname, type in vim.fs.dir(lsp_config_dir) do
+    local lsp_name = fname:gsub('(%w+)%.lua', '%1')
+    lsps[#lsps + 1] = lsp_name
+  end
+  return lsps
+end
 M.enable_workspace_lsps = function(workspace_topdir)
   local nvim_dir = vim.fs.joinpath(workspace_topdir, '.nvim')
 
-  -- local rtpaths = vim.api.nvim_list_runtime_paths()
-  -- if not vim.uv.fs_stat(nvim_dir) then
-  --   VimRc.err('Workspace folder ' .. workspace_topdir .. ' doesnt contain a .nvim directory!')
-  --   return
-  -- end
-  -- if vim.list_contains(rtpaths, nvim_dir) then
-  --   VimRc.warn 'Wokspace is already in the runtime path'
-  --   return
-  -- end
   local lsps = M.local_configs_get(nvim_dir)
   if lsps and #lsps > 0 then
     VimRc.info(string.format('Enabling lsps in workspace %s :\n %s', workspace_topdir, table.concat(lsps, '\n')))
     vim.lsp.enable(lsps)
   else
     VimRc.err('Couldnt find any lsp configs in ' .. nvim_dir)
+  end
+end
+---@param client vim.lsp.Client
+---@param bufnr integer
+---@param method vim.lsp.protocol.Method.ClientToServer.Request
+---@param params table
+---@param handler lsp.Handler
+function M.lsp_request_method(client, bufnr, method, params, handler)
+  vim.validate('method', method, 'string')
+  vim.validate('params', params, 'table', true)
+  vim.validate('handler', handler, 'function')
+  vim.validate('bufnr', bufnr, 'number')
+
+  if client and client:supports_method(method, bufnr) then
+    client:request(method, params, handler, bufnr)
   end
 end
 return M

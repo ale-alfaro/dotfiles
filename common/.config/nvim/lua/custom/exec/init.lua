@@ -1,35 +1,17 @@
 local M = {}
 
-vim.env.PATH = vim.env.HOME .. '/.local/share/mise/shims:' .. vim.env.PATH
-M.env = vim.fn.environ() or {}
-M.append_path = function(path)
-  vim.validate('path', path, 'string')
-  if not vim.uv.fs_stat(path) then
-    VimRc.err('Failed to append to PATH: ' .. path)
-    return nil
-  end
-  vim.fn.setenv('PATH', string.format('%$PATH:%s', path))
-  return vim.fn.getenv 'PATH'
-end
----Get environment variable
----@description Use for getting with fallback
----@param name string
----@param fallback? string
-M.getenv = function(name, fallback)
-  vim.validate('name', name, 'string')
-  vim.validate('fallback', fallback, 'string', true)
-  if VimRc.env[name] then
-    return VimRc.env[name]
-  elseif fallback then
-    return fallback
-  else
-    VimRc.err('Failed to get env: ' .. name)
-  end
-end
 -- Prepend mise shims to PATH
+vim.env.PATH = vim.env.HOME .. '/.local/share/mise/shims:' .. vim.env.PATH
+local function _fetch_env(env_name)
+  local env = vim.fn.getenv(env_name)
+  if env ~= vim.v.null then
+    return env
+  end
+  return nil
+end
 -- 'WEST_TOPDIR'
-function M.check_env(name)
-  return vim.fn.has_key(vim.fn.environ(), name)
+function M.ENV(name, fallback)
+  return vim.fn.has_key(vim.fn.environ(), name) and _fetch_env(name) or fallback
 end
 
 local executables_cache = {}

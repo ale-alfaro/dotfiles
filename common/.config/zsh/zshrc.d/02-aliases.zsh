@@ -8,7 +8,7 @@
 # source <(mise activate zsh)
 
 compress() {
-    tar -czf "${1%/}.tar.gz" "${1%/}"
+  tar -czf "${1%/}.tar.gz" "${1%/}"
 }
 
 alias decompress="tar -xzf"
@@ -16,27 +16,27 @@ alias decompress="tar -xzf"
 alias v="n"
 # Array to quoted list of strings
 n() {
-    if [[ "$#" -eq 0 ]]; then nvim; fi
-    if [[ "$#" -eq 1 ]]; then
-        case "$1" in
-            nvim | zsh | mise | hypr | wezterm | hypr)
-                nvim "$XDG_CONFIG_HOME/$1"
-                ;;
-            *)
-                if [[ ! -d "$1" && ! -f "$1" ]]; then
-                    zi "$1" && nvim .
-                else
-                    nvim "$1"
-                fi
-                ;;
-        esac
-    else
-        nvim "$@"
-    fi
+  if [[ "$" -eq 0 ]]; then nvim; fi
+  if [[ "$" -eq 1 ]]; then
+    case "$1" in
+      nvim | zsh | mise | hypr | wezterm | hypr)
+        nvim "$XDG_CONFIG_HOME/$1"
+        ;;
+      *)
+        if [[ ! -d "$1" && ! -f "$1" ]]; then
+          zi "$1" && nvim .
+        else
+          nvim "$1"
+        fi
+        ;;
+    esac
+  else
+    nvim "$@"
+  fi
 }
 ssh_agent_start() {
-    eval "$(ssh-agent -s)"
-    ssh-add ~/.ssh/id_ed25519_yubikey
+  eval "$(ssh-agent -s)"
+  ssh-add ~/.ssh/id_ed25519_yubikey
 }
 alias sshstart="ssh_agent_start"
 #######################################################
@@ -49,6 +49,7 @@ alias wman='wikiman'
 # Alias for lazygit
 # Link: https://github.com/jesseduffield/lazygit
 alias lg='lazygit'
+alias minimax='NVIM_APPNAME=nvim-minimax nvim'
 # -------------------------------------------
 # 5. Suffix Aliases - Open Files by Extension
 # -------------------------------------------
@@ -86,12 +87,12 @@ alias -g NUL='>/dev/null 2>&1'
 alias -g J='| jqp'
 
 if [[ "$OSTYPE" == "linux"* ]]; then
-    open() {
-        xdg-open "$@" >/dev/null 2>&1 &
-    }
-    alias -g C='| wlcopy'
+  open() {
+    xdg-open "$@" >/dev/null 2>&1 &
+  }
+  alias -g C='| wlcopy'
 elif [[ "$OSTYPE" == "macos"* ]]; then
-    alias -g C='| pbcopy'
+  alias -g C='| pbcopy'
 fi
 
 # -------------------------------------------

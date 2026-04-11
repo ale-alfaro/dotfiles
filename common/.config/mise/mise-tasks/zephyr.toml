@@ -18,23 +18,12 @@ diffconfig.py "${build_dir}/zephyr/.config.old" "${build_dir}/zephyr/.config" \
 '''
 
 
-[select_board]
-description = "West configure the workspace for building the application"
-usage = '''
-flag "-r --regex [regex]" {
-    help "Regex for board name to filter boards"
-}
-'''
+[kconfig_lint]
+env = { _.path = "{{env.ZEPHYR_BASE}}/scripts/kconfig", _.file = [
+  "{{config_root}}/kconfig.env",
+  "{{config_root}}/build_app/Kconfig/kconfig_module_dirs.env",
+], KCONFIG_BINARY_DIR = "{{config_root}}/build_app/Kconfig" }
 run = '''
-    board=$(west boards ${(z)${usage_board_regex:+-n $usage_regex}} -f "{name} {dir}" \
-        | fzf \
-            --ansi \
-            --preview='tree -C {2}' \
-            --preview-window='45%,border-sharp' \
-            --prompt='Boards > ' \
-            --accept-nth 1 \
-            --with-nth 1)
-[[ -z ${board:-} ]] && echo "No board selected, exiting" && return 0
-echo "Selected board: ${board?}"
-west config build.board "${board?}"
+# printenv
+lint.py --help
 '''
