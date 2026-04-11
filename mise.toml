@@ -1,66 +1,41 @@
-[settings]
-experimental = true
-python.uv_venv_auto = "create|source"
-task_output = "interleave"
 
 [task_config]
-includes = [
-  "mise-tasks/stow.toml", # a task toml file
-]
+includes = ["mise-tasks/mediactl","mise-tasks/stow.toml", "mise-tasks/nrfutil.toml"]
 
-
-[tools]
-python = "3.14"
-uv = "latest"
-"pipx:pyrefly" = "latest"
-
-
-[prepare.python]
-auto = true
-
-[prepare.uv]
-auto = true
 
 [task_templates."stow:platform"]
-description = "Stow platform packages"
 env = { STOW_PKG_DIR = "{{config_root}}/{{os()}}" }
 run = { task = "stow_generic" }
 
-[tasks.stow_platform]
-env = { VERBOSE_LVL = "0" }
+[tasks.stow_platform_sim]
+env = { VERBOSE_LVL = "2" }
+hide = true
 extends = "stow:platform"
 
 [tasks.stow_platform_unsafe]
 env = { STOW_NO_SIM = "1", VERBOSE_LVL = "0" }
+hide = true
+confirm = "Do you want to stow the common packages?"
 extends = "stow:platform"
+
+[tasks.stow_platform]
+description = "Stow platform packages"
+run = [{ task = "stow_platform_sim" }, { task = "stow_platform_unsafe" }]
 
 
 [task_templates."stow:common"]
-vars = { pkg_dir = "{{config_root}}/common" }
-description = "Restow common dotfile packages"
-run = 'mise run stow_generic {{vars.pkg_dir}} {{vars.target_dir}} --op {{vars.stow_op}} {{vars.pkgs}}'
+env = { STOW_PKG_DIR = "{{config_root}}/common", VERBOSE_LVL = "2" }
+hide = true
+run = { task = "stow_generic" }
 
-[tasks.stow_common]
+[tasks.stow_common_sim]
 extends = "stow:common"
 
 [tasks.stow_common_unsafe]
-env = { STOW_NO_SIM = "1" }
+env = { STOW_NO_SIM = "1", VERBOSE_LVL = "0" }
+confirm = "Do you want to stow the common packages?"
 extends = "stow:common"
 
-[tasks.type_infer]
-description = "Pyrefly type infer and auto annotate types"
-run = "pyrefly infer"
-
-[tasks.lint_fix]
-description = "Ruff lint and fix"
-run = "ruff check --fix --exit-zero --output-format=concise --unsafe-fixes"
-
-[tasks.fix]
-dir = "{{config_root}}/common/.config/gdb"
-description = "Run pyrefly type infer and ruff check fix"
-run = [{ task = "lint_fix" }, { task = "type_infer" }]
-
-[tasks.kboard_pdf]
-description = "Create pdf from keymap file"
-dir = "{{ config_root }}/kboard"
-run = "uvx --from=glove80-keymap-visualizer glove80-viz --linux ColemakDH-Glove80.keymap -o ColemakDH-Glove80.pdf"
+[tasks.stow_common]
+description = "Stow common packages"
+run = [{ task = "stow_common_sim" }, { task = "stow_common_unsafe" }]

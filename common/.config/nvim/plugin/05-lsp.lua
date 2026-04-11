@@ -18,6 +18,7 @@ local on_attach = function(client, bufnr)
   vim.lsp.document_color.enable(true, { bufnr = bufnr, style = 'virtual' })
   --- Global lsp keymaps redefined to use Fzf-lua functions
 
+  vim.bo[bufnr].formatexpr = 'v:lua.vim.lsp.formatexpr(#{timeout_ms:250})'
   local lsp_keys = {
     {
       lhs = 'grd',
@@ -54,6 +55,18 @@ local on_attach = function(client, bufnr)
   if client:supports_method 'textDocument/codeAction' then
     require('lsp.code_action').on_attach(bufnr, client)
   end
+        -- Auto-format ("lint") on save.
+        -- Usually not needed if server supports "textDocument/willSaveWaitUntil".
+        if not client:supports_method('textDocument/willSaveWaitUntil')
+            and client:supports_method('textDocument/formatting') then
+          vim.api.nvim_create_autocmd('BufWritePre', {
+            group = vim.api.nvim_create_augroup('my.lsp', {clear=false}),
+            buffer = bufnr,
+            callback = function()
+              vim.lsp.buf.format({ bufnr = bufnr, id = client.id, timeout_ms = 1000 })
+            end,
+          })
+        end
 end
 
 -- Two ways shown to configure keymaps with LSP
@@ -84,6 +97,25 @@ VimRc.new_autocmd('LspAttach', function(ev)
   on_attach(client, bufnr)
 end, '*', 'LspAttach Configure Lsps')
 
+  vim.api.nvim_create_autocmd('LspDetach', {
+    callback = function(ev)
+      -- Get the detaching client
+      local client = assert(vim.lsp.get_client_by_id(ev.data.client_id))
+
+      -- Remove the autocommand to format the buffer on save, if it exists
+      if client:supports_method('textDocument/formatting') then
+        vim.api.nvim_clear_autocmds({
+          event = 'BufWritePre',
+          buffer = ev.buf,
+        })
+      end
+    end,
+  })
+
+
+-- vim.cmd([[
+--   autocmd BufWritePre *.rs lua vim.lsp.buf.format({ async = false }
+-- ]])
 vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
   once = true,
   callback = function()

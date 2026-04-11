@@ -34,7 +34,6 @@ zephyr_res := f'{{zephyr_submods}}/res'
 init west_yaml:
     {{ west }} init -l {{ west_yaml }}
     {{ west }} update --fetch-opt=--filter=blob:none
-    {{ west }} zephyr-export
 
 [group('workspace')]
 [no-cd]

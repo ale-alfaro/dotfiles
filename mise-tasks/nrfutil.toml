@@ -1,0 +1,24 @@
+
+[nrf-flash]
+tools = { "ncs:nrfutil" = "latest" }
+dir = "{{cwd}}"
+usage = '''
+arg "<hex_file>"
+flag "--snr <serial_number>"
+'''
+run = '''
+nrfutil device program \
+  ${=${usage_serial_number:+--snr $usage_serial_number}} \
+  --firmware ${usage_hex_file?} \
+  --options chip_erase_mode=ERASE_ALL,reset=RESET_SYSTEM
+'''
+
+[nrf-list]
+tools = { "ncs:nrfutil" = "latest" }
+dir = "{{cwd}}"
+run = "nrfutil device reset device list --json --skip-overhead | jq -r '.devices[].serialNumber"
+
+[nrf-reset]
+tools = { "ncs:nrfutil" = "latest" }
+dir = "{{cwd}}"
+run = 'nrfutil device reset'

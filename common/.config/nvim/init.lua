@@ -1,16 +1,4 @@
 _G.VimRc = require 'custom'
-VimRc.env = vim.fn.environ() or {}
-VimRc.getenv = function(name, default)
-  vim.validate('name', name, 'string')
-  vim.validate('default', default, 'string', true)
-  if VimRc.env[name] then
-    return VimRc.env[name]
-  elseif default then
-    return default
-  else
-    VimRc.err('Failed to get env: ' .. name)
-  end
-end
 require 'config.opts'
 require 'config.autocmds'
 require 'config.usercmds'
