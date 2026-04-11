@@ -1,319 +1,261 @@
-VimRc.format_lines_sync = require('custom.lsp_format').format_lines_sync
+-- Minimal format-on-save: sync CLI formatters + LSP fallback
+-- Replaces conform.nvim for whole-file, synchronous formatting.
 
+local M = {}
 
----@param a? string
----@param b? string
----@return integer
-local function common_prefix_len(a, b)
-  if not a or not b then
-    return 0
-  end
-  local min_len = math.min(#a, #b)
-  for i = 1, min_len do
-    if string.byte(a, i) ~= string.byte(b, i) then
-      return i - 1
-    end
-  end
-  return min_len
-end
+-- Configuration ---------------------------------------------------------------
 
----@param a string
----@param b string
----@return integer
-local function common_suffix_len(a, b)
-  local a_len = #a
-  local b_len = #b
-  local min_len = math.min(a_len, b_len)
-  for i = 0, min_len - 1 do
-    if string.byte(a, a_len - i) ~= string.byte(b, b_len - i) then
-      return i
-    end
-  end
-  return min_len
-end
+M.timeout_ms = 1000
 
-local function create_text_edit(
-  original_lines,
-  replacement,
-  is_insert,
-  is_replace,
-  orig_line_start,
-  orig_line_end,
-  line_ending
-)
-  local start_line, end_line = orig_line_start - 1, orig_line_end - 1
-  local start_char, end_char = 0, 0
-  if is_replace then
-    -- If we're replacing text, see if we can avoid replacing the entire line
-    start_char = common_prefix_len(original_lines[orig_line_start], replacement[1])
-    if start_char > 0 then
-      replacement[1] = replacement[1]:sub(start_char + 1)
-    end
+---@alias FormatDef { cmd: string, args: string[] }
 
-    if original_lines[orig_line_end] then
-      local last_line = replacement[#replacement]
-      local suffix = common_suffix_len(original_lines[orig_line_end], last_line)
-      -- If we're only replacing one line, make sure the prefix/suffix calculations don't overlap
-      if orig_line_end == orig_line_start then
-        suffix = math.min(suffix, original_lines[orig_line_end]:len() - start_char)
-      end
-      end_char = original_lines[orig_line_end]:len() - suffix
-      if suffix > 0 then
-        replacement[#replacement] = last_line:sub(1, last_line:len() - suffix)
-      end
-    end
-  end
-  -- If we're inserting text, make sure the text includes a newline at the end.
-  -- The one exception is if we're inserting at the end of the file, in which case the newline is
-  -- implicit
-  if is_insert and start_line < #original_lines then
-    table.insert(replacement, "")
-  end
-  local new_text = table.concat(replacement, line_ending)
-
-  return {
-    newText = new_text,
-    range = {
-      start = {
-        line = start_line,
-        character = start_char,
-      },
-      ["end"] = {
-        line = end_line,
-        character = end_char,
-      },
+---@type table<string, FormatDef[]>
+M.formatters_by_ft = {
+  lua = {
+    { cmd = 'stylua', args = { '--search-parent-directories', '--respect-ignores', '--stdin-filepath', '$FILENAME', '-' } },
+  },
+  sh = {
+    { cmd = 'shfmt', args = { '-i', '2', '-ci', '-filename', '$FILENAME' } },
+  },
+  zsh = {
+    { cmd = 'shfmt', args = { '-i', '2', '-ci', '-filename', '$FILENAME' } },
+  },
+  python = {
+    {
+      cmd = 'ruff',
+      args = { 'check', '--fix', '--force-exclude', '--exit-zero', '--no-cache', '--unsafe-fixes', '--select=I001', '--stdin-filename', '$FILENAME', '-' },
     },
-  }
+    { cmd = 'ruff', args = { 'format', '--force-exclude', '--stdin-filename', '$FILENAME', '-' } },
+  },
+}
+
+-- Filetypes where LSP formatting is used exclusively when available
+---@type table<string, true>
+M.lsp_prefer = {
+  c = true,
+  cpp = true,
+  cmake = true,
+  dts = true,
+  toml = true,
+}
+
+-- Core ------------------------------------------------------------------------
+
+---@param args string[]
+---@param filename string
+---@return string[]
+local function resolve_args(args, filename)
+  local resolved = {}
+  for _, arg in ipairs(args) do
+    resolved[#resolved + 1] = arg == '$FILENAME' and filename or arg
+  end
+  return resolved
 end
+
+---Run a single formatter, returning the formatted text or nil on failure.
+---@param formatter FormatDef
+---@param text string
+---@param filename string
+---@return string|nil
+local function run_formatter(formatter, text, filename)
+  local cmd = vim.list_extend({ formatter.cmd }, resolve_args(formatter.args, filename))
+  local result = vim.system(cmd, { stdin = text, text = true }):wait(M.timeout_ms)
+  if result.code ~= 0 then
+    vim.notify(string.format('[format] %s exited with code %s', formatter.cmd, tostring(result.code)), vim.log.levels.WARN)
+    return nil
+  end
+  return result.stdout
+end
+
+---Diff original_lines vs new_lines and apply minimal text edits to the buffer.
 ---@param bufnr integer
 ---@param original_lines string[]
 ---@param new_lines string[]
----@param range? conform.Range
----@param only_apply_range boolean
----@param dry_run boolean
----@param undojoin boolean
----@return boolean any_changes
-local apply_format = function(
-  bufnr,
-  original_lines,
-  new_lines,
-  range,
-  only_apply_range,
-  dry_run,
-  undojoin
-)
-  if bufnr == 0 then
-    bufnr = vim.api.nvim_get_current_buf()
-  end
-  if not vim.api.nvim_buf_is_valid(bufnr) then
-    return false
-  end
-  local bufname = vim.api.nvim_buf_get_name(bufnr)
-  log.trace("Applying formatting to %s", bufname)
-  -- The vim.diff algorithm doesn't handle changes in newline-at-end-of-file well. The unified
-  -- result_type has some text to indicate that the eol changed, but the indices result_type has no
-  -- such indication. To work around this, we just add a trailing newline to the end of both the old
-  -- and the new text.
-  table.insert(original_lines, "")
-  table.insert(new_lines, "")
-  local original_text = table.concat(original_lines, "\n")
-  local new_text = table.concat(new_lines, "\n")
+---@return boolean changed
+local function apply_format(bufnr, original_lines, new_lines)
+  -- vim.diff doesn't handle EOL changes well with indices result_type.
+  -- Appending an empty line to both sides works around this.
+  table.insert(original_lines, '')
+  table.insert(new_lines, '')
+  local original_text = table.concat(original_lines, '\n')
+  local new_text = table.concat(new_lines, '\n')
   table.remove(original_lines)
   table.remove(new_lines)
 
-  -- Abort if output is empty but input is not (i.e. has some non-whitespace characters).
-  -- This is to hack around oddly behaving formatters (e.g black outputs nothing for excluded files).
-  if new_text:match("^%s*$") and not original_text:match("^%s*$") then
-    log.warn("Aborting because a formatter returned empty output for buffer %s", bufname)
+  -- Abort if formatter returned empty output for non-empty input
+  if new_text:match '^%s*$' and not original_text:match '^%s*$' then
+    vim.notify('[format] Aborting: formatter returned empty output', vim.log.levels.WARN)
     return false
   end
 
-  log.trace("Comparing lines %s and %s", original_lines, new_lines)
-  ---@diagnostic disable-next-line: missing-fields
   local indices = vim.text.diff(original_text, new_text, {
-    result_type = "indices",
-    algorithm = "histogram",
+    result_type = 'indices',
+    algorithm = 'histogram',
   })
-  assert(type(indices) == "table")
-  log.trace("Diff indices %s", indices)
+  if not indices or #indices == 0 then
+    return false
+  end
+
+  local line_ending = vim.bo[bufnr].fileformat == 'dos' and '\r\n' or '\n'
   local text_edits = {}
+
   for _, idx in ipairs(indices) do
-    local orig_line_start, orig_line_count, new_line_start, new_line_count = unpack(idx)
-    local is_insert = orig_line_count == 0
-    local is_delete = new_line_count == 0
-    local is_replace = not is_insert and not is_delete
-    local orig_line_end = orig_line_start + orig_line_count
-    local new_line_end = new_line_start + new_line_count
-    local replacement = vim.list_slice(new_lines, new_line_start, new_line_end - 1)
+    local orig_start, orig_count, new_start, new_count = unpack(idx)
+    local is_insert = orig_count == 0
+    local is_replace = orig_count > 0 and new_count > 0
+    local orig_end = orig_start + orig_count
+    local new_end = new_start + new_count
+    local replacement = vim.list_slice(new_lines, new_start, new_end - 1)
 
-    -- For replacement edits, convert the end line to be inclusive
     if is_replace then
-      orig_line_end = orig_line_end - 1
+      orig_end = orig_end - 1
     end
 
-    local should_apply_diff = not only_apply_range
-      or not range
-      or (is_insert and vim.indices_in_range(range, orig_line_start, orig_line_start + 1))
-      or (not is_insert and vim.iter(range, orig_line_start, orig_line_end))
+    -- Convert to 0-indexed LSP positions
+    local start_line = orig_start - 1
+    local end_line = orig_end - 1
+    local start_char, end_char = 0, 0
 
-    -- When the diff is an insert, it actually means to insert after the mentioned line
-    if is_insert then
-      orig_line_start = orig_line_start + 1
-      orig_line_end = orig_line_end + 1
-    end
+    if is_replace then
+      -- Trim common prefix on first line
+      local orig_first = original_lines[orig_start] or ''
+      local repl_first = replacement[1] or ''
+      local prefix = 0
+      local min_len = math.min(#orig_first, #repl_first)
+      for i = 1, min_len do
+        if orig_first:byte(i) ~= repl_first:byte(i) then
+          break
+        end
+        prefix = i
+      end
+      if prefix > 0 then
+        start_char = prefix
+        replacement[1] = replacement[1]:sub(prefix + 1)
+      end
 
-    if should_apply_diff then
-      local text_edit = create_text_edit(
-        original_lines,
-        replacement,
-        is_insert,
-        is_replace,
-        orig_line_start,
-        orig_line_end,
-        util.buf_line_ending(bufnr)
-      )
-      table.insert(text_edits, text_edit)
-
-      -- If we're using the aftermarket range formatting, diffs often have paired delete/insert
-      -- diffs. We should make sure that if one of them overlaps our selected range, extend the
-      -- range so that we pick up the other diff as well.
-      if range and only_apply_range then
-        range = vim.deepcopy(range)
-        range["end"][1] = math.max(range["end"][1], orig_line_end + 1)
+      -- Trim common suffix on last line
+      local orig_last = original_lines[orig_end] or ''
+      local repl_last = replacement[#replacement] or ''
+      local suffix = 0
+      local a_len, b_len = #orig_last, #repl_last
+      min_len = math.min(a_len, b_len)
+      if orig_end == orig_start then
+        min_len = math.min(min_len, a_len - start_char)
+      end
+      for i = 0, min_len - 1 do
+        if orig_last:byte(a_len - i) ~= repl_last:byte(b_len - i) then
+          break
+        end
+        suffix = i + 1
+      end
+      end_char = a_len - suffix
+      if suffix > 0 then
+        replacement[#replacement] = repl_last:sub(1, b_len - suffix)
       end
     end
-  end
 
-  if not dry_run then
-    log.trace("Applying text edits: %s", text_edits)
-    if undojoin then
-      -- may fail if after undo
-      -- Vim:E790: undojoin is not allowed after undo
-      pcall(vim.cmd.undojoin)
+    -- Inserts go after the mentioned line
+    if is_insert then
+      start_line = orig_start
+      end_line = orig_start
+      -- Append trailing newline for inserts (except at EOF)
+      if start_line < #original_lines then
+        replacement[#replacement + 1] = ''
+      end
     end
-    vim.lsp.util.apply_text_edits(text_edits, bufnr, "utf-8")
-    log.trace("Done formatting %s", bufname)
+
+    text_edits[#text_edits + 1] = {
+      newText = table.concat(replacement, line_ending),
+      range = {
+        start = { line = start_line, character = start_char },
+        ['end'] = { line = end_line, character = end_char },
+      },
+    }
   end
 
-  return not vim.tbl_isempty(text_edits)
+  pcall(vim.cmd.undojoin)
+  vim.lsp.util.apply_text_edits(text_edits, bufnr, 'utf-8')
+  return true
 end
 
 ---@param bufnr integer
----@param formatters conform.FormatterInfo[]
----@param timeout_ms integer
----@param range? conform.Range
----@param opts conform.RunOpts
----@return conform.Error? error
----@return boolean did_edit
-M.format_sync = function(bufnr, formatters, timeout_ms, range, opts)
-  if bufnr == 0 then
-    bufnr = vim.api.nvim_get_current_buf()
-  end
-  local original_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+local function format_buffer(bufnr)
+  local ft = vim.bo[bufnr].filetype
 
-  -- kill previous jobs for buffer
-  local prev_pid = vim.b[bufnr].conform_pid
-  if prev_pid and opts.exclusive then
-    if vim.uv.kill(prev_pid) == 0 then
-      log.info("Canceled previous format job for %s", vim.api.nvim_buf_get_name(bufnr))
+  -- LSP-preferred filetypes: just use the built-in LSP formatter
+  if M.lsp_prefer[ft] then
+    local clients = vim.lsp.get_clients { bufnr = bufnr, method = 'textDocument/formatting' }
+    if #clients > 0 then
+      vim.lsp.buf.format { bufnr = bufnr, timeout_ms = M.timeout_ms }
+      return
     end
   end
 
-  local err, final_result, all_support_range_formatting =
-    VimRc.format_lines_sync(bufnr, formatters, timeout_ms, range, original_lines, opts)
+  local formatters = M.formatters_by_ft[ft]
+  if not formatters or #formatters == 0 then
+    return
+  end
 
-  local did_edit = apply_format(
-    bufnr,
-    original_lines,
-    final_result,
-    range,
-    not all_support_range_formatting,
-    opts.dry_run,
-    opts.undojoin
-  )
-  return err, did_edit
+  -- Filter to available formatters
+  local available = {}
+  for _, fmt in ipairs(formatters) do
+    if vim.fn.executable(fmt.cmd) == 1 then
+      available[#available + 1] = fmt
+    end
+  end
+  if #available == 0 then
+    return
+  end
+
+  local filename = vim.api.nvim_buf_get_name(bufnr)
+  local original_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+  local eol = vim.bo[bufnr].eol
+
+  -- Build input text (matching vim's EOL behavior)
+  local input_lines = vim.list_extend({}, original_lines)
+  if eol then
+    input_lines[#input_lines + 1] = ''
+  end
+  local text = table.concat(input_lines, '\n')
+
+  -- Chain formatters: each takes the previous output as input
+  for _, fmt in ipairs(available) do
+    local output = run_formatter(fmt, text, filename)
+    if output then
+      text = output
+    end
+  end
+
+  -- Parse output back to vim lines
+  local new_lines = vim.split(text, '\r?\n')
+  if eol and new_lines[#new_lines] == '' then
+    table.remove(new_lines)
+  end
+  if #new_lines == 0 then
+    new_lines = { '' }
+  end
+
+  apply_format(bufnr, original_lines, new_lines)
 end
--- vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
--- require('conform').setup {
---   notify_on_error = false,
---   notify_no_formatters = false,
---   -- toggle autoformatting
---   format_on_save = function(bufnr)
---     -- Disable with a global or buffer-local variable
---     if not FeatureFlags:get 'Format' then
---       return false
---     end
---     return {}
---   end,
---   formatters = {
---     shfmt = {
---       prepend_args = { '-i', '2', '-ci' },
---     },
---     just = {
---       env = {
---         JUST_UNSTABLE = 1,
---       },
---     },
---     ruff_unsafe = {
---       inherit = 'ruff_fix',
---       append_args = {
---         '--unsafe-fixes',
---         '--select=I001',
---       },
---     },
---
---     kconfigstyle = {
---       command = 'kconfigstyle',
---       args = { '--preset', 'zephyr', '-w', '$FILENAME' },
---       stdin = false,
---     },
---
---     prettier = {
---       -- Require a Prettier configuration file to format.
---       prettier = { require_cwd = true },
---     },
---   },
---   formatters_by_ft = {
---     c = { name = 'clang-format', timeout_ms = 500, lsp_format = 'prefer' },
---     -- c = { 'clang-format' }, -- try out uncrustify
---     cpp = { name = 'clangd', timeout_ms = 500, lsp_format = 'prefer' },
---     cmake = { 'gersemi', timeout_ms = 500, lsp_format = 'prefer' },
---     dts = { name = 'devicetree_ls', timeout_ms = 500, lsp_format = 'prefer' },
---     kconfig = { 'kconfigstyle' },
---     lua = { 'stylua' },
---     sh = { 'shfmt' },
---     just = { 'just' },
---     -- # Example of using shfmt with extra args
---     python = {
---       -- To fix auto-fixable lint errors.
---       'ruff_unsafe',
---       -- To run the Ruff formatter.
---       'ruff_format',
---     },
---     zsh = { 'shfmt' },
---     markdown = { 'prettier' },
---     toml = { 'taplo', lsp_format = 'prefer' },
---     json = { 'prettier' },
---     jsonc = { 'prettier' },
---     yaml = { 'prettier' },
---     typst = { 'typstyle' },
---     javascript = { 'prettier', name = 'dprint', timeout_ms = 500, lsp_format = 'fallback' },
---     javascriptreact = { 'prettier', name = 'dprint', timeout_ms = 500, lsp_format = 'fallback' },
---     scss = { 'prettier' },
---     typescript = { 'prettier', name = 'dprint', timeout_ms = 500, lsp_format = 'fallback' },
---     typescriptreact = { 'prettier', name = 'dprint', timeout_ms = 500, lsp_format = 'fallback' },
---     ['_'] = { 'trim_whitespace', 'trim_newlines' },
---   },
--- }
---
--- vim.api.nvim_create_user_command('Format', function(args)
---   local range = nil
---   if args.count ~= -1 then
---     local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
---     range = {
---       start = { args.line1, 0 },
---       ['end'] = { args.line2, end_line:len() },
---     }
---   end
---   require('conform').format { async = true, lsp_format = 'fallback', range = range }
--- end, { range = true })
+
+-- Setup -----------------------------------------------------------------------
+
+function M.setup()
+  FeatureFlags:add { name = 'Format', gl_enabled = true }
+
+  vim.api.nvim_create_autocmd('BufWritePre', {
+    group = vim.api.nvim_create_augroup('CustomFormat', { clear = true }),
+    desc = 'Format on save',
+    callback = function(args)
+      if vim.bo[args.buf].buftype ~= '' then
+        return
+      end
+      if not FeatureFlags:get('Format').gl_enabled then
+        return
+      end
+      format_buffer(args.buf)
+    end,
+  })
+end
+
+return M

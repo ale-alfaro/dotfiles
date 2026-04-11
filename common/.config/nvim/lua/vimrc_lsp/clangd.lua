@@ -165,81 +165,125 @@ end
 ---@field containerName string
 ---@field usr string
 ---@field id string?
+---@brief
+---
+--- https://clangd.llvm.org/installation.html
+---
+--- - **NOTE:** Clang >= 11 is recommended! See [#23](https://github.com/neovim/nvim-lspconfig/issues/23).
+--- - If `compile_commands.json` lives in a build directory, you should
+---   symlink it to the root of your source tree.
+---   ```
+---   ln -s /path/to/myproject/build/compile_commands.json /path/to/myproject/
+---   ```
+--- - clangd relies on a [JSON compilation database](https://clang.llvm.org/docs/JSONCompilationDatabase.html)
+---   specified as compile_commands.json, see https://clangd.llvm.org/installation#compile_commandsjson
 
----@param err? lsp.ResponseError
----@param result? Clangd.SymbolDetails[]: table
----@param ctx lsp.HandlerContext
-local function symbol_info_handler(err, result, ctx)
-  vim.validate('err', err, 'table', true)
-  vim.validate('result', result, 'table', true)
-
-  if err or not result or not result[1] then
-    return
+-- https://clangd.llvm.org/extensions.html#switch-between-sourceheader
+local function switch_source_header(bufnr, client)
+  local method_name = 'textDocument/switchSourceHeader'
+  ---@diagnostic disable-next-line:param-type-mismatch
+  if not client or not client:supports_method(method_name) then
+    return vim.notify(('method %s is not supported by any servers active on the current buffer'):format(method_name))
   end
-
-  local name_str = ('name: %s'):format(result[1].name)
-  local container_str = ('container: %s'):format(result[1].containerName)
-
-  local buf, win = vim.lsp.util.open_floating_preview({ name_str, container_str }, '', {
-    height = 2,
-    width = math.max(name_str:len(), container_str:len()),
-    focusable = false,
-    focus = false,
-    border = require('clangd_extensions.config').options.symbol_info.border,
-  })
-
-  vim.keymap.set('n', 'q', function()
-    pcall(vim.api.nvim_buf_delete, buf, { force = true })
-    pcall(vim.api.nvim_win_close, win, true)
-  end, { buffer = buf })
+  local params = vim.lsp.util.make_text_document_params(bufnr)
+  ---@diagnostic disable-next-line:param-type-mismatch
+  client:request(method_name, params, function(err, result)
+    if err then
+      error(tostring(err))
+    end
+    if not result then
+      vim.notify 'corresponding file cannot be determined'
+      return
+    end
+    vim.cmd.edit(vim.uri_to_fname(result))
+  end, bufnr)
 end
----@return VimRcLspSetup
-return {
-  on_attach = function(client, bufnr)
-    VimRc.user_cmd('SwitchSourceHeader', function()
-      VimRc.lsp_request_method(client, bufnr, 'textDocument/switchSourceHeader', {
-        uri = vim.uri_from_bufnr(bufnr),
-      }, function(err, uri)
-        vim.validate('err', err, 'table', true)
-        vim.validate('uri', uri, 'string', true)
 
-        if err or not uri or (uri == '') then
-          VimRc.err('Corresponding file cannot be determined', { err = err, uri = uri })
-          return
-        end
+local function symbol_info(bufnr, client)
+  local method_name = 'textDocument/symbolInfo'
+  ---@diagnostic disable-next-line:param-type-mismatch
+  if not client or not client:supports_method(method_name) then
+    return vim.notify('Clangd client not found', vim.log.levels.ERROR)
+  end
+  local win = vim.api.nvim_get_current_win()
+  local params = vim.lsp.util.make_position_params(win, client.offset_encoding)
+  ---@diagnostic disable-next-line:param-type-mismatch
+  client:request(method_name, params, function(err, res)
+    if err or #res == 0 then
+      -- Clangd always returns an error, there is no reason to parse it
+      return
+    end
+    local container = string.format('container: %s', res[1].containerName) ---@type string
+    local name = string.format('name: %s', res[1].name) ---@type string
+    vim.lsp.util.open_floating_preview({ name, container }, '', {
+      height = 2,
+      width = math.max(string.len(name), string.len(container)),
+      focusable = false,
+      focus = false,
+      title = 'Symbol Info',
+    })
+  end, bufnr)
+end
 
-        vim.cmd.edit(vim.uri_to_fname(uri))
-      end)
-    end, { desc = 'Switch between source and header file' })
-    --- Symbol Info
-    VimRc.user_buf_cmd(bufnr, 'SymbolInfo', function()
-      VimRc.lsp_request_method(client, bufnr, 'textDocument/symbolInfo', {
-        textDocument = {
-          uri = vim.uri_from_bufnr(bufnr),
+---@class ClangdInitializeResult: lsp.InitializeResult
+---@field offsetEncoding? string
+
+---@return vim.lsp.Config
+M.create_config = function()
+  return {
+    cmd = { 'clangd' },
+    filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda' },
+    root_markers = {
+      '.clangd',
+      '.clang-tidy',
+      '.clang-format',
+      'compile_commands.json',
+      'compile_flags.txt',
+      'configure.ac', -- AutoTools
+      '.git',
+    },
+    get_language_id = function(_, ftype)
+      local t = { objc = 'objective-c', objcpp = 'objective-cpp', cuda = 'cuda-cpp' }
+      return t[ftype] or ftype
+    end,
+    capabilities = {
+      textDocument = {
+        completion = {
+          editsNearCursor = true,
         },
-        position = {
-          line = vim.fn.getcurpos()[2] - 1,
-          character = vim.fn.getcurpos()[3] - 1,
-        },
-      }, symbol_info_handler)
-    end, { desc = 'Clangd Symbol Info' })
-    --- Type Hierarchy
-    VimRc.user_buf_cmd(bufnr, 'TypeHierarchy', function()
-      VimRc.lsp_request_method(client, bufnr, 'textDocument/typeHierarchy', {
-        textDocument = {
-          uri = vim.uri_from_bufnr(bufnr),
-        },
-        position = {
-          line = vim.fn.getcurpos()[2] - 1,
-          character = vim.fn.getcurpos()[3] - 1,
-        },
-        -- TODO: make these configurable (config + command args)
-        resolve = 3,
-        direction = 2,
-      }, type_hierarchy_handler)
-    end, { desc = 'Clangd TypeHierarchy' })
-  end,
-  keymap = {
-    { '<leader>ch', '<cmd>SwitchSourceHeader<cr>', { desc = 'SwitchSourceHeader' } },
-  },
-}
+      },
+      offsetEncoding = { 'utf-8', 'utf-16' },
+    },
+    ---@param init_result ClangdInitializeResult
+    on_init = function(client, init_result)
+      if init_result.offsetEncoding then
+        client.offset_encoding = init_result.offsetEncoding
+      end
+    end,
+    on_attach = function(client, bufnr)
+      vim.api.nvim_buf_create_user_command(bufnr, 'LspClangdSwitchSourceHeader', function()
+        switch_source_header(bufnr, client)
+      end, { desc = 'Switch between source/header' })
+
+      vim.api.nvim_buf_create_user_command(bufnr, 'LspClangdShowSymbolInfo', function()
+        symbol_info(bufnr, client)
+      end, { desc = 'Show symbol info' })
+      VimRc.user_buf_cmd(bufnr, 'TypeHierarchy', function()
+        local method = 'textDocument/typeHierarchy'
+        ---@diagnostic disable-next-line:param-type-mismatch
+        VimRc.lsp_request_method(client, bufnr, method, {
+          textDocument = {
+            uri = vim.uri_from_bufnr(bufnr),
+          },
+          position = {
+            line = vim.fn.getcurpos()[2] - 1,
+            character = vim.fn.getcurpos()[3] - 1,
+          },
+          -- TODO: make these configurable (config + command args)
+          resolve = 3,
+          direction = 2,
+        }, type_hierarchy_handler)
+      end, { desc = 'Clangd TypeHierarchy' })
+    end,
+  }
+end

@@ -24,27 +24,27 @@ if [[ $- != *i* ]]; then
 fi
 eval "$(/home/alealfaro/.local/bin/mise activate zsh)" # added by https://mise.run/zsh
 
-typeset -i _mise_updated
+# typeset -i _mise_updated
 
 # replace default mise hook
-function _mise_hook {
-  local diff=${__MISE_DIFF}
-  source <(command mise hook-env -s zsh)
-  [[ ${diff} == ${__MISE_DIFF} ]]
-  _mise_updated=$?
-}
-
-_PROMPT="❱ " # or _PROMPT=${PROMPT} to keep the default
-
-function _prompt {
-  if ((${_mise_updated})); then
-    PROMPT='%F{blue}${_PROMPT}%f'
-  else
-    PROMPT='%(?.%F{green}${_PROMPT}%f.%F{red}${_PROMPT}%f)'
-  fi
-}
-
-add-zsh-hook precmd _prompt
+# function _mise_hook {
+#   local diff=${__MISE_DIFF}
+#   source <(command mise hook-env -s zsh)
+#   [[ ${diff} == ${__MISE_DIFF} ]]
+#   _mise_updated=$?
+# }
+#
+# _PROMPT="${PROMPT}" # or _PROMPT=${PROMPT} to keep the default
+#
+# function _prompt {
+#   if ((${_mise_updated})); then
+#     PROMPT='%F{blue}${_PROMPT}%f'
+#   else
+#     PROMPT='%(?.%F{green}${_PROMPT}%f.%F{red}${_PROMPT}%f)'
+#   fi
+# }
+#
+# add-zsh-hook precmd _prompt
 # ---- Eza (better ls) -----
 if has eza; then
   alias lt='eza --tree --level=3 --long --icons --git'

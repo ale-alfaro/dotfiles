@@ -61,6 +61,10 @@
       "rev": "54d4b5431e9634ee3d8d30784e017239b5b89d41",
       "src": "https://github.com/MeanderingProgrammer/render-markdown.nvim"
     },
+    "schemastore.nvim": {
+      "rev": "f5df9e70403b5d4c0642702a64534f04f3d71d03",
+      "src": "https://github.com/b0o/schemastore.nvim"
+    },
     "tiny-code-action.nvim": {
       "rev": "32090efd5d883dbbef0486312d6af464cb142a80",
       "src": "https://github.com/rachartier/tiny-code-action.nvim"

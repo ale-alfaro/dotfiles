@@ -19,16 +19,11 @@ end
 local nmap_leader = function(key, cmd, desc)
   map('<leader>' .. key, cmd, { desc = desc })
 end
--- VimRc.later(function()
---   vim.pack.add(_G.plug_spec {
---     'stevearc/conform.nvim',
---     'mfussenegger/nvim-lint',
---   })
---   FeatureFlags:add { name = 'Format', gl_enabled = true }
---   require 'custom.format'
---   FeatureFlags:add { name = 'Lint', gl_enabled = true }
---   require 'custom.lint'
--- end)
+VimRc.later(function()
+  require('custom.format').setup()
+  -- FeatureFlags:add { name = 'Lint', gl_enabled = true }
+  -- require 'custom.lint'
+end)
 --- MiniGit
 VimRc.later(function()
   local git = require 'mini.git'
