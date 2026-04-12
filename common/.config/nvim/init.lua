@@ -2,7 +2,7 @@ _G.VimRc = require 'custom'
 require 'config.opts'
 
 local gr = vim.api.nvim_create_augroup('vimrc', {})
----@param event string
+---@param event string|string[]
 ---@param callback function
 ---@param pattern (string|string[])?
 ---@param desc string?

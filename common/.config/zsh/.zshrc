@@ -89,5 +89,7 @@ if [[ ! -z ${ACLI_ENABLED:-} ]]; then
   source <(acli completion zsh)
   source $ZDOTDIR/helpers/acli.zsh
 fi
+source <(mise completion zsh)
 source <(gh completion -s zsh)
 source <(sg completions)
+source <(hk completion zsh)

@@ -1,24 +1,20 @@
 
-[task_config]
-includes = ["mise-tasks/mediactl","mise-tasks/stow.toml", "mise-tasks/nrfutil.toml"]
-
-
 [task_templates."stow:platform"]
 env = { STOW_PKG_DIR = "{{config_root}}/{{os()}}" }
 run = { task = "stow_generic" }
 
-[tasks.stow_platform_sim]
+[stow_platform_sim]
 env = { VERBOSE_LVL = "2" }
 hide = true
 extends = "stow:platform"
 
-[tasks.stow_platform_unsafe]
+[stow_platform_unsafe]
 env = { STOW_NO_SIM = "1", VERBOSE_LVL = "0" }
 hide = true
 confirm = "Do you want to stow the common packages?"
 extends = "stow:platform"
 
-[tasks.stow_platform]
+[stow_platform]
 description = "Stow platform packages"
 run = [{ task = "stow_platform_sim" }, { task = "stow_platform_unsafe" }]
 
@@ -28,14 +24,14 @@ env = { STOW_PKG_DIR = "{{config_root}}/common", VERBOSE_LVL = "2" }
 hide = true
 run = { task = "stow_generic" }
 
-[tasks.stow_common_sim]
+[stow_common_sim]
 extends = "stow:common"
 
-[tasks.stow_common_unsafe]
+[stow_common_unsafe]
 env = { STOW_NO_SIM = "1", VERBOSE_LVL = "0" }
 confirm = "Do you want to stow the common packages?"
 extends = "stow:common"
 
-[tasks.stow_common]
+[stow_common]
 description = "Stow common packages"
 run = [{ task = "stow_common_sim" }, { task = "stow_common_unsafe" }]

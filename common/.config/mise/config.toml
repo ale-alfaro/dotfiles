@@ -25,19 +25,18 @@ always_keep_install = false  # deleted on failure by default
 plugin_autoupdate_last_check_duration = '1 week' # set to 0 to disable updates
 
 
-verbose = false # set to true to see full installation output, see `MISE_VERBOSE`
-http_timeout = "30s" # set the timeout for http requests as duration string, see `MISE_HTTP_TIMEOUT`
-jobs = 4 # number of plugins or runtimes to install in parallel. The default is `4`.
-yes = false # set to true to automatically answer yes to all prompts
+verbose = false               # set to true to see full installation output, see `MISE_VERBOSE`
+http_timeout = "30s"          # set the timeout for http requests as duration string, see `MISE_HTTP_TIMEOUT`
+jobs = 4                      # number of plugins or runtimes to install in parallel. The default is `4`.
+yes = false                   # set to true to automatically answer yes to all prompts
 not_found_auto_install = true # see MISE_NOT_FOUND_AUTO_INSTALL
-task.output = "prefix" # see Tasks Runner for more information
-env_shell_expand = true
-use_file_shell_for_executable_tasks = true
 disable_backends = ["asdf"]
 
-env_file = '.env' # load env vars from a dotenv file, see `MISE_ENV_FILE`
+# env_file = '.env' # load env vars from a dotenv file, see `MISE_ENV_FILE`
 
 status = { missing_tools = "if_other_versions_installed", show_env = true, show_tools = true }
+
+task = { output = "interleave", run_auto_install = true, timings = true, disable_spec_from_run_scripts = true }
 
 [tools]
 python = ["3.11", "3.12", "3.14"]
@@ -72,8 +71,8 @@ rust = "latest"
 gh = "latest"
 shfmt = "latest"
 shellcheck = "latest"
+pkl = "latest"
 just = "latest"
-"pipx:docling" = "latest"
 "pipx:ptpython" = "latest"
 "pipx:pudb" = "latest"
 "pipx:pyrefly" = "latest"
@@ -93,7 +92,7 @@ just = "latest"
 "cargo:taplo-cli" = "latest"
 "cargo:neocmakelsp" = "latest"
 "cargo:tlrc" = "latest"
-"aqua:prek" = "latest"
+"npm:tsc" = "latest"
 
 [shell_alias]
 pygdb = "PYTHONHOME=/usr /opt/zephyr-sdk-custom/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb-py -ex 'target remote :2331'"
