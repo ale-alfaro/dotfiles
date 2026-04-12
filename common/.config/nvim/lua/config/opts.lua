@@ -21,6 +21,7 @@ vim.o.iskeyword = '@,48-57,_,192-255,-' -- Treat dash as `word` textobject part
 vim.o.incsearch = true -- Show search matches while typing
 vim.o.infercase = true -- Infer case in built-in completion
 vim.o.shiftwidth = 2 -- Use this number of spaces for indentation
+
 vim.o.smartcase = true -- Respect case if search pattern has upper case
 vim.o.smartindent = true -- Make indenting smart
 vim.o.spelloptions = 'camel' -- Treat camelCase word parts as separate words
@@ -34,7 +35,8 @@ vim.o.formatlistpat = [[^\s*[0-9\-\+\*]\+\([\.\)]\)*\s\+]]
 --
 -- -- Built-in completion
 -- Built-in completion
--- vim.o.complete = '.,w,b,kspell' -- Use less sources
+-- vim.o.complete = '.,w,b,u^5'
+vim.o.complete = '.,w,b,kspell' -- Use less sources
 vim.o.autocomplete = true
 vim.o.autocompletedelay = 100
 --[
@@ -44,11 +46,11 @@ vim.o.autocompletedelay = 100
 -- u	scan the unloaded buffers that are in the buffer list
 -- ^5 limits the number of items to 5
 --]--
-vim.o.complete = '.,w,b,u^5'
+vim.o.pumblend = 10
 vim.o.pumborder = 'rounded'
 vim.o.pummaxwidth = 40
 vim.o.completeopt = 'menu,menuone,fuzzy,noselect,longest,popup' -- Use custom behavior
-vim.o.completetimeout = 100 -- Limit sources delay
+vim.o.completetimeout = 300 -- Limit sources delay
 ---
 
 -- inoremap <silent><expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
@@ -99,6 +101,7 @@ vim.o.timeoutlen = 300
 vim.o.undolevels = 10000
 vim.o.updatetime = 200 -- Save swap file and trigger CursorHold
 vim.o.wildmode = 'longest:full,full' -- Command-line completion mode
+vim.o.wildignorecase = true
 vim.o.winminwidth = 5 -- Minimum window width
 
 -- Diff mode settings.
@@ -161,6 +164,31 @@ vim.diagnostic.config {
     numhl = {
       [vim.diagnostic.severity.ERROR] = 'ErrorMsg',
       [vim.diagnostic.severity.WARN] = 'WarningMsg',
+    },
+  },
+}
+
+vim.o.messagesopt = 'hit-enter,history:1000,progress:c'
+require('vim._core.ui2').enable {
+  enable = true, -- Whether to enable or disable the UI.
+  msg = { -- Options related to the message module.
+    ---@type 'cmd'|'msg' Default message target, either in the
+    ---cmdline or in a separate ephemeral message window.
+    ---@type string|table<string, 'cmd'|'msg'|'pager'> Default message target
+    ---or table mapping |ui-messages| kinds and triggers to a target.
+    targets = 'cmd',
+    cmd = { -- Options related to messages in the cmdline window.
+      height = 0.5, -- Maximum height while expanded for messages beyond 'cmdheight'.
+    },
+    dialog = { -- Options related to dialog window.
+      height = 0.5, -- Maximum height.
+    },
+    msg = { -- Options related to msg window.
+      height = 0.5, -- Maximum height.
+      timeout = 4000, -- Time a message is visible in the message window.
+    },
+    pager = { -- Options related to message window.
+      height = 1, -- Maximum height.
     },
   },
 }

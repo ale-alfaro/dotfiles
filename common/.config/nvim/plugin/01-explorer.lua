@@ -240,54 +240,51 @@ now_if_args(function()
   end
   -- stylua:ignore
   local wkey_prefix = '<leader>e'
-  KEYS.define({
+  ---@type table<string,function|string,string>[]
+  local mapkeys = {
     {
-      mode = { 'n', 'v', 'x' },
-      lhs = wkey_prefix .. 'v',
-      rhs = oil_open_loc(vim.fn.expand '$MYVIMRC'),
-      opts = { desc = 'Edit $MYVIMRC' },
+      wkey_prefix .. 'v',
+      oil_open_loc(vim.fn.expand '$MYVIMRC'),
+      'Edit $MYVIMRC',
     },
     {
-      mode = { 'n', 'v', 'x' },
-      lhs = wkey_prefix .. 'z',
-      rhs = oil_open_loc(vim.fn.getenv 'ZDOTDIR'),
-      opts = { desc = 'Edit .zshrc' },
+      wkey_prefix .. 'z',
+      oil_open_loc(vim.fn.getenv 'ZDOTDIR'),
+      'Edit .zshrc',
     },
     {
-      mode = { 'n', 'v', 'x' },
-      lhs = wkey_prefix .. 'o',
-      rhs = oil_open_loc(vim.fn.getenv 'OBSIDIAN_HOME'),
-      opts = { desc = 'Edit Obsidian' },
+      wkey_prefix .. 'o',
+      oil_open_loc(vim.fn.getenv 'OBSIDIAN_HOME'),
+      'Edit Obsidian',
     },
     {
-      mode = { 'n', 'v', 'x' },
-      lhs = wkey_prefix .. '.',
-      rhs = oil_open_loc(vim.fs.joinpath(vim.fn.getenv 'HOME', 'dotfiles')),
-      opts = { desc = 'Edit Dotfiles' },
+      wkey_prefix .. '.',
+      oil_open_loc(vim.fs.joinpath(vim.fn.getenv 'HOME', 'dotfiles')),
+      'Edit Dotfiles',
     },
     {
-      mode = { 'n', 'v', 'x' },
-      lhs = wkey_prefix .. 'm',
-      rhs = oil_open_loc(vim.fs.joinpath(vim.fn.getenv 'XDG_CONFIG_HOME', 'mise')),
-      opts = { desc = 'Edit Direnv config' },
+      wkey_prefix .. 'm',
+      oil_open_loc(vim.fs.joinpath(vim.fn.getenv 'XDG_CONFIG_HOME', 'mise')),
+      'Edit Direnv config',
     },
-    -- {
-    --   mode = { 'n', 'v', 'x' },
-    --   lhs = wkey_prefix .. 'c',
-    --   rhs = oil_open_loc(vim.fn.getenv 'XDG_CONFIG_HOME'),
-    --   opts = { desc = 'Edit Config Home' },
-    -- },
     {
-      mode = { 'n', 'v', 'x' },
-      lhs = wkey_prefix .. 'w',
-      rhs = oil_open_loc(vim.fs.joinpath(vim.fn.getenv 'HOME', 'sibel', 'eng')),
-      opts = { desc = 'Explore Sibel Work Dirs' },
+      wkey_prefix .. 'c',
+      oil_open_loc(vim.fn.getenv 'XDG_CONFIG_HOME'),
+      'Edit Config Home',
     },
-    { lhs = '<leader><leader>', rhs = '<Cmd>Oil<CR>', opts = { desc = 'File Explorer (cwd)' } },
     {
-      lhs = '\\',
-      rhs = oil_open_current_buf,
-      opts = { desc = 'Open file explorer shortcut' },
+      wkey_prefix .. 'w',
+      oil_open_loc(vim.fs.joinpath(vim.fn.getenv 'HOME', 'sibel', 'eng')),
+      'Explore Sibel Work Dirs',
     },
-  }, { group = 'Explore/Edit', prefix = wkey_prefix })
+    { '<leader><leader>', '<Cmd>Oil<CR>', 'File Explorer (cwd)' },
+    {
+      '\\',
+      oil_open_current_buf,
+      'Open file explorer shortcut',
+    },
+  }
+  for _, k in ipairs(mapkeys) do
+    vim.keymap.set('n', k[1], k[2], { desc = k[3] })
+  end
 end)

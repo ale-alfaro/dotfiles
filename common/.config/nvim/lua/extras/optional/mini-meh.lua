@@ -57,11 +57,17 @@ end
 
 
 -- stylua: ignore
-KEYS.define({
-  { lhs = prefix .. 's', rhs = function() search_visit_paths(nil) end,    opts = { desc = 'Search visits' }, },
-  { lhs = prefix .. 'S', rhs = function() search_visit_paths(true) end,    opts = { desc = 'Search visits' }, },
-  { lhs = prefix .. 'l', rhs = '<Cmd>lua MiniVisits.add_label("core")<CR>',    opts = { desc = 'Add to core' }, },
-  { lhs = prefix .. 'L', rhs = '<Cmd>lua MiniVisits.remove_label("core")<CR>', opts = { desc = 'Remove from core' }, },
-  { lhs = prefix .. 'c', rhs = function() search_visit_paths(nil, 'core') end,        opts = { desc = 'Core visits (all)' } },
-  { lhs = prefix .. 'C', rhs = function() search_visit_paths(true, 'core')end,       opts = { desc = 'Core visits (cwd)' } },
-}, { prefix = prefix, group = 'Visits' })
+local keys = {
+  {  prefix .. 's', function() search_visit_paths(nil) end,     { desc = 'Search visits' }, },
+  {  prefix .. 'S', function() search_visit_paths(true) end,     { desc = 'Search visits' }, },
+  {  prefix .. 'l', '<Cmd>lua MiniVisits.add_label("core")<CR>',     { desc = 'Add to core' }, },
+  {  prefix .. 'L', '<Cmd>lua MiniVisits.remove_label("core")<CR>',  { desc = 'Remove from core' }, },
+  {  prefix .. 'c', function() search_visit_paths(nil, 'core') end,         { desc = 'Core visits (all)' } },
+  {  prefix .. 'C', function() search_visit_paths(true, 'core')end,        { desc = 'Core visits (cwd)' } },
+}
+
+for _, k in ipairs(keys) do
+  table.insert(k, 1, 'n')
+
+  vim.keymap.set(unpack(k))
+end

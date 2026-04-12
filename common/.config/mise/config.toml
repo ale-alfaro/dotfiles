@@ -1,9 +1,10 @@
 # $schema: https://mise.jdx.dev/schema/mise.json
 [settings]
+activate_aggressive = true
 experimental = true
 lockfile = true
-python.uv_venv_auto = "source"
-unix_default_inline_shell_args = 'zsh -uc'
+unix_default_file_shell_args = 'zsh -eu -o pipe_fail'
+unix_default_inline_shell_args = 'zsh -eu -o pipe_fail -c'
 trusted_config_paths = [
   '~/sibel/eng/fw',
   '~/sibel/eng/tools',
@@ -34,9 +35,14 @@ disable_backends = ["asdf"]
 
 # env_file = '.env' # load env vars from a dotenv file, see `MISE_ENV_FILE`
 
-status = { missing_tools = "if_other_versions_installed", show_env = true, show_tools = true }
+status = { missing_tools = "if_other_versions_installed", show_env = true, show_tools = true, show_prepare_stale = true }
 
 task = { output = "interleave", run_auto_install = true, timings = true, disable_spec_from_run_scripts = true }
+
+npm.package_manager = "bun"
+pipx.uvx = true
+python.uv_venv_auto = "source"
+
 
 [tools]
 python = ["3.11", "3.12", "3.14"]
@@ -93,6 +99,9 @@ just = "latest"
 "cargo:neocmakelsp" = "latest"
 "cargo:tlrc" = "latest"
 "npm:tsc" = "latest"
+go = "latest"
+hk = "latest"
+
 
 [shell_alias]
 pygdb = "PYTHONHOME=/usr /opt/zephyr-sdk-custom/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb-py -ex 'target remote :2331'"

@@ -178,55 +178,59 @@ VimRc.later(function()
       },
     },
   }
-  KEYS.define {
-    { lhs = '<C-b>', rhs = '<cmd>FzfLua buffers<cr>', opts = { desc = 'Buffers', noremap = true } },
-    { lhs = '<C-\\>', rhs = '<cmd>FzfLua global<cr>', opts = { desc = 'Global', noremap = true } },
-    { lhs = '<C-e>', rhs = '<cmd>FzfLua files<cr>', opts = { desc = 'Files', noremap = true } },
-    { lhs = '<C-g>', rhs = '<cmd>FzfLua live_grep<cr>', opts = { desc = 'Grep (cwd)', noremap = true } },
-    { lhs = '<C-c>', rhs = '<cmd>FzfLua resume<cr>', opts = { desc = 'Continue', noremap = true } },
-    { lhs = '<C-f>', rhs = '<cmd>FzfLua command_history<cr>', opts = { desc = 'Command History', noremap = true } },
-    { lhs = '<C-y>', rhs = '<cmd>FzfLua register<cr>', opts = { desc = 'Registers', noremap = true } },
-    { lhs = '<C-l>', rhs = '<cmd>FzfLua blines<cr>', opts = { desc = 'Buffer Lines' } },
-    { lhs = '<M-o>', rhs = '<cmd>FzfLua oldfiles<cr>', opts = { desc = 'Old Files' } },
+  local nonprefix_keys = {
+    { '<C-b>', '<cmd>FzfLua buffers<cr>', 'Buffers' },
+    { '<C-\\>', '<cmd>FzfLua global<cr>', 'Global' },
+    { '<C-e>', '<cmd>FzfLua files<cr>', 'Files' },
+    { '<C-g>', '<cmd>FzfLua live_grep<cr>', 'Grep (cwd)' },
+    { '<C-c>', '<cmd>FzfLua resume<cr>', 'Continue' },
+    { '<C-f>', '<cmd>FzfLua command_history<cr>', 'Command History' },
+    { '<C-y>', '<cmd>FzfLua register<cr>', 'Registers' },
   }
+
+  for _, k in ipairs(nonprefix_keys) do
+    vim.keymap.set('n', k[1], k[2], { desc = k[3], noremap = true })
+  end
   local wkey_prefix = '<leader>f'
-  KEYS.define({
-    { lhs = wkey_prefix .. 'b', rhs = '<cmd>FzfLua builtin<cr>', opts = { desc = 'Find Fzf pickers' } },
-    { lhs = wkey_prefix .. 'm', rhs = '<cmd>FzfLua manpages<cr>', opts = { desc = 'Find Man' } },
-    { lhs = wkey_prefix .. 'h', rhs = '<cmd>FzfLua help_tags<cr>', opts = { desc = 'Help' } },
-    { lhs = wkey_prefix .. 'o', rhs = '<cmd>FzfLua history<cr>', opts = { desc = 'History' } },
-    { lhs = wkey_prefix .. 'O', rhs = '<cmd>FzfLua search_history<cr>', opts = { desc = 'History' } },
-    { lhs = wkey_prefix .. 'k', rhs = '<Cmd>FzfLua keymaps<CR>', opts = { desc = 'Keymaps' } },
-    { lhs = wkey_prefix .. 'fD', rhs = '<cmd>FzfLua git_diff<cr>', opts = { desc = 'Search Git Diff' } },
-    { lhs = wkey_prefix .. 'fc', rhs = '<CMD>FzfLua changes<CR>', opts = { desc = 'Search Git Diff (file-only)' } },
-    { lhs = wkey_prefix .. 'fH', rhs = '<cmd>FzfLua git_hunks<cr>', opts = { desc = 'Git Hunks' } },
-  }, { prefix = wkey_prefix, group = 'Find' })
-
   local lsp_wkey_prefix = '<leader>l'
-  KEYS.define {
-
+  local prefix_keys = {
+    { '<C-l>', '<cmd>FzfLua blines<cr>', 'Buffer Lines' },
+    { '<M-o>', '<cmd>FzfLua oldfiles<cr>', 'Old Files' },
+    { wkey_prefix .. 'b', '<cmd>FzfLua builtin<cr>', 'Find Fzf pickers' },
+    { wkey_prefix .. 'm', '<cmd>FzfLua manpages<cr>', 'Find Man' },
+    { wkey_prefix .. 'h', '<cmd>FzfLua help_tags<cr>', 'Help' },
+    { wkey_prefix .. 'o', '<cmd>FzfLua history<cr>', 'History' },
+    { wkey_prefix .. 'O', '<cmd>FzfLua search_history<cr>', 'History' },
+    { wkey_prefix .. 'k', '<Cmd>FzfLua keymaps<CR>', 'Keymaps' },
+    { wkey_prefix .. 'fD', '<cmd>FzfLua git_diff<cr>', 'Search Git Diff' },
+    { wkey_prefix .. 'fc', '<CMD>FzfLua changes<CR>', 'Search Git Diff (file-only)' },
+    { wkey_prefix .. 'fH', '<cmd>FzfLua git_hunks<cr>', 'Git Hunks' },
     {
-      lhs = lsp_wkey_prefix .. 'D',
-      rhs = function()
-        FzfLua.lsp_workspace_diagnostics { severity_limit = vim.diagnostic.severity.ERROR }
+      lsp_wkey_prefix .. 'D',
+      function()
+        FzfLua.lsp_workspace_diagnostics { vim.diagnostic.severity.ERROR }
       end,
-      opts = { desc = 'Workspace Diagnostics' },
+      'Workspace Diagnostics',
     },
     {
-      lhs = lsp_wkey_prefix .. 'r',
-      rhs = '<cmd>FzfLua lsp_references<cr>',
-      opts = { desc = 'References' },
+      lsp_wkey_prefix .. 'r',
+      '<cmd>FzfLua lsp_references<cr>',
+      'References',
     },
     {
-      lhs = lsp_wkey_prefix .. 'f',
-      rhs = '<cmd>FzfLua lsp_definitions<cr>',
-      opts = { desc = 'Definitions' },
+      lsp_wkey_prefix .. 'f',
+      '<cmd>FzfLua lsp_definitions<cr>',
+      'Definitions',
     },
     {
-      lhs = lsp_wkey_prefix .. 's',
-      rhs = '<cmd>FzfLua lsp_document_symbols<cr>',
-      opts = { desc = 'Live Document Symbols' },
+      lsp_wkey_prefix .. 's',
+      '<cmd>FzfLua lsp_document_symbols<cr>',
+      'Live Document Symbols',
     },
-    { lhs = wkey_prefix .. 'd', rhs = '<cmd>FzfLua lsp_document_diagnostics<cr>', opts = { desc = 'Document diagnostics' } },
+    { wkey_prefix .. 'd', '<cmd>FzfLua lsp_document_diagnostics<cr>', 'Document diagnostics' },
   }
+
+  for _, k in ipairs(prefix_keys) do
+    vim.keymap.set('n', k[1], k[2], { desc = k[3] })
+  end
 end)

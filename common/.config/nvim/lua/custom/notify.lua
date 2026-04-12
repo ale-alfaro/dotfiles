@@ -147,40 +147,44 @@ NOTIF.setup = function()
     end, level_data.duration)
   end
 
-  KEYS.define({
+  local keymaps = {
     {
-      lhs = '<leader>na',
-      rhs = function()
+      '<leader>na',
+      function()
         -- Get active notifications
         local notifs = get_notif_arr(function(notif)
           return notif.ts_remove ~= nil
         end)
         show_notifications(notifs)
       end,
-      opts = { desc = '[N]otification [A]ll' },
+      '[N]otification [A]ll',
     },
     {
-      lhs = '<leader>nh',
-      rhs = '<Cmd>lua MiniNotify.show_history()<CR>',
-      opts = { desc = '[N]otification [H]istory' },
+      '<leader>nh',
+      '<Cmd>lua MiniNotify.show_history()<CR>',
+      '[N]otification [H]istory',
     },
     {
-      lhs = '<leader>ne',
-      rhs = function()
+      '<leader>ne',
+      function()
         -- Get active notifications
         local err_notifs = get_notif_arr(function(notif)
           return notif.level == 'ERROR'
         end)
         show_notifications(err_notifs)
       end,
-      opts = { desc = '[N]otification [E]rrors' },
+      '[N]otification [E]rrors',
     },
     {
-      lhs = '<leader>nd',
-      rhs = '<Cmd>lua MiniNotify.clear()<CR>',
-      opts = { desc = '[N]otification [D]ismiss' },
+      '<leader>nd',
+      '<Cmd>lua MiniNotify.clear()<CR>',
+      '[N]otification [D]ismiss',
     },
-  }, { prefix = '<leader>n', group = 'Notification' })
+  }
+
+  for _, k in ipairs(keymaps) do
+    vim.keymap.set('n', k[1], k[2], { desc = k[3] })
+  end
 end
 
 return NOTIF

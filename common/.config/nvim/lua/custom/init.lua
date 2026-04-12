@@ -13,74 +13,12 @@ _G.KEYS = {}
 ---@field mode string|string[]?
 ---@field opts vim.keymap.set.Opts?
 ---
--- Tracks defined keymaps to prevent duplicates.
--- Key is a unique string like "n:<leader>ff".
-KEYS.registry = {}
-KEYS.leader_clues = {}
----@param lhs string
----@param mode string
-local function keymap_encode(lhs, mode)
-  return mode .. ':' .. lhs
-end
-
----@class WhichKeyGroupSpec
----@field prefix string
----@field group string
-
---- Defines a list of keymaps, preventing duplicates and handling conditions.
----@param keymaps KeymapSpec[]
----@param wkey_group WhichKeyGroupSpec?
-function KEYS.define(keymaps, wkey_group)
-  -- if wkey_group then
-  --   KEYS.leader_clues[#KEYS.leader_clues + 1] = { mode = 'n', keys = wkey_group.prefix, desc = wkey_group.group }
-  -- end
-
-  for _, spec in ipairs(keymaps) do
-    ---@type table
-    local modes = vim._ensure_list(spec.mode or 'n')
-    for _, mode in ipairs(modes) do
-      local id = keymap_encode(spec.lhs, mode)
-      if KEYS.registry[id] then
-        VimRc.warn('Keymap already defined and was skipped: ' .. id)
-        goto continue_inner
-      end
-
-      ---@type vim.keymap.set.Opts
-      local opts = spec.opts or {}
-      vim.keymap.set(mode, spec.lhs, spec.rhs, opts)
-      -- Mark this keymap as handled
-      KEYS.registry[id] = true
-      ::continue_inner::
-    end
-  end
-end
-
----@param keymaps KeymapSpec[]
----@param enable boolean
-function KEYS.toggle(keymaps, enable)
-  for _, spec in ipairs(keymaps) do
-    ---@type table
-    local modes = vim._ensure_list(spec.mode or 'n')
-    for _, mode in ipairs(modes) do
-      if enable then
-        -- Set the keymap
-        ---@type vim.keymap.set.Opts
-        local opts = spec.opts or {}
-        vim.keymap.set(mode, spec.lhs, spec.rhs, opts)
-      else
-        -- Unmap the key
-        pcall(vim.keymap.del, mode, spec.lhs)
-      end
-    end
-  end
-end
 
 --[[
 --  Global envs table and utilities
 --]]
 
 -- M.serial = require 'custom.serialization'
-M.exec = require 'custom.exec'
 ---@param lines string[]
 ---@param bufname string
 M.write_to_buffer = function(lines, bufname)
@@ -134,8 +72,7 @@ end
 ---@field dependencies vim.pack.Spec?
 ---@field opts table?
 ---@field config fun()?
----@field keys KeymapSpec[]?
----@field wkey_group WhichKeyGroupSpec?
+---@field keys table<string,string|function,string>?
 ---@type VimPackPlugin[]
 M.added_plugins = {}
 ---@param spec VimPackPlugin
@@ -144,78 +81,30 @@ function M.pack_add(spec)
     vim.pack.add(spec.dependencies)
   end
   local plug_spec = vim._ensure_list(spec.plugin)
-  vim.pack.add(plug_spec)
   if spec.config then
+    vim.pack.add(plug_spec)
     spec.config()
   elseif spec.opts and type(spec.opts) == 'table' then
     require(spec.name).setup(spec.opts)
   end
-  if spec.keys then
-    KEYS.define(spec.keys, spec.wkey_group)
+  if spec.keys and vim.islist(spec.keys) then
+    for _, k in ipairs(spec.keys) do
+      if vim.islist(k) and #k == 3 then
+        vim.keymap.set('n', k[1], k[2], { desc = k[3] })
+      end
+    end
   end
   M.added_plugins[#M.added_plugins + 1] = spec
 end
 
----@alias BuildHookCmdTypes 'shell' | 'user'
-BuildHookCmdTypes = {
-  shell = 'shell',
-  user = 'user',
-}
-
----@class VimPackBuildHooks
----@field plugin string
----@field build_cmd_type BuildHookCmdTypes
----@field build_cmd string
-
----@param build_hook VimPackBuildHooks
-local function create_plugin_build_hook(build_hook)
-  VimRc.check_type('build_hook', build_hook, 'table')
-  local plugin = build_hook.plugin
-  VimRc.check_type('plugin', plugin, 'string')
-  local type = build_hook.build_cmd_type
-  vim.validate('type', type, 'string')
-  local cmd = build_hook.build_cmd
-  vim.validate('cmd', cmd, 'string')
-  local hooks = function(ev)
-    -- Use available |event-data|
-    local name, kind = ev.data.spec.name, ev.data.kind
-    if type == BuildHookCmdTypes.shell then
-      -- Run build script after plugin's code has changed
-      if name == plugin and (kind == 'install' or kind == 'update') then
-        vim.system(vim.fn.split(cmd), { cwd = ev.data.path })
-      end
-    elseif type == BuildHookCmdTypes.user then
-      -- If action relies on code from the plugin (like user command or
-      -- Lua code), make sure to explicitly load it first
-      if name == plugin and kind == 'update' then
-        if not ev.data.active then
-          vim.cmd.packadd(plugin)
-        end
-        vim.cmd(cmd)
-        require(plugin).after_update()
-      end
-    else
-      VimRc.err 'Invalid build cmd type'
-    end
-  end
-
-  -- If hooks need to run on install, run this before `vim.pack.add()`
-  vim.api.nvim_create_autocmd('PackChanged', { callback = hooks })
-end
-
 ---@class VimPackOpts
 ---@field version string?
----@field build_hook VimPackBuildHooks?
 
 ---@param p string
 ---@param opts VimPackOpts?
 ---@return vim.pack.Spec
 function _G.plug(p, opts)
   local plug_name = p:match '%S+/(%S+)'
-  if opts and opts.build_hook then
-    create_plugin_build_hook(opts.build_hook)
-    plug_name = opts.plugin or plug_name
-  end
   ---@type vim.pack.Spec
   local plug = {
     src = 'https://github.com/' .. p,
