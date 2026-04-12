@@ -11,6 +11,10 @@ VimRc.new_autocmd = function(event, callback, pattern, desc)
   local opts = { group = gr, pattern = pattern, callback = callback, desc = desc }
   vim.api.nvim_create_autocmd(event, opts)
 end
+VimRc.oneshot_autocmd = function(event, callback)
+  local opts = { once = true, group = gr, callback = callback }
+  vim.api.nvim_create_autocmd(event, opts)
+end
 
 local bufgr = vim.api.nvim_create_augroup('vimrc.buf', { clear = false })
 --- Buflocal autocmd

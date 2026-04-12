@@ -144,5 +144,23 @@ function M.on_attach(bufnr, client)
     })
   end
 end
-
+M.setup = function()
+  require('tiny-code-action').setup {
+    picker = {
+      'buffer',
+      opts = {
+        hotkeys = true,
+        -- Use numeric labels.
+        hotkeys_mode = function(titles)
+          return vim
+            .iter(ipairs(titles))
+            :map(function(i)
+              return tostring(i)
+            end)
+            :totable()
+        end,
+      },
+    },
+  }
+end
 return M
