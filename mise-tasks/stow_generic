@@ -3,16 +3,11 @@ set -euo pipefail
 #MISE description="Initialize uv managed python environment... the right way"
 #MISE dir="{{cwd}}"
 #MISE hide=true
-#USAGE arg "<target_dir>" help="Package target dir"
-#USAGE arg "[pkg_dir]" help="Package root dir" {
-#USAGE   default "."
-#USAGE   env "STOW_PKG_DIR"
-#USAGE }
+#USAGE arg "[pkgs]" help="Packages" var=#true var_min=1
 #USAGE flag "--op [stow_op]" help="Stow operation to do with packages" {
 #USAGE   choices "stow" "restow" "unstow"
 #USAGE   default "restow"
 #USAGE }
-#USAGE arg "[pkgs]" help="Packages" var=#true var_min=1
 if [[ ! -z ${STOW_NO_SIM:-} && ${STOW_NO_SIM} = 1 ]]; then
   sim_flag=""
 else
@@ -26,4 +21,4 @@ case ${usage_op?} in
 esac
 eval "pkgs=( ${usage_pkgs?} )"
 [[ -z ${pkgs:-} ]] && echo "No packages given" && exit 1
-stow -d ${usage_pkg_dir?} -t ${usage_target_dir?} --verbose=${VERBOSE_LVL:-2} ${sim_flag?} ${op_flag?} ${pkgs[@]}
+stow -d ${STOW_PKG_DIR?} -t ${STOW_TARGET_DIR?} --verbose=${VERBOSE_LVL:-2} ${sim_flag?} ${op_flag?} ${pkgs[@]}

@@ -1,37 +1,27 @@
 
-[task_templates."stow:platform"]
-env = { STOW_PKG_DIR = "{{config_root}}/{{os()}}" }
-run = { task = "stow_generic" }
 
-[stow_platform_sim]
-env = { VERBOSE_LVL = "2" }
-hide = true
-extends = "stow:platform"
+[task_templates."stow:config"]
+env = { VERBOSE_LVL = 2, STOW_TARGET_DIR = "{{xdg_config_home}}", STOW_PKG_DIR = "{{config_root}}/common" }
+run = [{ task = "stow_generic", args = [".config"] }]
 
-[stow_platform_unsafe]
-env = { STOW_NO_SIM = "1", VERBOSE_LVL = "0" }
-hide = true
-confirm = "Do you want to stow the common packages?"
-extends = "stow:platform"
-
-[stow_platform]
-description = "Stow platform packages"
-run = [{ task = "stow_platform_sim" }, { task = "stow_platform_unsafe" }]
-
-
-[task_templates."stow:common"]
-env = { STOW_PKG_DIR = "{{config_root}}/common", VERBOSE_LVL = "2" }
-hide = true
-run = { task = "stow_generic" }
-
-[stow_common_sim]
-extends = "stow:common"
-
-[stow_common_unsafe]
-env = { STOW_NO_SIM = "1", VERBOSE_LVL = "0" }
-confirm = "Do you want to stow the common packages?"
-extends = "stow:common"
 
 [stow_common]
-description = "Stow common packages"
-run = [{ task = "stow_common_sim" }, { task = "stow_common_unsafe" }]
+extends = "stow:config"
+
+[stow_common_unsafe]
+env = { STOW_PKG_DIR = "{{config_root}}/commmon", STOW_NO_SIM = "1", VERBOSE_LVL = "0" }
+hide = true
+confirm = "Do you want to stow the common packages?"
+extends = "stow:config"
+
+
+[stow_platform_sim]
+env = { STOW_PKG_DIR = "{{config_root}}/{{os()}}" }
+hide = true
+extends = "stow:config"
+
+[stow_platform_unsafe]
+env = { STOW_PKG_DIR = "{{config_root}}/{{os()}}", STOW_NO_SIM = "1", VERBOSE_LVL = "0" }
+hide = true
+confirm = "Do you want to stow the platform packages?"
+extends = "stow:config"

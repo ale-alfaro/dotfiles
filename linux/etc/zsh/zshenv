@@ -28,5 +28,6 @@ export ZDOTDIR=$HOME/.config/zsh
 # made in ~/.zshenv. ~/.zprofile runs after /etc/zprofile. This ensures user
 # PATH additions are available in all login shells.
 typeset -U path PATH
-path=(~/.local/bin $path)
+path=($HOME/.local/bin $path)
 export PATH
+eval "$($HOME/.local/bin/mise activate zsh --shims)"

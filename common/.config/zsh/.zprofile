@@ -27,4 +27,4 @@ fi
 
 # cargo
 # ------------------------------------------------------------------------------
-eval "$(mise activate zsh --shims)"
+eval "$(/home/alealfaro/.local/bin/mise activate zsh --shims)"
