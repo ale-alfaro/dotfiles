@@ -32,12 +32,7 @@
 
 ---@module 'oil'
 
-local now_if_args = VimRc.now_if_args
-
-now_if_args(function()
-  vim.pack.add {
-    'https://github.com/stevearc/oil.nvim',
-  }
+VimRc.now_if_args(function()
   require('oil').setup {
     -- Oil will take over directory buffers (e.g. `vim .` or `:e src/`)
     -- Set to false if you want some other plugin (e.g. netrw) to open when you edit directories.

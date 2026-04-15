@@ -1,13 +1,3 @@
-local function map(lhs, rhs, mode, opts)
-  vim.validate('mode', mode, { 'string', 'table' }, true)
-  vim.validate('lhs', lhs, 'string')
-  vim.validate('rhs', rhs, { 'string', 'function' })
-  vim.validate('opts', opts, 'table', true)
-  opts = opts or {}
-  mode = mode or 'n'
-  vim.keymap.set(mode, lhs, rhs, opts)
-end
-
 ---@class MiniGitBufData
 ---@field repo string - full path to '.git' directory.
 ---@field root string - full path to worktree root.
@@ -16,9 +6,6 @@ end
 ---@field status string - two character file status as returned by `git status`.
 ---@field in_progress string  - name of action(s) currently in progress (bisect, merge, etc.). Can be a combination of those separated by ",".
 
-local nmap_leader = function(key, cmd, desc)
-  map('<leader>' .. key, cmd, { desc = desc })
-end
 VimRc.later(function()
   require('custom.format').setup()
   -- FeatureFlags:add { name = 'Lint', gl_enabled = true }
@@ -29,15 +16,8 @@ VimRc.later(function()
   local git = require 'mini.git'
   git.setup()
 
-  local git_log_cmd = [[Git log --pretty=format:\%h\ \%as\ │\ \%s --topo-order]]
-  local git_log_buf_cmd = git_log_cmd .. ' --follow -- %'
-
-  map('<C-g>c', '<Cmd>Git commit<CR>', { 'n', 'i' }, { desc = 'Commit' })
-  map('<C-g>l', '<Cmd>' .. git_log_cmd .. '<CR>', { 'n', 'i' }, { desc = 'Log' })
-  map('<C-g>L', '<Cmd>' .. git_log_buf_cmd .. '<CR>', { 'n', 'i' }, { desc = 'Log buffer' })
-
-  nmap_leader('da', '<Cmd>Git diff --cached<CR>', 'Added diff')
-  nmap_leader('dA', '<Cmd>Git diff --cached -- %<CR>', 'Added diff buffer')
+  vim.keymap.set('n', 'da', '<Cmd>Git diff --cached<CR>', { desc = 'Added diff' })
+  vim.keymap.set('n', 'dc', '<Cmd>Git diff --cached -- %<CR>', { desc = 'Added diff buffer' })
 end)
 
 --- MiniGit
@@ -95,19 +75,91 @@ VimRc.later(function()
     MiniDiff.toggle(0)
     MiniDiff.toggle_overlay(0)
   end
-  nmap_leader('do', toggle_mini_diff, 'Toggle overlay')
+  vim.keymap.set('n', 'do', toggle_mini_diff, { desc = 'Toggle overlay' })
 
   local export_diff_qf = function()
     vim.fn.setqflist(MiniDiff.export 'qf')
   end
-  nmap_leader('de', export_diff_qf, 'Diff to QuickFix')
+  vim.keymap.set('n', 'de', export_diff_qf, { desc = 'Diff to QuickFix' })
 end)
 
 VimRc.later(function()
   vim.pack.add(_G.plug_spec {
     'stevearc/overseer.nvim',
+    'folke/trouble.nvim',
+    'stevearc/quicker.nvim',
   })
-  require 'extras.quicker'
+  require('trouble').setup {
+    focus = true, -- Focus the window when opened
+    modes = {
+      symbols = {
+        ---@class trouble.Window.split
+        win = { type = 'split', position = 'right', size = { width = 0.5, height = 0.0 } },
+      },
+    },
+  }
+
+  require('quicker').setup {
+    opts = {
+      buflisted = false,
+      number = false,
+      relativenumber = false,
+      signcolumn = 'auto',
+      winfixheight = true,
+      wrap = true,
+    },
+    -- -- Set to false to disable the default options in `opts`
+    -- use_default_opts = true,
+    -- Keymaps to set for the quickfix buffer
+    keys = {
+      { '>', "<cmd>lua require('quicker').expand({ add_to_existing = true})", desc = 'Expand quickfix content' },
+      { '<', "<cmd>lua require('quicker').collapse()<CR>", desc = 'Collapse quickfix content' },
+      {
+        '-',
+        function()
+          require('quicker').expand { after = 0, before = 3, add_to_existing = true }
+        end,
+        desc = 'Expand/Collapse quickfix content toggle',
+      },
+      {
+        '+',
+        function()
+          require('quicker').expand { after = 3, before = 0, add_to_existing = true }
+        end,
+        desc = 'Expand/Collapse quickfix content toggle',
+      },
+      {
+        'r',
+        '<cmd>Refresh<cr>', -- User cmd added by quicker to the buffer
+        desc = 'Refresh quickfix content',
+      },
+    },
+    -- Callback function to run any custom logic or keymaps for the quickfix buffer
+    -- on_qf = function(bufnr) end,
+    edit = {
+      -- Enable editing the quickfix like a normal buffer
+      enabled = true,
+      -- Set to true to write buffers after applying edits.
+      -- Set to "unmodified" to only write unmodified buffers.
+      autosave = true,
+    },
+  }
+  local trouble_keys = {
+    { '<leader>xd', '<cmd>Trouble diagnostics toggle filter.severity=2<cr>', 'Diagnostics (Trouble)' },
+    { '<leader>xb', '<cmd>Trouble diagnostics toggle filter.buf=0 filter.severity=2<cr>', 'Buffer Diagnostics (Trouble)' },
+    { '<leader>xs', '<cmd>Trouble symbols toggle<cr>', 'Symbols (Trouble)' },
+    {
+      '<leader>xl',
+      '<cmd>Trouble lsp toggle<cr>',
+      'LSP references/definitions  (Trouble)',
+    },
+  }
+  for _, key in ipairs(trouble_keys) do
+    vim.keymap.set('n', key[1], key[2], { desc = key[3] })
+  end
+  local config = require 'fzf-lua.config'
+  local actions = require('trouble.sources.fzf').actions
+  config.defaults.actions.files['ctrl-t'] = actions.open
   require 'extras.overseer'
   require 'extras.optional.grug'
 end)
@@ -135,5 +187,3 @@ VimRc.on_filetype('markdown', function()
   vim.api.nvim_set_hl(0, '@markup.heading.3.markdown', { fg = '#e6c384' })
   vim.api.nvim_set_hl(0, '@markup.heading.4.markdown', { fg = '#7fb4ca' })
 end)
-
--- require('custom.obsidian').setup()

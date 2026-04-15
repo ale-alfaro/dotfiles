@@ -1,0 +1,39 @@
+[tools]
+neovim = "0.12"
+stylua = "latest"
+
+# --- CHECKS ---
+
+[tasks.check]
+description = "Simple headless command for quick LSP/settings checks"
+run = "nvim --headless -c ':lua vim.print(\"hello\")' -c 'qall'"
+
+[tasks.check-health]
+description = "Run Neovim health check"
+run = "nvim --headless -c 'checkhealth' -c '5sleep' -c 'qall'"
+
+[tasks.check-all]
+description = "Run both configuration check and health check"
+depends = ["check", "check-health"]
+
+[tasks.check-local-lsp]
+description = "Verify local LSP configs load and completion works in fake workspace"
+dir = "scratch/fake_workspace"
+run = "nvim --headless -c ':e index.rst' -c ':LspLocalStart esbonio' -c '5sleep' -c 'qall'"
+
+# --- TESTING ---
+
+[tasks.test]
+description = "Run all tests via mini.test"
+run = "nvim --headless --noplugin -u tests/minimal_init.lua -c 'lua MiniTest.run()' -c 'qa!'"
+
+[tasks."test-file"]
+description = "Run a specific test file"
+usage = "arg \"file\" help=\"Path to the test file\""
+run = "nvim --headless --noplugin -u tests/minimal_init.lua -c \"lua MiniTest.run_file('{{arg(name=\"file\")}}')\" -c 'qa!'"
+
+# --- FORMATTING ---
+
+[tasks.format]
+description = "Format all Lua files with stylua"
+run = "stylua ."

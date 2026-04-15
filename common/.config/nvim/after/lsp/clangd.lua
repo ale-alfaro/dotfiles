@@ -91,6 +91,7 @@ return {
     },
     offsetEncoding = { 'utf-8', 'utf-16' },
   },
+
   ---@param init_result ClangdInitializeResult
   on_init = function(client, init_result)
     if init_result.offsetEncoding then

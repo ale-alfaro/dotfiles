@@ -1,9 +1,28 @@
 local M = {}
 
+---@comment Get the lsp configuration in the current working directory
+---@return string[]
+local lsp_configs_get = function()
+  local lsp_dirs = {} --@type string[]
+  local lsps = {}
+  local loc = vim.fs.joinpath(vim.fn.expand '$XDG_CONFIG_HOME', 'nvim')
+  lsp_dirs[#lsp_dirs + 1] = vim.fs.joinpath(loc, 'lsp')
+  lsp_dirs[#lsp_dirs + 1] = vim.fs.joinpath(loc, 'after', 'lsp')
+  for _, dir in ipairs(lsp_dirs) do
+    if vim.uv.fs_stat(dir) then
+      for name, type in vim.fs.dir(dir) do
+        if type == 'file' then
+          lsps[#lsps + 1] = name:gsub('(%w+)%.lua', '%1')
+        end
+      end
+    end
+  end
+  return lsps
+end
 ---@description Function that handles LspAttach events.
 ---@param client vim.lsp.Client
 ---@param bufnr integer
-M.lsp_on_attach = function(client, bufnr)
+local lsp_on_attach = function(client, bufnr)
   -- Enable auto-completion. Note: Use CTRL-Y to select an item. |complete_CTRL-Y|
   VimRc.new_buf_autocmd({ 'CursorHold', 'InsertLeave' }, bufnr, vim.lsp.buf.document_highlight, 'Highlight references under the cursor')
   VimRc.new_buf_autocmd({ 'CursorMoved', 'InsertEnter', 'BufLeave' }, bufnr, vim.lsp.buf.clear_references, 'Clear highlight references')
@@ -49,13 +68,19 @@ M.lsp_on_attach = function(client, bufnr)
   if client:supports_method 'textDocument/codeAction' then
     require('vimrc_lsp.code_action').on_attach(bufnr, client)
   end
-  --[[ 
-  --    Auto-format ("lint") on save.
-  -- Usually not needed if server supports 
-  -- "textDocument/willSaveWaitUntil".
-  --
-  -- ]]
-  --
+  -- Enable auto-completion. Note: Use CTRL-Y to select an item. |complete_CTRL-Y|
+  if client:supports_method 'textDocument/completion' then
+    -- Optional: trigger autocompletion on EVERY keypress. May be slow!
+    -- local chars = {}
+    -- for i = 32, 126 do
+    --   table.insert(chars, string.char(i))
+    -- end
+    -- client.server_capabilities.completionProvider.triggerCharacters = chars
+
+    vim.cmd [[setlocal completeopt+=menuone,noselect,popup]]
+    vim.bo[bufnr].omnifunc = 'v:lua.MiniCompletion.completefunc_lsp'
+    vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = true })
+  end
   if not client:supports_method 'textDocument/willSaveWaitUntil' and client:supports_method 'textDocument/formatting' then
     VimRc.new_buf_autocmd('BufWritePre', bufnr, function()
       vim.lsp.buf.format { bufnr = bufnr, id = client.id, timeout_ms = 1000 }
@@ -65,19 +90,6 @@ M.lsp_on_attach = function(client, bufnr)
   if client:supports_method 'textDocument/foldingRange' then
     local win = vim.api.nvim_get_current_win()
     vim.wo[win][0].foldexpr = 'v:lua.vim.lsp.foldexpr()'
-  end
-end
-
----@description Function that handles LspAttach events.
----@param client vim.lsp.Client
----@param bufnr integer
-M.lsp_on_dettach = function(client, bufnr)
-  -- Remove the autocommand to format the buffer on save, if it exists
-  if client and client:supports_method 'textDocument/formatting' then
-    vim.api.nvim_clear_autocmds {
-      event = 'BufWritePre',
-      buffer = bufnr,
-    }
   end
 end
 
@@ -92,7 +104,7 @@ M.setup = function()
     local client = assert(vim.lsp.get_client_by_id(ev.data.client_id))
 
     VimRc.debug('[LspAttach autocmd] - ', { client = client.name, buf = bufnr })
-    M.lsp_on_attach(client, bufnr)
+    lsp_on_attach(client, bufnr)
   end, '*', 'LspAttach Configure Lsps')
 
   --- Lsp Configuration happens on a different paths sometimes when Lsp Servers are expected
@@ -108,36 +120,20 @@ M.setup = function()
       VimRc.debug(string.format('[registerCapability] - Client %s', client.name))
       VimRc.debug(client.capabilities)
       -- Update mappings when registering dynamic capabilities.
-      M.lsp_on_attach(client, vim.api.nvim_get_current_buf()) -- end
+      lsp_on_attach(client, vim.api.nvim_get_current_buf()) -- end
       return overridden_register_caps(err, res, ctx)
     end
   end)(vim.lsp.handlers['client/registerCapability'])
-
-  -- LspDetach event happens when buffer is closed and is symmetrical to the LspAttach
-  -- Do any clean-up or teardown here. Right now we just clear the autocmd formatting
-  -- that was created on the LspAttach event
-  VimRc.new_autocmd('LspDetach', function(ev)
-    local bufnr = ev.buf
-    local client = assert(vim.lsp.get_client_by_id(ev.data.client_id))
-
-    VimRc.debug('[LspDetach autocmd] - ', { client = client.name, buf = bufnr })
-    M.lsp_on_dettach(client, bufnr)
-  end, 'Clear after lsp detach')
 
   -- vim.cmd([[
   --   autocmd BufWritePre *.rs lua vim.lsp.buf.format({ async = false }
   -- ]])
   --
-
   -- Extend neovim's client capabilities with the completion ones.
-  local capabilities = MiniCompletion.get_lsp_capabilities()
-  capabilities.textDocument.completion.completionItem.snippetSupport = true
-  vim.lsp.config('*', { capabilities = capabilities })
   require('vimrc_lsp.schemastore').setup()
   require('vimrc_lsp.code_action').setup()
 
-  local path = vim.fs.joinpath(vim.fn.expand '$XDG_CONFIG_HOME', 'nvim')
-  local servers = VimRc.lsp_configs_get(path)
+  local servers = lsp_configs_get()
   servers = vim.list_extend(servers, { 'yamlls', 'jsonls' })
   VimRc.debug('Enabling lsps: ', { servers = servers })
   vim.lsp.enable(servers)

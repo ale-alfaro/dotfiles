@@ -1,6 +1,41 @@
-vim.pack.add {
-  'https://github.com/nvim-mini/mini.nvim',
-}
+_G.VimRc = require 'custom'
+require 'config.opts'
+
+local gr = vim.api.nvim_create_augroup('vimrc', {})
+---@param event string|string[]
+---@param callback function
+---@param pattern (string|string[])?
+---@param desc string?
+VimRc.new_autocmd = function(event, callback, pattern, desc)
+  pattern = pattern or '*'
+  local opts = { group = gr, pattern = pattern, callback = callback, desc = desc }
+  vim.api.nvim_create_autocmd(event, opts)
+end
+VimRc.oneshot_autocmd = function(event, callback)
+  local opts = { once = true, group = gr, callback = callback }
+  vim.api.nvim_create_autocmd(event, opts)
+end
+
+local bufgr = vim.api.nvim_create_augroup('vimrc.buf', { clear = false })
+--- Buflocal autocmd
+---@param event string|string[]
+---@param bufnr integer
+---@param callback function
+---@param desc string?
+VimRc.new_buf_autocmd = function(event, bufnr, callback, desc)
+  local opts = { group = bufgr, callback = callback, buffer = bufnr, desc = desc or '' }
+  vim.api.nvim_create_autocmd(event, opts)
+end
+require 'config.autocmds'
+
+VimRc.user_cmd = vim.api.nvim_create_user_command --[[@type function]]
+VimRc.user_buf_cmd = vim.api.nvim_buf_create_user_command--[[@type function]]
+require 'config.usercmds'
+require 'config.keymaps'
+vim.pack.add(_G.plug_spec {
+  'nvim-mini/mini.nvim',
+  'stevearc/oil.nvim',
+})
 
 -- Loading helpers used to organize config into fail-safe parts. Example usage:
 -- - `now` - execute immediately. Use for what must be executed during startup.

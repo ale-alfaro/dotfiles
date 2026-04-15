@@ -1,0 +1,338 @@
+==============================================================================
+QUICKSTART                                              *lsp-quickstart*
+
+Nvim provides an LSP client, but the servers are provided by third parties.
+Follow these steps to get LSP features:
+
+1. Install language servers using your package manager or by following the
+   upstream installation instructions. You can find language servers here:
+   https://microsoft.github.io/language-server-protocol/implementors/servers/
+2. Define a new config |lsp-new-config| (or install https://github.com/neovim/nvim-lspconfig).
+   Example: >lua
+     vim.lsp.config['lua_ls'] = {
+       -- Command and arguments to start the server.
+       cmd = { 'lua-language-server' },
+       -- Filetypes to automatically attach to.
+       filetypes = { 'lua' },
+       -- Sets the "workspace" to the directory where any of these files is found.
+       -- Files that share a root directory will reuse the LSP server connection.
+       -- Nested lists indicate equal priority, see |vim.lsp.Config|.
+       root_markers = { { '.luarc.json', '.luarc.jsonc' }, '.git' },
+       -- Specific settings to send to the server. The schema is server-defined.
+       -- Example: https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json
+       settings = {
+         Lua = {
+           runtime = {
+             version = 'LuaJIT',
+           }
+         }
+       }
+     }
+3. Use |vim.lsp.enable()| to enable the config.
+   Example: >lua
+     vim.lsp.enable('lua_ls')
+4. Open a code file matching one of the `filetypes` specified in the config.
+   Note: Depending on the LSP server, you may need to ensure your project has
+   a |lsp-root_markers| file so the workspace can be recognized.
+5. Check that LSP is active ("attached") for the buffer: >vim
+     :checkhealth vim.lsp
+6. Note: some LSP features are disabled by default, you can enable them
+   manually:
+     - |lsp-codelens|
+     - |lsp-linked_editing_range|
+     - |lsp-inlay_hint|
+     - |lsp-inline_completion|
+7. (Optional) Configure keymaps and autocommands to use LSP features.
+   |lsp-attach|
+
+==============================================================================
+DEFAULTS                                                *lsp-defaults*
+
+When LSP activates, by default it enables various LSP features and sets
+options and keymaps, listed below, if (1) the language server supports the
+functionality and (2) the options are empty or were set by the builtin runtime
+(ftplugin) files. The options are not restored when the LSP client is stopped
+or detached.
+
+GLOBAL DEFAULTS                       *gra* *gri* *grn* *grr* *grt* *grx* *i_CTRL-S*
+
+These GLOBAL keymaps are created unconditionally when Nvim starts:
+
+- "gra" (Normal and Visual mode) is mapped to |vim.lsp.buf.code_action()|
+- "gri" is mapped to |vim.lsp.buf.implementation()|
+- "grn" is mapped to |vim.lsp.buf.rename()|
+- "grr" is mapped to |vim.lsp.buf.references()|
+- "grt" is mapped to |vim.lsp.buf.type_definition()|
+- "grx" is mapped to |vim.lsp.codelens.run()|
+- "gO" is mapped to |vim.lsp.buf.document_symbol()|
+- CTRL-S (Insert mode) is mapped to |vim.lsp.buf.signature_help()|
+- |v_an| and |v_in| fall back to LSP |vim.lsp.buf.selection_range()| if
+  treesitter is not active.
+- |gx| handles `textDocument/documentLink`. Example: with gopls, invoking gx
+  on "os" in this Go code will open documentation externally: >
+    package nvim
+    import (
+       "os"
+    )
+<
+These LSP features are enabled by default:
+
+- Diagnostics |lsp-diagnostic|. See |vim.diagnostic.config()| to customize.
+- `workspace/didChangeWatchedFiles` (except on Linux). If you see poor
+  performance in big workspaces, run `:checkhealth vim.lsp` and look for "file
+  watching". Try disabling file-watching: >lua
+    local capabilities = vim.lsp.protocol.make_client_capabilities()
+    if capabilities.workspace then
+      capabilities.workspace.didChangeWatchedFiles = nil
+    end
+    vim.lsp.config('*', {
+      capabilities = capabilities,
+    })
+<
+
+BUFFER-LOCAL DEFAULTS
+
+- 'omnifunc' is set to |vim.lsp.omnifunc()|, use |i_CTRL-X_CTRL-O| to trigger
+  completion.
+- 'tagfunc' is set to |vim.lsp.tagfunc()|. This enables features like
+  go-to-definition, |:tjump|, and keymaps like |CTRL-]|, |CTRL-W_]|,
+  |CTRL-W_}| to utilize the language server.
+- 'formatexpr' is set to |vim.lsp.formatexpr()|, so you can format lines via
+  |gq| if the language server supports it.
+  - To opt out of this use |gw| instead of gq, or clear 'formatexpr' on |LspAttach|.
+- |K| is mapped to |vim.lsp.buf.hover()| unless 'keywordprg' is customized or
+  a custom keymap for `K` exists.
+- Document colors are enabled for highlighting color references in a document.
+  - To opt out call `vim.lsp.document_color.enable(false, { bufnr = ev.buf })` on |LspAttach|.
+
+DISABLING DEFAULTS                                      *lsp-defaults-disable*
+
+You can remove GLOBAL keymaps at any time using |vim.keymap.del()| or
+|:unmap|. See also |gr-default|.
+
+To remove or override BUFFER-LOCAL defaults, define a |LspAttach| handler: >lua
+
+    vim.api.nvim_create_autocmd('LspAttach', {
+      callback = function(ev)
+        -- Unset 'formatexpr'
+        vim.bo[ev.buf].formatexpr = nil
+        -- Unset 'omnifunc'
+        vim.bo[ev.buf].omnifunc = nil
+        -- Unmap K
+        vim.keymap.del('n', 'K', { buf = ev.buf })
+        -- Disable document colors
+        vim.lsp.document_color.enable(false, { bufnr = ev.buf })
+      end,
+    })
+<
+==============================================================================
+COMMANDS                                                 *:lsp* *lsp-commands*
+
+:lsp enable [config_name]                                 *:lsp-enable*
+    Activates LSP for current and future buffers. See |vim.lsp.enable()|.
+
+:lsp disable [config_name]                                *:lsp-disable*
+    Disables LSP (and stops if running) for current and future buffers. See
+    |vim.lsp.enable()|.
+
+:lsp restart [client_name]                                *:lsp-restart*
+    Restarts LSP clients and servers. If no client names are given, all active
+    clients attached to the current buffer are restarted.
+
+:lsp stop [client_name]                                   *:lsp-stop*
+    Stops LSP clients and servers. If no client names are given, all active
+    clients attached to the current buffer are stopped. Use |Client:stop()|
+    for non-interactive use.
+
+==============================================================================
+CONFIG                                                  *lsp-config*
+
+You can configure LSP behavior statically via vim.lsp.config(), and
+dynamically via |lsp-attach| or |Client:on_attach()|.
+
+Use |vim.lsp.config()| to define or modify LSP configurations, and
+|vim.lsp.enable()| to auto-activate them. This is basically a wrapper around
+|vim.lsp.start()| which allows you to share and merge configs (provided by
+Nvim, plugins, and your local config).
+
+NEW CONFIG                                            *lsp-new-config*
+To create a new config you can either use `vim.lsp.config()` or create
+a `lsp/<config-name>.lua` file.
+
+EXAMPLE: DEFINE A CONFIG AS CODE ~
+
+1. Run `:lua vim.lsp.config('foo', {cmd={'true'}})`
+2. Run `:lua vim.lsp.enable('foo')`
+3. Run `:checkhealth vim.lsp`, check "Enabled Configurations". 😎
+
+EXAMPLE: DEFINE A CONFIG AS A FILE ~
+
+1. Create a file `lsp/foo.lua` somewhere on your 'runtimepath'. >
+   :exe 'edit' stdpath('config') .. '/lsp/foo.lua'
+2. Add this code to the file (or copy an example from
+   https://github.com/neovim/nvim-lspconfig): >
+   return {
+     cmd = { 'true' },
+   }
+3. Save the file (with `++p` to ensure its parent directory is created). >
+   :write ++p
+4. Enable the config. >
+   :lua vim.lsp.enable('foo')
+5. Run `:checkhealth vim.lsp`, check "Enabled Configurations". 🌈
+
+HOW CONFIGS ARE MERGED                                  *lsp-config-merge*
+When an LSP client starts, it resolves its configuration by merging the
+following sources (merge semantics defined by |vim.tbl_deep_extend()| with
+"force" behavior), in order of increasing priority:
+
+1. Configuration defined for the `'*'` name.
+2. The merged configuration of all `lsp/<config>.lua` files in 'runtimepath'
+   for the config named `<config>`.
+3. The merged configuration of all `after/lsp/<config>.lua` files in
+   'runtimepath'.
+   - This behavior of the "after/" directory is a standard Vim feature
+     |after-directory| which allows you to override `lsp/*.lua` configs
+     provided by plugins (such as nvim-lspconfig).
+4. Configurations defined anywhere else.
+
+Example: given the following configs... >lua
+
+  -- Defined in init.lua
+  vim.lsp.config('*', {
+    capabilities = {
+      textDocument = {
+        semanticTokens = {
+          multilineTokenSupport = true,
+        }
+      }
+    },
+    root_markers = { '.git' },
+  })
+  -- Defined in <rtp>/lsp/clangd.lua
+  return {
+    cmd = { 'clangd' },
+    root_markers = { '.clangd', 'compile_commands.json' },
+    filetypes = { 'c', 'cpp' },
+  }
+  -- Defined in init.lua
+  vim.lsp.config('clangd', {
+    filetypes = { 'c' },
+  })
+<
+...the merged result is: >lua
+
+  {
+    -- From the clangd configuration in <rtp>/lsp/clangd.lua
+    cmd = { 'clangd' },
+
+    -- From the clangd configuration in <rtp>/lsp/clangd.lua
+    -- Overrides the "*" configuration in init.lua
+    root_markers = { '.clangd', 'compile_commands.json' },
+
+    -- From the clangd configuration in init.lua
+    -- Overrides the clangd configuration in <rtp>/lsp/clangd.lua
+    filetypes = { 'c' },
+
+    -- From the "*" configuration in init.lua
+    capabilities = {
+      textDocument = {
+        semanticTokens = {
+          multilineTokenSupport = true,
+        }
+      }
+    }
+  }
+<
+CONFIGURE ON ATTACH                                     *lsp-attach*
+To use LSP features beyond those provided by Nvim (see |lsp-buf|), you can set
+keymaps and options on |Client:on_attach()| or |LspAttach|. Not all language
+servers provide the same capabilities; check `supports_method()` in your
+LspAttach handler.
+                                                        *lsp-lint* *lsp-format*
+Example: Enable auto-completion and auto-formatting ("linting"): >lua
+
+    vim.api.nvim_create_autocmd('LspAttach', {
+      group = vim.api.nvim_create_augroup('my.lsp', {}),
+      callback = function(ev)
+        local client = assert(vim.lsp.get_client_by_id(ev.data.client_id))
+        if client:supports_method('textDocument/implementation') then
+          -- Create a keymap for vim.lsp.buf.implementation ...
+        end
+
+        -- Enable auto-completion. Note: Use CTRL-Y to select an item. |complete_CTRL-Y|
+        if client:supports_method('textDocument/completion') then
+          -- Optional: trigger autocompletion on EVERY keypress. May be slow!
+          -- local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
+          -- client.server_capabilities.completionProvider.triggerCharacters = chars
+
+          vim.lsp.completion.enable(true, client.id, ev.buf, {autotrigger = true})
+        end
+
+        -- Auto-format ("lint") on save.
+        -- Usually not needed if server supports "textDocument/willSaveWaitUntil".
+        if not client:supports_method('textDocument/willSaveWaitUntil')
+            and client:supports_method('textDocument/formatting') then
+          vim.api.nvim_create_autocmd('BufWritePre', {
+            group = vim.api.nvim_create_augroup('my.lsp', {clear=false}),
+            buffer = ev.buf,
+            callback = function()
+              vim.lsp.buf.format({ bufnr = ev.buf, id = client.id, timeout_ms = 1000 })
+            end,
+          })
+        end
+      end,
+    })
+<
+To see the capabilities for a given server, try this in a LSP-enabled buffer: >vim
+
+    :lua =vim.lsp.get_clients()[1].server_capabilities
+...
+- Q: How do I run a request synchronously (e.g. for formatting on file save)?
+- A: Check if the function has an `async` parameter and set the value to
+  false. E.g. code formatting: >vim
+
+     " Auto-format *.rs (rust) files prior to saving them
+     " (async = false is the default for format)
+     autocmd BufWritePre *.rs lua vim.lsp.buf.format({ async = false })
+
+format({opts})                                          *vim.lsp.buf.format()*
+    Formats a buffer using the attached (and optionally filtered) language
+    server clients.
+
+    Parameters: ~
+      • {opts}  (`table?`) A table with the following fields:
+                • {formatting_options}? (`lsp.FormattingOptions`) Can be used
+                  to specify FormattingOptions. Some unspecified options will
+                  be automatically derived from the current Nvim options. See
+                  https://microsoft.github.io/language-server-protocol/specification/#formattingOptions
+                • {timeout_ms}? (`integer`, default: `1000`) Time in
+                  milliseconds to block for formatting requests. No effect if
+                  async=true.
+                • {bufnr}? (`integer`, default: current buffer) Restrict
+                  formatting to the clients attached to the given buffer.
+                • {filter}? (`fun(client: vim.lsp.Client): boolean?`)
+                  Predicate used to filter clients. Receives a client as
+                  argument and must return a boolean. Clients matching the
+                  predicate are included. Example: >lua
+                    -- Never request typescript-language-server for formatting
+                    vim.lsp.buf.format {
+                      filter = function(client) return client.name ~= "ts_ls" end
+                    }
+<
+                • {async}? (`boolean`, default: false) If true the method
+                  won't block. Editing the buffer while formatting
+                  asynchronous can lead to unexpected changes.
+                • {id}? (`integer`) Restrict formatting to the client with ID
+                  (client.id) matching this field.
+                • {name}? (`string`) Restrict formatting to the client with
+                  name (client.name) matching this field.
+                • {range}?
+                  (`{start:[integer,integer],end:[integer, integer]}|{start:[integer,integer],end:[integer,integer]}[]`,
+                  default: current selection in visual mode, `nil` in other
+                  modes, formatting the full buffer) Range to format. Table
+                  must contain `start` and `end` keys with {row,col} tuples
+                  using (1,0) indexing. Can also be a list of tables that
+                  contain `start` and `end` keys as described above, in which
+                  case `textDocument/rangesFormatting` support is required.
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

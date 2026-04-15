@@ -49,7 +49,7 @@ vim.o.autocompletedelay = 100
 vim.o.pumblend = 10
 vim.o.pumborder = 'rounded'
 vim.o.pummaxwidth = 40
-vim.o.completeopt = 'menu,menuone,fuzzy,noselect,longest,popup' -- Use custom behavior
+vim.o.completeopt = 'menu,menuone,fuzzy,noselect,nosort' -- Use custom behavior
 vim.o.completetimeout = 300 -- Limit sources delay
 ---
 
@@ -115,35 +115,26 @@ vim.opt.shortmess:append {
 
 -- Status line.
 vim.o.cmdheight = 2
-local diagnostic_icons = {
-  ERROR = '',
-  WARN = '',
-  HINT = '',
-  INFO = '',
-}
-VimRc.now_if_args(function()
-  vim.diagnostic.config {
-    severity_sort = true,
-    virtual_text = {
-      prefix = '',
-      spacing = 2,
-      format = function(diagnostic)
-        -- Use shorter, nicer names for some sources:
-        local special_sources = {
-          ['Lua Diagnostics.'] = 'lua',
-          ['Lua Syntax Check.'] = 'lua',
-        }
 
-        local message = diagnostic_icons[vim.diagnostic.severity[diagnostic.severity]]
-        if diagnostic.source then
-          message = string.format('%s %s', message, special_sources[diagnostic.source] or diagnostic.source)
-        end
-        if diagnostic.code then
-          message = string.format('%s[%s]', message, diagnostic.code)
-        end
-
-        return message .. ' '
-      end,
+vim.diagnostic.config {
+  severity_sort = true,
+  float = {
+    border = 'rounded',
+    source = 'if_many',
+    underline = true,
+  },
+  virtual_text = {
+    spacing = 2,
+    source = 'if_many',
+    prefix = 'o',
+  },
+  -- Disable signs in the gutter.
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = 'E',
+      [vim.diagnostic.severity.WARN] = 'W',
+      [vim.diagnostic.severity.INFO] = 'I',
+      [vim.diagnostic.severity.HINT] = 'H',
     },
     float = {
       source = true, --'if_many',

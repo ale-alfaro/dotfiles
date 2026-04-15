@@ -1,6 +1,8 @@
--- Minimal format-on-save: sync CLI formatters + LSP fallback
--- Replaces conform.nvim for whole-file, synchronous formatting.
+-- Minimal format-on-save: CLI formatters + LSP fallback.
+-- Supports both sync (BufWritePre) and async (BufWritePost) modes.
+-- Replaces conform.nvim for whole-file formatting.
 
+local exec = require('custom.exec')
 local M = {}
 
 -- Configuration ---------------------------------------------------------------
@@ -8,8 +10,15 @@ local M = {}
 M.timeout_ms = 1000
 
 ---@alias FormatDef { cmd: string, args: string[] }
+--- Formatter list per filetype. When stop_after_first is true, only the first
+--- available formatter runs (useful for fallbacks like dprint → prettier).
+---@alias FormatList FormatDef[]|{ [integer]: FormatDef, stop_after_first?: boolean }
 
----@type table<string, FormatDef[]>
+-- Broad formatters reused across filetypes
+local prettier = { cmd = 'prettier', args = { '--stdin-filepath', '$FILENAME' } }
+local dprint = { cmd = 'dprint', args = { 'fmt', '--stdin', '$FILENAME' } }
+
+---@type table<string, FormatList>
 M.formatters_by_ft = {
   lua = {
     { cmd = 'stylua', args = { '--search-parent-directories', '--respect-ignores', '--stdin-filepath', '$FILENAME', '-' } },
@@ -27,6 +36,17 @@ M.formatters_by_ft = {
     },
     { cmd = 'ruff', args = { 'format', '--force-exclude', '--stdin-filename', '$FILENAME', '-' } },
   },
+  markdown = { prettier },
+  json = { dprint, prettier, stop_after_first = true },
+  jsonc = { dprint, prettier, stop_after_first = true },
+  yaml = { prettier },
+  javascript = { dprint, prettier, stop_after_first = true },
+  javascriptreact = { dprint, prettier, stop_after_first = true },
+  typescript = { dprint, prettier, stop_after_first = true },
+  typescriptreact = { dprint, prettier, stop_after_first = true },
+  scss = { prettier },
+  css = { prettier },
+  html = { prettier },
 }
 
 -- Filetypes where LSP formatting is used exclusively when available
@@ -52,7 +72,7 @@ local function resolve_args(args, filename)
   return resolved
 end
 
----Run a single formatter, returning the formatted text or nil on failure.
+---Run a single formatter synchronously, returning formatted text or nil on failure.
 ---@param formatter FormatDef
 ---@param text string
 ---@param filename string
@@ -65,6 +85,25 @@ local function run_formatter(formatter, text, filename)
     return nil
   end
   return result.stdout
+end
+
+---Run a single formatter asynchronously via exec.cli_run.
+---@param formatter FormatDef
+---@param text string
+---@param filename string
+---@param callback fun(output: string|nil)
+local function run_formatter_async(formatter, text, filename, callback)
+  local cmd = vim.list_extend({ formatter.cmd }, resolve_args(formatter.args, filename))
+  exec.cli_run(cmd, nil, function(code, stdout, _stderr)
+    if code ~= 0 then
+      vim.schedule(function()
+        vim.notify(string.format('[format] %s exited with code %s', formatter.cmd, tostring(code)), vim.log.levels.WARN)
+      end)
+      callback(nil)
+    else
+      callback(stdout)
+    end
+  end, { stdin = text, timeout = M.timeout_ms })
 end
 
 ---Diff original_lines vs new_lines and apply minimal text edits to the buffer.
@@ -87,12 +126,41 @@ local function apply_format(bufnr, original_lines, new_lines)
     vim.notify('[format] Aborting: formatter returned empty output', vim.log.levels.WARN)
     return false
   end
+  --- Optional parameters:
+  --- @comment
+  --- vim.text.diff.Opts
+  ---
+  --- Form of the returned diff:
+  ---   - `unified`: String in unified format.
+  ---   - `indices`: Array of hunk locations.
+  --- Note: This option is ignored if `on_hunk` is used.
+  --- (default: `'unified'`)
 
+  --- Run diff on strings {a} and {b}. Any indices returned by this function,
+  --- either directly or via callback arguments, are 1-based.
+  ---
+  --- Examples:
+  ---
+  --- ```lua
+  --- vim.text.diff('a\n', 'b\nc\n')
+  --- -- =>
+  --- -- @@ -1 +1,2 @@
+  --- -- -a
+  --- -- +b
+  --- -- +c
+  ---
+  --- vim.text.diff('a\n', 'b\nc\n', {result_type = 'indices'})
+  --- -- =>
+  --- -- {
+  --- --   {1, 1, 1, 2}
+  --- -- }
+  --- ```
+  ---
   local indices = vim.text.diff(original_text, new_text, {
     result_type = 'indices',
     algorithm = 'histogram',
   })
-  if not indices or #indices == 0 then
+  if not vim.islist(indices) or #indices == 0 then
     return false
   end
 
@@ -178,11 +246,66 @@ local function apply_format(bufnr, original_lines, new_lines)
   return true
 end
 
+---Resolve available CLI formatters for a buffer.
+---@param bufnr integer
+---@return FormatDef[]|nil available formatters, nil if LSP handled it or nothing to do
+---@return string filename
+---@return string[] original_lines
+local function resolve_formatters(bufnr)
+  local ft = vim.bo[bufnr].filetype
+  local formatters = M.formatters_by_ft[ft]
+  if not formatters or #formatters == 0 then
+    return nil, '', {}
+  end
+
+  local stop_after_first = formatters.stop_after_first
+  local available = {}
+  for _, fmt in ipairs(formatters) do
+    if vim.fn.executable(fmt.cmd) == 1 then
+      available[#available + 1] = fmt
+      if stop_after_first then
+        break
+      end
+    end
+  end
+  if #available == 0 then
+    return nil, '', {}
+  end
+
+  return available, vim.api.nvim_buf_get_name(bufnr), vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+end
+
+---@param text string
+---@param eol boolean
+---@return string[]
+local function parse_output_lines(text, eol)
+  local new_lines = vim.split(text, '\r?\n')
+  if eol and new_lines[#new_lines] == '' then
+    table.remove(new_lines)
+  end
+  if #new_lines == 0 then
+    new_lines = { '' }
+  end
+  return new_lines
+end
+
+---@param bufnr integer
+---@return string text, boolean eol
+local function buf_to_text(bufnr)
+  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+  local eol = vim.bo[bufnr].eol
+  if eol then
+    lines[#lines + 1] = ''
+  end
+  return table.concat(lines, '\n'), eol
+end
+
+-- Sync format (BufWritePre) ---------------------------------------------------
+
 ---@param bufnr integer
 local function format_buffer(bufnr)
   local ft = vim.bo[bufnr].filetype
 
-  -- LSP-preferred filetypes: just use the built-in LSP formatter
   if M.lsp_prefer[ft] then
     local clients = vim.lsp.get_clients { bufnr = bufnr, method = 'textDocument/formatting' }
     if #clients > 0 then
@@ -191,34 +314,13 @@ local function format_buffer(bufnr)
     end
   end
 
-  local formatters = M.formatters_by_ft[ft]
-  if not formatters or #formatters == 0 then
+  local available, filename, original_lines = resolve_formatters(bufnr)
+  if not available then
     return
   end
 
-  -- Filter to available formatters
-  local available = {}
-  for _, fmt in ipairs(formatters) do
-    if vim.fn.executable(fmt.cmd) == 1 then
-      available[#available + 1] = fmt
-    end
-  end
-  if #available == 0 then
-    return
-  end
+  local text, eol = buf_to_text(bufnr)
 
-  local filename = vim.api.nvim_buf_get_name(bufnr)
-  local original_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-  local eol = vim.bo[bufnr].eol
-
-  -- Build input text (matching vim's EOL behavior)
-  local input_lines = vim.list_extend({}, original_lines)
-  if eol then
-    input_lines[#input_lines + 1] = ''
-  end
-  local text = table.concat(input_lines, '\n')
-
-  -- Chain formatters: each takes the previous output as input
   for _, fmt in ipairs(available) do
     local output = run_formatter(fmt, text, filename)
     if output then
@@ -226,36 +328,119 @@ local function format_buffer(bufnr)
     end
   end
 
-  -- Parse output back to vim lines
-  local new_lines = vim.split(text, '\r?\n')
-  if eol and new_lines[#new_lines] == '' then
-    table.remove(new_lines)
+  apply_format(bufnr, original_lines, parse_output_lines(text, eol))
+end
+
+-- Async format (BufWritePost) -------------------------------------------------
+
+local applying_format = {} ---@type table<integer, true>
+
+---Chain formatters asynchronously, then apply the result.
+---@param bufnr integer
+---@param available FormatDef[]
+---@param filename string
+---@param original_lines string[]
+---@param text string
+---@param eol boolean
+---@param changedtick integer
+---@param idx integer
+local function chain_async(bufnr, available, filename, original_lines, text, eol, changedtick, idx)
+  local fmt = available[idx]
+  if not fmt then
+    -- All formatters done — apply on the main thread
+    vim.schedule(function()
+      if not vim.api.nvim_buf_is_valid(bufnr) or vim.b[bufnr].changedtick ~= changedtick then
+        return
+      end
+      local new_lines = parse_output_lines(text, eol)
+      if apply_format(bufnr, original_lines, new_lines) then
+        applying_format[bufnr] = true
+        vim.api.nvim_buf_call(bufnr, function()
+          vim.cmd.update()
+        end)
+        applying_format[bufnr] = nil
+      end
+    end)
+    return
   end
-  if #new_lines == 0 then
-    new_lines = { '' }
+  run_formatter_async(fmt, text, filename, function(output)
+    chain_async(bufnr, available, filename, original_lines, output or text, eol, changedtick, idx + 1)
+  end)
+end
+
+---@param bufnr integer
+local function format_buffer_async(bufnr)
+  local ft = vim.bo[bufnr].filetype
+
+  -- LSP-preferred filetypes: use async LSP formatting
+  if M.lsp_prefer[ft] then
+    local clients = vim.lsp.get_clients { bufnr = bufnr, method = 'textDocument/formatting' }
+    if #clients > 0 then
+      vim.lsp.buf.format { bufnr = bufnr, async = true }
+      return
+    end
   end
 
-  apply_format(bufnr, original_lines, new_lines)
+  local available, filename, original_lines = resolve_formatters(bufnr)
+  if not available then
+    return
+  end
+
+  local text, eol = buf_to_text(bufnr)
+  local changedtick = vim.b[bufnr].changedtick
+
+  chain_async(bufnr, available, filename, original_lines, text, eol, changedtick, 1)
 end
 
 -- Setup -----------------------------------------------------------------------
 
-function M.setup()
+---@param opts? { async?: boolean }
+function M.setup(opts)
+  opts = opts or {}
   FeatureFlags:add { name = 'Format', gl_enabled = true }
 
-  vim.api.nvim_create_autocmd('BufWritePre', {
-    group = vim.api.nvim_create_augroup('CustomFormat', { clear = true }),
-    desc = 'Format on save',
-    callback = function(args)
-      if vim.bo[args.buf].buftype ~= '' then
-        return
-      end
-      if not FeatureFlags:get('Format').gl_enabled then
-        return
-      end
-      format_buffer(args.buf)
-    end,
-  })
+  local aug = vim.api.nvim_create_augroup('CustomFormat', { clear = true })
+
+  if opts.async then
+    vim.api.nvim_create_autocmd('BufWritePost', {
+      group = aug,
+      desc = 'Format after save (async)',
+      callback = function(args)
+        if vim.bo[args.buf].buftype ~= '' then
+          return
+        end
+        if applying_format[args.buf] then
+          return
+        end
+        if not FeatureFlags:get('Format').gl_enabled then
+          return
+        end
+        format_buffer_async(args.buf)
+      end,
+    })
+  else
+    vim.api.nvim_create_autocmd('BufWritePre', {
+      group = aug,
+      desc = 'Format on save (sync)',
+      callback = function(args)
+        if vim.bo[args.buf].buftype ~= '' then
+          return
+        end
+        if not FeatureFlags:get('Format').gl_enabled then
+          return
+        end
+        format_buffer(args.buf)
+      end,
+    })
+  end
 end
+
+-- Expose internals for testing
+M._ = {
+  resolve_args = resolve_args,
+  apply_format = apply_format,
+  parse_output_lines = parse_output_lines,
+  resolve_formatters = resolve_formatters,
+}
 
 return M
