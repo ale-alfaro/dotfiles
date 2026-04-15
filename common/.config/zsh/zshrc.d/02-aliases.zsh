@@ -115,3 +115,25 @@ alias zln='zmv -L' # Link with patterns
 # Navigate back to directories easily using the zsh directory stack feature
 alias d='dirs -v'
 for index in {1..9}; do alias "$index"="builtin cd +${index}"; done
+
+
+# ---- Eza (better ls) -----
+if has eza; then
+  alias lt='eza --tree --level=3 --long --icons --git'
+  alias lta='lt -a'
+  alias ls="eza --icons=always --oneline --no-git --all"
+fi
+
+zd() {
+  if [ $# -eq 0 ]; then
+    builtin cd ~ && return
+  elif [ -d "$1" ]; then
+    builtin cd "$1"
+  else
+    zi "$1"
+  fi
+}
+if has zoxide; then
+  safe_source zoxide init zsh
+  alias cd='zd'
+fi

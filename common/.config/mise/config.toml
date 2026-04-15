@@ -97,8 +97,6 @@ just = "latest"
 "cargo:taplo-cli" = "latest"
 "cargo:neocmakelsp" = "latest"
 "cargo:tlrc" = "latest"
-"npm:tsc" = "latest"
-go = "latest"
 hk = "latest"
 
 

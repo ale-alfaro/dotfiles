@@ -86,7 +86,30 @@ zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*:corrections' format '%d (errors: %e) %f'
 zstyle ':completion:*:warnings' format ' no matches found %f'
 zstyle ':completion:*:default' list-prompt '%S%M matches%s'
-# zstyle ':completion:*:*:*:*:corrections' format '%F{yellow}!- %d (errors: %e) -!%f'
-# zstyle ':completion:*:*:*:*:descriptions' format '%F{blue}-- %D %d --%f'
-# zstyle ':completion:*:*:*:*:messages' format ' %F{purple} -- %d --%f'
-# zstyle ':completion:*:*:*:*:warnings' format ' %F{red}-- no matches found --%f'
+zstyle ':completion:*' rehash true
+
+
+source <(fzf --zsh)
+[[ -r /usr/share/fzf/key-bindings.zsh ]] && source /usr/share/fzf/key-bindings.zsh
+
+plugins=(
+  Aloxaf/fzf-tab
+)
+__init_plugins "${plugins[@]}"
+# [[ -r $ZDOTDIR/plugins/fzf.zsh ]] && source $ZDOTDIR/plugins/fzf.zsh
+# fzf-tab
+zstyle ':fzf-tab:complete:(v|n|nvim):*' fzf-preview '[[ -d $realpath ]] && eza --tree --color=always $realpath | head -200 || bat -n --color=always --line-range :500 $realpath'
+zstyle ':fzf-tab:complete:(z|cd|zd):*' fzf-preview 'eza --tree --color=always $realpath | head -200'
+# zstyle ':fzf-tab:complete:(z|cd|zd):*' fzf-preview 'eza --icons=always --oneline --no-git --all $realpath'
+# To make fzf-tab follow FZF_DEFAULT_OPTS.
+# NOTE: This may lead to unexpected behavior since some flags break this plugin. See Aloxaf/fzf-tab#455.
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
+
+# Enable multi select in tab completions using tab and shift tab
+# zstyle ':fzf-tab:complete:*' fzf-bindings 'tab:toggle+down,shift-tab:toggle+up'
+
+# switch group using `<` and `>`
+zstyle ':fzf-tab:*' switch-group ',' '.'
+
+# Do continious completion for traversing paths with ` key
+zstyle ':fzf-tab:*' continuous-trigger '`'
