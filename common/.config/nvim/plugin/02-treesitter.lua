@@ -201,4 +201,23 @@ VimRc.now_if_args(function()
     end
     return string.match(filename, '.*mise.*%.toml$') ~= nil
   end, { force = true, all = false })
+
+  local function treesitter_list()
+    ---@type vim.pack.PlugData[]
+    local installed = require('nvim-treesitter').get_installed()
+    local available = vim
+      .iter(require('nvim-treesitter.config').get_available())
+      :filter(function(parser)
+        return not vim.list_contains(installed, parser)
+      end)
+      :totable()
+    ---@type string[]
+    local lines = vim
+      .iter({ 'Installed Parser/Grammars:', '--------------------', installed, 'Available Parser/Grammars:', '-------------------- ', available })
+      :flatten(2)
+      :totable()
+    VimRc.write_to_buffer(lines, 'VimRc-treesitter-list')
+  end
+
+  vim.api.nvim_create_user_command('TSList', treesitter_list, { desc = 'View log messages' })
 end)

@@ -121,74 +121,50 @@ local diagnostic_icons = {
   HINT = '',
   INFO = '',
 }
+VimRc.now_if_args(function()
+  vim.diagnostic.config {
+    severity_sort = true,
+    virtual_text = {
+      prefix = '',
+      spacing = 2,
+      format = function(diagnostic)
+        -- Use shorter, nicer names for some sources:
+        local special_sources = {
+          ['Lua Diagnostics.'] = 'lua',
+          ['Lua Syntax Check.'] = 'lua',
+        }
 
-vim.diagnostic.config {
-  severity_sort = true,
-  virtual_text = {
-    prefix = '',
-    spacing = 2,
-    format = function(diagnostic)
-      -- Use shorter, nicer names for some sources:
-      local special_sources = {
-        ['Lua Diagnostics.'] = 'lua',
-        ['Lua Syntax Check.'] = 'lua',
-      }
+        local message = diagnostic_icons[vim.diagnostic.severity[diagnostic.severity]]
+        if diagnostic.source then
+          message = string.format('%s %s', message, special_sources[diagnostic.source] or diagnostic.source)
+        end
+        if diagnostic.code then
+          message = string.format('%s[%s]', message, diagnostic.code)
+        end
 
-      local message = diagnostic_icons[vim.diagnostic.severity[diagnostic.severity]]
-      if diagnostic.source then
-        message = string.format('%s %s', message, special_sources[diagnostic.source] or diagnostic.source)
-      end
-      if diagnostic.code then
-        message = string.format('%s[%s]', message, diagnostic.code)
-      end
-
-      return message .. ' '
-    end,
-  },
-  float = {
-    source = true, --'if_many',
-    -- Show severity icons as prefixes.
-    prefix = function(diag)
-      local level = vim.diagnostic.severity[diag.severity]
-      local prefix = string.format(' %s ', diagnostic_icons[level])
-      return prefix, 'Diagnostic' .. level:gsub('^%l', string.upper)
-    end,
-  },
-  -- Disable signs in the gutter.
-  signs = {
-    text = {
-      [vim.diagnostic.severity.ERROR] = 'E',
-      [vim.diagnostic.severity.WARN] = 'W',
-      [vim.diagnostic.severity.INFO] = 'I',
+        return message .. ' '
+      end,
     },
-    numhl = {
-      [vim.diagnostic.severity.ERROR] = 'ErrorMsg',
-      [vim.diagnostic.severity.WARN] = 'WarningMsg',
+    float = {
+      source = true, --'if_many',
+      -- Show severity icons as prefixes.
+      prefix = function(diag)
+        local level = vim.diagnostic.severity[diag.severity]
+        local prefix = string.format(' %s ', diagnostic_icons[level])
+        return prefix, 'Diagnostic' .. level:gsub('^%l', string.upper)
+      end,
     },
-  },
-}
-
-vim.o.messagesopt = 'hit-enter,history:1000,progress:c'
-require('vim._core.ui2').enable {
-  enable = true, -- Whether to enable or disable the UI.
-  msg = { -- Options related to the message module.
-    ---@type 'cmd'|'msg' Default message target, either in the
-    ---cmdline or in a separate ephemeral message window.
-    ---@type string|table<string, 'cmd'|'msg'|'pager'> Default message target
-    ---or table mapping |ui-messages| kinds and triggers to a target.
-    targets = 'cmd',
-    cmd = { -- Options related to messages in the cmdline window.
-      height = 0.5, -- Maximum height while expanded for messages beyond 'cmdheight'.
+    -- Disable signs in the gutter.
+    signs = {
+      text = {
+        [vim.diagnostic.severity.ERROR] = 'E',
+        [vim.diagnostic.severity.WARN] = 'W',
+        [vim.diagnostic.severity.INFO] = 'I',
+      },
+      numhl = {
+        [vim.diagnostic.severity.ERROR] = 'ErrorMsg',
+        [vim.diagnostic.severity.WARN] = 'WarningMsg',
+      },
     },
-    dialog = { -- Options related to dialog window.
-      height = 0.5, -- Maximum height.
-    },
-    msg = { -- Options related to msg window.
-      height = 0.5, -- Maximum height.
-      timeout = 4000, -- Time a message is visible in the message window.
-    },
-    pager = { -- Options related to message window.
-      height = 1, -- Maximum height.
-    },
-  },
-}
+  }
+end)

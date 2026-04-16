@@ -1,4 +1,11 @@
-VimRc.new_autocmd('TextYankPost', function()
+local new_autocmd = function(evt, cb, desc)
+  vim.api.nvim_create_autocmd(evt, { callback = cb, desc = desc })
+end
+
+local new_file_autocmd = function(evt, cb, pattern, desc)
+  vim.api.nvim_create_autocmd(evt, { callback = cb, desc = desc })
+end
+new_autocmd('TextYankPost', function()
   (vim.hl or vim.highlight).on_yank()
 end, 'Highlight on yank')
 
@@ -19,20 +26,20 @@ local ft_easy_quit = {
   'VimRc*',
 }
 
-VimRc.new_autocmd('FileType', function(args)
+new_file_autocmd('FileType', function(args)
   vim.bo[args.buf].buflisted = false
   vim.api.nvim_buf_set_keymap(args.buf, 'n', 'q', '<Cmd>lua MiniBufremove.delete(0, true)<CR>', { desc = 'Delete!' })
 end, ft_easy_quit, 'Close with <q>')
 
 -- Wrap and check for spell in text filetypes
-VimRc.new_autocmd('FileType', function()
+new_file_autocmd('FileType', function(args)
   vim.opt_local.wrap = true
   vim.opt_local.spell = true
 end, { 'text', 'plaintex', 'typst', 'gitcommit' }, 'Wrap and spell check for text filetypes')
 
 -- Auto create dir when saving a file, in case some intermediate directory does not exist
 
-VimRc.new_autocmd('QuitPre', function()
+new_autocmd('QuitPre', function()
   local all = vim.api.nvim_list_wins()
   local close = {}
   for _, win in ipairs(all) do

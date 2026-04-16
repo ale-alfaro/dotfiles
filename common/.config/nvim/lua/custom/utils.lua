@@ -1,8 +1,8 @@
-H = {}
+local M = {}
 -- Utilities ------------------------------------------------------------------
 
 ---@return string
-H.sprintf = function(...)
+M.sprintf = function(...)
   local msg = {}
   for i = 1, select('#', ...) do
     local o = select(i, ...)
@@ -39,15 +39,15 @@ local make_print_fn = function(lvl)
     return ...
   end
 end
-H.print = function(...)
-  H.info(H.sprintf(...))
+M.print = function(...)
+  M.info(M.sprintf(...))
 end
-H.log_level_names = {}
+M.log_level_names = {}
 for k, v in pairs(vim.log.levels) do
-  H.log_level_names[v] = k
+  M.log_level_names[v] = k
 end
 
-H.check_type = function(name, val, ref, allow_nil)
+M.check_type = function(name, val, ref, allow_nil)
   if type(val) == ref or (ref == 'callable' and vim.is_callable(val)) or (allow_nil and val == nil) then
     return
   end
@@ -55,31 +55,31 @@ H.check_type = function(name, val, ref, allow_nil)
 end
 
 ---@return table
-H.ensure_list = function(x)
+M.ensure_list = function(x)
   x = vim._ensure_list(x)
   if #x > 0 then
     return x
   end
   error(string.format('`%s` should be a list or item, but it is empty', x), 0)
 end
-H.info = make_print_fn 'INFO'
-H.warn = make_print_fn 'WARN'
-H.err = make_print_fn 'ERROR'
-H.debug = make_print_fn 'DEBUG'
+M.info = make_print_fn 'INFO'
+M.warn = make_print_fn 'WARN'
+M.err = make_print_fn 'ERROR'
+M.debug = make_print_fn 'DEBUG'
 
-H.set_buf_name = function(buf_id, name)
+M.set_buf_name = function(buf_id, name)
   vim.api.nvim_buf_set_name(buf_id, 'vimrc://' .. buf_id .. '/' .. name)
 end
 
-H.is_valid_win = function(win_id)
+M.is_valid_win = function(win_id)
   return type(win_id) == 'number' and vim.api.nvim_win_is_valid(win_id)
 end
 
-H.full_path = function(path)
+M.full_path = function(path)
   return (vim.fn.fnamemodify(path, ':p'):gsub('(.)/$', '%1'))
 end
 ---@return string[]
-H.get_workspace_files = function()
+M.get_workspace_files = function()
   local workspace_files = {}
   local folders = vim.lsp.buf.list_workspace_folders()
   if #folders > 0 and vim.uv.fs_stat(folders[0]) then
@@ -128,7 +128,7 @@ end
 
 local _detected_filetypes = {}
 local _dont_cache_these_extensions = { 'conf' }
-H.get_filetype = function(path)
+M.get_filetype = function(path)
   local ext = vim.fn.fnamemodify(path, ':e')
 
   if rawget(_detected_filetypes, ext) ~= nil then
@@ -145,14 +145,14 @@ H.get_filetype = function(path)
   return filetype
 end
 
-H.short_path = function(path, cwd)
+M.short_path = function(path, cwd)
   cwd = cwd or vim.fn.getcwd()
   -- Ensure `cwd` is treated as directory path (to not match similar prefix)
   cwd = cwd:sub(-1) == '/' and cwd or (cwd .. '/')
   return vim.startswith(path, cwd) and path:sub(cwd:len() + 1) or vim.fn.fnamemodify(path, ':~')
 end
 
-H.setTimeout = function(timeout, callback)
+M.setTimeout = function(timeout, callback)
   local timer = vim.uv.new_timer()
   if timer ~= nil then
     timer:start(timeout, 0, function()
@@ -172,7 +172,7 @@ end
 ---@param fname string
 ---@param on_change fun(any)
 ---@param opts WatchFileOpts?
-H.watch_file = function(fname, on_change, opts)
+M.watch_file = function(fname, on_change, opts)
   opts = opts or {}
   local fs_event = vim.uv.new_fs_event()
   if not fs_event then
@@ -192,10 +192,40 @@ H.watch_file = function(fname, on_change, opts)
       end
       fs_event:stop()
       vim.defer_fn(function()
-        H.watch_file(fname, on_change, opts)
+        M.watch_file(fname, on_change, opts)
       end, opts.debounce or 200)
     end)
   )
 end
 
-return H
+---@param lines string[]
+---@param bufname string
+M.write_to_buffer = function(lines, bufname)
+  local bufnr = vim.api.nvim_create_buf(true, true)
+  vim.api.nvim_buf_set_name(bufnr, bufname .. '#' .. bufnr)
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+  vim.cmd.sbuffer { bufnr, mods = { tab = vim.fn.tabpagenr() } }
+end
+
+---@return table<string>
+function M.get_packpath_dirs()
+  local paths = {}
+  local packpath = vim.fn.expand '$XDG_DATA_HOME' .. '/nvim/site/pack/core/opt'
+  for name, type in
+    vim.fs.dir(packpath, {
+      skip = function(dir_name)
+        if not string.match(dir_name, '^nvim') then
+          return true
+        else
+          return false
+        end
+      end,
+    })
+  do
+    if type == 'directory' then
+      table.insert(paths, name)
+    end
+  end
+  return paths
+end
+return M

@@ -1,28 +1,11 @@
 local now = VimRc.now
 
+VimRc.icons = require 'custom.icons'
 now(function()
-  if VimRc.THEME == 'kanagawa' then
-    vim.pack.add(_G.plug_spec {
-      'rebelot/kanagawa.nvim',
-    })
-    vim.cmd 'colorscheme kanagawa'
-  elseif VimRc.THEME == 'matte-black' then
-    vim.pack.add(_G.plug_spec {
-      'tahayvr/matteblack.nvim',
-    })
-    require('matteblack').colorscheme()
-  else
-    vim.pack.add(_G.plug_spec {
-      'catppuccin/nvim',
-    })
-    require('catppuccin').setup {
-      flavour = 'macchiato', -- latte, frappe, macchiato, mocha
-      background = { -- :h background
-        light = 'latte',
-        dark = 'mocha',
-      },
-    }
-  end
+  vim.pack.add {
+    'https://github.com/rebelot/kanagawa.nvim',
+  }
+  vim.cmd 'colorscheme kanagawa'
 end)
 now(function()
   -- Set up to not prefer extension-based icon for some extensions
@@ -59,24 +42,33 @@ end)
 now(function()
   require('mini.statusline').setup()
 end)
--- Example for showing notifications in bottom right corner: >lua
 
---- # Notification specification ~
----
---- Notification is a table with the following keys:
----
---- - <msg> `(string)` - single string with notification message.
----   Use `\n` to delimit several lines.
---- - <level> `(string)` - notification level as key of |vim.log.levels|.
----   Like "ERROR", "WARN", "INFO", etc.
---- - <hl_group> `(string)` - highlight group with which notification is shown.
---- - <data> `(table)` - extra data to store in notification (like `source`, etc.).
---- - <ts_add> `(number)` - timestamp of when notification is added.
---- - <ts_update> `(number)` - timestamp of the latest notification update.
---- - <ts_remove> `(number|nil)` - timestamp of when notification is removed.
----   It is `nil` if notification was never removed and thus considered "active".
----
-
+VimRc.later(function()
+  vim.o.messagesopt = 'hit-enter,history:1000,progress:c'
+  require('vim._core.ui2').enable {
+    enable = true, -- Whether to enable or disable the UI.
+    msg = { -- Options related to the message module.
+      ---@type 'cmd'|'msg' Default message target, either in the
+      ---cmdline or in a separate ephemeral message window.
+      ---@type string|table<string, 'cmd'|'msg'|'pager'> Default message target
+      ---or table mapping |ui-messages| kinds and triggers to a target.
+      targets = 'cmd',
+      cmd = { -- Options related to messages in the cmdline window.
+        height = 0.5, -- Maximum height while expanded for messages beyond 'cmdheight'.
+      },
+      dialog = { -- Options related to dialog window.
+        height = 0.5, -- Maximum height.
+      },
+      msg = { -- Options related to msg window.
+        height = 0.5, -- Maximum height.
+        timeout = 4000, -- Time a message is visible in the message window.
+      },
+      pager = { -- Options related to message window.
+        height = 1, -- Maximum height.
+      },
+    },
+  }
+end)
 -- Add LSP kind icons. Useful for 'mini.completion
 now(function()
   require('custom.notify').setup()

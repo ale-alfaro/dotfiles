@@ -98,44 +98,151 @@ the remaining arguments are the same as for |nvim_create_user_command()|:
       end,
       { nargs = 1 })
 --]]
+local new_usercmd = function(name, cb, desc)
+  vim.api.nvim_create_user_command(name, cb, { desc = desc })
+end
 
-VimRc.user_cmd('CopyCwd', function()
+new_usercmd('CopyCwd', function()
   vim.cmd [[let @+=expand("%:p")]]
-end, { desc = 'Copy Cwd Path' })
+end, 'Copy Cwd Path')
 
+---@class FilterOpts
+---@field names string[]?
+---@field filter_fn fun(p:vim.pack.PlugData):boolean|nil
+---@field output_names boolean?
+---
+---@param opts FilterOpts?
+---@return string[]
+local get_plugins = function(opts)
+  vim.validate('opts', opts, 'table', true, 'FilterOpts')
+  opts = vim.tbl_extend('force', { names = nil, filter_fn = nil, output_names = true }, opts or {})
+  ---@type FilterOpts
+
+  return vim
+    .iter(vim.pack.get(opts.names))
+    :map(function(p)
+      local pname = opts.output_names and p.spec.name or p
+      if type(opts.filter_fn) == 'callable' then
+        return pname and opts.filter_fn(p) or nil
+      end
+      return pname
+    end)
+    :totable()
+end
+
+--- @param plugins string[] Optional: A single plugin name or a list of plugin names to update.
+local pack_reload = function(plugins)
+  local ok, _ = pcall(vim.pack.del, plugins)
+  if not ok then
+    vim.cmd.echo 'Failed to delete plugins with vim.pack.del'
+    return
+  end
+  ok, _ = pcall(vim.pack.add, _G.plug_spec(plugins))
+  if not ok then
+    vim.cmd.echo 'Failed to add plugins with vim.pack.add'
+  end
+end
 ---@param desc string
----@return vim.api.keyset.user_command
-local function pack_usercmd_opts(desc)
-  return {
+local function vim_pack_usercmd(name, cb, desc)
+  vim.api.nvim_create_user_command(name, cb, {
     desc = desc,
     nargs = 1,
     ---@type fun(args: vim.api.keyset.create_user_command.command_args)
     complete = function(args)
-      return VimRc.get_plugins()
+      return get_plugins()
     end,
-  }
+  })
 end
 
-VimRc.user_cmd('PackOpen', function(opts)
+vim_pack_usercmd('PackOpen', function(opts)
   local ok, plug = pcall(vim.pack.get, { opts.fargs[1] })
   if ok then
     vim.cmd('edit ' .. plug[1].path)
   end
-end, pack_usercmd_opts 'Open plugin repository in pack path')
+end, 'Open plugin repository in pack path')
 
-VimRc.user_cmd('PackList', function()
-  VimRc.pack_list()
-end, { desc = 'List plugins installed with vim.pack' })
+--- @param p vim.pack.PlugData
+--- @return string
+local function write_plug_info(p)
+  local active_suffix = p.active and '' or ' (not active)'
 
-VimRc.user_cmd('PackReload', function(opts)
+  local parts = { ('## %s%s\n'):format(p.spec.name, active_suffix) }
+  local version_suffix = p.spec.version == '' and '' or (' (%s)'):format(p.spec.version)
+
+  parts[#parts + 1] = table.concat({
+    'Path:     ' .. p.path,
+    'Source:   ' .. p.spec.src,
+    'Revision: ' .. p.rev .. version_suffix,
+  }, '\n')
+
+  return table.concat(parts, '')
+end
+local function pack_list()
+  ---@type vim.pack.PlugData[]
+  local plugins = M.get_plugins { output_names = false }
+  ---@type string[]
+  local active = vim
+    .iter(plugins)
+    :filter(function(p)
+      return p.active
+    end)
+    :map(function(plug)
+      return write_plug_info(plug)
+    end)
+    :totable()
+  active = vim.list_extend({ 'Active Plugins List:' }, active)
+  local inactive = vim
+    .iter(plugins)
+    :filter(function(p)
+      return not p.active
+    end)
+    :map(function(plug)
+      return write_plug_info(plug)
+    end)
+    :totable()
+  local lines = vim.list_extend(active, vim.list_extend({ 'INACTIVE Plugins List:' }, inactive))
+
+  local bufnr = vim.api.nvim_create_buf(true, true)
+  vim.api.nvim_buf_set_name(bufnr, 'vim.pack.list#' .. bufnr)
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(table.concat(lines, '\n ------ \n'), '\n'))
+  vim.cmd.sbuffer { bufnr, mods = { tab = vim.fn.tabpagenr() } }
+end
+new_usercmd('PackList', pack_list, 'List plugins installed with vim.pack')
+
+local function pack_clean()
+  local active_plugins = {}
+  local unused_plugins = {}
+
+  for _, plugin in ipairs(vim.pack.get()) do
+    active_plugins[plugin.spec.name] = plugin.active
+  end
+
+  for _, plugin in ipairs(vim.pack.get()) do
+    if not active_plugins[plugin.spec.name] then
+      table.insert(unused_plugins, plugin.spec.name)
+    end
+  end
+
+  if #unused_plugins == 0 then
+    print 'No unused plugins.'
+    return
+  end
+
+  local choice = vim.fn.confirm('Remove unused plugins?', '&Yes\n&No', 2)
+  if choice == 1 then
+    vim.pack.del(unused_plugins)
+  end
+end
+vim_pack_usercmd('PackDel', pack_clean, 'Clean unactive plugins')
+vim_pack_usercmd('PackReload', function(opts)
   local plug = { opts.fargs[1] }
   local ok, _ = pcall(vim.pack.get, plug)
   if ok then
-    VimRc.pack_reload(plug)
+    pack_reload(plug)
   end
-end, pack_usercmd_opts 'Reload plugin')
+end, 'Reload plugin')
 
-VimRc.user_cmd('PackSync', function()
+new_usercmd('PackSync', function()
   --- @type string[]
   local plugins_name = {}
   --- @type string[]
@@ -148,61 +255,42 @@ VimRc.user_cmd('PackSync', function()
   end
   local ok, _ = pcall(vim.pack.del, plugins_name)
   if not ok then
-    VimRc.err 'Failed to delete plugins with vim.pack.del'
+    vim.cmd.echo 'Failed to delete plugins with vim.pack.del'
+    return
   end
   ok, _ = pcall(vim.pack.add, active_plugins_src)
   if not ok then
-    VimRc.err 'Failed to add plugins with vim.pack.add'
+    vim.cmd.echo 'Failed to add plugins with vim.pack.add'
   end
   vim.pack.update()
-end, { desc = 'Sync plugins' })
+end, 'Sync plugins')
 
-VimRc.user_cmd('PackDel', function(plugins)
-  VimRc.pack_clean()
-end, {
-  desc = 'Clean unactive plugins',
-  nargs = '*',
-  complete = function(ArgLead, CmdLine, CursorPos)
-    -- return completion candidates as a list-like table
-    return VimRc.get_plugins()
-  end,
-})
-
-VimRc.user_cmd('PackUpdate', function()
-  local plugins = VimRc.get_plugins {
+new_usercmd('PackUpdate', function()
+  local plugins = get_plugins {
     filter_fn = function(pspec)
       return pspec.active
     end,
   }
   if plugins then
-    VimRc.info(string.format('Plugins count: %d', #plugins))
-    VimRc.info(table.concat(plugins, '\n'))
+    vim.cmd.echo(string.format('Plugins count: %d', #plugins))
+    vim.cmd.echo(table.concat(plugins, '\n'))
     vim.pack.update(plugins)
   end
-end, { desc = 'Update active plugins' })
+end, 'Update active plugins')
 
-vim.api.nvim_create_user_command('LspInfo', ':checkhealth vim.lsp', { desc = 'Alias to `:checkhealth vim.lsp`' })
+new_usercmd('LspInfo', ':checkhealth vim.lsp', { desc = 'Alias to `:checkhealth vim.lsp`' })
 
-vim.api.nvim_create_user_command('LspLog', function()
+new_usercmd('LspLog', function()
   local logfile = vim.lsp.log.get_filename()
   if vim.uv.fs_stat(logfile) then
-    VimRc.exec.run_cmd { 'touch', vim.lsp.log.get_filename() }
+    vim.cmd.edit(vim.lsp.log.get_filename())
   end
 
   vim.cmd(string.format('tabnew %s', logfile))
-end, {
-  desc = 'Opens the Nvim LSP client log.',
-})
+end, 'Opens the Nvim LSP client log.')
 
-vim.api.nvim_create_user_command('LspLogClean', function()
-  VimRc.exec.run_cmd { 'rm', vim.lsp.log.get_filename() }
-  VimRc.exec.run_cmd { 'touch', vim.lsp.log.get_filename() }
-end, {
-  desc = 'Opens the Nvim LSP client log.',
-})
-
-vim.api.nvim_create_user_command('TSList', function()
-  VimRc.treesitter_list()
-end, {
-  desc = 'View log messages',
-})
+new_usercmd('LspLogClean', function()
+  local log = vim.lsp.log.get_filename()
+  vim.cmd(string.format('!rm %q', log))
+  vim.cmd(string.format('!touch  %q', log))
+end, 'Opens the Nvim LSP client log.')
