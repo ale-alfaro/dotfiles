@@ -2,9 +2,7 @@
 config-file = ?"~/.config/omarchy/current/theme/ghostty.conf"
 
 # Font
-font-family = "JetBrainsMono Nerd Font"
-font-style = Regular
-font-size = 9
+config-file = ?"~/.config/ghostty/font.conf"
 
 # Window
 window-theme = ghostty
@@ -29,7 +27,11 @@ keybind = super+control+shift+alt+arrow_down=resize_split:down,100
 keybind = super+control+shift+alt+arrow_up=resize_split:up,100
 keybind = super+control+shift+alt+arrow_left=resize_split:left,100
 keybind = super+control+shift+alt+arrow_right=resize_split:right,100
-
+keybind = alt+equal=increase_font_size:1
+keybind = alt+minus=decrease_font_size:1
+keybind = alt+enter=toggle_fullscreen
+keybind = alt+z=toggle_split_zoom
+keybind = alt+p=toggle_command_palette
 # Slowdown mouse scrolling
 mouse-scroll-multiplier = 0.95
 

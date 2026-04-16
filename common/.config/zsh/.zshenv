@@ -6,7 +6,7 @@
 # made in ~/.zshenv. ~/.zprofile runs after /etc/zprofile. This ensures user
 # PATH additions are available in all login shells.
 typeset -U path PATH
-path=($HOME/.local/bin $path)
+path=($HOME/.local/bin $HOME/dotfiles/linux/bin $HOME/dotfiles/common/bin $path)
 export PATH
 
 if [[ $- != *i* ]]; then
