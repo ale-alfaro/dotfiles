@@ -4,11 +4,10 @@ vim.g.maplocalleader = ','
 vim.o.mouse = 'a' -- Enable mouse
 vim.o.mousescroll = 'ver:25,hor:6' -- Customize mouse scroll
 vim.opt.number = true
--- vim.o.switchbuf = 'usetab' -- Use already opened buffers when switching
+vim.o.switchbuf = 'usetab' -- Use already opened buffers when switching
 vim.o.undofile = true -- Enable persistent undo
 
 vim.o.shada = "'100,<50,s10,:1000,/100,@100,h" -- Limit ShaDa file (for startup)
--- -- Enable all filetype plugins and syntax (if not enabled, for better startup)
 vim.cmd 'filetype plugin indent on'
 if vim.fn.exists 'syntax_on' ~= 1 then
   vim.cmd 'syntax enable'
@@ -39,6 +38,8 @@ vim.o.formatlistpat = [[^\s*[0-9\-\+\*]\+\([\.\)]\)*\s\+]]
 vim.o.complete = '.,w,b,kspell' -- Use less sources
 vim.o.autocomplete = true
 vim.o.autocompletedelay = 100
+-- stylua: ignore start
+-- stylua: ignore end
 --[
 -- .	scan the current buffer ('wrapscan' is ignored)
 -- w	scan buffers from other windows
@@ -51,10 +52,7 @@ vim.o.pumborder = 'rounded'
 vim.o.pummaxwidth = 40
 vim.o.completeopt = 'menu,menuone,fuzzy,noselect,nosort' -- Use custom behavior
 vim.o.completetimeout = 300 -- Limit sources delay
----
 
--- inoremap <silent><expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
--- inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 vim.opt.clipboard = 'unnamedplus' -- Sync with system clipboard
 vim.opt.conceallevel = 2 -- Hide * markup for bold and italic, but not markers with substitutions
 vim.opt.cursorline = true -- Enable highlighting of the current line
@@ -71,32 +69,21 @@ vim.o.gdefault = true -- g is on by default when substituting with s/pattern/rep
 vim.o.grepformat = '%f:%l:%c:%m'
 vim.o.grepprg = 'rg --vimgrep'
 vim.o.inccommand = 'nosplit' -- preview incremental substitute
--- vim.o.jumpoptions = 'view'
+vim.o.jumpoptions = 'clean'
 vim.o.laststatus = 3 -- global statusline
 vim.o.scrolloff = 4 -- Lines of context
 vim.o.shiftround = true -- Round indent
 vim.o.sidescrolloff = 8 -- Columns of context
 vim.o.signcolumn = 'yes' -- Always show the signcolumn, otherwise it would shift the text each time
 vim.opt.spelllang = { 'en' }
---[[
--- Fold Options
-'foldenable'  'fen':	Open all folds while not set.
-'foldexpr'    'fde':	Expression used for "expr" folding.
-'foldignore'  'fdi':	Characters used for "indent" folding.
-'foldmarker'  'fmr':	Defined markers used for "marker" folding.
-'foldmethod'  'fdm':	Name of the current folding method.
-'foldminlines' 'fml':	Minimum number of screen lines for a fold to be
-			displayed closed.
-'foldnestmax' 'fdn':	Maximum nesting for "indent" and "syntax" folding.
-'foldopen'    'fdo':	Which kinds of commands open closed folds.
-'foldclose'   'fcl':	When the folds not under the cursor are closed.
---]]
---
+
+--- Fold
+vim.o.foldmethod = 'expr'
+vim.o.foldexpr = 'v:lua.vim.lsp.foldexpr' -- Setting the default to LSP fold expr. Alternative is treesitter
 vim.o.foldminlines = 50
 vim.o.foldlevel = 4
 vim.o.foldnestmax = 5
 vim.o.foldcolumn = 'auto'
-vim.o.exrc = true
 vim.o.timeoutlen = 300
 vim.o.undolevels = 10000
 vim.o.updatetime = 200 -- Save swap file and trigger CursorHold
@@ -115,35 +102,18 @@ vim.opt.shortmess:append {
 
 -- Status line.
 vim.o.cmdheight = 2
-
-vim.diagnostic.config {
-  severity_sort = true,
-  float = {
-    border = 'rounded',
-    source = 'if_many',
-    underline = true,
-  },
-  virtual_text = {
-    spacing = 2,
-    source = 'if_many',
-    prefix = 'o',
-  },
-  -- Disable signs in the gutter.
-  signs = {
-    text = {
-      [vim.diagnostic.severity.ERROR] = 'E',
-      [vim.diagnostic.severity.WARN] = 'W',
-      [vim.diagnostic.severity.INFO] = 'I',
-      [vim.diagnostic.severity.HINT] = 'H',
-    },
+VimRc.now_if_args(function()
+  vim.diagnostic.config {
+    severity_sort = true,
     float = {
-      source = true, --'if_many',
-      -- Show severity icons as prefixes.
-      prefix = function(diag)
-        local level = vim.diagnostic.severity[diag.severity]
-        local prefix = string.format(' %s ', diagnostic_icons[level])
-        return prefix, 'Diagnostic' .. level:gsub('^%l', string.upper)
-      end,
+      border = 'rounded',
+      source = 'if_many',
+      underline = true,
+    },
+    virtual_text = {
+      spacing = 2,
+      source = 'if_many',
+      prefix = 'o',
     },
     -- Disable signs in the gutter.
     signs = {
@@ -151,10 +121,22 @@ vim.diagnostic.config {
         [vim.diagnostic.severity.ERROR] = 'E',
         [vim.diagnostic.severity.WARN] = 'W',
         [vim.diagnostic.severity.INFO] = 'I',
+        [vim.diagnostic.severity.HINT] = 'H',
       },
-      numhl = {
-        [vim.diagnostic.severity.ERROR] = 'ErrorMsg',
-        [vim.diagnostic.severity.WARN] = 'WarningMsg',
+      float = {
+        source = true, --'if_many',
+      },
+      -- Disable signs in the gutter.
+      signs = {
+        text = {
+          [vim.diagnostic.severity.ERROR] = 'E',
+          [vim.diagnostic.severity.WARN] = 'W',
+          [vim.diagnostic.severity.INFO] = 'I',
+        },
+        numhl = {
+          [vim.diagnostic.severity.ERROR] = 'ErrorMsg',
+          [vim.diagnostic.severity.WARN] = 'WarningMsg',
+        },
       },
     },
   }

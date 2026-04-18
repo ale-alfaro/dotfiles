@@ -1,4 +1,5 @@
 local M = {}
+local PRIV = {}
 
 local uv = vim.uv or vim.loop
 vim.env.PATH = vim.env.HOME .. '/.local/share/mise/shims:' .. vim.env.PATH
@@ -60,18 +61,12 @@ M.ERROR_CODE = {
 ---@field stdin  uv.spawn.options.stdio
 
 -- CLI ------------------------------------------------------------------------
----@param env_vars table
----@return table
-M.make_spawn_env = function(env_vars)
-  -- Setup all environment variables (`vim.loop.spawn()` by default has none)
-  local environ = vim.tbl_deep_extend('force', vim.loop.os_environ(), env_vars)
-  local res = {}
-  for k, v in pairs(environ) do
-    table.insert(res, string.format('%s=%s', k, tostring(v)))
-  end
-  return res
-end
 
+local cli_notify = function(msg, level)
+  vim.schedule(function()
+    vim.notify('[exec] ' .. msg, vim.log.levels[level] or vim.log.levels.INFO)
+  end)
+end
 ---@param command string[]
 ---@param cwd? string
 ---@param on_done? fun(ret:integer, stdout:string, stderr:string)
@@ -113,8 +108,8 @@ M.cli_run = function(command, cwd, on_done, opts)
     process:close()
 
     -- Convert to strings appropriate for notifications
-    local str_out = M.cli_stream_tostring(out)
-    local str_err = M.cli_stream_tostring(err):gsub('\r+', '\n'):gsub('\n%s+\n', '\n\n')
+    local str_out = PRIV.cli_stream_tostring(out)
+    local str_err = PRIV.cli_stream_tostring(err):gsub('\r+', '\n'):gsub('\n%s+\n', '\n\n')
     on_done(code, str_out, str_err)
   end
   ---@type uv.uv_process_t?
@@ -125,13 +120,13 @@ M.cli_run = function(command, cwd, on_done, opts)
       stdin_pipe:close()
     end)
   end
-  M.cli_read_stream(assert(stdout), out)
-  M.cli_read_stream(assert(stderr), err)
+  PRIV.cli_read_stream(assert(stdout), out)
+  PRIV.cli_read_stream(assert(stderr), err)
   vim.defer_fn(function()
     if not process or not process:is_active() then
       return
     end
-    M.notify('PROCESS REACHED TIMEOUT', 'WARN')
+    cli_notify('PROCESS REACHED TIMEOUT', 'WARN')
     on_exit(1)
   end, timeout)
 
@@ -144,7 +139,7 @@ M.cli_run = function(command, cwd, on_done, opts)
 end
 ---@param stream uv.uv_pipe_t
 ---@param feed string[]
-M.cli_read_stream = function(stream, feed)
+PRIV.cli_read_stream = function(stream, feed)
   stream:read_start(function(err, data)
     if err then
       return table.insert(feed, 1, 'ERROR: ' .. err)
@@ -156,64 +151,29 @@ M.cli_read_stream = function(stream, feed)
   end)
 end
 
-M.notify = function(msg, level)
-  vim.schedule(function()
-    vim.notify('[exec] ' .. msg, vim.log.levels[level] or vim.log.levels.INFO)
-  end)
-end
-
 ---@param stream string[]
 ---@return string
-M.cli_stream_tostring = function(stream)
+PRIV.cli_stream_tostring = function(stream)
   return (table.concat(stream):gsub('\n+$', ''))
 end
 
-M.cli_err_notify = function(code, out, err)
+PRIV.cli_err_notify = function(code, out, err)
   local should_stop = code ~= 0
   if should_stop then
-    M.notify(err .. (out == '' and '' or ('\n' .. out)), 'ERROR')
+    cli_notify(err .. (out == '' and '' or ('\n' .. out)), 'ERROR')
   end
   if not should_stop and err ~= '' then
-    M.notify(err, 'WARN')
+    cli_notify(err, 'WARN')
   end
   return should_stop
 end
 
 ---@param x string
 ---@return string
-M.cli_escape = function(x)
+PRIV.cli_escape = function(x)
   return (string.gsub(x, '([ \\])', '\\%1'))
 end
 
--- Buffers --------------------------------------------------------------------
-M.is_valid_buf = function(buf_id)
-  return type(buf_id) == 'number' and vim.api.nvim_buf_is_valid(buf_id)
-end
-
-M.buf_ensure_loaded = function(buf_id)
-  if type(buf_id) ~= 'number' or vim.api.nvim_buf_is_loaded(buf_id) then
-    return
-  end
-  local cache_eventignore = vim.o.eventignore
-  vim.o.eventignore = 'BufEnter'
-  pcall(vim.fn.bufload, buf_id)
-  vim.o.eventignore = cache_eventignore
-end
-
-M.buf_get_name = function(buf_id)
-  if not M.is_valid_buf(buf_id) then
-    return nil
-  end
-  local buf_name = vim.api.nvim_buf_get_name(buf_id)
-  if buf_name ~= '' then
-    buf_name = vim.fn.fnamemodify(buf_name, ':~:.')
-  end
-  return buf_name
-end
-
-M.set_buflines = function(buf_id, lines)
-  vim.api.nvim_buf_set_lines(buf_id, 0, -1, false, lines)
-end
 -- Command --------------------------------------------------------------------
 local executables_cache = {}
 ---Run a system command.

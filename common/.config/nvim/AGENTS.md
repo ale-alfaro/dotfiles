@@ -1,88 +1,247 @@
-# Agent Configuration
+## Getting Help in Vim
 
-This document outlines the configuration, conventions, and tools used in this Neovim setup.
+**Help Tags are located here**
 
-## Project Structure
+```
+$VIMRUNTIME/doc/tags
+```
 
-The configuration is organized within the `lua/` directory, following a modular approach managed by `lazy.nvim`.
+To access it in Neovim you can use an Ex cmd:
 
-- **`init.lua`**: The main entry point for the Neovim configuration.
-- **`lua/config/`**: Core Neovim settings.
-  - `lazy.lua`: Configuration for the `lazy.nvim` plugin manager.
-  - `options.lua`: General Neovim options (`vim.o`).
-  - `keymaps.lua`: Global key mappings.
-  - `autocmds.lua`: Automation rules.
-- **`lua/plugins/`**: Plugin specifications, organized by functionality (e.g., `lsp.lua`, `treesitter.lua`, `colorscheme.lua`).
-- **`lua/custom/`**: Custom modules and helpers that are not standard plugins.
-  - `helpers/`: Utility functions.
-  - `parsers/`: Custom parsers for tools like CodeCompanion memory.
+```
+:e $VIMRUNTIME/doc/tags
+```
 
-## Build, Lint, and Test Commands
+## Writing Help in Vim
 
-This project uses `just` as a command runner.
+From the `*helphelp*`
 
-- **Format Code**: `just format` (runs `stylua` on all Lua files).
-- **Check Formatting**: `just check-format` (verifies if formatting is needed).
-- **Check Config**: `just check-config` (validates that the configuration loads without errors).
-- **Health Check**: `just check-health` (runs Neovim's built-in health checks).
-- **Full Check**: `just check-all` (runs both config and health checks).
-- **Testing**: Not applicable, as this is a configuration repository.
+```vimdoc
+Writing help files					*help-writing*
 
-## Code Style Guidelines
+For ease of use, a Vim help file for a plugin should follow the format of the
+standard Vim help files, except for the first line.  If you are writing a new
+help file it's best to copy one of the existing files and use it as a
+template.
 
-- **Formatting**: Adheres to `stylua` with a 2-space indent, Unix line endings, and single quotes.
-- **Naming Conventions**:
-  - `snake_case` for local variables and function names.
-  - `PascalCase` for Lua modules that return a table (class-like structures).
-- **Error Handling**: Use `pcall()` for operations that might fail (e.g., `require`ing optional dependencies).
-- **Comments**: Keep comments minimal. Focus on *why* a piece of code exists, not *what* it does.
+The first line in a help file should have the following format: >
 
-## VectorCode Toolbox
+	*plugin_name.txt*	{short description of the plugin}
 
-This repository is indexed with `vectorcode`, a CLI tool for creating a searchable vector database of the codebase. This allows for semantic code search using natural language.
+The first field is a help tag where ":help plugin_name" will jump to.  The
+remainder of the line, after a Tab, describes the plugin purpose in a short
+way.  This will show up in the "LOCAL ADDITIONS" section of the main help
+file.  Check there that it shows up properly: |local-additions|.
 
-### Key Commands
+If you want to add a version number or last modification date, put it in the
+second line, right aligned.
 
-- **Initialize Project**: `vectorcode init`
+At the bottom of the help file, place a Vim modeline to set the 'textwidth'
+and 'tabstop' options and the 'filetype' to "help".  Never set a global option
+in such a modeline, that can have undesired consequences.
 
-  - Run this in the project root. It creates a `.vectorcode` directory for configuration.
 
-- **Vectorise Files**: `vectorcode vectorise <path/to/file_or_dir>`
+TAGS
 
-  - Creates or updates the vector embeddings for the specified files.
-  - It respects `.gitignore` by default.
-  - To index all files specified in `.vectorcode/vectorcode.include`, run `vectorcode vectorise` with no arguments.
+To define a help tag, place the name between asterisks ("*tag-name*").  The
+tag-name should be different from all the Vim help tag names and ideally
+should begin with the name of the Vim plugin.  The tag name is usually right
+aligned on a line.
 
-- **Query the Codebase**: `vectorcode query "natural language query"`
+When referring to an existing help tag and to create a hot-link, place the
+name between two bars ("|") eg. |help-writing|.
 
-  - Searches the indexed files for code relevant to the query. For multi-word queries, always enclose the query in quotes.
-  - **Example**: `vectorcode query "how are plugins configured"`
-  - **Control result count**: Use the `-n <number>` flag to specify the maximum number of documents to return.
-  - **Customize output**: Use the `--include` flag to control what information is returned. This is especially useful for scripting.
-    - `--include path`: Returns only the file paths of the results.
-    - `--include document`: Returns only the content of the results.
-    - `--include chunk`: Returns the specific chunks of text that matched the query, which can be more precise than the whole document.
+When referring to a Vim option in the help file, place the option name between
+two single quotes, eg. 'statusline'
 
-- **List Indexed Projects**: `vectorcode ls`
+When referring to any other technical term or symbol, such as a filename or
+function parameter, surround it in backticks, eg. `~/.path/to/init.vim`. This
+renders it as "inline" code (as opposed to a "codeblock" |help-codeblock|).
 
-  - Shows all projects (collections) currently indexed in the database.
 
-- **List Indexed Files**: `vectorcode files ls`
+HIGHLIGHTING
 
-  - Lists all the files indexed for the current project.
+To define a column heading, use a tilde character at the end of the line,
+preceded by a space. This will highlight the column heading in a different
+color.  E.g.
 
-- **Update Embeddings**: `vectorcode update`
+Column heading ~
 
-  - Refreshes the embeddings for all files currently indexed in the project.
+To separate sections in a help file, place a series of '=' characters in a
+line starting from the first column.  The section separator line is
+highlighted differently.
 
-- **Remove Project**: `vectorcode drop`
+							      *help-codeblock*
+To quote a block of ex-commands verbatim, place a greater than (>) character
+at the end of the line before the block and a less than (<) character as the
+first non-blank on a line following the block.  Any line starting in column 1
+also implicitly stops the block of ex-commands before it.  E.g. >
+	function Example_Func()
+	  echo "Example"
+	endfunction
+<
+To enable syntax highlighting for a block of code, place a language name
+annotation (e.g. "vim") after a greater than (>) character.  E.g. >vim
+	function Example_Func()
+	  echo "Example"
+	endfunction
+<
+						*help-notation*
+The following are highlighted differently in a Vim help file:
+  - a special key name expressed either in <> notation as in <PageDown>, or
+    as a Ctrl character as in CTRL-X
+  - anything between {braces}, e.g. {lhs} and {rhs}
 
-  - Deletes the entire collection for the current project from the database.
+The word "Note", "Notes" and similar automagically receive distinctive
+highlighting.  So do these:
+	Todo	something to do
+	Error	something wrong
 
-### Automation with Git Hooks
+You can find the details in $VIMRUNTIME/syntax/help.vim
 
-`vectorcode` can automatically update embeddings on commits using Git hooks. The `vectorcode init --hooks` command can be used to set this up, keeping the index synchronized with code changes.
 
-### Developer Integration (`--pipe`)
+FILETYPE COMPLETION					*ft-help-omni*
 
-For tool integration (like with the CodeCompanion plugin), the `--pipe` flag formats the command output as JSON, making it easy to parse programmatically.
+To get completion for help tags when writing a tag reference, you can use the
+|i_CTRL-X_CTRL-O| command.
+
+
+ `vim:tw=78:ts=8:noet:ft=help:norl:`
+```
+
+`api-ui-events  
+api  
+autocmd  
+change  
+channel  
+cmdline  
+credits  
+deprecated  
+dev  
+dev_arch  
+dev_style  
+dev_test  
+dev_theme  
+dev_tools  
+dev_vimpatch  
+diagnostic  
+diff  
+digraph  
+editing  
+faq  
+filetype  
+fold  
+ft_ada  
+ft_hare  
+ft_ps1  
+ft_raku  
+ft_rust  
+ft_sql  
+gui  
+health  
+help  
+helphelp  
+if_perl  
+if_pyth  
+if_ruby  
+indent  
+index  
+insert  
+intro  
+job_control  
+l10n-arabic  
+l10n-hebrew  
+l10n-russian  
+l10n-vietnamese.txt  
+lsp  
+lua-bit  
+lua-guide  
+lua-plugin  
+lua  
+luaref  
+luvref  
+map  
+mbyte  
+message  
+mlang  
+motion  
+news-0         .9  
+news-0         .10.txt  
+news-0         .11.txt  
+news  
+nvim  
+options  
+pack  
+pattern  
+pi_gzip  
+pi_msgpack  
+pi_paren  
+pi_spec  
+pi_tar  
+pi_tutor  
+pi_zip  
+plugins  
+provider  
+quickfix  
+quickref  
+recover  
+remote  
+remote_plugin  
+repeat  
+rileft  
+scroll  
+sign  
+spell  
+starting  
+support  
+syntax  
+tabpage  
+tags  
+tagsrch  
+terminal  
+tips  
+treesitter  
+tui  
+uganda  
+undo  
+userfunc  
+usr_01  
+usr_02  
+usr_03  
+usr_04  
+usr_05  
+usr_06  
+usr_07  
+usr_08  
+usr_09  
+usr_10  
+usr_11  
+usr_12  
+usr_20  
+usr_21  
+usr_22  
+usr_23  
+usr_24  
+usr_25  
+usr_26  
+usr_27  
+usr_28  
+usr_29  
+usr_30  
+usr_31  
+usr_32  
+usr_40  
+usr_41  
+usr_42  
+usr_43  
+usr_44  
+usr_45  
+usr_toc  
+various  
+vi_diff  
+vim_diff  
+vimeval  
+vimfn  
+visual  
+vvars  
+windows`

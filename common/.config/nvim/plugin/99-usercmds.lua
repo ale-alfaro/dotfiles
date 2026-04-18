@@ -98,68 +98,153 @@ the remaining arguments are the same as for |nvim_create_user_command()|:
       end,
       { nargs = 1 })
 --]]
-local new_usercmd = function(name, cb, desc)
+---@param name string
+---@param cb fun():nil
+---@param desc string
+local usercmd = function(name, cb, desc)
   vim.api.nvim_create_user_command(name, cb, { desc = desc })
 end
+---@param name string
+---@param cb string|fun(args: vim.api.keyset.create_user_command.command_args) Replacement command to execute when this user command is executed. When called
+---@param nargs integer
+---@param desc string
+local usercmd_args = function(name, cb, nargs, desc)
+  vim.api.nvim_create_user_command(name, cb, { nargs = nargs, desc = desc })
+end
 
-new_usercmd('CopyCwd', function()
+---@param name string
+---@param cb string|fun(args: vim.api.keyset.create_user_command.command_args) Replacement command to execute when this user command is executed. When called
+---@param desc string
+---@param nargs integer
+---@param complete fun(ArgLead:string,CmdLine:string,CursorPos:integer)|fun()
+--- ArgLead		the leading portion of the argument currently being
+---			completed on; note that this only captures the current
+---			space-separated word, even when using "-nargs=1"
+---	CmdLine		the entire command line
+---	CursorPos	the cursor position in it (byte index)
+local function usercmd_args_comp(name, cb, desc, nargs, complete)
+  vim.api.nvim_create_user_command(name, cb, {
+    desc = desc,
+    nargs = nargs,
+    complete = complete,
+  })
+end
+usercmd('CopyCwd', function()
   vim.cmd [[let @+=expand("%:p")]]
 end, 'Copy Cwd Path')
 
----@class FilterOpts
----@field names string[]?
----@field filter_fn fun(p:vim.pack.PlugData):boolean|nil
----@field output_names boolean?
----
----@param opts FilterOpts?
----@return string[]
-local get_plugins = function(opts)
-  vim.validate('opts', opts, 'table', true, 'FilterOpts')
-  opts = vim.tbl_extend('force', { names = nil, filter_fn = nil, output_names = true }, opts or {})
-  ---@type FilterOpts
+vim.cmd [[
+	set findfunc=Find
+	func Find(arg, _)
+	  if empty(s:filescache)
+	    let s:filescache = globpath('.', '**', 1, 1)
+	    call filter(s:filescache, '!isdirectory(v:val)')
+	    call map(s:filescache, "fnamemodify(v:val, ':.')")
+	  endif
+	  return a:arg == '' ? s:filescache : matchfuzzy(s:filescache, a:arg)
+	endfunc
+	let s:filescache = []
+	autocmd CmdlineEnter : let s:filescache = []
 
+  	command! -nargs=+ -complete=customlist,<SID>Grep
+		\ Grep call <SID>VisitFile()
+
+	func s:Grep(arglead, cmdline, cursorpos)
+	  if match(&grepprg, '\$\*') == -1 | let &grepprg ..= ' $*' | endif
+	  let cmd = substitute(&grepprg, '\$\*', shellescape(escape(a:arglead, '\')), '')
+	  return len(a:arglead) > 1 ? systemlist(cmd) : []
+	endfunc
+
+	func s:VisitFile()
+	  let item = getqflist(#{lines: [s:selected]}).items[0]
+	  let pos  = '[0,\ item.lnum,\ item.col,\ 0]'
+	  exe $':b +call\ setpos(".",\ {pos}) {item.bufnr}'
+	  call setbufvar(item.bufnr, '&buflisted', 1)
+	endfunc
+
+	autocmd CmdlineLeavePre :
+	      \ if get(cmdcomplete_info(), 'matches', []) != [] |
+	      \   let s:info = cmdcomplete_info() |
+	      \   if getcmdline() =~ '^\s*fin\%[d]\s' && s:info.selected == -1 |
+	      \     call setcmdline($'find {s:info.matches[0]}') |
+	      \   endif |
+	      \   if getcmdline() =~ '^\s*Grep\s' |
+	      \     let s:selected = s:info.selected != -1
+	      \         ? s:info.matches[s:info.selected] : s:info.matches[0] |
+	      \     call setcmdline(s:info.cmdline_orig) |
+	      \   endif |
+	      \ endif
+]]
+---@param args string,
+---@param cmdline string
+---@param cursorpos integer
+---@return string[]
+local get_plugins = function(args, cmdline, cursorpos)
   return vim
-    .iter(vim.pack.get(opts.names))
+    .iter(vim.pack.get())
     :map(function(p)
-      local pname = opts.output_names and p.spec.name or p
-      if type(opts.filter_fn) == 'callable' then
-        return pname and opts.filter_fn(p) or nil
-      end
-      return pname
+      return p.spec.name or p
     end)
     :totable()
 end
 
---- @param plugins string[] Optional: A single plugin name or a list of plugin names to update.
-local pack_reload = function(plugins)
-  local ok, _ = pcall(vim.pack.del, plugins)
-  if not ok then
-    vim.cmd.echo 'Failed to delete plugins with vim.pack.del'
-    return
+-- ──────────────────────────────────────────────────────────────
+--  Redir  — redirect :command / !shell output to scratch buffer
+-- ──────────────────────────────────────────────────────────────
+--
+-- VimRc.create_comp_commands = function()
+--   local opts = { bang = true, nargs = '+', complete = command_complete, desc = 'Execute Git command' }
+--   vim.api.nvim_create_user_command('Git', H.command_impl, opts)
+-- end
+usercmd_args('Redir', function(opts)
+  local cmd = opts.args
+  local output
+  if cmd:sub(1, 1) == '!' then
+    output = vim.fn.system(cmd:sub(2))
+  else
+    output = vim.api.nvim_exec2(cmd, { output = true }).output
   end
-  ok, _ = pcall(vim.pack.add, _G.plug_spec(plugins))
-  if not ok then
-    vim.cmd.echo 'Failed to add plugins with vim.pack.add'
+  VimRc.show_in_split {
+    'Cmd: ' .. cmd,
+    '---------',
+    unpack(vim.split(output or '', '\n')),
+  }
+end, 1, 'redirect command output to scratch buffer')
+
+-- ──────────────────────────────────────────────────────────────
+--  show_modified_buffers  — list unsaved buffers in quickfix
+-- ──────────────────────────────────────────────────────────────
+
+local function show_modified_buffers()
+  local items = {}
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_get_option_value('modified', { buf = buf }) then
+      local name = vim.api.nvim_buf_get_name(buf)
+      table.insert(items, {
+        bufnr = buf,
+        filename = name ~= '' and name or '[No Name]',
+        lnum = 1,
+        col = 0,
+        text = name ~= '' and name or '[No Name]',
+      })
+    end
   end
-end
----@param desc string
-local function vim_pack_usercmd(name, cb, desc)
-  vim.api.nvim_create_user_command(name, cb, {
-    desc = desc,
-    nargs = 1,
-    ---@type fun(args: vim.api.keyset.create_user_command.command_args)
-    complete = function(args)
-      return get_plugins()
-    end,
-  })
+  if #items > 0 then
+    vim.fn.setqflist({}, ' ', { title = 'Modified Buffers', items = items })
+    vim.cmd 'copen'
+  else
+    vim.notify('No modified buffers.', vim.log.levels.INFO)
+  end
 end
 
-vim_pack_usercmd('PackOpen', function(opts)
+usercmd('UnmodBuf', show_modified_buffers, 'show unsaved buffers in quickfix')
+
+usercmd_args_comp('PackOpen', function(opts)
   local ok, plug = pcall(vim.pack.get, { opts.fargs[1] })
   if ok then
     vim.cmd('edit ' .. plug[1].path)
   end
-end, 'Open plugin repository in pack path')
+end, 'Open plugin repository in pack path', 1, get_plugins)
 
 --- @param p vim.pack.PlugData
 --- @return string
@@ -179,7 +264,7 @@ local function write_plug_info(p)
 end
 local function pack_list()
   ---@type vim.pack.PlugData[]
-  local plugins = M.get_plugins { output_names = false }
+  local plugins = vim.pack.get()
   ---@type string[]
   local active = vim
     .iter(plugins)
@@ -202,75 +287,32 @@ local function pack_list()
     :totable()
   local lines = vim.list_extend(active, vim.list_extend({ 'INACTIVE Plugins List:' }, inactive))
 
-  local bufnr = vim.api.nvim_create_buf(true, true)
+  local bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(bufnr, 'vim.pack.list#' .. bufnr)
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(table.concat(lines, '\n ------ \n'), '\n'))
   vim.cmd.sbuffer { bufnr, mods = { tab = vim.fn.tabpagenr() } }
 end
-new_usercmd('PackList', pack_list, 'List plugins installed with vim.pack')
+usercmd('PackList', pack_list, 'List plugins installed with vim.pack')
 
-local function pack_clean()
-  local active_plugins = {}
-  local unused_plugins = {}
+usercmd_args_comp('PackClean', function(opts)
+  vim
+    .iter(vim.pack.get())
+    :filter(function(x)
+      return not x.active
+    end)
+    :map(function(x)
+      return x.spec.name
+    end)
+    :totable()
+end, 'Delete Unactive plugins', 1, get_plugins)
 
-  for _, plugin in ipairs(vim.pack.get()) do
-    active_plugins[plugin.spec.name] = plugin.active
-  end
-
-  for _, plugin in ipairs(vim.pack.get()) do
-    if not active_plugins[plugin.spec.name] then
-      table.insert(unused_plugins, plugin.spec.name)
-    end
-  end
-
-  if #unused_plugins == 0 then
-    print 'No unused plugins.'
-    return
-  end
-
-  local choice = vim.fn.confirm('Remove unused plugins?', '&Yes\n&No', 2)
-  if choice == 1 then
-    vim.pack.del(unused_plugins)
-  end
-end
-vim_pack_usercmd('PackDel', pack_clean, 'Clean unactive plugins')
-vim_pack_usercmd('PackReload', function(opts)
-  local plug = { opts.fargs[1] }
-  local ok, _ = pcall(vim.pack.get, plug)
-  if ok then
-    pack_reload(plug)
-  end
-end, 'Reload plugin')
-
-new_usercmd('PackSync', function()
-  --- @type string[]
-  local plugins_name = {}
-  --- @type string[]
-  local active_plugins_src = {}
-  for _, plugin in ipairs(vim.pack.get()) do
-    plugins_name[#plugins_name + 1] = plugin.spec.name
-    if plugin.active then
-      active_plugins_src[#active_plugins_src + 1] = plugin.spec.src
-    end
-  end
-  local ok, _ = pcall(vim.pack.del, plugins_name)
-  if not ok then
-    vim.cmd.echo 'Failed to delete plugins with vim.pack.del'
-    return
-  end
-  ok, _ = pcall(vim.pack.add, active_plugins_src)
-  if not ok then
-    vim.cmd.echo 'Failed to add plugins with vim.pack.add'
-  end
-  vim.pack.update()
-end, 'Sync plugins')
-
-new_usercmd('PackUpdate', function()
-  local plugins = get_plugins {
-    filter_fn = function(pspec)
+usercmd('PackUpdate', function()
+  local plugins = vim
+    .iter(vim.pack.get())
+    :filter(function(pspec)
       return pspec.active
-    end,
-  }
+    end)
+    :totable()
   if plugins then
     vim.cmd.echo(string.format('Plugins count: %d', #plugins))
     vim.cmd.echo(table.concat(plugins, '\n'))
@@ -278,19 +320,28 @@ new_usercmd('PackUpdate', function()
   end
 end, 'Update active plugins')
 
-new_usercmd('LspInfo', ':checkhealth vim.lsp', { desc = 'Alias to `:checkhealth vim.lsp`' })
-
-new_usercmd('LspLog', function()
-  local logfile = vim.lsp.log.get_filename()
-  if vim.uv.fs_stat(logfile) then
-    vim.cmd.edit(vim.lsp.log.get_filename())
+vim.api.nvim_create_user_command('Lsp', function(args)
+  local cmd = args.args
+  if cmd then
+    if cmd == 'log' then
+      local log = vim.lsp.log.get_filename()
+      vim.api.nvim_cmd({
+        cmd = 'edit',
+        args = { log },
+      }, {})
+    elseif cmd == 'clean' then
+      local log = vim.lsp.log.get_filename()
+      vim.cmd(string.format('!rm %q', log))
+      vim.cmd(string.format('!touch  %q', log))
+    elseif cmd == 'info' then
+      vim.cmd ':checkhealth vim.lsp'
+    end
   end
-
-  vim.cmd(string.format('tabnew %s', logfile))
-end, 'Opens the Nvim LSP client log.')
-
-new_usercmd('LspLogClean', function()
-  local log = vim.lsp.log.get_filename()
-  vim.cmd(string.format('!rm %q', log))
-  vim.cmd(string.format('!touch  %q', log))
-end, 'Opens the Nvim LSP client log.')
+end, {
+  nargs = 1,
+  desc = 'Lsp Commands',
+  complete = function(ArgLead, CmdLine, CursorPos)
+    -- return completion candidates as a list-like table
+    return { 'log', 'clean', 'info' }
+  end,
+})

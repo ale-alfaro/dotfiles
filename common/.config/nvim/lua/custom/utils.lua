@@ -1,4 +1,5 @@
 local M = {}
+local PRIV = {}
 -- Utilities ------------------------------------------------------------------
 
 ---@return string
@@ -163,69 +164,101 @@ M.setTimeout = function(timeout, callback)
     return timer
   end
 end
+-- Buffers --------------------------------------------------------------------
+M.is_valid_buf = function(buf_id)
+  return type(buf_id) == 'number' and vim.api.nvim_buf_is_valid(buf_id)
+end
 
----@class WatchFileOpts : table
----@field debounce integer|nil # default: false
----@field evt_flags uv.uv_fs_event_t|nil # default: false
-
---- Watch a file for changes
----@param fname string
----@param on_change fun(any)
----@param opts WatchFileOpts?
-M.watch_file = function(fname, on_change, opts)
-  opts = opts or {}
-  local fs_event = vim.uv.new_fs_event()
-  if not fs_event then
+M.buf_ensure_loaded = function(buf_id)
+  if type(buf_id) ~= 'number' or vim.api.nvim_buf_is_loaded(buf_id) then
     return
   end
-  local fullpath = vim.api.nvim_call_function('fnamemodify', { fname, ':p' })
-  fs_event:start(
-    fullpath,
-    opts.evt_flags or { stat = true },
-    vim.schedule_wrap(function(...)
-      -- Do work...
-      on_change(...)
-      -- vim.api.nvim_command('checktime')
-      -- Debounce: stop/start.
-      if not fs_event then
-        return
-      end
-      fs_event:stop()
-      vim.defer_fn(function()
-        M.watch_file(fname, on_change, opts)
-      end, opts.debounce or 200)
+  local cache_eventignore = vim.o.eventignore
+  vim.o.eventignore = 'BufEnter'
+  pcall(vim.fn.bufload, buf_id)
+  vim.o.eventignore = cache_eventignore
+end
+
+M.buf_get_name = function(buf_id)
+  if not M.is_valid_buf(buf_id) then
+    return nil
+  end
+  local buf_name = vim.api.nvim_buf_get_name(buf_id)
+  if buf_name ~= '' then
+    buf_name = vim.fn.fnamemodify(buf_name, ':~:.')
+  end
+  return buf_name
+end
+
+---@param buf_id integer
+---@param lines string[]
+PRIV.set_buflines = function(buf_id, lines)
+  vim.api.nvim_buf_set_lines(buf_id, 0, -1, false, lines)
+end
+
+PRIV.define_scratch_buf_window = function(cleanup)
+  local buf_id, win_id = vim.api.nvim_get_current_buf(), vim.api.nvim_get_current_win()
+  vim.bo.swapfile, vim.bo.buflisted = false, false
+
+  -- Define action to finish editing Git related file
+  local finish_au_id
+  local finish = function(data)
+    local should_close = data.buf == buf_id or (data.event == 'WinClosed' and tonumber(data.match) == win_id)
+    if not should_close then
+      return
+    end
+
+    pcall(vim.api.nvim_del_autocmd, finish_au_id)
+    pcall(vim.api.nvim_win_close, win_id, true)
+    vim.schedule(function()
+      pcall(vim.api.nvim_buf_delete, buf_id, { force = true })
     end)
-  )
+
+    if vim.is_callable(cleanup) then
+      vim.schedule(cleanup)
+    end
+  end
+  -- - Use `nested` to allow other events (`WinEnter` for 'mini.statusline')
+  local events = { 'WinClosed', 'BufDelete', 'BufWipeout', 'VimLeave' }
+  local opts = { nested = true, callback = finish, desc = 'Cleanup window and buffer' }
+  finish_au_id = vim.api.nvim_create_autocmd(events, opts)
+end
+---@param lines string[]
+---@param bufname string?
+---@return integer
+M.write_to_buffer = function(lines, bufname)
+  local buf_id = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_name(buf_id, bufname or 'vimrc')
+  PRIV.set_buflines(buf_id, lines)
+  vim.api.nvim_set_current_buf(buf_id)
+  PRIV.define_scratch_buf_window()
+  return buf_id
 end
 
 ---@param lines string[]
----@param bufname string
-M.write_to_buffer = function(lines, bufname)
-  local bufnr = vim.api.nvim_create_buf(true, true)
-  vim.api.nvim_buf_set_name(bufnr, bufname .. '#' .. bufnr)
-  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-  vim.cmd.sbuffer { bufnr, mods = { tab = vim.fn.tabpagenr() } }
+---@param name string?
+---@param filetype string?
+M.show_in_split = function(lines, name, filetype)
+  -- Create a target window split
+  local win_source = vim.api.nvim_get_current_win()
+  vim.cmd 'vertical split'
+  local win_stdout = vim.api.nvim_get_current_win()
+
+  -- Prepare buffer
+  local buf_id = M.write_to_buffer(lines, name)
+
+  local has_filetype = not (filetype == nil or filetype == '')
+  if has_filetype then
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    vim.bo[buf_id].filetype = filetype
+  end
+
+  -- Completely unfold for no filetype output (like `:Git help`)
+  if not has_filetype then
+    vim.wo[win_stdout].foldlevel = 999
+  end
+
+  return win_source, win_stdout
 end
 
----@return table<string>
-function M.get_packpath_dirs()
-  local paths = {}
-  local packpath = vim.fn.expand '$XDG_DATA_HOME' .. '/nvim/site/pack/core/opt'
-  for name, type in
-    vim.fs.dir(packpath, {
-      skip = function(dir_name)
-        if not string.match(dir_name, '^nvim') then
-          return true
-        else
-          return false
-        end
-      end,
-    })
-  do
-    if type == 'directory' then
-      table.insert(paths, name)
-    end
-  end
-  return paths
-end
 return M

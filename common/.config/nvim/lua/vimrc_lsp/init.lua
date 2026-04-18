@@ -3,29 +3,31 @@ local M = {}
 ---@comment Get the lsp configuration in the current working directory
 ---@return string[]
 local lsp_configs_get = function()
-  local lsp_dirs = {} --@type string[]
-  local lsps = {}
-  local loc = vim.fs.joinpath(vim.fn.expand '$XDG_CONFIG_HOME', 'nvim')
-  lsp_dirs[#lsp_dirs + 1] = vim.fs.joinpath(loc, 'lsp')
-  lsp_dirs[#lsp_dirs + 1] = vim.fs.joinpath(loc, 'after', 'lsp')
-  for _, dir in ipairs(lsp_dirs) do
-    if vim.uv.fs_stat(dir) then
-      for name, type in vim.fs.dir(dir) do
-        if type == 'file' then
-          lsps[#lsps + 1] = name:gsub('(%w+)%.lua', '%1')
-        end
-      end
-    end
-  end
-  return lsps
+  return vim
+    .iter(vim.fn.globpath(vim.fn.expand '$XDG_CONFIG_HOME/nvim', '**/lsp/*.lua', false, true))
+    :map(function(f)
+      return f:match '/(%w+)%.lua$'
+    end)
+    :totable()
+end
+
+local bufgr = vim.api.nvim_create_augroup('vimrc.lsp', { clear = false })
+--- Buflocal autocmd
+---@param event string|string[]
+---@param bufnr integer
+---@param callback function
+---@param desc string?
+local new_buf_autocmd = function(event, bufnr, callback, desc)
+  local opts = { group = bufgr, callback = callback, buffer = bufnr, desc = desc or '' }
+  vim.api.nvim_create_autocmd(event, opts)
 end
 ---@description Function that handles LspAttach events.
 ---@param client vim.lsp.Client
 ---@param bufnr integer
 local lsp_on_attach = function(client, bufnr)
   -- Enable auto-completion. Note: Use CTRL-Y to select an item. |complete_CTRL-Y|
-  VimRc.new_buf_autocmd({ 'CursorHold', 'InsertLeave' }, bufnr, vim.lsp.buf.document_highlight, 'Highlight references under the cursor')
-  VimRc.new_buf_autocmd({ 'CursorMoved', 'InsertEnter', 'BufLeave' }, bufnr, vim.lsp.buf.clear_references, 'Clear highlight references')
+  new_buf_autocmd({ 'CursorHold', 'InsertLeave' }, bufnr, vim.lsp.buf.document_highlight, 'Highlight references under the cursor')
+  new_buf_autocmd({ 'CursorMoved', 'InsertEnter', 'BufLeave' }, bufnr, vim.lsp.buf.clear_references, 'Clear highlight references')
 
   -- Don't check for the capability here to allow dynamic registration of the request.
   vim.lsp.document_color.enable(true, { bufnr = bufnr, style = 'virtual' })
@@ -55,7 +57,7 @@ local lsp_on_attach = function(client, bufnr)
     vim.api.nvim_buf_set_keymap(bufnr, 'n', key.lhs, key.rhs, key.opts)
   end
 
-  VimRc.new_buf_autocmd('CursorHold', bufnr, function()
+  new_buf_autocmd('CursorHold', bufnr, function()
     local hover_opts = {
       focusable = false,
       close_events = { 'BufLeave', 'CursorMoved', 'InsertEnter', 'FocusLost' },
@@ -77,12 +79,12 @@ local lsp_on_attach = function(client, bufnr)
     -- end
     -- client.server_capabilities.completionProvider.triggerCharacters = chars
 
-    vim.cmd [[setlocal completeopt+=menuone,noselect,popup]]
+    -- vim.cmd [[setlocal completeopt+=menuone,noselect,popup]]
     vim.bo[bufnr].omnifunc = 'v:lua.MiniCompletion.completefunc_lsp'
     vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = true })
   end
   if not client:supports_method 'textDocument/willSaveWaitUntil' and client:supports_method 'textDocument/formatting' then
-    VimRc.new_buf_autocmd('BufWritePre', bufnr, function()
+    new_buf_autocmd('BufWritePre', bufnr, function()
       vim.lsp.buf.format { bufnr = bufnr, id = client.id, timeout_ms = 1000 }
     end)
   end
@@ -125,17 +127,18 @@ M.setup = function()
     end
   end)(vim.lsp.handlers['client/registerCapability'])
 
+  vim.api.nvim_create_user_command('SchemaStore', 'lua require("vimrc_lsp.schemastore").setup()', { desc = 'Enable SchemaStore for Json and YAML Lsp' })
+
   -- vim.cmd([[
   --   autocmd BufWritePre *.rs lua vim.lsp.buf.format({ async = false }
   -- ]])
   --
   -- Extend neovim's client capabilities with the completion ones.
-  require('vimrc_lsp.schemastore').setup()
   require('vimrc_lsp.code_action').setup()
 
   local servers = lsp_configs_get()
-  servers = vim.list_extend(servers, { 'yamlls', 'jsonls' })
-  VimRc.debug('Enabling lsps: ', { servers = servers })
+  servers = vim.list_extend(servers, { 'lua_ls', 'yamlls', 'jsonls' })
+  VimRc.info('Enabling lsps: ', { servers = servers })
   vim.lsp.enable(servers)
 
   -- HACK: Override buf_request to ignore notifications from LSP servers that don't implement a method.

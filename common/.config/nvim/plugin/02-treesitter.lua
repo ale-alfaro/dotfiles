@@ -52,37 +52,40 @@ VimRc.now_if_args(function()
       table.insert(filetypes, ft)
     end
   end
-  FeatureFlags:add {
-    name = 'Fold',
-    gl_enabled = true,
-  }
+  VimRc.g_ts_folds = true
   local ts_start = function(ev)
     vim.treesitter.start(ev.buf)
 
     vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-    if FeatureFlags:get 'Fold' then
+    if VimRc.g_ts_folds then
       vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
       vim.wo[0][0].foldmethod = 'expr'
     end
   end
   VimRc.new_autocmd('FileType', ts_start, vim._ensure_list(filetypes), 'Start tree-sitter')
-
-  ---@param match table<integer,TSNode[]>,
-  ---@param pattern integer
-  ---@param bufnr integer|string
-  ---@param pred any[]
-  ---@param metadata vim.treesitter.query.TSMetadata
-  ---@return boolean?
-  vim.treesitter.query.add_predicate('is-mise?', function(match, pattern, bufnr, pred, metadata)
-    local filepath = vim.api.nvim_buf_get_name(tonumber(bufnr) or 0)
-    local filename = vim.fn.fnamemodify(filepath, ':t')
-    for dir in vim.fs.parents(filepath) do
-      if dir:match 'mise-tasks' ~= nil then
-        return true
-      end
-    end
-    return string.match(filename, '.*mise.*%.toml$') ~= nil
+  VimRc.g_mise_injections = true
+  vim.treesitter.query.add_predicate('is-mise?', function(_, _, _, _, _)
+    --   local filepath = vim.api.nvim_buf_get_name(tonumber(bufnr) or 0)
+    --   local filename = vim.fn.fnamemodify(filepath, ':t')
+    --   for dir in vim.fs.parents(filepath) do
+    --     if dir:match 'mise-tasks' ~= nil then
+    --       return true
+    --     end
+    --   end
+    -- return string.match(filename, '.*mise.*%.toml$') ~= nil
+    return VimRc.g_mise_injections
   end, { force = true, all = false })
+  vim.api.nvim_create_user_command('TSFolds', function()
+    VimRc.g_ts_folds = not VimRc.g_ts_folds
+    if VimRc.g_ts_folds then
+      vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+      vim.wo[0][0].foldmethod = 'expr'
+    end
+  end, { desc = 'Toggle Mise Treesitter Injections for syntax highlighting' })
+
+  vim.api.nvim_create_user_command('TSMiseInjections', function()
+    VimRc.g_mise_injections = not VimRc.g_mise_injections
+  end, { desc = 'Toggle Mise Treesitter Injections for syntax highlighting' })
 
   local function treesitter_list()
     ---@type vim.pack.PlugData[]
@@ -101,5 +104,5 @@ VimRc.now_if_args(function()
     VimRc.write_to_buffer(lines, 'VimRc-treesitter-list')
   end
 
-  vim.api.nvim_create_user_command('TSList', treesitter_list, { desc = 'View log messages' })
+  vim.api.nvim_create_user_command('TSList', treesitter_list, { desc = 'Treesitter Parsers List' })
 end)

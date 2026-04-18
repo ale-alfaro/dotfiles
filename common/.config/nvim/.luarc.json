@@ -1,6 +1,7 @@
 {
-  "diagnostics.globals": ["vim"],
-
+  "diagnostics.globals": [
+    "vim"
+  ],
   "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
   "runtime": {
     "version": "LuaJIT"
@@ -22,6 +23,9 @@
       "$XDG_DATA_HOME/nvim/site/pack/core/opt/obsidian.nvim",
       "$XDG_DATA_HOME/nvim/site/pack/core/opt/plenary.nvim",
       "$XDG_DATA_HOME/nvim/site/pack/core/opt/nvim/after"
+    ],
+    "ignoreDir": [
+      "tests"
     ]
   }
 }

@@ -46,8 +46,9 @@
 # -> see https://stackoverflow.com/a/13785716/149220 for a solution
 
 # Complete the alias when _expand_alias is used as a function
-fpath=($fpath ${XDG_DATA_HOME}/zsh/generated_man_completions ${XDG_STATE_HOME}/zsh/plugins/zsh-users/zsh-completions/src)
-fpath=(${XDG_DATA_HOME:-$HOME/.local/share}/mise-completions/zsh ${ZDOTDIR}/completions/src ${ZDOTDIR}/functions $fpath)
+fpath=($fpath "${XDG_DATA_HOME}/zsh/generated_man_completions" "/usr/share/zsh/plugins/zsh-users/zsh-completions/src")
+fpath+=("${ZDOTDIR}/completions/src")
+fpath+=("${ZDOTDIR}/functions")
 cache_directory="$XDG_CACHE_HOME/zsh"
 [[ -r "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh" ]] && . "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh"
 autoload -Uz compinit && compinit -d $cache_directory
@@ -86,8 +87,6 @@ zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*:corrections' format '%d (errors: %e) %f'
 zstyle ':completion:*:warnings' format ' no matches found %f'
 zstyle ':completion:*:default' list-prompt '%S%M matches%s'
-zstyle ':completion:*' rehash true
-
 
 source <(fzf --zsh)
 [[ -r /usr/share/fzf/key-bindings.zsh ]] && source /usr/share/fzf/key-bindings.zsh

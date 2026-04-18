@@ -213,7 +213,7 @@ end)
 
 later(function()
   require('mini.misc').setup()
-  MiniMisc.setup_auto_root { '.west' }
+  MiniMisc.setup_auto_root { '.west', '.git' }
   MiniMisc.setup_termbg_sync()
   MiniMisc.setup_restore_cursor()
 end)
@@ -231,27 +231,6 @@ later(function()
 end)
 later(function()
   require('mini.bufremove').setup()
-  local bufremove_keys = {
-
-    { '<leader>bb', '<cmd>b#<cr>', { desc = 'Switch to Other Buffer' } },
-    {
-      '<leader>bs',
-      function()
-        vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(true, true))
-      end,
-      { desc = 'Scratch Buffer' },
-    },
-    { '<leader>bd', '<Cmd>lua MiniBufremove.delete(0, true)<CR>', { desc = 'Delete!' } },
-    { '<leader>bD', '<cmd>:%bdelete|edit #|normal`<cr>', { desc = 'Close all Other Buffers' } },
-    { '<leader>bw', '<Cmd>lua MiniBufremove.wipeout()<CR>', { desc = 'Wipeout' } },
-    { '<leader>bW', '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', { desc = 'Wipeout!' } },
-  }
-  for _, keymap in ipairs(bufremove_keys) do
-    local lhs, rhs, opts = unpack(keymap)
-    if type(lhs) == 'string' and (type(rhs) == 'string' or vim.is_callable(rhs)) and type(opts) == 'table' then
-      vim.keymap.set('n', lhs, rhs, opts)
-    end
-  end
 end)
 
 later(function()
@@ -261,14 +240,14 @@ later(function()
   require('mini.indentscope').setup()
 end)
 later(function()
-  require('mini.operators').setup { replace = { prefix = 'cr' } }
+  require('mini.operators').setup { replace = { prefix = 'or' } }
 
   local map_combo = require('mini.keymap').map_combo
 
   -- In Insert mode pressing `x` followed by `x` within 1 second logs 'A'
   -- and emulates extra pressing of `yy`
-  map_combo('n', 'g(', 'gxiagxila', { delay = 1000 })
-  map_combo('n', 'g)', 'gxiagxina', { delay = 1000 })
+  map_combo('n', '(', 'gxiagxila', { delay = 1000 })
+  map_combo('n', ')', 'gxiagxina', { delay = 1000 })
   -- vim.keymap.set('n', 'g(', 'gxiagxila', { remap = true, desc = 'Swap arg left' })
   -- vim.keymap.set('n', 'g)', 'gxiagxina', { remap = true, desc = 'Swap arg right' })
 end)
@@ -368,9 +347,6 @@ later(function()
     -- idle time if user input is required.
     silent = false,
   }
-end)
-later(function()
-  require('mini.keymap').setup()
 end)
 
 -- Split and join arguments (regions inside brackets between allowed separators).

@@ -7,88 +7,14 @@
 ---@field in_progress string  - name of action(s) currently in progress (bisect, merge, etc.). Can be a combination of those separated by ",".
 
 VimRc.later(function()
-  require('custom.format').setup()
-  -- FeatureFlags:add { name = 'Lint', gl_enabled = true }
-  -- require 'custom.lint'
-end)
---- MiniGit
-VimRc.later(function()
-  local git = require 'mini.git'
-  git.setup()
-
-  vim.keymap.set('n', 'da', '<Cmd>Git diff --cached<CR>', { desc = 'Added diff' })
-  vim.keymap.set('n', 'dc', '<Cmd>Git diff --cached -- %<CR>', { desc = 'Added diff buffer' })
-end)
-
---- MiniGit
-VimRc.later(function()
-  ---@type MiniGitBufData|nil
-  local output = MiniGit.get_buf_data(0)
-  local is_git_repo = false
-  if type(output) == 'table' and output.root then
-    is_git_repo = vim.uv.fs_stat(output.root) ~= nil
-  end
-  FeatureFlags:add {
-    name = 'Diff',
-    gl_enabled = is_git_repo,
-    toggle_hook = function(enabled, bufnr)
-      if enabled then
-        require('mini.diff').enable(bufnr)
-      else
-        require('mini.diff').disable(bufnr)
-      end
-      -- HACK: redraw to update the signs
-      vim.defer_fn(function()
-        vim.cmd [[redraw!]]
-      end, 200)
-    end,
-  }
-  local diff = require 'mini.diff'
-  diff.setup {
-
-    -- Source(s) for how reference text is computed/updated/etc
-    -- Uses content from Git index by default
-    source = { diff.gen_source.git(), diff.gen_source.save() },
-    view = {
-      style = 'sign',
-      signs = { add = '+', change = '~', delete = '-' },
-    },
-  }
-
-  local format_summary = function(data)
-    local summary = vim.b[data.buf].minidiff_summary
-    local t = {}
-    if summary.add > 0 then
-      table.insert(t, '+' .. summary.add)
-    end
-    if summary.change > 0 then
-      table.insert(t, '~' .. summary.change)
-    end
-    if summary.delete > 0 then
-      table.insert(t, '-' .. summary.delete)
-    end
-    vim.b[data.buf].minidiff_summary_string = table.concat(t, ' ')
-  end
-
-  vim.api.nvim_create_autocmd('User', { pattern = 'MiniDiffUpdated', callback = format_summary })
-  local function toggle_mini_diff()
-    MiniDiff.toggle(0)
-    MiniDiff.toggle_overlay(0)
-  end
-  vim.keymap.set('n', 'do', toggle_mini_diff, { desc = 'Toggle overlay' })
-
-  local export_diff_qf = function()
-    vim.fn.setqflist(MiniDiff.export 'qf')
-  end
-  vim.keymap.set('n', 'de', export_diff_qf, { desc = 'Diff to QuickFix' })
-end)
-
-VimRc.later(function()
   vim.pack.add(_G.plug_spec {
     'stevearc/overseer.nvim',
     'folke/trouble.nvim',
+    'MeanderingProgrammer/render-markdown.nvim',
+    'MagicDuck/grug-far.nvim',
     'stevearc/quicker.nvim',
   })
+  require('custom.format').setup()
   require('trouble').setup {
     focus = true, -- Focus the window when opened
     modes = {
@@ -160,13 +86,98 @@ VimRc.later(function()
   local config = require 'fzf-lua.config'
   local actions = require('trouble.sources.fzf').actions
   config.defaults.actions.files['ctrl-t'] = actions.open
-  require 'extras.overseer'
-  require 'extras.optional.grug'
 end)
+
+local is_git_repo = function()
+  local output = require('mini.git').get_buf_data(0)
+  local inside_git_repo = type(output) == 'table' and output.root and vim.uv.fs_stat(output.root) ~= nil
+  return inside_git_repo
+end
+
+--- MiniGit
+local minigit_setup = function()
+  require('mini.git').setup()
+  vim.keymap.set('n', 'da', '<Cmd>Git diff --cached<CR>', { desc = 'Added diff' })
+  vim.keymap.set('n', 'dc', '<Cmd>Git diff --cached -- %<CR>', { desc = 'Added diff buffer' })
+end
+
+local minidiff_setup = function()
+  local diff = require 'mini.diff'
+  diff.setup {
+
+    -- Source(s) for how reference text is computed/updated/etc
+    -- Uses content from Git index by default
+    source = { diff.gen_source.git(), diff.gen_source.save() },
+    view = {
+      style = 'sign',
+      signs = { add = '+', change = '~', delete = '-' },
+    },
+  }
+
+  local format_summary = function(data)
+    local summary = vim.b[data.buf].minidiff_summary
+    local t = {}
+    if summary.add > 0 then
+      table.insert(t, '+' .. summary.add)
+    end
+    if summary.change > 0 then
+      table.insert(t, '~' .. summary.change)
+    end
+    if summary.delete > 0 then
+      table.insert(t, '-' .. summary.delete)
+    end
+    vim.b[data.buf].minidiff_summary_string = table.concat(t, ' ')
+  end
+
+  vim.api.nvim_create_autocmd('User', { pattern = 'MiniDiffUpdated', callback = format_summary })
+  local function toggle_mini_diff()
+    MiniDiff.toggle(0)
+    MiniDiff.toggle_overlay(0)
+  end
+  vim.keymap.set('n', 'do', toggle_mini_diff, { desc = 'Toggle overlay' })
+
+  local export_diff_qf = function()
+    vim.fn.setqflist(MiniDiff.export 'qf')
+  end
+  vim.keymap.set('n', 'de', export_diff_qf, { desc = 'Diff to QuickFix' })
+end
+
+FeatureFlags:add {
+  name = 'Git',
+  gl_enabled = false,
+  toggle_hook = function(enabled, bufnr)
+    if not MiniGit then
+      minigit_setup()
+      if not is_git_repo() then
+        VimRc.wrn 'Not inside git repo! MiniGit only works within a repo'
+      end
+    end
+  end,
+}
+FeatureFlags:add {
+  name = 'Diff',
+  gl_enabled = false,
+  toggle_hook = function(enabled, bufnr)
+    if not MiniDiff then
+      minidiff_setup()
+    end
+    if enabled then
+      if MiniDiff then
+        MiniDiff.enable(bufnr)
+        MiniDiff.toggle_overlay(bufnr)
+      end
+    else
+      require('mini.diff').disable(bufnr)
+    end
+    -- HACK: redraw to update the signs
+    vim.defer_fn(function()
+      vim.cmd [[redraw!]]
+    end, 200)
+  end,
+}
+--- MiniGit
+
 VimRc.on_filetype('markdown', function()
-  vim.pack.add(_G.plug_spec {
-    'MeanderingProgrammer/render-markdown.nvim',
-  })
   require('render-markdown').setup(
     ---@type render.md.Settings
     {

@@ -31,7 +31,7 @@ log_status() {
 #
 #    log_error "Unable to find specified directory!"
 
-error() {
+log_error() {
   print "error: $*"
   exit 1
 }
@@ -61,128 +61,100 @@ safe_source() {
   shift
   source <($cmd "$@")
 }
-# Usage: join_args [args...]
-#
-# Joins all the passed arguments into a single string that can be evaluated by bash
-#
-# This is useful when one has to serialize an array of arguments back into a string
-join_args() {
-  printf '%q ' "$@"
-}
+# ------------------------------------------------------------------------------
+## Load this module to ensure $EPOCHSECONDS is available
+zmodload zsh/datetime
 
-# Usage: expand_path <rel_path> [<relative_to>]
-#
-# Outputs the absolute path of <rel_path> relative to <relative_to> or the
-# current directory.
-#
-# Example:
-#
-#    cd /usr/local/games
-#    expand_path ../foo
-#    # output: /usr/local/foo
-#
-expand_path() {
-  REPLY=.
-  realpath "$1"
-  REPLY=${REPLY:-/}
-}
-append_path () {
-  case ":$PATH:" in
-    *:"$1":*)
-      ;;
-    *)
-      PATH="${PATH:+$PATH:}$1"
-  esac
-}
+local enable_plugin_helper_messages=false
+local plugins_dir="$XDG_STATE_HOME/zsh/plugins"
 
-# Usage: PATH_add <path> [<path> ...]
-#
-# Prepends the expanded <path> to the PATH environment variable, in order.
-# It prevents a common mistake where PATH is replaced by only the new <path>,
-# or where a trailing colon is left in PATH, resulting in the current directory
-# being considered in the PATH.  Supports adding multiple directories at once.
-#
-# Example:
-#
-#    pwd
-#    # output: /my/project
-#    PATH_add bin
-#    echo $PATH
-#    # output: /my/project/bin:/usr/bin:/bin
-#    PATH_add bam boum
-#    echo $PATH
-#    # output: /my/project/bam:/my/project/boum:/my/project/bin:/usr/bin:/bin
-#
-PATH_add() {
-  path_add PATH "$@"
-}
-
-
-
-# Usage: semver_search <directory> <folder_prefix> <partial_version>
-#
-# Search a directory for the highest version number in SemVer format (X.Y.Z).
-#
-# Examples:
-#
-# $ tree .
-# .
-# |-- dir
-#     |-- program-1.4.0
-#     |-- program-1.4.1
-#     |-- program-1.5.0
-# $ semver_search "dir" "program-" "1.4.0"
-# 1.4.0
-# $ semver_search "dir" "program-" "1.4"
-# 1.4.1
-# $ semver_search "dir" "program-" "1"
-# 1.5.0
-#
-semver_search() {
-  local version_dir=${1:-}
-  local prefix=${2:-}
-  local partial_version=${3:-}
-  # Look for matching versions in $version_dir path
-  # Strip possible "/" suffix from $version_dir, then use that to
-  # strip $version_dir/$prefix prefix from line.
-  # Sort by version: split by "." then reverse numeric sort for each piece of the version string
-  # The first one is the highest
-  find "$version_dir" -maxdepth 1 -mindepth 1 -type d -name "${prefix}${partial_version}*" |
-    while IFS= read -r line; do echo "${line#"${version_dir%/}"/"${prefix}"}"; done |
-    sort -t . -k 1,1rn -k 2,2rn -k 3,3rn |
-    head -1
-}
-
-arr2quotes(){
-    emulate -L zsh
-    typeset -U ar
-    local ar=()
-
-    if [[ $# == 0 ]]; then
-        # Listen to STDIN if no arguments are provided
-        ar=( ${(f)$(<&0)} )
+function __init_plugins() {
+  local plugins=("$@")
+  for plugin in "${plugins[@]}"; do
+    if [[ ! -d "$plugins_dir/$plugin" ]]; then
+      __install_plugin "$plugin"
     fi
+    if [[ -d "$plugins_dir/$plugin" ]]; then
+      __update_plugin_if_stale "$plugin"
+    fi
+    if [[ -d "$plugins_dir/$plugin" ]]; then
+      __load_plugin "$plugin"
+    fi
+  done
+}
 
-    while [[ $# > 0 ]]; do
-        if [[ -r "$1" && -f "$1" ]]; then
-            # A readable file.
-            ar=(
-                $ar[@]
-                "${(fq)$(<$1)}"
-            )
-        elif [[ ${(Pt)1} = "array" ]]; then
-            ar=(
-                $ar[@]
-                ${(Pq)1}
-            )
-        else
-            echo "Do not understand: $1" >&2
-            echo "Arguments need to be files, names of arrays, or standard input." >&2
-            echo 'Arrays must be referenced by name, so use `array` instead of `$array`.' >&2
-            return 1
-        fi
-        shift
-    done
+local function __update_plugin_if_stale() {
+  local plugin="$1"
+  local one_day_in_seconds=$(( 60 * 60 * 24 ))
+  local last_update_file="$plugins_dir/$plugin"_last_update
+  local last_update_timestamp=""
 
-    print ${(j:, :)${(qq)ar[@]}}
+  if [[ -e "$last_update_file" ]]; then
+    last_update_timestamp="$(cat $last_update_file)"
+  fi
+
+  # update even if no timestamp is found
+  if [[ -z "$last_update_timestamp" ]]; then
+    __update_plugin "$plugin"
+    return
+  fi
+    local time_difference=$(( "$EPOCHSECONDS" - "$last_update_timestamp" ))
+    if [[ $time_difference -ge $one_day_in_seconds ]]; then
+      __update_plugin "$plugin"
+    fi
+}
+
+function __load_plugin() {
+  local plugin="$1"
+  local plugin_dir="$plugins_dir/$plugin"
+
+  if [[ ! -d "$plugin_dir" ]]; then
+    echo "Loading of plugin '$plugin' aborted, because it could not be found."
+    return 1
+  fi
+
+  if $enable_plugin_helper_messages; then
+    echo "Loading '$plugin'..."
+  fi
+  source "$plugin_dir/$(basename $plugin).plugin.zsh"
+}
+# ------------------------------------------------------------------------------
+#     Private functions
+# ------------------------------------------------------------------------------
+local function __install_plugin() {
+  local plugin="$1"
+  local plugin_dir="$plugins_dir/$plugin"
+  local last_update_file="$plugins_dir/$plugin"_last_update
+
+  if [[ -d "$plugin_dir" ]]; then
+    echo "Installation of '$plugin' aborted, because plugin directory already exists."
+    return 1
+  fi
+
+  if $enable_plugin_helper_messages; then
+    echo "Installing '$plugin' into '$plugin_dir'..."
+    git clone "https://github.com/$plugin.git" "$plugin_dir"
+  else
+    git clone "https://github.com/$plugin.git" "$plugin_dir" 1&>/dev/null
+  fi
+  echo "$EPOCHSECONDS" > "$last_update_file"
+}
+
+local function __update_plugin() {
+  local plugin="$1"
+  local plugin_dir="$plugins_dir/$plugin"
+  local last_update_file="$plugins_dir/$plugin"_last_update
+
+  if [[ ! -d "$plugin_dir" ]]; then
+    echo "Update aborted, because plugin '$plugin' could not be found."
+    return 1
+  fi
+
+  if $enable_plugin_helper_messages; then
+    echo "Updating '$plugin'..."
+    git --git-dir="$plugin_dir/.git" pull --no-rebase
+  else
+    git --git-dir="$plugin_dir/.git" pull --no-rebase 1&>/dev/null
+  fi
+  echo "$EPOCHSECONDS" > "$last_update_file"
 }

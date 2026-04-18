@@ -4,6 +4,7 @@ if [[ $- != *i* ]]; then
   echo "Non interactive mode"
   return
 fi
+source $ZDOTDIR/helpers/stdlib.zsh
 
 for file in $ZDOTDIR/zshrc.d/*.zsh; do
   source "$file"
@@ -19,13 +20,31 @@ bd_zsh="$ZDOTDIR/plugins/bd.zsh"
 safe_source mise activate zsh
 safe_source atuin init zsh
 safe_source starship init zsh
-# source <(codex completion zsh)
-# source <(ast-grep completions)
-# if [[ ! -z ${ACLI_ENABLED:-} ]]; then
-#   source <(acli completion zsh)
-#   source $ZDOTDIR/helpers/acli.zsh
-# fi
-# source <(mise completion zsh)
-# source <(gh completion -s zsh)
-# source <(sg completions)
-# source <(hk completion zsh)
+
+source <(mise completion zsh)
+source <(gh completion -s zsh)
+source <(hk completion zsh)
+#
+## The hook below is to check the date updated by pacman to
+# rehash the completions after a certain time
+zshcache_time="$(date +%s%N)"
+
+autoload -Uz add-zsh-hook
+
+rehash_precmd() {
+  if [[ -e /var/cache/zsh/pacman ]]; then
+    local paccache_time="$(date -r /var/cache/zsh/pacman +%s%N)"
+    if ((zshcache_time < paccache_time)); then
+      rehash
+      zshcache_time="$paccache_time"
+    fi
+  fi
+}
+
+add-zsh-hook -Uz precmd rehash_precmd
+
+if eza; then
+  alias lt='eza --tree --level=3 --long --icons --git'
+  alias lta='lt -a'
+  alias ls="eza --icons=always --oneline --no-git --all"
+fi

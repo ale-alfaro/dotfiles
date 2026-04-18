@@ -170,8 +170,31 @@ local function map(lhs, rhs, mode, opts)
   vim.keymap.set(mode, lhs, rhs, opts)
 end
 local nmap_leader = function(key, cmd, desc)
-  map('<leader>' .. key, cmd, { desc = desc })
+  map('<leader>' .. key, cmd, 'n', { desc = desc })
 end
+
+-- ──────────────────────────────────────────────────────────────
+--  switch_case  — toggle camelCase ↔ snake_case under cursor
+-- ──────────────────────────────────────────────────────────────
+
+local function switch_case()
+  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+  local word = vim.fn.expand '<cword>'
+  local word_start = vim.fn.matchstrpos(vim.fn.getline '.', '\\k*\\%' .. (col + 1) .. 'c\\k*')[2]
+
+  if word:find '[a-z][A-Z]' then
+    local snake = word:gsub('([a-z])([A-Z])', '%1_%2'):lower()
+    vim.api.nvim_buf_set_text(0, line - 1, word_start, line - 1, word_start + #word, { snake })
+  elseif word:find '_[a-z]' then
+    local camel = word:gsub('(_)([a-z])', function(_, l)
+      return l:upper()
+    end)
+    vim.api.nvim_buf_set_text(0, line - 1, word_start, line - 1, word_start + #word, { camel })
+  else
+    vim.notify('Not camelCase or snake_case', vim.log.levels.WARN)
+  end
+end
+
 map('q', '<nop>', nil, { noremap = true })
 map('j', 'gj', { 'n', 'x' }, { desc = 'Navigate down (visual line)' })
 map('k', 'gk', { 'n', 'x' }, { desc = 'Navigate up (visual line)' })
@@ -185,10 +208,75 @@ map('<M-r>', '<Cmd>restart<CR>', nil, { desc = 'Restart', noremap = true })
 map('<C-q>', '<Cmd>q<CR>', nil, { desc = 'Quit', noremap = true })
 
 -- Misc
-map('<leader>so', '<Cmd>source %<CR>', nil, { noremap = true, desc = 'Source Current buffer' })
+nmap_leader('so', '<Cmd>source %<CR>', 'Source Current buffer')
 map('<', '<gv', 'v')
 map('>', '>gv', 'v')
 map('<C-Left>', '<C-w>h', nil, { desc = 'Focus window left' })
 map('<C-Right>', '<C-w>l', nil, { desc = 'Focus window right' })
 map('<C-Up>', '<C-w>k', nil, { desc = 'Focus window up' })
 map('<C-Down>', '<C-w>j', nil, { desc = 'Focus window up' })
+
+local new_scratch_buffer = function()
+  vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(true, true))
+end
+nmap_leader('ba', '<Cmd>b#<CR>', 'Alternate')
+nmap_leader('bd', '<Cmd>lua MiniBufremove.delete()<CR>', 'Delete')
+nmap_leader('bD', '<Cmd>lua MiniBufremove.delete(0, true)<CR>', 'Delete!')
+nmap_leader('bA', '<cmd>:%bdelete|edit #|normal<cr><CR>', 'Delete All')
+nmap_leader('bs', new_scratch_buffer, 'Scratch')
+nmap_leader('bw', '<Cmd>lua MiniBufremove.wipeout()<CR>', 'Wipeout')
+nmap_leader('bW', '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', 'Wipeout!')
+
+local explore_quickfix = function()
+  vim.cmd(vim.fn.getqflist({ winid = true }).winid ~= 0 and 'cclose' or 'copen')
+end
+local explore_locations = function()
+  vim.cmd(vim.fn.getloclist(0, { winid = true }).winid ~= 0 and 'lclose' or 'lopen')
+end
+nmap_leader('eq', explore_quickfix, 'Quickfix list')
+nmap_leader('eQ', explore_locations, 'Location list')
+-- s is for 'Session'. Common usage:
+-- - `<Leader>sn` - start new session
+-- - `<Leader>sr` - read previously started session
+-- - `<Leader>sR` - restart Neovim preserving current session
+local session_new = 'vim.ui.input({ prompt = "Session name: " }, MiniSessions.write)'
+
+-- Session management. A thin wrapper around `:h mksession` that consistently
+-- manages session files. Example usage:
+-- - `<Leader>sn` - start new session
+-- - `<Leader>sr` - read previously started session
+-- - `<Leader>sd` - delete previously started session
+VimRc.now(function()
+  require('mini.sessions').setup()
+end)
+nmap_leader('sd', '<Cmd>lua MiniSessions.select("delete")<CR>', 'Delete')
+nmap_leader('sn', '<Cmd>lua ' .. session_new .. '<CR>', 'New')
+nmap_leader('sr', '<Cmd>lua MiniSessions.select("read")<CR>', 'Read')
+nmap_leader('sR', '<Cmd>lua MiniSessions.restart()<CR>', 'Restart')
+nmap_leader('sw', '<Cmd>lua MiniSessions.write()<CR>', 'Write current')
+
+-- v is for 'Visits'. Common usage:
+-- - `<Leader>vv` - add    "core" label to current file.
+-- - `<Leader>vV` - remove "core" label to current file.
+-- - `<Leader>vc` - pick among all files with "core" label.
+local make_pick_core = function(cwd, desc)
+  return function()
+    local sort_latest = MiniVisits.gen_sort.default { recency_weight = 1 }
+    local local_opts = { cwd = cwd, filter = 'core', sort = sort_latest }
+    MiniExtra.pickers.visit_paths(local_opts, { source = { name = desc } })
+  end
+end
+
+nmap_leader('vc', make_pick_core('', 'Core visits (all)'), 'Core visits (all)')
+nmap_leader('vC', make_pick_core(nil, 'Core visits (cwd)'), 'Core visits (cwd)')
+nmap_leader('vv', '<Cmd>lua MiniVisits.add_label("core")<CR>', 'Add "core" label')
+nmap_leader('vV', '<Cmd>lua MiniVisits.remove_label("core")<CR>', 'Remove "core" label')
+nmap_leader('vl', '<Cmd>lua MiniVisits.add_label()<CR>', 'Add label')
+nmap_leader('vL', '<Cmd>lua MiniVisits.remove_label()<CR>', 'Remove label')
+
+-- o is for 'Other'. Common usage:
+-- - `<Leader>oz` - toggle between "zoomed" and regular view of current buffer
+nmap_leader('or', '<Cmd>lua MiniMisc.resize_window()<CR>', 'Resize to default width')
+nmap_leader('ot', '<Cmd>lua MiniTrailspace.trim()<CR>', 'Trim trailspace')
+nmap_leader('oz', '<Cmd>lua MiniMisc.zoom()<CR>', 'Zoom toggle')
+nmap_leader('oc', switch_case, 'toggle camelCase/snake_case')

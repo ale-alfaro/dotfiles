@@ -1,19 +1,20 @@
 [grep]
 tool = ripgrep
-ripgrep.tool-path=/bin/rg
+ripgrep.tool-path = /bin/rg
 ripgrep.tool-args = '--max-count=10'
 
 [update]
 narrow = true
+auto-cache = /home/alealfaro/.cache/west
 
 [zephyr]
 base-prefer = env
 
 [alias]
-update = update -o=--depth=1 -n
 target = build -p=never -t
 menuconfig = build -p=never -t menuconfig -d
 partitions = build -p=never -t partition_manager_report -d
 initlevels = build -p=never -t initlevels -d
 build_resume = build -p=never -t all -d
 find-board = boards --format "{name:30} | {qualifiers:30} | {dir}" --fuzzy-match
+
