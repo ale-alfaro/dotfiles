@@ -1,0 +1,6 @@
+chaotic-keyring
+chaotic-mirrorlist
+saleae-logic2
+slack-desktop
+timeshift-autosnap
+zen-browser-bin

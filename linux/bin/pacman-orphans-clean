@@ -1,0 +1,21 @@
+#!/bin/env bash
+
+ask_yn() {
+  local reply
+
+  while true; do
+    read -r -p "$1 [y/n]? " reply
+
+    case "${reply}" in
+    Y* | y*) return 0 ;;
+    N* | n*) return 1 ;;
+    *) echo "Invalid choice '${reply}'" ;;
+    esac
+  done
+}
+
+if ask_yn "Do you want to list the orphans before proceeding?"; then
+  pacman -Qdttq
+  exit 0
+fi
+pacman -Qdttq | sudo pacman -Rns -

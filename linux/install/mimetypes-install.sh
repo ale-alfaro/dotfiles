@@ -1,17 +1,11 @@
 # Copy and sync icon files
 mkdir -p ~/.local/share/icons/hicolor/48x48/apps/
-cp ~/.local/share/omarchy/applications/icons/*.png ~/.local/share/icons/hicolor/48x48/apps/
+cp ~/dotfiles/linux/applications/icons/*.png ~/.local/share/icons/hicolor/48x48/apps/
 gtk-update-icon-cache ~/.local/share/icons/hicolor &>/dev/null
 
 # Copy .desktop declarations
 mkdir -p ~/.local/share/applications
-cp ~/.local/share/omarchy/applications/*.desktop ~/.local/share/applications/
-cp ~/.local/share/omarchy/applications/hidden/*.desktop ~/.local/share/applications/
-
-# Refresh the webapps and TUIs
-bash $OMARCHY_PATH/install/packaging/icons.sh
-# bash $OMARCHY_PATH/install/packaging/webapps.sh
-# bash $OMARCHY_PATH/install/packaging/tuis.sh
+cp -r ~/dotfiles/linux/applications/*.desktop ~/.local/share/applications
 
 update-desktop-database ~/.local/share/applications
 

@@ -46,7 +46,8 @@
 # -> see https://stackoverflow.com/a/13785716/149220 for a solution
 
 # Complete the alias when _expand_alias is used as a function
-fpath=($fpath "${XDG_DATA_HOME}/zsh/generated_man_completions" "/usr/share/zsh/plugins/zsh-users/zsh-completions/src")
+fpath+=(/usr/share/zsh/plugins/zsh-users/zsh-completions/src)
+fpath+=("${XDG_DATA_HOME}/zsh/generated_man_completions")
 fpath+=("${ZDOTDIR}/completions/src")
 fpath+=("${ZDOTDIR}/functions")
 cache_directory="$XDG_CACHE_HOME/zsh"
@@ -90,12 +91,11 @@ zstyle ':completion:*:default' list-prompt '%S%M matches%s'
 
 source <(fzf --zsh)
 [[ -r /usr/share/fzf/key-bindings.zsh ]] && source /usr/share/fzf/key-bindings.zsh
-
+#
 plugins=(
   Aloxaf/fzf-tab
 )
 __init_plugins "${plugins[@]}"
-# [[ -r $ZDOTDIR/plugins/fzf.zsh ]] && source $ZDOTDIR/plugins/fzf.zsh
 # fzf-tab
 zstyle ':fzf-tab:complete:(v|n|nvim):*' fzf-preview '[[ -d $realpath ]] && eza --tree --color=always $realpath | head -200 || bat -n --color=always --line-range :500 $realpath'
 zstyle ':fzf-tab:complete:(z|cd|zd):*' fzf-preview 'eza --tree --color=always $realpath | head -200'

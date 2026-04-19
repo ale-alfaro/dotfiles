@@ -14,8 +14,7 @@ done
 # Some zsh plugins
 source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-bd_zsh="$ZDOTDIR/plugins/bd.zsh"
-[[ -f "$bd_zsh" ]] && source "$bd_zsh"
+[[ -f $ZDOTDIR/plugins/bd.zsh ]] && source $ZDOTDIR/plugins/bd.zsh
 # Some other stuff I might remove
 safe_source mise activate zsh
 safe_source atuin init zsh

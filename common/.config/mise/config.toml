@@ -99,6 +99,7 @@ just = "latest"
 "cargo:tlrc" = "latest"
 go = "latest"
 hk = "latest"
+jqp = "latest"
 
 
 [shell_alias]

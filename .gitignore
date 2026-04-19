@@ -34,3 +34,4 @@ log
 **/tmux/plugins
 /common/.config/codex/skills/.system
 /common/.config/codex
+/common/.config/zsh/plugins
