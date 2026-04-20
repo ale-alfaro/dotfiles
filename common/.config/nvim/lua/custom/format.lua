@@ -2,7 +2,7 @@
 -- Supports both sync (BufWritePre) and async (BufWritePost) modes.
 -- Replaces conform.nvim for whole-file formatting.
 
-local exec = require('custom.exec')
+local exec = require 'custom.exec'
 local M = {}
 
 -- Configuration ---------------------------------------------------------------
@@ -397,7 +397,7 @@ end
 ---@param opts? { async?: boolean }
 function M.setup(opts)
   opts = opts or {}
-  FeatureFlags:add { name = 'Format', gl_enabled = true }
+  FeatureFlags:add('Format', { enable = true })
 
   local aug = vim.api.nvim_create_augroup('CustomFormat', { clear = true })
 
@@ -412,7 +412,7 @@ function M.setup(opts)
         if applying_format[args.buf] then
           return
         end
-        if not FeatureFlags:get('Format').gl_enabled then
+        if not FeatureFlags:get('Format').enabled then
           return
         end
         format_buffer_async(args.buf)
@@ -426,7 +426,7 @@ function M.setup(opts)
         if vim.bo[args.buf].buftype ~= '' then
           return
         end
-        if not FeatureFlags:get('Format').gl_enabled then
+        if not FeatureFlags:get('Format').enabled then
           return
         end
         format_buffer(args.buf)

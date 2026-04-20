@@ -60,7 +60,7 @@ local oil_setup = function()
       ['g?'] = { 'actions.show_help', mode = 'n' },
       ['<CR>'] = 'actions.select',
 
-      ['gp'] = {
+      ['p'] = {
         'actions.paste_from_system_clipboard',
         opts = {
           delete_original = true,
@@ -68,19 +68,15 @@ local oil_setup = function()
         desc = 'Paste and delete',
       },
       ['<Right>'] = { 'actions.select', mode = 'n' },
-      ['gv'] = { 'actions.select', opts = { vertical = true } },
       ['q'] = { 'actions.close', mode = 'n' },
       ['gr'] = 'actions.refresh',
       ['<Left>'] = { 'actions.parent', mode = 'n' },
       ['gw'] = { 'actions.open_cwd', mode = 'n' },
       ['g~'] = { 'actions.cd', opts = { scope = 'tab' }, mode = 'n' },
       ['gs'] = { 'actions.change_sort', mode = 'n' },
-      ['gx'] = 'actions.open_external',
+      ['gX'] = 'actions.open_external',
       ['gt'] = 'actions.open_terminal',
-      ['g.'] = { 'actions.toggle_hidden', mode = 'n' },
-      ['g\\'] = { 'actions.toggle_trash', mode = 'n' },
-      ['gy'] = 'actions.yank_entry',
-      ['<C-q>'] = 'actions.send_to_qflist',
+      ['y'] = 'actions.yank_entry',
 
       -- Mappings can be a function
       ['gd'] = {
@@ -89,41 +85,12 @@ local oil_setup = function()
         end,
         desc = 'Show more info',
       },
-      -- You can pass additional opts to vim.keymap.set by using
-      -- a table with the mapping as the first element.
-      ['<leader>ff'] = {
-        function()
-          require('fzf-lua').files {
-            cwd = require('oil').get_current_dir(),
-          }
-        end,
-        mode = 'n',
-        nowait = true,
-        desc = 'Find files in the current directory',
-      },
-      -- Mappings that are a string starting with "actions." will be
-      -- one of the built-in actions, documented below.
-      ['`'] = 'actions.tcd',
-      -- Some actions have parameters. These are passed in via the `opts` key.
-      ['<leader>:'] = {
-        'actions.open_cmdline',
-        opts = {
-          shorten_path = true,
-          modify = ':h',
-        },
-        desc = 'Open the command line with the current directory as an argument',
-      },
     },
     -- Set to false to disable all of the above keymaps
     use_default_keymaps = false,
     view_options = {
       -- Show files and directories that start with "."
       show_hidden = true,
-      -- This function defines what is considered a "hidden" file
-      is_hidden_file = function(name, bufnr)
-        local m = name:match '^%.'
-        return m ~= nil
-      end,
       -- This function defines what will never be shown, even when `show_hidden` is set
       is_always_hidden = function(name, bufnr)
         return false
@@ -149,50 +116,21 @@ local oil_setup = function()
     },
   }
 end
----@type table<string,oil.OpenPreviewOpts>
-local oil_preview_opts = {
-  ['vsplit'] = {
+
+---@param dir? string
+local oil_open_loc = function(dir)
+  require('oil').open(dir, {
     preview = { vertical = true, horizontal = false, split = 'aboveleft' },
-  },
-  ['hsplit'] = {
-    preview = { vertical = false, horizontal = true, split = 'botleft' },
-  },
-}
-
----Open oil browser for a directory
----@param dir string?
----@param preview? "hsplit"|"vsplit"
-local function create_oil_open_fn(dir, preview)
-  local opts = nil
-  if preview and oil_preview_opts[preview] then
-    opts = oil_preview_opts[preview]
-  end
-  return function()
-    require('oil').open(dir, opts, function()
-      MiniClue.disable_buf_triggers(0)
-    end)
-  end
-end
-local oil_open_current_buf = create_oil_open_fn(nil, 'vsplit')
-
----@comment create a oil open function
----@param loc string
----@return function
-local oil_open_loc = function(loc)
-  if type(loc) == 'string' and vim.uv.fs_stat(loc) then
-    return create_oil_open_fn(loc)
-  else
-    VimRc.err 'Location is not a valid path. Creating open cwd function'
-    return function()
-      VimRc.warn 'Location was not a valid path. Check your config!'
-      create_oil_open_fn(vim.fn.getcwd())
-    end
-  end
+  }, function()
+    MiniClue.disable_buf_triggers(0)
+  end)
 end
 
 ---@return ExplorerPlugin
 return {
   setup = oil_setup,
-  open_curr_buf = oil_open_current_buf,
+  open_curr_buf = function()
+    oil_open_loc(nil)
+  end,
   open_at_loc = oil_open_loc,
 }

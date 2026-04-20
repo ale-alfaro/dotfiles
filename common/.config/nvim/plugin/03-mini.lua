@@ -1,36 +1,15 @@
-local later = VimRc.later
-
--- Step two ===================================================================
-
--- Extra 'mini.nvim' functionality.
---
--- See also:
--- - `:h MiniExtra.pickers` - pickers. Most are mapped in `<Leader>f` group.
---   Calling `setup()` makes 'mini.pick' respect 'mini.extra' pickers.
--- - `:h MiniExtra.gen_ai_spec` - 'mini.ai' textobject specifications
--- - `:h MiniExtra.gen_highlighter` - 'mini.hipatterns' highlighters
-later(function()
+VimRc.later(function()
   require('mini.extra').setup()
 end)
 
--- Extend and create a/i textobjects, like `:h a(`, `:h a'`, and more).
--- Contains not only `a` and `i` type of textobjects, but also their "next" and
--- "last" variants that will explicitly search for textobjects after and before
--- cursor. Example usage:
--- - `ci)` - *c*hange *i*inside parenthesis (`)`)
--- - `di(` - *d*elete *i*inside padded parenthesis (`(`)
--- - `yaq` - *y*ank *a*round *q*uote (any of "", '', or ``)
--- - `vif` - *v*isually select *i*inside *f*unction call
--- - `cina` - *c*hange *i*nside *n*ext *a*rgument
--- - `valaala` - *v*isually select *a*round *l*ast (i.e. previous) *a*rgument
---   and then again reselect *a*round new *l*ast *a*rgument
---
--- See also:
--- - `:h text-objects` - general info about what textobjects are
--- - `:h MiniAi-builtin-textobjects` - list of all supported textobjects
--- - `:h MiniAi-textobject-specification` - examples of custom textobjects
-
--- require('mini.extra').setup()
+-- Session management. A thin wrapper around `:h mksession` that consistently
+-- manages session files. Example usage:
+-- - `<Leader>sn` - start new session
+-- - `<Leader>sr` - read previously started session
+-- - `<Leader>sd` - delete previously started session
+VimRc.now(function()
+  require('mini.sessions').setup()
+end)
 
 -- local builtin_textobjects = {
 --   -- Use balanced pair for brackets. Use opening ones to possibly remove edge
@@ -77,7 +56,7 @@ end)
 -- - `:h text-objects` - general info about what textobjects are
 -- - `:h MiniAi-builtin-textobjects` - list of all supported textobjects
 -- - `:h MiniAi-textobject-specification` - examples of custom textobjects
-later(function()
+VimRc.later(function()
   local ai = require 'mini.ai'
   ai.setup {
     custom_textobjects = {
@@ -111,7 +90,7 @@ end)
 -- - `:h MiniClue-examples` - examples of common setups
 -- - `:h MiniClue.ensure_buf_triggers()` - use it to enable triggers in buffer
 -- - `:h MiniClue.set_mapping_desc()` - change mapping description not from config
-later(function()
+VimRc.later(function()
   local miniclue = require 'mini.clue'
   -- stylua: ignore
   miniclue.setup({
@@ -160,7 +139,7 @@ end)
 -- - Autocompletion. Basically an automated `:h cmdline-completion`.
 -- - Autocorrection of words as-you-type. Like `:W`->`:w`, `:lau`->`:lua`, etc.
 -- - Autopeek command range (like line number at the start) as-you-type.
-later(function()
+VimRc.later(function()
   local mini_cmdline = require 'mini.cmdline'
   mini_cmdline.setup {
 
@@ -211,7 +190,7 @@ later(function()
   }
 end)
 
-later(function()
+VimRc.later(function()
   require('mini.misc').setup()
   MiniMisc.setup_auto_root { '.west', '.git' }
   MiniMisc.setup_termbg_sync()
@@ -223,23 +202,23 @@ end)
 -- - `gy` / `gp` - copy / paste from system clipboard
 -- - `\` + key - toggle common options. Like `\h` toggles highlighting search.
 -- - `<C-hjkl>` (four combos) - navigate between windows.
-later(function()
+VimRc.later(function()
   require('mini.align').setup()
 end)
-later(function()
+VimRc.later(function()
   require('mini.bracketed').setup()
 end)
-later(function()
+VimRc.later(function()
   require('mini.bufremove').setup()
 end)
 
-later(function()
+VimRc.later(function()
   require('mini.comment').setup()
 end)
-later(function()
+VimRc.later(function()
   require('mini.indentscope').setup()
 end)
-later(function()
+VimRc.later(function()
   require('mini.operators').setup { replace = { prefix = 'or' } }
 
   local map_combo = require('mini.keymap').map_combo
@@ -252,7 +231,7 @@ later(function()
   -- vim.keymap.set('n', 'g)', 'gxiagxina', { remap = true, desc = 'Swap arg right' })
 end)
 
-later(function()
+VimRc.later(function()
   require('mini.move').setup {
     mappings = {
       left = '<M-left>',
@@ -268,7 +247,7 @@ later(function()
   }
 end)
 
-later(function()
+VimRc.later(function()
   require('mini.jump').setup {
 
     -- Module mappings. Use `''` (empty string) to disable one.
@@ -297,7 +276,7 @@ later(function()
   }
 end)
 
-later(function()
+VimRc.later(function()
   require('mini.jump2d').setup {
     -- Function producing jump spots (byte indexed) for a particular line.
     -- For more information see |MiniJump2d.start()|.
@@ -359,7 +338,7 @@ end)
 --
 -- See also:
 -- - `:h MiniSplitjoin.gen_hook` - list of available hooks
-later(function()
+VimRc.later(function()
   require('mini.splitjoin').setup()
 end)
 
@@ -386,27 +365,39 @@ end)
 -- - `:h MiniSurround-builtin-surroundings` - list of all supported surroundings
 -- - `:h MiniSurround-surrounding-specification` - examples of custom surroundings
 -- - `:h MiniSurround-vim-surround-config` - alternative set of action mappings
-later(function()
-  require('mini.surround').setup {
-    mappings = {
-      add = 'sa', -- Add surrounding in Normal and Visual modes
-      delete = 'sd', -- Delete surrounding
-      find = 'sf', -- Find surrounding (to the right)
-      find_left = 'sF', -- Find surrounding (to the left)
-      replace = 'sr', -- Replace surrounding
-      update_n_lines = 'sn', -- Update `n_lines`
+VimRc.later(function()
+  local surround = require 'mini.surround'
+  local ts_input = surround.gen_spec.input.treesitter
+  surround.setup {
+    custom_surroundings = {
+      f = {
+        input = ts_input({ outer = '@call.outer', inner = '@calll.inner' }, { use_nvim_treesitter = true }),
+      },
     },
+    mappings = {
+      add = 'ys',
+      delete = 'ds',
+      find = '',
+      find_left = '',
+      highlight = '',
+      replace = 'cs',
+
+      -- Add this only if you don't want to use extended mappings
+      suffix_last = '',
+      suffix_next = '',
+    },
+    search_method = 'cover_or_next',
   }
 end)
 
 -- Highlight and remove trailspace. Temporarily stops highlighting in Insert mode
 -- to reduce noise when typing. Example usage:
 -- - `<Leader>ot` - trim all trailing whitespace in a buffer
-later(function()
+VimRc.later(function()
   require('mini.trailspace').setup()
 end)
 
-later(function()
+VimRc.later(function()
   require('mini.hipatterns').setup {
     highlighters = {
       fixme = require('mini.extra').gen_highlighter.words({ 'FIXME', 'Fixme', 'fixme' }, 'MiniHipatternsFixme'),

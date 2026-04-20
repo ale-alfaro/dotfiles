@@ -7,13 +7,6 @@
 ---@field in_progress string  - name of action(s) currently in progress (bisect, merge, etc.). Can be a combination of those separated by ",".
 
 VimRc.later(function()
-  vim.pack.add(_G.plug_spec {
-    'stevearc/overseer.nvim',
-    'folke/trouble.nvim',
-    'MeanderingProgrammer/render-markdown.nvim',
-    'MagicDuck/grug-far.nvim',
-    'stevearc/quicker.nvim',
-  })
   require('custom.format').setup()
   require('trouble').setup {
     focus = true, -- Focus the window when opened
@@ -142,9 +135,8 @@ local minidiff_setup = function()
   vim.keymap.set('n', 'de', export_diff_qf, { desc = 'Diff to QuickFix' })
 end
 
-FeatureFlags:add {
-  name = 'Git',
-  gl_enabled = false,
+FeatureFlags:add('Git', {
+  enable = false,
   toggle_hook = function(enabled, bufnr)
     if not MiniGit then
       minigit_setup()
@@ -153,10 +145,9 @@ FeatureFlags:add {
       end
     end
   end,
-}
-FeatureFlags:add {
-  name = 'Diff',
-  gl_enabled = false,
+})
+FeatureFlags:add('Diff', {
+  enable = false,
   toggle_hook = function(enabled, bufnr)
     if not MiniDiff then
       minidiff_setup()
@@ -174,7 +165,7 @@ FeatureFlags:add {
       vim.cmd [[redraw!]]
     end, 200)
   end,
-}
+})
 --- MiniGit
 
 VimRc.on_filetype('markdown', function()

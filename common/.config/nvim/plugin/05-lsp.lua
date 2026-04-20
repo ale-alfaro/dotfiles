@@ -1,39 +1,27 @@
--- This Lsps are better not enabled by default and enabled locally
---
---[[
---
-  CompletionItemKind = {
-    Text = 1,
-    Method = 2,
-    Function = 3,
-    Constructor = 4,
-    Field = 5,
-    Variable = 6,
-    Class = 7,
-    Interface = 8,
-    Module = 9,
-    Property = 10,
-    Unit = 11,
-    Value = 12,
-    Enum = 13,
-    Keyword = 14,
-    Snippet = 15,
-    Color = 16,
-    File = 17,
-    Reference = 18,
-    Folder = 19,
-    EnumMember = 20,
-    Constant = 21,
-    Struct = 22,
-    Event = 23,
-    Operator = 24,
-    TypeParameter = 25,
-  },
---
---
---
---]]
---
+VimRc.now_if_args(function()
+  vim.diagnostic.config {
+    severity_sort = true,
+    float = {
+      border = 'rounded',
+      source = 'if_many',
+      underline = true,
+    },
+    virtual_text = {
+      spacing = 2,
+      source = 'if_many',
+      prefix = 'o',
+    },
+    -- Disable signs in the gutter.
+    signs = {
+      text = {
+        [vim.diagnostic.severity.ERROR] = 'E',
+        [vim.diagnostic.severity.WARN] = 'W',
+        [vim.diagnostic.severity.INFO] = 'I',
+        [vim.diagnostic.severity.HINT] = 'H',
+      },
+    },
+  }
+end)
 VimRc.now_if_args(function()
   -- Customize post-processing of LSP responses for a better user experience.
   -- Don't show 'Text' suggestions (usually noisy) and show snippets last.
@@ -127,11 +115,6 @@ end)
 
 -- Set up LSP servers.
 VimRc.now_if_args(function()
-  vim.pack.add(_G.plug_spec {
-    'neovim/nvim-lspconfig',
-    'b0o/schemastore.nvim',
-    'rachartier/tiny-code-action.nvim',
-  })
   -- Code action setup
   local capabilities = MiniCompletion.get_lsp_capabilities { resolve_additional_text_edits = true }
   capabilities.textDocument.completion.completionItem.snippetSupport = true

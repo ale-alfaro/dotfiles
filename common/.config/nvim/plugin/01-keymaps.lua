@@ -222,10 +222,10 @@ end
 nmap_leader('ba', '<Cmd>b#<CR>', 'Alternate')
 nmap_leader('bd', '<Cmd>lua MiniBufremove.delete()<CR>', 'Delete')
 nmap_leader('bD', '<Cmd>lua MiniBufremove.delete(0, true)<CR>', 'Delete!')
-nmap_leader('bA', '<cmd>:%bdelete|edit #|normal<cr><CR>', 'Delete All')
 nmap_leader('bs', new_scratch_buffer, 'Scratch')
-nmap_leader('bw', '<Cmd>lua MiniBufremove.wipeout()<CR>', 'Wipeout')
-nmap_leader('bW', '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', 'Wipeout!')
+nmap_leader('dd', '<cmd>:%bdelete|edit #|normal<cr><CR>', 'Delete All')
+nmap_leader('dw', '<Cmd>lua MiniBufremove.wipeout()<CR>', 'Wipeout')
+nmap_leader('dW', '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', 'Wipeout!')
 
 local explore_quickfix = function()
   vim.cmd(vim.fn.getqflist({ winid = true }).winid ~= 0 and 'cclose' or 'copen')
@@ -241,14 +241,6 @@ nmap_leader('eQ', explore_locations, 'Location list')
 -- - `<Leader>sR` - restart Neovim preserving current session
 local session_new = 'vim.ui.input({ prompt = "Session name: " }, MiniSessions.write)'
 
--- Session management. A thin wrapper around `:h mksession` that consistently
--- manages session files. Example usage:
--- - `<Leader>sn` - start new session
--- - `<Leader>sr` - read previously started session
--- - `<Leader>sd` - delete previously started session
-VimRc.now(function()
-  require('mini.sessions').setup()
-end)
 nmap_leader('sd', '<Cmd>lua MiniSessions.select("delete")<CR>', 'Delete')
 nmap_leader('sn', '<Cmd>lua ' .. session_new .. '<CR>', 'New')
 nmap_leader('sr', '<Cmd>lua MiniSessions.select("read")<CR>', 'Read')

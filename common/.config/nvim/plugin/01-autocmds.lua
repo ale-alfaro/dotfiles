@@ -83,7 +83,7 @@ vim.api.nvim_create_autocmd('FileType', {
   end,
 })
 
-if VimRc.trust_on_write then
+if FeatureFlags:get 'exrc' then
   vim.api.nvim_create_autocmd('BufWritePost', {
     group = vim.api.nvim_create_augroup('exrc', { clear = true }),
     desc = 'Trust exrc files after write',

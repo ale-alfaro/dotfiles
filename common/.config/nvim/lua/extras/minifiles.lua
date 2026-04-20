@@ -1,16 +1,5 @@
+---@module 'mini.files'
 ---
----@param entry MiniFilesFsEntry
----@return boolean
-local filter = function(entry)
-  return entry.fs_type ~= 'file' or entry.name ~= '.DS_Store'
-end
---- Default prefix of file system entries
----
---- - If set up |mini.icons|, use |MiniIcons.get()| for "directory"/"file" category.
---- - Otherwise:
----     - For directory return fixed icon and "MiniFilesDirectory" group name.
----     - For file try to use `get_icon()` from 'nvim-tree/nvim-web-devicons'.
----       If missing, return fixed icon and 'MiniFilesFile' group name.
 ---
 vim.api.nvim_set_hl(0, 'MiniFilesSymLink', { link = 'PmenuExtra' })
 ---@param fs_entry MiniFilesFsEntry
@@ -36,55 +25,9 @@ local prefix = function(fs_entry)
   end
 end
 
---- Default sort of file system entries
----
---- Sort directories and files separately (alphabetically ignoring case) and
---- put directories first.
----@param entries MiniFilesFsEntry[]
----@return MiniFilesFsEntry[]
-local sort = function(entries)
-  local function compare_alphanumerically(e1, e2)
-    -- Put directories first.
-    if e1.is_dir and not e2.is_dir then
-      return true
-    end
-    if not e1.is_dir and e2.is_dir then
-      return false
-    end
-    -- Order numerically based on digits if the text before them is equal.
-    if e1.pre_digits == e2.pre_digits and e1.digits ~= nil and e2.digits ~= nil then
-      return e1.digits < e2.digits
-    end
-    -- Otherwise order alphabetically ignoring case.
-    return e1.lower_name < e2.lower_name
-  end
-
-  local sorted = vim.tbl_map(function(entry)
-    local pre_digits, digits = entry.name:match '^(%D*)(%d+)'
-    if digits ~= nil then
-      digits = tonumber(digits)
-    end
-
-    return {
-      fs_type = entry.fs_type,
-      name = entry.name,
-      path = entry.path,
-      lower_name = entry.name:lower(),
-      is_dir = entry.fs_type == 'directory',
-      pre_digits = pre_digits,
-      digits = digits,
-    }
-  end, entries)
-  table.sort(sorted, compare_alphanumerically)
-  -- Keep only the necessary fields.
-  return vim.tbl_map(function(x)
-    return { name = x.name, fs_type = x.fs_type, path = x.path }
-  end, sorted)
-end
 local minifiles_setup = function()
   require('mini.files').setup {
     windows = {
-
       -- Whether to show preview of file/directory under cursor
       preview = true,
       -- Width of focused window
@@ -100,22 +43,16 @@ local minifiles_setup = function()
       use_as_default_explorer = false,
     },
     content = {
-
-      filter = filter,
-      sort = sort,
       prefix = prefix,
     },
     mappings = {
       close = 'q',
-      -- go_in       = 'l',
-      go_in = '<Right>',
-      go_in_plus = 'L',
-      go_out = 'h',
-      -- go_out_plus = 'H',
+      go_in = '<CR>',
+      go_in_plus = '<Right>',
+      go_out = '-',
       go_out_plus = '<Left>',
       mark_goto = "'",
       mark_set = 'm',
-      reset = '<BS>',
       reveal_cwd = '@',
       show_help = 'g?',
       synchronize = '=',
@@ -190,7 +127,11 @@ end
 ---@return ExplorerPlugin
 return {
   setup = minifiles_setup,
-  open_curr_buf = '<Cmd>lua MiniFiles.open(vim.api.nvim_buf_get_name(0))<CR>',
+  open_curr_buf = function()
+    MiniFiles.open(vim.api.nvim_buf_get_name(0), false)
+    MiniFiles.reveal_cwd()
+  end,
+  open_at_cwd = '<Cmd>lua MiniFiles.open()<CR>',
   open_at_loc = function(loc)
     if MiniFiles then
       MiniFiles.open(loc)

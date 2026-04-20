@@ -1,6 +1,4 @@
 VimRc.later(function()
-  vim.pack.add(_G.plug_spec { 'ibhagwan/fzf-lua' })
-
   ---@module 'fzf-lua'
   local toggle_only_sources = function(_, opts)
     require('fzf-lua.actions').toggle_opt(opts, 'tzsrc')

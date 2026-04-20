@@ -11,11 +11,11 @@ local ensure_feature_flags = function()
       _G.FeatureFlags = { entries = {} }
       FeatureFlags.__index = FeatureFlags
       function FeatureFlags:add(f)
-        if type(f) == 'string' then f = { name = f, gl_enabled = false } end
+        if type(f) == 'string' then f = { name = f, enabled = false } end
         self.entries[f.name] = f; return f
       end
-      function FeatureFlags:get(n) return self.entries[n] or self:add({ name = n, gl_enabled = false }) end
-      function FeatureFlags:set(n, e) self:get(n).gl_enabled = e or false end
+      function FeatureFlags:get(n) return self.entries[n] or self:add({ name = n, enabled = false }) end
+      function FeatureFlags:set(n, e) self:get(n).enabled = e or false end
     end
   ]])
 end
@@ -157,7 +157,7 @@ end
 
 T['setup']['registers Format feature flag'] = function()
   load_format()
-  local enabled = child.lua_get([[FeatureFlags:get('Format').gl_enabled]])
+  local enabled = child.lua_get([[FeatureFlags:get('Format').enabled]])
   eq(enabled, true)
 end
 

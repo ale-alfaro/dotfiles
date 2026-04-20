@@ -14,10 +14,26 @@
 -- See also:
 -- - `:h MiniMisc.safely()`
 -- - 'plugin/30_mini.lua' and 'plugin/40_plugins.lua'
-vim.pack.add { 'https://github.com/nvim-mini/mini.nvim' }
+local gh = function(repo)
+  return 'https://github.com/' .. repo
+end
+vim.pack.add {
+  gh 'nvim-mini/mini.nvim',
+  gh 'stevearc/oil.nvim',
+  gh 'stevearc/quicker.nvim',
+  gh 'folke/trouble.nvim',
+  gh 'rebelot/kanagawa.nvim',
+  gh 'ibhagwan/fzf-lua',
+  gh 'nvim-treesitter/nvim-treesitter',
+  gh 'nvim-treesitter/nvim-treesitter-textobjects',
+  gh 'neovim/nvim-lspconfig',
+  gh 'b0o/schemastore.nvim',
+  gh 'rachartier/tiny-code-action.nvim',
+  gh 'MeanderingProgrammer/render-markdown.nvim',
+  gh 'MagicDuck/grug-far.nvim',
+}
 local misc = require 'mini.misc'
 
-vim.o.exrc = true
 _G.VimRc = _G.VimRc or require 'custom.utils'
 VimRc.now = function(f)
   misc.safely('now', f)
@@ -36,7 +52,7 @@ end
 local gr = vim.api.nvim_create_augroup('vimrc', {})
 ---@param event string|string[]
 ---@param callback function
----@param pattern (string|string[])?
+---@param pattern string|string[]?
 ---@param desc string?
 VimRc.new_autocmd = function(event, callback, pattern, desc)
   pattern = pattern or '*'
@@ -59,45 +75,18 @@ VimRc.on_packchanged = function(plugin_name, kinds, callback, desc)
   VimRc.new_autocmd('PackChanged', f, '*', desc)
 end
 
----@param spec string[]
----@return vim.pack.Spec
-function _G.plug_spec(spec)
-  return vim
-    .iter(spec)
-    :map(function(p)
-      if type(p) == 'string' then
-        return {
-          src = 'https://github.com/' .. p,
-          name = p:match '%S+/(%S+)',
-        }
-      elseif type(p) == 'table' then
-        return vim.tbl_extend('force', p, {
-          src = 'https://github.com/' .. p,
-        })
-      end
-      return {}
-    end)
-    :totable()
+local ts_update = function()
+  vim.cmd 'TSUpdate'
 end
+VimRc.on_packchanged('nvim-treesitter', { 'update' }, ts_update, ':TSUpdate')
 
----@class FeatureFlagOpts
----@field local boolean?
----@field toggle_hook fun(enabled: boolean, bufnr:integer, data:table)?
 ---
 ---
 ---@class FeatureFlag
 ---@field name string
----@field gl_enabled boolean
----@field opts FeatureFlagOpts?
-FeatureFlag = {}
----@method
----@param o FeatureFlag
-function FeatureFlag:new(o)
-  o = o or {} -- create object if user does not provide one
-  setmetatable(o, self)
-  self.__index = self
-  return o
-end
+---@field enabled boolean
+---@field toggle_hook? fun(enabled:boolean)
+---
 ---@class vimrc.FeatureFlags
 ---@field entries table<string, FeatureFlag>
 _G.FeatureFlags = {
@@ -105,24 +94,26 @@ _G.FeatureFlags = {
 }
 FeatureFlags.__index = FeatureFlags
 
----@param feature FeatureFlag|string
+---@class vimrc.FeatureFlags.AddOpts
+---@field enable? boolean
+---@field local? boolean
+---@field toggle_hook? fun(enabled: boolean, bufnr:integer, data:table)
+---
+---@param name string
+---@param opts? vimrc.FeatureFlags.AddOpts
 ---@return FeatureFlag
-function FeatureFlags:add(feature)
-  vim.validate('feature', feature, { 'table', 'string' })
-  local name
-  if type(feature) == 'string' then
-    name = feature
-    feature = FeatureFlag:new { name = name, gl_enabled = false }
-  else
-    name = feature.name
-  end
-
-  self.entries[name] = feature
+function FeatureFlags:add(name, opts)
+  vim.validate('name', name, 'string')
+  vim.validate('opts', opts, 'table')
+  opts = opts or {}
+  self.entries[name] = {
+    name = name,
+    enabled = opts.enable or false,
+  }
   local usercmd_name = name .. 'Toggle'
   vim.api.nvim_create_user_command(usercmd_name, function(args)
     local flag = FeatureFlags:get(name)
-    local enable = not flag.gl_enabled
-    local opts = flag.opts or {}
+    local enable = not flag.enabled
     FeatureFlags:set(flag.name, enable)
     if vim.is_callable(opts.toggle_hook) then
       opts.toggle_hook(enable, vim.api.nvim_get_current_buf(), args)
@@ -130,7 +121,7 @@ function FeatureFlags:add(feature)
   end, {
     desc = 'Toggle feature flag for ' .. name,
   })
-  return feature
+  return self.entries[name]
 end
 
 ---@param name string
@@ -140,7 +131,7 @@ function FeatureFlags:get(name)
   -- neovim to hard crash
   local entry = self.entries[name]
   if not entry then
-    return FeatureFlags:add { name = name, gl_enabled = false }
+    return FeatureFlags:add(name, { enable = false })
   end
   return entry
 end
@@ -149,6 +140,12 @@ end
 ---@param enable boolean?
 function FeatureFlags:set(name, enable)
   local fflag = self:get(name)
-  fflag.gl_enabled = enable or false
+  fflag.enabled = enable or false
   self.entries[name] = fflag
 end
+
+FeatureFlags:add('Exrc', {
+  enable = true,
+})
+
+vim.o.exrc = true

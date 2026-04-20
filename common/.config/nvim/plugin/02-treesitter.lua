@@ -29,15 +29,6 @@ local languages = {
 
 VimRc.now_if_args(function()
   -- Define hook to update tree-sitter parsers after plugin is updated
-  local ts_update = function()
-    vim.cmd 'TSUpdate'
-  end
-  VimRc.on_packchanged('nvim-treesitter', { 'update' }, ts_update, ':TSUpdate')
-
-  vim.pack.add {
-    'https://github.com/nvim-treesitter/nvim-treesitter',
-    'https://github.com/nvim-treesitter/nvim-treesitter-textobjects',
-  }
 
   local isnt_installed = function(lang)
     return #vim.api.nvim_get_runtime_file('parser/' .. lang .. '.*', false) == 0
@@ -65,14 +56,6 @@ VimRc.now_if_args(function()
   VimRc.new_autocmd('FileType', ts_start, vim._ensure_list(filetypes), 'Start tree-sitter')
   VimRc.g_mise_injections = true
   vim.treesitter.query.add_predicate('is-mise?', function(_, _, _, _, _)
-    --   local filepath = vim.api.nvim_buf_get_name(tonumber(bufnr) or 0)
-    --   local filename = vim.fn.fnamemodify(filepath, ':t')
-    --   for dir in vim.fs.parents(filepath) do
-    --     if dir:match 'mise-tasks' ~= nil then
-    --       return true
-    --     end
-    --   end
-    -- return string.match(filename, '.*mise.*%.toml$') ~= nil
     return VimRc.g_mise_injections
   end, { force = true, all = false })
   vim.api.nvim_create_user_command('TSFolds', function()
@@ -103,6 +86,9 @@ VimRc.now_if_args(function()
       :totable()
     VimRc.write_to_buffer(lines, 'VimRc-treesitter-list')
   end
-
-  vim.api.nvim_create_user_command('TSList', treesitter_list, { desc = 'Treesitter Parsers List' })
+  local usercmd = vim.api.nvim_create_user_command
+  usercmd('TSList', treesitter_list, { desc = 'Treesitter Parsers List' })
+  usercmd('TSObjCheck', function(args)
+    vim.print(vim.inspect(vim.treesitter.query.get_files(args.args[1], 'textobjects')))
+  end, { nargs = 1, complete = 'filetype', desc = 'Treesitter Check TextObjecs' })
 end)

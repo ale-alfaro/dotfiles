@@ -1,13 +1,77 @@
-local now = VimRc.now
+VimRc.now(function()
+  ---
+  --- WARNING: This is an experimental feature intended to replace the builtin message + cmdline
+  --- presentation layer.
+  ---
+  --- To enable this feature (default opts shown):
+  --- ```lua
+  --- require('vim._core.ui2').enable({
+  ---   enable = true, -- Whether to enable or disable the UI.
+  ---   msg = { -- Options related to the message module.
+  ---     ---@type 'cmd'|'msg' Default message target, either in the
+  ---     ---cmdline or in a separate ephemeral message window.
+  ---     ---@type string|table<string, 'cmd'|'msg'|'pager'> Default message target
+  ---     ---or table mapping |ui-messages| kinds and triggers to a target.
+  ---     targets = 'cmd',
+  ---     cmd = { -- Options related to messages in the cmdline window.
+  ---       height = 0.5 -- Maximum height while expanded for messages beyond 'cmdheight'.
+  ---     },
+  ---     dialog = { -- Options related to dialog window.
+  ---       height = 0.5, -- Maximum height.
+  ---     },
+  ---     msg = { -- Options related to msg window.
+  ---       height = 0.5, -- Maximum height.
+  ---       timeout = 4000, -- Time a message is visible in the message window.
+  ---     },
+  ---     pager = { -- Options related to message window.
+  ---       height = 1, -- Maximum height.
+  ---     },
+  ---   },
+  --- })
+  --- ```
+  ---
+  --- There are four special windows/buffers for presenting messages and cmdline:
+  --- - "cmd": Cmdline. Also used for 'showcmd', 'showmode', 'ruler', and messages by default.
+  --- - "msg": Message window, shows ephemeral messages useful for 'cmdheight' == 0.
+  --- - "pager": Pager window, shows |:messages| and certain messages that are never "collapsed".
+  --- - "dialog": Dialog window, shows modal prompts that expect user input.
+  ---
+  --- The buffer 'filetype' is set to the above-listed id ("cmd", "msg", …).
+  --- Handle the |FileType| event to configure any local options for these
+  --- windows and their respective buffers.
+  ---
+  --- Unlike the legacy |hit-enter| prompt, messages exceeding 'cmdheight' are
+  --- instead "collapsed", followed by a `[+x]` "spill" indicator, where `x`
+  --- indicates the spilled lines. To see the full messages, do either:
+  --- - ENTER immediately after interactive |:| cmdline shows a message and returns to |Normal-mode|.
+  --- - |g<| at any time.
+  require('vim._core.ui2').enable {
+    enable = true,
+    msg = { -- Options related to the message module.
+      target = 'cmd', ---@type 'cmd'|'msg' Default message target if not present in targets.
+      targets = {}, ---@type table<string, 'cmd'|'msg'|'pager'> Kind specific message targets.
+      cmd = { -- Options related to messages in the cmdline window.
+        height = 0.5, -- Maximum height while expanded for messages beyond 'cmdheight'.
+      },
+      dialog = { -- Options related to dialog window.
+        height = 0.5, -- Maximum height.
+      },
+      msg = { -- Options related to msg window.
+        height = 0.5, -- Maximum height.
+        timeout = 4000, -- Time a message is visible in the message window.
+      },
+      pager = { -- Options related to message window.
+        height = 1, -- Maximum height.
+      },
+    },
+  }
+end)
 
 VimRc.icons = require 'custom.icons'
-now(function()
-  vim.pack.add {
-    'https://github.com/rebelot/kanagawa.nvim',
-  }
+VimRc.now(function()
   vim.cmd 'colorscheme kanagawa'
 end)
-now(function()
+VimRc.now(function()
   -- Set up to not prefer extension-based icon for some extensions
   local ext3_blocklist = { scm = true, txt = true, yml = true }
   local ext4_blocklist = { json = true, yaml = true }
@@ -19,7 +83,7 @@ now(function()
   }
   mini_icons.mock_nvim_web_devicons()
 end)
-now(function()
+VimRc.now(function()
   local starter = require 'mini.starter'
   starter.setup {
     items = {
@@ -37,11 +101,11 @@ now(function()
   }
 end)
 
-now(function()
+VimRc.now(function()
   require('mini.statusline').setup()
 end)
 ---
 
-now(function()
+VimRc.now(function()
   require('custom.notify').setup()
 end)

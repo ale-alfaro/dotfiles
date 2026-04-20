@@ -13,7 +13,7 @@ require('mini.test').setup()
 -- Provide FeatureFlags stub so format.lua can call setup()
 ---@class FeatureFlag
 ---@field name string
----@field gl_enabled boolean
+---@field enabled boolean
 _G.FeatureFlags = {
   entries = {},
 }
@@ -21,17 +21,17 @@ FeatureFlags.__index = FeatureFlags
 
 function FeatureFlags:add(feature)
   if type(feature) == 'string' then
-    feature = { name = feature, gl_enabled = false }
+    feature = { name = feature, enabled = false }
   end
   self.entries[feature.name] = feature
   return feature
 end
 
 function FeatureFlags:get(name)
-  return self.entries[name] or self:add { name = name, gl_enabled = false }
+  return self.entries[name] or self:add { name = name, enabled = false }
 end
 
 function FeatureFlags:set(name, enable)
   local f = self:get(name)
-  f.gl_enabled = enable or false
+  f.enabled = enable or false
 end
