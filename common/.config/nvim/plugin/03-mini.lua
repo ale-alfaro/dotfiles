@@ -318,7 +318,7 @@ VimRc.later(function()
 
     -- Module mappings. Use `''` (empty string) to disable one.
     mappings = {
-      start_jumping = '<CR>',
+      start_jumping = '<S-CR>',
     },
 
     -- Whether to disable showing non-error feedback
@@ -341,17 +341,9 @@ end)
 VimRc.later(function()
   require('mini.splitjoin').setup()
 end)
-
--- Surround actions: add/delete/replace/find/highlight. Working with surroundings
--- is surprisingly common: surround word with quotes, replace `)` with `]`, etc.
--- This module comes with many built-in surroundings, each identified by a single
--- character. It searches only for surrounding that covers cursor and comes with
--- a special "next" / "last" versions of actions to search forward or backward
--- (just like 'mini.ai'). All text editing actions are dot-repeatable (see `:h .`).
 --
 -- Example usage (this may feel intimidating at first, but after practice it
 -- becomes second nature during text editing):
--- - `saiw)` - *s*urround *a*dd for *i*nside *w*ord parenthesis (`)`)
 -- - `sdf`   - *s*urround *d*elete *f*unction call (like `f(var)` -> `var`)
 -- - `srb[`  - *s*urround *r*eplace *b*racket (any of [], (), {}) with padded `[`
 -- - `sf*`   - *s*urround *f*ind right part of `*` pair (like bold in markdown)
@@ -360,11 +352,92 @@ end)
 -- - `sdl'`  - *s*urround *d*elete *l*ast quote pair (`'`)
 -- - `vaWsa<Space>` - *v*isually select *a*round *W*ORD and *s*urround *a*dd
 --                    spaces (`<Space>`)
---
+---
+--- Regular mappings:
+--- - `saiw?[[<CR>]]<CR>` - add (`sa`) for inner word (`iw`) interactive
+---   surrounding (`?`): `[[` for left and `]]` for right.
+--- - `2sdf` - delete (`sd`) second (`2`) surrounding function call (`f`).
+--- - `sr)tdiv<CR>` - replace (`sr`) surrounding parenthesis (`)`) with tag
+---   (`t`) with identifier 'div' (`div<CR>` in command line prompt).
+--- - `sff` - find right (`sf`) part of surrounding function call (`f`).
+--- - `sh}` - highlight (`sh`) for a brief period of time surrounding curly
+---   brackets (`}`).
+---
+--- Extended mappings (temporary force "prev"/"next" search methods):
+--- - `sdnf` - delete (`sd`) next (`n`) function call (`f`).
+--- - `srlf(` - replace (`sr`) last (`l`) function call (`f`) with padded
+---   bracket (`(`).
+--- - `2sfnt` - find (`sf`) second (`2`) next (`n`) tag (`t`).
+--- - `2shl}` - highlight (`sh`) last (`l`) second (`2`) curly bracket (`}`).
 -- See also:
--- - `:h MiniSurround-builtin-surroundings` - list of all supported surroundings
--- - `:h MiniSurround-surrounding-specification` - examples of custom surroundings
--- - `:h MiniSurround-vim-surround-config` - alternative set of action mappings
+--- `Key` represents the surrounding identifier: single character which should
+--  be typed after action mappings (see "Mappings" in |MiniSurround.config|).
+--- `Name` is a description of surrounding.
+--- `Example line` contains a string for which examples are constructed. The
+--  `*` denotes the cursor position over `a` character.
+--- `Delete` shows the result of typing `sd` followed by surrounding identifier.
+--  It aims to demonstrate "input" surrounding which is also used in replace
+--  with `sr` (surrounding id is typed first), highlight with `sh`, find with
+--  `sf` and `sF`.
+--- `Replace` shows the result of typing `sr!` followed by surrounding
+--  identifier (with possible follow up from user). It aims to demonstrate
+--  "output" surrounding which is also used in adding with `sa` (followed by
+--  textobject/motion or in Visual mode).
+--
+--Example: typing `sd)` with cursor on `*` (covers `a` character) changes line
+--`!( *a (bb) )!` into `! aa (bb) !`. Typing `sr!)` changes same initial line
+--into `(( aa (bb) ))`.
+-->
+-- ┌───┬───────────────┬───────────────┬─────────────┬─────────────────┐
+-- │Key│     Name      │  Example line │    Delete   │     Replace     │
+-- ├───┴───────────────┴───────────────┴─────────────┴─────────────────┤
+-- ├┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┤
+-- │ ( │  Balanced ()  │ !( *a (bb) )! │  !aa (bb)!  │ ( ( aa (bb) ) ) │
+-- │ [ │  Balanced []  │ ![ *a [bb] ]! │  !aa [bb]!  │ [ [ aa [bb] ] ] │
+-- │ { │  Balanced {}  │ !{ *a {bb} }! │  !aa {bb}!  │ { { aa {bb} } } │
+-- │ < │  Balanced <>  │ !< *a <bb> >! │  !aa <bb>!  │ < < aa <bb> > > │
+-- ├┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┤
+-- │ ) │  Balanced ()  │ !( *a (bb) )! │ ! aa (bb) ! │ (( aa (bb) ))   │
+-- │ ] │  Balanced []  │ ![ *a [bb] ]! │ ! aa [bb] ! │ [[ aa [bb] ]]   │
+-- │ } │  Balanced {}  │ !{ *a {bb} }! │ ! aa {bb} ! │ {{ aa {bb} }}   │
+-- │ > │  Balanced <>  │ !< *a <bb> >! │ ! aa <bb> ! │ << aa <bb> >>   │
+-- │ b │  Alias for    │ !( *a {bb} )! │ ! aa {bb} ! │ (( aa {bb} ))   │
+-- │   │  ), ], or }   │               │             │                 │
+-- ├┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┤
+-- │ q │  Alias for    │ !'aa'*a'aa'!  │ !'aaaaaa'!  │ "'aa'aa'aa'"    │
+-- │   │  ", ', or `   │               │             │                 │
+-- ├┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┤
+-- │ ? │  User prompt  │ !e * o!       │ ! a !       │ ee a oo         │
+-- │   │(typed e and o)│               │             │                 │
+-- ├┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┤
+-- │ t │      Tag      │ !<x>*</x>!    │ !a!         │ <y><x>a</x></y> │
+-- │   │               │               │             │ (typed y)       │
+-- ├┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┤
+-- │ f │ Function call │ !f(*a, bb)!   │ !aa, bb!    │ g(f(*a, bb))    │
+-- │   │               │               │             │ (typed g)       │
+-- ├┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┤
+-- │   │    Default    │ !_a*a_!       │ !aaa!       │ __aaa__         │
+-- │   │   (typed _)   │               │             │                 │
+-- └┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┘
+--
+--
+--                                               *MiniSurround-count-with-actions*
+-- |[count]| is supported by all actions in the following ways:
+--
+-- * In add, two types of `[count]` is supported in Normal mode:
+--  `[count1]sa[count2][textobject]`. The `[count1]` defines how many times
+--  left and right parts of output surrounding will be repeated and `[count2]` is
+--  used for textobject.
+--  In Visual mode `[count]` is treated as `[count1]`.
+--  Example: `2sa3aw)` and `v3aw2sa)` will result into textobject `3aw` being
+--  surrounded by `((` and `))`.
+--
+--- In delete/replace/find/highlight `[count]` means "find n-th surrounding
+--  and execute operator on it".
+--  Example: `2sd)` on line `(a(b(c)b)a)` with cursor on `c` will result into
+--  `(ab(c)ba)` (and not in `(abcba)` if it would have meant "delete n times").
+
+--
 VimRc.later(function()
   local surround = require 'mini.surround'
   local ts_input = surround.gen_spec.input.treesitter
@@ -374,19 +447,6 @@ VimRc.later(function()
         input = ts_input({ outer = '@call.outer', inner = '@calll.inner' }, { use_nvim_treesitter = true }),
       },
     },
-    mappings = {
-      add = 'ys',
-      delete = 'ds',
-      find = '',
-      find_left = '',
-      highlight = '',
-      replace = 'cs',
-
-      -- Add this only if you don't want to use extended mappings
-      suffix_last = '',
-      suffix_next = '',
-    },
-    search_method = 'cover_or_next',
   }
 end)
 

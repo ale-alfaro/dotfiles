@@ -19,6 +19,7 @@ local q_close_ft = {
   'qf',
   'scratch',
   'vimrc',
+  'scratch',
   'minigit',
   'ministarter',
   'Overseer*',

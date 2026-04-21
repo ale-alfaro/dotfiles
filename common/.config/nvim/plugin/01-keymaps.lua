@@ -156,73 +156,66 @@
 --
 -- ]--
 
----@param mode (string|string[])?
----@param lhs string
----@param rhs string|fun(args:table)
-----@param opts vim.keymap.set.Opts?
-local function map(lhs, rhs, mode, opts)
-  vim.validate('mode', mode, { 'string', 'table' }, true)
-  vim.validate('lhs', lhs, 'string')
-  vim.validate('rhs', rhs, { 'string', 'function' })
-  vim.validate('opts', opts, 'table', true)
-  opts = opts or {}
-  mode = mode or 'n'
-  vim.keymap.set(mode, lhs, rhs, opts)
-end
-local nmap_leader = function(key, cmd, desc)
-  map('<leader>' .. key, cmd, 'n', { desc = desc })
-end
-
 -- ──────────────────────────────────────────────────────────────
 --  switch_case  — toggle camelCase ↔ snake_case under cursor
 -- ──────────────────────────────────────────────────────────────
 
-local function switch_case()
-  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-  local word = vim.fn.expand '<cword>'
-  local word_start = vim.fn.matchstrpos(vim.fn.getline '.', '\\k*\\%' .. (col + 1) .. 'c\\k*')[2]
+--[[
+--
+--1.7 WHAT KEYS TO MAP					*map-which-keys*
 
-  if word:find '[a-z][A-Z]' then
-    local snake = word:gsub('([a-z])([A-Z])', '%1_%2'):lower()
-    vim.api.nvim_buf_set_text(0, line - 1, word_start, line - 1, word_start + #word, { snake })
-  elseif word:find '_[a-z]' then
-    local camel = word:gsub('(_)([a-z])', function(_, l)
-      return l:upper()
-    end)
-    vim.api.nvim_buf_set_text(0, line - 1, word_start, line - 1, word_start + #word, { camel })
-  else
-    vim.notify('Not camelCase or snake_case', vim.log.levels.WARN)
-  end
-end
+If you are going to map something, you will need to choose which key(s) to use
+for the {lhs}.  You will have to avoid keys that are used for Vim commands,
+otherwise you would not be able to use those commands anymore.  Here are a few
+suggestions:
+- Function keys <F2>, <F3>, etc..  Also the shifted function keys <S-F1>,
+  <S-F2>, etc.  Note that <F1> is already used for the help command.
+- Meta-keys (with the ALT key pressed).  Depending on your keyboard accented
+  characters may be used as well. |:map-alt-keys|
+- Use the '_' or ',' character and then any other character.  The "_" and ","
+  commands do exist in Vim (see |_| and |,|), but you probably never use them.
+- Use a key that is a synonym for another command.  For example: CTRL-P and
+  CTRL-N.  Use an extra character to allow more mappings.
+- The key defined by <Leader> and one or more other keys.  This is especially
+  useful in scripts. |mapleader|
 
-map('q', '<nop>', nil, { noremap = true })
-map('j', 'gj', { 'n', 'x' }, { desc = 'Navigate down (visual line)' })
-map('k', 'gk', { 'n', 'x' }, { desc = 'Navigate up (visual line)' })
-map('<Down>', 'gj', { 'n', 'x' }, { desc = 'Navigate down (visual line)' })
-map('gk', '<Up>', { 'n', 'x' }, { desc = 'Navigate up (visual line)' })
-map('<M-Up>', '<C-o>:move -2<cr>', 'i', { desc = 'Move Line Up' })
-map('<M-Down>', '<C-o>:move +1<cr>', 'i', { desc = 'Move Line Down' })
-map('<C-s>', '<Cmd>silent! update | redraw<CR>', nil, { desc = 'Save', noremap = true })
-map('<C-s>', '<Esc><Cmd>silent! update | redraw<CR>', { 'x', 'i' }, { desc = 'Save and go to Normal mode', noremap = true })
-map('<M-r>', '<Cmd>restart<CR>', nil, { desc = 'Restart', noremap = true })
-map('<C-q>', '<Cmd>q<CR>', nil, { desc = 'Quit', noremap = true })
+See the file "index" for keys that are not used and thus can be mapped without
+losing any builtin function.  You can also use ":help {key}^D" to find out if
+a key is used for some command.  ({key} is the specific key you want to find
+out about, ^D is CTRL-D).
+--
+--]]
 
--- Misc
-nmap_leader('so', '<Cmd>source %<CR>', 'Source Current buffer')
-map('<', '<gv', 'v')
-map('>', '>gv', 'v')
-map('<C-Left>', '<C-w>h', nil, { desc = 'Focus window left' })
-map('<C-Right>', '<C-w>l', nil, { desc = 'Focus window right' })
-map('<C-Up>', '<C-w>k', nil, { desc = 'Focus window up' })
-map('<C-Down>', '<C-w>j', nil, { desc = 'Focus window up' })
+VimRc.map({ lhs = 'q', rhs = '<nop>' }, { noremap = true })
+VimRc.map({ mode = 'v', lhs = '<', rhs = '<gv' }, { noremap = true })
+VimRc.map({ mode = 'v', lhs = '>', rhs = '>gv' }, { noremap = true })
+VimRc.map({ mode = { 'n', 'x' }, lhs = '<Down>', rhs = 'gj' }, 'Navigate down (visual line)')
+VimRc.map({ mode = { 'n', 'x' }, lhs = '<Up>', rhs = 'gk' }, 'Navigate down (visual line)')
+VimRc.map({ lhs = '<C-s>', rhs = '<Cmd>silent! update | redraw<CR>' }, { noremap = true })
+VimRc.map({ mode = { 'x', 'i' }, lhs = '<C-s>', rhs = '<Esc><Cmd>silent! update | redraw<CR>' }, { noremap = true })
+VimRc.map({ lhs = '<C-q>', rhs = '<Cmd>q<CR>' }, { noremap = true })
+VimRc.map({ lhs = '<M-q>', rhs = '<Cmd>qall!<CR>' }, { desc = 'Quit all!', noremap = true })
+-- map('<C-s>', '<Esc><Cmd>silent! update | redraw<CR>', { 'x', 'i' }, { desc = 'Save and go to Normal mode', noremap = true })
+-- map('<C-q>', '<Cmd>q<CR>', { desc = 'Quit', noremap = true })
+-- -- Misc
+-- nmap_leader('so', '<Cmd>source %<CR>', 'Source Current buffer')
+-- map('<', '<gv', 'v')
+-- map('>', '>gv', 'v')
+-- map('<C-Left>', '<C-w>h', nil, { desc = 'Focus window left' })
+-- map('<C-Right>', '<C-w>l', nil, { desc = 'Focus window right' })
+-- map('<C-Up>', '<C-w>k', nil, { desc = 'Focus window up' })
+-- map('<C-Down>', '<C-w>j', nil, { desc = 'Focus window up' })
 
-local new_scratch_buffer = function()
-  vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(true, true))
+---@param key string
+---@param keycmd string|fun()
+---@param desc string
+local nmap_leader = function(key, keycmd, desc)
+  VimRc.map({ mode = 'n', lhs = '<leader>' .. key, rhs = keycmd }, { desc = desc })
 end
 nmap_leader('ba', '<Cmd>b#<CR>', 'Alternate')
 nmap_leader('bd', '<Cmd>lua MiniBufremove.delete()<CR>', 'Delete')
 nmap_leader('bD', '<Cmd>lua MiniBufremove.delete(0, true)<CR>', 'Delete!')
-nmap_leader('bs', new_scratch_buffer, 'Scratch')
+-- nmap_leader('bs', new_scratch_buffer, 'Scratch')
 nmap_leader('dd', '<cmd>:%bdelete|edit #|normal<cr><CR>', 'Delete All')
 nmap_leader('dw', '<Cmd>lua MiniBufremove.wipeout()<CR>', 'Wipeout')
 nmap_leader('dW', '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', 'Wipeout!')
@@ -243,9 +236,10 @@ local session_new = 'vim.ui.input({ prompt = "Session name: " }, MiniSessions.wr
 
 nmap_leader('sd', '<Cmd>lua MiniSessions.select("delete")<CR>', 'Delete')
 nmap_leader('sn', '<Cmd>lua ' .. session_new .. '<CR>', 'New')
+VimRc.map({ lhs = '<M-r>', rhs = '<Cmd>lua MiniSessions.restart()<CR>' }, 'Restart')
 nmap_leader('sr', '<Cmd>lua MiniSessions.select("read")<CR>', 'Read')
-nmap_leader('sR', '<Cmd>lua MiniSessions.restart()<CR>', 'Restart')
-nmap_leader('sw', '<Cmd>lua MiniSessions.write()<CR>', 'Write current')
+nmap_leader('ss', '<Cmd>lua MiniSessions.write()<CR>', 'Write current')
+-- map('<M-r>', '<Cmd>restart<CR>', nil, { desc = 'Restart', noremap = true })
 
 -- v is for 'Visits'. Common usage:
 -- - `<Leader>vv` - add    "core" label to current file.
@@ -271,4 +265,3 @@ nmap_leader('vL', '<Cmd>lua MiniVisits.remove_label()<CR>', 'Remove label')
 nmap_leader('or', '<Cmd>lua MiniMisc.resize_window()<CR>', 'Resize to default width')
 nmap_leader('ot', '<Cmd>lua MiniTrailspace.trim()<CR>', 'Trim trailspace')
 nmap_leader('oz', '<Cmd>lua MiniMisc.zoom()<CR>', 'Zoom toggle')
-nmap_leader('oc', switch_case, 'toggle camelCase/snake_case')

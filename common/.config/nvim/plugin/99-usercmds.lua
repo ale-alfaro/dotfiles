@@ -115,8 +115,8 @@ end
 ---@param name string
 ---@param cb string|fun(args: vim.api.keyset.create_user_command.command_args) Replacement command to execute when this user command is executed. When called
 ---@param desc string
----@param nargs integer
----@param complete fun(ArgLead:string,CmdLine:string,CursorPos:integer)|fun()
+---@param nargs integer|string
+---@param complete fun(ArgLead:string,CmdLine:string,CursorPos:integer)|string[]
 --- ArgLead		the leading portion of the argument currently being
 ---			completed on; note that this only captures the current
 ---			space-separated word, even when using "-nargs=1"
@@ -126,59 +126,32 @@ local function usercmd_args_comp(name, cb, desc, nargs, complete)
   vim.api.nvim_create_user_command(name, cb, {
     desc = desc,
     nargs = nargs,
-    complete = complete,
+    complete = (vim.islist(complete)) and function(args, cmdline, cursorpos)
+      return complete
+    end or complete,
   })
 end
-usercmd('CopyCwd', function()
-  vim.cmd [[let @+=expand("%:p")]]
-end, 'Copy Cwd Path')
+usercmd_args_comp('CopyBufPath', function(ev)
+  local args = ev.args or { 'abs' }
+  local path
+  if args[1] == 'dir' then
+    path = vim.fn.expand '%:p:h'
+  elseif args[1] == 'abs' then
+    path = vim.fn.expand '%:p'
+  elseif args[1] == 'rel' then
+    path = vim.fn.expand '%'
+  end
+  if path then
+    vim.fn.setreg('+', path)
+    vim.echo("Set register '+' to " .. path)
+  end
+end, 'Copy Cwd Path', 1, { 'rel', 'abs', 'dir' })
 
-vim.cmd [[
-	set findfunc=Find
-	func Find(arg, _)
-	  if empty(s:filescache)
-	    let s:filescache = globpath('.', '**', 1, 1)
-	    call filter(s:filescache, '!isdirectory(v:val)')
-	    call map(s:filescache, "fnamemodify(v:val, ':.')")
-	  endif
-	  return a:arg == '' ? s:filescache : matchfuzzy(s:filescache, a:arg)
-	endfunc
-	let s:filescache = []
-	autocmd CmdlineEnter : let s:filescache = []
-
-  	command! -nargs=+ -complete=customlist,<SID>Grep
-		\ Grep call <SID>VisitFile()
-
-	func s:Grep(arglead, cmdline, cursorpos)
-	  if match(&grepprg, '\$\*') == -1 | let &grepprg ..= ' $*' | endif
-	  let cmd = substitute(&grepprg, '\$\*', shellescape(escape(a:arglead, '\')), '')
-	  return len(a:arglead) > 1 ? systemlist(cmd) : []
-	endfunc
-
-	func s:VisitFile()
-	  let item = getqflist(#{lines: [s:selected]}).items[0]
-	  let pos  = '[0,\ item.lnum,\ item.col,\ 0]'
-	  exe $':b +call\ setpos(".",\ {pos}) {item.bufnr}'
-	  call setbufvar(item.bufnr, '&buflisted', 1)
-	endfunc
-
-	autocmd CmdlineLeavePre :
-	      \ if get(cmdcomplete_info(), 'matches', []) != [] |
-	      \   let s:info = cmdcomplete_info() |
-	      \   if getcmdline() =~ '^\s*fin\%[d]\s' && s:info.selected == -1 |
-	      \     call setcmdline($'find {s:info.matches[0]}') |
-	      \   endif |
-	      \   if getcmdline() =~ '^\s*Grep\s' |
-	      \     let s:selected = s:info.selected != -1
-	      \         ? s:info.matches[s:info.selected] : s:info.matches[0] |
-	      \     call setcmdline(s:info.cmdline_orig) |
-	      \   endif |
-	      \ endif
-]]
 ---@param args string,
 ---@param cmdline string
 ---@param cursorpos integer
 ---@return string[]
+---@diagnostic disable-next-line: unused-local
 local get_plugins = function(args, cmdline, cursorpos)
   return vim
     .iter(vim.pack.get())
@@ -239,6 +212,9 @@ end
 
 usercmd('UnmodBuf', show_modified_buffers, 'show unsaved buffers in quickfix')
 
+-- ──────────────────────────────────────────────────────────────
+--  Vim.pack cmd
+-- ──────────────────────────────────────────────────────────────
 usercmd_args_comp('PackOpen', function(opts)
   local ok, plug = pcall(vim.pack.get, { opts.fargs[1] })
   if ok then
@@ -262,86 +238,57 @@ local function write_plug_info(p)
 
   return table.concat(parts, '')
 end
-local function pack_list()
-  ---@type vim.pack.PlugData[]
+
+usercmd_args_comp('Pack', function(args)
+  local arg = (args.args or {})[1]
   local plugins = vim.pack.get()
-  ---@type string[]
   local active = vim
-    .iter(plugins)
-    :filter(function(p)
-      return p.active
-    end)
-    :map(function(plug)
-      return write_plug_info(plug)
+    .iter()
+    :filter(function(pspec)
+      return pspec.active
     end)
     :totable()
-  active = vim.list_extend({ 'Active Plugins List:' }, active)
+
   local inactive = vim
     .iter(plugins)
     :filter(function(p)
       return not p.active
     end)
-    :map(function(plug)
-      return write_plug_info(plug)
-    end)
     :totable()
-  local lines = vim.list_extend(active, vim.list_extend({ 'INACTIVE Plugins List:' }, inactive))
 
-  local bufnr = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_buf_set_name(bufnr, 'vim.pack.list#' .. bufnr)
-  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(table.concat(lines, '\n ------ \n'), '\n'))
-  vim.cmd.sbuffer { bufnr, mods = { tab = vim.fn.tabpagenr() } }
-end
-usercmd('PackList', pack_list, 'List plugins installed with vim.pack')
+  if arg == 'clean' then
+    vim.pack.del(inactive)
+  elseif string.find(arg, '^up') then
+    vim.cmd.echo(string.format('Plugins count: %d', #active))
+    vim.cmd.echo(table.concat(active, '\n'))
+    vim.pack.update(active)
+  elseif arg == 'ls' or arg == 'list' then
+    local lines = {
+      'Active Plugins List:',
+      unpack(vim.iter(active):map(write_plug_info):totable()),
+      'INACTIVE Plugins List:',
+      unpack(vim.iter(inactive):map(write_plug_info):totable()),
+    }
 
-usercmd_args_comp('PackClean', function(opts)
-  vim
-    .iter(vim.pack.get())
-    :filter(function(x)
-      return not x.active
-    end)
-    :map(function(x)
-      return x.spec.name
-    end)
-    :totable()
-end, 'Delete Unactive plugins', 1, get_plugins)
-
-usercmd('PackUpdate', function()
-  local plugins = vim
-    .iter(vim.pack.get())
-    :filter(function(pspec)
-      return pspec.active
-    end)
-    :totable()
-  if plugins then
-    vim.cmd.echo(string.format('Plugins count: %d', #plugins))
-    vim.cmd.echo(table.concat(plugins, '\n'))
-    vim.pack.update(plugins)
+    VimRc.show_in_split(lines)
+  else
+    VimRc.err('Unknown Pack arg: ' .. arg)
   end
-end, 'Update active plugins')
+end, 'vim.pack Interface', 1, { 'list', 'update', 'clean' })
 
-vim.api.nvim_create_user_command('Lsp', function(args)
-  local cmd = args.args
-  if cmd then
-    if cmd == 'log' then
-      local log = vim.lsp.log.get_filename()
-      vim.api.nvim_cmd({
-        cmd = 'edit',
-        args = { log },
-      }, {})
-    elseif cmd == 'clean' then
-      local log = vim.lsp.log.get_filename()
-      vim.cmd(string.format('!rm %q', log))
-      vim.cmd(string.format('!touch  %q', log))
-    elseif cmd == 'info' then
-      vim.cmd ':checkhealth vim.lsp'
-    end
+usercmd_args_comp('Lsp', function(args)
+  local arg = (args.args or {})[1]
+  if arg == 'log' then
+    local log = vim.lsp.log.get_filename()
+    vim.api.nvim_cmd({
+      cmd = 'edit',
+      args = { log },
+    }, {})
+  elseif arg == 'clean' then
+    local log = vim.lsp.log.get_filename()
+    vim.cmd(string.format('!rm %q', log))
+    vim.cmd(string.format('!touch  %q', log))
+  elseif arg == 'info' then
+    vim.cmd ':checkhealth vim.lsp'
   end
-end, {
-  nargs = 1,
-  desc = 'Lsp Commands',
-  complete = function(ArgLead, CmdLine, CursorPos)
-    -- return completion candidates as a list-like table
-    return { 'log', 'clean', 'info' }
-  end,
-})
+end, 'Lsp Commands', 1, { 'log', 'clean', 'info' })
