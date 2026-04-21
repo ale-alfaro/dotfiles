@@ -1,0 +1,27 @@
+#!/usr/bin/env zsh
+local -r info_preview="pacman -Si {}"
+local -r info_preview_header="ALT+F for Pkg Files"
+local -r info_preview_prompt=" Pkg Info > "
+
+local -r file_preview="pacman -Fl {} | awk '{ print \$2 }'"
+local -r file_preview_header="ALT+I for Pkg Info"
+local -r file_preview_prompt="Pkg Files > "
+
+pkgs=$(
+  pacman -Slq |
+    fzf \
+      -q "$1" \
+      --ansi \
+      --multi \
+      --tiebreak=begin \
+      --prompt="${info_preview_prompt?}" \
+      --header="${info_preview_header?}" \
+      --preview-window '50%,rounded,<50(up,85%,border-bottom)' \
+      --preview "${info_preview?}" \
+      --bind "alt-f:+change-preview(${file_preview?})+change-prompt(${file_preview_prompt?})+change-header(${file_preview_header?})" \
+      --bind "alt-i:+change-preview(${info_preview?})+change-prompt(${info_preview_prompt?})+change-header(${info_preview_header?})"
+)
+if [[ -n "$pkgs" ]]; then
+  print -rl "Installing pkgs: $pkgs"
+  sudo pacman -S $pkgs
+fi

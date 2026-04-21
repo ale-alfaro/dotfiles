@@ -3,6 +3,7 @@
 # Environment Variables
 #######################################################
 export BAT_THEME=ansi
+export PAGER="bat"
 export MANPAGER="nvim +Man!"
 # zsh options
 export HISTFILE="$XDG_DATA_HOME/zsh/history"
@@ -58,4 +59,3 @@ fi
 
 export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/ripgreprc"
 export OBSIDIAN_HOME="$HOME/Documents/Obsidian"
-export STARSHIP_CONFIG="$XDG_CONFIG_HOME/starship/starship.toml"

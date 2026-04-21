@@ -7,4 +7,3 @@
 # The file should be in this toml format:
 clang = "https://github.com/mise-plugins/vfox-clang.git"
 zephyr = "https://github.com/ale-alfaro/vfox-zephyr-sdk"
-ncs = "https://github.com/ale-alfaro/vfox-ncs"

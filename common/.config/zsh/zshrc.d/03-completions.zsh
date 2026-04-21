@@ -90,7 +90,6 @@ zstyle ':completion:*:warnings' format ' no matches found %f'
 zstyle ':completion:*:default' list-prompt '%S%M matches%s'
 
 source <(fzf --zsh)
-[[ -r /usr/share/fzf/key-bindings.zsh ]] && source /usr/share/fzf/key-bindings.zsh
 #
 plugins=(
   Aloxaf/fzf-tab

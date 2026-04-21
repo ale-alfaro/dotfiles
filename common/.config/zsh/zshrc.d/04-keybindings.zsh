@@ -30,8 +30,8 @@ key[Control-Right]="${terminfo[kRIT5]}"
 [[ -n "${key[Control-Right]}" ]] && bindkey -- "${key[Control-Right]}" end-of-line
 [[ -n "${key[Backspace]}" ]] && bindkey -- "${key[Backspace]}"  backward-delete-char
 [[ -n "${key[Delete]}"    ]] && bindkey -- "${key[Delete]}"     delete-char
-[[ -n "${key[Up]}"        ]] && bindkey -- "${key[Up]}"         up-line-or-history
-[[ -n "${key[Down]}"      ]] && bindkey -- "${key[Down]}"       down-line-or-history
+# [[ -n "${key[Up]}"        ]] && bindkey -- "${key[Up]}"         up-line-or-history
+# [[ -n "${key[Down]}"      ]] && bindkey -- "${key[Down]}"       down-line-or-history
 [[ -n "${key[Left]}"      ]] && bindkey -- "${key[Left]}"       backward-char
 [[ -n "${key[Right]}"     ]] && bindkey -- "${key[Right]}"      forward-char
 [[ -n "${key[PageUp]}"    ]] && bindkey -- "${key[PageUp]}"     beginning-of-buffer-or-history
@@ -47,3 +47,11 @@ if (( ${+terminfo[smkx]} && ${+terminfo[rmkx]} )); then
     add-zle-hook-widget -Uz zle-line-init zle_application_mode_start
     add-zle-hook-widget -Uz zle-line-finish zle_application_mode_stop
 fi
+
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+
+[[ -n "${key[Up]}"   ]] && bindkey -- "${key[Up]}"   up-line-or-beginning-search
+[[ -n "${key[Down]}" ]] && bindkey -- "${key[Down]}" down-line-or-beginning-search
+

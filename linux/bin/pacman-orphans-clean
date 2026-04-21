@@ -16,6 +16,7 @@ ask_yn() {
 
 if ask_yn "Do you want to list the orphans before proceeding?"; then
   pacman -Qdttq
-  exit 0
 fi
-pacman -Qdttq | sudo pacman -Rns -
+if ask_yn "Do you want to proceed with removing all the orphans?"; then
+  pacman -Qdttq | sudo pacman -Rns -
+fi

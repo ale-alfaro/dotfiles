@@ -1,0 +1,69 @@
+
+[vars]
+jlink_5v_power_command = '''
+    power <STATE>
+    q
+'''
+jlink_vcom_command = '''
+    VCOM <STATE>
+    q
+'''
+
+
+[jlink_run]
+description = "JLink Tasks"
+usage = '''
+arg "[script]" help="JLink script"
+flag "-d --device" help="Target Device" default="NRF52840_XX"
+'''
+run = '''
+JLinkExe \
+        -device {{usage.device}} \
+        -if swd \
+        -speed 4000 \
+        -CommanderScript {{usage.script}} \
+        -nogui 1 \
+        -ExitOnError 1
+'''
+
+
+# verify-flash device:
+#     @echo "r\nh\nmem32 0x10000200 4\nq" > {{ jlink_verify_script_tmp_path }}
+#     @echo "INFO: Verifying flash on {{ device }}"...
+#     @just _jlink-run "{{ device }}" "{{ jlink_verify_script_tmp_path }}"
+#
+#
+# # jlink-status device:
+# #     @echo "{{ jlink_status_command }}"  > "{{ jlink_action_script_tmp_path }}"
+# #     @echo "INFO: Getting Device Status"
+# #     @just _jlink-run {{ device }} "{{ jlink_action_script_tmp_path }}"
+# ##### J-Link Probe Actions #####
+#
+#
+# # Toggle target power. State must be 'on' or 'off'.
+# jlink-power state:
+#     {{ if state =~ 'on&&off' { error('Invalid state') } else { '' } }}
+#     @echo "INFO: Turning target power {{ state }}"
+#     @JLinkExe \
+#       -CommanderScript "{{ replace(jlink_5v_power_command, '<STATE>', state) }}" \
+#         -nogui 1 \
+#         -ExitOnError 1
+#
+#
+# # Toggle VCOM. State must be 'enable' or 'disable'.
+# jlink-vcom state:
+#     {{ if state =~ 'enable&&disable' { error('Invalid state') } else { '' } }}
+#     @echo "INFO: Setting VCOM to {{ state }}. Power-cycle the J-Link probe for change to take effect."
+#     @JLinkExe \
+#         -CommanderScript "{{ replace(jlink_vcom_command, '<STATE>', state) }}" \
+#         -nogui 1 \
+#         -ExitOnError 1
+#
+#
+# # Show J-Link probe hardware and firmware status
+# jlink-status-probe:
+#     @echo "INFO: Getting JLink probe status"
+#     @JLinkExe \
+#         -CommanderScript "{{ jlink_probe_status_command }}" \
+#         -nogui 1 \
+#         -ExitOnError 1

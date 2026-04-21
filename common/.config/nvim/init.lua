@@ -1,19 +1,9 @@
--- Loading helpers used to organize config into fail-safe parts. Example usage:
--- - `now` - execute immediately. Use for what must be executed during startup.
---   Like colorscheme, statusline, tabline, dashboard, etc.
--- - `later` - execute a bit later. Use for things not needed during startup.
--- - `now_if_args` - use only if needed during startup when Neovim is started
---   like `nvim -- path/to/file`, but otherwise delaying is fine.
--- - Others are better used only if the above is not enough for good performance.
---   Use only if you are comfortable with adding complexity to your config:
---   - `on_event` - execute once on a first matched event. Like "delay until
---     first Insert mode enter": `on_event('InsertEnter', function() ... end)`.
---   - `on_filetype` - execute once on a first matched filetype. Like "delay
---     until first Lua file": `on_filetype('lua', function() ... end)`.
---
--- See also:
--- - `:h MiniMisc.safely()`
--- - 'plugin/30_mini.lua' and 'plugin/40_plugins.lua'
+---@class vimrc.KeyMapping
+---@field mode (string|string[])?
+---@field lhs string
+---@field rhs string|function
+---
+---
 local gh = function(repo)
   return 'https://github.com/' .. repo
 end
@@ -33,8 +23,39 @@ vim.pack.add {
   gh 'MagicDuck/grug-far.nvim',
 }
 local misc = require 'mini.misc'
+---@class VimRc : vimrc.Utils
+---@field map fun(mapping:vimrc.KeyMapping,opts:vim.keymap.set.Opts|string)
+---@field now fun(func:function)
+---@field later fun(func:function)
+---@field now_if_args fun(func:function)
+---@field on_filetype fun(ft:string,func:function)
+---@field on_event fun(evt:string,func:function)
+---@field new_autocmd fun(event:string|string[],callback:function,pattern:string|string[]?,desc:string?)
+---@field on_packchanged fun(plugin_name:string,kinds:string[],callback:function,desc:string?)
+---@field notify? fun(msg:string,lvl:string)
+_G.VimRc = _G.VimRc or require 'custom.utils' ---@type VimRc
+---
+---
+---@param mapping vimrc.KeyMapping
+---@param opts vim.keymap.set.Opts|string
+function VimRc.map(mapping, opts)
+  vim.validate('mapping', mapping, 'table')
+  vim.validate('mode', mapping.mode, { 'string', 'table' }, true)
+  vim.validate('lhs', mapping.lhs, 'string')
+  vim.validate('rhs', mapping.rhs, { 'string', 'function' })
+  vim.validate('opts', opts, { 'string', 'table' }, true)
+  local keymap_opts ---@as vim.keymap.set.Opts
+  if type(opts) == 'string' then
+    keymap_opts = { desc = opts }
+  else
+    keymap_opts = opts or {}
+  end
 
-_G.VimRc = _G.VimRc or require 'custom.utils'
+  local mode = mapping.mode or 'n'
+
+  vim.keymap.set(mode, mapping.lhs, mapping.rhs, keymap_opts)
+end
+
 VimRc.now = function(f)
   misc.safely('now', f)
 end

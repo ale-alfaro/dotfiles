@@ -16,13 +16,18 @@ source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 [[ -f $ZDOTDIR/plugins/bd.zsh ]] && source $ZDOTDIR/plugins/bd.zsh
 # Some other stuff I might remove
-safe_source mise activate zsh
-safe_source atuin init zsh
-safe_source starship init zsh
+# source <(mise activate zsh)
+alias mx='mise x'
+activate_mise() {
+  eval "$(mise activate zsh)"
+  eval "$(mise completion zsh)"
+}
+alias mise_en='activate_mise'
+# safe_source atuin init zsh
+eval "$(mx -- starship init zsh)"
 
-source <(mise completion zsh)
-source <(gh completion -s zsh)
-source <(hk completion zsh)
+# source <(gh completion -s zsh)
+# source <(hk completion zsh)
 #
 ## The hook below is to check the date updated by pacman to
 # rehash the completions after a certain time

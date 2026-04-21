@@ -1,7 +1,10 @@
+---@class vimrc.Utils
+---@field log_level_names table<integer,string>
 local M = {}
 local PRIV = {}
 -- Utilities ------------------------------------------------------------------
 
+---@param ... string|number|boolean|table
 ---@return string
 M.sprintf = function(...)
   local msg = {}
@@ -21,7 +24,7 @@ end
 --- Print Lua objects in command line
 ---
 ---@param lvl string Log level of print function
----@return fun(...):any print function
+---@return fun(...:any):...
 local make_print_fn = function(lvl)
   return function(...)
     local objects = {}
@@ -40,6 +43,7 @@ local make_print_fn = function(lvl)
     return ...
   end
 end
+---@param ... any
 M.print = function(...)
   M.info(M.sprintf(...))
 end
@@ -48,6 +52,10 @@ for k, v in pairs(vim.log.levels) do
   M.log_level_names[v] = k
 end
 
+---@param name string
+---@param val any
+---@param ref string
+---@param allow_nil boolean?
 M.check_type = function(name, val, ref, allow_nil)
   if type(val) == ref or (ref == 'callable' and vim.is_callable(val)) or (allow_nil and val == nil) then
     return
@@ -55,6 +63,7 @@ M.check_type = function(name, val, ref, allow_nil)
   error(string.format('`%s` should be %s, not %s', name, ref, type(val)), 0)
 end
 
+---@param x any
 ---@return table
 M.ensure_list = function(x)
   x = vim._ensure_list(x)
@@ -68,17 +77,24 @@ M.warn = make_print_fn 'WARN'
 M.err = make_print_fn 'ERROR'
 M.debug = make_print_fn 'DEBUG'
 
+---@param buf_id integer
+---@param name string
 M.set_buf_name = function(buf_id, name)
   vim.api.nvim_buf_set_name(buf_id, 'vimrc://' .. buf_id .. '/' .. name)
 end
 
+---@param win_id any
+---@return boolean
 M.is_valid_win = function(win_id)
   return type(win_id) == 'number' and vim.api.nvim_win_is_valid(win_id)
 end
 
+---@param path string
+---@return string
 M.full_path = function(path)
   return (vim.fn.fnamemodify(path, ':p'):gsub('(.)/$', '%1'))
 end
+
 ---@return string[]
 M.get_workspace_files = function()
   local workspace_files = {}
@@ -129,6 +145,8 @@ end
 
 local _detected_filetypes = {}
 local _dont_cache_these_extensions = { 'conf' }
+---@param path string
+---@return string|false|nil
 M.get_filetype = function(path)
   local ext = vim.fn.fnamemodify(path, ':e')
 
@@ -146,6 +164,9 @@ M.get_filetype = function(path)
   return filetype
 end
 
+---@param path string
+---@param cwd string?
+---@return string
 M.short_path = function(path, cwd)
   cwd = cwd or vim.fn.getcwd()
   -- Ensure `cwd` is treated as directory path (to not match similar prefix)
@@ -153,6 +174,9 @@ M.short_path = function(path, cwd)
   return vim.startswith(path, cwd) and path:sub(cwd:len() + 1) or vim.fn.fnamemodify(path, ':~')
 end
 
+---@param timeout integer
+---@param callback fun()
+---@return uv.uv_timer_t?
 M.setTimeout = function(timeout, callback)
   local timer = vim.uv.new_timer()
   if timer ~= nil then
@@ -165,10 +189,13 @@ M.setTimeout = function(timeout, callback)
   end
 end
 -- Buffers --------------------------------------------------------------------
+---@param buf_id any
+---@return boolean
 M.is_valid_buf = function(buf_id)
   return type(buf_id) == 'number' and vim.api.nvim_buf_is_valid(buf_id)
 end
 
+---@param buf_id integer
 M.buf_ensure_loaded = function(buf_id)
   if type(buf_id) ~= 'number' or vim.api.nvim_buf_is_loaded(buf_id) then
     return
@@ -179,6 +206,8 @@ M.buf_ensure_loaded = function(buf_id)
   vim.o.eventignore = cache_eventignore
 end
 
+---@param buf_id integer
+---@return string?
 M.buf_get_name = function(buf_id)
   if not M.is_valid_buf(buf_id) then
     return nil
@@ -248,10 +277,7 @@ M.show_in_split = function(lines, name, filetype)
   local buf_id = M.write_to_buffer(lines, name)
 
   local has_filetype = not (filetype == nil or filetype == '')
-  if has_filetype then
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    vim.bo[buf_id].filetype = filetype
-  end
+  vim.bo[buf_id].filetype = filetype or 'vimrc'
 
   -- Completely unfold for no filetype output (like `:Git help`)
   if not has_filetype then
