@@ -6,4 +6,4 @@
 # Shorthands make it so when a user runs something like mise install elixir mise will automatically install the asdf-elixir plugin. By default, it uses the shorthands in registry/.
 # The file should be in this toml format:
 clang = "https://github.com/mise-plugins/vfox-clang.git"
-zephyr = "https://github.com/ale-alfaro/vfox-zephyr-sdk"
+zephyr = "https://github.com/ale-alfaro/vfox-zephyr-sdk.git"

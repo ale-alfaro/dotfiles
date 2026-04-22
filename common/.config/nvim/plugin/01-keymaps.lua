@@ -185,26 +185,61 @@ a key is used for some command.  ({key} is the specific key you want to find
 out about, ^D is CTRL-D).
 --
 --]]
+VimRc.keymap_clues = {
+  { mode = 'n', keys = '<Leader>b', desc = '+Buffer' },
+  { mode = 'n', keys = '<Leader>e', desc = '+Explore/Edit' },
+  { mode = 'n', keys = '<Leader>f', desc = '+Find' },
+  { mode = 'n', keys = '<Leader>g', desc = '+Git' },
+  { mode = 'n', keys = '<Leader>l', desc = '+Language' },
+  { mode = 'n', keys = '<Leader>n', desc = '+Notifications' },
+  { mode = 'n', keys = '<Leader>o', desc = '+Obsidian' },
+  { mode = 'n', keys = '<Leader>s', desc = '+Session' },
+  { mode = 'n', keys = '<Leader>x', desc = '+Extra' },
+  { mode = 'n', keys = '<Leader>v', desc = '+Visits' },
 
+  { mode = 'x', keys = '<Leader>g', desc = '+Git' },
+  { mode = 'x', keys = '<Leader>l', desc = '+Language' },
+}
 VimRc.map({ lhs = 'q', rhs = '<nop>' }, { noremap = true })
 VimRc.map({ mode = 'v', lhs = '<', rhs = '<gv' }, { noremap = true })
 VimRc.map({ mode = 'v', lhs = '>', rhs = '>gv' }, { noremap = true })
 VimRc.map({ mode = { 'n', 'x' }, lhs = '<Down>', rhs = 'gj' }, 'Navigate down (visual line)')
 VimRc.map({ mode = { 'n', 'x' }, lhs = '<Up>', rhs = 'gk' }, 'Navigate down (visual line)')
+VimRc.map({ mode = { 'n', 'x' }, lhs = '<Down>', rhs = [[v:count == 0 ? 'gj' : 'j']] }, { expr = true })
+VimRc.map({ mode = { 'n', 'x' }, lhs = '<Up>', rhs = [[v:count == 0 ? 'gk' : 'k']] }, { expr = true })
+
+-- Add empty lines before and after cursor line supporting dot-repeat
+VimRc.put_empty_line = function(put_above)
+  -- This has a typical workflow for enabling dot-repeat:
+  -- - On first call it sets `operatorfunc`, caches data, and calls
+  --   `operatorfunc` on current cursor position.
+  -- - On second call it performs task: puts `v:count1` empty lines
+  --   above/below current line.
+  if type(put_above) == 'boolean' then
+    vim.o.operatorfunc = 'v:lua.VimRc.put_empty_line'
+    VimRc.cache_empty_line = { put_above = put_above }
+    return 'g@l'
+  end
+
+  local target_line = vim.fn.line '.' - (VimRc.cache_empty_line.put_above and 1 or 0)
+  vim.fn.append(target_line, vim.fn['repeat']({ '' }, vim.v.count1))
+end
+
+VimRc.map({ lhs = 'gO', rhs = 'v:lua.MiniBasics.put_empty_line(v:true)' }, { expr = true, desc = 'Put empty line above' })
+VimRc.map({ lhs = 'go', rhs = 'v:lua.MiniBasics.put_empty_line(v:false)' }, { expr = true, desc = 'Put empty line below' })
+-- Reselect latest changed, put, or yanked text
+VimRc.map({ lhs = 'gV', rhs = '"g`[" . strpart(getregtype(), 0, 1) . "g`]"' }, { expr = true, replace_keycodes = false, desc = 'Visually select changed text' })
+-- Search inside visually highlighted text. Use `silent = false` for it to
+-- make effect immediately.
+VimRc.map({ mode = 'x', lhs = 'g/', rhs = '<esc>/\\%V' }, { silent = false, desc = 'Search inside visual selection' })
 VimRc.map({ lhs = '<C-s>', rhs = '<Cmd>silent! update | redraw<CR>' }, { noremap = true })
 VimRc.map({ mode = { 'x', 'i' }, lhs = '<C-s>', rhs = '<Esc><Cmd>silent! update | redraw<CR>' }, { noremap = true })
 VimRc.map({ lhs = '<C-q>', rhs = '<Cmd>q<CR>' }, { noremap = true })
 VimRc.map({ lhs = '<M-q>', rhs = '<Cmd>qall!<CR>' }, { desc = 'Quit all!', noremap = true })
--- map('<C-s>', '<Esc><Cmd>silent! update | redraw<CR>', { 'x', 'i' }, { desc = 'Save and go to Normal mode', noremap = true })
--- map('<C-q>', '<Cmd>q<CR>', { desc = 'Quit', noremap = true })
--- -- Misc
--- nmap_leader('so', '<Cmd>source %<CR>', 'Source Current buffer')
--- map('<', '<gv', 'v')
--- map('>', '>gv', 'v')
--- map('<C-Left>', '<C-w>h', nil, { desc = 'Focus window left' })
--- map('<C-Right>', '<C-w>l', nil, { desc = 'Focus window right' })
--- map('<C-Up>', '<C-w>k', nil, { desc = 'Focus window up' })
--- map('<C-Down>', '<C-w>j', nil, { desc = 'Focus window up' })
+VimRc.map({ lhs = '<C-Left>', rhs = '<C-w>h' }, 'Focus window left')
+VimRc.map({ lhs = '<C-Right>', rhs = '<C-w>l' }, 'Focus window right')
+VimRc.map({ lhs = '<C-Up>', rhs = '<C-w>k' }, 'Focus window up')
+VimRc.map({ lhs = '<C-Down>', rhs = '<C-w>j' }, 'Focus window up')
 
 ---@param key string
 ---@param keycmd string|fun()
@@ -215,10 +250,11 @@ end
 nmap_leader('ba', '<Cmd>b#<CR>', 'Alternate')
 nmap_leader('bd', '<Cmd>lua MiniBufremove.delete()<CR>', 'Delete')
 nmap_leader('bD', '<Cmd>lua MiniBufremove.delete(0, true)<CR>', 'Delete!')
--- nmap_leader('bs', new_scratch_buffer, 'Scratch')
-nmap_leader('dd', '<cmd>:%bdelete|edit #|normal<cr><CR>', 'Delete All')
-nmap_leader('dw', '<Cmd>lua MiniBufremove.wipeout()<CR>', 'Wipeout')
-nmap_leader('dW', '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', 'Wipeout!')
+nmap_leader('bs', function()
+  vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(true, true))
+end, 'Scratch')
+nmap_leader('bw', '<Cmd>lua MiniBufremove.wipeout()<CR>', 'Wipeout')
+nmap_leader('bW', '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', 'Wipeout!')
 
 local explore_quickfix = function()
   vim.cmd(vim.fn.getqflist({ winid = true }).winid ~= 0 and 'cclose' or 'copen')
@@ -259,9 +295,3 @@ nmap_leader('vv', '<Cmd>lua MiniVisits.add_label("core")<CR>', 'Add "core" label
 nmap_leader('vV', '<Cmd>lua MiniVisits.remove_label("core")<CR>', 'Remove "core" label')
 nmap_leader('vl', '<Cmd>lua MiniVisits.add_label()<CR>', 'Add label')
 nmap_leader('vL', '<Cmd>lua MiniVisits.remove_label()<CR>', 'Remove label')
-
--- o is for 'Other'. Common usage:
--- - `<Leader>oz` - toggle between "zoomed" and regular view of current buffer
-nmap_leader('or', '<Cmd>lua MiniMisc.resize_window()<CR>', 'Resize to default width')
-nmap_leader('ot', '<Cmd>lua MiniTrailspace.trim()<CR>', 'Trim trailspace')
-nmap_leader('oz', '<Cmd>lua MiniMisc.zoom()<CR>', 'Zoom toggle')

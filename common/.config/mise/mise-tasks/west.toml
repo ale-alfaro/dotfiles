@@ -1,12 +1,15 @@
-[west_find]
+[tasks.west_find]
+tools = { 'pipx:west' = 'latest' }
 description = "Find file across west workspace and open it with neovim"
 raw = true
 alias = "wfd"
 usage = '''
 arg "<regex>" help="Regex to find file with"
+arg "[extensions]" help="File extensions" var=#true
 '''
 run = '''
-west -q forall -c "fd '{{usage.regex}}' . --absolute-path" | fzf --bind 'enter:become(nvim {})'
+eval "extensions=(${usage_extensions:-})"
+west -q forall -c "fd '{{usage.regex}}' . --absolute-path ${extensions[@]/#/-e }" | fzf --bind 'enter:become(nvim {})'
 '''
 
 

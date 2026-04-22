@@ -1,4 +1,35 @@
 
+
+
+[tasks.dts_find]
+description = "Find DTS node with dtsh"
+raw = true
+tools = { 'pipx:dtsh' = 'latest' }
+alias = "dtsf"
+usage = '''
+arg "<regex>" help="Regex to find dts nodes with"
+arg "[attribute]" help="Attribute to find dts nodes with" {
+    choices "compatible"  "alias" "dts-ord" "chosen" "label" "bus"
+    default "dts-ord"
+}
+flag "-d --build-dir [build_dir]" help="Build directory to do post action on" default="build"
+'''
+run = '''
+cmd="find --with-${usage_attribute?} ${usage_regex?}"
+
+if [[ ! -d "${usage_build_dir?}" ]]; then
+  echo "Build directory '${build_dir}' does not exist. Run a build first."
+  exit 1
+fi
+if [[ -f "${usage_build_dir}/domains.yaml" ]]; then
+    domain=$(cat "${build_dir:?}/domains.yaml" | yq e -r '.domains[].name' | fzf)
+    dts_file="${usage_build_dir}/${domain?}/zephyr/zephyr.dts"
+else
+    dts_file="${usage_build_dir}/zephyr/zephyr.dts"
+fi
+dtsh -c ${(q)cmd}  ${dts_file}
+'''
+
 [diffconfig]
 description = "Diffconfig after menucfg"
 dir = "{{cwd}}"

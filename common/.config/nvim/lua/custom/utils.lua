@@ -52,47 +52,223 @@ for k, v in pairs(vim.log.levels) do
   M.log_level_names[v] = k
 end
 
----@param name string
----@param val any
----@param ref string
----@param allow_nil boolean?
-M.check_type = function(name, val, ref, allow_nil)
-  if type(val) == ref or (ref == 'callable' and vim.is_callable(val)) or (allow_nil and val == nil) then
-    return
-  end
-  error(string.format('`%s` should be %s, not %s', name, ref, type(val)), 0)
-end
-
----@param x any
----@return table
-M.ensure_list = function(x)
-  x = vim._ensure_list(x)
-  if #x > 0 then
-    return x
-  end
-  error(string.format('`%s` should be a list or item, but it is empty', x), 0)
-end
 M.info = make_print_fn 'INFO'
 M.warn = make_print_fn 'WARN'
 M.err = make_print_fn 'ERROR'
 M.debug = make_print_fn 'DEBUG'
 
----@param buf_id integer
----@param name string
-M.set_buf_name = function(buf_id, name)
-  vim.api.nvim_buf_set_name(buf_id, 'vimrc://' .. buf_id .. '/' .. name)
-end
-
----@param win_id any
----@return boolean
-M.is_valid_win = function(win_id)
-  return type(win_id) == 'number' and vim.api.nvim_win_is_valid(win_id)
+-- Paths --------------------------------------------------------------------
+---@param path string
+---@param cwd string?
+---@return string
+M.short_path = function(path, cwd)
+  cwd = cwd or vim.fn.getcwd()
+  -- Ensure `cwd` is treated as directory path (to not match similar prefix)
+  cwd = cwd:sub(-1) == '/' and cwd or (cwd .. '/')
+  return vim.startswith(path, cwd) and path:sub(cwd:len() + 1) or vim.fn.fnamemodify(path, ':~')
 end
 
 ---@param path string
 ---@return string
 M.full_path = function(path)
   return (vim.fn.fnamemodify(path, ':p'):gsub('(.)/$', '%1'))
+end
+local function coerce(v)
+  if v == vim.NIL then
+    return nil
+  else
+    return v
+  end
+end
+
+---@param path table
+---@param k string
+---@param factory fun(path: obsidian.Path): any
+---@private
+local function cached_get(path, k, factory)
+  local cache_key = '__' .. k
+  local v = rawget(path, cache_key)
+  if v == nil then
+    v = factory(path)
+    if v == nil then
+      v = vim.NIL
+    end
+    path[cache_key] = v
+  end
+  return coerce(v)
+end
+
+--- A `Path` class that provides a subset of the functionality of the Python `pathlib` library while
+--- staying true to its API. It improves on a number of bugs in `plenary.path`.
+---
+---@toc_entry obsidian.Path
+---
+---@class obsidian.Path
+---
+---@field filename string The underlying filename as a string.
+---@field name string|? The final path component, if any.
+---@field suffix string|? The final extension of the path, if any.
+---@field stem string The final path component, without its suffix.
+---@operator div(string|obsidian.Path): obsidian.Path
+local Path = {}
+
+Path.__tostring = function(self)
+  return self.filename
+end
+
+Path.__eq = function(a, b)
+  return a.filename == b.filename
+end
+Path.__div = function(self, other)
+  return Path.new(vim.fs.joinpath(self.filename, tostring(other)))
+end
+
+Path.__index = function(self, k)
+  local raw = rawget(Path, k)
+  if raw then
+    return raw
+  end
+
+  local factory
+  if k == 'name' then
+    factory = function(path)
+      return vim.fs.basename(path.filename)
+    end
+  elseif k == 'suffix' then
+    factory = function(path)
+      return vim.fs.ext(path.filename)
+    end
+  elseif k == 'stem' then
+    factory = function(path)
+      return vim.fs.basename(path.filename):gsub('%.' .. vim.fs.ext(path.filename))
+    end
+  end
+
+  if factory then
+    return cached_get(self, k, factory)
+  end
+end
+
+--- Check if an object is an `obsidian.Path` object.
+---
+---@param path any
+---
+---@return boolean
+Path.is_path_obj = function(path)
+  if getmetatable(path) == Path then
+    return true
+  else
+    return false
+  end
+end
+
+-------------------------------------------------------------------------------
+--- Constructors.
+-------------------------------------------------------------------------------
+
+--- Create a new path from a string.
+---
+---@param p string|obsidian.Path
+---
+---@return obsidian.Path
+Path.new = function(p)
+  local self = {}
+
+  if Path.is_path_obj(p) then
+    ---@cast p -string
+    return p
+  end
+  --- Path is expanded to an absolute path
+  self.filename = vim.fs.normalize(tostring(p))
+
+  return setmetatable(self, Path)
+end
+
+--- Get a temporary path with a unique name.
+---
+---@param opts { suffix: string|? }|?
+---
+---@return obsidian.Path
+Path.temp = function(opts)
+  opts = opts or {}
+  local tmpname = vim.fn.tempname()
+  if opts.suffix then
+    tmpname = tmpname .. opts.suffix
+  end
+  return Path.new(tmpname)
+end
+
+--- Get a path corresponding to a buffer.
+---
+---@param bufnr integer|? The buffer number or `0` / `nil` for the current buffer.
+---
+---@return obsidian.Path
+Path.buffer = function(bufnr)
+  return Path.new(vim.api.nvim_buf_get_name(bufnr or 0))
+end
+
+--- Try to resolve a version of the path relative to the other.
+--- An error is raised when it's not possible.
+---
+---@param other obsidian.Path|string
+---
+---@return obsidian.Path?
+Path.relative_to = function(self, other)
+  other = (type(other) == 'string') and Path.new(other) or other
+
+  local common_prefix = string.match(other.filename, '^' .. self.filename)
+  if common_prefix then
+    common_prefix = common_prefix:gsub('%w$', '%1/')
+    return Path.new(other.filename:gsub(common_prefix, ''))
+  end
+  return nil
+end
+--- The logical parent of the path.
+---
+---@return obsidian.Path|?
+Path.parent = function(self)
+  local parent = vim.fs.dirname(self.filename)
+  if parent ~= nil then
+    return Path.new(parent)
+  else
+    return nil
+  end
+end
+
+--- Get a list of the parent directories.
+---
+---@return obsidian.Path[]
+Path.parents = function(self)
+  return vim.iter(vim.fs.parents(self.filename)):map(Path.new):totable()
+end
+
+--- Check if the path is a parent of other. This is a pure path method, so it only checks by
+--- comparing strings. Therefore in practice you probably want to `:resolve()` each path before
+--- using this.
+---
+---@param other obsidian.Path|string
+---
+---@return boolean
+Path.is_parent_of = function(self, other)
+  other = Path.new(other)
+  for _, parent in ipairs(other:parents()) do
+    if parent == self then
+      return true
+    end
+  end
+  return false
+end
+
+--- Get OS stat results.
+---
+---@return boolean
+Path.exists = function(self)
+  local realpath = vim.fs.abspath(self.filename)
+  if realpath then
+    local stat, _ = vim.uv.fs_stat(realpath)
+    return stat ~= nil
+  end
+  return false
 end
 
 ---@return string[]
@@ -121,59 +297,6 @@ M.get_workspace_files = function()
   return workspace_files
 end
 
-local function _detect_filetype(path)
-  local filetype = vim.filetype.match { filename = path }
-
-  -- vim.filetype.match is not guaranteed to work on filename alone (see https://github.com/neovim/neovim/issues/27265)
-  if not filetype then
-    for _, buf in ipairs(vim.fn.getbufinfo()) do
-      if vim.fn.fnamemodify(buf.name, ':p') == path then
-        return vim.filetype.match { buf = buf.bufnr }
-      end
-    end
-
-    local bufn = vim.fn.bufadd(path)
-    vim.fn.bufload(bufn)
-
-    filetype = vim.filetype.match { buf = bufn }
-
-    vim.api.nvim_buf_delete(bufn, { force = true })
-  end
-
-  return filetype
-end
-
-local _detected_filetypes = {}
-local _dont_cache_these_extensions = { 'conf' }
----@param path string
----@return string|false|nil
-M.get_filetype = function(path)
-  local ext = vim.fn.fnamemodify(path, ':e')
-
-  if rawget(_detected_filetypes, ext) ~= nil then
-    return _detected_filetypes[ext]
-  end
-
-  local filetype = _detect_filetype(path)
-
-  -- some file types share the same extension (see https://github.com/artemave/workspace-diagnostics.nvim/issues/3)
-  -- so we never want to cache detection results for those ones.
-  if not vim.tbl_contains(_dont_cache_these_extensions, ext) then
-    _detected_filetypes[ext] = filetype or false
-  end
-  return filetype
-end
-
----@param path string
----@param cwd string?
----@return string
-M.short_path = function(path, cwd)
-  cwd = cwd or vim.fn.getcwd()
-  -- Ensure `cwd` is treated as directory path (to not match similar prefix)
-  cwd = cwd:sub(-1) == '/' and cwd or (cwd .. '/')
-  return vim.startswith(path, cwd) and path:sub(cwd:len() + 1) or vim.fn.fnamemodify(path, ':~')
-end
-
 ---@param timeout integer
 ---@param callback fun()
 ---@return uv.uv_timer_t?
@@ -189,6 +312,16 @@ M.setTimeout = function(timeout, callback)
   end
 end
 -- Buffers --------------------------------------------------------------------
+---@param buf_id integer
+---@param name string
+M.set_buf_name = function(buf_id, name)
+  vim.api.nvim_buf_set_name(buf_id, 'vimrc://' .. buf_id .. '/' .. name)
+end
+---@param win_id any
+---@return boolean
+M.is_valid_win = function(win_id)
+  return type(win_id) == 'number' and vim.api.nvim_win_is_valid(win_id)
+end
 ---@param buf_id any
 ---@return boolean
 M.is_valid_buf = function(buf_id)

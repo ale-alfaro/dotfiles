@@ -98,15 +98,10 @@ VimRc.later(function()
     -- (uses `desc` field from the mapping; takes precedence over custom clue).
     clues = {
       -- This is defined in 'plugin/20_keymaps.lua' with Leader group descriptions
-      { mode = { 'n', 'x' }, keys = '<leader>c', desc = '+change' },
-      { mode = { 'n', 'x' }, keys = '<leader>f', desc = '+find' },
-      { mode = 'n', keys = '<leader>b', desc = '+buffers' },
-      { mode = 'n', keys = '<leader>d', desc = '+diff' },
-      { mode = 'n', keys = '<leader>x', desc = '+eXtra' },
-      { mode = 'n', keys = '[', desc = '+prev' },
-      { mode = 'n', keys = ']', desc = '+next' },
+      VimRc.keymap_clues,
       miniclue.gen_clues.builtin_completion(),
       miniclue.gen_clues.g(),
+      miniclue.gen_clues.marks(),
       miniclue.gen_clues.registers(),
       miniclue.gen_clues.square_brackets(),
       -- This creates a submode for window resize mappings. Try the following:
@@ -126,7 +121,10 @@ VimRc.later(function()
       { mode = { 'n', 'x' }, keys = ']' },
       { mode =   'i',        keys = '<C-x>' },    -- Built-in completion
       { mode = { 'n', 'x' }, keys = 'g' },        -- `g` key
+      { mode = { 'n', 'x' }, keys = "'" },        -- Marks
+      { mode = { 'n', 'x' }, keys = '`' },
       { mode = { 'n', 'x' }, keys = '"' },        -- Registers
+      { mode = { 'i', 'c' }, keys = '<C-r>' },
       { mode =   'n',        keys = '<C-w>' },    -- Window commands
       { mode = { 'n', 'x' }, keys = 's' },        -- `s` key (mini.surround, etc.)
       { mode = { 'n', 'x' }, keys = 'z' },        -- `z` key
@@ -141,53 +139,7 @@ end)
 -- - Autopeek command range (like line number at the start) as-you-type.
 VimRc.later(function()
   local mini_cmdline = require 'mini.cmdline'
-  mini_cmdline.setup {
-
-    -- Autocompletion: show `:h 'wildmenu'` as you type
-    autocomplete = {
-      enable = true,
-
-      -- Delay (in ms) after which to trigger completion
-      -- Neovim>=0.12 is recommended for positive values
-      delay = 100,
-
-      -- Custom rule of when to trigger completion
-      -- predicate = nil,
-
-      -- Whether to map arrow keys for more consistent wildmenu behavior
-      map_arrows = true,
-      predicate = mini_cmdline.default_autocomplete_predicate,
-      -- predicate = function()
-      --   return not block_compltype[vim.fn.getcmdcompltype()] -- MiniCmdline.default_autocomplete_predicate
-      -- end,
-    },
-
-    -- Autocorrection: adjust non-existing words (commands, options, etc.)
-    autocorrect = {
-      enable = true,
-
-      -- Custom autocorrection rule
-      predicate = mini_cmdline.default_autocorrect_func,
-    },
-
-    -- Autopeek: show command's target range in a floating window
-    autopeek = {
-      enable = true,
-
-      -- Number of lines to show above and below range lines
-      n_context = 5,
-
-      -- Custom rule of when to show peek window
-      predicate = mini_cmdline.default_autopeek_predicate,
-
-      -- Window options
-      window = {
-
-        -- Function to render statuscolumn
-        statuscolumn = mini_cmdline.default_autopeek_statuscolumn,
-      },
-    },
-  }
+  mini_cmdline.setup()
 end)
 
 VimRc.later(function()
@@ -219,16 +171,11 @@ VimRc.later(function()
   require('mini.indentscope').setup()
 end)
 VimRc.later(function()
+  vim.keymap.set('n', 'o', '<nop>')
   require('mini.operators').setup { replace = { prefix = 'or' } }
 
-  local map_combo = require('mini.keymap').map_combo
-
-  -- In Insert mode pressing `x` followed by `x` within 1 second logs 'A'
-  -- and emulates extra pressing of `yy`
-  map_combo('n', '(', 'gxiagxila', { delay = 1000 })
-  map_combo('n', ')', 'gxiagxina', { delay = 1000 })
-  -- vim.keymap.set('n', 'g(', 'gxiagxila', { remap = true, desc = 'Swap arg left' })
-  -- vim.keymap.set('n', 'g)', 'gxiagxina', { remap = true, desc = 'Swap arg right' })
+  vim.keymap.set('n', 'g(', 'gxiagxila', { remap = true, desc = 'Swap arg left' })
+  vim.keymap.set('n', 'g)', 'gxiagxina', { remap = true, desc = 'Swap arg right' })
 end)
 
 VimRc.later(function()
@@ -248,32 +195,7 @@ VimRc.later(function()
 end)
 
 VimRc.later(function()
-  require('mini.jump').setup {
-
-    -- Module mappings. Use `''` (empty string) to disable one.
-    mappings = {
-      forward = 'f',
-      backward = 'F',
-      forward_till = 't',
-      backward_till = 'T',
-      repeat_jump = ';',
-    },
-
-    -- Delay values (in ms) for different functionalities. Set any of them to
-    -- a very big number (like 10^7) to virtually disable.
-    delay = {
-      -- Delay between jump and highlighting all possible jumps
-      highlight = 250,
-
-      -- Delay between jump and automatic stop if idle (no jump is done)
-      idle_stop = 10000000,
-    },
-
-    -- Whether to disable showing non-error feedback
-    -- This also affects (purely informational) helper messages shown after
-    -- idle time if user input is required.
-    silent = false,
-  }
+  require('mini.jump').setup()
 end)
 
 VimRc.later(function()

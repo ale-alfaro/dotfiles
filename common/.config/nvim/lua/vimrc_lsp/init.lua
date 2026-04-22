@@ -138,7 +138,7 @@ M.setup = function()
 
   local servers = lsp_configs_get()
   servers = vim.list_extend(servers, { 'lua_ls', 'yamlls', 'jsonls' })
-  VimRc.info('Enabling lsps: ', { servers = servers })
+  VimRc.debug('Enabling lsps: ', { servers = servers })
   vim.lsp.enable(servers)
 
   -- HACK: Override buf_request to ignore notifications from LSP servers that don't implement a method.

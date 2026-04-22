@@ -135,7 +135,7 @@ NOTIF.setup = function()
   }
 
   VimRc.notify = function(msg, lvl)
-    VimRc.check_type('msg', msg, 'string')
+    vim.validate('msg', msg, 'string')
     local level_data = VimRc.loglvl_opts[lvl]
     if not level_data or level_data.duration <= 0 then
       return

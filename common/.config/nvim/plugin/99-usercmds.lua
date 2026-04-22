@@ -132,18 +132,18 @@ local function usercmd_args_comp(name, cb, desc, nargs, complete)
   })
 end
 usercmd_args_comp('CopyBufPath', function(ev)
-  local args = ev.args or { 'abs' }
+  local arg = (ev.fargs or { 'abs' })[1]
   local path
-  if args[1] == 'dir' then
+  if arg == 'dir' then
     path = vim.fn.expand '%:p:h'
-  elseif args[1] == 'abs' then
+  elseif arg == 'abs' then
     path = vim.fn.expand '%:p'
-  elseif args[1] == 'rel' then
+  elseif arg == 'rel' then
     path = vim.fn.expand '%'
   end
   if path then
     vim.fn.setreg('+', path)
-    vim.echo("Set register '+' to " .. path)
+    vim.print('Copied ' .. path)
   end
 end, 'Copy Cwd Path', 1, { 'rel', 'abs', 'dir' })
 
