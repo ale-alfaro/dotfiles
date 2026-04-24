@@ -1,24 +1,19 @@
 #!/usr/bin/env zsh
 set -euo pipefail
-#MISE description="Initialize uv managed python environment... the right way"
-#MISE dir="{{cwd}}"
-#MISE hide=true
-#USAGE arg "[pkgs]" help="Packages" var=#true var_min=1
+#MISE description="Stow dotfiles"
+#MISE dir="{{env.HOME}}/dotfiles"
+#USAGE arg "<pkg>" help="Package" default=".config"
+#USAGE flag "--sim" help="Perform simulated operation instead of doing it"
 #USAGE flag "--op [stow_op]" help="Stow operation to do with packages" {
 #USAGE   choices "stow" "restow" "unstow"
 #USAGE   default "restow"
-#USAGE }
-if [[ ! -z ${STOW_NO_SIM:-} && ${STOW_NO_SIM} = 1 ]]; then
-  sim_flag=""
-else
-  sim_flag="--simulate"
-fi
+#USAGE}
 case ${usage_op?} in
   stow) op_flag="-S" ;;
   restow) op_flag="-R" ;;
   unstow) op_flag="-D" ;;
   *) echo "Invalid operation!" && exit 1 ;;
 esac
-eval "pkgs=( ${usage_pkgs?} )"
-[[ -z ${pkgs:-} ]] && echo "No packages given" && exit 1
-stow -d ${STOW_PKG_DIR?} -t ${STOW_TARGET_DIR?} --verbose=${VERBOSE_LVL:-2} ${sim_flag?} ${op_flag?} ${pkgs[@]}
+flags=('-t' "${XDG_CONFIG_HOME:-$HOME/.config}" "${(z)${usage_sim:+-vv --simulate}:-}" "${op_flag?}" .)
+stow -d "common/.config" "${flags[@]}"
+stow -d "linux/.config" "${flags[@]}"

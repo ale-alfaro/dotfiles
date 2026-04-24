@@ -1,0 +1,19 @@
+#!/usr/bin/env zsh
+
+if [[ $# -eq 0 ]]; then nvim; fi
+if [[ $# -eq 1 ]]; then
+  if [[ ! -d "$1" && ! -f "$1" ]]; then
+    nvim "$(
+      zoxide query -l -s |
+        fzf -q "$1" \
+          --prompt=' Nvim> ' \
+          --accept-nth 2 \
+          --preview-window '50%,rounded,<50(up,85%,border-bottom)' \
+          --preview '[[ -d {2} ]] && eza --tree --color=always {2} | head -200 || bat -n --color=always --line-range :500 {2}'
+    )"
+  else
+    nvim "$1"
+  fi
+else
+  nvim "$@"
+fi

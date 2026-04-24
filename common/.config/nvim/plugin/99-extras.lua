@@ -136,16 +136,17 @@ local minidiff_setup = function()
 end
 
 FeatureFlags:add('Git', {
-  enable = false,
+  enable = true,
   toggle_hook = function(enabled, bufnr)
     if not MiniGit then
       minigit_setup()
       if not is_git_repo() then
-        VimRc.wrn 'Not inside git repo! MiniGit only works within a repo'
+        VimRc.warn 'Not inside git repo! MiniGit only works within a repo'
       end
     end
   end,
 })
+require('mini.git').setup()
 FeatureFlags:add('Diff', {
   enable = false,
   toggle_hook = function(enabled, bufnr)
@@ -166,7 +167,6 @@ FeatureFlags:add('Diff', {
     end, 200)
   end,
 })
---- MiniGit
 
 VimRc.on_filetype('markdown', function()
   require('render-markdown').setup(

@@ -116,7 +116,7 @@ end
 ---@param cb string|fun(args: vim.api.keyset.create_user_command.command_args) Replacement command to execute when this user command is executed. When called
 ---@param desc string
 ---@param nargs integer|string
----@param complete fun(ArgLead:string,CmdLine:string,CursorPos:integer)|string[]
+---@param complete (fun(ArgLead:string,CmdLine:string,CursorPos:integer):string[])|string[]
 --- ArgLead		the leading portion of the argument currently being
 ---			completed on; note that this only captures the current
 ---			space-separated word, even when using "-nargs=1"
@@ -146,20 +146,6 @@ usercmd_args_comp('CopyBufPath', function(ev)
     vim.print('Copied ' .. path)
   end
 end, 'Copy Cwd Path', 1, { 'rel', 'abs', 'dir' })
-
----@param args string,
----@param cmdline string
----@param cursorpos integer
----@return string[]
----@diagnostic disable-next-line: unused-local
-local get_plugins = function(args, cmdline, cursorpos)
-  return vim
-    .iter(vim.pack.get())
-    :map(function(p)
-      return p.spec.name or p
-    end)
-    :totable()
-end
 
 -- ──────────────────────────────────────────────────────────────
 --  Redir  — redirect :command / !shell output to scratch buffer
@@ -215,10 +201,18 @@ usercmd('UnmodBuf', show_modified_buffers, 'show unsaved buffers in quickfix')
 -- ──────────────────────────────────────────────────────────────
 --  Vim.pack cmd
 -- ──────────────────────────────────────────────────────────────
+local get_plugins = function(args, cmdline, cursorpos)
+  return vim
+    .iter(vim.pack.get())
+    :map(function(p)
+      return p.spec.name or p
+    end)
+    :totable()
+end
 usercmd_args_comp('PackOpen', function(opts)
   local ok, plug = pcall(vim.pack.get, { opts.fargs[1] })
   if ok then
-    vim.cmd('edit ' .. plug[1].path)
+    vim.cmd.edit(plug[1].path)
   end
 end, 'Open plugin repository in pack path', 1, get_plugins)
 
@@ -240,7 +234,7 @@ local function write_plug_info(p)
 end
 
 usercmd_args_comp('Pack', function(args)
-  local arg = (args.args or {})[1]
+  local arg = (args.fargs or {})[1]
   local plugins = vim.pack.get()
   local active = vim
     .iter()
@@ -277,7 +271,7 @@ usercmd_args_comp('Pack', function(args)
 end, 'vim.pack Interface', 1, { 'list', 'update', 'clean' })
 
 usercmd_args_comp('Lsp', function(args)
-  local arg = (args.args or {})[1]
+  local arg = (args.fargs or {})[1]
   if arg == 'log' then
     local log = vim.lsp.log.get_filename()
     vim.api.nvim_cmd({
@@ -292,3 +286,141 @@ usercmd_args_comp('Lsp', function(args)
     vim.cmd ':checkhealth vim.lsp'
   end
 end, 'Lsp Commands', 1, { 'log', 'clean', 'info' })
+
+local list_files_from_branch_action = function(action, selected, o, args)
+  local file = require('fzf-lua').path.entry_to_file(selected[1], o)
+  local cmd = string.format('%s %s:%s', action, args, file.path)
+  vim.cmd(cmd)
+end
+
+local get_vaults = function()
+  return vim.fn.systemlist [[obsidian vaults verbose | awk '{print $2}']]
+end
+usercmd_args_comp('ObsFiles', function(ev)
+  local arg = (ev.fargs or {})[1]
+  vim.cmd('FzfLua files cwd_only=true cwd=' .. arg)
+end, 'Obsidian Files', 1, get_vaults)
+
+usercmd_args_comp('ObsGrep', function(ev)
+  local arg = (ev.fargs or {})[1]
+  local fzf = require 'fzf-lua'
+  fzf.live_grep {
+    cwd = arg,
+    cwd_only = true,
+    prompt = 'Live Grep',
+  }
+end, 'Obsidian Grep', 1, get_vaults)
+usercmd_args_comp(
+  'GitFiles',
+  function(opts)
+    require('fzf-lua').fzf_exec('git ls-tree -r --name-only ' .. opts.args, {
+      prompt = opts.args .. ' >',
+      actions = {
+        ['default'] = function(selected, o)
+          list_files_from_branch_action('Git', selected, o, opts.args)
+        end,
+      },
+      previewer = false,
+      preview = {
+        type = 'cmd',
+        fn = function(items)
+          local file = require('fzf-lua').path.entry_to_file(items[1])
+          return string.format('git show %s:%s | delta', opts.args, file.path)
+        end,
+      },
+    })
+  end,
+  'List all git files from a branch',
+  1,
+  function()
+    local branches = vim.fn.systemlist "git branch --sort=-committerdate --format='%(refname:short)'"
+    if vim.v.shell_error == 0 then
+      return vim.tbl_map(function(x)
+        return x:match('[^%s%*]+'):gsub('^remotes/', '')
+      end, branches)
+    end
+    return {}
+  end
+)
+
+-- ---------------------------------------------------------------------------
+-- Obsidian
+-- ---------------------------------------------------------------------------
+
+local obsidian = require 'custom.obsidian'
+---Return arg completions for a CLI command, filtering out already-typed args.
+---@param cli_cmd string Full CLI command name (e.g. "files" or "property:read")
+---@param typed_args string[] Arguments already on the command line
+---@param arg_lead string Current partial text being completed
+---@return string[]
+local function obsidian_get_arg_completions(cli_cmd, typed_args, arg_lead)
+  local available = obsidian.cli.args[cli_cmd]
+  if not available then
+    return {}
+  end
+
+  local used = {}
+  for _, arg in ipairs(typed_args) do
+    local key = arg:match '^([%w_%-]+)'
+    if key then
+      used[key] = true
+    end
+  end
+
+  return vim.tbl_filter(function(candidate)
+    local key = candidate:match '^([%w_%-]+)'
+    if not key or used[key] then
+      return false
+    end
+    return vim.startswith(candidate, arg_lead)
+  end, available)
+end
+
+---Completion function for the :Obsidian user command.
+---@param arg_lead string
+---@param cmdline string
+---@param cursor_pos number
+---@return string[]
+local function obsidian_get_completions(arg_lead, cmdline, cursor_pos)
+  local parts = vim.split(cmdline, ' ', { plain = true, trimempty = true })
+  local trailing_space = cmdline:sub(-1) == ' '
+  local nparts = #parts
+
+  local cmd = parts[2]
+  if not obsidian.cli.cmds[cmd] then
+    return {}
+  end
+
+  local subs = (type(obsidian.cli.cmds[cmd]) == 'table') and obsidian.cli.cmds[cmd] or nil
+
+  -- Phase 2: subcommands for commands that have them
+  if subs then
+    if nparts == 2 and trailing_space then
+      return subs
+    end
+    if nparts == 3 and not trailing_space then
+      return vim.tbl_filter(function(s)
+        return vim.startswith(s, parts[3])
+      end, subs)
+    end
+    -- Subcommand is complete, offer arg completions
+    if nparts >= 3 and vim.tbl_contains(subs, parts[3]) then
+      local cli_cmd = cmd .. ':' .. parts[3]
+      local typed_args = trailing_space and vim.list_slice(parts, 4) or vim.list_slice(parts, 4, nparts - 1)
+      return obsidian_get_arg_completions(cli_cmd, typed_args or {}, arg_lead)
+    end
+    return {}
+  end
+
+  -- Phase 3: arg completions for simple commands
+  local typed_args = trailing_space and vim.list_slice(parts, 3) or vim.list_slice(parts, 3, nparts - 1)
+  return obsidian_get_arg_completions(cmd, typed_args or {}, arg_lead)
+end
+
+vim.api.nvim_create_user_command('Obsidian', function(data)
+  obsidian.setup()
+  obsidian.handle_command(data)
+end, {
+  nargs = '+',
+  complete = obsidian_get_completions,
+})

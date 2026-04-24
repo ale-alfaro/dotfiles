@@ -42,7 +42,7 @@ function zle_sesh_sessions() {
     session=$(sesh list -t -c | fzf --height 40% --reverse --border-label ' sesh ' --border --prompt '⚡  ')
     zle reset-prompt >/dev/null 2>&1 || true
     [[ -z "$session" ]] && return
-    sesh connect $session
+    sesh connect $session -c 'mise en'
   }
 }
 
@@ -70,3 +70,10 @@ zle_man() {
 
 zle -N zle_man
 bindkey '^H' zle_man
+
+# zle_mise() {
+#   mise deactivate
+# }
+#
+# zle -N zle_mise
+# bindkey '^M' zle_mise

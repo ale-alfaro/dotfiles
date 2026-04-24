@@ -96,19 +96,6 @@ west attach --gdb ${ARM_GDB_PY?} --domain ${usage_domain:-$app_name} -d "build_$
 '''
 
 
-[task_templates."sca:run"]
-description = "Run static analysis via Zephyr SCA"
-usage = '''
-arg "[sca]"  {
-  choices "gcc" "clang" "codechecker" "coverity" "eclair" "polyspace" "cpptest"
-  env "ZEPHYR_SCA"
-  help "Static code analyis tool to run"
-}
-'''
-run = '''
-west build --pristine=always -- -DZEPHYR_SCA_VARIANT=${usage_sca?}
-'''
-
 [task_templates."test:info"]
 description = "Get the test tree and list of tags from Zephyr twister test runner"
 dir = "{{config_root}}"

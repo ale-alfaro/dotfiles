@@ -6,6 +6,18 @@ vim.o.mousescroll = 'ver:25,hor:6' -- Customize mouse scroll
 vim.opt.number = true
 vim.o.switchbuf = 'usetab' -- Use already opened buffers when switching
 vim.o.undofile = true -- Enable persistent undo
+
+-- vim.g.clipboard = {
+--   name = 'Tmux',
+--   paste = {
+--     ['+'] = { 'tmux', 'save-buffer', '-' },
+--     ['*'] = { 'tmux', 'save-buffer', '-' },
+--   },
+--   copy = {
+--     ['+'] = { 'tmux', 'load-buffer', '-' },
+--     ['*'] = { 'tmux', 'load-buffer', '-' },
+--   },
+-- }
 vim.opt.clipboard = 'unnamedplus' -- Sync with system clipboard
 vim.o.dict = '/home/alealfaro/.config/obsidian/Custom Dictionary.txt'
 vim.o.gdefault = true -- g is on by default when substituting with s/pattern/replace

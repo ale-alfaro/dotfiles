@@ -95,6 +95,9 @@ just = "latest"
 "cargo:taplo-cli" = "latest"
 "cargo:neocmakelsp" = "latest"
 "cargo:tlrc" = "latest"
+acli = "latest"
+lazydocker = "latest"
+jq = "latest"
 
 
 [shell_alias]

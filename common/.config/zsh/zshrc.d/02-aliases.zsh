@@ -5,46 +5,6 @@ compress() {
 }
 
 alias decompress="tar -xzf"
-zd() {
-  if [ $# -eq 0 ]; then
-    builtin cd ~ && return
-  elif [ -d "$1" ]; then
-    builtin cd "$1"
-  else
-    zi "$1"
-  fi
-}
-safe_source zoxide init zsh
-alias cd='zd'
-
-# ---- Editor -----
-fnvim() {
-  local gotopath=$(
-    zoxide query -l -s |
-      fzf -q "$1" \
-        --prompt=' Nvim> ' \
-        --accept-nth 2 \
-        --preview-window '50%,rounded,<50(up,85%,border-bottom)' \
-        --preview '[[ -d {2} ]] && eza --tree --color=always {2} | head -200 || bat -n --color=always --line-range :500 {2}'
-  )
-
-  nvim "$gotopath"
-}
-
-# Array to quoted list of strings
-n() {
-  if [[ $# -eq 0 ]]; then nvim; fi
-  if [[ $# -eq 1 ]]; then
-    if [[ ! -d "$1" && ! -f "$1" ]]; then
-      fnvim "$1"
-    else
-      nvim "$1"
-    fi
-  else
-    nvim "$@"
-  fi
-}
-alias v="n"
 
 ssh_agent_start() {
   eval "$(ssh-agent -s)"
@@ -55,6 +15,9 @@ alias sshstart="ssh_agent_start"
 # CLI Aliases
 #######################################################
 # Alias For bat
+alias lt='eza --tree --level=3 --long --icons --git'
+alias lta='lt -a'
+alias ls="eza --icons=always --oneline --no-git --all"
 # Link: https://github.com/sharkdp/bat
 alias wman='wikiman'
 # has batman && alias man='batman'

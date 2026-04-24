@@ -48,8 +48,7 @@ VimRc.now(function()
   require('vim._core.ui2').enable {
     enable = true,
     msg = { -- Options related to the message module.
-      target = 'cmd', ---@type 'cmd'|'msg' Default message target if not present in targets.
-      targets = {}, ---@type table<string, 'cmd'|'msg'|'pager'> Kind specific message targets.
+      targets = 'cmd', ---@type 'cmd'|'msg' Default message target if not present in targets.
       cmd = { -- Options related to messages in the cmdline window.
         height = 0.5, -- Maximum height while expanded for messages beyond 'cmdheight'.
       },
@@ -84,21 +83,21 @@ VimRc.now(function()
   mini_icons.mock_nvim_web_devicons()
 end)
 VimRc.now(function()
-  local starter = require 'mini.starter'
-  starter.setup {
-    items = {
-      { action = 'FzfLua global', name = 'Browser', section = 'Fzf' },
-      { action = 'FzfLua history', name = 'Command history', section = 'Fzf' },
-      { action = 'FzfLua files', name = 'Files', section = 'Fzf' },
-      { action = 'FzfLua helptags', name = 'Help tags', section = 'Fzf' },
-      { action = 'FzfLua live_grep', name = 'Live grep', section = 'Fzf' },
-      { action = 'FzfLua oldfiles', name = 'Old files', section = 'Fzf' },
-    },
-    content_hooks = {
-      starter.gen_hook.adding_bullet(),
-      starter.gen_hook.aligning('center', 'center'),
-    },
-  }
+  require('mini.starter').setup()
+  -- starter.setup {
+  --   items = {
+  --     { action = 'FzfLua global', name = 'Browser', section = 'Fzf' },
+  --     { action = 'FzfLua history', name = 'Command history', section = 'Fzf' },
+  --     { action = 'FzfLua files', name = 'Files', section = 'Fzf' },
+  --     { action = 'FzfLua helptags', name = 'Help tags', section = 'Fzf' },
+  --     { action = 'FzfLua live_grep', name = 'Live grep', section = 'Fzf' },
+  --     { action = 'FzfLua oldfiles', name = 'Old files', section = 'Fzf' },
+  --   },
+  --   content_hooks = {
+  --     starter.gen_hook.adding_bullet(),
+  --     starter.gen_hook.aligning('center', 'center'),
+  --   },
+  -- }
 end)
 
 VimRc.now(function()

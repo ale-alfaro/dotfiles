@@ -132,19 +132,37 @@ VimRc.later(function()
 
   })
 end)
+---@class CmdLineState
+---@field line string vim.fn.getcmdline
+---@field pos string vim.fn.getcmdpos
+---@field prev_line string vim.fn.getcmdline
+---@field prev_pos string vim.fn.getcmdpos
+---
+---@class CmdLineInfo
+---@field complpat string  vim.fn.getcmdcomplpat completion pattern
+---@field compltype string vim.fn.getcmdcompltype completion type
 
+local block_compltype = { 'shellcmd' }
 -- Command line tweaks. Improves command line editing with:
 -- - Autocompletion. Basically an automated `:h cmdline-completion`.
 -- - Autocorrection of words as-you-type. Like `:W`->`:w`, `:lau`->`:lua`, etc.
 -- - Autopeek command range (like line number at the start) as-you-type.
 VimRc.later(function()
-  local mini_cmdline = require 'mini.cmdline'
-  mini_cmdline.setup()
+  require('mini.cmdline').setup {
+    autocomplete = {
+      delay = 1000,
+      ---@param state CmdLineState
+      predicate = function(state, _opts)
+        return (state.line:find '%a' ~= nil) and not block_compltype[vim.fn.getcmdcompltype()]
+      end,
+    },
+    autocorrect = {},
+  }
 end)
 
 VimRc.later(function()
   require('mini.misc').setup()
-  MiniMisc.setup_auto_root { '.west', '.git' }
+  MiniMisc.setup_auto_root { '.nvim', '.git' }
   MiniMisc.setup_termbg_sync()
   MiniMisc.setup_restore_cursor()
 end)

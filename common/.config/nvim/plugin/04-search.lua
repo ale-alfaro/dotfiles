@@ -177,51 +177,32 @@ VimRc.later(function()
     },
   }
   local nonprefix_keys = {
+    { '<Space><Space>', '<cmd>FzfLua builtin<cr>', 'Find Fzf pickers' },
     { '<C-b>', '<cmd>FzfLua buffers<cr>', 'Buffers' },
     { '<C-\\>', '<cmd>FzfLua global<cr>', 'Global' },
     { '<C-e>', '<cmd>FzfLua files<cr>', 'Files' },
+    { '<C-S-e>', '<cmd>FzfLua oldfiles<cr>', 'Old Files' },
     { '<C-g>', '<cmd>FzfLua live_grep<cr>', 'Grep (cwd)' },
+    { '<C-l>', '<cmd>FzfLua blines<cr>', 'Buffer Lines' },
     { '<C-c>', '<cmd>FzfLua resume<cr>', 'Continue' },
     { '<C-f>', '<cmd>FzfLua command_history<cr>', 'Command History' },
-    { '<C-y>', '<cmd>FzfLua register<cr>', 'Registers' },
+    { '<C-h>', '<cmd>FzfLua search_history<cr>', 'History' },
+    { '<C-y>', '<cmd>FzfLua tmux<cr>', 'Tmux' },
   }
 
   for _, k in ipairs(nonprefix_keys) do
     vim.keymap.set('n', k[1], k[2], { desc = k[3], noremap = true })
   end
   local wkey_prefix = '<leader>f'
-  local lsp_wkey_prefix = '<leader>l'
   local prefix_keys = {
-    { '<C-l>', '<cmd>FzfLua blines<cr>', 'Buffer Lines' },
-    { '<M-o>', '<cmd>FzfLua oldfiles<cr>', 'Old Files' },
-    { wkey_prefix .. 'b', '<cmd>FzfLua builtin<cr>', 'Find Fzf pickers' },
     { wkey_prefix .. 'm', '<cmd>FzfLua manpages<cr>', 'Find Man' },
     { wkey_prefix .. 'h', '<cmd>FzfLua help_tags<cr>', 'Help' },
-    { wkey_prefix .. 'o', '<cmd>FzfLua history<cr>', 'History' },
-    { wkey_prefix .. 'O', '<cmd>FzfLua search_history<cr>', 'History' },
     { wkey_prefix .. 'k', '<Cmd>FzfLua keymaps<CR>', 'Keymaps' },
-    { wkey_prefix .. 'fD', '<cmd>FzfLua git_diff<cr>', 'Search Git Diff' },
-    { wkey_prefix .. 'fc', '<CMD>FzfLua changes<CR>', 'Search Git Diff (file-only)' },
-    { wkey_prefix .. 'fH', '<cmd>FzfLua git_hunks<cr>', 'Git Hunks' },
+    { wkey_prefix .. 'D', '<cmd>FzfLua git_diff<cr>', 'Search Git Diff' },
+    { wkey_prefix .. 'c', '<CMD>FzfLua changes<CR>', 'Search Git Diff (file-only)' },
+    { wkey_prefix .. 'H', '<cmd>FzfLua git_hunks<cr>', 'Git Hunks' },
     {
-      lsp_wkey_prefix .. 'D',
-      function()
-        FzfLua.lsp_workspace_diagnostics { vim.diagnostic.severity.ERROR }
-      end,
-      'Workspace Diagnostics',
-    },
-    {
-      lsp_wkey_prefix .. 'r',
-      '<cmd>FzfLua lsp_references<cr>',
-      'References',
-    },
-    {
-      lsp_wkey_prefix .. 'f',
-      '<cmd>FzfLua lsp_definitions<cr>',
-      'Definitions',
-    },
-    {
-      lsp_wkey_prefix .. 's',
+      wkey_prefix .. 's',
       '<cmd>FzfLua lsp_document_symbols<cr>',
       'Live Document Symbols',
     },

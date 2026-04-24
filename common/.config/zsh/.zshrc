@@ -15,20 +15,10 @@ done
 source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 [[ -f $ZDOTDIR/plugins/bd.zsh ]] && source $ZDOTDIR/plugins/bd.zsh
-# Some other stuff I might remove
-# source <(mise activate zsh)
 alias mx='mise x'
-activate_mise() {
-  eval "$(mise activate zsh)"
-  eval "$(mise completion zsh)"
-}
-alias mise_en='activate_mise'
-# safe_source atuin init zsh
 eval "$(mx -- starship init zsh)"
 
-# source <(gh completion -s zsh)
-# source <(hk completion zsh)
-#
+autoload fsesh termux
 ## The hook below is to check the date updated by pacman to
 # rehash the completions after a certain time
 zshcache_time="$(date +%s%N)"
@@ -47,8 +37,18 @@ rehash_precmd() {
 
 add-zsh-hook -Uz precmd rehash_precmd
 
-if eza; then
-  alias lt='eza --tree --level=3 --long --icons --git'
-  alias lta='lt -a'
-  alias ls="eza --icons=always --oneline --no-git --all"
-fi
+zd() {
+  if [ $# -eq 0 ]; then
+    builtin cd ~ && return
+  elif [ -d "$1" ]; then
+    builtin cd "$1"
+  else
+    zi "$1"
+  fi
+}
+safe_source zoxide init zsh
+alias cd='zd'
+
+# ---- Editor -----
+autoload fvim
+alias v="fvim"
