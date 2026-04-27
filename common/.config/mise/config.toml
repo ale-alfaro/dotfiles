@@ -99,6 +99,7 @@ acli = "latest"
 lazydocker = "latest"
 jq = "latest"
 cargo-binstall = "latest"
+devcontainer-cli = "latest"
 
 
 [shell_alias]

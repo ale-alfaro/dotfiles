@@ -1,44 +1,50 @@
 [user]
 	name = Ale Alfaro
-	email = alejandro.alfaro@sibelhealth.com
-[pull]
-  rebase = true
+	email = ale16alfaro@gmail.com
+[credential "https://github.com"]
+	helper = !gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = !gh auth git-credential
+
 [alias]
   st = status -s
   lol = log --oneline --graph --all
-[branch]
-	sort = -committerdate
-[credential "https://github.com"]
-	helper =
-	helper = !/usr/bin/env gh auth git-credential
-[credential "https://gist.github.com"]
-	helper =
-	helper = !/usr/bin/env gh auth git-credential
-[difftool]
-  prompt = true
 
-[diff]
-  tool = nvimdiff
-  algorithm = histogram
-  colorMoved = plain
-  mnemonicPrefix = true
-  renames = true
+[extensions]
+  relativeWorktrees = true
+
+[branch]
+  sort = -committerdate
+[color]
+  ui = always
 [column]
-  ui = auto
-[difftool "nvimdiff"]
-  cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
-[rebase]
-	updateRefs = true
-[rerere]
-	enabled = true
-[init]
-	defaultBranch = main
-[merge]
-	conflictstyle = diff3
+  ui = always
+[core]
+  pager = bat
+  editor = nvim
+[fetch]
+	prune = true
+[pull]
+  rebase = true
+  autoStash = true
 [push]
   default = simple
 	autoSetupRemote = true
-[fetch]
-	prune = true
-[advice]
-	skippedCherryPicks = false
+[diff]
+	tool = diffnav
+[rebase]
+	autoStash = true
+	updateRefs = true
+[rerere]
+  enabled = true
+  autoUpdate = true
+[init]
+	defaultBranch = main
+[merge]
+  conflictStyle = zdiff3
+  tool = nvimdiff2
+[web]
+  browser = zen-browser
+[worktree]
+  useRelativePaths = true
+  guessRemote = true
