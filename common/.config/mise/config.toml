@@ -98,6 +98,7 @@ just = "latest"
 acli = "latest"
 lazydocker = "latest"
 jq = "latest"
+cargo-binstall = "latest"
 
 
 [shell_alias]

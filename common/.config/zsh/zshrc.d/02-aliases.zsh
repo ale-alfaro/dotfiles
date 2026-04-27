@@ -24,6 +24,7 @@ alias wman='wikiman'
 # Alias for lazygit
 # Link: https://github.com/jesseduffield/lazygit
 alias lg='lazygit'
+alias lzd='lazydocker'
 alias minimax='NVIM_APPNAME=nvim-minimax nvim'
 # -------------------------------------------
 # 5. Suffix Aliases - Open Files by Extension
@@ -62,9 +63,9 @@ if [[ "$OSTYPE" == "linux"* ]]; then
   open() {
     xdg-open "$@" >/dev/null 2>&1 &
   }
-  alias -g C='| wlcopy'
+  alias -g CP='| wlcopy'
 elif [[ "$OSTYPE" == "macos"* ]]; then
-  alias -g C='| pbcopy'
+  alias -g CP='| pbcopy'
 fi
 
 # -------------------------------------------

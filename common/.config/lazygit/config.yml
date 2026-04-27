@@ -1,9 +1,9 @@
 # Copied from https://github.com/folke/tokyonight.nvim/blob/main/extras/lazygit/tokyonight_night.conf
 os:
-  edit: "mise x neovim@0.12 -- nvim  -- {{filename}}"
-  editAtLine: "mise x neovim@0.12 -- nvim  +{{line}} -- {{filename}}"
-  editAtLineAndWait: "mise x neovim@0.12 -- nvim  +{{line}} -- {{filename}}"
-  openDirInEditor: "mise x neovim@0.12 -- nvim  -- {{dir}}"
+  edit: "mise x  -- nvim  -- {{filename}}"
+  editAtLine: "mise x  -- nvim  +{{line}} -- {{filename}}"
+  editAtLineAndWait: "mise x  -- nvim  +{{line}} -- {{filename}}"
+  openDirInEditor: "mise x  -- nvim  -- {{dir}}"
   editInTerminal: true
 # to skip without creating a new repo
 notARepository: "skip"
@@ -255,7 +255,8 @@ gui:
 # Config relating to git
 git:
   pagers:
-    - pager: delta --dark --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
+    - pager: delta --dark --paging=never --line-numbers --hyperlinks
+        --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
   # Array of pagers. Each entry has the following format:
   #
   #   # Value of the --color arg in the git diff command. Some pagers want
@@ -338,12 +339,14 @@ git:
   autoStageResolvedConflicts: true
 
   # Command used when displaying the current branch git log in the main window
-  branchLogCmd: "git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=medium --oneline {{branchName}} --"
+  branchLogCmd: "git log --graph --color=always --abbrev-commit --decorate
+    --date=relative --pretty=medium --oneline {{branchName}} --"
 
   # Commands used to display git log of all branches in the main window, they will
   # be cycled in order of appearance (array of strings)
   allBranchesLogCmds:
-    - "git log --graph --all --color=always --abbrev-commit --decorate --date=relative  --pretty=medium"
+    - "git log --graph --all --color=always --abbrev-commit --decorate
+      --date=relative  --pretty=medium"
 
   # If true, git diffs are rendered with the `--ignore-all-space` flag, which
   # ignores whitespace changes. Can be toggled from within Lazygit with `<c-w>`.

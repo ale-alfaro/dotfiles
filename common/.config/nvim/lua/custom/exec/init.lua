@@ -1,39 +1,6 @@
 local M = {}
 local PRIV = {}
 
-local uv = vim.uv or vim.loop
-vim.env.PATH = vim.env.HOME .. '/.local/share/mise/shims:' .. vim.env.PATH
-M.env = vim.fn.environ() or {}
-M.append_path = function(path)
-  vim.validate('path', path, 'string')
-  if not uv.fs_stat(path) then
-    VimRc.err('Failed to append to PATH: ' .. path)
-    return nil
-  end
-  vim.fn.setenv('PATH', string.format('%$PATH:%s', path))
-  return vim.fn.getenv 'PATH'
-end
----Get environment variable
----@description Use for getting with fallback
----@param name string
----@param fallback? string
-M.getenv = function(name, fallback)
-  vim.validate('name', name, 'string')
-  vim.validate('fallback', fallback, 'string', true)
-  if VimRc.env[name] then
-    return VimRc.env[name]
-  elseif fallback then
-    return fallback
-  else
-    VimRc.err('Failed to get env: ' .. name)
-  end
-end
--- Prepend mise shims to PATH
--- 'WEST_TOPDIR'
-function M.check_env(name)
-  return vim.fn.has_key(vim.fn.environ(), name)
-end
-
 ---@class vimrc.exec.Error
 ---@field code exec.ERROR_CODE
 ---@field message string
@@ -67,21 +34,20 @@ local cli_notify = function(msg, level)
     vim.notify('[exec] ' .. msg, vim.log.levels[level] or vim.log.levels.INFO)
   end)
 end
----@param command string[]
----@param cwd? string
+---@param executable string
 ---@param on_done? fun(ret:integer, stdout:string, stderr:string)
----@param opts? table
+---@param opts? {cwd?:string,envs?:table<string,string>,timeout:number,stdin:string}
 ---@return table<integer, string, string>|nil
-M.cli_run = function(command, cwd, on_done, opts)
-  local spawn_opts = opts or {}
-  local timeout = spawn_opts.timeout or 100
-  local stdin_data = spawn_opts.stdin
-  spawn_opts.stdin, spawn_opts.timeout = nil, nil
-  local executable, args = command[1], vim.list_slice(command, 2, #command)
-  local stdin_pipe = stdin_data and vim.loop.new_pipe() or nil
+M.cli_run = function(executable, on_done, opts)
+  vim.validate('executable', executable, 'string')
+  vim.validate('on_done', on_done, 'function', true)
+  vim.validate('opts', opts, 'table', true)
+
+  opts = opts or {}
+  local timeout = opts.timeout or 100
+  local stdin_pipe = opts.stdin and vim.loop.new_pipe() or nil
   local stdout, stderr = vim.loop.new_pipe(), vim.loop.new_pipe()
   local process = nil
-  spawn_opts.args, spawn_opts.cwd, spawn_opts.stdio = args, cwd or vim.fn.getcwd(), { stdin_pipe, stdout, stderr }
 
   -- Allow `on_done = nil` to mean synchronous execution
   local is_sync, res = false, nil
@@ -112,10 +78,12 @@ M.cli_run = function(command, cwd, on_done, opts)
     local str_err = PRIV.cli_stream_tostring(err):gsub('\r+', '\n'):gsub('\n%s+\n', '\n\n')
     on_done(code, str_out, str_err)
   end
+  ---@type uv.spawn.options
+  local spawn_opts = { args = opts.args, cwd = opts.cwd or vim.fn.getcwd(), stdio = { stdin_pipe, stdout, stderr }, env = opts.envs }
   ---@type uv.uv_process_t?
   process = vim.loop.spawn(executable, spawn_opts, on_exit)
-  if stdin_pipe and stdin_data then
-    stdin_pipe:write(stdin_data)
+  if stdin_pipe then
+    stdin_pipe:write(opts.stdin)
     stdin_pipe:shutdown(function()
       stdin_pipe:close()
     end)
@@ -177,57 +145,18 @@ end
 -- Command --------------------------------------------------------------------
 local executables_cache = {}
 ---Run a system command.
----@param cmd string[] command arguments
+---@param cmd string command arguments
+---@param args? string[] command arguments
 ---@return table<integer, string, string>
-function M.run_cmd_sync(cmd)
-  if #cmd == 0 then
-    error 'No command provided'
+function M.run_cmd_sync(cmd, args)
+  vim.validate('cmd', cmd, 'string')
+  vim.validate('args', args, vim.islist, true)
+  local executable = cmd[1]
+  executables_cache[executable] = executables_cache[executable] or vim.fn.executable(executable) == 1
+  if not executables_cache[executable] then
+    error(string.format('`%s` is not executable (not found on `$PATH`)', executable))
   end
 
-  executables_cache[cmd[1]] = executables_cache[cmd[1]] or vim.fn.executable(cmd[1]) == 1
-  if not executables_cache[cmd[1]] then
-    error(string.format('`%s` is not executable (not found on `$PATH`)', cmd[1]))
-  end
-
-  return assert(M.cli_run(cmd))
+  return assert(M.cli_run(executable, nil, { args = args }))
 end
-
----Run a system command.
----@param cmd string[] command arguments
----@param on_done fun(ret:integer, stdout:string, stderr:string)
-function M.run_cmd(cmd, on_done)
-  if #cmd == 0 then
-    error 'No command provided'
-  end
-
-  executables_cache[cmd[1]] = executables_cache[cmd[1]] or vim.fn.executable(cmd[1]) == 1
-  if not executables_cache[cmd[1]] then
-    error(string.format('`%s` is not executable (not found on `$PATH`)', cmd[1]))
-  end
-
-  M.cli_run(cmd, nil, on_done)
-end
----@param cmd string|string[]
----@return string|nil
-function M.west(cmd)
-  local full = { 'west' }
-  if type(cmd) == 'table' then
-    full = vim.list_extend({ 'west' }, cmd, 1, #cmd + 1)
-  elseif type(cmd) == 'string' then
-    for c in vim.gsplit(cmd, ' ', { plain = true, trimempty = true }) do
-      table.insert(full, c)
-    end
-  else
-    VimRc.err('Invalid type fed to west: ' .. type(cmd))
-    return nil
-  end
-  VimRc.inf('Running west cmd: ' .. table.concat(full, ' '))
-  local ret, out, err = M.run_cmd_sync(full)
-  if ret ~= 0 then
-    VimRc.err('Cmd return error: ' .. err)
-    return nil
-  end
-  return out
-end
-
 return M

@@ -46,10 +46,10 @@
 # -> see https://stackoverflow.com/a/13785716/149220 for a solution
 
 # Complete the alias when _expand_alias is used as a function
-fpath+=(/usr/share/zsh/plugins/zsh-users/zsh-completions/src)
-fpath+=("${XDG_DATA_HOME}/zsh/generated_man_completions")
-fpath+=("${ZDOTDIR}/completions/src")
-fpath+=("${ZDOTDIR}/functions")
+fpath+=/usr/share/zsh/plugins/zsh-users/zsh-completions/src
+fpath+="$XDG_DATA_HOME}/zsh/generated_man_completions"
+fpath+="$ZDOTDIR/completions/src"
+fpath+="$ZDOTDIR/functions"
 cache_directory="$XDG_CACHE_HOME/zsh"
 [[ -r "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh" ]] && . "${HOME}/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh"
 autoload -Uz compinit && compinit -d $cache_directory

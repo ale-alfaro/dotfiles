@@ -293,8 +293,21 @@ local list_files_from_branch_action = function(action, selected, o, args)
   vim.cmd(cmd)
 end
 
+---@return string[]
 local get_vaults = function()
-  return vim.fn.systemlist [[obsidian vaults verbose | awk '{print $2}']]
+  local vaults = {}
+  local obs = VimRc.getenv 'OBSIDIAN_HOME'
+  if not obs then
+    return {}
+  end
+  for basename, _ in vim.fs.dir(obs, { depth = 1, type = 'directory' }) do
+    local abs = vim.fs.joinpath(obs, basename)
+    if vim.uv.fs_stat(vim.fs.joinpath(abs, '.obsidian')) ~= nil then
+      vaults[#vaults + 1] = abs
+    end
+  end
+  vim.print(vaults)
+  return vaults
 end
 usercmd_args_comp('ObsFiles', function(ev)
   local arg = (ev.fargs or {})[1]

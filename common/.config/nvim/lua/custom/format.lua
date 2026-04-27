@@ -9,14 +9,15 @@ local M = {}
 
 M.timeout_ms = 1000
 
----@alias FormatDef { cmd: string, args: string[] }
+---@alias FormatDef { cmd: string, args: string[] , envs? : table<string,string>}
 --- Formatter list per filetype. When stop_after_first is true, only the first
 --- available formatter runs (useful for fallbacks like dprint → prettier).
 ---@alias FormatList FormatDef[]|{ [integer]: FormatDef, stop_after_first?: boolean }
 
 -- Broad formatters reused across filetypes
 local prettier = { cmd = 'prettier', args = { '--stdin-filepath', '$FILENAME' } }
-local dprint = { cmd = 'dprint', args = { 'fmt', '--stdin', '$FILENAME' } }
+local dprint =
+  { cmd = 'dprint', args = { 'fmt', '--stdin', '$FILENAME' }, envs = { DPRINT_CONFIG_DIR = '~/.config/dprint', DPRINT_CONFIG_DISCOVERY = 'global' } }
 
 ---@type table<string, FormatList>
 M.formatters_by_ft = {
@@ -93,8 +94,7 @@ end
 ---@param filename string
 ---@param callback fun(output: string|nil)
 local function run_formatter_async(formatter, text, filename, callback)
-  local cmd = vim.list_extend({ formatter.cmd }, resolve_args(formatter.args, filename))
-  exec.cli_run(cmd, nil, function(code, stdout, _stderr)
+  exec.cli_run(formatter.cmd, function(code, stdout)
     if code ~= 0 then
       vim.schedule(function()
         vim.notify(string.format('[format] %s exited with code %s', formatter.cmd, tostring(code)), vim.log.levels.WARN)
@@ -103,7 +103,7 @@ local function run_formatter_async(formatter, text, filename, callback)
     else
       callback(stdout)
     end
-  end, { stdin = text, timeout = M.timeout_ms })
+  end, { args = formatter.args, envs = formatter.envs, stdin = text, timeout = M.timeout_ms })
 end
 
 ---Diff original_lines vs new_lines and apply minimal text edits to the buffer.

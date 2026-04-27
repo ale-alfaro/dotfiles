@@ -50,11 +50,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   export BROWSER=arc
   export SDKROOT="$(xcrun --show-sdk-path)"
 else
-  export BROWSER=zen-browser
-  # SSH agent started by systemd automatically. Only need to set the socketp
-  if [[ -z "${SSH_CONNECTION}" ]]; then
-    export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
-  fi
 fi
 
 export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/ripgreprc"

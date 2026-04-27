@@ -14,6 +14,14 @@ case ${usage_op?} in
   unstow) op_flag="-D" ;;
   *) echo "Invalid operation!" && exit 1 ;;
 esac
-flags=('-t' "${XDG_CONFIG_HOME:-$HOME/.config}" "${(z)${usage_sim:+-vv --simulate}:-}" "${op_flag?}" .)
-stow -d "common/.config" "${flags[@]}"
-stow -d "linux/.config" "${flags[@]}"
+
+case ${usage_pkg?} in
+  .config) target="${XDG_CONFIG_HOME:-$HOME/.config}" ;;
+  home) target="${HOME}" ;;
+  bin) target="${HOME}/.local/bin" ;;
+  *) echo "Invalid operation!" && exit 1 ;;
+esac
+
+flags=('-t' "${target?}" "${(z)${usage_sim:+-vv --simulate}:-}" "${op_flag?}")
+stow -d "common/${usage_pkg?}" "${flags[@]}"
+stow -d "linux/${usage_pkg?}" "${flags[@]}"

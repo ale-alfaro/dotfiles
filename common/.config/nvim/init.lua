@@ -33,6 +33,9 @@ local misc = require 'mini.misc'
 ---@field new_autocmd fun(event:string|string[],callback:function,pattern:string|string[]?,desc:string?)
 ---@field on_packchanged fun(plugin_name:string,kinds:string[],callback:function,desc:string?)
 ---@field notify? fun(msg:string,lvl:string)
+---@field env table<string,string>
+---@field getenv fun(name:string,fallback?:string):string?
+---@field checkenv fun(name:string):boolean
 _G.VimRc = _G.VimRc or require 'custom.utils' ---@type VimRc
 ---
 ---
@@ -165,8 +168,43 @@ function FeatureFlags:set(name, enable)
   self.entries[name] = fflag
 end
 
-FeatureFlags:add('Exrc', {
-  enable = true,
-})
-
 vim.o.exrc = true
+--- Load given exrc file
+---@param exrc_path? string
+function VimRc.exrc_trust(exrc_path)
+  -- Ensure we trust the file before loading
+  exrc_path = exrc_path or '.nvim.lua'
+  local ok, result = vim.secure.trust { action = 'allow', path = exrc_path }
+  if not ok then
+    VimRc.err('Failed to load exrc "%s"', exrc_path)
+    error(result)
+  end
+end
+
+function VimRc.exrc_database()
+  vim.cmd('e ' .. vim.fs.joinpath(vim.fn.expand '$XDG_STATE_HOME', 'nvim', 'trust'))
+end
+
+vim.env.PATH = vim.env.HOME .. '/.local/share/mise/shims:' .. vim.env.PATH
+VimRc.env = vim.fn.environ() or {}
+---Get environment variable
+---@description Use for getting with fallback
+---@param name string
+---@param fallback? string
+---@return string?
+VimRc.getenv = function(name, fallback)
+  vim.validate('name', name, 'string')
+  vim.validate('fallback', fallback, 'string', true)
+  if VimRc.env[name] then
+    return VimRc.env[name]
+  elseif fallback then
+    return fallback
+  else
+    VimRc.err('Failed to get env: ' .. name)
+  end
+end
+-- Prepend mise shims to PATH
+-- 'WEST_TOPDIR'
+function VimRc.checkenv(name)
+  return vim.fn.has_key(vim.fn.environ() or {}, name) ~= 0
+end

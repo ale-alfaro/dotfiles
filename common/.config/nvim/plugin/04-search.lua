@@ -181,7 +181,7 @@ VimRc.later(function()
     { '<C-b>', '<cmd>FzfLua buffers<cr>', 'Buffers' },
     { '<C-\\>', '<cmd>FzfLua global<cr>', 'Global' },
     { '<C-e>', '<cmd>FzfLua files<cr>', 'Files' },
-    { '<C-S-e>', '<cmd>FzfLua oldfiles<cr>', 'Old Files' },
+    { '<C-a>', '<cmd>FzfLua oldfiles<cr>', 'Old Files' },
     { '<C-g>', '<cmd>FzfLua live_grep<cr>', 'Grep (cwd)' },
     { '<C-l>', '<cmd>FzfLua blines<cr>', 'Buffer Lines' },
     { '<C-c>', '<cmd>FzfLua resume<cr>', 'Continue' },
