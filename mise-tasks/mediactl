@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-set -euo pipefail
+set -e
 #MISE description="Control brightness, volume and playback on Arch Linux"
 #MISE dir="{{cwd}}"
 #USAGE flag "--toggle [onoff]" help="Toggle playback or mute mic/speakers" {
@@ -14,31 +14,6 @@ set -euo pipefail
 # Adjust brightness on the most likely display device.
 # Usage: omarchy-brightness-display <step>
 MONITOR="$(hyprctl monitors -j | jq -r '.[] | select(.focused == true).name')"
-_swayosd_brightness_ctl() {
-
-  local -r step="${1:-5%}"
-  local display_dev="$(ls -1 /sys/class/backlight 2>/dev/null | head -n1)"
-  for candidate in amdgpu_bl* intel_backlight acpi_video*; do
-    if [[ -e /sys/class/backlight/$candidate ]]; then
-      display_dev="$candidate"
-      break
-    fi
-  done
-  # Set the actual brightness of the display device.
-  brightnessctl -d "$display_dev" set "$step" >/dev/null
-
-  # Use SwayOSD to display the new brightness setting.
-  percent="$(brightnessctl -d "$display_dev" -m | cut -d',' -f4 | tr -d '%')"
-
-  progress="$(awk -v p="$percent" 'BEGIN{printf "%.2f", p/100}')"
-  [[ $progress == "0.00" ]] && progress="0.01"
-
-  swayosd-client \
-    --monitor $MONITOR \
-    --custom-icon display-brightness \
-    --custom-progress "$progress" \
-    --custom-progress-text "${percent}%"
-}
 
 _swayosd_ctl() {
   swayosd-client --monitor "$MONITOR" "$@"
@@ -47,10 +22,10 @@ _swayosd_ctl() {
 ctl="${usage_ctl:-${usage_onoff?}}"
 case ${ctl} in
   bright)
-    _swayosd_brightness_ctl ${usage_scalar:-}
+    omarchy-brightness-display "${usage_scalar?}%"
     ;;
   vol)
-    _swayosd_ctl --output-volume ${usage_scalar:-raise}
+    _swayosd_ctl --output-volume "${usage_scalar:-raise}"
     ;;
   play)
     _swayosd_ctl --playerctl play-pause
