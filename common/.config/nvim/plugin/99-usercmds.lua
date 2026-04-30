@@ -237,7 +237,7 @@ usercmd_args_comp('Pack', function(args)
   local arg = (args.fargs or {})[1]
   local plugins = vim.pack.get()
   local active = vim
-    .iter()
+    .iter(plugins)
     :filter(function(pspec)
       return pspec.active
     end)
@@ -253,9 +253,7 @@ usercmd_args_comp('Pack', function(args)
   if arg == 'clean' then
     vim.pack.del(inactive)
   elseif string.find(arg, '^up') then
-    vim.cmd.echo(string.format('Plugins count: %d', #active))
-    vim.cmd.echo(table.concat(active, '\n'))
-    vim.pack.update(active)
+    vim.pack.update()
   elseif arg == 'ls' or arg == 'list' then
     local lines = {
       'Active Plugins List:',

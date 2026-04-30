@@ -11,6 +11,9 @@ VimRc.now(function()
   require('mini.sessions').setup()
 end)
 
+VimRc.later(function()
+  require('mini.visits').setup()
+end)
 -- local builtin_textobjects = {
 --   -- Use balanced pair for brackets. Use opening ones to possibly remove edge
 --   -- whitespace from `i` textobject.

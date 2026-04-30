@@ -61,14 +61,13 @@ keybindings:
     - key: C
       builtin: checkout
     - key: m
-      name: Assign Team
-      command: gh pr edit --repo {{.RepoName}} {{.PrNumber}} --add-reviewer
-        sibelhealth/Firmware
-    # - key: O
-    #   name: code review
-    #   command: >
-    #     tmux new-window -c {{.RepoPath}} -n "octo" '
-    #     nvim -c ":silent Octo pr edit {{.PrNumber}}"
+      command: gh pr edit -R {{.RepoName}} --add-reviewer sibelhealth/Firmware
+        {{.PrNumber}}
+    - key: O
+      name: code review
+      command: >
+        tmux new-window -c {{.RepoPath}} -n "octo" ' nvim -c ":silent Octo pr
+        edit {{.PrNumber}}"
     #     '
     - key: T
       command: >-

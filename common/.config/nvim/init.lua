@@ -21,6 +21,8 @@ vim.pack.add {
   gh 'rachartier/tiny-code-action.nvim',
   gh 'MeanderingProgrammer/render-markdown.nvim',
   gh 'MagicDuck/grug-far.nvim',
+  gh 'nvim-lua/plenary.nvim',
+  gh 'pwntester/octo.nvim',
 }
 local misc = require 'mini.misc'
 ---@class VimRc : vimrc.Utils

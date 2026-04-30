@@ -167,7 +167,14 @@ FeatureFlags:add('Diff', {
     end, 200)
   end,
 })
-
+VimRc.later(function()
+  require('octo').setup {
+    -- or "fzf-lua" or "snacks" or "default"
+    picker = 'fzf-lua',
+    -- bare Octo command opens picker of commands
+    enable_builtin = true,
+  }
+end)
 VimRc.on_filetype('markdown', function()
   require('render-markdown').setup(
     ---@type render.md.Settings

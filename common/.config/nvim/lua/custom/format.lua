@@ -37,6 +37,7 @@ M.formatters_by_ft = {
     },
     { cmd = 'ruff', args = { 'format', '--force-exclude', '--stdin-filename', '$FILENAME', '-' } },
   },
+  cmake = { cmd = 'gersemi', args = { '-i', '--no-warn-about-unknown-commands', '$FILENAME' } },
   markdown = { prettier },
   json = { dprint, prettier, stop_after_first = true },
   jsonc = { dprint, prettier, stop_after_first = true },

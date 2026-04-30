@@ -270,12 +270,11 @@ nmap_leader('eQ', explore_locations, 'Location list')
 -- - `<Leader>sR` - restart Neovim preserving current session
 local session_new = 'vim.ui.input({ prompt = "Session name: " }, MiniSessions.write)'
 
-nmap_leader('sd', '<Cmd>lua MiniSessions.select("delete")<CR>', 'Delete')
-nmap_leader('sn', '<Cmd>lua ' .. session_new .. '<CR>', 'New')
+VimRc.map({ lhs = '<M-d>', rhs = '<Cmd>lua MiniSessions.select("delete")<CR>' }, 'Delete Sesh')
+VimRc.map({ lhs = '<M-s>', rhs = 'sn', '<Cmd>lua ' .. session_new .. '<CR>' }, 'New Sesh')
 VimRc.map({ lhs = '<M-r>', rhs = '<Cmd>lua MiniSessions.restart()<CR>' }, 'Restart')
 nmap_leader('sr', '<Cmd>lua MiniSessions.select("read")<CR>', 'Read')
 nmap_leader('ss', '<Cmd>lua MiniSessions.write()<CR>', 'Write current')
--- map('<M-r>', '<Cmd>restart<CR>', nil, { desc = 'Restart', noremap = true })
 
 -- v is for 'Visits'. Common usage:
 -- - `<Leader>vv` - add    "core" label to current file.
@@ -283,9 +282,35 @@ nmap_leader('ss', '<Cmd>lua MiniSessions.write()<CR>', 'Write current')
 -- - `<Leader>vc` - pick among all files with "core" label.
 local make_pick_core = function(cwd, desc)
   return function()
-    local sort_latest = MiniVisits.gen_sort.default { recency_weight = 1 }
-    local local_opts = { cwd = cwd, filter = 'core', sort = sort_latest }
-    MiniExtra.pickers.visit_paths(local_opts, { source = { name = desc } })
+    local visits = require 'mini.visits'
+    visits.setup()
+    local sort_latest = visits.gen_sort.default { recency_weight = 1 }
+    local local_opts = { filter = 'core', sort = sort_latest }
+    local paths = visits.list_paths('', local_opts)
+    paths = vim.tbl_map(function(x)
+      return vim.fs.normalize(x)
+    end, paths)
+    vim.print(paths)
+    local fzf = require 'fzf-lua'
+    fzf.fzf_exec(
+      paths,
+      ---@type fzf-lua.config.Base
+      {
+        fn_selected = function(selected, _opts)
+          if not selected[1] then
+            return
+          end
+          local cwd = selected[1]:match '[^\t]+$' or selected[1]
+          if vim.uv.fs_stat(cwd) then
+            vim.cmd('Oil ' .. cwd)
+            vim.system { 'zoxide', 'add', '--', cwd }
+            VimRc.info(("cwd set to '%s'"):format(cwd))
+          else
+            VimRc.warn(("Unable to set cwd to '%s', directory is not accessible"):format(cwd))
+          end
+        end,
+      }
+    )
   end
 end
 
