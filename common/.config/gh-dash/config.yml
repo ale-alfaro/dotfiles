@@ -61,7 +61,9 @@ keybindings:
     - key: C
       builtin: checkout
     - key: m
-      command: gh pr edit --repo {{.RepoName}} --add-assignee sibelhealth/Firmware
+      name: Assign Team
+      command: gh pr edit --repo {{.RepoName}} {{.PrNumber}} --add-reviewer
+        sibelhealth/Firmware
     # - key: O
     #   name: code review
     #   command: >

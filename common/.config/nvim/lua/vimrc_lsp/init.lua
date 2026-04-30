@@ -6,7 +6,7 @@ local lsp_configs_get = function()
   return vim
     .iter(vim.fn.globpath(vim.fn.expand '$XDG_CONFIG_HOME/nvim', '**/lsp/*.lua', false, true))
     :map(function(f)
-      return f:match '/(%w+)%.lua$'
+      return f:match '/([%w%-_]+)%.lua$'
     end)
     :totable()
 end
@@ -138,7 +138,8 @@ M.setup = function()
 
   local servers = lsp_configs_get()
   servers = vim.list_extend(servers, { 'lua_ls', 'yamlls', 'jsonls' })
-  VimRc.debug('Enabling lsps: ', { servers = servers })
+  VimRc.info('Enabling lsps:')
+  VimRc.info(table.concat(servers,' \n ') )
   vim.lsp.enable(servers)
 
   -- HACK: Override buf_request to ignore notifications from LSP servers that don't implement a method.

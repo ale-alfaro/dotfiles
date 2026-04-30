@@ -4,9 +4,11 @@
 return {
     cmd = { 'rust-analyzer' },
     filetypes = { 'rust' },
-    root_markers = { 'Cargo.toml', 'rust-project.json' },
+    root_markers = { 'Cargo.toml', 'rust-project.json', '.git' },
     settings = {
         ['rust-analyzer'] = {
+            cargo = {allFeatures = true},
+            formatting = {  command = {'rustfmt'}},
             inlayHints = {
                 -- These are a bit too much.
                 chainingHints = { enable = false },

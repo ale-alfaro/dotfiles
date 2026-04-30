@@ -63,9 +63,9 @@ if [[ "$OSTYPE" == "linux"* ]]; then
   open() {
     xdg-open "$@" >/dev/null 2>&1 &
   }
-  alias -g CP='| wlcopy'
+  alias -g CP='| wl-copy'
 elif [[ "$OSTYPE" == "macos"* ]]; then
-  alias -g CP='| pbcopy'
+  alias -g CP='| pb-copy'
 fi
 
 # -------------------------------------------

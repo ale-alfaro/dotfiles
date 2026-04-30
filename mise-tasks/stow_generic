@@ -22,6 +22,7 @@ case ${usage_pkg?} in
   *) echo "Invalid operation!" && exit 1 ;;
 esac
 
-flags=('-t' "${target?}" "${(z)${usage_sim:+-vv --simulate}:-}" "${op_flag?}")
-stow -d "common/${usage_pkg?}" "${flags[@]}"
-stow -d "linux/${usage_pkg?}" "${flags[@]}"
+common_flags=('-d' "common/${usage_pkg?}" '-t' "${target?}" "${(z)${usage_sim:+-vv --simulate}:-}" "${op_flag?}" '.')
+stow "${common_flags[@]}"
+platform_flags=('-d' "linux/${usage_pkg?}" '-t' "${target?}" "${(z)${usage_sim:+-vv --simulate}:-}" "${op_flag?}" '.')
+stow "${platform_flags[@]}"
