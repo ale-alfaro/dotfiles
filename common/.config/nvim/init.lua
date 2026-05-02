@@ -12,7 +12,6 @@ vim.pack.add {
   gh 'stevearc/oil.nvim',
   gh 'stevearc/quicker.nvim',
   gh 'folke/trouble.nvim',
-  gh 'rebelot/kanagawa.nvim',
   gh 'ibhagwan/fzf-lua',
   gh 'nvim-treesitter/nvim-treesitter',
   gh 'nvim-treesitter/nvim-treesitter-textobjects',
@@ -23,6 +22,9 @@ vim.pack.add {
   gh 'MagicDuck/grug-far.nvim',
   gh 'nvim-lua/plenary.nvim',
   gh 'pwntester/octo.nvim',
+
+  gh 'rebelot/kanagawa.nvim',
+  gh 'ellisonleao/gruvbox.nvim',
 }
 local misc = require 'mini.misc'
 ---@class VimRc : vimrc.Utils

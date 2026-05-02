@@ -149,7 +149,7 @@ VimRc.later(function()
     vim.keymap.set('n', '<leader>d' .. k[1], k[2], { desc = k[3] })
   end
 end)
-VimRc.on_filetype('markdown', function()
+VimRc.later(function()
   require('render-markdown').setup(
     ---@type render.md.Settings
     {
@@ -169,4 +169,5 @@ VimRc.on_filetype('markdown', function()
   vim.api.nvim_set_hl(0, '@markup.heading.2.markdown', { fg = '#ff9e3b' })
   vim.api.nvim_set_hl(0, '@markup.heading.3.markdown', { fg = '#e6c384' })
   vim.api.nvim_set_hl(0, '@markup.heading.4.markdown', { fg = '#7fb4ca' })
+  require('custom.obsidian').setup()
 end)
