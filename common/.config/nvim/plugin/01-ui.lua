@@ -68,7 +68,8 @@ end)
 
 VimRc.icons = require 'custom.icons'
 VimRc.now(function()
-  vim.cmd 'colorscheme kanagawa'
+  -- vim.cmd 'colorscheme kanagawa'
+  vim.cmd 'colorscheme gruvbox'
 end)
 VimRc.now(function()
   -- Set up to not prefer extension-based icon for some extensions
@@ -106,5 +107,5 @@ end)
 ---
 
 VimRc.now(function()
-  require('custom.notify').setup()
+  require 'custom.notify'
 end)

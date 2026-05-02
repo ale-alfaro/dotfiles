@@ -87,14 +87,26 @@ local is_git_repo = function()
   return inside_git_repo
 end
 
---- MiniGit
-local minigit_setup = function()
-  require('mini.git').setup()
-  vim.keymap.set('n', 'da', '<Cmd>Git diff --cached<CR>', { desc = 'Added diff' })
-  vim.keymap.set('n', 'dc', '<Cmd>Git diff --cached -- %<CR>', { desc = 'Added diff buffer' })
+local export_diff_qf = function()
+  vim.fn.setqflist(MiniDiff.export 'qf')
 end
 
-local minidiff_setup = function()
+local minidiff_toggle_hook = function(enabled, bufnr)
+  if enabled then
+    if MiniDiff then
+      MiniDiff.enable(bufnr)
+      MiniDiff.toggle_overlay(bufnr)
+    end
+  else
+    require('mini.diff').disable(bufnr)
+  end
+  -- HACK: redraw to update the signs
+  vim.defer_fn(function()
+    vim.cmd [[redraw!]]
+  end, 200)
+end
+VimRc.later(function()
+  require 'extras.minigit'
   local diff = require 'mini.diff'
   diff.setup {
 
@@ -106,74 +118,36 @@ local minidiff_setup = function()
       signs = { add = '+', change = '~', delete = '-' },
     },
   }
-
-  local format_summary = function(data)
-    local summary = vim.b[data.buf].minidiff_summary
-    local t = {}
-    if summary.add > 0 then
-      table.insert(t, '+' .. summary.add)
-    end
-    if summary.change > 0 then
-      table.insert(t, '~' .. summary.change)
-    end
-    if summary.delete > 0 then
-      table.insert(t, '-' .. summary.delete)
-    end
-    vim.b[data.buf].minidiff_summary_string = table.concat(t, ' ')
-  end
-
-  vim.api.nvim_create_autocmd('User', { pattern = 'MiniDiffUpdated', callback = format_summary })
-  local function toggle_mini_diff()
-    MiniDiff.toggle(0)
-    MiniDiff.toggle_overlay(0)
-  end
-  vim.keymap.set('n', 'do', toggle_mini_diff, { desc = 'Toggle overlay' })
-
-  local export_diff_qf = function()
-    vim.fn.setqflist(MiniDiff.export 'qf')
-  end
-  vim.keymap.set('n', 'de', export_diff_qf, { desc = 'Diff to QuickFix' })
-end
-
-FeatureFlags:add('Git', {
-  enable = true,
-  toggle_hook = function(enabled, bufnr)
-    if not MiniGit then
-      minigit_setup()
-      if not is_git_repo() then
-        VimRc.warn 'Not inside git repo! MiniGit only works within a repo'
-      end
-    end
-  end,
-})
-require('mini.git').setup()
-FeatureFlags:add('Diff', {
-  enable = false,
-  toggle_hook = function(enabled, bufnr)
-    if not MiniDiff then
-      minidiff_setup()
-    end
-    if enabled then
-      if MiniDiff then
-        MiniDiff.enable(bufnr)
-        MiniDiff.toggle_overlay(bufnr)
-      end
-    else
-      require('mini.diff').disable(bufnr)
-    end
-    -- HACK: redraw to update the signs
-    vim.defer_fn(function()
-      vim.cmd [[redraw!]]
-    end, 200)
-  end,
-})
-VimRc.later(function()
   require('octo').setup {
     -- or "fzf-lua" or "snacks" or "default"
     picker = 'fzf-lua',
     -- bare Octo command opens picker of commands
     enable_builtin = true,
   }
+  local prefix_keys = {
+    { 's', '<cmd>FzfLua git_status<cr>', 'Status' },
+    { 'd', '<cmd>FzfLua git_diff<cr>', 'Diff' },
+    { 'h', '<Cmd>FzfLua git_hunks<CR>', 'Hunks' },
+    { 'b', '<cmd>FzfLua git_blame<cr>', 'Blame' },
+    { 'B', '<cmd>vertical Git blame --porcelain -- %<cr>', 'Blame (MiniGit)' },
+    { 'c', '<cmd>FzfLua git_bcommit<cr>', 'Buf Commits' },
+    { 'C', '<cmd>FzfLua git_commit<cr>', 'Commits' },
+  }
+
+  for _, k in ipairs(prefix_keys) do
+    vim.keymap.set('n', '<leader>g' .. k[1], k[2], { desc = k[3] })
+  end
+  local diff_keys = {
+    { 'T', minidiff_toggle_hook, 'Diff toggle' },
+    { 't', '<cmd>lua MiniDiff.toggle_overlay()<cr>', 'Toggle overlay' },
+    { 'e', export_diff_qf, 'QuickFix' },
+    { 'a', '<Cmd>Git diff --cached<CR>', 'Added diff' },
+    { 'b', '<Cmd>Git diff --cached -- %<CR>', 'Added diff buffer' },
+  }
+
+  for _, k in ipairs(diff_keys) do
+    vim.keymap.set('n', '<leader>d' .. k[1], k[2], { desc = k[3] })
+  end
 end)
 VimRc.on_filetype('markdown', function()
   require('render-markdown').setup(

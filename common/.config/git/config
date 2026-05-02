@@ -15,8 +15,6 @@
 
 [branch]
   sort = -committerdate
-[color]
-  ui = always
 [column]
   ui = always
 [core]

@@ -43,14 +43,10 @@ pipx.uvx = true
 python.uv_venv_auto = "source"
 
 [tools]
-python = ["3.11", "3.12", "3.14"]
 go = "latest"
 hk = "latest"
 jqp = "latest"
-node = ["22", "24"]
-bun = "latest"
 actionlint = "latest"
-uv = "latest"
 lua = ["5.1", "5.5"]
 dprint = "latest"
 lua-language-server = "latest"
@@ -70,39 +66,45 @@ marksman = "latest"
 typst = "latest"
 typstyle = "latest"
 tinymist = "latest"
-rust = "latest"
-gh = "latest"
 shfmt = "latest"
 shellcheck = "latest"
 pkl = "latest"
 just = "latest"
+acli = "latest"
+lazydocker = "latest"
+jq = "latest"
+devcontainer-cli = "latest"
+
+python = ["3.11", "3.12", "3.14"]
+uv = "latest"
 "pipx:pyrefly" = "latest"
 "pipx:ruff" = "latest"
 "pipx:ty" = "latest"
 "pipx:commitizen" = "latest"
+"pipx:gersemi" = "latest"
+
+node = ["22", "24"]
+bun = "latest"
 "npm:prettier" = "latest"
 "npm:bash-language-server" = "latest"
 "npm:yaml-language-server" = "latest"
 "npm:vscode-langservers-extracted" = "latest"
+"npm:defuddle" = "latest"
+
+gh = "latest"
 "github:clangd/clangd" = "latest"
 "github:joshmedeski/sesh" = "latest"
 "github:dlvhdr/diffnav" = "latest"
 "github:dandavison/delta" = "latest"
 "github:BlankSpruce/gersemi" = "latest"
+
+rust = "latest"
+rust-analyzer = "latest"
+cargo = "latest"
+cargo-binstall = "latest"
 "cargo:taplo-cli" = "latest"
 "cargo:neocmakelsp" = "latest"
 "cargo:tlrc" = "latest"
-acli = "latest"
-lazydocker = "latest"
-jq = "latest"
-cargo-binstall = "latest"
-devcontainer-cli = "latest"
-"npm:defuddle" = "latest"
-cargo = "latest"
-rust-analyzer = "latest"
-
-
-"pipx:gersemi" = "latest"
 
 [shell_alias]
 pygdb = "PYTHONHOME=/usr /opt/zephyr-sdk-custom/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb-py -ex 'target remote :2331'"

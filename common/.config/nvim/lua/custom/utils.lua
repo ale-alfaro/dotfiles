@@ -183,6 +183,7 @@ PRIV.define_scratch_buf_window = function(cleanup)
       vim.schedule(cleanup)
     end
   end
+  vim.api.nvim_buf_set_keymap(buf_id, 'n', 'q', '<Cmd>lua MiniBufremove.delete()<CR>', {})
   -- - Use `nested` to allow other events (`WinEnter` for 'mini.statusline')
   local events = { 'WinClosed', 'BufDelete', 'BufWipeout', 'VimLeave' }
   local opts = { nested = true, callback = finish, desc = 'Cleanup window and buffer' }
@@ -195,7 +196,7 @@ M.write_to_buffer = function(lines, bufname)
   local buf_id = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(buf_id, bufname or 'vimrc')
   PRIV.set_buflines(buf_id, lines)
-  vim.api.nvim_set_current_buf(buf_id)
+  vim.bo[buf_id].filetype = 'vimrc'
   PRIV.define_scratch_buf_window()
   return buf_id
 end
@@ -219,6 +220,7 @@ M.show_in_split = function(lines, name, filetype)
   if not has_filetype then
     vim.wo[win_stdout].foldlevel = 999
   end
+  vim.api.nvim_set_current_buf(buf_id)
 
   return win_source, win_stdout
 end

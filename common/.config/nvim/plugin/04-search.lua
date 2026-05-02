@@ -80,36 +80,33 @@ VimRc.later(function()
   local nonprefix_keys = {
     { '<Space><Space>', '<cmd>FzfLua builtin<cr>', 'Find Fzf pickers' },
     { '<C-b>', '<cmd>FzfLua buffers<cr>', 'Buffers' },
-    { '<C-j>', '<cmd>FzfLua zoxide<cr>', 'Jump' },
-    { '<C-e>', '<cmd>FzfLua files<cr>', 'Files' },
-    { '<C-a>', '<cmd>FzfLua oldfiles<cr>', 'Old Files' },
+    { '<C-f>', '<cmd>FzfLua files<cr>', 'Files' },
     { '<C-g>', '<cmd>FzfLua live_grep<cr>', 'Grep (cwd)' },
-    { '<C-l>', '<cmd>FzfLua blines<cr>', 'Buffer Lines' },
+    { '<C-e>', '<cmd>FzfLua global<cr>', 'Global' },
+    { '<C-/>', '<cmd>FzfLua blines<cr>', 'Buffer Lines' },
     { '<C-c>', '<cmd>FzfLua resume<cr>', 'Continue' },
-    { '<C-f>', '<cmd>FzfLua command_history<cr>', 'Command History' },
-    { '<C-h>', '<cmd>FzfLua search_history<cr>', 'History' },
   }
 
   for _, k in ipairs(nonprefix_keys) do
     vim.keymap.set('n', k[1], k[2], { desc = k[3], noremap = true })
   end
-  local wkey_prefix = '<leader>f'
   local prefix_keys = {
-    { wkey_prefix .. 'm', '<cmd>FzfLua manpages<cr>', 'Find Man' },
-    { wkey_prefix .. 'h', '<cmd>FzfLua help_tags<cr>', 'Help' },
-    { wkey_prefix .. 'k', '<Cmd>FzfLua keymaps<CR>', 'Keymaps' },
-    { wkey_prefix .. 'D', '<cmd>FzfLua git_diff<cr>', 'Search Git Diff' },
-    { wkey_prefix .. 'c', '<CMD>FzfLua changes<CR>', 'Search Git Diff (file-only)' },
-    { wkey_prefix .. 'H', '<cmd>FzfLua git_hunks<cr>', 'Git Hunks' },
+    { 'o', '<cmd>FzfLua oldfiles<cr>', 'Old Files' },
+    { 'm', '<cmd>FzfLua manpages<cr>', 'Find Man' },
+    { 'h', '<cmd>FzfLua help_tags<cr>', 'Help' },
+    { 'k', '<Cmd>FzfLua keymaps<CR>', 'Keymaps' },
+    { 'z', '<cmd>FzfLua zoxide<cr>', 'Zoxide' },
+    { 'H', '<cmd>FzfLua command_history<cr>', 'Command History' },
+    { 'h', '<cmd>FzfLua search_history<cr>', 'History' },
     {
-      wkey_prefix .. 's',
+      's',
       '<cmd>FzfLua lsp_document_symbols<cr>',
       'Live Document Symbols',
     },
-    { wkey_prefix .. 'd', '<cmd>FzfLua lsp_document_diagnostics<cr>', 'Document diagnostics' },
+    { 'd', '<cmd>FzfLua lsp_document_diagnostics<cr>', 'Document diagnostics' },
   }
 
   for _, k in ipairs(prefix_keys) do
-    vim.keymap.set('n', k[1], k[2], { desc = k[3] })
+    vim.keymap.set('n', '<leader>f' .. k[1], k[2], { desc = k[3] })
   end
 end)

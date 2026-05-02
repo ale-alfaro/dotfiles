@@ -57,6 +57,10 @@ keybindings:
       name: lazygit
       command: >
         cd {{.RepoPath}} && lazygit
+    - key: c
+      name: Config
+      command: >
+        nvim ~/.config/gh-dash/config.yml
   prs:
     - key: C
       builtin: checkout
@@ -68,7 +72,7 @@ keybindings:
       command: >
         tmux new-window -c {{.RepoPath}} -n "octo" ' nvim -c ":silent Octo pr
         edit {{.PrNumber}}"
-    #     '
+         '
     - key: T
       command: >-
         tmux new-window -n "enhance" '
@@ -79,6 +83,13 @@ keybindings:
       command: >
         gh pr review --repo {{.RepoName}} --approve --body "$(gum input
         --prompt='Approval Comment: ')" {{.PrNumber}}
+    - key: r
+      name: Run Workflow
+      command: >
+        gh workflow run "$(gh workflow list --json path --jq '.' | jq -r
+        '.[].path | ltrimstr(".github/workflows/")' | fzf)"
+        --ref={{.HeadRefName}}
+
   notifications:
     - key: d
       builtin: markAsDone
