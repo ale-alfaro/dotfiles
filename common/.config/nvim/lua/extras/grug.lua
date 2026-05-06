@@ -85,7 +85,7 @@ require('grug-far').setup {
         search = nil,
         replacement = nil,
         filesFilter = nil,
-        flags = nil,
+        flags = '--strictness=smart --lang=c ',
         paths = nil,
       },
     },
@@ -147,7 +147,7 @@ require('grug-far').setup {
     },
   },
 
-  windowCreationCommand = 'tab split',
+  windowCreationCommand = 'tab split', -- vsplit
   -- shortcuts for the actions you see at the top of the buffer
   -- set to '' or false to unset. Mappings with no normal mode value will be removed from the help header
   -- you can specify either a string which is then used as the mapping for both normal and insert mode
@@ -155,36 +155,43 @@ require('grug-far').setup {
   -- it is recommended to use g though as that is more vim-ish
   -- see https://learnvimscriptthehardway.stevelosh.com/chapters/11.html#local-leader
   keymaps = {
-    replace = { n = '<M-r>' },
-    qflist = { n = '<M-q>' },
-    syncLocations = { n = '<M-s>' },
-    syncLine = { n = '<M-l>' },
-    close = { n = '<M-c>' },
-    historyOpen = { n = '<M-t>' },
+    replace = { n = 'gr' },
+    syncLocations = { n = 'gs' },
+    syncLine = { n = 'gl' },
+    abort = { n = 'gb' },
+    openLocation = { n = 'go' },
+    syncFile = { n = 'gf' },
+    help = { n = '<F1>' },
+    historyOpen = { n = '<F2>' },
+    close = { n = '<F3>' },
+    qflist = { n = '<F4>' },
+    toggleShowCommand = { n = '<F5>' },
+    refresh = { n = '<F6>' },
+    swapEngine = { n = '<F7>' },
+    previewLocation = { n = '<F8>' },
+    swapReplacementInterpreter = { n = '<F9>' },
     historyAdd = { n = '<M-a>' },
-    refresh = { n = '<M-f>' },
-    openLocation = { n = '<M-o>' },
     openNextLocation = { n = '<down>' },
     openPrevLocation = { n = '<up>' },
     gotoLocation = { n = '<enter>' },
     pickHistoryEntry = { n = '<enter>' },
-    abort = { n = '<M-b>' },
-    help = { n = '<M-?>' },
-    toggleShowCommand = { n = '<M-w>' },
-    swapEngine = { n = '<M-e>' },
-    previewLocation = { n = '<M-i>' },
-    swapReplacementInterpreter = { n = '<M-x>' },
-    applyNext = { n = '<M-j>' },
-    applyPrev = { n = '<M-k>' },
+    applyNext = { n = '<C-n>' },
+    applyPrev = { n = '<C-p>' },
     syncNext = { n = '<M-n>' },
     syncPrev = { n = '<M-p>' },
-    syncFile = { n = '<M-v>' },
     nextInput = { n = '<tab>' },
     prevInput = { n = '<s-tab>' },
   },
 }
-
-vim.keymap.set('n', '<leader>cg', function()
-  local grug = require 'grug-far'
-  grug.open()
-end, { desc = 'GrugFar' })
+local map = function(key, cb, desc)
+  vim.keymap.set('n', '<leader>c' .. key, cb, { desc = 'GrugFar ' .. desc })
+end
+map('g', function()
+  require('grug-far').open()
+end, 'Rg')
+map('a', function()
+  require('grug-far').open { engine = 'astgrep' }
+end, 'Ast-grep')
+map('l', function()
+  require('grug-far').open { prefills = { paths = vim.fn.expand '%' } }
+end, 'Local')

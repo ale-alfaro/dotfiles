@@ -17,7 +17,7 @@ work_item_json=$(acli jira workitem create --editor --project "${1}" --type "${2
 
 key=$(printf '%s' "$work_item_json" | jq -r '.key')
 branch_name=$(printf '%s' "$work_item_json" | jq -r '
-  "\(.key)/\(.fields.summary | ascii_downcase | gsub("[^a-z0-9 -]"; "") | gsub(" +"; "-"))"
+"\(.key)-\(.fields.summary | ascii_downcase | gsub("[^a-z0-9 -]"; "") | gsub(" +"; "-"))"
 ')
 
 printf 'Created: %s\nBranch:  %s\n' "$key" "$branch_name"
@@ -29,8 +29,8 @@ if prompt "Create git branch '$branch_name'?"; then
     fd -H -d 5 -t d -g '.git' ~ 2>/dev/null |
       sed 's|/.git/?$||' |
       fzf --prompt=' Repo> ' \
-          --preview-window 'right:50%' \
-          --preview 'git -C {} log --oneline --color=always -10 2>/dev/null'
+        --preview-window 'right:50%' \
+        --preview 'git -C {} log --oneline --color=always -10 2>/dev/null'
   )
   git -C "$repo" checkout -b "$branch_name"
   printf 'Branch created in %s\n' "$repo"

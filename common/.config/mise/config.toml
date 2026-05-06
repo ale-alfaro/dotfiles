@@ -105,6 +105,7 @@ cargo-binstall = "latest"
 "cargo:taplo-cli" = "latest"
 "cargo:neocmakelsp" = "latest"
 "cargo:tlrc" = "latest"
+git-lfs = "3.7.1"
 
 [shell_alias]
 pygdb = "PYTHONHOME=/usr /opt/zephyr-sdk-custom/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb-py -ex 'target remote :2331'"

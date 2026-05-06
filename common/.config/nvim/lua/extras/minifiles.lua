@@ -2,7 +2,7 @@
 ---
 ---
 vim.api.nvim_set_hl(0, 'MiniFilesSymLink', { link = 'PmenuExtra' })
----@param fs_entry MiniFilesFsEntry
+
 ---@return string, string
 local prefix = function(fs_entry)
   -- Prefer 'mini.icons'
@@ -61,11 +61,33 @@ local minifiles_setup = function()
     },
   }
 
+  local files_grug_far_replace = function(path)
+    -- works only if cursor is on the valid file system entry
+    local cur_entry_path = MiniFiles.get_fs_entry().path
+    local prefills = { paths = vim.fs.dirname(cur_entry_path) }
+
+    local grug_far = require 'grug-far'
+
+    -- instance check
+    if not grug_far.has_instance 'explorer' then
+      grug_far.open {
+        instanceName = 'explorer',
+        prefills = prefills,
+        staticTitle = 'Find and Replace from Explorer',
+      }
+    else
+      grug_far.get_instance('explorer'):open()
+      -- updating the prefills without crealing the search and other fields
+      grug_far.get_instance('explorer'):update_input_values(prefills, false)
+    end
+  end
+
   vim.api.nvim_create_autocmd('User', {
     pattern = 'MiniFilesBufferCreate',
     callback = function(args)
       local b = args.data.buf_id
       MiniClue.enable_buf_triggers(b)
+      vim.keymap.set('n', 'gs', files_grug_far_replace, { buffer = args.data.buf_id, desc = 'Search in directory' })
       vim.keymap.set('n', 'g~', function()
         local path = (MiniFiles.get_fs_entry() or {}).path
         if path == nil then

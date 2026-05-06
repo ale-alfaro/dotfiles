@@ -1,10 +1,22 @@
 #!/usr/bin/env zsh
-query=$(
-    cat <<-EOF
-project = "BEDR"
-AND assignee = 5efe36132a72950bbfb58925
+acli_query=$(
+  cat <<-EOF
+project IN (BEDR, CWP, FWP)
+AND assignee = currentUser()
 AND status NOT IN (Done, Closed, Deprecated, Canceled)
 ORDER BY created DESC
 EOF
 )
-acli jira workitem search --jql "$query" --fields "key,summary" --csv | column --table --separator=,
+jq_query=$(
+  cat <<-EOF
+.[] | [
+  .key,
+  "\(.fields | .issuetype.name, .status.name)",
+  "\(.key)-\(.fields.summary | ascii_downcase | gsub("[^a-z0-9 -]"; "") | gsub(" +"; "-"))"
+] | @tsv
+EOF
+)
+
+mise x acli -- \
+  acli jira workitem search --jql "$acli_query" --fields "key,summary,status,issuetype" --json |
+  jq -r "$jq_query"

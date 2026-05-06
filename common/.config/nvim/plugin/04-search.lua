@@ -33,19 +33,28 @@ VimRc.later(function()
   require('fzf-lua').setup {
     ---@type fzf-lua.profile[]
     { 'fzf-native', 'border-fused', 'hide' },
-    -- Make stuff better combine with the editor.
-    --
+    keymap = {
+      fzf = { true, ['ctrl-q'] = 'select-all+accept' },
+    },
     ui_select = true,
     -- Configuration for specific commands.
     files = {
       winopts = {
         preview = { hidden = true },
       },
+      --- NOTE: the directory must exist, so if you're using a custom folder make sure the directory exists using mkdir -p.
+      fzf_opts = {
+        ['--history'] = vim.fs.joinpath(vim.fn.stdpath 'data', 'fzf-lua', 'files-history'),
+      },
       no_ignore = false, -- enable hidden files by default
     },
     grep = {
       -- Search in hidden files by default.
       hidden = true,
+      --- NOTE: the directory must exist, so if you're using a custom folder make sure the directory exists using mkdir -p.
+      fzf_opts = {
+        ['--history'] = vim.fs.joinpath(vim.fn.stdpath 'data', 'fzf-lua', 'grep-history'),
+      },
     },
     helptags = {
       actions = {
@@ -96,8 +105,7 @@ VimRc.later(function()
     { 'h', '<cmd>FzfLua help_tags<cr>', 'Help' },
     { 'k', '<Cmd>FzfLua keymaps<CR>', 'Keymaps' },
     { 'z', '<cmd>FzfLua zoxide<cr>', 'Zoxide' },
-    { 'H', '<cmd>FzfLua command_history<cr>', 'Command History' },
-    { 'h', '<cmd>FzfLua search_history<cr>', 'History' },
+    { 'H', '<cmd>FzfLua command_history<cr>', 'History' },
     {
       's',
       '<cmd>FzfLua lsp_document_symbols<cr>',
@@ -109,4 +117,8 @@ VimRc.later(function()
   for _, k in ipairs(prefix_keys) do
     vim.keymap.set('n', '<leader>f' .. k[1], k[2], { desc = k[3] })
   end
+end)
+
+VimRc.later(function()
+  require 'extras.grug'
 end)

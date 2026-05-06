@@ -1,0 +1,3 @@
+#!/usr/bin/env zsh
+#
+print "${${$(git remote get-url origin)#https://github.com/*}%*.git}"

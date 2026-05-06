@@ -1,0 +1,312 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
+"""
+clip-rust-book — clip a Brown Rust Book chapter into a Markdown note.
+
+Usage:
+    ./clip-rust-book.py URL [-o OUTPUT.md]
+    ./clip-rust-book.py --from-file page.html [-o OUTPUT.md]
+
+Pipeline:
+    1. Fetch URL (urllib) or read local file
+    2. defuddle (via `npx defuddle-cli`) → title + prose markdown
+    3. html.parser (stdlib) → data-code from .aquascope, data-quiz-questions
+       from .quiz-placeholder, one value per attribute
+    4. Render Aquascope blocks as fenced rust, quizzes as Obsidian callouts
+       (handles MultipleChoice / ShortAnswer / Tracing; scalar or array answers)
+    5. Stitch with YAML frontmatter, write to file or stdout
+
+Requirements: Python 3.11+, npx on PATH (Node 18+).
+The script invokes `npx --yes defuddle-cli` so no global npm install is needed.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import subprocess
+import sys
+import tempfile
+from datetime import date
+from html.parser import HTMLParser
+from pathlib import Path
+from typing import Any
+from urllib.request import Request, urlopen
+
+# --- HTML attribute extraction --------------------------------------------- #
+
+
+class AttrPicker(HTMLParser):
+    """Collect a single attribute from every element matching tag+class."""
+
+    def __init__(self, tag: str, cls: str, attr: str) -> None:
+        super().__init__()
+        self.tag, self.cls, self.attr = tag, cls, attr
+        self.values: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag != self.tag:
+            return
+        d = dict(attrs)
+        classes = (d.get("class") or "").split()
+        if self.cls in classes:
+            v = d.get(self.attr)
+            if v is not None:
+                self.values.append(v)
+
+
+def extract_attrs(html: str, tag: str, cls: str, attr: str) -> list[str]:
+    p = AttrPicker(tag, cls, attr)
+    p.feed(html)
+    return p.values
+
+
+# --- I/O ------------------------------------------------------------------- #
+
+
+def fetch(url: str) -> str:
+    req = Request(url, headers={"User-Agent": "clip-rust-book/1.0"})
+    with urlopen(req) as resp:  # noqa: S310 - URL comes from CLI arg
+        charset = resp.headers.get_content_charset() or "utf-8"
+        return resp.read().decode(charset, errors="replace")
+
+
+def run_defuddle(html_path: Path, *args: str) -> str:
+    """Invoke defuddle CLI via npx; return stdout. Exits on failure."""
+    cmd = [
+        "mise",
+        "x",
+        "npm:defuddle",
+        "--",
+        "defuddle",
+        "parse",
+        str(html_path),
+        *args,
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    if result.returncode != 0:
+        sys.exit(f"defuddle failed:\n{result.stderr}")
+    return result.stdout
+
+
+# --- Quiz formatting ------------------------------------------------------- #
+
+# <div ... class="aquascope-embed" ...> placeholders inside question prompts
+# need to be stripped without eating Rust generics like Box<i32>.
+AQUASCOPE_EMBED = re.compile(r"<div[^>]*aquascope-embed[^>]*>(?:</div>)?")
+SNIPPET_REPLACEMENT = "[interactive snippet on source page]"
+
+
+def callout_lines(text: str) -> str:
+    """Prefix every line of `text` with '> ' so it sits inside a callout."""
+    return text.replace("\n", "\n> ")
+
+
+def question_title(q: dict[str, Any]) -> str:
+    if q["type"] == "Tracing":
+        return "Tracing — does this program compile?"
+    raw = q.get("prompt", {}).get("prompt") or "Question"
+    cleaned = AQUASCOPE_EMBED.sub("[interactive snippet]", raw)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned[:140]
+
+
+def format_multiple_choice(q: dict[str, Any]) -> list[str]:
+    answer = q["answer"]["answer"]
+    correct = answer if isinstance(answer, list) else [answer]
+    distractors = q["prompt"]["distractors"]
+    prompt = AQUASCOPE_EMBED.sub(SNIPPET_REPLACEMENT, q["prompt"]["prompt"])
+
+    options = []
+    for d in distractors:
+        options.append(
+            f"> - {callout_lines(d).replace(chr(10) + '> ', chr(10) + '>   ')}"
+        )
+    for c in correct:
+        inner = callout_lines(c).replace("\n> ", "\n>   ")
+        options.append(f"> - **✓ {inner}**")
+
+    return [
+        f"> **Question:** {callout_lines(prompt)}",
+        "> ",
+        "> **Options:**",
+        *options,
+    ]
+
+
+def format_short_answer(q: dict[str, Any]) -> list[str]:
+    prompt = AQUASCOPE_EMBED.sub(SNIPPET_REPLACEMENT, q["prompt"]["prompt"])
+    return [
+        f"> **Question:** {callout_lines(prompt)}",
+        "> ",
+        f"> **Expected answer:** `{q['answer']['answer']}`",
+    ]
+
+
+def format_tracing(q: dict[str, Any]) -> list[str]:
+    program = q["prompt"]["program"].rstrip("\n")
+    answer = q["answer"]
+    lines = [
+        "> ```rust",
+        f"> {callout_lines(program)}",
+        "> ```",
+        f"> **Compiles:** {'yes' if answer.get('doesCompile') else 'no'}",
+    ]
+    if "stdout" in answer:
+        lines.append(f"> **Stdout:** `{answer['stdout']}`")
+    if "lineNumber" in answer:
+        lines.append(f"> **Error on line:** {answer['lineNumber']}")
+    return lines
+
+
+def format_question(n: int, q: dict[str, Any]) -> str:
+    qtype = q["type"]
+    handler = {
+        "MultipleChoice": format_multiple_choice,
+        "ShortAnswer": format_short_answer,
+        "Tracing": format_tracing,
+    }.get(qtype)
+
+    body = handler(q) if handler else ["> (unknown question type)"]
+    explanation = q.get("context", "").rstrip("\n")
+
+    return "\n".join([
+        f"> [!question]- Q{n}: {question_title(q)}",
+        f"> **Type:** {qtype}",
+        "> ",
+        *body,
+        "> ",
+        f"> **Explanation:** {callout_lines(explanation)}",
+    ])
+
+
+def format_aquascope(json_strings: list[str]) -> str:
+    blocks = []
+    for js in json_strings:
+        try:
+            code = json.loads(js)
+        except json.JSONDecodeError:
+            continue
+        blocks.append(f"```rust\n{code}\n```")
+    return "\n\n".join(blocks)
+
+
+def format_quizzes(json_strings: list[str]) -> str:
+    questions: list[dict[str, Any]] = []
+    for js in json_strings:
+        try:
+            questions.extend(json.loads(js)["questions"])
+        except (json.JSONDecodeError, KeyError):
+            continue
+    return "\n\n".join(format_question(i + 1, q) for i, q in enumerate(questions))
+
+
+# --- Document assembly ----------------------------------------------------- #
+
+FRONTMATTER = """\
+---
+category: "[[Clippings]]"
+source: {url}
+clipped: {date}
+tags:
+  - rust
+  - mdbook
+---
+"""
+
+
+def assemble(
+    url: str, title: str, prose: str, aquascope_md: str, quizzes_md: str
+) -> str:
+    parts = [
+        FRONTMATTER.format(url=url, date=date.today().isoformat()),
+        f"# {title}",
+        "",
+        f"> [!cite] Source\n> [{url}]({url})",
+        "",
+        prose.rstrip(),
+        "",
+        "---",
+        "",
+        "## Code from interactive examples",
+        "",
+        "> [!info] Visual permission diagrams",
+        f"> Aquascope permission diagrams omitted; see the [original page]({url}) "
+        "to view them. Rust source preserved below; annotations stripped.",
+        "",
+        aquascope_md if aquascope_md else "_No interactive examples on this page._",
+        "",
+        "## Quizzes",
+        "",
+        "> [!info] Answer key",
+        f"> Take the quizzes on the [original page]({url}) before peeking.",
+        "",
+        quizzes_md if quizzes_md else "_No quizzes on this page._",
+        "",
+    ]
+    return "\n".join(parts)
+
+
+# --- CLI ------------------------------------------------------------------- #
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    src = parser.add_mutually_exclusive_group(required=True)
+    src.add_argument("url", nargs="?", help="URL of the page to clip")
+    src.add_argument(
+        "--from-file", type=Path, help="Read HTML from a local file (debug)"
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default=None,
+        help="Write to file (default: stdout)",
+    )
+    args = parser.parse_args()
+
+    # Resolve source
+    if args.from_file:
+        html = args.from_file.read_text(encoding="utf-8")
+        url = str(args.from_file)
+    else:
+        html = fetch(args.url)
+        url = args.url
+
+    # Defuddle reads from a file path, so write the HTML to a tempfile.
+    with tempfile.NamedTemporaryFile(
+        "w", suffix=".html", delete=False, encoding="utf-8"
+    ) as tf:
+        tf.write(html)
+        tmp_path = Path(tf.name)
+    try:
+        title = run_defuddle(tmp_path, "-p", "title").strip() or "Untitled"
+        prose = run_defuddle(tmp_path, "--markdown")
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+    aquascope_md = format_aquascope(
+        extract_attrs(html, "div", "aquascope", "data-code")
+    )
+    quizzes_md = format_quizzes(
+        extract_attrs(html, "div", "quiz-placeholder", "data-quiz-questions")
+    )
+
+    note = assemble(url, title, prose, aquascope_md, quizzes_md)
+
+    if args.output:
+        args.output.write_text(note, encoding="utf-8")
+        print(f"Wrote {args.output}", file=sys.stderr)
+    else:
+        sys.stdout.write(note)
+
+
+if __name__ == "__main__":
+    main()
+
+# vim: ft=python

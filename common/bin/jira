@@ -1,0 +1,35 @@
+#!/usr/bin/env zsh
+#MISE description="Jira CLI through acli"
+#MISE tools={ acli = "latest" }
+#MISE dir="{{cwd}}"
+#USAGE arg "<subcmd>" help="Sub command" {
+#USAGE  choices "summary" "create"
+#USAGE }
+#USAGE arg "acli_args" help="Additional arguments to pass to acli" var=#true
+
+: "${usage_subcmd?? No subcommand chosen!}"
+if [[ "${usage_subcmd}" == summary ]]; then
+  acli_query=$(
+    cat <<-EOF
+project IN (BEDR, CWP, FWP)
+AND assignee = currentUser()
+AND status NOT IN (Done, Closed, Deprecated, Canceled)
+ORDER BY created DESC
+EOF
+  )
+  jq_query=$(
+    cat <<-EOF
+.[] | [
+  .key,
+  "\(.fields | .issuetype.name, .status.name)",
+  "\(.key)-\(.fields.summary | ascii_downcase | gsub("[^a-z0-9 -]"; "") | gsub(" +"; "-"))"
+] | @tsv
+EOF
+  )
+
+  mise x acli -- \
+    acli jira workitem search --jql "$acli_query" --fields "key,summary,status,issuetype" --json |
+    jq -r "$jq_query"
+else
+
+fi

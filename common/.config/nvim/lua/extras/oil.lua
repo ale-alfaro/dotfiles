@@ -1,5 +1,6 @@
 local oil_setup = function()
-  require('oil').setup {
+  local oil = require 'oil'
+  oil.setup {
     -- Oil will take over directory buffers (e.g. `vim .` or `:e src/`)
     -- Set to false if you want some other plugin (e.g. netrw) to open when you edit directories.
     default_file_explorer = true,
@@ -8,22 +9,8 @@ local oil_setup = function()
     columns = {
       'icon',
       'permissions',
-    },
-    -- Buffer-local options to use for oil buffers
-    buf_options = {
-      buflisted = false,
-      bufhidden = 'hide',
-    },
-    -- Window-local options to use for oil buffers
-    win_options = {
-      wrap = false,
-      signcolumn = 'no',
-      cursorcolumn = false,
-      foldcolumn = '0',
-      spell = false,
-      list = false,
-      conceallevel = 3,
-      concealcursor = 'nvic',
+      'size',
+      'mtime',
     },
     -- Send deleted files to the trash instead of permanently deleting them (:help oil-trash)
     delete_to_trash = true,
@@ -47,7 +34,7 @@ local oil_setup = function()
     },
     -- Constrain the cursor to the editable parts of the oil buffer
     -- Set to `false` to disable, or "name" to keep it on the file names
-    constrain_cursor = 'editable',
+    constrain_cursor = 'name',
     -- Set to true to watch the filesystem for changes and reload oil
     watch_for_changes = true,
     -- Keymaps in oil buffer. Can be any value that `vim.keymap.set` accepts OR a table of keymap
@@ -60,56 +47,38 @@ local oil_setup = function()
       ['g?'] = { 'actions.show_help', mode = 'n' },
       ['<CR>'] = 'actions.select',
 
-      ['p'] = {
-        'actions.paste_from_system_clipboard',
-        opts = {
-          delete_original = true,
-        },
-        desc = 'Paste and delete',
+      -- create a new mapping, gs, to search and replace in the current directory
+      gs = {
+        callback = function()
+          -- get the current directory
+          local prefills = { paths = oil.get_current_dir() }
+
+          local grug_far = require 'grug-far'
+          -- instance check
+          if not grug_far.has_instance 'explorer' then
+            grug_far.open {
+              instanceName = 'explorer',
+              prefills = prefills,
+              staticTitle = 'Find and Replace from Explorer',
+            }
+          else
+            grug_far.get_instance('explorer'):open()
+            -- updating the prefills without clearing the search and other fields
+            grug_far.get_instance('explorer'):update_input_values(prefills, false)
+          end
+        end,
+        mode = 'n',
+        desc = 'oil: Search in directory',
       },
       ['<Right>'] = { 'actions.select', mode = 'n' },
       ['q'] = { 'actions.close', mode = 'n' },
-      ['gr'] = 'actions.refresh',
       ['<Left>'] = { 'actions.parent', mode = 'n' },
-      ['gw'] = { 'actions.open_cwd', mode = 'n' },
-      ['g~'] = { 'actions.cd', opts = { scope = 'tab' }, mode = 'n' },
-      ['gs'] = { 'actions.change_sort', mode = 'n' },
-      ['gX'] = 'actions.open_external',
-      ['gt'] = 'actions.open_terminal',
-      ['y'] = 'actions.yank_entry',
-
-      -- Mappings can be a function
-      ['gd'] = {
-        function()
-          require('oil').set_columns { 'icon', 'permissions', 'size', 'mtime' }
-        end,
-        desc = 'Show more info',
-      },
     },
     -- Set to false to disable all of the above keymaps
-    use_default_keymaps = false,
     view_options = {
       -- Show files and directories that start with "."
       show_hidden = true,
       -- This function defines what will never be shown, even when `show_hidden` is set
-      is_always_hidden = function(name, bufnr)
-        return false
-      end,
-      -- Sort file names with numbers in a more intuitive order for humans.
-      -- Can be "fast", true, or false. "fast" will turn it off for large directories.
-      natural_order = 'fast',
-      -- Sort file and directory names case insensitive
-      case_insensitive = true,
-      sort = {
-        -- sort order can be "asc" or "desc"
-        -- see :help oil-columns to see which columns are sortable
-        { 'type', 'asc' },
-        { 'name', 'asc' },
-      },
-      -- Customize the highlight group for the file name
-      -- highlight_filename = function(entry, is_hidden, is_link_target, is_link_orphan)
-      --   return is_link_orphan or is_link_target
-      -- end,
     },
     keymaps_help = {
       border = 'rounded',

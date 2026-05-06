@@ -1,5 +1,6 @@
-if MiniSplitJoin then
-  local gen_hook = MiniSplitjoin.gen_hook
+local ok, splitjoin = pcall(require, 'mini.splitjoin')
+if ok then
+  local gen_hook = splitjoin.gen_hook
   local curly = { brackets = { '%b{}' } }
 
   -- Add trailing comma when splitting inside curly brackets
