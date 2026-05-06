@@ -40,6 +40,10 @@
       "rev": "0fcc83805ad11cf714a949c98c605ed717e0b83e",
       "src": "https://github.com/stevearc/oil.nvim"
     },
+    "overseer.nvim": {
+      "rev": "f818eefff81f4b12fb7cf236f1b6c16768a2fcbc",
+      "src": "https://github.com/stevearc/overseer.nvim"
+    },
     "plenary.nvim": {
       "rev": "74b06c6c75e4eeb3108ec01852001636d85a932b",
       "src": "https://github.com/nvim-lua/plenary.nvim"

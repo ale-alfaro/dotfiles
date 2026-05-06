@@ -4,7 +4,7 @@
 
 local exec = require 'custom.exec'
 local M = {}
-
+local H = {}
 -- Configuration ---------------------------------------------------------------
 
 M.timeout_ms = 1000
@@ -74,12 +74,37 @@ local function resolve_args(args, filename)
   return resolved
 end
 
+
+---@param text string
+---@param eol boolean
+---@return string[]
+local function parse_output_lines(text, eol)
+  local new_lines = vim.split(text, '\r?\n')
+  if eol and new_lines[#new_lines] == '' then
+    table.remove(new_lines)
+  end
+  if #new_lines == 0 then
+    new_lines = { '' }
+  end
+  return new_lines
+end
+
+---@param bufnr integer
+---@return string text, boolean eol
+local function buf_to_text(bufnr)
+  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+  local eol = vim.bo[bufnr].eol
+  if eol then
+    lines[#lines + 1] = ''
+  end
+  return table.concat(lines, '\n'), eol
+end
 ---Run a single formatter synchronously, returning formatted text or nil on failure.
 ---@param formatter FormatDef
 ---@param text string
 ---@param filename string
 ---@return string|nil
-local function run_formatter(formatter, text, filename)
+function H.run_formatter(formatter, text, filename)
   local cmd = vim.list_extend({ formatter.cmd }, resolve_args(formatter.args, filename))
   local result = vim.system(cmd, { stdin = text, text = true }):wait(M.timeout_ms)
   if result.code ~= 0 then
@@ -94,7 +119,7 @@ end
 ---@param text string
 ---@param filename string
 ---@param callback fun(output: string|nil)
-local function run_formatter_async(formatter, text, filename, callback)
+function H.run_formatter_async(formatter, text, filename, callback)
   exec.cli_run(formatter.cmd, function(code, stdout)
     if code ~= 0 then
       vim.schedule(function()
@@ -112,7 +137,7 @@ end
 ---@param original_lines string[]
 ---@param new_lines string[]
 ---@return boolean changed
-local function apply_format(bufnr, original_lines, new_lines)
+function H.apply_format(bufnr, original_lines, new_lines)
   -- vim.diff doesn't handle EOL changes well with indices result_type.
   -- Appending an empty line to both sides works around this.
   table.insert(original_lines, '')
@@ -156,11 +181,11 @@ local function apply_format(bufnr, original_lines, new_lines)
   --- --   {1, 1, 1, 2}
   --- -- }
   --- ```
-  ---
+  ---@type integer[][]
   local indices = vim.text.diff(original_text, new_text, {
     result_type = 'indices',
     algorithm = 'histogram',
-  })
+  }) or {{}}
   if not vim.islist(indices) or #indices == 0 then
     return false
   end
@@ -168,7 +193,7 @@ local function apply_format(bufnr, original_lines, new_lines)
   local line_ending = vim.bo[bufnr].fileformat == 'dos' and '\r\n' or '\n'
   local text_edits = {}
 
-  for _, idx in ipairs(indices) do
+  for _, idx in ipairs(indices) do 
     local orig_start, orig_count, new_start, new_count = unpack(idx)
     local is_insert = orig_count == 0
     local is_replace = orig_count > 0 and new_count > 0
@@ -252,7 +277,7 @@ end
 ---@return FormatDef[]|nil available formatters, nil if LSP handled it or nothing to do
 ---@return string filename
 ---@return string[] original_lines
-local function resolve_formatters(bufnr)
+function H.resolve_formatters(bufnr)
   local ft = vim.bo[bufnr].filetype
   local formatters = M.formatters_by_ft[ft]
   if not formatters or #formatters == 0 then
@@ -276,35 +301,10 @@ local function resolve_formatters(bufnr)
   return available, vim.api.nvim_buf_get_name(bufnr), vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
 end
 
----@param text string
----@param eol boolean
----@return string[]
-local function parse_output_lines(text, eol)
-  local new_lines = vim.split(text, '\r?\n')
-  if eol and new_lines[#new_lines] == '' then
-    table.remove(new_lines)
-  end
-  if #new_lines == 0 then
-    new_lines = { '' }
-  end
-  return new_lines
-end
-
----@param bufnr integer
----@return string text, boolean eol
-local function buf_to_text(bufnr)
-  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-  local eol = vim.bo[bufnr].eol
-  if eol then
-    lines[#lines + 1] = ''
-  end
-  return table.concat(lines, '\n'), eol
-end
-
 -- Sync format (BufWritePre) ---------------------------------------------------
 
 ---@param bufnr integer
-local function format_buffer(bufnr)
+function M.format_buffer(bufnr)
   local ft = vim.bo[bufnr].filetype
 
   if M.lsp_prefer[ft] then
@@ -315,7 +315,7 @@ local function format_buffer(bufnr)
     end
   end
 
-  local available, filename, original_lines = resolve_formatters(bufnr)
+  local available, filename, original_lines = H.resolve_formatters(bufnr)
   if not available then
     return
   end
@@ -323,13 +323,13 @@ local function format_buffer(bufnr)
   local text, eol = buf_to_text(bufnr)
 
   for _, fmt in ipairs(available) do
-    local output = run_formatter(fmt, text, filename)
+    local output = H.run_formatter(fmt, text, filename)
     if output then
       text = output
     end
   end
 
-  apply_format(bufnr, original_lines, parse_output_lines(text, eol))
+  H.apply_format(bufnr, original_lines, parse_output_lines(text, eol))
 end
 
 -- Async format (BufWritePost) -------------------------------------------------
@@ -345,7 +345,7 @@ local applying_format = {} ---@type table<integer, true>
 ---@param eol boolean
 ---@param changedtick integer
 ---@param idx integer
-local function chain_async(bufnr, available, filename, original_lines, text, eol, changedtick, idx)
+function H.chain_async(bufnr, available, filename, original_lines, text, eol, changedtick, idx)
   local fmt = available[idx]
   if not fmt then
     -- All formatters done — apply on the main thread
@@ -354,7 +354,7 @@ local function chain_async(bufnr, available, filename, original_lines, text, eol
         return
       end
       local new_lines = parse_output_lines(text, eol)
-      if apply_format(bufnr, original_lines, new_lines) then
+      if H.apply_format(bufnr, original_lines, new_lines) then
         applying_format[bufnr] = true
         vim.api.nvim_buf_call(bufnr, function()
           vim.cmd.update()
@@ -364,13 +364,13 @@ local function chain_async(bufnr, available, filename, original_lines, text, eol
     end)
     return
   end
-  run_formatter_async(fmt, text, filename, function(output)
-    chain_async(bufnr, available, filename, original_lines, output or text, eol, changedtick, idx + 1)
+  H.run_formatter_async(fmt, text, filename, function(output)
+    H.chain_async(bufnr, available, filename, original_lines, output or text, eol, changedtick, idx + 1)
   end)
 end
 
 ---@param bufnr integer
-local function format_buffer_async(bufnr)
+function M.format_buffer_async(bufnr)
   local ft = vim.bo[bufnr].filetype
 
   -- LSP-preferred filetypes: use async LSP formatting
@@ -382,7 +382,7 @@ local function format_buffer_async(bufnr)
     end
   end
 
-  local available, filename, original_lines = resolve_formatters(bufnr)
+  local available, filename, original_lines = H.resolve_formatters(bufnr)
   if not available then
     return
   end
@@ -390,7 +390,7 @@ local function format_buffer_async(bufnr)
   local text, eol = buf_to_text(bufnr)
   local changedtick = vim.b[bufnr].changedtick
 
-  chain_async(bufnr, available, filename, original_lines, text, eol, changedtick, 1)
+  H.chain_async(bufnr, available, filename, original_lines, text, eol, changedtick, 1)
 end
 
 -- Setup -----------------------------------------------------------------------
@@ -416,7 +416,7 @@ function M.setup(opts)
         if not FeatureFlags:get('Format').enabled then
           return
         end
-        format_buffer_async(args.buf)
+        H.format_buffer_async(args.buf)
       end,
     })
   else
@@ -430,18 +430,18 @@ function M.setup(opts)
         if not FeatureFlags:get('Format').enabled then
           return
         end
-        format_buffer(args.buf)
+        H.format_buffer(args.buf)
       end,
     })
   end
 end
 
 -- Expose internals for testing
-M._ = {
-  resolve_args = resolve_args,
-  apply_format = apply_format,
-  parse_output_lines = parse_output_lines,
-  resolve_formatters = resolve_formatters,
-}
+-- M._ = {
+--   resolve_args = resolve_args,
+--   apply_format = H.apply_format,
+--   parse_output_lines = parse_output_lines,
+--   resolve_formatters = H.resolve_formatters,
+-- }
 
 return M

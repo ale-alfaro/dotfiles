@@ -83,11 +83,6 @@ local lsp_on_attach = function(client, bufnr)
     vim.bo[bufnr].omnifunc = 'v:lua.MiniCompletion.completefunc_lsp'
     vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = true })
   end
-  if not client:supports_method 'textDocument/willSaveWaitUntil' and client:supports_method 'textDocument/formatting' then
-    new_buf_autocmd('BufWritePre', bufnr, function()
-      vim.lsp.buf.format { bufnr = bufnr, id = client.id, timeout_ms = 1000 }
-    end)
-  end
 
   if client:supports_method 'textDocument/foldingRange' then
     local win = vim.api.nvim_get_current_win()
@@ -129,9 +124,6 @@ M.setup = function()
 
   vim.api.nvim_create_user_command('SchemaStore', 'lua require("vimrc_lsp.schemastore").setup()', { desc = 'Enable SchemaStore for Json and YAML Lsp' })
 
-  -- vim.cmd([[
-  --   autocmd BufWritePre *.rs lua vim.lsp.buf.format({ async = false }
-  -- ]])
   --
   -- Extend neovim's client capabilities with the completion ones.
   require('vimrc_lsp.code_action').setup()
