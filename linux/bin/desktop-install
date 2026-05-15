@@ -1,0 +1,49 @@
+#!/usr/bin/env zsh
+#MISE description="Install or update Desktop apps into ~/.local from a .pkg.tar.zst archive."
+#MISE dir="{{cwd}}"
+#USAGE arg "<archive>" help="Archive"
+
+set -euo pipefail
+
+PKG="${usage_archive?}"
+PKG_NAME="${PKG##*.deb}"
+if [[ ! -f $PKG ]]; then
+  echo "Not a file: $PKG" >&2
+  exit 1
+fi
+
+PREFIX=$HOME/.local
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
+
+echo ">> Extracting $(basename "$PKG")"
+
+bsdtar -O -xf "$PKG" 'data.tar*' | bsdtar -C "${TMP}/${PKG_NAME}" -xf -
+if [[ ! -d "${TMP}/${PKG_NAME}/usr" ]]; then
+  echo "Archive has no usr/ directory — unexpected layout" >&2
+  exit 1
+fi
+PKG_ROOT="${TMP}/${PKG_NAME}/usr"
+echo ">> Removing previous install (if any)"
+rm -rf \
+  "$PREFIX/lib/otii3" \
+  "$PREFIX/bin/otii3" \
+  "$PREFIX/share/applications/otii3.desktop" \
+  "$PREFIX/share/pixmaps/otii3.png" \
+  "$PREFIX/share/doc/otii3" \
+  "$PREFIX/share/lintian/overrides/otii3"
+
+echo ">> Copying files into $PREFIX"
+cp -a "$PKG_ROOT/." "$PREFIX/"
+
+DESKTOP="$PREFIX/share/applications/${PKG_NAME}.desktop"
+if [[ -f $DESKTOP ]]; then
+  echo ">> Patching .desktop Icon= to absolute path"
+  sed -i "s|^Icon=otii3$|Icon=$PREFIX/share/pixmaps/otii3.png|" "$DESKTOP"
+fi
+
+if command -v update-desktop-database >/dev/null; then
+  update-desktop-database "$PREFIX/share/applications" 2>/dev/null || true
+fi
+
+echo "   Run: otii3"

@@ -1,0 +1,30 @@
+#!/usr/bin/env zsh
+
+if [[ $# -eq 0 ]]; then
+  echo "usage: farchive <fd-pattern> [output.tar.gz]" >&2
+  return 1 2>/dev/null || exit 1
+fi
+
+local pattern="$1"
+local out="${2:-archive-$(date +%Y%m%d-%H%M%S).tar.gz}"
+
+local selected
+selected=$(
+  fd --type f "$pattern" |
+    fzf --multi --ansi \
+      --prompt=' Archive> ' \
+      --border-label " farchive → ${out} " \
+      --header '  tab: mark  ^a: all  ^d: none  enter: archive' \
+      --bind 'ctrl-a:select-all' \
+      --bind 'ctrl-d:deselect-all' \
+      --preview-window '50%,rounded,<50(up,85%,border-bottom)' \
+      --preview '[[ -d {} ]] && eza --tree --color=always {} | head -200 || bat -n --color=always --line-range :500 {}'
+) || return 130
+
+[[ -z "$selected" ]] && {
+  echo "farchive: nothing selected" >&2
+  return 1
+}
+
+print -r -- "$selected" | tar czvf "$out" -T -
+echo "→ $out ($(du -h "$out" | cut -f1))"

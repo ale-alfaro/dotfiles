@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+
+suffix="${1:-md}"
+local tmp=$(mktemp "--suffix=.${suffix:?}")
+wl-paste >"$tmp"
+nvim "$tmp" </dev/tty >/dev/tty
+wl-copy <"$tmp"
+rm "$tmp"

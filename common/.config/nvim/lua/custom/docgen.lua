@@ -8,7 +8,7 @@ local function generate_c_doc(bufnr, row, line)
     -- match: type *func_name(params) or type* func_name(params)
     local ret, name, params = stripped:match("^%s*([%w_]+%s*%**)%s*([%w_]+)%s*%((.*)%)%s*{?%s*$")
     if not name then
-        return nil, "No C function signature found on current line"
+        return {}, "No C function signature found on current line"
     end
 
     local doc = { "/**", " * " .. name .. "() - " }
@@ -51,7 +51,7 @@ local function generate_go_doc(bufnr, row, line)
     end
 
     if not name then
-        return nil, "No Go function signature found on current line"
+        return {}, "No Go function signature found on current line"
     end
 
     local doc = { "// " .. name .. " " }
@@ -100,7 +100,7 @@ local function generate_rust_doc(bufnr, row, line)
     end
 
     if not name then
-        return nil, "No Rust function signature found on current line"
+        return {}, "No Rust function signature found on current line"
     end
 
     local doc = { "/// " }
@@ -144,7 +144,7 @@ local function generate_python_doc(bufnr, row, line)
     end
 
     if not name then
-        return nil, "No Python function signature found on current line"
+        return {}, "No Python function signature found on current line"
     end
 
     local indent = line:match("^(%s*)") or ""
@@ -177,6 +177,7 @@ local function generate_python_doc(bufnr, row, line)
 end
 
 -- filetype to generator mapping
+---@type table<string,fun(bufnr:integer, row:integer, line:string):string[],string?>
 local generators = {
     c = generate_c_doc,
     cpp = generate_c_doc,
@@ -188,8 +189,8 @@ local generators = {
 
 function M.generate_doc()
     local bufnr = vim.api.nvim_get_current_buf()
+    local line = vim.api.nvim_get_current_line()
     local row = vim.api.nvim_win_get_cursor(0)[1]
-    local line = vim.api.nvim_buf_get_lines(bufnr, row - 1, row, false)[1]
     local ft = vim.bo[bufnr].filetype
 
     local generator = generators[ft]
@@ -200,7 +201,7 @@ function M.generate_doc()
 
     local doc, err = generator(bufnr, row, line)
     if err then
-        vim.notify(err, vim.log.levels.ERROR)
+        VimRc.err(err)
         return
     end
 
@@ -220,5 +221,4 @@ function M.generate_doc()
     vim.api.nvim_win_set_cursor(0, { cursor_row, cursor_col })
     vim.cmd("startinsert!")
 end
-
-vim.keymap.set("n", "<leader>dg", M.generate_doc)
+return M

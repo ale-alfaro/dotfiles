@@ -2,11 +2,17 @@
 
 # Ensure Omarchy bins are in the path
 export OMARCHY_PATH=$HOME/.local/share/omarchy
+export DOTFILES_COMMON_PATH=$HOME/dotfiles/common
 export DOTFILES_LINUX_PATH=$HOME/dotfiles/linux
 export PATH=$OMARCHY_PATH/bin/:$PATH
 # Ensure that local bin is in the path for neovim
 export PATH=$HOME/.local/bin:$PATH
+export LD_LIBRARY_PATH=$HOME/.local/lib:$PATH
 export PATH=$DOTFILES_LINUX_PATH/bin/:$PATH
+export PATH=$DOTFILES_COMMON_PATH/bin/:$PATH
 
 # Set default terminal and editor
 source ~/.config/uwsm/default
+
+# Activate mise if present on the system
+omarchy-cmd-present mise && eval "$(mise activate zsh --shims)"

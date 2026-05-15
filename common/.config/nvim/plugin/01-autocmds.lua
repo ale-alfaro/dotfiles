@@ -30,7 +30,9 @@ local q_close_ft = {
 }
 local qclose_gr = vim.api.nvim_create_augroup('q_close', { clear = true })
 ft_autocmd(q_close_ft, function(ev)
-  vim.keymap.set('n', 'q', '<cmd>close<cr>', { buf = ev.buf, silent = true, nowait = true })
+  vim.keymap.set('n', 'q', function()
+    MiniBufremove.delete(vim.api.nvim_get_current_buf(), true)
+  end, { buf = ev.buf, silent = true, nowait = true })
 end, 'Close with Q', qclose_gr)
 vim.cmd [[
 :autocmd! nvim.terminal TermClose

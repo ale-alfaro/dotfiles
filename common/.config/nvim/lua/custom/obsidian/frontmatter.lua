@@ -10,7 +10,6 @@ local function writelines(p, l)
   vim.fn.writefile(l, p)
 end
 
----@param abs_path string
 ---@return string?  Date as YYYY-MM-DD from file mtime.
 local function datetime()
   local secs, _ = vim.uv.gettimeofday()

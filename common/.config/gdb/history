@@ -553,3 +553,50 @@ mon halt
 c
 l
 q
+mon reset
+mon halt
+c
+bt
+up
+l
+info locals
+p core_regs
+p core_regs.lr
+p *core_regs.lr
+p $2
+info symbol $2
+p core_regs.pc
+info symbol $5
+l $5
+list $5
+list 0x5ddae
+info symbol 0x5ddae
+info symbol 0x5d2fd
+list 0x5d2fd
+q
+mon halt
+mon reset
+c
+l
+info symbol 0x9d6
+q
+q
+enable tui
+tui enable
+tui new-layout 
+help tui
+layout next 
+layout next
+bt
+l
+up
+frame 0
+info locals
+info args
+p fa_id
+p image_index
+p slot
+p/x *state 
+q
+q
+q

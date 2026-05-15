@@ -86,8 +86,9 @@ local minifiles_setup = function()
     pattern = 'MiniFilesBufferCreate',
     callback = function(args)
       local b = args.data.buf_id
-      MiniClue.enable_buf_triggers(b)
+      -- MiniClue.enable_buf_triggers(b)
       vim.keymap.set('n', 'gs', files_grug_far_replace, { buffer = args.data.buf_id, desc = 'Search in directory' })
+      vim.keymap.set('n', 'q', function() MiniFiles.close() end, { buffer = args.data.buf_id, desc = 'Close' })
       vim.keymap.set('n', 'g~', function()
         local path = (MiniFiles.get_fs_entry() or {}).path
         if path == nil then

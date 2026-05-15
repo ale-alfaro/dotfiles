@@ -235,12 +235,8 @@ VimRc.map({ lhs = 'gV', rhs = '"g`[" . strpart(getregtype(), 0, 1) . "g`]"' }, {
 VimRc.map({ mode = 'x', lhs = 'g/', rhs = '<esc>/\\%V' }, { silent = false, desc = 'Search inside visual selection' })
 VimRc.map({ lhs = '<C-s>', rhs = '<Cmd>silent! update | redraw<CR>' }, { noremap = true })
 VimRc.map({ mode = { 'x', 'i' }, lhs = '<C-s>', rhs = '<Esc><Cmd>silent! update | redraw<CR>' }, { noremap = true })
-VimRc.map({ lhs = '<C-q>', rhs = '<Cmd>q<CR>' }, { noremap = true })
--- VimRc.map({ lhs = '<M-q>', rhs = '<Cmd>qall!<CR>' }, { desc = 'Quit all!', noremap = true })
--- VimRc.map({ lhs = '<C-Left>', rhs = '<C-w>h' }, 'Focus window left')
--- VimRc.map({ lhs = '<C-Down>', rhs = '<C-w>j' }, 'Focus window up')
--- VimRc.map({ lhs = '<C-Up>', rhs = '<C-w>k' }, 'Focus window up')
--- VimRc.map({ lhs = '<C-Right>', rhs = '<C-w>l' }, 'Focus window right')
+VimRc.map({ lhs = '<C-q>', rhs = '<Cmd>qall<CR>' }, { noremap = true })
+
 vim.cmd [[
     :tnoremap <F2> <C-\><C-N><C-\><C-N> 
     :tnoremap <C-Left>  <C-\><C-N><C-w>h

@@ -148,19 +148,22 @@ def render_diff(
 
     lines: list[str] = create_diff(diff, merge=merge)
 
-    text = Text()
+    console = Console()
+    text = Text("\n".join(lines)) if merge else Text()
     if out := output_to_file:
+        text = Text()
         with out.open(mode="w", encoding="utf-8") as f:
             [text.append(f"{line}\n") for line in lines]
             console = Console(file=f)
             console.print(text)
-    else:
+        return
+    if not merge:
+        text = Text()
         for idx, line in enumerate(lines):
             text.append(f"{idx + 1:>{len(str(len(lines)))}} │ ", style="dim")
             text.append(line)
             text.append("\n")
-        console = Console()
-        console.print(text)
+    console.print(text)
 
 
 @app.default

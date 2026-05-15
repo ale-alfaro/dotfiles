@@ -63,13 +63,13 @@ VimRc.now_if_args(function()
     mappings = {
       -- Force two-step/fallback completions
       force_twostep = '<A-Space>',
-      force_fallback = '<A-y>',
+      force_fallback = '<A-CR>',
 
       -- Scroll info/signature window down/up. When overriding, check for
       -- conflicts with built-in keys for popup menu (like `<C-u>`/`<C-o>`
       -- for 'completefunc'/'omnifunc' source function; or `<C-n>`/`<C-p>`).
-      scroll_down = '<C-PageDown>',
-      scroll_up = '<C-PageUp>',
+      scroll_down = '<C-f>',
+      scroll_up = '<C-b>',
     },
   }
 
@@ -77,7 +77,6 @@ VimRc.now_if_args(function()
   --
   --
   -- SNIPPETS
-  --
   --
   --]]
   --
@@ -120,4 +119,5 @@ VimRc.now_if_args(function()
   capabilities.textDocument.completion.completionItem.snippetSupport = true
   vim.lsp.config('*', { capabilities = capabilities })
   require('vimrc_lsp').setup()
+  require('custom.format').setup()
 end)

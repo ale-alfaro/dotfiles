@@ -102,13 +102,40 @@ the remaining arguments are the same as for |nvim_create_user_command()|:
 ---@param cb fun():nil
 ---@param desc string
 local usercmd = function(name, cb, desc)
-  vim.api.nvim_create_user_command(name, cb, { desc = desc })
+  vim.api.nvim_create_user_command(name, cb, { desc = desc, nargs = 0 })
 end
+usercmd('ToggleFormat', function()
+  vim.g.autoformat = not vim.g.autoformat
+  vim.notify(string.format('%s formatting...', vim.g.autoformat and 'Enabling' or 'Disabling'), vim.log.levels.INFO)
+end, 'Toggle conform.nvim auto-formatting')
+
+usercmd('ToggleInlayHints', function()
+  vim.g.inlay_hints = not vim.g.inlay_hints
+  vim.notify(string.format('%s inlay hints...', vim.g.inlay_hints and 'Enabling' or 'Disabling'), vim.log.levels.INFO)
+
+  local mode = vim.api.nvim_get_mode().mode
+  vim.lsp.inlay_hint.enable(vim.g.inlay_hints and (mode == 'n' or mode == 'v'))
+end, 'Toggle inlay hints')
+
+usercmd('Scratch', function()
+  vim.cmd 'bel 10new'
+  local buf = vim.api.nvim_get_current_buf()
+  for name, value in pairs {
+    filetype = 'scratch',
+    buftype = 'nofile',
+    bufhidden = 'wipe',
+    swapfile = false,
+    modifiable = true,
+  } do
+    vim.api.nvim_set_option_value(name, value, { buf = buf })
+  end
+end, 'Open a scratch buffer')
+
 ---@param name string
 ---@param cb string|fun(args: vim.api.keyset.create_user_command.command_args) Replacement command to execute when this user command is executed. When called
----@param nargs integer
 ---@param desc string
-local usercmd_args = function(name, cb, nargs, desc)
+---@param nargs integer|string
+local usercmd_args = function(name, cb, desc, nargs)
   vim.api.nvim_create_user_command(name, cb, { nargs = nargs, desc = desc })
 end
 
@@ -168,7 +195,7 @@ usercmd_args('Redir', function(opts)
     '---------',
     unpack(vim.split(output or '', '\n')),
   }
-end, 1, 'redirect command output to scratch buffer')
+end, 'redirect command output to scratch buffer', 1)
 
 -- ──────────────────────────────────────────────────────────────
 --  show_modified_buffers  — list unsaved buffers in quickfix
@@ -285,40 +312,9 @@ usercmd_args_comp('Lsp', function(args)
   end
 end, 'Lsp Commands', 1, { 'log', 'clean', 'info' })
 
-local list_files_from_branch_action = function(action, selected, o, args)
-  local file = require('fzf-lua').path.entry_to_file(selected[1], o)
-  local cmd = string.format('%s %s:%s', action, args, file.path)
-  vim.cmd(cmd)
-end
-usercmd_args_comp(
-  'GitFiles',
-  function(opts)
-    require('fzf-lua').fzf_exec('git ls-tree -r --name-only ' .. opts.args, {
-      prompt = opts.args .. ' >',
-      actions = {
-        ['default'] = function(selected, o)
-          list_files_from_branch_action('Git', selected, o, opts.args)
-        end,
-      },
-      previewer = false,
-      preview = {
-        type = 'cmd',
-        fn = function(items)
-          local file = require('fzf-lua').path.entry_to_file(items[1])
-          return string.format('git show %s:%s | delta', opts.args, file.path)
-        end,
-      },
-    })
-  end,
-  'List all git files from a branch',
-  1,
-  function()
-    local branches = vim.fn.systemlist "git branch --sort=-committerdate --format='%(refname:short)'"
-    if vim.v.shell_error == 0 then
-      return vim.tbl_map(function(x)
-        return x:match('[^%s%*]+'):gsub('^remotes/', '')
-      end, branches)
-    end
-    return {}
-  end
-)
+usercmd_args('WestFiles', function(opts)
+  local args = opts.fargs or {}
+  require('fzf-lua').fzf_exec(string.format('west -q forall -c "fd %q . --absolute-path ' .. vim.list_slice(args, 2), args[1]), {
+    prompt = 'West Files >',
+  })
+end, 'List all git files from a branch', '+')

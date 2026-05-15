@@ -71,9 +71,14 @@ zle_man() {
 zle -N zle_man
 bindkey '^H' zle_man
 
-# zle_mise() {
-#   mise deactivate
+zle_copy_last_cmd() {
+  wl-copy "!!"
+}
+zle -N zle_copy_last_cmd
+bindkey '' zle_copy_last_cmd
+
+# zle_edit_last_cmd() {
+#   fc
 # }
-#
-# zle -N zle_mise
-# bindkey '^M' zle_mise
+# zle -N zle_copy_last_cmd
+# bindkey '' zle_copy_last_cmd

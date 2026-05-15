@@ -147,7 +147,7 @@ require('grug-far').setup {
     },
   },
 
-  windowCreationCommand = 'tab split', -- vsplit
+  windowCreationCommand = 'vsplit', -- vsplit
   -- shortcuts for the actions you see at the top of the buffer
   -- set to '' or false to unset. Mappings with no normal mode value will be removed from the help header
   -- you can specify either a string which is then used as the mapping for both normal and insert mode
@@ -158,21 +158,21 @@ require('grug-far').setup {
     replace = '<localleader>r',
     syncLocations = '<localleader>L',
     syncLine = '<localleader>l',
-    refresh = '<localleader>r',
-    abort = '<localleader>q',
+    refresh = '<localleader>R',
+    swapEngine = '<localleader>e',
+    historyOpen = '<localleader>h',
     openLocation = '<localleader>x',
     syncFile = '<localleader>f',
+    close = '<localleader>q',
     historyAdd = '<M-a>',
     syncNext = '<M-n>',
     syncPrev = '<M-p>',
     applyNext = '<C-n>',
     applyPrev = '<C-p>',
     help = '<F1>',
-    historyOpen = '<F2>',
-    close = '<F3>',
     qflist = '<F4>',
     toggleShowCommand = '<F5>',
-    swapEngine = '<F7>',
+    abort = '<F7>',
     previewLocation = '<F8>',
     swapReplacementInterpreter = '<F9>',
     openNextLocation = { n = '<down>' },

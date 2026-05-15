@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+#MISE description="Start llama.cpp sever"
+#MISE env={ LD_LIBRARY_PATH="$HOME/.local/lib" }
+#USAGE arg "<model>" help="Model to serve" default="unsloth/Qwen3.6-27B-GGUF:UD-Q4_K_XL"
+llama-server -hf "${usage_model:?}" \
+  --host 127.0.0.1 --port 8080 -ngl 99 -c 65536 -fa on \
+  -ctk q8_0 -ctv q8_0 --jinja \
+  --reasoning off \
+  "${LLAMA_CPP_SERVER_API_KEY:+--api-key=${LLAMA_CPP_SERVER_API_KEY}}"

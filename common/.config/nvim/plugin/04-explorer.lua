@@ -45,26 +45,27 @@ local create_explorer_open_fn = function(explorer, loc)
     explorer.open_at_loc(loc)
   end
 end
+if not vim.o.diff then
+  VimRc.now_if_args(function()
+    local minifiles = require 'extras.minifiles' ---@as ExplorerPlugin
+    local oil = require 'extras.oil' ---@as ExplorerPlugin
+    oil.setup()
+    minifiles.setup()
 
-VimRc.now_if_args(function()
-  local minifiles = require 'extras.minifiles' ---@as ExplorerPlugin
-  local oil = require 'extras.oil' ---@as ExplorerPlugin
-  oil.setup()
-  minifiles.setup()
-
-  -- stylua:ignore
-  local wkey_prefix = '<leader>e'
-  vim.keymap.set('n', wkey_prefix .. 'v', create_explorer_open_fn(oil, vim.fn.expand '$MYVIMRC'), { desc = '$MYVIMRC' })
-  vim.keymap.set('n', wkey_prefix .. 'z', create_explorer_open_fn(oil, vim.fn.getenv 'ZDOTDIR'), { desc = '.zshrc' })
-  vim.keymap.set('n', wkey_prefix .. 'o', create_explorer_open_fn(oil, vim.fn.getenv 'OBSIDIAN_HOME'), { desc = 'Obsidian' })
-  vim.keymap.set(
-    'n',
-    wkey_prefix .. 'd',
-    create_explorer_open_fn(oil, vim.fs.joinpath(vim.fn.getenv 'HOME', 'dotfiles', 'common')),
-    { desc = 'Common Dotfiles' }
-  )
-  vim.keymap.set('n', wkey_prefix .. 'l', create_explorer_open_fn(oil, vim.fs.joinpath(vim.fn.getenv 'HOME', 'dotfiles', 'linux')), { desc = 'Linux Dotfiles' })
-  vim.keymap.set('n', wkey_prefix .. 'm', create_explorer_open_fn(oil, vim.fs.joinpath(vim.fn.getenv 'XDG_CONFIG_HOME', 'mise')), { desc = 'Mise config' })
-  vim.keymap.set('n', wkey_prefix .. 'w', create_explorer_open_fn(oil, vim.fs.joinpath(vim.fn.getenv 'HOME', 'sibel', 'eng')), { desc = 'Work' })
-  vim.keymap.set('n', '\\', minifiles.open_curr_buf, { desc = 'Cwd' })
-end)
+    -- stylua:ignore
+    local wkey_prefix = '<leader>e'
+    vim.keymap.set('n', wkey_prefix .. 'v', create_explorer_open_fn(oil, vim.fn.expand '$MYVIMRC'), { desc = '$MYVIMRC' })
+    vim.keymap.set('n', wkey_prefix .. 'z', create_explorer_open_fn(oil, vim.fn.getenv 'ZDOTDIR'), { desc = '.zshrc' })
+    vim.keymap.set('n', wkey_prefix .. 'o', create_explorer_open_fn(oil, vim.fn.getenv 'OBSIDIAN_HOME'), { desc = 'Obsidian' })
+    vim.keymap.set(
+      'n',
+      wkey_prefix .. 'd',
+      create_explorer_open_fn(oil, vim.fs.joinpath(vim.fn.getenv 'HOME', 'dotfiles', 'common')),
+      { desc = 'Common Dotfiles' }
+    )
+    vim.keymap.set('n', wkey_prefix .. 'l', create_explorer_open_fn(oil, vim.fs.joinpath(vim.fn.getenv 'HOME', 'dotfiles', 'linux')), { desc = 'Linux Dotfiles' })
+    vim.keymap.set('n', wkey_prefix .. 'm', create_explorer_open_fn(oil, vim.fs.joinpath(vim.fn.getenv 'XDG_CONFIG_HOME', 'mise')), { desc = 'Mise config' })
+    vim.keymap.set('n', wkey_prefix .. 'w', create_explorer_open_fn(oil, vim.fs.joinpath(vim.fn.getenv 'HOME', 'sibel', 'eng')), { desc = 'Work' })
+    vim.keymap.set('n', '\\', minifiles.open_curr_buf, { desc = 'Cwd' })
+  end)
+end

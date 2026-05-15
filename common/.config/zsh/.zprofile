@@ -14,4 +14,4 @@ fi
 # fi
 
 # eval "$(SHELL=/bin/zsh keychain --eval --quick --systemd --ssh-allow-forwarded id_ed25519_yubikey)"
-path=($HOME/.local/share/mise/shims $HOME/.local/bin $path)
+path=($HOME/.local/share/mise/shims $HOME/.local/bin $HOME/dotfiles/common/bin $HOME/dotfiles/linux/bin $path)

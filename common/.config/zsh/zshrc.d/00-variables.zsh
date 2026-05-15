@@ -52,5 +52,5 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
 fi
 
-export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/ripgreprc"
+# export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/ripgreprc"
 export OBSIDIAN_HOME="$HOME/Documents/Obsidian"
