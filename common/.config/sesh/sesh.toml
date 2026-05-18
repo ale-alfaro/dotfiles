@@ -1,7 +1,17 @@
+# :schema https://github.com/joshmedeski/sesh/raw/main/sesh.schema.json
+blacklist = ["build"]
+sort_order = ["config", "zoxide"]
+
 [default_session]
 preview_command = "eza --all --git --icons --color=always {}"
+startup_command = "mise en"
 
 [[session]]
-name = "tmux config"
-path = "~/dotfiles/common/.config/tmux"
+name = "Common Config"
+path = "~/dotfiles/common/.config"
 startup_command = "nvim tmux.conf"
+
+[[session]]
+name = "Aria"
+path = "~/sibel/eng/fw/aria-workspace"
+startup_command = "nvim ."
