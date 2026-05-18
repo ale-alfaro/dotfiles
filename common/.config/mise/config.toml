@@ -105,7 +105,7 @@ cargo-binstall = "latest"
 "cargo:neocmakelsp" = "latest"
 "cargo:tlrc" = "latest"
 git-lfs = "3.7.1"
-"http:nrfutil" = { version = "1.4.0", url = "https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/{{arch(x64='x86-64')}}-{{os(linux='unknown-linux-gnu')}}/nrfutil" }
+"http:nrfutil" = { version = "1.4.0", url = "https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/{{arch(x64='x86_64')}}-{{os(linux='unknown-linux-gnu')}}/nrfutil" }
 rg = "latest"
 
 [shell_alias]
