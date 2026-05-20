@@ -311,10 +311,3 @@ usercmd_args_comp('Lsp', function(args)
     vim.cmd ':checkhealth vim.lsp'
   end
 end, 'Lsp Commands', 1, { 'log', 'clean', 'info' })
-
-usercmd_args('WestFiles', function(opts)
-  local args = opts.fargs or {}
-  require('fzf-lua').fzf_exec(string.format('west -q forall -c "fd %q . --absolute-path ' .. vim.list_slice(args, 2), args[1]), {
-    prompt = 'West Files >',
-  })
-end, 'List all git files from a branch', '+')

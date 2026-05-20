@@ -50,7 +50,7 @@ overseer.setup {
 }
 
 vim.cmd.cnoreabbrev 'OS OverseerShell'
-vim.api.nvim_create_user_command('OverseerMake', function(params)
+vim.api.nvim_create_user_command('Make', function(params)
   -- Insert args at the '$*' in the makeprg
   local cmd, num_subs = vim.o.makeprg:gsub('%$%*', params.args)
   if num_subs == 0 then
@@ -95,30 +95,3 @@ vim.api.nvim_create_user_command('OverseerRestartLast', function()
     ovr.run_action(most_recent, 'restart')
   end
 end, {})
-local keys = {
-  {
-    '<leader>or',
-    '<cmd>OverseerRun<cr>',
-    { desc = 'OverseerRun' },
-  },
-  {
-    '<leader>ov',
-    function()
-      local ovr = require 'overseer'
-      ovr.run_task({ name = 'mise' }, function(task)
-        if task then
-          ovr.run_action(task, 'open vsplit')
-        end
-      end)
-    end,
-    { desc = 'OverseerRun (Custom' },
-  },
-  { '<leader>ot', '<cmd>OverseerToggle bottom<cr>', { desc = 'OverseerToggle' } },
-  { '<leader>oq', '<cmd>OverseerRestartLast<cr>', { desc = 'Action recent task' } },
-}
-for _, key in ipairs(keys) do
-  local lhs, rhs, opts = unpack(key)
-  if type(lhs) == 'string' and (type(rhs) == 'string' or vim.is_callable(rhs)) and type(opts) == 'table' then
-    vim.keymap.set('n', lhs, rhs, opts)
-  end
-end

@@ -13,5 +13,5 @@ startup_command = "nvim tmux.conf"
 
 [[session]]
 name = "Aria"
-path = "~/sibel/eng/fw/aria-workspace"
+path = "~/sibel/eng/fw/aria_workspace"
 startup_command = "nvim ."

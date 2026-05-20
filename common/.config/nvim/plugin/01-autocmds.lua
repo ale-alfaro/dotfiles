@@ -25,14 +25,18 @@ local q_close_ft = {
   'vimrc',
   'scratch',
   'minigit',
+  'git',
   'ministarter',
-  'Overseer*',
+  'Overseer',
 }
 local qclose_gr = vim.api.nvim_create_augroup('q_close', { clear = true })
 ft_autocmd(q_close_ft, function(ev)
+  local bufnr = vim.api.nvim_get_current_buf()
   vim.keymap.set('n', 'q', function()
-    MiniBufremove.delete(vim.api.nvim_get_current_buf(), true)
+    MiniBufremove.unshow(bufnr)
+    MiniBufremove.delete(bufnr, true)
   end, { buf = ev.buf, silent = true, nowait = true })
+  MiniClue.ensure_buf_triggers(bufnr)
 end, 'Close with Q', qclose_gr)
 vim.cmd [[
 :autocmd! nvim.terminal TermClose

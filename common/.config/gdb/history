@@ -600,3 +600,28 @@ p/x *state
 q
 q
 q
+l
+quit
+b z_arm_svc
+mon halt
+mon reset
+c
+l
+bt
+quit
+ls
+l
+quit
+c
+q
+l
+pt
+bt
+mon halt
+mon reset
+c
+quit
+q
+bt
+l
+quit

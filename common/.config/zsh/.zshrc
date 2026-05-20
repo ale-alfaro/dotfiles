@@ -9,20 +9,19 @@ source $ZDOTDIR/helpers/stdlib.zsh
 for file in $ZDOTDIR/zshrc.d/*.zsh; do
   source "$file"
 done
-
 # SSH agent started by systemd automatically. Only need to set the socketp
-# if [[ -z "${SSH_CONNECTION}" ]]; then
-#   export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
-# fi
-# eval $(keychain --eval --quiet ~/.ssh/id_ed25519_yubikey)
+if [[ -z "${SSH_CONNECTION}" ]]; then
+  export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+fi
 # Ghostty shell integration for Bash. This should be at the top of your bashrc!
 # Some zsh plugins
 source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 [[ -f $ZDOTDIR/plugins/bd.zsh ]] && source $ZDOTDIR/plugins/bd.zsh
-
 alias mx='mise x'
-eval "$(mx -- starship init zsh)"
+if [[ $- == *i* ]] && [[ ${TERM:-} != "dumb" ]]; then
+  eval "$(mx starship -- starship init zsh)"
+fi
 
 autoload fsesh termux
 ## The hook below is to check the date updated by pacman to
@@ -58,3 +57,5 @@ alias cd='zd'
 # ---- Editor -----
 autoload fvim
 alias v="fvim"
+
+[[ -f "$HOME/.local/state/dotfiles/toggles/mise_activate" ]] && eval "$(mise activate zsh)"

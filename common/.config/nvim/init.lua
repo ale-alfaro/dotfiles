@@ -11,6 +11,7 @@ vim.pack.add {
   gh 'nvim-mini/mini.nvim',
   gh 'stevearc/oil.nvim',
   gh 'stevearc/quicker.nvim',
+  gh 'stevearc/overseer.nvim',
   gh 'folke/trouble.nvim',
   gh 'ibhagwan/fzf-lua',
   gh 'nvim-treesitter/nvim-treesitter',

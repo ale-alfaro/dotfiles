@@ -1,6 +1,5 @@
 # $schema: https://mise.jdx.dev/schema/mise.json
 [settings]
-activate_aggressive = true
 experimental = true
 lockfile = true
 color_theme = "dracula"
@@ -41,6 +40,10 @@ task = { output = "interleave", run_auto_install = true, timings = true, disable
 npm.package_manager = "bun"
 pipx.uvx = true
 python.uv_venv_auto = "source"
+env_file = ".env"
+
+[settings.github]
+gh_cli_tokens = true
 
 [tools]
 go = "latest"

@@ -187,19 +187,10 @@ out about, ^D is CTRL-D).
 --]]
 VimRc.keymap_clues = {
   { mode = 'n', keys = '<Leader>b', desc = '+Buffer' },
-  { mode = 'n', keys = '<Leader>c', desc = '+Change' },
   { mode = 'n', keys = '<Leader>e', desc = '+Explore/Edit' },
   { mode = 'n', keys = '<Leader>f', desc = '+Find' },
-  { mode = 'n', keys = '<Leader>g', desc = '+Git' },
-  { mode = 'n', keys = '<Leader>l', desc = '+Language' },
   { mode = 'n', keys = '<Leader>n', desc = '+Notifications' },
-  { mode = 'n', keys = '<Leader>o', desc = '+Obsidian' },
   { mode = 'n', keys = '<Leader>s', desc = '+Session' },
-  { mode = 'n', keys = '<Leader>x', desc = '+Extra' },
-  { mode = 'n', keys = '<Leader>v', desc = '+Visits' },
-
-  { mode = 'x', keys = '<Leader>g', desc = '+Git' },
-  { mode = 'x', keys = '<Leader>l', desc = '+Language' },
 }
 VimRc.map({ lhs = 'q', rhs = '<nop>' }, { noremap = true })
 VimRc.map({ mode = 'v', lhs = '<', rhs = '<gv' }, { noremap = true })
@@ -287,48 +278,3 @@ VimRc.map({ lhs = '<M-s>', rhs = 'sn', '<Cmd>lua ' .. session_new .. '<CR>' }, '
 VimRc.map({ lhs = '<M-r>', rhs = '<Cmd>lua MiniSessions.restart()<CR>' }, 'Restart')
 nmap_leader('sr', '<Cmd>lua MiniSessions.select("read")<CR>', 'Read')
 nmap_leader('ss', '<Cmd>lua MiniSessions.write()<CR>', 'Write current')
-
--- v is for 'Visits'. Common usage:
--- - `<Leader>vv` - add    "core" label to current file.
--- - `<Leader>vV` - remove "core" label to current file.
--- - `<Leader>vc` - pick among all files with "core" label.
-local make_pick_core = function(cwd, desc)
-  return function()
-    local visits = require 'mini.visits'
-    visits.setup()
-    local sort_latest = visits.gen_sort.default { recency_weight = 1 }
-    local local_opts = { filter = 'core', sort = sort_latest }
-    local paths = visits.list_paths('', local_opts)
-    paths = vim.tbl_map(function(x)
-      return vim.fs.normalize(x)
-    end, paths)
-    vim.print(paths)
-    local fzf = require 'fzf-lua'
-    fzf.fzf_exec(
-      paths,
-      ---@type fzf-lua.config.Base
-      {
-        fn_selected = function(selected, _opts)
-          if not selected[1] then
-            return
-          end
-          local cwd = selected[1]:match '[^\t]+$' or selected[1]
-          if vim.uv.fs_stat(cwd) then
-            vim.cmd('Oil ' .. cwd)
-            vim.system { 'zoxide', 'add', '--', cwd }
-            VimRc.info(("cwd set to '%s'"):format(cwd))
-          else
-            VimRc.warn(("Unable to set cwd to '%s', directory is not accessible"):format(cwd))
-          end
-        end,
-      }
-    )
-  end
-end
-
-nmap_leader('vc', make_pick_core('', 'Core visits (all)'), 'Core visits (all)')
-nmap_leader('vC', make_pick_core(nil, 'Core visits (cwd)'), 'Core visits (cwd)')
-nmap_leader('vv', '<Cmd>lua MiniVisits.add_label("core")<CR>', 'Add "core" label')
-nmap_leader('vV', '<Cmd>lua MiniVisits.remove_label("core")<CR>', 'Remove "core" label')
-nmap_leader('vl', '<Cmd>lua MiniVisits.add_label()<CR>', 'Add label')
-nmap_leader('vL', '<Cmd>lua MiniVisits.remove_label()<CR>', 'Remove label')
