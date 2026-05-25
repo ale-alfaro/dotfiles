@@ -115,7 +115,7 @@ VimRc.now_if_args(function()
       .iter({ 'Installed Parser/Grammars:', '--------------------', installed, 'Available Parser/Grammars:', '-------------------- ', available })
       :flatten(2)
       :totable()
-    VimRc.write_to_buffer(lines, 'VimRc-treesitter-list')
+    VimRc.show_in_split(lines, 'vimrc://treesitter')
   end
   local usercmd = vim.api.nvim_create_user_command
   usercmd('TSList', treesitter_list, { desc = 'Treesitter Parsers List' })

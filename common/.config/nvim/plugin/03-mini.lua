@@ -77,34 +77,6 @@ VimRc.later(function()
   }
 end)
 
----@class CmdLineState
----@field line string vim.fn.getcmdline
----@field pos string vim.fn.getcmdpos
----@field prev_line string vim.fn.getcmdline
----@field prev_pos string vim.fn.getcmdpos
----
----@class CmdLineInfo
----@field complpat string  vim.fn.getcmdcomplpat completion pattern
----@field compltype string vim.fn.getcmdcompltype completion type
-
-local block_compltype = { 'shellcmd' }
--- Command line tweaks. Improves command line editing with:
--- - Autocompletion. Basically an automated `:h cmdline-completion`.
--- - Autocorrection of words as-you-type. Like `:W`->`:w`, `:lau`->`:lua`, etc.
--- - Autopeek command range (like line number at the start) as-you-type.
-VimRc.later(function()
-  require('mini.cmdline').setup {
-    autocomplete = {
-      delay = 1000,
-      ---@param state CmdLineState
-      predicate = function(state, _opts)
-        return (state.line:find '%a' ~= nil) and not block_compltype[vim.fn.getcmdcompltype()]
-      end,
-    },
-    autocorrect = {},
-  }
-end)
-
 VimRc.later(function()
   require('mini.misc').setup()
   MiniMisc.setup_auto_root { '.west', '.nvim', '.git' }
@@ -123,90 +95,90 @@ end)
 VimRc.later(function()
   require('mini.align').setup()
 end)
-if not vim.o.diff then
-  VimRc.later(function()
-    require('mini.bracketed').setup {
-      comment = { suffix = '', options = {} },
-      conflict = { suffix = 'c', options = {} },
-    }
-  end)
 
-  VimRc.later(function()
-    require('mini.comment').setup()
-  end)
-  VimRc.later(function()
-    require('mini.indentscope').setup()
-  end)
-  VimRc.later(function()
-    vim.keymap.set('n', 'o', '<nop>')
-    require('mini.operators').setup { replace = { prefix = '' } }
+VimRc.later(function()
+  require('mini.bracketed').setup {
+    comment = { suffix = '', options = {} },
+    conflict = { suffix = 'c', options = {} },
+  }
+end)
 
-    vim.keymap.set('n', 'g(', 'gxiagxila', { remap = true, desc = 'Swap arg left' })
-    vim.keymap.set('n', 'g)', 'gxiagxina', { remap = true, desc = 'Swap arg right' })
-  end)
+VimRc.later(function()
+  require('mini.comment').setup()
+end)
+VimRc.later(function()
+  require('mini.indentscope').setup()
+end)
+VimRc.later(function()
+  vim.keymap.set('n', 'o', '<nop>')
+  require('mini.operators').setup { replace = { prefix = '' } }
 
-  VimRc.later(function()
-    require('mini.move').setup {
-      mappings = {
-        left = '<M-left>',
-        right = '<M-right>',
-        down = '<M-down>',
-        up = '<M-up>',
+  vim.keymap.set('n', 'g(', 'gxiagxila', { remap = true, desc = 'Swap arg left' })
+  vim.keymap.set('n', 'g)', 'gxiagxina', { remap = true, desc = 'Swap arg right' })
+end)
 
-        line_left = '<M-left>',
-        line_right = '<M-right>',
-        line_down = '<M-down>',
-        line_up = '<M-up>',
-      },
-    }
-  end)
+VimRc.later(function()
+  require('mini.move').setup {
+    mappings = {
+      left = '<M-left>',
+      right = '<M-right>',
+      down = '<M-down>',
+      up = '<M-up>',
 
-  VimRc.later(function()
-    require('mini.jump').setup()
-  end)
+      line_left = '<M-left>',
+      line_right = '<M-right>',
+      line_down = '<M-down>',
+      line_up = '<M-up>',
+    },
+  }
+end)
 
-  VimRc.later(function()
-    -- Custom mapping
-    vim.keymap.set({ 'n', 'i', 'x' }, 'J', '<Cmd>lua MiniJump2d.start(MiniJump2d.builtin_opts.line_start)<CR>')
+VimRc.later(function()
+  require('mini.jump').setup()
+end)
 
-    -- Inside `MiniJump2d.setup()` (make sure to use all defined options)
-    local jump2d = require 'mini.jump2d'
-    local jump_line_start = jump2d.builtin_opts.line_start
-    jump2d.setup {
-      spotter = jump_line_start.spotter,
-      hooks = { after_jump = jump_line_start.hooks.after_jump },
+VimRc.later(function()
+  -- Custom mapping
+  vim.keymap.set({ 'n', 'i', 'x' }, 'J', '<Cmd>lua MiniJump2d.start(MiniJump2d.builtin_opts.line_start)<CR>')
 
-      -- Which lines are used for computing spots
-      allowed_lines = {
-        blank = false, -- Blank line (not sent to spotter even if `true`)
-        cursor_before = false, -- Lines before cursor line
-        cursor_at = true, -- Cursor line
-        cursor_after = true, -- Lines after cursor line
-        fold = false, -- Start of fold (not sent to spotter even if `true`)
-      },
+  -- Inside `MiniJump2d.setup()` (make sure to use all defined options)
+  local jump2d = require 'mini.jump2d'
+  local jump_line_start = jump2d.builtin_opts.line_start
+  jump2d.setup {
+    spotter = jump_line_start.spotter,
+    hooks = { after_jump = jump_line_start.hooks.after_jump },
 
-      -- Which windows from current tabpage are used for visible lines
-      allowed_windows = {
-        current = true,
-        not_current = false,
-      },
-    }
-  end)
+    -- Which lines are used for computing spots
+    allowed_lines = {
+      blank = false, -- Blank line (not sent to spotter even if `true`)
+      cursor_before = false, -- Lines before cursor line
+      cursor_at = true, -- Cursor line
+      cursor_after = true, -- Lines after cursor line
+      fold = false, -- Start of fold (not sent to spotter even if `true`)
+    },
 
-  -- Split and join arguments (regions inside brackets between allowed separators).
-  -- It uses Lua patterns to find arguments, which means it works in comments and
-  -- strings but can be not as accurate as tree-sitter based solutions.
-  -- Each action can be configured with hooks (like add/remove trailing comma).
-  -- Example usage:
-  -- - `gS` - toggle between joined (all in one line) and split (each on a separate
-  --   line and indented) arguments. It is dot-repeatable (see `:h .`).
-  --
-  -- See also:
-  -- - `:h MiniSplitjoin.gen_hook` - list of available hooks
-  VimRc.later(function()
-    require('mini.splitjoin').setup()
-  end)
-end
+    -- Which windows from current tabpage are used for visible lines
+    allowed_windows = {
+      current = true,
+      not_current = false,
+    },
+  }
+end)
+
+-- Split and join arguments (regions inside brackets between allowed separators).
+-- It uses Lua patterns to find arguments, which means it works in comments and
+-- strings but can be not as accurate as tree-sitter based solutions.
+-- Each action can be configured with hooks (like add/remove trailing comma).
+-- Example usage:
+-- - `gS` - toggle between joined (all in one line) and split (each on a separate
+--   line and indented) arguments. It is dot-repeatable (see `:h .`).
+--
+-- See also:
+-- - `:h MiniSplitjoin.gen_hook` - list of available hooks
+VimRc.later(function()
+  require('mini.splitjoin').setup()
+end)
+
 --
 -- Example usage (this may feel intimidating at first, but after practice it
 -- becomes second nature during text editing):

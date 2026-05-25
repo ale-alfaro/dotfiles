@@ -140,15 +140,19 @@ end
 
 return {
   setup = function()
-    vim.api.nvim_create_user_command('Obsidian', function(data)
-      handle_command(data)
-    end, {
-      nargs = '*',
-    })
-    if not CLI.check_obsidian_open() then
-      VimRc.warn 'Obsidian UI must be open, run Obsidian command first to get the rest of the user commands '
-      return
+    local obsidian_vault_root = vim.fs.root(vim.fn.getcwd(), { '.obsidian' })
+    local obsidian_conf = vim.fs.joinpath(obsidian_vault_root, '.obsidian', 'app.json')
+    if obsidian_vault_root and vim.uv.fs_stat(obsidian_conf) then
+      vim.api.nvim_create_user_command('Obsidian', function(data)
+        handle_command(data)
+      end, {
+        nargs = '*',
+      })
+      if not CLI.check_obsidian_open() then
+        VimRc.warn 'Obsidian UI must be open, run Obsidian command first to get the rest of the user commands '
+        return
+      end
+      obs_vault_usercmd()
     end
-    obs_vault_usercmd()
   end,
 }

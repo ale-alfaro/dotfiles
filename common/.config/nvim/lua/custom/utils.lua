@@ -1,7 +1,6 @@
 ---@class vimrc.Utils
 ---@field log_level_names table<integer,string>
 local M = {}
-local PRIV = {}
 -- Utilities ------------------------------------------------------------------
 
 ---@param ... string|number|boolean|table
@@ -23,7 +22,7 @@ end
 
 --- Print Lua objects in command line
 ---
----@param lvl string Log level of print function
+---@param lvl integer Log level of print function
 ---@return fun(...:any):...
 local make_print_fn = function(lvl)
   return function(...)
@@ -34,28 +33,16 @@ local make_print_fn = function(lvl)
       table.insert(objects, vim.inspect(v))
     end
 
-    if VimRc.notify then
-      VimRc.notify(table.concat(objects, '\n'), lvl)
-    else
-      print(table.concat(objects, '\n'))
-    end
+    vim.notify(table.concat(objects, '\n'), lvl)
 
     return ...
   end
 end
----@param ... any
-M.print = function(...)
-  M.info(M.sprintf(...))
-end
-M.log_level_names = {}
-for k, v in pairs(vim.log.levels) do
-  M.log_level_names[v] = k
-end
 
-M.info = make_print_fn 'INFO'
-M.warn = make_print_fn 'WARN'
-M.err = make_print_fn 'ERROR'
-M.debug = make_print_fn 'DEBUG'
+M.debug = make_print_fn(vim.log.levels.DEBUG)
+M.info = make_print_fn(vim.log.levels.INFO)
+M.warn = make_print_fn(vim.log.levels.WARN)
+M.err = make_print_fn(vim.log.levels.ERROR)
 
 -- Paths --------------------------------------------------------------------
 ---@param path string
@@ -115,10 +102,91 @@ M.setTimeout = function(timeout, callback)
   end
 end
 -- Buffers --------------------------------------------------------------------
----@param buf_id integer
----@param name string
-M.set_buf_name = function(buf_id, name)
-  vim.api.nvim_buf_set_name(buf_id, 'vimrc://' .. buf_id .. '/' .. name)
+--[[
+--12. Special kinds of buffers			*special-buffers*
+
+Instead of containing the text of a file, buffers can also be used for other
+purposes.  A few options can be set to change the behavior of a buffer:
+	'bufhidden'	what happens when the buffer is no longer displayed
+			in a window.
+	'buftype'	what kind of a buffer this is
+	'swapfile'	whether the buffer will have a swap file
+	'buflisted'	buffer shows up in the buffer list
+
+A few useful kinds of a buffer:
+
+quickfix	Used to contain the error list or the location list.  See
+		|:cwindow| and |:lwindow|.  This command sets the 'buftype'
+		option to "quickfix".  You are not supposed to change this!
+		'swapfile' is off.
+
+help		Contains a help file.  Will only be created with the |:help|
+		command.  The flag that indicates a help buffer is internal
+		and can't be changed.  The 'buflisted' option will be reset
+		for a help buffer.
+
+terminal	A terminal window buffer, see |terminal|.  The contents cannot
+		be read or changed until the job ends.
+
+directory	Displays directory contents.  Can be used by a file explorer
+		plugin.  The buffer is created with these settings: >
+			:setlocal buftype=nowrite
+			:setlocal bufhidden=delete
+			:setlocal noswapfile
+<		The buffer name is the name of the directory and is adjusted
+		when using the |:cd| command.
+
+						*scratch-buffer*
+scratch		Contains text that can be discarded at any time.  It is kept
+		when closing the window, it must be deleted explicitly.
+		Settings: >
+			:setlocal buftype=nofile
+			:setlocal bufhidden=hide
+			:setlocal noswapfile
+<		The buffer name can be used to identify the buffer, if you
+		give it a meaningful name.
+
+						*unlisted-buffer*
+unlisted	The buffer is not in the buffer list.  It is not used for
+		normal editing, but to show a help file, remember a file name
+		or marks.  The ":bdelete" command will also set this option,
+		thus it doesn't completely delete the buffer.  Settings: >
+			:setlocal nobuflisted
+
+--
+--]]
+--
+-- M.create_scratch_buf = function(name)
+--   local buf_id = vim.api.nvim_create_buf(true, true)
+--   if name then
+--     vim.api.nvim_buf_set_name(buf_id, name)
+--   end
+--   for optname, value in pairs {
+--     filetype = 'scratch',
+--     buftype = 'nofile',
+--     bufhidden = 'wipe',
+--     swapfile = false,
+--     modifiable = true,
+--   } do
+--     vim.api.nvim_set_option_value(optname, value, { buf = buf_id })
+--   end
+--   return buf_id
+-- end
+M.new_scratch_buffer = function()
+  vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(true, true))
+end
+---@param lines string[]
+---@param name? string
+M.show_in_unlisted_ro_only_buf = function(lines, name)
+  local buf_id = vim.api.nvim_create_buf(false, true)
+  if name then
+    vim.api.nvim_buf_set_name(buf_id, name)
+  end
+  vim.api.nvim_buf_set_lines(buf_id, 0, -1, false, lines)
+  vim.api.nvim_set_current_buf(buf_id)
+  vim.bo.filetype = 'vimrc'
+  vim.bo.modifiable = false
+  return buf_id
 end
 ---@param win_id any
 ---@return boolean
@@ -141,86 +209,35 @@ M.buf_ensure_loaded = function(buf_id)
   pcall(vim.fn.bufload, buf_id)
   vim.o.eventignore = cache_eventignore
 end
+---@alias SplitType
+---|'vert'
+---|'hor'
+---
+---@param type?  SplitType
+M.scratch_split = function(type)
+  -- Create a target window split
+  local win_source = vim.api.nvim_get_current_win()
+  vim.api.nvim_cmd({
+    cmd = type or 'vert',
+    args = { 'split' },
+  }, {})
+  local win_stdout = vim.api.nvim_get_current_win()
 
----@param buf_id integer
----@return string?
-M.buf_get_name = function(buf_id)
-  if not M.is_valid_buf(buf_id) then
-    return nil
-  end
-  local buf_name = vim.api.nvim_buf_get_name(buf_id)
-  if buf_name ~= '' then
-    buf_name = vim.fn.fnamemodify(buf_name, ':~:.')
-  end
-  return buf_name
+  -- Prepare buffer
+  M.new_scratch_buffer()
+
+  return win_source, win_stdout
 end
-
----@param buf_id integer
----@param lines string[]
-PRIV.set_buflines = function(buf_id, lines)
-  vim.api.nvim_buf_set_lines(buf_id, 0, -1, false, lines)
-end
-
-PRIV.define_scratch_buf_window = function(cleanup)
-  local buf_id, win_id = vim.api.nvim_get_current_buf(), vim.api.nvim_get_current_win()
-  vim.bo.swapfile, vim.bo.buflisted = false, false
-
-  -- Define action to finish editing Git related file
-  local finish_au_id
-  local finish = function(data)
-    local should_close = data.buf == buf_id or (data.event == 'WinClosed' and tonumber(data.match) == win_id)
-    if not should_close then
-      return
-    end
-
-    pcall(vim.api.nvim_del_autocmd, finish_au_id)
-    pcall(vim.api.nvim_win_close, win_id, true)
-    vim.schedule(function()
-      pcall(vim.api.nvim_buf_delete, buf_id, { force = true })
-    end)
-
-    if vim.is_callable(cleanup) then
-      vim.schedule(cleanup)
-    end
-  end
-  vim.api.nvim_buf_set_keymap(buf_id, 'n', 'q', '<Cmd>lua MiniBufremove.delete()<CR>', {})
-  -- - Use `nested` to allow other events (`WinEnter` for 'mini.statusline')
-  local events = { 'WinClosed', 'BufDelete', 'BufWipeout', 'VimLeave' }
-  local opts = { nested = true, callback = finish, desc = 'Cleanup window and buffer' }
-  finish_au_id = vim.api.nvim_create_autocmd(events, opts)
-end
----@param lines string[]
----@param bufname string?
----@return integer
-M.write_to_buffer = function(lines, bufname)
-  local buf_id = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_buf_set_name(buf_id, bufname or 'vimrc')
-  PRIV.set_buflines(buf_id, lines)
-  vim.bo[buf_id].filetype = 'vimrc'
-  PRIV.define_scratch_buf_window()
-  return buf_id
-end
-
 ---@param lines string[]
 ---@param name string?
----@param filetype string?
-M.show_in_split = function(lines, name, filetype)
+M.show_in_split = function(lines, name)
   -- Create a target window split
   local win_source = vim.api.nvim_get_current_win()
   vim.cmd 'vertical split'
   local win_stdout = vim.api.nvim_get_current_win()
 
   -- Prepare buffer
-  local buf_id = M.write_to_buffer(lines, name)
-
-  local has_filetype = not (filetype == nil or filetype == '')
-  vim.bo[buf_id].filetype = filetype or 'vimrc'
-
-  -- Completely unfold for no filetype output (like `:Git help`)
-  if not has_filetype then
-    vim.wo[win_stdout].foldlevel = 999
-  end
-  vim.api.nvim_set_current_buf(buf_id)
+  M.show_in_unlisted_ro_only_buf(lines, name)
 
   return win_source, win_stdout
 end

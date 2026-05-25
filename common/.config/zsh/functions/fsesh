@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
-sesh connect "$(
-  sesh list --icons | fzf-tmux -p 80%,70% \
+local -r session="$(
+  sesh list --icons --hide-duplicates | fzf-tmux -p 80%,70% \
     --no-sort --ansi --border-label ' sesh ' --prompt '⚡  ' \
     --header '  ^a all ^t tmux ^g configs ^x zoxide ^d tmux kill ^f find' \
     --bind 'tab:down,btab:up' \
@@ -13,3 +13,5 @@ sesh connect "$(
     --preview-window 'right:55%' \
     --preview 'sesh preview {}'
 )"
+[[ -z "$session" ]] && return
+sesh connect "$session" "${1:+-c $1}"

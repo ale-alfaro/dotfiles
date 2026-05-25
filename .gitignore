@@ -35,3 +35,4 @@ log
 /common/.config/codex/skills/.system
 /common/.config/codex
 /common/.config/zsh/plugins
+/common/llm/ts/state

@@ -1,0 +1,20 @@
+#!/usr/bin/env zsh
+
+set -euo pipefail
+
+(($# < 1)) && {
+  printf -- 'usage: %s <flag>\n' "${0}"
+  return 1
+} >&2
+
+FLAG_NAME="${1:?}"
+FLAG="$HOME/.local/state/dots/toggles/${FLAG_NAME}"
+
+if [[ -f "$FLAG" ]]; then
+  rm "$FLAG"
+  notify-send -u low "Disabled toggle ${FLAG_NAME}"
+else
+  mkdir -p "$(dirname "$FLAG")"
+  touch "$FLAG"
+  notify-send -u low "Enabled toggle ${FLAG_NAME}"
+fi

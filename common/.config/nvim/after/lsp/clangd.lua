@@ -73,16 +73,12 @@ return {
     '--fallback-style=llvm',
     '--log=error',
   },
-  filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda' },
+  filetypes = { 'c', 'cpp' },
   root_markers = {
     '.clangd',
     'compile_commands.json',
     'build',
   },
-  get_language_id = function(_, ftype)
-    local t = { objc = 'objective-c', objcpp = 'objective-cpp', cuda = 'cuda-cpp' }
-    return t[ftype] or ftype
-  end,
   capabilities = {
     textDocument = {
       completion = {

@@ -1,15 +1,3 @@
-"""
-ARM Cortex-M debug toolkit for GDB.
-
-Provides commands for fault analysis, exception frame inspection, NVIC state,
-MPU configuration, vector table display, and more.
-
-Load into GDB:
-    (gdb) source ~/.config/gdb/pygdb/cortex_m.py
-
-All commands are prefixed 'cortex-'. Tab-complete 'cortex-' to see the full list.
-"""
-
 import contextlib
 from struct import pack, unpack
 from typing import override
@@ -41,7 +29,7 @@ NVIC_ICER_BASE = 0xE000E180  # Interrupt Clear-Enable
 NVIC_ISPR_BASE = 0xE000E200  # Interrupt Set-Pending
 NVIC_ICPR_BASE = 0xE000E280  # Interrupt Clear-Pending
 NVIC_IABR_BASE = 0xE000E300  # Interrupt Active Bit
-NVIC_IPR_BASE = 0xE000E400   # Interrupt Priority (8-bit per IRQ)
+NVIC_IPR_BASE = 0xE000E400  # Interrupt Priority (8-bit per IRQ)
 
 # --- MPU (Memory Protection Unit) ---
 MPU_TYPE = 0xE000ED90
@@ -126,7 +114,10 @@ CCR_BITS = {
     1: ("USERSETMPEND", "User set-pending enable"),
     3: ("UNALIGN_TRP", "Unaligned access trap"),
     4: ("DIV_0_TRP", "Divide-by-zero trap"),
-    8: ("BFHFNMIGN", "Bus fault handler ignores precise bus faults during priority -1/-2 handlers"),
+    8: (
+        "BFHFNMIGN",
+        "Bus fault handler ignores precise bus faults during priority -1/-2 handlers",
+    ),
     9: ("STKALIGN", "8-byte stack alignment on exception entry"),
     16: ("DC", "Data cache enable (M7)"),
     17: ("IC", "Instruction cache enable (M7)"),
@@ -552,7 +543,9 @@ class CortexMNvic(gdb.Command):
 
         _section_header(f"NVIC - {num_irqs} external IRQs")
         print(f"  {'IRQ':>5s}  {'Ena':>3s}  {'Pnd':>3s}  {'Act':>3s}  {'Pri':>5s}")
-        print(f"  {'\u2500' * 5}  {'\u2500' * 3}  {'\u2500' * 3}  {'\u2500' * 3}  {'\u2500' * 5}")
+        print(
+            f"  {'\u2500' * 5}  {'\u2500' * 3}  {'\u2500' * 3}  {'\u2500' * 3}  {'\u2500' * 5}"
+        )
 
         try:
             displayed = 0
@@ -563,7 +556,9 @@ class CortexMNvic(gdb.Command):
                 enabled = (_read_reg32(NVIC_ISER_BASE + reg_idx * 4) >> bit) & 1
                 pending = (_read_reg32(NVIC_ISPR_BASE + reg_idx * 4) >> bit) & 1
                 active = (_read_reg32(NVIC_IABR_BASE + reg_idx * 4) >> bit) & 1
-                priority = _read_reg32(NVIC_IPR_BASE + (irq & ~3)) >> (8 * (irq & 3)) & 0xFF
+                priority = (
+                    _read_reg32(NVIC_IPR_BASE + (irq & ~3)) >> (8 * (irq & 3)) & 0xFF
+                )
 
                 if show_all or enabled or pending or active:
                     e = "*" if enabled else "."
@@ -711,7 +706,9 @@ class CortexMVtor(gdb.Command):
                 else:
                     handler_addr = handler & ~1  # Clear thumb bit
                     sym = _resolve_symbol(handler_addr)
-                    print(f"  {i:4d}  0x{entry_addr:08X}  0x{handler:08X}  {exc_name}: {sym}")
+                    print(
+                        f"  {i:4d}  0x{entry_addr:08X}  0x{handler:08X}  {exc_name}: {sym}"
+                    )
             except gdb.MemoryError:
                 print(f"  {i:4d}  0x{vtor + i * 4:08X}  <read error>")
 
@@ -770,11 +767,15 @@ class CortexMScb(gdb.Command):
             return
         active = icsr & 0x1FF
         pending = (icsr >> 12) & 0x1FF
-        active_name = SYSTEM_EXCEPTIONS.get(active, f"IRQ{active - 16}") if active else "None"
+        active_name = (
+            SYSTEM_EXCEPTIONS.get(active, f"IRQ{active - 16}") if active else "None"
+        )
         pending_name = (
             SYSTEM_EXCEPTIONS.get(pending, f"IRQ{pending - 16}") if pending else "None"
         )
-        print(f"  ICSR:    0x{icsr:08X}  (active: {active_name}, pending: {pending_name})")
+        print(
+            f"  ICSR:    0x{icsr:08X}  (active: {active_name}, pending: {pending_name})"
+        )
 
     @staticmethod
     def _dump_aircr():
@@ -805,7 +806,11 @@ class CortexMScb(gdb.Command):
     def _dump_fault_regs_raw():
         """Print raw fault register values."""
         if not _is_armv6m():
-            for name, addr in [("CFSR", SCB_CFSR), ("HFSR", SCB_HFSR), ("DFSR", SCB_DFSR)]:
+            for name, addr in [
+                ("CFSR", SCB_CFSR),
+                ("HFSR", SCB_HFSR),
+                ("DFSR", SCB_DFSR),
+            ]:
                 val = _read_scb_reg(name, addr)
                 if val is not None:
                     print(f"  {name}:    0x{val:08X}")
@@ -878,4 +883,6 @@ CortexMVtor()
 CortexMScb()
 CortexMSystick()
 
-print("Cortex-M debug commands loaded. Type 'help cortex-' and tab-complete to see all.")
+print(
+    "Cortex-M debug commands loaded. Type 'help cortex-' and tab-complete to see all."
+)

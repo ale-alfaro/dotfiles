@@ -80,8 +80,8 @@ local lsp_on_attach = function(client, bufnr)
     -- client.server_capabilities.completionProvider.triggerCharacters = chars
 
     -- vim.cmd [[setlocal completeopt+=menuone,noselect,popup]]
-    vim.bo[bufnr].omnifunc = 'v:lua.MiniCompletion.completefunc_lsp'
-    vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = true })
+    -- vim.bo[bufnr].omnifunc = 'v:lua.MiniCompletion.completefunc_lsp'
+    -- vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = true })
   end
 
   if client:supports_method 'textDocument/foldingRange' then
@@ -121,15 +121,16 @@ M.setup = function()
       return overridden_register_caps(err, res, ctx)
     end
   end)(vim.lsp.handlers['client/registerCapability'])
-
-  vim.api.nvim_create_user_command('SchemaStore', 'lua require("vimrc_lsp.schemastore").setup()', { desc = 'Enable SchemaStore for Json and YAML Lsp' })
+  local sstore = require 'vimrc_lsp.schemastore'
+  VimRc.on_filetype('json', sstore.json_ls)
+  VimRc.on_filetype('yaml', sstore.yaml_ls)
 
   --
   -- Extend neovim's client capabilities with the completion ones.
   require('vimrc_lsp.code_action').setup()
 
   local servers = lsp_configs_get()
-  servers = vim.list_extend(servers, { 'lua_ls', 'yamlls', 'jsonls' })
+  servers = vim.list_extend(servers, { 'taplo', 'lua_ls', 'yamlls', 'jsonls' })
   vim.lsp.enable(servers)
 
   -- HACK: Override buf_request to ignore notifications from LSP servers that don't implement a method.

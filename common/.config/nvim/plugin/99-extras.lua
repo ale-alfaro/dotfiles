@@ -32,10 +32,10 @@ VimRc.later(function()
     {
       'v',
       function()
-        local ovr = require 'overseer'
-        ovr.run_task({ name = 'mise' }, function(task)
+        local overseer = require 'overseer'
+        overseer.run({ name = 'mise build' }, function(task)
           if task then
-            ovr.run_action(task, 'open vsplit')
+            overseer.run_action(task, 'open quickfix')
           end
         end)
       end,
@@ -51,58 +51,10 @@ VimRc.later(function()
 end)
 
 VimRc.later(function()
-  require 'extras.minigit'
-  local diff = require 'mini.diff'
-  diff.setup {
-
-    -- Source(s) for how reference text is computed/updated/etc
-    -- Uses content from Git index by default
-    source = { diff.gen_source.git(), diff.gen_source.save() },
-    view = {
-      style = 'sign',
-      signs = { add = '+', change = '~', delete = '-' },
-    },
-  }
-  require('octo').setup {
-    -- or "fzf-lua" or "snacks" or "default"
-    picker = 'fzf-lua',
-    -- bare Octo command opens picker of commands
-    enable_builtin = true,
-  }
-  local git_keys = {
-    { 's', '<cmd>FzfLua git_status<cr>', 'Status' },
-    { 'd', '<cmd>FzfLua git_diff<cr>', 'Diff' },
-    { 'h', '<Cmd>FzfLua git_hunks<CR>', 'Hunks' },
-    { 'b', '<cmd>FzfLua git_blame<cr>', 'Blame' },
-    { 'B', '<cmd>vertical Git blame --porcelain -- %<cr>', 'Blame (MiniGit)' },
-    { 'c', '<cmd>FzfLua git_bcommit<cr>', 'Buf Commits' },
-    { 'C', '<cmd>FzfLua git_commit<cr>', 'Commits' },
-  }
-
-  for _, k in ipairs(git_keys) do
-    vim.keymap.set('n', '<leader>g' .. k[1], k[2], { desc = k[3] })
-  end
-  VimRc.keymap_clues[#VimRc.keymap_clues + 1] = { mode = 'n', keys = '<Leader>g', desc = '+Git' }
-  VimRc.keymap_clues[#VimRc.keymap_clues + 1] = { mode = 'x', keys = '<Leader>g', desc = '+Git' }
-  local diff_keys = {
-    { 't', '<cmd>lua MiniDiff.toggle_overlay()<cr>', 'Toggle overlay' },
-    {
-      'q',
-      function()
-        vim.fn.setqflist(MiniDiff.export 'qf')
-      end,
-      'QuickFix',
-    },
-    { 'a', '<Cmd>Git diff --cached<CR>', 'Added diff' },
-    { 'b', '<Cmd>Git diff --cached -- %<CR>', 'Added diff buffer' },
-  }
-
-  for _, k in ipairs(diff_keys) do
-    vim.keymap.set('n', '<leader>d' .. k[1], k[2], { desc = k[3] })
-  end
-  VimRc.keymap_clues[#VimRc.keymap_clues + 1] = { mode = 'n', keys = '<Leader>d', desc = '+Diff' }
+  require 'extras.git'
 end)
 VimRc.later(function()
+  -- end
   require('render-markdown').setup(
     ---@type render.md.Settings
     {
@@ -126,7 +78,10 @@ VimRc.later(function()
 end)
 
 VimRc.later(function()
-  require('custom.west').setup()
+  if vim.g.west_workspace == 1 then
+    require('custom.west').setup()
+  end
+  require 'extras.codecompanion'
 end)
 
 -- Show next key clues in a bottom right window. Requires explicit opt-in for
@@ -186,5 +141,17 @@ VimRc.later(function()
       { mode = { 'n', 'x' }, keys = 'z' },        -- `z` key
     },
 
+    window = {
+      -- Show window immediately
+      delay = 0,
+
+      config = {
+        -- Compute window width automatically
+        width = 'auto',
+
+        -- Use double-line border
+        border = 'double',
+      },
+    },
   })
 end)

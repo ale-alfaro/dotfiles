@@ -1,9 +1,4 @@
 # If not running interactively, don't do anything (leave this at the top of this file)
 
 # (don't mess with these directly, just overwrite them here!)
-source bash/shell
-source bash/aliases
-source bash/functions
-source bash/init
-source bash/envs
-[[ $- == *i* ]] && bind -f bash/inputrc
+source bash/rc

@@ -7,8 +7,12 @@
 local gh = function(repo)
   return 'https://github.com/' .. repo
 end
+local gh_rev = function(repo, rev)
+  return { src = 'https://github.com/' .. repo, version = rev }
+end
 vim.pack.add {
   gh 'nvim-mini/mini.nvim',
+  gh 'folke/snacks.nvim',
   gh 'stevearc/oil.nvim',
   gh 'stevearc/quicker.nvim',
   gh 'stevearc/overseer.nvim',
@@ -23,9 +27,12 @@ vim.pack.add {
   gh 'MagicDuck/grug-far.nvim',
   gh 'nvim-lua/plenary.nvim',
   gh 'pwntester/octo.nvim',
-
+  gh 'olimorris/codecompanion.nvim',
   gh 'rebelot/kanagawa.nvim',
+  gh 'saghen/blink.lib',
   gh 'ellisonleao/gruvbox.nvim',
+  gh_rev('saghen/blink.cmp', 'main'),
+  gh '3rd/image.nvim',
 }
 local misc = require 'mini.misc'
 ---@class VimRc : vimrc.Utils
@@ -99,16 +106,41 @@ VimRc.on_packchanged = function(plugin_name, kinds, callback, desc)
     if not ev.data.active then
       vim.cmd.packadd(plugin_name)
     end
-    callback()
+    callback(ev.data.spec, ev.data.path)
   end
   VimRc.new_autocmd('PackChanged', f, '*', desc)
 end
-
-local ts_update = function()
+---@param plugin vim.pack.Spec
+---@param path string
+local ts_update = function(plugin, path)
   vim.cmd 'TSUpdate'
 end
 VimRc.on_packchanged('nvim-treesitter', { 'update' }, ts_update, ':TSUpdate')
 
+-- local hooks = function(ev)
+--   -- Use available |event-data|
+--   local name, kind = ev.data.spec.name, ev.data.kind
+--
+--   -- Run build script after plugin's code has changed
+--   if name == 'plug-1' and (kind == 'install' or kind == 'update') then
+--     -- Append `:wait()` if you need synchronous execution
+--     vim.system({ 'make' }, { cwd = ev.data.path })
+--   end
+--
+--   -- If action relies on code from the plugin (like user command or
+--   -- Lua code), make sure to explicitly load it first
+--   if name == 'plug-2' and kind == 'update' then
+--     if not ev.data.active then
+--       vim.cmd.packadd('plug-2')
+--     end
+--     vim.cmd('PlugTwoUpdate')
+--     require('plug2').after_update()
+--   end
+-- end
+--
+-- -- If hooks need to run on install, run this before `vim.pack.add()`
+-- -- To act on install from lockfile, run before very first `vim.pack.add()`
+-- vim.api.nvim_create_autocmd('PackChanged', { callback = hooks })
 ---
 ---
 ---@class FeatureFlag

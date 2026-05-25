@@ -1,8 +1,9 @@
 ### General ###
 .cache
 help.txt
-build
-out
+build/
+out/
+twister-out*/
 
 *.*db
 
@@ -85,3 +86,6 @@ pyrightconfig.json
 .nvim/*
 
 mise.local.toml
+mise.ignore.toml
+mise.*.local.toml
+compile_commands.json

@@ -118,12 +118,12 @@ vim.o.formatlistpat = [[^\s*[0-9\-\+\*]\+\([\.\)]\)*\s\+]]
 --
 -- -- Built-in completion
 -- Built-in completion
-vim.o.complete = '.,w,b,kspell' -- Use less sources
-vim.o.completeopt = 'menuone,noselect,fuzzy,nosort' -- Use custom behavior
-vim.o.completetimeout = 100 -- Limit sources delay
+-- vim.o.complete = '.,w,b,kspell' -- Use less sources
+-- vim.o.completeopt = 'menuone,noselect,fuzzy,nosort' -- Use custom behavior
+-- vim.o.completetimeout = 100 -- Limit sources delay
 
-vim.o.autocomplete = true
-vim.o.autocompletedelay = 100
+-- vim.o.autocomplete = true
+-- vim.o.autocompletedelay = 100
 --- Command Line completion
 vim.o.wildmode = 'longest:full,full' -- Command-line completion mode
 vim.o.wildignorecase = true

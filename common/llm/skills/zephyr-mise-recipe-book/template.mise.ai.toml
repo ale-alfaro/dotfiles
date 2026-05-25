@@ -1,0 +1,127 @@
+# Reference `mise.ai.toml` — copy this into the workspace next to `mise.toml`,
+# then trim/rename to fit the project.
+#
+# How this file is used:
+#   mise -E ai run <task>           # one-shot, recommended
+#   MISE_ENV=ai mise run <task>     # same, via env
+#   mise -E ai tasks                # list everything in this file
+#
+# The `-E ai` (or `MISE_ENV=ai`) gate is what keeps these agent-owned recipes
+# from polluting the normal `mise run` namespace humans use. Pick the env name
+# the user has set up — common choices are `ai`, `agent`, or `claude`.
+#
+# Anything you put here is additive on top of `mise.toml`. Tools pinned in
+# `mise.toml` (e.g. `vfox-zephyr:west`) are inherited; you only need to add a
+# `[tools]` block here for things the recipes themselves require (most often
+# the workspace-scoped toolchain, e.g. `vfox-zephyr:arm`).
+#
+# Run lines:
+#   * Paths are relative to `config_root` (the dir that holds this file).
+#   * Don't `cd` and don't use absolute paths — mise sets cwd to config_root.
+#   * Use `\` for multi-line; keep flags one-per-line so diffs stay readable.
+#   * Prefer `-T <testcase_name>` to inline `-D<CONFIG>=y` — extra configs
+#     belong in `testcase.yaml` / `sample.yaml` so the recipe stays minimal
+#     and the build is reproducible from twister too.
+[plugins]
+vfox-zephyr = "https://github.com/alealfaro/vfox-zephyr-sdk"
+
+[env]
+ZEPHYR_BASE = { required = true }
+BOARD = { required = true }
+# ---- workspace toolchain ----------------------------------------------------
+# Pin tools that the recipes below need. `vfox-zephyr:west` is usually already
+# pinned in `mise.toml`; the ARM cross-compiler is what you typically need to
+# add here so `west build` finds an `arm-zephyr-eabi-gcc`.
+[tools]
+"vfox-zephyr:arm" = { version = "0.17.0", tools = true }
+
+
+# ---- driver / subsystem test (host-side, native_sim) ------------------------
+# Builds the FTL disk-access test for the host simulator. Useful as the first
+# smoke test for any FTL/disk change — no hardware required.
+[tasks."ftl:test:native_sim:build"]
+description = "Build drivers.disk.ftl on native_sim (host-side FTL test)."
+run = '''
+west build --no-sysbuild -p=always -b native_sim \
+    -d build_ftl_sim \
+    -T drivers.disk.ftl \
+    ../sh_sdk/tests/drivers/disk_access
+'''
+
+# Same test, run after building. `depends` makes the build implicit — call
+# `:run` and you don't have to remember to `:build` first.
+[tasks."ftl:test:native_sim:run"]
+description = "Run the native_sim FTL test binary."
+depends = ["ftl:test:native_sim:build"]
+run = '''
+build_ftl_sim/zephyr/zephyr.exe
+'''
+
+
+# ---- driver test (target board) ---------------------------------------------
+# Same test, cross-compiled for the real board. `-T` picks the board-specific
+# entry in `testcase.yaml` so the board overlay and extra_configs are loaded
+# from there, not from the command line.
+[tasks."ftl:test:aria:build"]
+description = "Build drivers.disk.ftl.aria_nand for aria/nrf5340/cpuapp."
+run = '''
+west build --no-sysbuild -p=always -b aria/nrf5340/cpuapp \
+    -d build_ftl_test \
+    -T drivers.disk.ftl.aria_nand \
+    ../sh_sdk/tests/drivers/disk_access
+'''
+
+# Flash variant. `-d` must match the build's `-d`. `--reset` makes sure the
+# device comes up after flashing.
+[tasks."ftl:test:aria:flash"]
+description = "Flash the aria FTL test build over J-Link."
+depends = ["ftl:test:aria:build"]
+run = '''
+west flash -d build_ftl_test -r jlink --reset
+'''
+
+
+# ---- sample app -------------------------------------------------------------
+# Sample build for the same board. Same recipe shape as the test, just a
+# different testcase/sample name.
+[tasks."ftl:sample:aria:build"]
+description = "Build the littlefs sample for aria/nrf5340/cpuapp (FTL backend)."
+run = '''
+west build --no-sysbuild -p=always -b aria/nrf5340/cpuapp \
+    -d build_lfs_sample \
+    -T sample.filesystem.littlefs.aria_nrf5340_cpuapp_nand \
+    ../sh_sdk/samples/littlefs
+'''
+
+[tasks."ftl:sample:aria:flash"]
+description = "Flash the aria littlefs sample over J-Link."
+depends = ["ftl:sample:aria:build"]
+run = '''
+west flash -d build_lfs_sample -r jlink --reset
+'''
+
+
+# ---- naming convention ------------------------------------------------------
+# `<group>:<artifact>:<board>:<verb>` makes related recipes group together
+# alphabetically and lets future-you grep for `:flash` or `aria:` without
+# false hits. Keep it consistent:
+#
+#   <group>   short feature/subsystem tag — ftl, ble, ota, audio, dfu
+#   <artifact>  test | sample | app
+#   <board>     aria | native_sim | <board name> | (omit if board-agnostic)
+#   <verb>      build | run | flash | debug | dfu
+
+
+# ---- one-time, persistent fixes that don't belong in a task -----------------
+# Some configuration is global to the workspace, not per-build. Don't keep
+# papering over it with per-call flags — fix it once:
+#
+#   west config build.sysbuild false
+#     Turns sysbuild off persistently so `west build` stops dragging in
+#     `ipc_radio` / netcore child images when you don't want them.
+#
+#   west config build.board aria/nrf5340/cpuapp
+#     Set the default board so plain `west build` works without `-b`.
+#
+# These belong in the workspace setup steps (or `mise run init`), not in
+# individual recipes.

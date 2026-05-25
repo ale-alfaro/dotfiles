@@ -7,5 +7,7 @@
 # PATH additions are available in all login shells.
 
 typeset -U path PATH
-path=($HOME/.local/share/mise/shims $HOME/.local/bin $path)
+path=($HOME/.local/bin $path)
 export PATH
+
+eval "$(mise activate --shims)"

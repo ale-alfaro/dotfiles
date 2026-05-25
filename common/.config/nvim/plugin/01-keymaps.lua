@@ -191,6 +191,8 @@ VimRc.keymap_clues = {
   { mode = 'n', keys = '<Leader>f', desc = '+Find' },
   { mode = 'n', keys = '<Leader>n', desc = '+Notifications' },
   { mode = 'n', keys = '<Leader>s', desc = '+Session' },
+  { mode = 'n', keys = '<Leader>t', desc = '+Terminal' },
+  { mode = 'n', keys = '<Leader>v', desc = '+Visits' },
 }
 VimRc.map({ lhs = 'q', rhs = '<nop>' }, { noremap = true })
 VimRc.map({ mode = 'v', lhs = '<', rhs = '<gv' }, { noremap = true })
@@ -228,22 +230,6 @@ VimRc.map({ lhs = '<C-s>', rhs = '<Cmd>silent! update | redraw<CR>' }, { noremap
 VimRc.map({ mode = { 'x', 'i' }, lhs = '<C-s>', rhs = '<Esc><Cmd>silent! update | redraw<CR>' }, { noremap = true })
 VimRc.map({ lhs = '<C-q>', rhs = '<Cmd>qall<CR>' }, { noremap = true })
 
-vim.cmd [[
-    :tnoremap <F2> <C-\><C-N><C-\><C-N> 
-    :tnoremap <C-Left>  <C-\><C-N><C-w>h
-    :tnoremap <C-Down>  <C-\><C-N><C-w>j
-    :tnoremap <C-Up>    <C-\><C-N><C-w>k
-    :tnoremap <C-Right> <C-\><C-N><C-w>l
-    :inoremap <C-Left>  <C-\><C-N><C-w>h
-    :inoremap <C-Down>  <C-\><C-N><C-w>j
-    :inoremap <C-Up>    <C-\><C-N><C-w>k
-    :inoremap <C-Right> <C-\><C-N><C-w>l
-    :nnoremap <C-Left>  <C-w>h
-    :nnoremap <C-Down>  <C-w>j
-    :nnoremap <C-Up>    <C-w>k
-    :nnoremap <C-Right> <C-w>l
-
-]]
 ---@param key string
 ---@param keycmd string|fun()
 ---@param desc string
@@ -253,9 +239,7 @@ end
 nmap_leader('ba', '<Cmd>b#<CR>', 'Alternate')
 nmap_leader('bd', '<Cmd>lua MiniBufremove.delete()<CR>', 'Delete')
 nmap_leader('bD', '<Cmd>lua MiniBufremove.delete(0, true)<CR>', 'Delete!')
-nmap_leader('bs', function()
-  vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(true, true))
-end, 'Scratch')
+nmap_leader('bs', '<Cmd>lua VimRc.new_scratch_buffer()<Cr>', 'Scratch')
 nmap_leader('bw', '<Cmd>lua MiniBufremove.wipeout()<CR>', 'Wipeout')
 nmap_leader('bW', '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', 'Wipeout!')
 
@@ -278,3 +262,43 @@ VimRc.map({ lhs = '<M-s>', rhs = 'sn', '<Cmd>lua ' .. session_new .. '<CR>' }, '
 VimRc.map({ lhs = '<M-r>', rhs = '<Cmd>lua MiniSessions.restart()<CR>' }, 'Restart')
 nmap_leader('sr', '<Cmd>lua MiniSessions.select("read")<CR>', 'Read')
 nmap_leader('ss', '<Cmd>lua MiniSessions.write()<CR>', 'Write current')
+
+nmap_leader('tT', '<Cmd>horizontal term<CR>', 'Terminal (horizontal)')
+nmap_leader('tt', '<Cmd>vertical term<CR>', 'Terminal (vertical)')
+
+vim.cmd [[
+    :tnoremap <F2> <C-\><C-N><C-\><C-N> 
+    :tnoremap <C-Left>  <C-\><C-N><C-w>h
+    :tnoremap <C-Down>  <C-\><C-N><C-w>j
+    :tnoremap <C-Up>    <C-\><C-N><C-w>k
+    :tnoremap <C-Right> <C-\><C-N><C-w>l
+    :inoremap <C-Left>  <C-\><C-N><C-w>h
+    :inoremap <C-Down>  <C-\><C-N><C-w>j
+    :inoremap <C-Up>    <C-\><C-N><C-w>k
+    :inoremap <C-Right> <C-\><C-N><C-w>l
+    :nnoremap <C-Left>  <C-w>h
+    :nnoremap <C-Down>  <C-w>j
+    :nnoremap <C-Up>    <C-w>k
+    :nnoremap <C-Right> <C-w>l
+
+]]
+-- v is for 'Visits'. Common usage:
+-- - `<Leader>vv` - add    "core" label to current file.
+-- - `<Leader>vV` - remove "core" label to current file.
+-- - `<Leader>vc` - pick among all files with "core" label.
+local make_pick_core = function(cwd, desc)
+  return function()
+    local sort_latest = MiniVisits.gen_sort.default { recency_weight = 1 }
+    local local_opts = { cwd = cwd, filter = 'core', sort = sort_latest }
+    require('mini.extras').pickers.visit_paths(local_opts, { source = { name = desc } })
+  end
+end
+-- VimRc.later(function()
+--   require('mini.visits').setup()
+-- end)
+nmap_leader('vc', make_pick_core('', 'Core visits (all)'), 'Core visits (all)')
+nmap_leader('vC', make_pick_core(nil, 'Core visits (cwd)'), 'Core visits (cwd)')
+nmap_leader('vv', '<Cmd>lua MiniVisits.add_label("core")<CR>', 'Add "core" label')
+nmap_leader('vV', '<Cmd>lua MiniVisits.remove_label("core")<CR>', 'Remove "core" label')
+nmap_leader('vl', '<Cmd>lua MiniVisits.add_label()<CR>', 'Add label')
+nmap_leader('vL', '<Cmd>lua MiniVisits.remove_label()<CR>', 'Remove label')

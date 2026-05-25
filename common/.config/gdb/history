@@ -625,3 +625,225 @@ q
 bt
 l
 quit
+c
+locals
+local
+arg
+args
+bt
+up
+l
+info args
+info locals 
+info symbol 0x5efde
+info symbol 0x5e52d
+l 0x5e52d
+info 0x5e52d
+p 0x5e52
+p *0x5e52
+p info.exception_reg_state 
+p *info.exception_reg_state 
+p/x *(uint32_t*)0x20042200@8
+p/x *(uint32_t*)0xE000ED28
+q
+mon halt
+b z_arm_usage_fault 
+mon reset
+c
+l
+sou
+source ~/.config/gdb/gdbinit 
+define z_fault_dump
+    printf "\n=== z_arm_fault context ===\n"
+    printf "msp=0x%x psp=0x%x exc_return=0x%x\n", $r0, $r1, $r2
+
+    # Fault status registers
+    # Entire CFSR
+    set $cfsr = *(uint32_t*)0xE000ED28
+    # UsageFault Status Register (UFSR)
+    set $ufsr = *(uint16_t *)0xE000ED2A
+    # BusFault Status Register (BFSR)
+    set $bfsr = *(uint8_t *)0xE000ED29
+    # MemManage Status Register (MMFSR)
+    set $mmfsr = *(uint8_t *)0xE000ED28
+    printf "Entire Configurable Fault Register CFSR=0x%08x\n", $cfsr
+    printf "UFSR=0x%04x BSFR=0x%02x MMFSR=0x%02x\n", $ufsr, $bfsr, $mmfsr
+    set $exc_return = $lr
+    set $msp_was_active = $exc_return&(1<<2)
+
+    p/a *(uint32_t[8] *)$msp
+    p/a *(uint32_t[8] *)$psp
+end
+
+define z_esf_dump
+    # Dump stacked registers from esf_copy if available
+    if &esf_copy
+      printf "ESF: r0=0x%x r1=0x%x r2=0x%x r3=0x%x r12=0x%x lr=0x%x pc=0x%x xpsr=0x%x\n", \
+        esf_copy.basic.r0, esf_copy.basic.r1, esf_copy.basic.r2, esf_copy.basic.r3, \
+        esf_copy.basic.r12, esf_copy.basic.lr, esf_copy.basic.pc, esf_copy.basic.xpsr
+    end
+
+    #Print current thread stack info and name
+    if &_kernel
+      set $cur = _kernel.cpus[0].current
+      printf "current=0x%x\n", $cur
+      if $cur
+        printf "stack_start=0x%x stack_size=0x%x\n", $cur->stack_info.start, $cur->stack_info.size
+        # Uncomment if CONFIG_THREAD_NAME=y
+        printf "name=%s\n", $cur->name
+      end
+    end
+  end
+
+define z_fault_dump
+    printf "\n=== z_arm_fault context ===\n"
+    printf "msp=0x%x psp=0x%x exc_return=0x%x\n", $r0, $r1, $r2
+
+    # Fault status registers
+    # Entire CFSR
+    set $cfsr = *(uint32_t*)0xE000ED28
+    # UsageFault Status Register (UFSR)
+    set $ufsr = *(uint16_t *)0xE000ED2A
+    # BusFault Status Register (BFSR)
+    set $bfsr = *(uint8_t *)0xE000ED29
+    # MemManage Status Register (MMFSR)
+    set $mmfsr = *(uint8_t *)0xE000ED28
+    printf "Entire Configurable Fault Register CFSR=0x%08x\n", $cfsr
+    printf "UFSR=0x%04x BSFR=0x%02x MMFSR=0x%02x\n", $ufsr, $bfsr, $mmfsr
+    set $exc_return = $lr
+    set $msp_was_active = $exc_return&(1<<2)
+
+    p/a *(uint32_t[8] *)$msp
+    p/a *(uint32_t[8] *)$psp
+end
+
+z_fault_dump 
+info symbol 0x4847b
+p/x 0x4847b
+p/x *0x4847b
+list symbol 0x4847b
+
+info line *0x4
+i
+bt
+info symbol 0x64347
+list *0x64347
+info symbol 0x38682
+list *0x38682
+mon halt
+mon reset
+c
+disas /s 0x483f0,0x484a0
+x/40xw 0x200422f8
+info symbol 0x6e92d
+info symbol 0x4b6d1
+info symbol 0x6e5f7
+info symbol 0x6e645
+info symbol 0x6e93d
+info symbol 0x84840
+x/64xw 0x20042400
+x/64xw 0x20042500
+q
+quit
+mon halt
+mon reset
+c
+bt
+l
+quit
+bt
+p/x $psp
+p/x $lr
+p/a *(uint32_t[8] *)0x20037cd8
+x/40xw 0x20037cf8
+info symbol 0x74228
+info symbol 0x2ec57
+info symbol 0x73f03
+info symbol 0x7422b
+info symbol 0x2ec0d
+info symbol 0x2c70b
+info line *0x2ec57
+info line *0x7422b
+info line *0x73f03
+q
+c
+p/a *(uint32_t[8] *)0x200408c0
+x/40xw 0x200408e0
+info symbol 0xd950f
+info symbol 0xd9511
+info symbol 0x5d187
+info symbol 0x5cf03
+info symbol 0x2b90e
+info symbol 0x4454f
+info symbol 0x44823
+info symbol 0x4450d
+info symbol 0x74b9e
+info symbol 0x74879
+info symbol 0x63903
+info symbol 0x235c9
+q
+source ~/.config/gdb/pygdb/cortex_m.py 
+quit
+q
+mon halt
+mon reset
+c
+mon halt
+c
+q
+mon halt
+q
+c
+mon reset
+c
+mon reset
+c
+bt
+l
+up
+info locals
+q
+mon halt
+mon reset
+c
+bt
+up
+info threads
+l
+info args
+p/x *workq_ptr 
+p/x workq_ptr 
+p workq_ptr 
+pp workq_ptr 
+q
+q
+mon halt
+c
+q
+mon halt
+mon reset
+c
+monitor halt
+load
+monitor reset
+continue
+q
+monitor halt
+load
+monitor reset
+continue
+where
+quit
+ continue
+monitor reset
+continue
+info threads
+bt
+thread apply all bt 8
+x/8w 0x20000000
+qmonitor reset
+monitor reset
+continue
+continue
+continue
+q

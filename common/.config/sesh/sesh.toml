@@ -1,17 +1,32 @@
-# :schema https://github.com/joshmedeski/sesh/raw/main/sesh.schema.json
+#:schema https://github.com/joshmedeski/sesh/raw/main/sesh.schema.json
 blacklist = ["build"]
-sort_order = ["config", "zoxide"]
+sort_order = ["tmux", "config", "zoxide"]
 
 [default_session]
 preview_command = "eza --all --git --icons --color=always {}"
-startup_command = "mise en"
+startup_command = "nvim ."
 
 [[session]]
 name = "Common Config"
 path = "~/dotfiles/common/.config"
-startup_command = "nvim tmux.conf"
 
 [[session]]
-name = "Aria"
+name = "Obsidian"
+path = "~/Documents/Obsidian"
+startup_command = "tdl claude"
+
+[[session]]
+name = "Aria (v2)"
 path = "~/sibel/eng/fw/aria_workspace"
-startup_command = "nvim ."
+startup_command = "tdl claude"
+
+[[session]]
+name = "Vfox Plugin"
+path = "~/sibel/eng/tools/vfox-zephyr-sdk"
+startup_command = "mise deactivate"
+
+
+[[session]]
+name = "Aria Legacy (v1)"
+path = "~/sibel/eng/fw/aria-legacy-workspace"
+startup_command = "tdl claude"

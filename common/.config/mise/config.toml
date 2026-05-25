@@ -3,18 +3,16 @@
 experimental = true
 lockfile = true
 color_theme = "dracula"
-unix_default_file_shell_args = 'zsh -eu -o pipe_fail'
-unix_default_inline_shell_args = "zsh -eu -o pipe_fail -c"
+unix_default_file_shell_args = 'zsh -eu'
+unix_default_inline_shell_args = "zsh -eu -c"
 trusted_config_paths = [
-  '~/sibel/eng/fw',
-  '~/sibel/eng/tools',
-  "~/sibel/Geekie-Stuff",
+  '~/sibel/eng/fw/anne-workspace',
   "~/sibel/Documents/Obsidian",
 ]
 # tools can read the versions files used by other version managers
 # for example, .nvmrc in the case of node's nvm
 idiomatic_version_file_enable_tools = ['python']
-
+disable_backends = ["asdf"]
 # configure `mise install` to always keep the downloaded archive
 always_keep_download = false # deleted after install by default
 always_keep_install = false  # deleted on failure by default
@@ -22,34 +20,18 @@ always_keep_install = false  # deleted on failure by default
 # configure how frequently (in minutes) to fetch updated plugin repository changes
 # this is updated whenever a new runtime is installed
 # (note: this isn't currently implemented but there are plans to add it: https://github.com/jdx/mise/discussions/6735)
-plugin_autoupdate_last_check_duration = '1 week' # set to 0 to disable updates
-
-verbose = false                # set to true to see full installation output, see `MISE_VERBOSE`
-http_timeout = "30s"           # set the timeout for http requests as duration string, see `MISE_HTTP_TIMEOUT`
-jobs = 4                       # number of plugins or runtimes to install in parallel. The default is `4`.
-yes = false                    # set to true to automatically answer yes to all prompts
-not_found_auto_install = false # see MISE_NOT_FOUND_AUTO_INSTALL
-disable_backends = ["asdf"]
-# shorthands_file = "~/.config/mise/shorthands.toml"
-# env_file = '.env' # load env vars from a dotenv file, see `MISE_ENV_FILE`
-
+plugin_autoupdate_last_check_duration = '1 week'                                                                # set to 0 to disable updates
+shorthands_file = "~/.config/mise/shorthands.toml"
 status = { missing_tools = "if_other_versions_installed", show_env = true, show_tools = true }
-
 task = { output = "interleave", run_auto_install = true, timings = true, disable_spec_from_run_scripts = true }
-
 npm.package_manager = "bun"
 pipx.uvx = true
 python.uv_venv_auto = "source"
-env_file = ".env"
-
-[settings.github]
-gh_cli_tokens = true
+disable_tools = ["pipx:west"]
 
 [tools]
 go = "latest"
-hk = "latest"
 jqp = "latest"
-actionlint = "latest"
 lua = "5.1"
 dprint = "latest"
 lua-language-server = "latest"
@@ -57,36 +39,24 @@ stylua = "latest"
 lazygit = "latest"
 usage = "latest"
 claude-code = "latest"
-cmake = ["3.31.7", "4.3.1"]
-starship = "latest"
+cmake = "3.31.7"
 tree-sitter = "latest"
 ast-grep = "latest"
 tmux = "latest"
 ccache = "latest"
-yq = "latest"
 neovim = "0.12"
 marksman = "latest"
-typst = "latest"
-typstyle = "latest"
-tinymist = "latest"
 shfmt = "latest"
 shellcheck = "latest"
-pkl = "latest"
-just = "latest"
 acli = "latest"
 lazydocker = "latest"
 jq = "latest"
-devcontainer-cli = "latest"
-
-python = ["3.12", "3.14"]
 uv = "latest"
 "pipx:pyrefly" = "latest"
 "pipx:ruff" = "latest"
 "pipx:ty" = "latest"
 "pipx:commitizen" = "latest"
-"pipx:gersemi" = "latest"
 
-node = ["22", "24"]
 bun = "latest"
 "npm:prettier" = "latest"
 "npm:bash-language-server" = "latest"
@@ -99,18 +69,20 @@ gh = "latest"
 "github:joshmedeski/sesh" = "latest"
 "github:dlvhdr/diffnav" = "latest"
 "github:dandavison/delta" = "latest"
-"github:BlankSpruce/gersemi" = "latest"
 
 rust = "latest"
 rust-analyzer = "latest"
-cargo-binstall = "latest"
 "cargo:taplo-cli" = "latest"
 "cargo:neocmakelsp" = "latest"
 "cargo:tlrc" = "latest"
 git-lfs = "3.7.1"
 "http:nrfutil" = { version = "1.4.0", url = "https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/{{arch(x64='x86_64')}}-{{os(linux='unknown-linux-gnu')}}/nrfutil" }
 rg = "latest"
+codex = "latest"
 
 [shell_alias]
-pygdb = "PYTHONHOME=/usr /opt/zephyr-sdk-custom/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb-py -ex 'target remote :2331'"
+pygdb = "PYTHONHOME=/usr /opt/zephyr-sdk-custom/gnu/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb-py -ex 'target remote :2331'"
 jdbserver = "JLinkGDBServer -device NRF52840_XXAA -if SWD -speed 4000 -port 2331 -silent -singlerun"
+
+[tool_alias]
+"python@3.12" = "python"

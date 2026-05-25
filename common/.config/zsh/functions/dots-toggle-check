@@ -1,0 +1,15 @@
+#!/usr/bin/env zsh
+
+(($# < 1)) && {
+  printf -- 'usage: %s <flag>\n' "${0}"
+  return 1
+} >&2
+
+typeset -g -A actions
+
+actions[mise_activate]="~/.local/bin/mise activate zsh"
+
+FLAG="${1:?}"
+if [[ -n "${actions[$FLAG]:-}" && -f "$HOME/.local/state/dots/toggles/${FLAG}" ]]; then
+  return "$action[$FLAG]"
+fi

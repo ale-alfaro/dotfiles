@@ -1,0 +1,94 @@
+[settings]
+lockfile = true
+
+[env]
+TS_AUTHKEY = { required = true }
+SERVICE = { required = true }
+'_'.file = ".env"
+
+# Materialise a presets.ini section into a temp env-file, source it into
+# the task shell, then bring the stack up. We source (not --env-file) so
+# the values land in compose's process env — that wins over both --env-file
+# and stale shell vars during ${...} interpolation.
+[task_templates."service:up"]
+run = """
+unset HF_REPO LLAMA_ARG_CTX_SIZE LLAMA_ARG_N_GPU_LAYERS LLAMA_ARG_FLASH_ATTN \
+      LLAMA_ARG_CACHE_TYPE_K LLAMA_ARG_CACHE_TYPE_V LLAMA_ARG_JINJA \
+      LLAMA_ARG_BATCH LLAMA_ARG_UBATCH LLAMA_ARG_N_PARALLEL \
+      LLAMA_ARG_N_CPU_MOE LLAMA_ARG_REASONING LLAMA_ARG_NO_MMAP
+TMP=$(mktemp)
+trap 'rm -f "$TMP"' EXIT
+python3 scripts/preset-to-env.py "$preset" > "$TMP"
+set -a; . "$TMP"; set +a
+docker compose -f llm-service.yaml up -d
+"""
+
+[tasks.qwen27b-balanced]
+extends = "service:up"
+env.preset = "qwen27b-balanced"
+
+[tasks.qwen27b-creative]
+extends = "service:up"
+env.preset = "qwen27b-creative"
+
+[tasks.qwen35b]
+extends = "service:up"
+env.preset = "qwen35b"
+
+[tasks.down]
+description = "Stop and remove both containers"
+run = "docker compose -f llm-service.yaml down"
+
+[tasks.logs]
+description = "Follow llama-cpp logs (Ctrl-C to stop)"
+run = "docker compose -f llm-service.yaml logs -f llama-cpp"
+
+[tasks."logs:ts"]
+description = "Follow tailscale sidecar logs (Ctrl-C to stop)"
+run = "docker compose -f llm-service.yaml logs -f tailscale"
+
+# Quick "is it up and serving?" — safe to run any time.
+[tasks.status]
+description = "Container states, model loaded, VRAM"
+run = """
+docker compose -f llm-service.yaml ps
+echo
+docker exec tailscale-llama-cpp wget -qO- --timeout=3 http://127.0.0.1:8080/v1/models 2>/dev/null \
+  | python3 -c 'import json,sys; m=json.load(sys.stdin)["data"][0]; print("model:", m["id"], "| ctx:", m["meta"]["n_ctx"])' 2>/dev/null \
+  || echo "model: (not loaded or server not responding)"
+nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader,nounits \
+  | awk -F, '{printf "VRAM:  %d / %d MiB (%.0f%%)\\n", $1, $2, $1/$2*100}'
+"""
+
+# Kitchen-sink diagnostic — run this when something breaks on boot.
+# Wrapped in {% raw %} so docker's '{{.State.Status}}' format strings
+# survive mise's Tera templating pass.
+[tasks.debug]
+description = "Full diagnostic dump for boot failures"
+run = """
+{% raw %}
+echo "=== compose ps ==="
+docker compose -f llm-service.yaml ps -a
+echo
+echo "=== llama-cpp container state ==="
+if docker inspect app-llama-cpp >/dev/null 2>&1; then
+  docker inspect app-llama-cpp --format 'status={{.State.Status}} exit={{.State.ExitCode}} health={{.State.Health.Status}} restarts={{.RestartCount}}'
+  echo "command: $(docker inspect app-llama-cpp --format '{{.Config.Cmd}}')"
+else
+  echo "(container not present)"
+fi
+echo
+echo "=== llama-cpp last 40 log lines ==="
+docker logs --tail 40 app-llama-cpp 2>&1 || echo "(no logs)"
+echo
+echo "=== tailscale last 15 log lines ==="
+docker logs --tail 15 tailscale-llama-cpp 2>&1 || echo "(no logs)"
+echo
+echo "=== GPU ==="
+nvidia-smi --query-gpu=name,memory.used,memory.free,memory.total --format=csv,noheader
+echo
+echo "=== HF cache & disk ==="
+du -sh "$HOME/.cache/huggingface" 2>/dev/null
+df -h "$HOME" | tail -2
+{% endraw %}
+"""

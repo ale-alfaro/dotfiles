@@ -1,6 +1,7 @@
 vim.filetype.add {
   extension = {
     overlay = 'dts',
+    h = 'c',
   },
   pattern = {
     ['.*'] = {

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mise Task Composer"
+  short_description: "Compose project mise file tasks"
+  default_prompt: "Use -task-composer to add a new mise file task."

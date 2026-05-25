@@ -208,3 +208,10 @@ ls
 q
 tree
 q
+ls
+tree
+cat\040-A\040&\040lp5813
+cat\040-A\040&lp5813
+help
+?
+\011\011\011q

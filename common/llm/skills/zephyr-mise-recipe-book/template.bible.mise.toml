@@ -1,0 +1,266 @@
+# Generic west:* task-template "recipe bible" for a Zephyr/west workspace.
+#
+# IRON RULE — colocation
+# ----------------------
+# `[task_templates."x"]` and the `[tasks.foo] extends = "x"` blocks that
+# reference them MUST live in the SAME mise file. mise's template resolution
+# is per-file: templates defined in one file are NOT visible to consumers in
+# another file (no monorepo cross-config inheritance, no global pool).
+#
+# Practically:
+#   * Copy the templates you need from this bible into whichever mise file
+#     holds the consumer tasks (most often the project `mise.toml`).
+#   * If a different mise file in the same workspace also wants `west:build`,
+#     copy the template into THAT file too — duplication is correct here.
+#   * Do NOT scatter templates across files hoping they cross-reference.
+#     They won't, and the error surfaces only at task-run time as
+#     `template '<name>' was not found. Available templates: (none)`.
+#
+# Drop the templates into the same file as the consumer tasks (NOT into an
+# existing project `mise.toml` without renaming — see CAUTION below). They
+# are NOT meant to be run directly. Consumer `[tasks.*]` blocks live in the
+# same file and `extends = "west:..."` them, supplying `vars.*` (category 3)
+# or passing CLI args (categories 1–2).
+#
+# Setup
+# -----
+# Add to `[settings]` in the consuming `mise.toml`:
+#
+#     experimental = true   # required for [task_templates.*]
+#
+# CAUTION — name collisions
+# -------------------------
+# If the existing `mise.toml` already defines a `[task_templates."west:build"]`
+# or `[task_templates."west:flash"]` (common — projects bake their own app-
+# build / dual-core-flash logic there), DO NOT silently overwrite them.
+# Either:
+#   (a) rename the project-specific ones to a project-scoped namespace
+#       (e.g. `aria:app:build`, `aria:flash`) and update their consumers, OR
+#   (b) skip the colliding generics from the bible and keep the existing
+#       project-specific definitions in the `west:*` slots.
+# Confirm with the maintainer before option (a).
+#
+# Field merge (per https://mise.jdx.dev/tasks/templates.html)
+# -----------------------------------------------------------
+#   tools, env       deep-merged   — consumer inherits + extends
+#   run, depends     replaced      — consumer overrides fully if needed
+#   description      overridden
+#   vars             merge by key  — consumer sets individual vars
+#
+# Three categories
+# ----------------
+# 1. Git read-only      (status, diff)
+#       No `vars`. Optional `usage` flags/args for project filtering.
+#       Read-only by definition; safe to invoke directly.
+#
+# 2. Search & exec      (grep, forall)
+#       `usage` flags REQUIRED. `forall` restricts executable commands to a
+#       fixed `choices` allowlist — no free-form shell. Read-only only.
+#
+# 3. Project tasks      (build, flash, twister)
+#       Heavy `vars`, minimal-to-zero `usage`. Meant to be EXTENDED by
+#       downstream tasks that pre-configure board / source_dir / testcase /
+#       etc. via `vars = { ... }`. Not invoked directly.
+#
+# Example category-3 consumer
+# ---------------------------
+#   [tasks.ftl-test-build]
+#   extends = "west:build"
+#   vars = { source_dir = "../sh_sdk/tests/drivers/disk_access",
+#            board      = "aria/nrf5340/cpuapp",
+#            testcase   = "drivers.disk.ftl.aria_nand",
+#            build_dir  = "build_ftl_test" }
+
+
+# ============================================================================
+# CATEGORY 1 — Git read-only
+# ============================================================================
+# No `vars`. Optional `usage` flags filter projects and pass-through git args.
+
+# ---- west status ------------------------------------------------------------
+[task_templates."west:status"]
+description = "git status across west projects (read-only)."
+usage = '''
+flag "-a --all" help="Include inactive projects"
+arg "[projects]..." help="Project names to inspect (default: all active)"
+flag "--git-args <args>" help="Raw flags appended to `git status` after --"
+'''
+run = '''
+west status \
+    ${usage_all:+-a} \
+    $usage_projects \
+    ${usage_git_args:+-- $usage_git_args}
+'''
+
+
+# ---- west diff --------------------------------------------------------------
+[task_templates."west:diff"]
+description = "git diff across west projects (read-only)."
+usage = '''
+flag "-a --all" help="Include inactive projects"
+flag "-m --manifest" help="Diff each project against its manifest-rev"
+arg "[projects]..." help="Project names to diff (default: all active)"
+flag "--git-args <args>" help="Raw flags appended to `git diff` after --"
+'''
+run = '''
+west diff \
+    ${usage_all:+-a} \
+    ${usage_manifest:+-m} \
+    $usage_projects \
+    ${usage_git_args:+-- $usage_git_args}
+'''
+
+
+# ============================================================================
+# CATEGORY 2 — Search & exec (controlled surface, read-only)
+# ============================================================================
+
+# ---- west grep --------------------------------------------------------------
+# Pattern is required. Backend choice is constrained to known-good tools.
+[task_templates."west:grep"]
+description = "Search across west projects (read-only)."
+usage = '''
+arg "<pattern>" help="Pattern to search for"
+flag "--tool <tool>" help="Backend to use" default="ripgrep" {
+  choices "ripgrep" "git-grep" "grep"
+}
+flag "-p --project <name>" help="Limit to a specific project (pass --project N times for multiple)"
+flag "--grep-args <args>" help="Extra flags forwarded to the underlying tool (after --)"
+'''
+run = '''
+west grep \
+    --tool "${usage_tool}" \
+    ${usage_project:+-p $usage_project} \
+    "${usage_pattern}" \
+    ${usage_grep_args:+-- $usage_grep_args}
+'''
+
+
+# ---- west forall ------------------------------------------------------------
+# `west forall` is the dangerous one: it runs an arbitrary shell command in
+# each project. This template REFUSES free-form input. The `--cmd` flag is
+# constrained to a fixed allowlist of read-only commands; the run script
+# resolves the choice to a verbatim invocation. To add a new allowed command,
+# extend BOTH the `choices` set AND the `case` statement.
+[task_templates."west:forall"]
+description = "Run a *read-only* command in each west project (allowlisted via --cmd)."
+usage = '''
+flag "--cmd <cmd>" help="Command to run (read-only allowlist)" {
+  choices "git-log" "git-status" "git-branch" "git-head" "git-remote" "git-tag" "ls" "pwd"
+}
+flag "-a --all" help="Include inactive projects"
+flag "-g --group <group>" help="Limit to a project group (pass --group N times for multiple)"
+arg "[projects]..." help="Limit to named projects (default: all active)"
+'''
+run = '''
+case "${usage_cmd}" in
+    git-log)    cmd="git log -1 --oneline" ;;
+    git-status) cmd="git status --short --branch" ;;
+    git-branch) cmd="git branch --show-current" ;;
+    git-head)   cmd="git rev-parse HEAD" ;;
+    git-remote) cmd="git remote -v" ;;
+    git-tag)    cmd="git describe --tags --always --dirty" ;;
+    ls)         cmd="ls -la" ;;
+    pwd)        cmd="pwd" ;;
+    *)          echo "west:forall: unsupported --cmd '${usage_cmd}' (allowlist enforced)" >&2; exit 2 ;;
+esac
+
+west forall -c "$cmd" \
+    ${usage_all:+-a} \
+    ${usage_group:+-g $usage_group} \
+    $usage_projects
+'''
+
+
+# ============================================================================
+# CATEGORY 3 — Project tasks (heavy vars, lean usage)
+# ============================================================================
+# Extended by downstream tasks via `extends = "west:<x>"` and `vars = {...}`.
+# Not meant to be invoked directly. Every template accepts `vars.extra_args`
+# as a raw-flags passthrough escape hatch.
+
+# ---- west build -------------------------------------------------------------
+# Required vars: source_dir, board.
+# Optional   vars: build_dir (default "build"), testcase (-T <name>),
+#                  pristine (default "always"), sysbuild ("true"/"false",
+#                  default "false"), extra_args (raw passthrough).
+[task_templates."west:build"]
+description = "west build — generic. Set vars: source_dir, board (req'd); build_dir, testcase, pristine, sysbuild, extra_args (opt)."
+tools = { "vfox-zephyr:arm" = "0.17.0" }
+vars = { build_dir = "build", pristine = "always", sysbuild = "false", extra_args = "" }
+run = '''
+west build \
+    {% if vars.sysbuild == "false" %}--no-sysbuild{% else %}--sysbuild{% endif %} \
+    -p={{vars.pristine}} \
+    -b {{vars.board}} \
+    -d {{vars.build_dir}} \
+    {% if vars.testcase %}-T {{vars.testcase}}{% endif %} \
+    {{vars.extra_args}} \
+    {{vars.source_dir}}
+'''
+
+
+# ---- west flash -------------------------------------------------------------
+# Optional vars: build_dir (default "build"), runner (default "jlink"),
+#                domain (sysbuild domain to flash), extra_args.
+[task_templates."west:flash"]
+description = "west flash — generic. vars: build_dir, runner, domain, extra_args."
+tools = { "vfox-zephyr:arm" = "0.17.0" }
+vars = { build_dir = "build", runner = "jlink", extra_args = "" }
+run = '''
+west flash \
+    -d {{vars.build_dir}} \
+    -r {{vars.runner}} \
+    --reset \
+    {% if vars.domain %}--domain {{vars.domain}}{% endif %} \
+    {{vars.extra_args}}
+'''
+
+
+# ---- west twister -----------------------------------------------------------
+# Required vars: testsuite_root (one path or whitespace-separated list).
+# Optional   vars: platform (-p), test_name (-s <suite.name>), tag (-t),
+#                  jobs (-j), build_only ("true"/"false", default "true"),
+#                  extra_args. Override `run` entirely for device-testing /
+#                  coverage / etc.
+[task_templates."west:twister"]
+description = "west twister — generic. vars: testsuite_root (req'd); platform, test_name, tag, jobs, build_only, extra_args."
+tools = { "vfox-zephyr:arm" = "0.17.0" }
+vars = { build_only = "true", extra_args = "" }
+run = '''
+west twister \
+    -T {{vars.testsuite_root}} \
+    {% if vars.platform %}-p {{vars.platform}}{% endif %} \
+    {% if vars.test_name %}-s {{vars.test_name}}{% endif %} \
+    {% if vars.tag %}-t {{vars.tag}}{% endif %} \
+    {% if vars.jobs %}-j {{vars.jobs}}{% endif %} \
+    {% if vars.build_only == "true" %}-b{% endif %} \
+    --inline-logs \
+    {{vars.extra_args}}
+'''
+
+
+# ============================================================================
+# EXAMPLE CONSUMERS — these live in the SAME FILE as the templates above.
+# ============================================================================
+# Delete this section once you have real consumers. It's here so the
+# colocation rule is concrete: every `extends = "west:..."` reference resolves
+# only because the matching `[task_templates."west:..."]` block is in this
+# same file. Splitting them across files breaks resolution.
+
+# Category 3 example — vars-only override.
+# [tasks."myapp:build:sim"]
+# extends = "west:build"
+# vars = { source_dir = "../sh_sdk/tests/drivers/disk_access",
+#          board      = "native_sim",
+#          testcase   = "drivers.disk.ftl",
+#          build_dir  = "build_ftl_sim" }
+
+# Category 3 example — extending the flash template, paired with build above.
+# [tasks."myapp:flash:aria"]
+# extends = "west:flash"
+# depends = ["myapp:build:aria"]
+# vars    = { build_dir = "build_ftl_test" }
+
+# Categories 1 & 2 typically don't get extended — they're invoked directly
+# via `mise run west:status -- foo bar` (positional args go to twister/west).

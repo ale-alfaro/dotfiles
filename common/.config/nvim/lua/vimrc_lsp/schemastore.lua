@@ -1,42 +1,18 @@
 local M = {}
 
-M.setup = function()
-  --- https://github.com/redhat-developer/yaml-language-server
-  ---
-  --- `yaml-language-server` can be installed via `yarn`:
-  --- ```sh
-  --- yarn global add yaml-language-server
-  --- ```
-  ---
-  --- To use a schema for validation, there are two options:
-  ---
-  --- 1. Add a modeline to the file. A modeline is a comment of the form:
-  ---
-  --- ```
-  --- # yaml-language-server: $schema=<urlToTheSchema|relativeFilePath|absoluteFilePath}>
-  --- ```
-  ---
-  --- where the relative filepath is the path relative to the open yaml file, and the absolute filepath
-  --- is the filepath relative to the filesystem root ('/' on unix systems)
-  ---
-  --- 2. Associated a schema url, relative , or absolute (to root of project, not to filesystem root) path to
-  --- the a glob pattern relative to the detected project root. Check `:checkhealth vim.lsp` to determine the resolved project
-  --- root.
-  ---
-  --- ```lua
-  --- vim.lsp.config('yamlls', {
-  ---   ...
-  ---   settings = {
-  ---     yaml = {
-  ---       ... -- other settings. note this overrides the lspconfig defaults.
-  ---       schemas = {
-  ---         ["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*",
-  ---         ["../path/relative/to/file.yml"] = "/.github/workflows/*",
-  ---         ["/path/from/root/of/project"] = "/.github/workflows/*",
-  ---       },
-  ---     },
-  ---   }
-  --- })
+M.json_ls = function()
+  local json_schemas = require('schemastore').json.schemas()
+  vim.lsp.config('jsonls', {
+    settings = {
+      json = {
+        schemas = json_schemas,
+        validate = { enable = true },
+      },
+    },
+  })
+  vim.lsp.enable 'json_ls'
+end
+M.yaml_ls = function()
   local yaml_schemas = require('schemastore').yaml.schemas()
   vim.lsp.config('yamlls', {
     settings = {
@@ -47,15 +23,27 @@ M.setup = function()
       },
     },
   })
-  local json_schemas = require('schemastore').json.schemas()
-  vim.lsp.config('jsonls', {
+  vim.lsp.enable 'yaml_ls'
+end
+M.toml_ls = function()
+  local catalogs = require('schemastore').json.load()
+  vim.lsp.config('taplo', {
     settings = {
-      json = {
-        schemas = json_schemas,
-        validate = { enable = true },
+      -- Use the defaults that the VSCode extension uses: https://github.com/tamasfe/taplo/blob/2e01e8cca235aae3d3f6d4415c06fd52e1523934/editors/vscode/package.json
+      taplo = {
+        configFile = { enabled = true },
+        schema = {
+          enabled = true,
+          catalogs = catalogs,
+          cache = {
+            memoryExpiration = 60,
+            diskExpiration = 600,
+          },
+        },
       },
     },
   })
+  vim.lsp.enable 'taplo'
 end
 
 return M

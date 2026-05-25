@@ -10,7 +10,7 @@ for file in $ZDOTDIR/zshrc.d/*.zsh; do
   source "$file"
 done
 # SSH agent started by systemd automatically. Only need to set the socketp
-if [[ -z "${SSH_CONNECTION}" ]]; then
+if [[ -z "${SSH_CONNECTION:-}" ]]; then
   export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 fi
 # Ghostty shell integration for Bash. This should be at the top of your bashrc!
@@ -18,12 +18,7 @@ fi
 source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 [[ -f $ZDOTDIR/plugins/bd.zsh ]] && source $ZDOTDIR/plugins/bd.zsh
-alias mx='mise x'
-if [[ $- == *i* ]] && [[ ${TERM:-} != "dumb" ]]; then
-  eval "$(mx starship -- starship init zsh)"
-fi
-
-autoload fsesh termux
+# dots-toggle-check mise_activate
 ## The hook below is to check the date updated by pacman to
 # rehash the completions after a certain time
 zshcache_time="$(date +%s%N)"
@@ -42,6 +37,13 @@ rehash_precmd() {
 
 add-zsh-hook -Uz precmd rehash_precmd
 
+alias mx='mise x'
+if [[ $- == *i* ]] && [[ ${TERM:-} != "dumb" ]]; then
+  eval "$(starship init zsh)"
+fi
+
+autoload fsesh termux dots-toggle dots-toggle-check
+dots-toggle-check mise_activate
 zd() {
   if [ $# -eq 0 ]; then
     builtin cd ~ && return
@@ -57,5 +59,3 @@ alias cd='zd'
 # ---- Editor -----
 autoload fvim
 alias v="fvim"
-
-[[ -f "$HOME/.local/state/dotfiles/toggles/mise_activate" ]] && eval "$(mise activate zsh)"

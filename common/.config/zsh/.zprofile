@@ -6,12 +6,16 @@
 if [[ "$OSTYPE" == "darwin"* ]]; then
   [[ -e "/opt/homebrew/bin/brew" ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
   typeset -U path PATH
+  path=($HOME/.local/bin $HOME/dotfiles/common/bin $HOME/dotfiles/linux/bin $path)
   export PATH
 fi
 
-# if [[ -z "${SSH_CONNECTION}" ]]; then
-#   export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
-# fi
-
 # eval "$(SHELL=/bin/zsh keychain --eval --quick --systemd --ssh-allow-forwarded id_ed25519_yubikey)"
-path=($HOME/.local/share/mise/shims $HOME/.local/bin $HOME/dotfiles/common/bin $HOME/dotfiles/linux/bin $path)
+typeset -U path PATH
+path=($HOME/.local/bin $path)
+export PATH
+if [[ -n "${SSH_CONNECTION}" ]]; then
+  source <(mise activate zsh)
+else
+  source <(mise activate --shims)
+fi

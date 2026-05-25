@@ -117,19 +117,20 @@ usercmd('ToggleInlayHints', function()
   vim.lsp.inlay_hint.enable(vim.g.inlay_hints and (mode == 'n' or mode == 'v'))
 end, 'Toggle inlay hints')
 
-usercmd('Scratch', function()
-  vim.cmd 'bel 10new'
-  local buf = vim.api.nvim_get_current_buf()
-  for name, value in pairs {
-    filetype = 'scratch',
-    buftype = 'nofile',
-    bufhidden = 'wipe',
-    swapfile = false,
-    modifiable = true,
+usercmd('BufInfo', function()
+  local bufnr = vim.api.nvim_get_current_buf()
+  for _, name in ipairs {
+    'filetype',
+    'buftype',
+    'bufhidden',
+    'buflisted',
+    'swapfile',
+    'modifiable',
   } do
-    vim.api.nvim_set_option_value(name, value, { buf = buf })
+    MiniMisc.put('Option: ', { name = name, val = vim.api.nvim_get_option_value(name, { scope = 'local', buf = bufnr }) })
   end
-end, 'Open a scratch buffer')
+end, 'Print current buffer Ft')
+usercmd('Scratch', VimRc.scratch_split, 'Open a scratch buffer')
 
 ---@param name string
 ---@param cb string|fun(args: vim.api.keyset.create_user_command.command_args) Replacement command to execute when this user command is executed. When called
@@ -294,7 +295,9 @@ usercmd_args_comp('Pack', function(args)
     VimRc.err('Unknown Pack arg: ' .. arg)
   end
 end, 'vim.pack Interface', 1, { 'list', 'update', 'clean' })
-
+usercmd('SwapDel', function()
+  vim.fn.system('rm ' .. vim.fn.swapname(vim.api.nvim_get_current_buf()))
+end, 'Delete current buffer swapfile')
 usercmd_args_comp('Lsp', function(args)
   local arg = (args.fargs or {})[1]
   if arg == 'log' then
