@@ -36,3 +36,5 @@ log
 /common/.config/codex
 /common/.config/zsh/plugins
 /common/llm/ts/state
+gh/hosts.yml
+/common/.config/gh/hosts.yml
