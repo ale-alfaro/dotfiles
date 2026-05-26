@@ -311,6 +311,10 @@ checksum = "sha256:b6a8df3c8c6b9c80f290906387673bc4d272840f3789c5650e0e4e6e75522
 url = "https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_windows_amd64.zip"
 provenance = "github-attestations"
 
+[[tools.git-lfs]]
+version = "3.7.1"
+backend = "aqua:git-lfs/git-lfs"
+
 [[tools."github:clangd/clangd"]]
 version = "22.1.0"
 backend = "github:clangd/clangd"
@@ -1145,3 +1149,11 @@ provenance = "github-attestations"
 checksum = "sha256:dd9d6d6554bfab265bfa98aa8e8a406c5c3a7b97582f93de1f4d48d9154a0395"
 url = "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-x86_64-pc-windows-msvc.zip"
 provenance = "github-attestations"
+
+[[tools."vfox-zephyr:arm"]]
+version = "0.17.0"
+backend = "vfox-zephyr:arm"
+
+[[tools."vfox-zephyr:west"]]
+version = "1.5.0"
+backend = "vfox-zephyr:west"

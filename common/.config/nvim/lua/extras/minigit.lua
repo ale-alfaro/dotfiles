@@ -29,7 +29,7 @@ return {
       { 's', '<cmd>Git status<cr>', 'Status (MiniGit)' },
       { 'c', '<cmd>Git commit<cr>', 'Commit (MiniGit)' },
       { 'D', '<cmd>Git diff<cr>', 'Diff (MiniGit)' },
-      { 'c', '<cmd>FzfLua git_bcommits<cr>', 'Buf Commits' },
+      { 'b', '<cmd>FzfLua git_bcommits<cr>', 'Buf Commits' },
       { 'C', '<cmd>FzfLua git_commits<cr>', 'Commits' },
     }
 

@@ -8,16 +8,11 @@ M.setup = function()
   end
   vim.api.nvim_create_user_command('WestFiles', function(opts)
     local args = opts.fargs or {}
-    if args[1] == 'Files' then
-      require('fzf-lua').exec {
-        cmd = M.west .. ' forall -c "fd . --absolute-path" ' .. vim.fn.join(args, ' '),
-        multiprocess = 1, ---@type integer|boolean
-        color_icons = true,
-        git_icons = true,
-        fzf_opts = { ['--multi'] = true, ['--scheme'] = 'path' },
-        winopts = { preview = { winopts = { cursorline = false } } },
-      }
-    end
+    local pattern = args[1]
+    local vargs = vim.fn.join(vim.list_slice(args, 2) or {}, ' ')
+
+    local fdq = string.format([[fd %q %s --format  "\${WEST_PROJECT_PATH}/{}"]], pattern, vargs)
+    FzfLua.fzf_exec(M.west .. '-q forall -c  ' .. fdq, { cwd = H.exec 'topdir' })
   end, {
     desc = 'West Files Search',
     nargs = '+',
@@ -39,13 +34,13 @@ M.setup = function()
 
   vim.api.nvim_create_user_command('Wg', function()
     require('fzf-lua').live_grep {
-      cwd = H.exec('topdir')[1] or vim.fn.getcwd(),
+      cwd = H.exec 'topdir' or vim.fn.getcwd(),
     }
   end, { desc = 'Live Grep west workspace' })
 
   vim.api.nvim_create_user_command('Wf', function()
     require('fzf-lua').files {
-      cwd = H.exec('topdir')[1] or vim.fn.getcwd(),
+      cwd = H.exec 'topdir' or vim.fn.getcwd(),
     }
   end, { desc = 'Files west workspace' })
 end
@@ -53,7 +48,7 @@ end
 ---
 ---@param subcmd string
 ---@param args? string[]
----@return string[]
+---@return string?
 H.exec = function(subcmd, args)
   vim.validate('subcmd', subcmd, 'string')
   vim.validate('kwargs', args, 'table', true)
@@ -67,13 +62,13 @@ H.exec = function(subcmd, args)
   local sysobj = vim.system(vim.fn.split(cmd, ' ')):wait()
   if sysobj.code ~= 0 then
     VimRc.err('West cmd failed with err: ', sysobj.stderr)
-    return {}
+    return
   end
   local lines = vim.split(sysobj.stdout, '\n', { trimempty = true })
   if #lines == 0 then
     VimRc.warn('No output for command', { cmd = cmd })
   end
-  return lines
+  return vim.fn.join(lines, '\n')
 end
 
 ---@return boolean

@@ -847,3 +847,14 @@ continue
 continue
 continue
 q
+mon reset
+c
+bt
+frame 10
+p/a dev->api
+p ((const struct spi_driver_api *)dev->api)->iodev_submit
+p sh_bmi323_data_0.bus_iodev[0]
+p *(struct spi_dt_spec *)sh_bmi323_data_0.bus_iodev->data
+p ((struct spi_dt_spec *)sh_bmi323_data_0.bus_iodev->data)->bus->api
+p *(struct spi_driver_api *)0x7faec
+q
