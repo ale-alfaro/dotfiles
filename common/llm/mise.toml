@@ -3,8 +3,10 @@ lockfile = true
 
 [env]
 TS_AUTHKEY = { required = true }
+HF_REPO = { required = true }
 SERVICE = { required = true }
 '_'.file = ".env"
+
 
 # Materialise a presets.ini section into a temp env-file, source it into
 # the task shell, then bring the stack up. We source (not --env-file) so
@@ -12,26 +14,15 @@ SERVICE = { required = true }
 # and stale shell vars during ${...} interpolation.
 [task_templates."service:up"]
 run = """
-unset HF_REPO LLAMA_ARG_CTX_SIZE LLAMA_ARG_N_GPU_LAYERS LLAMA_ARG_FLASH_ATTN \
-      LLAMA_ARG_CACHE_TYPE_K LLAMA_ARG_CACHE_TYPE_V LLAMA_ARG_JINJA \
-      LLAMA_ARG_BATCH LLAMA_ARG_UBATCH LLAMA_ARG_N_PARALLEL \
-      LLAMA_ARG_N_CPU_MOE LLAMA_ARG_REASONING LLAMA_ARG_NO_MMAP
-TMP=$(mktemp)
-trap 'rm -f "$TMP"' EXIT
-python3 scripts/preset-to-env.py "$preset" > "$TMP"
-set -a; . "$TMP"; set +a
 docker compose -f llm-service.yaml up -d
 """
 
-[tasks.qwen27b-balanced]
+[tasks.qwen27b]
 extends = "service:up"
-env.preset = "qwen27b-balanced"
-
-[tasks.qwen27b-creative]
-extends = "service:up"
-env.preset = "qwen27b-creative"
+env.preset = "qwen27b"
 
 [tasks.qwen35b]
+description = "Run Qwen 3.5"
 extends = "service:up"
 env.preset = "qwen35b"
 
@@ -52,7 +43,7 @@ run = "docker compose -f llm-service.yaml logs -f tailscale"
 description = "Container states, model loaded, VRAM"
 run = """
 docker compose -f llm-service.yaml ps
-echo
+eho
 docker exec tailscale-llama-cpp wget -qO- --timeout=3 http://127.0.0.1:8080/v1/models 2>/dev/null \
   | python3 -c 'import json,sys; m=json.load(sys.stdin)["data"][0]; print("model:", m["id"], "| ctx:", m["meta"]["n_ctx"])' 2>/dev/null \
   || echo "model: (not loaded or server not responding)"

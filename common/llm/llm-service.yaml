@@ -55,7 +55,6 @@ services:
               count: all
               capabilities: [gpu]
     environment:
-      - HF_TOKEN
       - HF_HOME=/cache/huggingface
       # Populated per-variant from presets.ini via scripts/preset-to-env.py.
       # Bare passthroughs: unset vars are simply omitted from the container.
