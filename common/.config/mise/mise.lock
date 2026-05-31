@@ -107,6 +107,10 @@ url = "https://github.com/ast-grep/ast-grep/releases/download/0.43.0/app-x86_64-
 checksum = "sha256:a26253a9c821d935f7e383e40f0de7c2ca62a4121de1f73a6d81ec32eae631e0"
 url = "https://github.com/ast-grep/ast-grep/releases/download/0.43.0/app-x86_64-unknown-linux-gnu.zip"
 
+[tools.ast-grep."platforms.linux-x64-baseline"]
+checksum = "sha256:4191ac4247d183c502778e740a68b7cf45fe477b6423c43b8b8d6e732ba3b333"
+url = "https://github.com/ast-grep/ast-grep/releases/download/0.42.3/app-x86_64-unknown-linux-gnu.zip"
+
 [tools.ast-grep."platforms.macos-arm64"]
 checksum = "sha256:8c847d0a29aa4b3101b3361e0b3ee7fb53c7e497adc9ed1afc9615538cd40782"
 url = "https://github.com/ast-grep/ast-grep/releases/download/0.43.0/app-aarch64-apple-darwin.zip"
@@ -119,6 +123,10 @@ url = "https://github.com/ast-grep/ast-grep/releases/download/0.43.0/app-x86_64-
 checksum = "sha256:6d703090b106747b2f56086b6ccc7e798fe78bcae70257aa20519b220153555b"
 url = "https://github.com/ast-grep/ast-grep/releases/download/0.43.0/app-x86_64-apple-darwin.zip"
 
+[tools.ast-grep."platforms.macos-x64-baseline"]
+checksum = "sha256:af5a04a43c062974634296f692ab93c03755e5b6f33e70e226a434cde1355a1f"
+url = "https://github.com/ast-grep/ast-grep/releases/download/0.42.3/app-x86_64-apple-darwin.zip"
+
 [tools.ast-grep."platforms.windows-x64"]
 checksum = "sha256:a4febbc8c48671e5729d85e29e4ebe5a051b7250d19545bca18e725ccf40ef61"
 url = "https://github.com/ast-grep/ast-grep/releases/download/0.43.0/app-x86_64-pc-windows-msvc.zip"
@@ -126,6 +134,10 @@ url = "https://github.com/ast-grep/ast-grep/releases/download/0.43.0/app-x86_64-
 [tools.ast-grep."platforms.windows-x64-baseline"]
 checksum = "sha256:a4febbc8c48671e5729d85e29e4ebe5a051b7250d19545bca18e725ccf40ef61"
 url = "https://github.com/ast-grep/ast-grep/releases/download/0.43.0/app-x86_64-pc-windows-msvc.zip"
+
+[tools.ast-grep."platforms.windows-x64-baseline"]
+checksum = "sha256:98acb57edae7a9f9e68657c2cc03ce25b7144bae69621fe7cf2d0492807cb623"
+url = "https://github.com/ast-grep/ast-grep/releases/download/0.42.3/app-x86_64-pc-windows-msvc.zip"
 
 [[tools.bun]]
 version = "1.3.14"
@@ -234,20 +246,20 @@ backend = "aqua:anthropics/claude-code"
 url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.167/linux-arm64/claude"
 
 [tools.claude-code."platforms.linux-arm64-musl"]
-url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.167/linux-arm64-musl/claude"
+url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.148/linux-arm64/claude"
 
 [tools.claude-code."platforms.linux-x64"]
-checksum = "blake3:2f0fac6824edf85f0e67e9df3623ca14e91270b2bee2e314655be3853da0f923"
-url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.167/linux-x64/claude"
+checksum = "blake3:77cfcc3fbda801026f403dffae5cf9c85b20421b7a00ecf0334109b4ab9ee65f"
+url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.148/linux-x64/claude"
 
 [tools.claude-code."platforms.linux-x64-baseline"]
-url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.167/linux-x64/claude"
+url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.148/linux-x64/claude"
 
 [tools.claude-code."platforms.linux-x64-musl"]
-url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.167/linux-x64-musl/claude"
+url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.148/linux-x64/claude"
 
 [tools.claude-code."platforms.linux-x64-musl-baseline"]
-url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.167/linux-x64-musl/claude"
+url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.148/linux-x64/claude"
 
 [tools.claude-code."platforms.macos-arm64"]
 url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.167/darwin-arm64/claude"
@@ -257,6 +269,9 @@ url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d
 
 [tools.claude-code."platforms.macos-x64-baseline"]
 url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.167/darwin-x64/claude"
+
+[tools.claude-code."platforms.macos-x64-baseline"]
+url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.148/darwin-x64/claude"
 
 [[tools.cmake]]
 version = "4.3.3"
@@ -629,7 +644,17 @@ checksum = "sha256:4a5cdd75a38c6e3167ab80d419a9973097b2f7e1b63c8150c4e6db8e40c6d
 url = "https://github.com/joshmedeski/sesh/releases/download/v2.26.2/sesh_Linux_x86_64.tar.gz"
 url_api = "https://api.github.com/repos/joshmedeski/sesh/releases/assets/416138648"
 
+[tools."github:joshmedeski/sesh"."platforms.linux-x64-baseline"]
+checksum = "sha256:4a5cdd75a38c6e3167ab80d419a9973097b2f7e1b63c8150c4e6db8e40c6d803"
+url = "https://github.com/joshmedeski/sesh/releases/download/v2.26.2/sesh_Linux_x86_64.tar.gz"
+url_api = "https://api.github.com/repos/joshmedeski/sesh/releases/assets/416138648"
+
 [tools."github:joshmedeski/sesh"."platforms.linux-x64-musl"]
+checksum = "sha256:4a5cdd75a38c6e3167ab80d419a9973097b2f7e1b63c8150c4e6db8e40c6d803"
+url = "https://github.com/joshmedeski/sesh/releases/download/v2.26.2/sesh_Linux_x86_64.tar.gz"
+url_api = "https://api.github.com/repos/joshmedeski/sesh/releases/assets/416138648"
+
+[tools."github:joshmedeski/sesh"."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:4a5cdd75a38c6e3167ab80d419a9973097b2f7e1b63c8150c4e6db8e40c6d803"
 url = "https://github.com/joshmedeski/sesh/releases/download/v2.26.2/sesh_Linux_x86_64.tar.gz"
 url_api = "https://api.github.com/repos/joshmedeski/sesh/releases/assets/416138648"
@@ -644,7 +669,17 @@ checksum = "sha256:f9921664081330579b3d71209719e342428975777b6f9ea6414771d9c7f9b
 url = "https://github.com/joshmedeski/sesh/releases/download/v2.26.2/sesh_Darwin_x86_64.tar.gz"
 url_api = "https://api.github.com/repos/joshmedeski/sesh/releases/assets/416138650"
 
+[tools."github:joshmedeski/sesh"."platforms.macos-x64-baseline"]
+checksum = "sha256:f9921664081330579b3d71209719e342428975777b6f9ea6414771d9c7f9b9ee"
+url = "https://github.com/joshmedeski/sesh/releases/download/v2.26.2/sesh_Darwin_x86_64.tar.gz"
+url_api = "https://api.github.com/repos/joshmedeski/sesh/releases/assets/416138650"
+
 [tools."github:joshmedeski/sesh"."platforms.windows-x64"]
+checksum = "sha256:6e602704ef30340aa86bd80436a6767aa2ae4a5cc9fadf3540c26777f9cb9349"
+url = "https://github.com/joshmedeski/sesh/releases/download/v2.26.2/sesh_Windows_x86_64.zip"
+url_api = "https://api.github.com/repos/joshmedeski/sesh/releases/assets/416138660"
+
+[tools."github:joshmedeski/sesh"."platforms.windows-x64-baseline"]
 checksum = "sha256:6e602704ef30340aa86bd80436a6767aa2ae4a5cc9fadf3540c26777f9cb9349"
 url = "https://github.com/joshmedeski/sesh/releases/download/v2.26.2/sesh_Windows_x86_64.zip"
 url_api = "https://api.github.com/repos/joshmedeski/sesh/releases/assets/416138660"
@@ -669,6 +704,10 @@ url = "https://dl.google.com/go/go1.26.4.linux-amd64.tar.gz"
 checksum = "sha256:1153d3d50e0ac764b447adfe05c2bcf08e889d42a02e0fe0259bd47f6733ad7f"
 url = "https://dl.google.com/go/go1.26.4.linux-amd64.tar.gz"
 
+[tools.go."platforms.linux-x64-baseline"]
+checksum = "sha256:2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556"
+url = "https://dl.google.com/go/go1.26.3.linux-amd64.tar.gz"
+
 [tools.go."platforms.linux-x64-musl"]
 checksum = "sha256:1153d3d50e0ac764b447adfe05c2bcf08e889d42a02e0fe0259bd47f6733ad7f"
 url = "https://dl.google.com/go/go1.26.4.linux-amd64.tar.gz"
@@ -676,6 +715,10 @@ url = "https://dl.google.com/go/go1.26.4.linux-amd64.tar.gz"
 [tools.go."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:1153d3d50e0ac764b447adfe05c2bcf08e889d42a02e0fe0259bd47f6733ad7f"
 url = "https://dl.google.com/go/go1.26.4.linux-amd64.tar.gz"
+
+[tools.go."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556"
+url = "https://dl.google.com/go/go1.26.3.linux-amd64.tar.gz"
 
 [tools.go."platforms.macos-arm64"]
 checksum = "sha256:b62ad2b6d7d2464f12a5bcad7ff47f19d08325773b5efd21610e445a05a9bf53"
@@ -688,6 +731,10 @@ url = "https://dl.google.com/go/go1.26.4.darwin-amd64.tar.gz"
 [tools.go."platforms.macos-x64-baseline"]
 checksum = "sha256:05dc9b5f9997744520aaebb3d5deaa7c755371aebbfb7f97c2511a9f3367538d"
 url = "https://dl.google.com/go/go1.26.4.darwin-amd64.tar.gz"
+
+[tools.go."platforms.macos-x64-baseline"]
+checksum = "sha256:278d580b32e299fe4a9c990fcf2d02acfe538c7e551a6ee18f9c7164573d2c63"
+url = "https://dl.google.com/go/go1.26.3.darwin-amd64.tar.gz"
 
 [tools.go."platforms.windows-x64"]
 checksum = "sha256:3ca8fb4630b07c419cbdd51f754e31363cfcfb83b3a5354d9e895c90be2cc345"
@@ -736,6 +783,10 @@ url = "https://github.com/jdx/hk/releases/download/v1.46.0/hk-x86_64-pc-windows-
 [tools.hk."platforms.windows-x64-baseline"]
 checksum = "sha256:5af7e769acb7f70d8630ed53ae1fb2cc4b205117f29df5d83619fa0ff72a3bf1"
 url = "https://github.com/jdx/hk/releases/download/v1.46.0/hk-x86_64-pc-windows-msvc.zip"
+
+[tools.go."platforms.windows-x64-baseline"]
+checksum = "sha256:20d2ceafb4ed41b96b879010927b28bc92a5be57a7c1801ce365a9ca51d3224a"
+url = "https://dl.google.com/go/go1.26.3.windows-amd64.zip"
 
 [[tools."http:nrfutil"]]
 version = "1.4.0"
@@ -1154,6 +1205,10 @@ url = "https://github.com/rust-lang/rust-analyzer/releases/download/2026-06-01/r
 checksum = "sha256:1f243cefae24b9e7a0392f2369810d1d82b31d4fa7e07eb95a3465528cc2e1cb"
 url = "https://github.com/rust-lang/rust-analyzer/releases/download/2026-06-01/rust-analyzer-x86_64-unknown-linux-gnu.gz"
 
+[tools.rust-analyzer."platforms.linux-x64-baseline"]
+checksum = "sha256:d4a0f9acec52904af584332199cb41d19c9d5d4bf0d15e0466459c1d1b2d8881"
+url = "https://github.com/rust-lang/rust-analyzer/releases/download/2026-05-18/rust-analyzer-x86_64-unknown-linux-gnu.gz"
+
 [tools.rust-analyzer."platforms.linux-x64-musl"]
 checksum = "sha256:8990e1306d7cae9e5ea080c7932a832d63d67a2691a06246af48ce1014992555"
 url = "https://github.com/rust-lang/rust-analyzer/releases/download/2026-06-01/rust-analyzer-x86_64-unknown-linux-musl.gz"
@@ -1161,6 +1216,10 @@ url = "https://github.com/rust-lang/rust-analyzer/releases/download/2026-06-01/r
 [tools.rust-analyzer."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:8990e1306d7cae9e5ea080c7932a832d63d67a2691a06246af48ce1014992555"
 url = "https://github.com/rust-lang/rust-analyzer/releases/download/2026-06-01/rust-analyzer-x86_64-unknown-linux-musl.gz"
+
+[tools.rust-analyzer."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:89c22bceb72a72f220146e56537d0e025830bc1c2a782b95f5b207694182c6e8"
+url = "https://github.com/rust-lang/rust-analyzer/releases/download/2026-05-18/rust-analyzer-x86_64-unknown-linux-musl.gz"
 
 [tools.rust-analyzer."platforms.macos-arm64"]
 checksum = "sha256:e3f859bc11c7b54035c9dc3612c3353f8599f39845412b737e6423fd4f51deaa"
@@ -1174,6 +1233,10 @@ url = "https://github.com/rust-lang/rust-analyzer/releases/download/2026-06-01/r
 checksum = "sha256:df97badb5c7c303bc2a0d51a443ed877fd93770fbb132d93d0bc400a057ca7cb"
 url = "https://github.com/rust-lang/rust-analyzer/releases/download/2026-06-01/rust-analyzer-x86_64-apple-darwin.gz"
 
+[tools.rust-analyzer."platforms.macos-x64-baseline"]
+checksum = "sha256:185f13571ad0b092475e7b8be79587227e6f0749505a8cde1c8443d596c3e349"
+url = "https://github.com/rust-lang/rust-analyzer/releases/download/2026-05-18/rust-analyzer-x86_64-apple-darwin.gz"
+
 [tools.rust-analyzer."platforms.windows-x64"]
 checksum = "sha256:0c361771bd0d85cf9d2227d726d5c2b3cab034e1ad7e460f659f38c41d9395e8"
 url = "https://github.com/rust-lang/rust-analyzer/releases/download/2026-06-01/rust-analyzer-x86_64-pc-windows-msvc.zip"
@@ -1181,6 +1244,10 @@ url = "https://github.com/rust-lang/rust-analyzer/releases/download/2026-06-01/r
 [tools.rust-analyzer."platforms.windows-x64-baseline"]
 checksum = "sha256:0c361771bd0d85cf9d2227d726d5c2b3cab034e1ad7e460f659f38c41d9395e8"
 url = "https://github.com/rust-lang/rust-analyzer/releases/download/2026-06-01/rust-analyzer-x86_64-pc-windows-msvc.zip"
+
+[tools.rust-analyzer."platforms.windows-x64-baseline"]
+checksum = "sha256:9990c96852ba745ad555404747ce3cb1be29d461f968ba68c8316f64452f6a47"
+url = "https://github.com/rust-lang/rust-analyzer/releases/download/2026-05-18/rust-analyzer-x86_64-pc-windows-msvc.zip"
 
 [[tools.shellcheck]]
 version = "0.11.0"
@@ -1262,7 +1329,15 @@ url = "https://github.com/JohnnyMorganz/StyLua/releases/download/v2.5.2/stylua-l
 checksum = "sha256:ca6f1cf52eaf69e6632b81acef9c197aa24b85eb30d2455a35e7dbe28ae77c72"
 url = "https://github.com/JohnnyMorganz/StyLua/releases/download/v2.5.2/stylua-linux-x86_64-musl.zip"
 
+[tools.stylua."platforms.linux-x64-baseline"]
+checksum = "sha256:ca6f1cf52eaf69e6632b81acef9c197aa24b85eb30d2455a35e7dbe28ae77c72"
+url = "https://github.com/JohnnyMorganz/StyLua/releases/download/v2.5.2/stylua-linux-x86_64-musl.zip"
+
 [tools.stylua."platforms.linux-x64-musl"]
+checksum = "sha256:ca6f1cf52eaf69e6632b81acef9c197aa24b85eb30d2455a35e7dbe28ae77c72"
+url = "https://github.com/JohnnyMorganz/StyLua/releases/download/v2.5.2/stylua-linux-x86_64-musl.zip"
+
+[tools.stylua."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:ca6f1cf52eaf69e6632b81acef9c197aa24b85eb30d2455a35e7dbe28ae77c72"
 url = "https://github.com/JohnnyMorganz/StyLua/releases/download/v2.5.2/stylua-linux-x86_64-musl.zip"
 
@@ -1274,7 +1349,15 @@ url = "https://github.com/JohnnyMorganz/StyLua/releases/download/v2.5.2/stylua-m
 checksum = "sha256:53c50a1605d0a6345d160a1a5a21db40bcf2bf9cd23c17f7c277a63a1bff3a7f"
 url = "https://github.com/JohnnyMorganz/StyLua/releases/download/v2.5.2/stylua-macos-x86_64.zip"
 
+[tools.stylua."platforms.macos-x64-baseline"]
+checksum = "sha256:53c50a1605d0a6345d160a1a5a21db40bcf2bf9cd23c17f7c277a63a1bff3a7f"
+url = "https://github.com/JohnnyMorganz/StyLua/releases/download/v2.5.2/stylua-macos-x86_64.zip"
+
 [tools.stylua."platforms.windows-x64"]
+checksum = "sha256:e77d0ea1226b8b389b43f702240091249a96eea25857281f90ea24d0eb9eb969"
+url = "https://github.com/JohnnyMorganz/StyLua/releases/download/v2.5.2/stylua-windows-x86_64.zip"
+
+[tools.stylua."platforms.windows-x64-baseline"]
 checksum = "sha256:e77d0ea1226b8b389b43f702240091249a96eea25857281f90ea24d0eb9eb969"
 url = "https://github.com/JohnnyMorganz/StyLua/releases/download/v2.5.2/stylua-windows-x86_64.zip"
 
@@ -1294,7 +1377,15 @@ url = "https://github.com/tmux/tmux-builds/releases/download/v3.6b/tmux-3.6b-lin
 checksum = "sha256:002a6f4fd52212600fa0d72d865dcf328e5b8b6e83c179788144d8587b75677a"
 url = "https://github.com/tmux/tmux-builds/releases/download/v3.6b/tmux-3.6b-linux-x86_64.tar.gz"
 
+[tools.tmux."platforms.linux-x64-baseline"]
+checksum = "sha256:002a6f4fd52212600fa0d72d865dcf328e5b8b6e83c179788144d8587b75677a"
+url = "https://github.com/tmux/tmux-builds/releases/download/v3.6b/tmux-3.6b-linux-x86_64.tar.gz"
+
 [tools.tmux."platforms.linux-x64-musl"]
+checksum = "sha256:002a6f4fd52212600fa0d72d865dcf328e5b8b6e83c179788144d8587b75677a"
+url = "https://github.com/tmux/tmux-builds/releases/download/v3.6b/tmux-3.6b-linux-x86_64.tar.gz"
+
+[tools.tmux."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:002a6f4fd52212600fa0d72d865dcf328e5b8b6e83c179788144d8587b75677a"
 url = "https://github.com/tmux/tmux-builds/releases/download/v3.6b/tmux-3.6b-linux-x86_64.tar.gz"
 
@@ -1303,6 +1394,10 @@ checksum = "sha256:88323402bd28d21103239caf009b130086ebf334807de485d4a1e1c7188ee
 url = "https://github.com/tmux/tmux-builds/releases/download/v3.6b/tmux-3.6b-macos-arm64.tar.gz"
 
 [tools.tmux."platforms.macos-x64"]
+checksum = "sha256:073f6e2c2baa7eb5d643563600ee6052ca8619f3ec5a0cfdf99c56397fb72c94"
+url = "https://github.com/tmux/tmux-builds/releases/download/v3.6b/tmux-3.6b-macos-x86_64.tar.gz"
+
+[tools.tmux."platforms.macos-x64-baseline"]
 checksum = "sha256:073f6e2c2baa7eb5d643563600ee6052ca8619f3ec5a0cfdf99c56397fb72c94"
 url = "https://github.com/tmux/tmux-builds/releases/download/v3.6b/tmux-3.6b-macos-x86_64.tar.gz"
 
@@ -1325,7 +1420,17 @@ checksum = "sha256:9ce82137caa65864e7ca8b869fd391cef88c9bd2a01c4371b9c4dd26c2585
 url = "https://github.com/tree-sitter/tree-sitter/releases/download/v0.26.9/tree-sitter-linux-x64.gz"
 provenance = "github-attestations"
 
+[tools.tree-sitter."platforms.linux-x64-baseline"]
+checksum = "sha256:9ce82137caa65864e7ca8b869fd391cef88c9bd2a01c4371b9c4dd26c2585efb"
+url = "https://github.com/tree-sitter/tree-sitter/releases/download/v0.26.9/tree-sitter-linux-x64.gz"
+provenance = "github-attestations"
+
 [tools.tree-sitter."platforms.linux-x64-musl"]
+checksum = "sha256:9ce82137caa65864e7ca8b869fd391cef88c9bd2a01c4371b9c4dd26c2585efb"
+url = "https://github.com/tree-sitter/tree-sitter/releases/download/v0.26.9/tree-sitter-linux-x64.gz"
+provenance = "github-attestations"
+
+[tools.tree-sitter."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:9ce82137caa65864e7ca8b869fd391cef88c9bd2a01c4371b9c4dd26c2585efb"
 url = "https://github.com/tree-sitter/tree-sitter/releases/download/v0.26.9/tree-sitter-linux-x64.gz"
 provenance = "github-attestations"
@@ -1340,7 +1445,17 @@ checksum = "sha256:a57b6044ad739ca3164cc20637db65352ccc9c69e1c34a7cda3e5a62d529b
 url = "https://github.com/tree-sitter/tree-sitter/releases/download/v0.26.9/tree-sitter-macos-x64.gz"
 provenance = "github-attestations"
 
+[tools.tree-sitter."platforms.macos-x64-baseline"]
+checksum = "sha256:a57b6044ad739ca3164cc20637db65352ccc9c69e1c34a7cda3e5a62d529b164"
+url = "https://github.com/tree-sitter/tree-sitter/releases/download/v0.26.9/tree-sitter-macos-x64.gz"
+provenance = "github-attestations"
+
 [tools.tree-sitter."platforms.windows-x64"]
+checksum = "sha256:dbb5309fcc76eaeb4ec358fcb72ac2eae5cd653e12967246cc63f84038d16cd8"
+url = "https://github.com/tree-sitter/tree-sitter/releases/download/v0.26.9/tree-sitter-windows-x64.gz"
+provenance = "github-attestations"
+
+[tools.tree-sitter."platforms.windows-x64-baseline"]
 checksum = "sha256:dbb5309fcc76eaeb4ec358fcb72ac2eae5cd653e12967246cc63f84038d16cd8"
 url = "https://github.com/tree-sitter/tree-sitter/releases/download/v0.26.9/tree-sitter-windows-x64.gz"
 provenance = "github-attestations"
@@ -1417,6 +1532,11 @@ checksum = "sha256:c4c0d0a383413261af5f0f0743e1292f4aafbe907987ed83bd0ac66f0a3d7
 url = "https://github.com/astral-sh/uv/releases/download/0.11.19/uv-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
+[tools.uv."platforms.linux-x64-baseline"]
+checksum = "sha256:1bc4be1be0a000f893b0d1db97906cf392b63fa22fda9a0ecf33d0d4bbb4bc9a"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-x86_64-unknown-linux-musl.tar.gz"
+provenance = "github-attestations"
+
 [tools.uv."platforms.linux-x64-musl"]
 checksum = "sha256:c4c0d0a383413261af5f0f0743e1292f4aafbe907987ed83bd0ac66f0a3d7e20"
 url = "https://github.com/astral-sh/uv/releases/download/0.11.19/uv-x86_64-unknown-linux-musl.tar.gz"
@@ -1425,6 +1545,11 @@ provenance = "github-attestations"
 [tools.uv."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:c4c0d0a383413261af5f0f0743e1292f4aafbe907987ed83bd0ac66f0a3d7e20"
 url = "https://github.com/astral-sh/uv/releases/download/0.11.19/uv-x86_64-unknown-linux-musl.tar.gz"
+provenance = "github-attestations"
+
+[tools.uv."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:1bc4be1be0a000f893b0d1db97906cf392b63fa22fda9a0ecf33d0d4bbb4bc9a"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.uv."platforms.macos-arm64"]
@@ -1442,6 +1567,11 @@ checksum = "sha256:1585f415cade9f061e7f00fe5b00030a79ccfac60c650242ce639ba946138
 url = "https://github.com/astral-sh/uv/releases/download/0.11.19/uv-x86_64-apple-darwin.tar.gz"
 provenance = "github-attestations"
 
+[tools.uv."platforms.macos-x64-baseline"]
+checksum = "sha256:6b91ae3de155f51bd1f5b74814821c79f016a176561f252cd9ddfb976939af2e"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-x86_64-apple-darwin.tar.gz"
+provenance = "github-attestations"
+
 [tools.uv."platforms.windows-x64"]
 checksum = "sha256:1665fc8e37b5d70a134820d6d7891747471a2ac8bc940ee7af0b69fd03b28d61"
 url = "https://github.com/astral-sh/uv/releases/download/0.11.19/uv-x86_64-pc-windows-msvc.zip"
@@ -1450,6 +1580,11 @@ provenance = "github-attestations"
 [tools.uv."platforms.windows-x64-baseline"]
 checksum = "sha256:1665fc8e37b5d70a134820d6d7891747471a2ac8bc940ee7af0b69fd03b28d61"
 url = "https://github.com/astral-sh/uv/releases/download/0.11.19/uv-x86_64-pc-windows-msvc.zip"
+provenance = "github-attestations"
+
+[tools.uv."platforms.windows-x64-baseline"]
+checksum = "sha256:dd9d6d6554bfab265bfa98aa8e8a406c5c3a7b97582f93de1f4d48d9154a0395"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-x86_64-pc-windows-msvc.zip"
 provenance = "github-attestations"
 
 [[tools."vfox-zephyr:arm"]]
