@@ -29,6 +29,13 @@ pipx.uvx = true
 python.uv_venv_auto = "source"
 disable_tools = ["pipx:west"]
 
+[settings.cargo]
+binstall = true
+
+[settings.github]
+oauth_open_browser = true
+credential_command = "gh auth token"
+
 [tools]
 go = "latest"
 jqp = "latest"
