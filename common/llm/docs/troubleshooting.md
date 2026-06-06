@@ -8,18 +8,18 @@ tags:
 
 # Troubleshooting
 
-When something breaks, your first move is:
+First step for any failure:
 
 ```bash
 mise run debug
 ```
 
-It prints compose state, container exit codes, recent logs from both sides, GPU info, HF cache size, and disk free. That's usually enough to identify the failure class. The sections below map symptoms → causes → fixes for the issues this stack has hit historically.
+It prints compose state, container exit codes, recent logs from both sides, GPU info, HF cache size, and disk free. That's usually enough to identify the failure class. Sections below map symptoms → causes → fixes for the issues this stack has hit historically.
 
 ## Tailscale unhealthy / `/healthz` returns 503
 
 > [!bug] Symptom
-> `mise run status` shows `tailscale-llama-cpp` as `unhealthy` or `starting` indefinitely. `mise run logs:ts` shows tailscaled stuck cycling through `NeedsLogin → warming-up`. The `app-llama-cpp` container never starts because `depends_on: tailscale: condition: service_healthy` blocks it.
+> `mise run status` shows `tailscale-llama-cpp` as `unhealthy` or stuck `starting`. `mise run logs:ts` shows tailscaled cycling through `NeedsLogin → warming-up`. `app-llama-cpp` never starts because `depends_on: tailscale: condition: service_healthy` blocks it.
 
 **Cause**: invalid, placeholder, or already-consumed `TS_AUTHKEY` in `.env`.
 
@@ -30,7 +30,7 @@ It prints compose state, container exit codes, recent logs from both sides, GPU 
    ```
    TS_AUTHKEY=tskey-auth-...
    ```
-3. `mise run down && mise run <variant>`.
+3. `mise run down && mise run qwen27b`.
 
 > [!info] Why reusable, not ephemeral
 > Ephemeral keys remove the node from the tailnet shortly after disconnect — defeats the purpose of a stable `llama-cpp.tail5a0932.ts.net` host. Reusable + non-ephemeral + 90-day expiry is the right combination.
@@ -48,7 +48,7 @@ It prints compose state, container exit codes, recent logs from both sides, GPU 
 sudo pacman -S nvidia-container-toolkit
 sudo nvidia-ctk runtime configure --runtime=docker
 sudo systemctl restart docker
-mise run down && mise run <variant>
+mise run down && mise run qwen27b
 ```
 
 Verify with `docker info | grep -i runtimes` — you should see `nvidia` listed.
@@ -63,22 +63,26 @@ Verify with `docker info | grep -i runtimes` — you should see `nvidia` listed.
 
 **Cause**: recent llama.cpp builds require `--flash-attn on|off|auto` — a bare `--flash-attn` followed by another flag gets the next flag parsed as the value.
 
-**Fix**: in `presets.ini`, the `[*]` section should have `flash-attn = on` (already the case in this repo's checked-in config). If you copied an older config, fix it.
+**Fix**: in `model.vars`, ensure `LLAMA_ARG_FLASH_ATTN=on` (not bare). If you copied an older config snippet, fix it.
 
-## Wrong model loaded
+## Edited `model.vars` but the change didn't take effect
 
 > [!bug] Symptom
-> `mise run status` shows a different model than the variant you just ran. `docker inspect app-llama-cpp --format '{{.Config.Cmd}}'` shows the wrong `-hf` argument.
+> You changed a value in `model.vars`, ran `mise run qwen27b`, but `mise run status` or `docker exec app-llama-cpp env` still shows the old value.
 
-**Cause**: stale `HF_REPO` (or `LLAMA_ARG_*`) in your shell env was overriding the preset's value during compose interpolation. This can happen if an earlier `mise activate` loaded a now-stale `.env` value into your interactive shell.
+**Cause**: `docker compose up -d` only recreates a container when its config hash changes. Bare-passthrough env vars (`- LLAMA_ARG_*`) don't always show up in compose's hash, so it can decide "no change" and skip the recreate.
 
-**Fix**: the `service:up` template already `unset`s these vars before sourcing the preset, so a fresh `mise run <variant>` should always win. To verify your shell is clean:
+**Fix**: bring it down first, which guarantees a fresh start:
 
 ```bash
-echo "HF_REPO='${HF_REPO:-<unset>}'"
+mise run down && mise run qwen27b
 ```
 
-Should print `<unset>` outside of an in-flight `mise run`.
+Confirm with:
+
+```bash
+docker exec app-llama-cpp env | grep LLAMA_ARG_
+```
 
 ## CUDA OOM despite plenty of VRAM free
 
@@ -89,13 +93,13 @@ Should print `<unset>` outside of an in-flight `mise run`.
 > ```
 > while `nvidia-smi` shows the GPU mostly idle.
 
-**Cause**: usually a crash-loop where each restart attempt leaves CUDA state behind before fully releasing. Container restart fragmenting VRAM. ==Especially likely when switching between models with different memory profiles.==
+**Cause**: usually a crash-loop where each restart leaves CUDA state behind before fully releasing — VRAM ends up fragmented across orphaned contexts. ==Especially likely when switching between models with different memory profiles.==
 
 **Fix**: bring everything down cleanly before retrying.
 
 ```bash
 mise run down
-mise run <variant>
+mise run qwen27b
 ```
 
 If that doesn't help, check what else holds VRAM:
@@ -114,13 +118,13 @@ nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv
 To enable HTTPS:
 
 1. Admin console → DNS → **Enable HTTPS**.
-2. `mise run down && mise run <variant>` so tailscaled re-reads the serve config.
+2. `mise run down && mise run qwen27b` so tailscaled re-reads the serve config.
 3. Verify with `docker exec tailscale-llama-cpp tailscale serve status` — should now list the proxy on `:443`.
 
-## Container "healthy" but `/v1/chat/completions` 404s
+## Container "healthy" but `/v1/chat/completions` 404s or hangs
 
 > [!bug] Symptom
-> Healthcheck passes (`pgrep -f llama-server` succeeds), but actual API calls return errors or hang.
+> Healthcheck passes (`pgrep -f llama-server` succeeds), but API calls error or hang.
 
 **Cause**: the healthcheck only checks the **process** exists, not that the model is loaded and serving. While the model is downloading or mmap-loading, the process exists but the HTTP server isn't accepting connections.
 
@@ -133,21 +137,28 @@ mise run logs     # watch for "server is listening on http://0.0.0.0:8080"
 
 First-time loads of an uncached HF repo take ~5 min (download 17 GB). Subsequent boots are ~10–15 s.
 
-## "command not found" or task fails silently
+## `mise run qwen27b` errors with "HF_REPO not set" or similar
 
 > [!bug] Symptom
-> `mise run <variant>` returns in milliseconds without recreating anything, OR `mise tasks ls` doesn't list your variant.
+> ```
+> HF_REPO is required but not set
+> ```
+> or `docker compose` fails to interpolate `${HF_REPO}`.
 
-**Cause**: probably a `presets.ini` / `mise.toml` mismatch — the variant references a section that doesn't exist (or vice versa).
+**Cause**: `model.vars` is missing, empty, or not being loaded by mise. Most commonly: the file was renamed or moved.
 
 **Fix**:
 
 ```bash
-mise tasks ls                    # confirm task exists
-python3 scripts/preset-to-env.py qwen27b-balanced   # dry-run the adapter
+test -f model.vars && cat model.vars     # should print HF_REPO=... etc.
+grep -A1 "_.file" mise.toml              # confirm mise points at it
 ```
 
-If the script errors with `section [...] not found`, fix the section name in either `presets.ini` or the `env.preset` value in `mise.toml`.
+The mise.toml `[env]` block should have:
+
+```toml
+'_'.file = [".env", "model.vars"]
+```
 
 ## Disk full
 
@@ -173,6 +184,6 @@ rm -rf ~/.cache/huggingface
 
 ## See also
 
-- [[operations]] — task reference, adding variants
+- [[operations]] — task reference, changing config
 - [[clients]] — connection methods
 - [[README]] — system overview + mermaid diagram

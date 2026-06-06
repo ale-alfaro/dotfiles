@@ -1,0 +1,38 @@
+/*
+ * Sample overlay for the {{ vendor_upper }} {{ chip_upper }} sensor.
+ *
+ * TODO: adapt the bus node name and address to your board.
+ */
+
+{% if is_i2c %}
+&i2c0 { /* TODO: use the correct bus alias for your board. */
+	status = "okay";
+
+	{{ chip }}: {{ chip }}@0 { /* TODO: set the real I2C address. */
+		compatible = "{{ compat_dash }}";
+		reg = <0x00>;
+{% if streaming %}
+		int-gpios = <&gpio0 0 0>; /* TODO: pick the right port/pin/flags. */
+{% endif %}
+	};
+};
+{% else %}
+&spi0 { /* TODO: use the correct SPI controller alias for your board. */
+	status = "okay";
+
+	{{ chip }}: {{ chip }}@0 {
+		compatible = "{{ compat_dash }}";
+		reg = <0>;
+		spi-max-frequency = <1000000>; /* TODO */
+{% if streaming %}
+		int-gpios = <&gpio0 0 0>; /* TODO: pick the right port/pin/flags. */
+{% endif %}
+	};
+};
+{% endif %}
+
+/ {
+	aliases {
+		{{ chip }} = &{{ chip }};
+	};
+};

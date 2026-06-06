@@ -183,20 +183,24 @@ end, 'Copy Cwd Path', 1, { 'rel', 'abs', 'dir' })
 --   local opts = { bang = true, nargs = '+', complete = command_complete, desc = 'Execute Git command' }
 --   vim.api.nvim_create_user_command('Git', H.command_impl, opts)
 -- end
-usercmd_args('Redir', function(opts)
+usercmd_args('Sh', function(opts)
   local cmd = opts.args
-  local output
-  if cmd:sub(1, 1) == '!' then
-    output = vim.fn.system(cmd:sub(2))
-  else
-    output = vim.api.nvim_exec2(cmd, { output = true }).output
-  end
+  local output = vim.fn.system(cmd)
   VimRc.show_in_split {
     'Cmd: ' .. cmd,
     '---------',
     unpack(vim.split(output or '', '\n')),
   }
-end, 'redirect command output to scratch buffer', 1)
+end, 'redirect Shell output to scratch buffer', '+')
+usercmd_args('Cmd', function(opts)
+  local cmd = opts.args
+  local output = vim.api.nvim_exec2(cmd, { output = true }).output
+  VimRc.show_in_split {
+    'Cmd: ' .. cmd,
+    '---------',
+    unpack(vim.split(output or '', '\n')),
+  }
+end, 'redirect Neovim command output to scratch buffer', '+')
 
 -- ──────────────────────────────────────────────────────────────
 --  show_modified_buffers  — list unsaved buffers in quickfix
@@ -314,3 +318,5 @@ usercmd_args_comp('Lsp', function(args)
     vim.cmd ':checkhealth vim.lsp'
   end
 end, 'Lsp Commands', 1, { 'log', 'clean', 'info' })
+
+usercmd('DocGen', require('custom.docgen').generate_doc, 'Generate documentation comments')

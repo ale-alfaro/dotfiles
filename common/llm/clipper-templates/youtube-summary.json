@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "0.1.0",
+  "name": "youtube-summary",
+  "behavior": "create",
+  "noteContentFormat": "## About\n\n![{{title}}]({{schema:@VideoObject:embedUrl|replace:\"embed/\":\"watch?v=\"}})\n\n**TL;DR:** {{\"single-sentence description of what this video is about\"}}\n\n## Key points\n\n{{\"3-7 bullet-point key takeaways from the transcript\"}}\n\n## Technical references\n\n{{\"code, commands, or technical content mentioned, each prefixed with the [HH:MM:SS] timestamp when shown. If none, write 'None.'\"}}",
+  "properties": [
+    {
+      "name": "created",
+      "value": "{{time|date:\\\"YYYY-MM-DDTHH:mm:ssZ\\\"}}",
+      "type": "date"
+    },
+    {
+      "name": "tags",
+      "value": "video/youtube",
+      "type": "multitext"
+    },
+    {
+      "name": "source",
+      "value": "{{schema:@VideoObject:embedUrl|replace:\\\"embed/\\\":\\\"watch?v=\\\"}}",
+      "type": "text"
+    },
+    {
+      "name": "alias",
+      "value": "{{schema:@VideoObject:name}}",
+      "type": "text"
+    },
+    {
+      "name": "channel",
+      "value": "{{schema:@VideoObject:author}}",
+      "type": "text"
+    },
+    {
+      "name": "categories",
+      "value": "[[video-clippings]]",
+      "type": "multitext"
+    },
+    {
+      "name": "published",
+      "value": "{{schema:@VideoObject:uploadDate|date:\\\"YYYY-MM-DD\\\"}}",
+      "type": "date"
+    },
+    {
+      "name": "thumbnailUrl",
+      "value": "{{schema:@VideoObject:thumbnailUrl|first}}",
+      "type": "text"
+    },
+    {
+      "name": "duration",
+      "value": "{{schema:@VideoObject:duration|replace:\\\"PT\\\":\\\"\\\":\\\"S\\\",\\\"\\\"|duration}}",
+      "type": "text"
+    }
+  ],
+  "triggers": [
+    "/https:\\/\\/www\\.youtube.com\\/.*/"
+  ],
+  "noteNameFormat": "{{schema:@VideoObject:name|kebab}}",
+  "path": "reference",
+  "context": "{{transcript}}"
+}

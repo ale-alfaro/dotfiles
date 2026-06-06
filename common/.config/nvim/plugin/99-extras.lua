@@ -54,33 +54,13 @@ VimRc.later(function()
   require 'extras.git'
 end)
 VimRc.later(function()
-  -- end
-  require('render-markdown').setup(
-    ---@type render.md.Settings
-    {
-      preset = 'obsidian',
-      completions = {
-        lsp = {
-          enabled = true,
-        },
-      },
-      pipe_table = {
-        preset = 'round',
-      },
-      latex = { enabled = false },
-    }
-  )
-  vim.api.nvim_set_hl(0, '@markup.heading.1.markdown', { fg = '#e46876' })
-  vim.api.nvim_set_hl(0, '@markup.heading.2.markdown', { fg = '#ff9e3b' })
-  vim.api.nvim_set_hl(0, '@markup.heading.3.markdown', { fg = '#e6c384' })
-  vim.api.nvim_set_hl(0, '@markup.heading.4.markdown', { fg = '#7fb4ca' })
-  require('custom.obsidian').setup()
+  require 'extras.obsidian'
+end)
+VimRc.later(function()
+  require('custom.west').setup()
 end)
 
 VimRc.later(function()
-  if vim.g.west_workspace == 1 then
-    require('custom.west').setup()
-  end
   require 'extras.codecompanion'
 end)
 
@@ -100,7 +80,7 @@ end)
 -- - `:h MiniClue-examples` - examples of common setups
 -- - `:h MiniClue.ensure_buf_triggers()` - use it to enable triggers in buffer
 -- - `:h MiniClue.set_mapping_desc()` - change mapping description not from config
-VimRc.later(function()
+VimRc.now_if_args(function()
   local miniclue = require 'mini.clue'
   -- stylua: ignore
   miniclue.setup({

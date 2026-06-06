@@ -858,3 +858,178 @@ p *(struct spi_dt_spec *)sh_bmi323_data_0.bus_iodev->data
 p ((struct spi_dt_spec *)sh_bmi323_data_0.bus_iodev->data)->bus->api
 p *(struct spi_driver_api *)0x7faec
 q
+mon halt
+mon reset
+c
+bt
+q
+c
+q
+c
+bt
+q
+loadfile build_release/zephyr.elf
+file build_release/zephyr/zephyr.elf 
+info threads
+load
+bt 20
+b main
+mon reset
+c
+p _kernel.cpus[0].current->name
+bt 5
+p _SEGGER_RTT
+p &_SEGGER_RTT
+mon halt
+x/4wx 0xe000ed28
+q
+q
+mon help
+load build_release/zephyr/merged.hex 
+mon reset
+go
+c
+bt
+info threads
+q
+quit
+mon reset
+c
+q
+q
+c
+q
+mon device nrf5340_xxaa_net
+mon go
+mon device nrf5340_xxaa_app
+mon reset
+c
+q
+q
+p (int)bt_le_adv_start
+bt sh_ble_advertising_continue
+p cur_state
+p bt_device_name
+help exec-file 
+help mon
+mon
+mon flash device
+mon flash device help
+mon help
+mon device nrf5340_xxaa_net
+file build_debug/hci_ipc/zephyr/zephyr.elf
+mon device nrf5340_xxaa_app
+file build_debug/zephyr/zephyr.elf
+y
+load
+b bt_le_adv_start
+mon reset
+mon halt
+c
+p/x param->options
+p *param
+q
+b z_arm_usage_fault 
+mon reset
+c
+file build/app/zephyr/zephyr.elf 
+bt
+l
+up
+info locals
+l 0x00062690
+l *0x00062690
+info symbol 0x00062690
+q
+mon reset
+q
+b z_arm_usage_fault
+mon reset
+bt
+up
+down
+l
+b z_arm_fault
+c
+info locals
+p/a *(uint32_t[8] *)esf_copy.extra_info.msp
+p/x esf_copy.extra_info.msp
+l *esf_copy.extra_info.msp
+q
+c
+bt
+l *0x0002456e
+info symbol 0x0002456e
+info locals
+q
+mon reset
+c
+bt
+p psp
+p *psp
+p msp
+q
+load
+loadbin
+load build_debug/zephyr/merged.hex 
+mon reset
+c
+q
+mon reset
+print rxBufferLen
+x/10xb trxBuffer
+b ptx30w_Hip.c:215
+c
+p status
+p temp_length
+bt
+l
+tui
+tui enable 
+step
+info args
+info locals
+tui disable
+q
+c
+q
+source scripts/gdb/aria_flash.py 
+aria-flash build_debug
+q
+c
+source scripts/gdb/aria_flash.py 
+aria-flash build_debug
+q
+aria-flash build_debug
+q
+c
+frame 4
+printf "\n===CFSR===\n"; p/x *(uint32_t*)0xE000ED28
+printf "\n===POOL===\n"; p _zbus_msg_subscribers_pool.alloc
+p *_zbus_msg_subscribers_pool.alloc
+p *_zbus_msg_subscribers_pool.alloc->cb
+p/x *(uint32_t*)0xE000ED28
+p/x *(uint32_t*)0xE000ED34
+p/x *(uint32_t*)0xE000ED38
+p _system_heap
+p sizeof(rx_thread_stack)
+p/x &rx_thread_stack
+p/x $psplim
+p/x $sp
+aria-flash build_debug
+q
+mon reset
+c
+q
+q
+q
+c
+aria-flash build_debug
+q
+c
+q
+c
+aria-flash build_debug
+q
+c
+q

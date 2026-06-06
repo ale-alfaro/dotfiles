@@ -1,0 +1,119 @@
+/*
+ * Copyright (c) {{ year }} {{ vendor_upper }}
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include <stdio.h>
+
+#include <zephyr/device.h>
+#include <zephyr/drivers/sensor.h>
+#include <zephyr/drivers/sensor_data_types.h>
+#include <zephyr/kernel.h>
+#include <zephyr/rtio/rtio.h>
+#include <zephyr/sys/util.h>
+
+#define {{ chip_upper }}_NODE DT_ALIAS({{ chip }})
+
+BUILD_ASSERT(DT_NODE_EXISTS({{ chip_upper }}_NODE),
+	     "Add a `{{ chip }}` alias pointing at your {{ chip_upper }} sensor node.");
+
+static const struct device *const sensor = DEVICE_DT_GET({{ chip_upper }}_NODE);
+
+/* One-shot read iodev (works whether or not streaming is built in). */
+SENSOR_DT_READ_IODEV(oneshot_iodev, {{ chip_upper }}_NODE,
+{% for ch in channels %}
+	{ {{ ch.chan_macro }}, 0 }{{ "," if not loop.last else "" }}
+{% endfor %}
+);
+
+RTIO_DEFINE(oneshot_ctx, 4, 4);
+
+{% if streaming %}
+#ifdef CONFIG_{{ chip_upper }}_STREAM
+SENSOR_DT_STREAM_IODEV(stream_iodev, {{ chip_upper }}_NODE,
+	{ SENSOR_TRIG_FIFO_WATERMARK, SENSOR_STREAM_DATA_INCLUDE });
+
+RTIO_DEFINE_WITH_MEMPOOL(stream_ctx, 4, 4, 4, 256, sizeof(void *));
+
+static void run_stream(void)
+{
+	struct rtio_sqe *handle;
+	int rc = sensor_stream(&stream_iodev, &stream_ctx, NULL, &handle);
+
+	if (rc < 0) {
+		printf("sensor_stream failed: %d\n", rc);
+		return;
+	}
+
+	while (1) {
+		struct rtio_cqe *cqe = rtio_cqe_consume_block(&stream_ctx);
+
+		if (cqe->result < 0) {
+			printf("stream cqe failed: %d\n", cqe->result);
+			rtio_cqe_release(&stream_ctx, cqe);
+			return;
+		}
+
+		uint8_t *buf;
+		uint32_t buf_len;
+
+		if (rtio_cqe_get_mempool_buffer(&stream_ctx, cqe, &buf, &buf_len) == 0) {
+			printf("FIFO buffer: %u bytes\n", buf_len);
+			rtio_release_buffer(&stream_ctx, buf, buf_len);
+		}
+		rtio_cqe_release(&stream_ctx, cqe);
+	}
+}
+#endif /* CONFIG_{{ chip_upper }}_STREAM */
+{% endif %}
+
+static void run_one_shot(void)
+{
+	uint8_t buf[128];
+	int rc = sensor_read(&oneshot_iodev, &oneshot_ctx, buf, sizeof(buf));
+
+	if (rc < 0) {
+		printf("sensor_read failed: %d\n", rc);
+		return;
+	}
+
+	const struct sensor_decoder_api *decoder;
+
+	if (sensor_get_decoder(sensor, &decoder) < 0) {
+		printf("sensor_get_decoder failed\n");
+		return;
+	}
+
+{% for ch in channels %}
+	{
+		struct {{ ch.data_struct }} out;
+		uint32_t fit = 0;
+		struct sensor_chan_spec spec = { {{ ch.chan_macro }}, 0 };
+
+		if (decoder->decode(buf, spec, &fit, 1, &out) > 0) {
+			printf("{{ ch.label }}: shift=%d t=%llu\n",
+			       out.shift,
+			       (unsigned long long)out.header.base_timestamp_ns);
+		}
+	}
+{% endfor %}
+}
+
+int main(void)
+{
+	if (!device_is_ready(sensor)) {
+		printf("Sensor %s not ready\n", sensor->name);
+		return 0;
+	}
+
+	run_one_shot();
+
+{% if streaming %}
+#ifdef CONFIG_{{ chip_upper }}_STREAM
+	run_stream();
+#endif
+{% endif %}
+
+	return 0;
+}

@@ -3,7 +3,8 @@ local H = {}
 
 M.west = 'mise exec vfox-zephyr:west -- west'
 M.setup = function()
-  if not H.is_west_workspace() then
+  M.topdir = M.topdir or H.west_workspace()
+  if not M.topdir then
     return
   end
   vim.api.nvim_create_user_command('WestFiles', function(opts)
@@ -71,14 +72,18 @@ H.exec = function(subcmd, args)
   return vim.fn.join(lines, '\n')
 end
 
----@return boolean
-H.is_west_workspace = function()
-  local lines = H.exec 'topdir'
-  if not lines or #lines < 1 or vim.uv.fs_stat(lines[#lines]) == nil then
-    VimRc.warn 'Not in a workspace'
-    return false
+---@param dir integer|string|nil
+---@return string?
+H.west_workspace = function(dir)
+  local topdir
+  if not dir then
+    topdir = vim.fs.root(0, { '.west' })
+  elseif type(dir) == 'string' then
+    topdir = vim.fs.root(dir, { '.west' })
+  elseif type(dir) == 'integer' then
+    topdir = vim.fs.root(vim.uri_from_bufnr(dir), { '.west' })
   end
-  return true
+  return topdir
 end
 
 H.get_projects = function()

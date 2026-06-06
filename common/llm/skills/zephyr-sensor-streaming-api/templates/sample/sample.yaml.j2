@@ -1,0 +1,13 @@
+sample:
+  name: {{ chip_upper }} sensor sample
+  description: One-shot read{% if streaming %} and FIFO streaming{% endif %} demo for the {{ chip_upper }}.
+
+tests:
+  sample.sensor.{{ chip }}:
+    tags:
+      - sensors
+      - rtio
+    integration_platforms:
+      # TODO: list real platforms this sample is verified on.
+      - native_sim
+    harness: console

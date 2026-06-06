@@ -1,0 +1,310 @@
+/*
+ * Copyright (c) {{ year }} {{ vendor_upper }}
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#define DT_DRV_COMPAT {{ compat_under }}
+
+#include <zephyr/drivers/sensor.h>
+#include <zephyr/drivers/sensor_clock.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/rtio/rtio.h>
+#include <zephyr/logging/log.h>
+
+#include "{{ chip }}.h"
+
+LOG_MODULE_DECLARE({{ chip }}, CONFIG_SENSOR_LOG_LEVEL);
+
+{% set i2c_flag = 'read_fifo->iodev_flags |= RTIO_IODEV_I2C_STOP | RTIO_IODEV_I2C_RESTART;' if is_i2c else '' %}
+{% set i2c_flag_len = 'read_len->iodev_flags |= RTIO_IODEV_I2C_STOP | RTIO_IODEV_I2C_RESTART;' if is_i2c else '' %}
+{% set i2c_flag_st  = 'read_st->iodev_flags |= RTIO_IODEV_I2C_STOP | RTIO_IODEV_I2C_RESTART;' if is_i2c else '' %}
+
+static struct sensor_stream_trigger *
+{{ chip }}_find_trigger(struct sensor_read_config *cfg, enum sensor_trigger_type t)
+{
+	for (size_t i = 0; i < cfg->count; i++) {
+		if (cfg->triggers[i].trigger == t) {
+			return &cfg->triggers[i];
+		}
+	}
+	return NULL;
+}
+
+void {{ chip }}_submit_stream(const struct device *dev, struct rtio_iodev_sqe *iodev_sqe)
+{
+	const struct sensor_read_config *cfg =
+		(const struct sensor_read_config *)iodev_sqe->sqe.iodev->data;
+	const struct {{ chip }}_config *drv_cfg = dev->config;
+	struct {{ chip }}_data *data = dev->data;
+	int rc;
+
+	rc = gpio_pin_interrupt_configure_dt(&drv_cfg->int_gpios, GPIO_INT_DISABLE);
+	if (rc < 0) {
+		LOG_ERR("Failed to disable int gpio: %d", rc);
+		rtio_iodev_sqe_err(iodev_sqe, rc);
+		return;
+	}
+
+	/* Validate every trigger; reject anything the chip doesn't support. */
+	for (size_t i = 0; i < cfg->count; i++) {
+		switch (cfg->triggers[i].trigger) {
+		case SENSOR_TRIG_FIFO_WATERMARK:
+		case SENSOR_TRIG_FIFO_FULL:
+			break;
+		default:
+			LOG_ERR("Unsupported trigger: %d", cfg->triggers[i].trigger);
+			rtio_iodev_sqe_err(iodev_sqe, -ENOTSUP);
+			return;
+		}
+	}
+
+	/*
+	 * TODO: if the requested trigger set differs from the current FIFO
+	 * config, reprogram FIFO_CTL / INT_MAP / watermark here. Blocking
+	 * bus writes are allowed: submit runs in thread context.
+	 */
+
+	/* Stash the sqe so the IRQ-driven callback chain can complete it. */
+	data->streaming_sqe = iodev_sqe;
+
+	rc = gpio_pin_interrupt_configure_dt(&drv_cfg->int_gpios,
+					     GPIO_INT_EDGE_TO_ACTIVE);
+	if (rc < 0) {
+		LOG_ERR("Failed to re-arm int gpio: %d", rc);
+		data->streaming_sqe = NULL;
+		rtio_iodev_sqe_err(iodev_sqe, rc);
+		return;
+	}
+}
+
+static void {{ chip }}_complete_cb(struct rtio *r, const struct rtio_sqe *sqe, void *arg)
+{
+	const struct device *dev = (const struct device *)arg;
+	const struct {{ chip }}_config *drv_cfg = dev->config;
+	struct {{ chip }}_data *data = dev->data;
+	struct rtio_iodev_sqe *iodev_sqe = (struct rtio_iodev_sqe *)sqe->userdata;
+
+	ARG_UNUSED(r);
+
+	data->streaming_sqe = NULL;
+	rtio_iodev_sqe_ok(iodev_sqe, 0);
+
+	/* Re-arm only after the SQE is completed. */
+	gpio_pin_interrupt_configure_dt(&drv_cfg->int_gpios, GPIO_INT_EDGE_TO_ACTIVE);
+}
+
+static void {{ chip }}_fifo_drain_cb(struct rtio *r, const struct rtio_sqe *sqe, void *arg)
+{
+	const struct device *dev = (const struct device *)arg;
+	struct {{ chip }}_data *data = dev->data;
+	struct rtio_iodev_sqe *iodev_sqe = data->streaming_sqe;
+	uint16_t fifo_count;
+	uint8_t *buf;
+	uint32_t buf_len;
+	int rc;
+
+	ARG_UNUSED(sqe);
+
+	if (iodev_sqe == NULL) {
+		LOG_DBG("No stashed sqe in fifo_drain_cb");
+		return;
+	}
+
+	/*
+	 * TODO: parse data->fifo_count after the length-register read. For
+	 * many chips it's a little-endian uint16 in two adjacent registers.
+	 */
+	fifo_count = data->fifo_count;
+
+	const size_t min_read_size   = sizeof(struct {{ chip }}_fifo_data) + {{ chip_upper }}_SAMPLE_SIZE;
+	const size_t ideal_read_size = sizeof(struct {{ chip }}_fifo_data) + fifo_count;
+
+	rc = rtio_sqe_rx_buf(iodev_sqe, min_read_size, ideal_read_size, &buf, &buf_len);
+	if (rc != 0) {
+		LOG_ERR("Failed to acquire FIFO buffer: %d", rc);
+		data->streaming_sqe = NULL;
+		rtio_iodev_sqe_err(iodev_sqe, -ENOMEM);
+		return;
+	}
+
+	struct {{ chip }}_fifo_data *hdr = (struct {{ chip }}_fifo_data *)buf;
+
+	memset(hdr, 0, sizeof(*hdr));
+	hdr->header.is_fifo   = 1;
+	hdr->header.timestamp = data->timestamp;
+	hdr->int_status       = data->int_status;
+	/* TODO: encode current range/odr in hdr->header. */
+
+	uint32_t avail = buf_len - sizeof(*hdr);
+	uint32_t read_len = MIN((uint32_t)fifo_count, avail);
+
+	/* TODO: round down to chip frame size if needed. */
+	hdr->fifo_byte_count = read_len;
+
+	uint8_t *read_buf = buf + sizeof(*hdr);
+
+	struct rtio_sqe *write_addr = rtio_sqe_acquire(r);
+	struct rtio_sqe *read_fifo  = rtio_sqe_acquire(r);
+	struct rtio_sqe *complete   = rtio_sqe_acquire(r);
+	const uint8_t reg = {{ chip_upper }}_REG_FIFO_DATA;
+
+	rtio_sqe_prep_tiny_write(write_addr, data->bus_iodev, RTIO_PRIO_NORM,
+				 &reg, 1, NULL);
+	write_addr->flags |= RTIO_SQE_TRANSACTION;
+
+	rtio_sqe_prep_read(read_fifo, data->bus_iodev, RTIO_PRIO_NORM,
+			   read_buf, read_len, iodev_sqe);
+	read_fifo->flags |= RTIO_SQE_CHAINED;
+{% if is_i2c %}
+	read_fifo->iodev_flags |= RTIO_IODEV_I2C_STOP | RTIO_IODEV_I2C_RESTART;
+{% endif %}
+
+	rtio_sqe_prep_callback(complete, {{ chip }}_complete_cb, (void *)dev, iodev_sqe);
+	rtio_submit(r, 0);
+}
+
+static void {{ chip }}_int_status_cb(struct rtio *r, const struct rtio_sqe *sqe, void *arg)
+{
+	const struct device *dev = (const struct device *)arg;
+	const struct {{ chip }}_config *drv_cfg = dev->config;
+	struct {{ chip }}_data *data = dev->data;
+	struct rtio_iodev_sqe *iodev_sqe = data->streaming_sqe;
+	struct sensor_read_config *read_cfg;
+	uint8_t *buf;
+	uint32_t buf_len;
+	int rc;
+
+	ARG_UNUSED(sqe);
+
+	if (iodev_sqe == NULL) {
+		LOG_DBG("No stashed sqe in int_status_cb");
+		return;
+	}
+
+	read_cfg = (struct sensor_read_config *)iodev_sqe->sqe.iodev->data;
+	if (read_cfg == NULL || !read_cfg->is_streaming) {
+		return;
+	}
+
+	struct sensor_stream_trigger *wm =
+		{{ chip }}_find_trigger(read_cfg, SENSOR_TRIG_FIFO_WATERMARK);
+	struct sensor_stream_trigger *fl =
+		{{ chip }}_find_trigger(read_cfg, SENSOR_TRIG_FIFO_FULL);
+
+	bool wm_fired = (wm != NULL) &&
+			FIELD_GET({{ chip_upper }}_INT_FIFO_WM_MSK, data->int_status);
+	bool fl_fired = (fl != NULL) &&
+			FIELD_GET({{ chip_upper }}_INT_FIFO_FULL_MSK, data->int_status);
+
+	if (!wm_fired && !fl_fired) {
+		/* IRQ for a trigger this stream didn't subscribe to. */
+		gpio_pin_interrupt_configure_dt(&drv_cfg->int_gpios,
+						GPIO_INT_EDGE_TO_ACTIVE);
+		return;
+	}
+
+	enum sensor_stream_data_opt opt;
+
+	if (wm_fired && !fl_fired) {
+		opt = wm->opt;
+	} else if (!wm_fired && fl_fired) {
+		opt = fl->opt;
+	} else {
+		opt = MIN(wm->opt, fl->opt);
+	}
+
+	if (opt == SENSOR_STREAM_DATA_NOP || opt == SENSOR_STREAM_DATA_DROP) {
+		data->streaming_sqe = NULL;
+		rc = rtio_sqe_rx_buf(iodev_sqe, sizeof(struct {{ chip }}_fifo_data),
+				     sizeof(struct {{ chip }}_fifo_data), &buf, &buf_len);
+		if (rc != 0) {
+			rtio_iodev_sqe_err(iodev_sqe, -ENOMEM);
+			gpio_pin_interrupt_configure_dt(&drv_cfg->int_gpios,
+							GPIO_INT_EDGE_TO_ACTIVE);
+			return;
+		}
+
+		struct {{ chip }}_fifo_data *hdr = (struct {{ chip }}_fifo_data *)buf;
+
+		memset(hdr, 0, buf_len);
+		hdr->header.is_fifo   = 1;
+		hdr->header.timestamp = data->timestamp;
+		hdr->int_status       = data->int_status;
+		hdr->fifo_byte_count  = 0;
+
+		rtio_iodev_sqe_ok(iodev_sqe, 0);
+
+		if (opt == SENSOR_STREAM_DATA_DROP) {
+			/*
+			 * TODO: issue a chip-specific FIFO flush here
+			 * (bypass/restore, or a dedicated flush register).
+			 */
+		}
+
+		gpio_pin_interrupt_configure_dt(&drv_cfg->int_gpios,
+						GPIO_INT_EDGE_TO_ACTIVE);
+		return;
+	}
+
+	/* INCLUDE: chain a FIFO-length read, then a FIFO drain. */
+	struct rtio_sqe *write_len = rtio_sqe_acquire(r);
+	struct rtio_sqe *read_len  = rtio_sqe_acquire(r);
+	struct rtio_sqe *cb        = rtio_sqe_acquire(r);
+	const uint8_t reg = {{ chip_upper }}_REG_FIFO_LEN_LSB;
+
+	rtio_sqe_prep_tiny_write(write_len, data->bus_iodev, RTIO_PRIO_NORM,
+				 &reg, 1, NULL);
+	write_len->flags |= RTIO_SQE_TRANSACTION;
+
+	rtio_sqe_prep_read(read_len, data->bus_iodev, RTIO_PRIO_NORM,
+			   (uint8_t *)&data->fifo_count, sizeof(data->fifo_count), NULL);
+	read_len->flags |= RTIO_SQE_CHAINED;
+{% if is_i2c %}
+	read_len->iodev_flags |= RTIO_IODEV_I2C_STOP | RTIO_IODEV_I2C_RESTART;
+{% endif %}
+
+	rtio_sqe_prep_callback(cb, {{ chip }}_fifo_drain_cb, (void *)dev, NULL);
+	rtio_submit(r, 0);
+}
+
+void {{ chip }}_stream_irq_handler(const struct device *dev)
+{
+	struct {{ chip }}_data *data = dev->data;
+	uint64_t cycles;
+	int rc;
+
+	if (data->streaming_sqe == NULL) {
+		return;
+	}
+
+	rc = sensor_clock_get_cycles(&cycles);
+	if (rc != 0) {
+		LOG_ERR("Failed to read sensor clock: %d", rc);
+		rtio_iodev_sqe_err(data->streaming_sqe, rc);
+		data->streaming_sqe = NULL;
+		return;
+	}
+
+	data->timestamp = sensor_clock_cycles_to_ns(cycles);
+
+	struct rtio *r = data->rtio_ctx;
+	struct rtio_sqe *write_st = rtio_sqe_acquire(r);
+	struct rtio_sqe *read_st  = rtio_sqe_acquire(r);
+	struct rtio_sqe *cb       = rtio_sqe_acquire(r);
+	const uint8_t reg = {{ chip_upper }}_REG_INT_STATUS;
+
+	rtio_sqe_prep_tiny_write(write_st, data->bus_iodev, RTIO_PRIO_NORM,
+				 &reg, 1, NULL);
+	write_st->flags |= RTIO_SQE_TRANSACTION;
+
+	rtio_sqe_prep_read(read_st, data->bus_iodev, RTIO_PRIO_NORM,
+			   &data->int_status, 1, NULL);
+	read_st->flags |= RTIO_SQE_CHAINED;
+{% if is_i2c %}
+	read_st->iodev_flags |= RTIO_IODEV_I2C_STOP | RTIO_IODEV_I2C_RESTART;
+{% endif %}
+
+	rtio_sqe_prep_callback(cb, {{ chip }}_int_status_cb, (void *)dev, NULL);
+	rtio_submit(r, 0);
+}

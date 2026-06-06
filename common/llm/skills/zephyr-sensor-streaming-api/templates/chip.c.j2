@@ -1,0 +1,160 @@
+/*
+ * Copyright (c) {{ year }} {{ vendor_upper }}
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#define DT_DRV_COMPAT {{ compat_under }}
+
+#include <zephyr/init.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/sensor.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/logging/log.h>
+#include <zephyr/rtio/rtio.h>
+#include <zephyr/rtio/work.h>
+
+#include "{{ chip }}.h"
+
+LOG_MODULE_REGISTER({{ chip }}, CONFIG_SENSOR_LOG_LEVEL);
+
+/* TODO: chip-specific register definitions and helpers. */
+
+static int {{ chip }}_sample_fetch(const struct device *dev, enum sensor_channel chan)
+{
+	ARG_UNUSED(dev);
+	ARG_UNUSED(chan);
+
+	/*
+	 * Legacy fetch-and-get path is not implemented by the scaffold.
+	 * Implement bus reads here, or rely solely on the RTIO async API path.
+	 */
+	return -ENOSYS;
+}
+
+static int {{ chip }}_channel_get(const struct device *dev,
+				  enum sensor_channel chan,
+				  struct sensor_value *val)
+{
+	ARG_UNUSED(dev);
+	ARG_UNUSED(chan);
+	ARG_UNUSED(val);
+
+	/* TODO: implement legacy channel_get, or leave as -ENOSYS if async-only. */
+	return -ENOSYS;
+}
+
+static int {{ chip }}_attr_set(const struct device *dev,
+			       enum sensor_channel chan,
+			       enum sensor_attribute attr,
+			       const struct sensor_value *val)
+{
+	ARG_UNUSED(dev);
+	ARG_UNUSED(chan);
+	ARG_UNUSED(attr);
+	ARG_UNUSED(val);
+
+	/* TODO: implement ODR / full-scale / batch attribute handling. */
+	return -ENOTSUP;
+}
+
+static int {{ chip }}_attr_get(const struct device *dev,
+			       enum sensor_channel chan,
+			       enum sensor_attribute attr,
+			       struct sensor_value *val)
+{
+	ARG_UNUSED(dev);
+	ARG_UNUSED(chan);
+	ARG_UNUSED(attr);
+	ARG_UNUSED(val);
+
+	/* TODO: implement attr_get if any attributes are runtime-readable. */
+	return -ENOTSUP;
+}
+
+{% if streaming %}
+#ifdef CONFIG_{{ chip_upper }}_TRIGGER
+static int {{ chip }}_trigger_set_stub(const struct device *dev,
+				       const struct sensor_trigger *trig,
+				       sensor_trigger_handler_t handler)
+{
+	ARG_UNUSED(dev);
+	ARG_UNUSED(trig);
+	ARG_UNUSED(handler);
+
+	/*
+	 * TODO: implement legacy trigger_set (e.g. SENSOR_TRIG_DATA_READY).
+	 * Streaming consumers use the submit/get_decoder pair instead.
+	 */
+	return -ENOTSUP;
+}
+#endif /* CONFIG_{{ chip_upper }}_TRIGGER */
+{% endif %}
+
+static int {{ chip }}_init(const struct device *dev)
+{
+	const struct {{ chip }}_config *cfg = dev->config;
+	struct {{ chip }}_data *data = dev->data;
+
+	data->dev = dev;
+
+	if (!{{ bus_ready_check }}(&cfg->bus)) {
+		LOG_ERR("{{ bus_upper }} bus %s not ready", cfg->bus.bus->name);
+		return -ENODEV;
+	}
+	/* TODO: probe chip ID, soft-reset, apply default ODR/range. */
+
+{% if streaming %}
+#ifdef CONFIG_{{ chip_upper }}_STREAM
+	int ret = {{ chip }}_init_interrupt(dev);
+
+	if (ret < 0) {
+		LOG_ERR("Failed to init {{ chip }} interrupt: %d", ret);
+		return ret;
+	}
+#endif /* CONFIG_{{ chip_upper }}_STREAM */
+{% endif %}
+
+	return 0;
+}
+
+static DEVICE_API(sensor, {{ chip }}_driver_api) = {
+	.sample_fetch = {{ chip }}_sample_fetch,
+	.channel_get  = {{ chip }}_channel_get,
+	.attr_set     = {{ chip }}_attr_set,
+	.attr_get     = {{ chip }}_attr_get,
+{% if streaming %}
+#ifdef CONFIG_{{ chip_upper }}_TRIGGER
+	.trigger_set  = {{ chip }}_trigger_set_stub,
+#endif
+{% endif %}
+#ifdef CONFIG_SENSOR_ASYNC_API
+	.submit       = {{ chip }}_submit,
+	.get_decoder  = {{ chip }}_get_decoder,
+#endif
+};
+
+#define {{ chip_upper }}_RTIO_DEFINE(inst)                                       \
+	{{ bus_iodev_macro }}({{ chip }}_bus_iodev_##inst, DT_DRV_INST(inst));   \
+	RTIO_DEFINE({{ chip }}_rtio_ctx_##inst, 8, 8)
+
+#define {{ chip_upper }}_DEFINE(inst)                                            \
+	{{ chip_upper }}_RTIO_DEFINE(inst);                                      \
+	static struct {{ chip }}_data {{ chip }}_data_##inst = {                 \
+		.rtio_ctx  = &{{ chip }}_rtio_ctx_##inst,                        \
+		.bus_iodev = &{{ chip }}_bus_iodev_##inst,                       \
+	};                                                                       \
+	static const struct {{ chip }}_config {{ chip }}_config_##inst = {       \
+		.bus = {{ bus_spec_get }}(inst),                                 \
+{% if streaming %}
+		IF_ENABLED(CONFIG_{{ chip_upper }}_STREAM, (                     \
+		.int_gpios = GPIO_DT_SPEC_INST_GET_OR(inst, int_gpios, {0}),))   \
+{% endif %}
+	};                                                                       \
+	DEVICE_DT_INST_DEFINE(inst, {{ chip }}_init, NULL,                       \
+			      &{{ chip }}_data_##inst,                           \
+			      &{{ chip }}_config_##inst,                         \
+			      POST_KERNEL, CONFIG_SENSOR_INIT_PRIORITY,          \
+			      &{{ chip }}_driver_api);
+
+DT_INST_FOREACH_STATUS_OKAY({{ chip_upper }}_DEFINE)

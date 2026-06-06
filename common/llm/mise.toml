@@ -5,26 +5,17 @@ lockfile = true
 TS_AUTHKEY = { required = true }
 HF_REPO = { required = true }
 SERVICE = { required = true }
-'_'.file = ".env"
+# .env holds secrets (gitignored); model.vars holds non-sensitive runtime
+# config (committed). Both get loaded into the task shell — later files
+# override earlier ones if they redefine a key.
+'_'.file = [".env", "model.vars"]
 
 
-# Materialise a presets.ini section into a temp env-file, source it into
-# the task shell, then bring the stack up. We source (not --env-file) so
-# the values land in compose's process env — that wins over both --env-file
-# and stale shell vars during ${...} interpolation.
-[task_templates."service:up"]
-run = """
-docker compose -f llm-service.yaml up -d
-"""
-
+# Bring the stack up using whatever env vars mise loaded from
+# .env (secrets) + model.vars (model + runtime knobs).
 [tasks.qwen27b]
-extends = "service:up"
-env.preset = "qwen27b"
-
-[tasks.qwen35b]
-description = "Run Qwen 3.5"
-extends = "service:up"
-env.preset = "qwen35b"
+description = "Bring up the llama.cpp stack with model.vars config"
+run = "docker compose -f llm-service.yaml up -d"
 
 [tasks.down]
 description = "Stop and remove both containers"
@@ -43,7 +34,7 @@ run = "docker compose -f llm-service.yaml logs -f tailscale"
 description = "Container states, model loaded, VRAM"
 run = """
 docker compose -f llm-service.yaml ps
-eho
+echo
 docker exec tailscale-llama-cpp wget -qO- --timeout=3 http://127.0.0.1:8080/v1/models 2>/dev/null \
   | python3 -c 'import json,sys; m=json.load(sys.stdin)["data"][0]; print("model:", m["id"], "| ctx:", m["meta"]["n_ctx"])' 2>/dev/null \
   || echo "model: (not loaded or server not responding)"

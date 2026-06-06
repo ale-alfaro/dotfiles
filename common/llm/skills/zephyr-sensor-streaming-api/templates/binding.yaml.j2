@@ -1,0 +1,21 @@
+# Copyright (c) {{ year }} {{ vendor_upper }}
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  TODO: short description of the {{ vendor_upper }} {{ chip_upper }} sensor.
+
+compatible: "{{ compat_dash }}"
+
+include: [sensor-device.yaml, {{ bus }}-device.yaml]
+
+properties:
+{% if streaming %}
+  int-gpios:
+    type: phandle-array
+    required: false
+    description: |
+      Interrupt line used by the chip to signal FIFO watermark / full
+      events. Required when CONFIG_{{ chip_upper }}_STREAM is enabled.
+{% else %}
+  # TODO: add chip-specific properties (odr, range, etc.).
+{% endif %}

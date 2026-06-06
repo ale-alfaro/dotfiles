@@ -44,7 +44,7 @@ volume = 0.7
 # .en models are English-only but faster and more accurate for English
 # large-v3-turbo is faster than large-v3 with minimal accuracy loss (recommended for GPU)
 # Or provide absolute path to a custom .bin model file
-model = "base.en"
+model = "large-v3-turbo"
 
 # Language for transcription
 # Use "en" for English, "auto" for auto-detection
@@ -61,8 +61,8 @@ translate = false
 # Primary output mode: "type" or "clipboard"
 # - type: Simulates keyboard input at cursor position (requires ydotool)
 # - clipboard: Copies text to clipboard (requires wl-copy)
-mode = "clipboard"
-# paste_keys="ctrl+shift+v"
+mode = "paste"
+paste_keys = "shift+insert"
 
 # Fall back to clipboard if typing fails
 # fallback_to_clipboard = true

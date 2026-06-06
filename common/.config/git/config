@@ -2,9 +2,11 @@
 	name = Ale Alfaro
 	email = ale16alfaro@gmail.com
 [credential "https://github.com"]
-	helper = !gh auth git-credential
+	helper = 
+	helper = !mise exec gh -- gh auth git-credential
 [credential "https://gist.github.com"]
-	helper = !gh auth git-credential
+	helper = 
+	helper = !mise exec gh -- gh auth git-credential
 
 [alias]
   st = status -s
@@ -30,6 +32,8 @@
 	autoSetupRemote = true
 [diff]
 	tool = nvimdiff
+	external = difft
+	mnemonicPrefix = true
 [rebase]
 	autoStash = true
 	updateRefs = true

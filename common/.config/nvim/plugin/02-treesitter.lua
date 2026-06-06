@@ -41,6 +41,7 @@ local languages = {
   'printf',
   'python',
   'query',
+  'swift',
   'regex',
   'requirements',
   'rst',

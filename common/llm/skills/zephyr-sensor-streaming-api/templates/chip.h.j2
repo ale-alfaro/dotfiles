@@ -1,0 +1,112 @@
+/*
+ * Copyright (c) {{ year }} {{ vendor_upper }}
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#ifndef ZEPHYR_DRIVERS_SENSOR_{{ vendor_upper }}_{{ chip_upper }}_H_
+#define ZEPHYR_DRIVERS_SENSOR_{{ vendor_upper }}_{{ chip_upper }}_H_
+
+#include <stdint.h>
+
+#include <zephyr/device.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/drivers/sensor.h>
+#include <zephyr/kernel.h>
+#include <zephyr/rtio/rtio.h>
+#include <zephyr/sys/util.h>
+
+{% if is_i2c %}
+#include <zephyr/drivers/i2c.h>
+#include <zephyr/drivers/i2c/rtio.h>
+{% else %}
+#include <zephyr/drivers/spi.h>
+#include <zephyr/drivers/spi/rtio.h>
+{% endif %}
+
+/* TODO: replace with real register addresses for the {{ chip }}. */
+#define {{ chip_upper }}_REG_CHIP_ID        0x00
+#define {{ chip_upper }}_REG_INT_STATUS     0x00
+#define {{ chip_upper }}_REG_FIFO_LEN_LSB   0x00
+#define {{ chip_upper }}_REG_FIFO_LEN_MSB   0x00
+#define {{ chip_upper }}_REG_FIFO_DATA      0x00
+
+/* TODO: replace with real interrupt status bits. */
+#define {{ chip_upper }}_INT_FIFO_WM_MSK    BIT(0)
+#define {{ chip_upper }}_INT_FIFO_FULL_MSK  BIT(1)
+#define {{ chip_upper }}_INT_DATA_RDY_MSK   BIT(2)
+
+/* TODO: pick the chip's native sample frame size in bytes. */
+#define {{ chip_upper }}_SAMPLE_SIZE        6
+
+struct {{ chip }}_config {
+	struct {{ bus_dt_spec }} bus;
+{% if streaming %}
+#ifdef CONFIG_{{ chip_upper }}_STREAM
+	struct gpio_dt_spec int_gpios;
+#endif
+{% endif %}
+	/* TODO: add per-instance config such as default ODR/range. */
+};
+
+struct {{ chip }}_data {
+	const struct device *dev;
+	struct rtio *rtio_ctx;
+	struct rtio_iodev *bus_iodev;
+
+{% if streaming %}
+#ifdef CONFIG_{{ chip_upper }}_STREAM
+	struct rtio_iodev_sqe *streaming_sqe;
+	struct gpio_callback gpio_cb;
+	uint64_t timestamp;
+	uint8_t  int_status;
+	uint16_t fifo_count;
+	uint8_t  current_wm;
+#endif
+{% endif %}
+
+	/* TODO: add runtime-config fields (ODR, range, FIFO mode...) */
+};
+
+/*
+ * Wire-format header (must include is_fifo discriminator). The decoder
+ * receives raw bytes only, so anything it needs must live in the buffer.
+ */
+struct {{ chip }}_decoder_header {
+	uint64_t timestamp;
+	uint8_t  is_fifo : 1;
+	uint8_t  range   : 3;   /* TODO: encode the active full-scale range. */
+	uint8_t  odr     : 4;   /* TODO: encode the active output data rate. */
+} __packed;
+
+struct {{ chip }}_sample {
+	struct {{ chip }}_decoder_header header;
+	uint8_t payload[{{ chip_upper }}_SAMPLE_SIZE];
+};
+
+{% if streaming %}
+#ifdef CONFIG_{{ chip_upper }}_STREAM
+struct {{ chip }}_fifo_data {
+	struct {{ chip }}_decoder_header header;
+	uint8_t  int_status;
+	uint16_t fifo_byte_count;
+	/* Followed by raw FIFO frames of total length fifo_byte_count. */
+} __packed;
+#endif /* CONFIG_{{ chip_upper }}_STREAM */
+{% endif %}
+
+#ifdef CONFIG_SENSOR_ASYNC_API
+void {{ chip }}_submit(const struct device *dev, struct rtio_iodev_sqe *iodev_sqe);
+int  {{ chip }}_get_decoder(const struct device *dev,
+			   const struct sensor_decoder_api **api);
+#endif
+
+{% if streaming %}
+#ifdef CONFIG_{{ chip_upper }}_STREAM
+void {{ chip }}_submit_stream(const struct device *dev, struct rtio_iodev_sqe *iodev_sqe);
+void {{ chip }}_stream_irq_handler(const struct device *dev);
+int  {{ chip }}_init_interrupt(const struct device *dev);
+#endif
+{% endif %}
+
+#endif /* ZEPHYR_DRIVERS_SENSOR_{{ vendor_upper }}_{{ chip_upper }}_H_ */

@@ -42,8 +42,10 @@ if [[ $- == *i* ]] && [[ ${TERM:-} != "dumb" ]]; then
   eval "$(starship init zsh)"
 fi
 
-autoload fsesh termux dots-toggle dots-toggle-check
-dots-toggle-check mise_activate
+autoload fsesh
+if [[ ! -f "$HOME/.local/state/dots/toggles/mise_activate" ]]; then
+  source <(mise activate zsh)
+fi
 zd() {
   if [ $# -eq 0 ]; then
     builtin cd ~ && return

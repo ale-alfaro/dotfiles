@@ -11,4 +11,4 @@ export LD_LIBRARY_PATH=$HOME/.local/lib:$PATH
 source ~/.config/uwsm/default
 
 # Activate mise if present on the system
-omarchy-cmd-present mise && eval "$(mise activate zsh)"
+omarchy-cmd-present mise && eval "$(mise activate bash)"

@@ -39,7 +39,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    restart: always
+    restart: "no"
 
   # llama.cpp server (CUDA)
   llama-cpp:
@@ -85,4 +85,4 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-    restart: always
+    restart: "no"

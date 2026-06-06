@@ -1,0 +1,18 @@
+CONFIG_SENSOR=y
+CONFIG_SENSOR_ASYNC_API=y
+CONFIG_LOG=y
+CONFIG_RTIO=y
+CONFIG_RTIO_WORKQ=y
+CONFIG_{{ chip_upper }}=y
+{% if is_i2c %}
+CONFIG_I2C=y
+CONFIG_I2C_RTIO=y
+{% else %}
+CONFIG_SPI=y
+CONFIG_SPI_RTIO=y
+{% endif %}
+{% if streaming %}
+CONFIG_{{ chip_upper }}_TRIGGER=y
+CONFIG_{{ chip_upper }}_STREAM=y
+CONFIG_GPIO=y
+{% endif %}

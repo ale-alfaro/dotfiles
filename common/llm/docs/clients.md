@@ -132,6 +132,43 @@ require("avante").setup({
 > [!tip]
 > Inline completion (ghost text) is a different workflow than chat — `minuet-ai.nvim` handles it well against an OpenAI-compatible backend.
 
+## Obsidian Web Clipper
+
+The Web Clipper extension's [Interpreter](https://obsidian.md/help/web-clipper/interpreter) feature lets clipped pages run through an LLM before landing in your vault. To use this stack:
+
+### Add provider
+
+| Field | Value |
+|---|---|
+| Name | `Local llama.cpp` |
+| Base URL | `http://llama-cpp.tail5a0932.ts.net:8080/v1/chat/completions` |
+| API key | `no-key` (the field is required; the value isn't validated server-side) |
+
+> [!info] Use the FQDN, not the short name
+> Browser extensions sometimes bypass the OS resolver (DNS-over-HTTPS, fetch-internal resolver, etc.), so MagicDNS short names can intermittently fail. The FQDN is a public DNS record and always resolves.
+
+### Add model
+
+| Field | Value |
+|---|---|
+| Provider | `Local llama.cpp` |
+| Display name | `Qwen 3.6 27B` |
+| Model ID | `unsloth/Qwen3.6-27B-GGUF:UD-Q4_K_XL` |
+
+==The model ID is effectively a label — llama-server in single-model mode ignores the request's `model` field and serves whatever's currently loaded.==
+
+### Recommended template settings
+
+- **Context**: scope it. Default is the full page HTML (20k+ tokens of nav/footer); for most templates `{{selectorHtml:main, article, [role=main], #content}}` or `{{contentHtml|strip_tags}}` cuts that to 1–3k.
+- **Prompts**: keep them terse and specific. `{{"one-line summary"}}` runs in seconds; vague longform prompts run in tens of seconds.
+- **Formatting**: use filters (`|blockquote`, `|markdown_links`) instead of asking the model to format. Cheaper and more reliable.
+
+A ready-made template lives at `clipper-templates/youtube-summary.json` — import it in Web Clipper settings → Templates → Import.
+
+### Why reasoning is off
+
+`model.vars` has `LLAMA_ARG_REASONING=off` specifically because Web Clipper / summarisation tasks don't benefit from chain-of-thought, and the latency tax is real. If you want thinking back on for a specific request (e.g., from CodeCompanion), send `"reasoning": "on"` in the JSON body — that overrides the server default per-request.
+
 ## Sharing with non-tailnet users (Funnel)
 
 > [!danger]
@@ -148,6 +185,6 @@ For your own travel use, plain Tailscale on the laptop is the correct answer —
 
 ## See also
 
-- [[operations]] — running the stack, switching variants
+- [[operations]] — running the stack, changing config
 - [[troubleshooting]] — when something doesn't work
 - [[README]] — system overview

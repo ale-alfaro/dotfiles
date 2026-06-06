@@ -14,8 +14,6 @@ fi
 typeset -U path PATH
 path=($HOME/.local/bin $path)
 export PATH
-if [[ -n "${SSH_CONNECTION}" ]]; then
-  source <(mise activate zsh)
-else
+if [[ ! -n "${SSH_CONNECTION}" ]]; then
   source <(mise activate --shims)
 fi

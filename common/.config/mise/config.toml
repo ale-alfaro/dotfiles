@@ -32,14 +32,14 @@ disable_tools = ["pipx:west"]
 [tools]
 go = "latest"
 jqp = "latest"
-lua = "5.1"
+lua = "5.5"
 dprint = "latest"
 lua-language-server = "latest"
 stylua = "latest"
 lazygit = "latest"
 usage = "latest"
 claude-code = "latest"
-cmake = "3.31.7"
+cmake = "4.3.3"
 tree-sitter = "latest"
 ast-grep = "latest"
 tmux = "latest"
@@ -78,13 +78,15 @@ rust-analyzer = "latest"
 git-lfs = "3.7.1"
 "http:nrfutil" = { version = "1.4.0", url = "https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/{{arch(x64='x86_64')}}-{{os(linux='unknown-linux-gnu')}}/nrfutil" }
 rg = "latest"
-codex = "latest"
 "vfox-zephyr:arm" = "0.17.0"
 "vfox-zephyr:west" = "1.5.0"
+difftastic = "latest"
+yq = "latest"
+hk = "latest"
+actionlint = "1.7.12"
+node = "latest"
+"npm:typescript-language-server" = "latest"
 
-[shell_alias]
-pygdb = "PYTHONHOME=/usr /opt/zephyr-sdk-custom/gnu/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb-py -ex 'target remote :2331'"
-jdbserver = "JLinkGDBServer -device NRF52840_XXAA -if SWD -speed 4000 -port 2331 -silent -singlerun"
 
 [tool_alias]
 "python@3.12" = "python"

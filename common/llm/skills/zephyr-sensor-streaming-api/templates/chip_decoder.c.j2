@@ -1,0 +1,237 @@
+/*
+ * Copyright (c) {{ year }} {{ vendor_upper }}
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#define DT_DRV_COMPAT {{ compat_under }}
+
+#include <errno.h>
+#include <string.h>
+
+#include <zephyr/drivers/sensor.h>
+#include <zephyr/drivers/sensor_data_types.h>
+#include <zephyr/logging/log.h>
+
+#include "{{ chip }}.h"
+
+LOG_MODULE_DECLARE({{ chip }}, CONFIG_SENSOR_LOG_LEVEL);
+
+static int {{ chip }}_get_frame_count(const uint8_t *buffer,
+				      struct sensor_chan_spec ch,
+				      uint16_t *frame_count)
+{
+	const struct {{ chip }}_decoder_header *hdr =
+		(const struct {{ chip }}_decoder_header *)buffer;
+
+	if (ch.chan_idx != 0) {
+		return -ENOTSUP;
+	}
+
+{% if streaming %}
+#ifdef CONFIG_{{ chip_upper }}_STREAM
+	if (hdr->is_fifo) {
+		const struct {{ chip }}_fifo_data *fifo =
+			(const struct {{ chip }}_fifo_data *)buffer;
+
+		if (fifo->fifo_byte_count == 0) {
+			/* NOP/DROP path -> empty trigger event. */
+			*frame_count = 0;
+			return 0;
+		}
+
+		switch (ch.chan_type) {
+{% for ch in channels %}
+		case {{ ch.chan_macro }}:
+			/* TODO: frame count = fifo_byte_count / chip frame size for {{ ch.label }}. */
+			*frame_count = fifo->fifo_byte_count / {{ chip_upper }}_SAMPLE_SIZE;
+			return 0;
+{% endfor %}
+		default:
+			return -ENOTSUP;
+		}
+	}
+#else
+	ARG_UNUSED(hdr);
+#endif /* CONFIG_{{ chip_upper }}_STREAM */
+{% else %}
+	ARG_UNUSED(hdr);
+{% endif %}
+
+	switch (ch.chan_type) {
+{% for ch in channels %}
+	case {{ ch.chan_macro }}:
+{% endfor %}
+		*frame_count = 1;
+		return 0;
+	default:
+		return -ENOTSUP;
+	}
+}
+
+static int {{ chip }}_get_size_info(struct sensor_chan_spec ch,
+				    size_t *base_size, size_t *frame_size)
+{
+	__ASSERT_NO_MSG(base_size != NULL);
+	__ASSERT_NO_MSG(frame_size != NULL);
+
+	switch (ch.chan_type) {
+{% for ch in channels %}
+	case {{ ch.chan_macro }}:
+		*base_size  = sizeof(struct {{ ch.data_struct }});
+		*frame_size = sizeof(struct {{ ch.sample_data_struct }});
+		return 0;
+{% endfor %}
+	default:
+		return -ENOTSUP;
+	}
+}
+
+static int {{ chip }}_decode_one_shot(const uint8_t *buffer,
+				      struct sensor_chan_spec ch,
+				      uint32_t *fit, uint16_t max_count,
+				      void *data_out)
+{
+	const struct {{ chip }}_sample *sample = (const struct {{ chip }}_sample *)buffer;
+
+	if (*fit != 0 || max_count == 0) {
+		return 0;
+	}
+
+	switch (ch.chan_type) {
+{% for c in channels %}
+	case {{ c.chan_macro }}: {
+		struct {{ c.data_struct }} *out = (struct {{ c.data_struct }} *)data_out;
+
+		memset(out, 0, sizeof(*out));
+		out->header.base_timestamp_ns = sample->header.timestamp;
+		out->header.reading_count    = 1;
+		/* TODO: derive q31 shift for {{ c.label }} from sample->header.range. */
+		out->shift = 0;
+		/* TODO: unpack sample->payload into readings[0]{% if c.is_three_axis %}.x/y/z{% else %}.value{% endif %} (q31). */
+		*fit = 1;
+		return 1;
+	}
+{% endfor %}
+	default:
+		return -ENOTSUP;
+	}
+}
+
+{% if streaming %}
+#ifdef CONFIG_{{ chip_upper }}_STREAM
+static int {{ chip }}_decode_fifo(const uint8_t *buffer,
+				  struct sensor_chan_spec ch,
+				  uint32_t *fit, uint16_t max_count,
+				  void *data_out)
+{
+	const struct {{ chip }}_fifo_data *edata = (const struct {{ chip }}_fifo_data *)buffer;
+	const uint8_t *frames     = buffer + sizeof(*edata);
+	const uint8_t *frames_end = frames + edata->fifo_byte_count;
+	int count = 0;
+
+	if ((uintptr_t)frames_end <= *fit || ch.chan_idx != 0) {
+		return 0;
+	}
+
+	switch (ch.chan_type) {
+{% for c in channels %}
+	case {{ c.chan_macro }}: {
+		struct {{ c.data_struct }} *out = (struct {{ c.data_struct }} *)data_out;
+
+		memset(out, 0, sizeof(*out));
+		out->header.base_timestamp_ns = edata->header.timestamp;
+		/* TODO: derive q31 shift for {{ c.label }} from edata->header.range. */
+		out->shift = 0;
+
+		while (count < max_count && frames < frames_end) {
+			const uint8_t *frame_end = frames + {{ chip_upper }}_SAMPLE_SIZE;
+
+			if ((uintptr_t)frames < *fit) {
+				frames = frame_end;
+				continue;
+			}
+
+			/* TODO: compute timestamp_delta from ODR period * frame index. */
+			out->readings[count].timestamp_delta = 0;
+			/* TODO: unpack {{ c.label }} frame at `frames` into readings[count]{% if c.is_three_axis %}.x/y/z{% else %}.value{% endif %}. */
+
+			frames = frame_end;
+			*fit = (uintptr_t)frame_end;
+			count++;
+		}
+
+		out->header.reading_count = count;
+		break;
+	}
+{% endfor %}
+	default:
+		return -ENOTSUP;
+	}
+
+	return count;
+}
+#endif /* CONFIG_{{ chip_upper }}_STREAM */
+{% endif %}
+
+static int {{ chip }}_decode(const uint8_t *buffer, struct sensor_chan_spec ch,
+			     uint32_t *fit, uint16_t max_count, void *data_out)
+{
+{% if streaming %}
+#ifdef CONFIG_{{ chip_upper }}_STREAM
+	const struct {{ chip }}_decoder_header *hdr =
+		(const struct {{ chip }}_decoder_header *)buffer;
+
+	if (hdr->is_fifo) {
+		return {{ chip }}_decode_fifo(buffer, ch, fit, max_count, data_out);
+	}
+#endif
+{% endif %}
+
+	return {{ chip }}_decode_one_shot(buffer, ch, fit, max_count, data_out);
+}
+
+static bool {{ chip }}_has_trigger(const uint8_t *buffer, enum sensor_trigger_type trig)
+{
+{% if streaming %}
+#ifdef CONFIG_{{ chip_upper }}_STREAM
+	const struct {{ chip }}_fifo_data *edata = (const struct {{ chip }}_fifo_data *)buffer;
+
+	if (!edata->header.is_fifo) {
+		return false;
+	}
+
+	switch (trig) {
+	case SENSOR_TRIG_FIFO_WATERMARK:
+		return FIELD_GET({{ chip_upper }}_INT_FIFO_WM_MSK, edata->int_status) != 0;
+	case SENSOR_TRIG_FIFO_FULL:
+		return FIELD_GET({{ chip_upper }}_INT_FIFO_FULL_MSK, edata->int_status) != 0;
+	default:
+		return false;
+	}
+#else
+	ARG_UNUSED(buffer);
+	ARG_UNUSED(trig);
+	return false;
+#endif
+{% else %}
+	ARG_UNUSED(buffer);
+	ARG_UNUSED(trig);
+	return false;
+{% endif %}
+}
+
+SENSOR_DECODER_API_DT_DEFINE() = {
+	.get_frame_count = {{ chip }}_get_frame_count,
+	.get_size_info   = {{ chip }}_get_size_info,
+	.decode          = {{ chip }}_decode,
+	.has_trigger     = {{ chip }}_has_trigger,
+};
+
+int {{ chip }}_get_decoder(const struct device *dev,
+			   const struct sensor_decoder_api **api)
+{
+	ARG_UNUSED(dev);
+	*api = &SENSOR_DECODER_NAME();
+	return 0;
+}

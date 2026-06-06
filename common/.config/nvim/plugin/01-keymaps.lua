@@ -188,9 +188,9 @@ out about, ^D is CTRL-D).
 VimRc.keymap_clues = {
   { mode = 'n', keys = '<Leader>b', desc = '+Buffer' },
   { mode = 'n', keys = '<Leader>e', desc = '+Explore/Edit' },
-  { mode = 'n', keys = '<Leader>f', desc = '+Find' },
+  { mode = 'n', keys = '<Leader>f', desc = '+Find ' },
   { mode = 'n', keys = '<Leader>n', desc = '+Notifications' },
-  { mode = 'n', keys = '<Leader>s', desc = '+Session' },
+  { mode = 'n', keys = '<Leader>s', desc = '+Search (Codebase)' },
   { mode = 'n', keys = '<Leader>t', desc = '+Terminal' },
   { mode = 'n', keys = '<Leader>v', desc = '+Visits' },
 }
@@ -260,8 +260,8 @@ local session_new = 'vim.ui.input({ prompt = "Session name: " }, MiniSessions.wr
 VimRc.map({ lhs = '<M-d>', rhs = '<Cmd>lua MiniSessions.select("delete")<CR>' }, 'Delete Sesh')
 VimRc.map({ lhs = '<M-s>', rhs = 'sn', '<Cmd>lua ' .. session_new .. '<CR>' }, 'New Sesh')
 VimRc.map({ lhs = '<M-r>', rhs = '<Cmd>lua MiniSessions.restart()<CR>' }, 'Restart')
-nmap_leader('sr', '<Cmd>lua MiniSessions.select("read")<CR>', 'Read')
-nmap_leader('ss', '<Cmd>lua MiniSessions.write()<CR>', 'Write current')
+-- nmap_leader('sr', '<Cmd>lua MiniSessions.select("read")<CR>', 'Read')
+-- nmap_leader('ss', '<Cmd>lua MiniSessions.write()<CR>', 'Write current')
 
 nmap_leader('tT', '<Cmd>horizontal term<CR>', 'Terminal (horizontal)')
 nmap_leader('tt', '<Cmd>vertical term<CR>', 'Terminal (vertical)')

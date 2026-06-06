@@ -10,4 +10,4 @@ typeset -U path PATH
 path=($HOME/.local/bin $path)
 export PATH
 
-eval "$(mise activate --shims)"
+# eval "$(mise activate --shims)"

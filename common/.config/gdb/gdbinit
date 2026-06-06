@@ -24,7 +24,6 @@ set data-directory /opt/zephyr-sdk-custom/arm-zephyr-eabi/share/gdb
 # Example: add-auto-load-safe-path ~/src
 # (Keep reading below for why.)
 add-auto-load-safe-path ~/sibel/eng/fw
-add-auto-load-safe-path ~/sibel/eng/fw/anne_sensors_workspace
 
 # --- TUI (text UI) defaults ---
 # set debuginfod enabled on
@@ -71,4 +70,3 @@ define z_esf_dump
     end
   end
 
-source ~/.config/gdb/pygdb/cortex_m.py

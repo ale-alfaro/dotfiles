@@ -28,7 +28,7 @@ extend-select = [
   "B",     # Flake8-bugbear – common bug patterns
   "A",     # Flake8-builtins – misuse of Python built-in names
   "COM",   # Flake8-commas – trailing/comma issues
-  "C4",  # Flake8-comprehensions – best practices in comprehensions
+  "C4",    # Flake8-comprehensions – best practices in comprehensions
   # "DTZ", # Flake8-datetimez – requires timezone-aware datetime objects
   "T10", # Flake8-debugger – debugger statements (e.g. pdb)
   "EM",  # Flake8-errmsg – error message style
@@ -37,9 +37,9 @@ extend-select = [
   "ISC", # Flake8-implicit-str-concat – warns on implicit string concatenation
   "ICN", # Flake8-import-conventions – enforces conventional import aliases
   # "LOG", # Flake8-logging – proper logging usage
-  "G",   # Flake8-logging-format – logging format string issues
-  "INP", # Flake8-no-pep420 – warns against non-PEP420 namespace usage
-  "PIE", # Flake8-pie – Python improvement suggestions
+  "G",    # Flake8-logging-format – logging format string issues
+  "INP",  # Flake8-no-pep420 – warns against non-PEP420 namespace usage
+  "PIE",  # Flake8-pie – Python improvement suggestions
   "T20",  # Flake8-print – disallows print statements
   "PYI",  # Flake8-pyi – checks for type stub (.pyi) consistency
   "PT",   # Flake8-pytest-style – pytest best practices
@@ -71,7 +71,7 @@ extend-select = [
 ]
 
 ignore = [
-  "T201",  # Print instead of log
+  "T201",    # Print instead of log
   "E501",    # Pycodestyle - line too long
   "ERA001",  # Pycodestyle - Uncommented code
   "D1",      # Pydocstyle - missing docstring in public module, class, or function
@@ -85,7 +85,8 @@ ignore = [
   "FA102",   # Flake8-future-annotations - Missing `from __future__ import annotations`, but uses PEP 604 union
   "TRY003",  # Tryceratops - Checks for long exception messages that are not defined in the exception class itself.
   "EM101",   # Flake8-errmsg - Checks for the use of string literals in exception constructors.
-  "COM812",   # Flake8-commas – trailing/comma issues
+  "COM812",  # Flake8-commas – trailing/comma issues
+  "G004",
 ]
 
 [lint.flake8-annotations]

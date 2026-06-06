@@ -1,0 +1,36 @@
+# {{ chip_upper }} sensor driver
+#
+# Copyright (c) {{ year }} {{ vendor_upper }}
+# SPDX-License-Identifier: Apache-2.0
+
+config {{ chip_upper }}
+	bool "{{ chip_upper }} sensor"
+	default y
+	depends on DT_HAS_{{ vendor_upper }}_{{ chip_upper }}_ENABLED
+	select I2C if $(dt_compat_on_bus,$(DT_COMPAT_{{ vendor_upper }}_{{ chip_upper }}),i2c)
+	select SPI if $(dt_compat_on_bus,$(DT_COMPAT_{{ vendor_upper }}_{{ chip_upper }}),spi)
+	select RTIO_WORKQ if SENSOR_ASYNC_API
+	help
+	  Enable driver for the {{ vendor_upper }} {{ chip_upper }} sensor.
+
+if {{ chip_upper }}
+
+{% if streaming %}
+config {{ chip_upper }}_TRIGGER
+	bool "Use GPIO interrupt"
+	default n
+	depends on GPIO
+	help
+	  Enable the GPIO callback used by streaming and (optionally) legacy
+	  data-ready triggers.
+
+config {{ chip_upper }}_STREAM
+	bool "Use FIFO to stream data via RTIO"
+	select {{ chip_upper }}_TRIGGER
+	depends on (SPI_RTIO || I2C_RTIO)
+	depends on SENSOR_ASYNC_API
+	help
+	  Stream sensor data via RTIO on FIFO interrupts.
+{% endif %}
+
+endif # {{ chip_upper }}
