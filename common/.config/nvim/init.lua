@@ -43,7 +43,7 @@ local misc = require 'mini.misc'
 ---@field on_filetype fun(ft:string,func:function)
 ---@field on_event fun(evt:string,func:function)
 ---@field new_autocmd fun(event:string|string[],callback:function,pattern:string|string[]?,desc:string?)
----@field on_packchanged fun(plugin_name:string,kinds:string[],callback:function,desc:string?)
+---@field on_packchanged fun(plugin_name:string,kinds:string[],callback:fun(plugin_spec:vim.pack.Spec,plugin_path:string),desc:string?)
 ---@field notify? fun(msg:string,lvl:string)
 ---@field env table<string,string>
 ---@field getenv fun(name:string,fallback?:string):string?
@@ -116,7 +116,6 @@ local ts_update = function(plugin, path)
   vim.cmd 'TSUpdate'
 end
 VimRc.on_packchanged('nvim-treesitter', { 'update' }, ts_update, ':TSUpdate')
-
 -- local hooks = function(ev)
 --   -- Use available |event-data|
 --   local name, kind = ev.data.spec.name, ev.data.kind

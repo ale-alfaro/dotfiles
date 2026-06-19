@@ -101,6 +101,8 @@ return {
     end
 
     minifiles_autocmd('BufferCreate', function(args)
+      vim.b.minisurround_disable = false
+      vim.b.minioperators_disable = false
       local b = args.data.buf_id
       ---@param lhs string
       ---@param rhs string
@@ -108,7 +110,12 @@ return {
       local buf_map = function(lhs, rhs, desc)
         vim.api.nvim_buf_set_keymap(b, 'n', '<localleader>' .. lhs, rhs, { desc = desc })
       end
+      buf_map('q', '<cmd>lua MiniFiles.close()<cr>', 'close')
       vim.api.nvim_buf_create_user_command(b, 'Search', files_grug_far_replace, { desc = 'Search' })
+      buf_map('s', '<cmd>Search<cr>', 'Search in directory')
+      local localleader_buf_map = function(lhs, rhs, desc)
+        buf_map('<localleader>' .. lhs, rhs, desc)
+      end
       vim.api.nvim_buf_create_user_command(b, 'Yank', function()
         local path = (MiniFiles.get_fs_entry() or {}).path
         if path == nil then
@@ -123,13 +130,9 @@ return {
         end
         vim.fn.chdir(vim.fs.dirname(path))
       end, { desc = 'Change Cwd' })
-      vim.b.minisurround_disable = false
-      vim.b.minioperators_disable = false
-      buf_map('q', '<cmd>lua MiniFiles.close()<cr>', 'close')
-      buf_map('r', '<cmd>Search<cr>', 'Search in directory')
-      buf_map('~', '<cmd>Cwd<cr>', 'Set cwd')
-      buf_map('y', '<cmd>Yank<cr>', 'Yank path')
-      buf_map('X', '<cmd>lua vim.ui.open(MiniFiles.get_fs_entry().path)<cr>', 'OS open')
+      localleader_buf_map('~', '<cmd>Cwd<cr>', 'Set cwd')
+      localleader_buf_map('y', '<cmd>Yank<cr>', 'Yank path')
+      localleader_buf_map('X', '<cmd>lua vim.ui.open(MiniFiles.get_fs_entry().path)<cr>', 'OS open')
       MiniClue.ensure_buf_triggers(b)
     end, 'Mappings')
 

@@ -8,6 +8,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   typeset -U path PATH
   path=($HOME/.local/bin $HOME/dotfiles/common/bin $HOME/dotfiles/linux/bin $path)
   export PATH
+  export BROWSER=arc
+  export SDKROOT="$(xcrun --show-sdk-path)"
 fi
 
 # eval "$(SHELL=/bin/zsh keychain --eval --quick --systemd --ssh-allow-forwarded id_ed25519_yubikey)"

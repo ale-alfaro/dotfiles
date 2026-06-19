@@ -22,9 +22,7 @@ VimRc.now_if_args(function()
       },
     },
   }
-  local cmp = require 'extras.completion'
-  cmp.setup_mini_snippets()
-  cmp.setup_blink()
+  require('extras.completion').setup_blink()
   -- or equivalently
 
   require('vimrc_lsp').setup()

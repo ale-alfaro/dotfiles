@@ -156,3 +156,13 @@ tgdbserial() {
   local pane_id=$(tmux new-window -c "${PWD}" -P -F '#{pane_id}')
   tmux send-keys -t "$pane_id" "tgdb $1 $2 $serial_cmd" C-m
 }
+ssh_agent_start() {
+  eval "$(ssh-agent -s)"
+  ssh-add ~/.ssh/id_ed25519_yubikey
+  if ! command -v dots-toggle; then
+    touch ~/.local/state/dots/toggles/ssh-agent
+  else
+    dots-toggle ssh-agent
+  fi
+}
+alias sshstart="ssh_agent_start"

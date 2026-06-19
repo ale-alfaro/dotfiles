@@ -6,13 +6,19 @@ if [[ $- != *i* ]]; then
 fi
 source $ZDOTDIR/helpers/stdlib.zsh
 
+if [[ -f "$HOME/.local/state/dots/toggles/ssh-agent" ]]; then
+  eval "$(ssh-agent -s)"
+  ssh-add ~/.ssh/id_ed25519_yubikey
+  if [[ -z "${SSH_CONNECTION:-}" ]]; then
+    export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+  fi
+fi
+
+autoload fsesh dots-toggle
 for file in $ZDOTDIR/zshrc.d/*.zsh; do
   source "$file"
 done
 # SSH agent started by systemd automatically. Only need to set the socketp
-if [[ -z "${SSH_CONNECTION:-}" ]]; then
-  export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
-fi
 # Ghostty shell integration for Bash. This should be at the top of your bashrc!
 # Some zsh plugins
 source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
@@ -37,15 +43,14 @@ rehash_precmd() {
 
 add-zsh-hook -Uz precmd rehash_precmd
 
-alias mx='mise x'
 if [[ $- == *i* ]] && [[ ${TERM:-} != "dumb" ]]; then
   eval "$(starship init zsh)"
 fi
 
-autoload fsesh
-if [[ ! -f "$HOME/.local/state/dots/toggles/mise_activate" ]]; then
+if [[ -f "$HOME/.local/state/dots/toggles/mise_activate" ]]; then
   source <(mise activate zsh)
 fi
+
 zd() {
   if [ $# -eq 0 ]; then
     builtin cd ~ && return

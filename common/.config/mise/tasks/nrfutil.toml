@@ -1,0 +1,31 @@
+
+[nrf-flash]
+tools = { "ncs:nrfutil" = "latest" }
+dir = "{{cwd}}"
+usage = '''
+arg "<hex_file>"
+flag "--family [family]" help="Nordic MCU Family"{
+  choices "nrf52" "nrf53" "nrf54"
+}
+flag "--core [core]" help="Core to flash (only applicable to nRF5340 and other multicore MCUs)" {
+  choices "Application" "Network"
+}
+'''
+run = '''
+local -a additional_flags
+additional_flags=()
+if [[ -n "${usage_family:-}" ]]; then
+  additional_flags+=('--family' "$usage_family")
+  [[ $usage_family == nrf53 ]] additional_flags+=('--core' "${usage_core:-Application}")
+fi
+nrfutil device program \
+  --firmware ${usage_hex_file?} \
+  --options chip_erase_mode=ERASE_ALL,reset=DEFAULT,verify=READ \
+  "${additional_flags[@]}"
+
+'''
+
+[nrf-list]
+tools = { "ncs:nrfutil" = "latest" }
+dir = "{{cwd}}"
+run = "nrfutil device list --json --skip-overhead | jq -r '.devices[].serialNumber"

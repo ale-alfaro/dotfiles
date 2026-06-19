@@ -6,11 +6,9 @@ compress() {
 
 alias decompress="tar -xzf"
 
-ssh_agent_start() {
-  eval "$(ssh-agent -s)"
-  ssh-add ~/.ssh/id_ed25519_yubikey
-}
-alias sshstart="ssh_agent_start"
+alias mx='mise x'
+alias mr='mise run'
+alias mt='mise tasks'
 #######################################################
 # CLI Aliases
 #######################################################

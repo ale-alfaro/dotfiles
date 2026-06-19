@@ -26,25 +26,29 @@ Fmt.config = {
 
   ---@type table<string, FormatList>
   formatters_by_ft = {
-    lua = { cmd = 'stylua', args = { '--stdin-filepath', '$FILENAME', '-' } },
     sh = shfmt,
-    zsh = shfmt,
-    python = {
-      { cmd = 'ruff', args = { 'check', '--fix', '--force-exclude', '--exit-zero', '--no-cache', '--unsafe-fixes', '--select=I001', '--stdin-filename', '$FILENAME', '-' } },
-      { cmd = 'ruff', args = { 'format', '--force-exclude', '--stdin-filename', '$FILENAME', '-' } },
-    },
     cmake = { cmd = 'gersemi', args = { '-' } },
-    markdown = prettier,
-    json = { dprint, prettier },
-    jsonc = { dprint, prettier },
-    yaml = prettier,
-    javascript = { dprint, prettier },
-    javascriptreact = { dprint, prettier },
-    typescript = { dprint, prettier },
-    typescriptreact = { dprint, prettier },
-    scss = prettier,
     css = prettier,
     html = prettier,
+    json = { dprint, prettier },
+    jsonc = { dprint, prettier },
+    javascript = { dprint, prettier },
+    javascriptreact = { dprint, prettier },
+    lua = { cmd = 'stylua', args = { '--stdin-filepath', '$FILENAME', '-' } },
+    markdown = prettier,
+    python = {
+      {
+        cmd = 'ruff',
+        args = { 'check', '--fix', '--force-exclude', '--exit-zero', '--no-cache', '--unsafe-fixes', '--select=I001', '--stdin-filename', '$FILENAME', '-' },
+      },
+      { cmd = 'ruff', args = { 'format', '--force-exclude', '--stdin-filename', '$FILENAME', '-' } },
+    },
+    rust = { cmd = 'rustfmt', args = { '$FILENAME' } },
+    scss = prettier,
+    typescript = { dprint, prettier },
+    typescriptreact = { dprint, prettier },
+    yaml = prettier,
+    zsh = shfmt,
   },
 
   -- Filetypes that use LSP formatting exclusively when a client is attached.
@@ -53,12 +57,12 @@ Fmt.config = {
     c = true,
     cpp = true,
     dts = true,
+    rust = true,
     toml = true,
   },
 }
 
----@param opts? table
-function Fmt.setup(opts)
+function Fmt.setup()
   vim.g.autoformat = true
   _G.Fmt = Fmt
   local aug = vim.api.nvim_create_augroup('CustomFormat', { clear = true })

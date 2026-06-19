@@ -1,12 +1,21 @@
 return {
   setup_blink = function()
+    require 'extras.snippets'
     local blink_build = function(plugin, path)
-      -- vim.system({ 'cargo', 'build', '--release' }, { cwd = path })
-      require('blink.cmp').build():wait(60000)
+      VimRc.info('Running blink build after plugin install', { plugin = plugin, path = path })
+      vim.system({ 'mise', 'exec', '--', 'cargo', 'build', '--release' }, { cwd = path })
+    end
+
+    local blink_plug_path = vim.pack.get({ 'blink.cmp' })[1].path
+    local blink_dylib = vim.fs.joinpath(blink_plug_path, 'target', 'release')
+    if blink_plug_path and vim.uv.fs_stat(blink_dylib) ~= nil then
+      local lib_path = vim.env['LD_LIBRARY_PATH']
+      lib_path = lib_path and lib_path .. ':' or ''
+      VimRc.debug('Blink lib already installed at ' .. blink_dylib .. '. Adding to LD_LIBRARY_PATH=' .. lib_path)
+      vim.fn.setenv('LD_LIBRARY_PATH', lib_path .. blink_dylib)
     end
     VimRc.on_packchanged('blink.cmp', { 'update', 'install' }, blink_build, 'Build  Blink')
-    local cmp = require 'blink.cmp'
-    cmp.setup {
+    require('blink.cmp').setup {
       -- Enables keymaps, completions and signature help when true (doesn't apply to cmdline or term)
       --
       -- If the function returns 'force', the default conditions for disabling the plugin will be ignored
@@ -17,14 +26,12 @@ return {
       enabled = function()
         return true
       end,
-
-      -- Disable cmdline
+      keymap = {
+        preset = 'super-tab',
+      },
       cmdline = { enabled = true, keymap = { preset = 'cmdline' } },
       fuzzy = {
-        implementation = 'prefer_rust_with_warning',
-      },
-      keymap = {
-        preset = 'default',
+        implementation = 'prefer_rust',
       },
 
       -- Use a preset for snippets, check the snippets documentation for more information
@@ -34,7 +41,7 @@ return {
       signature = { enabled = true },
     }
 
-    local capabilities = vim.tbl_deep_extend('force', vim.lsp.protocol.make_client_capabilities(), cmp.get_lsp_capabilities({}, false))
+    local capabilities = require('blink.cmp').get_lsp_capabilities(vim.lsp.protocol.make_client_capabilities(), false)
     vim.lsp.config('*', { capabilities = capabilities })
   end,
   setup_mini_cmdline = function()
@@ -123,39 +130,5 @@ return {
     map('i', '<Tab>', { 'pmenu_next' })
     map('i', '<S-Tab>', { 'pmenu_prev' })
     map('i', '<CR>', { 'pmenu_accept' })
-  end,
-  --
-  --[[
-    --
-    --
-    -- SNIPPETS
-    --
-    --]]
-  --
-  --
-  --
-  setup_mini_snippets = function()
-    local snippets = require 'mini.snippets'
-    local config_path = vim.fn.stdpath 'config'
-    local common_sh_patterns = { 'sh/**/*.json', '**/sh.json', 'shell/**/*.json', '**/shell.json' }
-    local lang_patterns = {
-      -- Recognize special injected language of markdown tree-sitter parser
-      markdown_inline = { 'markdown.json' },
-      c = { 'cdoc/**/*.json', 'c/**/*.json', '**/cdoc.json', '**/c.json' },
-      cpp = { 'cpp/**/*.json', '**/cpp.json', '**/cppdoc.json' },
-      cmake = { 'cmake/**/*.json', '**/cmake.json' },
-      python = { 'python/**/*.json', '**/python.json' },
-      bash = vim.list_extend({ 'bash/**/*.json', '**/bash.json' }, common_sh_patterns),
-      sh = common_sh_patterns,
-      zsh = vim.list_extend({ 'zsh/**/*.json', '**/zsh.json' }, common_sh_patterns),
-    }
-    snippets.setup {
-      snippets = {
-        -- Always load 'snippets/global.json' from config directory
-        snippets.gen_loader.from_file(config_path .. '/snippets/global.json'),
-        -- Load from 'snippets/' directory of plugins, like 'friendly-snippets'
-        snippets.gen_loader.from_lang { lang_patterns = lang_patterns },
-      },
-    }
   end,
 }
