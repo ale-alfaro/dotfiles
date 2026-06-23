@@ -320,3 +320,15 @@ usercmd_args_comp('Lsp', function(args)
 end, 'Lsp Commands', 1, { 'log', 'clean', 'info' })
 
 usercmd('DocGen', require('custom.docgen').generate_doc, 'Generate documentation comments')
+
+usercmd('RstToMd', function()
+  local steps = {
+    [[%s/\v(.+)\n\*+$/## \1/]], -- text + *** underline  -> ## heading
+    [[%s/\v(.+)\n\=+$/### \1/]], -- text + === underline  -> ### heading
+    [[%s/\v:\w+:\w+://g]], -- strip :role:word: inline markup
+    [[%s/\v^\.\.\s+(\w.*)/<!-- \1 -->/g]], -- .. directive/comment  -> HTML comment
+  }
+  for _, cmd in ipairs(steps) do
+    pcall(vim.cmd, cmd) -- a "Pattern not found" (E486) won't abort the rest
+  end
+end, 'Convert Current Buffer from ReStructured Text to Markdown')

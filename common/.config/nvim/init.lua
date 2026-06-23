@@ -3,13 +3,13 @@
 ---@field lhs string
 ---@field rhs string|function
 ---
----
 local gh = function(repo)
   return 'https://github.com/' .. repo
 end
 local gh_rev = function(repo, rev)
   return { src = 'https://github.com/' .. repo, version = rev }
 end
+
 vim.pack.add {
   gh 'nvim-mini/mini.nvim',
   gh 'folke/snacks.nvim',

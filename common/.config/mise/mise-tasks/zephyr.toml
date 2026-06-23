@@ -1,7 +1,21 @@
 
+["mcuboot:keygen"]
+hide = true
+env = { MCUBOOT_SCRIPTS = "{{config_root}}/external/bootloader/mcuboot/scripts" }
+usage = '''
+arg "<keyname>" help="Name of key" default="test"
+'''
+run = '''
+#!/usr/bin/env zsh
+set -euo pipefail
+
+typeset -a _imgtool
+_imgtool=(uv run '--with-requirements' "${MCUBOOT_SCRIPTS}/requirements.txt" "${MCUBOOT_SCRIPTS}/imgtool.py")
+$_imgtool keygen -k "${usage_keyname?}_key.pem" -t ecdsa-p256
+'''
 
 
-[tasks.dts_find]
+["dts:find"]
 description = "Find DTS node with dtsh"
 raw = true
 tools = { 'pipx:dtsh' = 'latest' }

@@ -1033,3 +1033,19 @@ aria-flash build_debug
 q
 c
 q
+c
+q
+q
+mon reset
+c
+help shell
+!mise build
+aria-flash build_debug
+q
+mon reset
+c
+aria-flash build_release
+mon reset
+c
+c
+q

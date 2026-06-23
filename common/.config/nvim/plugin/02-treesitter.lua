@@ -22,6 +22,7 @@ local languages = {
   'html',
   'html_tags',
   'hyprlang',
+  'ini',
   'javascript',
   'jinja',
   'jinja_inline',

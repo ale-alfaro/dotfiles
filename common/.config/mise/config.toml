@@ -8,6 +8,7 @@ unix_default_inline_shell_args = "zsh -eu -c"
 trusted_config_paths = [
   '~/sibel/eng/fw/anne-workspace',
   "~/sibel/Documents/Obsidian",
+  "~/dotfiles/",
 ]
 # tools can read the versions files used by other version managers
 # for example, .nvmrc in the case of node's nvm
@@ -30,11 +31,6 @@ python.uv_venv_auto = "source"
 disable_tools = ["pipx:west"]
 
 [settings.cargo]
-binstall = true
-
-[settings.github]
-oauth_open_browser = true
-credential_command = "gh auth token"
 
 [tools]
 go = "latest"
@@ -93,6 +89,8 @@ hk = "latest"
 actionlint = "1.7.12"
 node = "latest"
 "npm:typescript-language-server" = "latest"
+"go:github.com/coolamit/mermaid-cli/cmd/mmd-cli" = "0.1.1"
+"pipx:ptpython" = "latest"
 
 
 [tool_alias]

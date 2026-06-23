@@ -3,7 +3,7 @@
     "prefix": "/**",
     "body": [
       "/**",
-      " * ${1:A one-line summary.}",
+      " * @brief ${1:A one-line summary.}",
       " *",
       " * ${2:Description.}$0",
       " *",

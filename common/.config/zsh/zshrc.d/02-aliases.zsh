@@ -18,14 +18,15 @@ alias lta='lt -a'
 alias ls="eza --icons=always --oneline --no-git --all"
 # Link: https://github.com/sharkdp/bat
 alias wman='wikiman'
-# has batman && alias man='batman'
 # Alias for lazygit
 # Link: https://github.com/jesseduffield/lazygit
 alias lg='lazygit'
 alias lzd='lazydocker'
-alias minimax='NVIM_APPNAME=nvim-minimax nvim'
 alias gdb-py='/opt/zephyr-sdk-custom/gnu/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb-py'
 alias jlink-gdbserver='JLinkGDBServer  -if SWD -speed 4000 -port 2331 -silent -singlerun'
+alias mx='mise x'
+alias mr='mise run'
+alias mt='mise tasks'
 
 # -------------------------------------------
 # 5. Suffix Aliases - Open Files by Extension

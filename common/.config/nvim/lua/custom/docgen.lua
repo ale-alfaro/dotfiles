@@ -11,14 +11,14 @@ local function generate_c_doc(bufnr, row, line)
     return {}, 'No C function signature found on current line'
   end
 
-  local doc = { '/**', ' * ' .. name .. '() - ' }
+  local doc = { '/**', ' * @brief ' .. name .. '() - ' }
 
   -- parse parameters
   if params and params:match '%S' and not params:match '^%s*void%s*$' then
     for param in params:gmatch '([^,]+)' do
       local pname = param:match '([%w_]+)%s*$' or param:match '%*%s*([%w_]+)' or param:match '([%w_]+)%s*%['
       if pname then
-        table.insert(doc, ' * @' .. pname .. ': ')
+        table.insert(doc, ' * @param ' .. pname .. ': ')
       end
     end
   end
@@ -28,7 +28,7 @@ local function generate_c_doc(bufnr, row, line)
   -- add Return: if not void
   ret = ret and ret:gsub('%s+', ' '):gsub('^%s*', ''):gsub('%s*$', '') or ''
   if ret ~= 'void' and ret ~= '' then
-    table.insert(doc, ' * Return: ')
+    table.insert(doc, ' * @return ')
   end
 
   table.insert(doc, ' */')

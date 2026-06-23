@@ -1,8 +1,18 @@
 {
-  "comment": {
+  "func": {
     "prefix": "---",
     "body": [
       "--- ${1:A one-line summary.}",
+      "--- ${2:Description.}$0",
+      "--- @param ${5:name} ${6:type} ${7:Parameter description.}",
+      "--- @return ${3:type} ${4: Description of the returned object.}"
+    ],
+    "description": "A lua comment with short summary, description, parameters, return, and example."
+  },
+  "class": {
+    "prefix": "--- @class",
+    "body": [
+      "--- @class ${1:Class name.}",
       "-- ${2:Description.}$0",
       "-- @param ${5:name} ${6:type} ${7:Parameter description.}",
       "-- @return ${3:type} ${4: Description of the returned object.}",

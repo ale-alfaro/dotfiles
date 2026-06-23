@@ -1,0 +1,22 @@
+["preproc:remove:diff"]
+description = "Remove preprocessor definitions"
+dir = "{{cwd}}"
+usage = '''
+arg "<file>" help="File"
+arg "<syms>" var=#true var_min=1
+flag "-i --in-place" help="In place"
+flag "-u --undef" help="Symbols are undefined"
+'''
+run = '''
+file="${usage_file?}"
+eval "symbols=( ${usage_syms?} )"
+local -a cmd
+cmd=(unifdef '-x1')
+for sym in "${symbols[@]}"; do
+   cmd+=("-${${usage_undef:+U}:-D}CONFIG_${sym}")
+done
+eval "${cmd[@]} $file | difft $file -"
+if [[ "${usage_in_place:-}" ]]; then
+  eval "${cmd[@]} -m $file"
+fi
+'''

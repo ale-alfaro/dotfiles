@@ -11,6 +11,11 @@
 [alias]
   st = status -s
   lol = log --oneline --graph --all
+  dft = -c diff.external=difft diff
+  # `git log` with patches shown with difftastic.
+  dl = -c diff.external=difft log -p --ext-diff
+  # Show the most recent commit with difftastic.
+  ds = -c diff.external=difft show --ext-diff
 
 [extensions]
   relativeWorktrees = true
@@ -20,7 +25,8 @@
 [column]
   ui = always
 [core]
-  pager = bat
+	pager = delta
+	diff = diffnav
   editor = nvim
 [fetch]
 	prune = true
@@ -30,10 +36,6 @@
 [push]
   default = simple
 	autoSetupRemote = true
-[diff]
-	tool = nvimdiff
-	external = difft
-	mnemonicPrefix = true
 [rebase]
 	autoStash = true
 	updateRefs = true
@@ -43,10 +45,9 @@
 [init]
 	defaultBranch = main
 [merge]
-  conflictStyle = zdiff3
-	tool = nvimdiff
+	conflictStyle = zdiff3
 [web]
-  browser = zen-browser
+  browser = zen
 [worktree]
   useRelativePaths = true
   guessRemote = true
@@ -55,5 +56,8 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
-[pager]
-	diff = diffnav
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+	dark = true

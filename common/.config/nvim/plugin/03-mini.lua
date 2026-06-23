@@ -79,7 +79,7 @@ end)
 
 VimRc.later(function()
   require('mini.misc').setup()
-  MiniMisc.setup_auto_root { '.west', '.nvim', '.git' }
+  MiniMisc.setup_auto_root()
   MiniMisc.setup_termbg_sync()
   MiniMisc.setup_restore_cursor()
 end)

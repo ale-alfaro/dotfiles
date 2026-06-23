@@ -11,7 +11,8 @@ overseer.setup {
   -- Configure the task list
   task_list = {
     -- Default direction. Can be "left", "right", or "bottom"
-    direction = 'right',
+    direction = 'bottom',
+    max_height = { 40, 0.3 },
     keymaps = {
       ['?'] = 'keymap.show_help',
       ['g?'] = 'keymap.show_help',
@@ -47,25 +48,37 @@ overseer.setup {
       ['q'] = { '<CMD>close<CR>', desc = 'Close task list' },
     },
   },
+  -- Configure the floating window used for task templates that require input
+  -- and the floating window used for editing tasks
+  form = {
+    zindex = 40,
+    -- Dimensions can be integers or a float between 0 and 1 (e.g. 0.4 for 40%)
+    -- min_X and max_X can be a single value or a list of mixed integer/float types.
+    min_width = 40,
+    max_width = 0.9,
+    min_height = 10,
+    max_height = 0.9,
+    border = nil,
+    -- Set any window options here (e.g. winhighlight)
+    win_opts = {},
+  },
 }
 
 vim.cmd.cnoreabbrev 'OS OverseerShell'
-vim.api.nvim_create_user_command('Make', function(params)
+vim.api.nvim_create_user_command('Build', function(evt)
+  local args = vim.fn.join(evt.fargs or {}, ' ')
   -- Insert args at the '$*' in the makeprg
-  local cmd, num_subs = vim.o.makeprg:gsub('%$%*', params.args)
-  if num_subs == 0 then
-    cmd = cmd .. ' ' .. params.args
-  end
+  local cmd = (args ~= '') and string.format('mise build %s', args) or 'mise build'
   local task = require('overseer').new_task {
-    cmd = vim.fn.expandcmd(cmd),
+    cmd = cmd,
     components = {
-      { 'on_output_quickfix', open = not params.bang, open_height = 20 },
+      { 'on_result_diagnostics_trouble', open = true, open_height = 20 },
       'default',
     },
   }
   task:start()
 end, {
-  desc = 'Run your makeprg as an Overseer task',
+  desc = 'Run Mise Build Overseer task',
   nargs = '*',
   bang = true,
 })

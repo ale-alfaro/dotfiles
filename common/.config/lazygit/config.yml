@@ -255,8 +255,8 @@ gui:
 # Config relating to git
 git:
   pagers:
-    - pager: delta --dark --paging=never --line-numbers --hyperlinks
-        --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
+    - pager: delta --dark --paging=never
+    - externalDiffCommand: difft --color=always
   # Array of pagers. Each entry has the following format:
   #
   #   # Value of the --color arg in the git diff command. Some pagers want
@@ -377,10 +377,8 @@ git:
   parseEmoji: false
   # See https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#predefined-commit-message-prefix
   commitPrefix:
-    - pattern: "^\\w+\\/(\\w+-\\w+).*"
-      replace: "[$1] "
-    - pattern: "^(\\w{3}-\\d+).*"
-      replace: "[$1] "
+    - pattern: "^(\\w+)\\/(\\w+)-"
+      replace: "$1($2): "
     - pattern: "^([^_]+)_.*" # Take all text prior to the first underscore
       replace: "($1) "
 

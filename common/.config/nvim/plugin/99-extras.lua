@@ -41,7 +41,8 @@ VimRc.later(function()
       end,
       'OverseerRun (Custom)',
     },
-    { 't', '<cmd>OverseerToggle bottom<cr>', 'OverseerToggle' },
+    { 't', '<cmd>OverseerToggle<cr>', 'OverseerToggle' },
+    { 'b', '<cmd>OverseerBuild<cr>', 'OverseerBuild' },
     { 'q', '<cmd>OverseerRestartLast<cr>', 'Action recent task' },
   }
   for _, key in ipairs(overseer_keys) do

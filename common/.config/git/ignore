@@ -31,6 +31,7 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+/.git/rr-cache/
 
 
 # Sphinx documentation
@@ -85,7 +86,11 @@ pyrightconfig.json
 .nvim.lua
 .nvim/*
 
+compile_commands.json
+
 mise.local.toml
 mise.ignore.toml
 mise.*.local.toml
-compile_commands.json
+.miserc.toml
+.miserc.*.toml
+

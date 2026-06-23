@@ -18,6 +18,9 @@ return {
     require('blink.cmp').setup {
       -- Enables keymaps, completions and signature help when true (doesn't apply to cmdline or term)
       --
+      sources = {
+        default = { 'lsp', 'path', 'snippets', 'buffer' },
+      },
       -- If the function returns 'force', the default conditions for disabling the plugin will be ignored
       -- Default conditions: (vim.bo.buftype ~= 'prompt' and vim.b.completion ~= false)
       -- Note that the default conditions are ignored when `vim.b.completion` is explicitly set to `true`
@@ -39,6 +42,7 @@ return {
 
       -- Experimental signature help support
       signature = { enabled = true },
+      cmdline = { enabled = true },
     }
 
     local capabilities = require('blink.cmp').get_lsp_capabilities(vim.lsp.protocol.make_client_capabilities(), false)

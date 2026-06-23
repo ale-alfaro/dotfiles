@@ -8,7 +8,7 @@ narrow = true
 auto-cache = /home/alealfaro/.cache/west
 
 [zephyr]
-base-prefer = env
+base-prefer = configfile
 
 [alias]
 target = build -p=never -t
@@ -17,4 +17,6 @@ partitions = build -p=never -t partition_manager_report -d
 initlevels = build -p=never -t initlevels -d
 build_resume = build -p=never -t all -d
 find-board = boards --format "{name:30} | {qualifiers:30} | {dir}" --fuzzy-match
+run = build -p=never -t run -d
 
+# vim: ft=ini
