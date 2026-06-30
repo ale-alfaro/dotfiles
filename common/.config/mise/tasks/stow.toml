@@ -29,6 +29,7 @@ stow "${platform_flags[@]}"
 
 ["stow:dry_run"]
 description = "Stow dotfiles"
+hide = true
 usage = '''
 arg "<pkg>" help="Package types to stow" {
   choices "config" "home" "bin"
@@ -36,11 +37,11 @@ arg "<pkg>" help="Package types to stow" {
 }
 '''
 run = [
-  { task = "stow", args = [
+  { task = "_stow_dotfiles", args = [
     '{{usage.pkg}}',
     "--sim",
   ] },
-  { task = "stow", args = [
+  { task = "_stow_dotfiles", args = [
     '{{usage.pkg}}',
     "--sim",
   ], env = { STOW_PKG_DIR = "{{config_root}}/{{os()}}" } },
@@ -49,6 +50,7 @@ run = [
 
 ["stow:doftiles"]
 description = "Stow dotfiles"
+hide = true
 usage = '''
 arg "<pkg>" help="Package types to stow" {
   choices "config" "home" "bin"
@@ -56,10 +58,10 @@ arg "<pkg>" help="Package types to stow" {
 }
 '''
 run = [
-  { task = "stow", args = [
+  { task = "_stow_dotfiles", args = [
     '{{usage.pkg}}',
   ] },
-  { task = "stow", args = [
+  { task = "_stow_dotfiles", args = [
     '{{usage.pkg}}',
   ], env = { STOW_PKG_DIR = "{{config_root}}/{{os()}}" } },
 ]

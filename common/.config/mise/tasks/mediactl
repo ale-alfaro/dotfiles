@@ -2,6 +2,7 @@
 set -e
 #MISE description="Control brightness, volume and playback on Arch Linux"
 #MISE dir="{{cwd}}"
+#MISE hide=true
 #USAGE flag "--toggle [onoff]" help="Toggle playback or mute mic/speakers" {
 #USAGE  choices "playback" "mic" "speakers"
 #USAGE }

@@ -1,0 +1,65 @@
+["west:menuconfig"]
+description = "Run menuconfig"
+dir = "{{cwd}}"
+interactive = true
+usage = '''
+arg "[build_dir]" help="build directory"
+flag "--domain [domain]" help="Domain (only needed for sysbuild)"
+flag "--resume" help="Flag to resume build with the configuration change"
+'''
+run = '''
+west build -p=never -d "${usage_build_dir:-build}" -t menuconfig "${(z)${usage_domain:+--domain $domain}}"
+{% if usage.resume is defined %}
+  west build -p=never -d "${usage_build_dir:-build}" -t all
+{% endif %}
+'''
+["west:resume"]
+description = "Resume west build after menuconfig"
+dir = "{{cwd}}"
+usage = '''
+arg "[build_dir]" help="build directory"
+'''
+run = '''
+west build -p=never -d "${usage_build_dir:-build}" -t all
+'''
+["west:attach"]
+description = "Run west attach with arm-zephyr-eabi-gdb-py"
+dir = "{{cwd}}"
+interactive = true
+usage = '''
+arg "[build_dir]" help="build directory"
+'''
+run = '''
+west attach -d "${usage_build_dir:-build}" --gdb=/opt/zephyr-sdk-custom/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb-py
+'''
+
+["build:post_action"]
+description = "Post build actions for zephyr app with Ninja"
+usage = '''
+arg "[build_dir]" help="Build directory to do post action on" {
+    default "build"
+}
+arg "<run>" help="Run west post-action" {
+    choices "flash" "debug" "debugserver" "attach" "rtt"
+    default "flash"
+}
+'''
+run = '''
+#!/usr/bin/env zsh
+set -euxo pipefail
+
+bdir=${usage_build_dir?}
+app_name=${bdir?:t}
+domain="${app_name}"
+print -v cmd "ninja -C ${build_dir:?} ${usage_target:?}"
+if [[ -f "${build_dir:?}/domains.yaml" ]]; then
+domain=$(cat "${bdir:?}/domains.yaml" | yq e -r '.domains[].name' | fzf)
+print -v cmd "ninja -C ${bdir:?}/${domain:?} ${usage_run:?}"
+else
+
+print -v cmd "ninja -C ${bdir:?} ${usage_run:?}"
+fi
+echo "Running build cmd $cmd"
+eval "$cmd"
+'''
+

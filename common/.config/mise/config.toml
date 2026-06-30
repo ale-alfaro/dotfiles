@@ -21,10 +21,10 @@ always_keep_install = false  # deleted on failure by default
 # configure how frequently (in minutes) to fetch updated plugin repository changes
 # this is updated whenever a new runtime is installed
 # (note: this isn't currently implemented but there are plans to add it: https://github.com/jdx/mise/discussions/6735)
-plugin_autoupdate_last_check_duration = '1 week'                                                                # set to 0 to disable updates
+plugin_autoupdate_last_check_duration = '1 week'                                               # set to 0 to disable updates
 shorthands_file = "~/.config/mise/shorthands.toml"
 status = { missing_tools = "if_other_versions_installed", show_env = true, show_tools = true }
-task = { output = "interleave", run_auto_install = true, timings = true, disable_spec_from_run_scripts = true }
+task = { output = "interleave", run_auto_install = true, timings = true }
 npm.package_manager = "bun"
 pipx.uvx = true
 python.uv_venv_auto = "source"
@@ -81,7 +81,6 @@ rust-analyzer = "latest"
 git-lfs = "3.7.1"
 "http:nrfutil" = { version = "1.4.0", url = "https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/{{arch(x64='x86_64')}}-{{os(linux='unknown-linux-gnu')}}/nrfutil" }
 rg = "latest"
-"vfox-zephyr:arm" = "0.17.0"
 "vfox-zephyr:west" = "1.5.0"
 difftastic = "latest"
 yq = "latest"
@@ -91,6 +90,11 @@ node = "latest"
 "npm:typescript-language-server" = "latest"
 "go:github.com/coolamit/mermaid-cli/cmd/mmd-cli" = "0.1.1"
 "pipx:ptpython" = "latest"
+sd = "latest"
+opam = { version = "latest", asset_pattern = "opam-*-{gnu_arch}-{os}" }
+pkl = "latest"
+"github:apple/pkl-lsp" = "latest"
+"npm:devicetree-language-server" = "latest"
 
 
 [tool_alias]

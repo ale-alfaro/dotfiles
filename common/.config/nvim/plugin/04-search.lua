@@ -147,10 +147,6 @@ VimRc.later(function()
     { '<C-/>', '<cmd>FzfLua blines<cr>', 'Buffer Lines' },
     { '<C-c>', '<cmd>FzfLua resume<cr>', 'Continue' },
   }
-  local westgrep = function()
-    local fzf = require 'fzf-lua'
-    fzf.live_grep { cmd = 'west grep' }
-  end
   for _, k in ipairs(nonprefix_keys) do
     vim.keymap.set('n', k[1], k[2], { desc = k[3], noremap = true })
   end
@@ -174,7 +170,9 @@ VimRc.later(function()
   end
   local search_keys = {
     { 'o', '<cmd>FzfLua files cwd=$OBSIDIAN_HOME fd_opts=-e=md<cr>', 'Search Obsidian' },
-    { 'w', '<cmd>FzfLua files cwd=$WEST_TOPDIR<cr>', 'Search West Workspace' },
+    { 'w', '<cmd>Wf<cr>', 'Search West Workspace (Files)' },
+
+    { 'g', '<cmd>Wg<cr>', 'Search West Workspace (Live Grep)' },
     { 'v', '<cmd>FzfLua visits<cr>', 'Search Recent Visits' },
     { 'f', "<cmd>FzfLua visits sort_by='frequency'<cr>", 'Search Frequent Visits' },
   }

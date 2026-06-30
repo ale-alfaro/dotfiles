@@ -50,7 +50,7 @@ require('grug-far').setup {
         search = nil,
         replacement = nil,
         filesFilter = nil,
-        flags = '--ignore-case --replace= --multiline',
+        flags = '--ignore-case',
         paths = nil,
       },
     },

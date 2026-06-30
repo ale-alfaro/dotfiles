@@ -1,37 +1,19 @@
 local M = {}
 local H = {}
 
-M.west = 'mise exec vfox-zephyr:west -- west'
+M.west = { 'west' }
 M.setup = function()
-  M.topdir = M.topdir or H.west_workspace()
-  if not M.topdir then
+  M.topdir = M.topdir or M.get_topdir(vim.api.nvim_get_current_buf())
+  M.zephyr_base = vim.env['ZEPHYR_BASE'] or M.get_config ('zephyr.base')
+  if not M.topdir or not M.zephyr_base then
+    VimRc.warn 'no west workspace found'
     return
   end
-  vim.api.nvim_create_user_command('WestFiles', function(opts)
-    local args = opts.fargs or {}
-    local pattern = args[1]
-    local vargs = vim.fn.join(vim.list_slice(args, 2) or {}, ' ')
+  if not vim.uv.fs_stat(M.zephyr_base) then
+    M.zephyr_base = vim.fs.joinpath(M.topdir, M.zephyr_base)
+  end
 
-    local fdq = string.format([[fd %q %s --format  "\${WEST_PROJECT_PATH}/{}"]], pattern, vargs)
-    FzfLua.fzf_exec(M.west .. '-q forall -c  ' .. fdq, { cwd = H.exec 'topdir' })
-  end, {
-    desc = 'West Files Search',
-    nargs = '+',
-  })
-  vim.api.nvim_create_user_command('WestGrep', function(opts)
-    local args = opts.fargs or {}
-    require('fzf-lua').exec {
-      cmd = M.west .. ' grep ' .. vim.fn.join(args, ' '),
-      multiprocess = 1, ---@type integer|boolean
-      color_icons = true,
-      git_icons = true,
-      fzf_opts = { ['--multi'] = true, ['--scheme'] = 'path' },
-      winopts = { preview = { winopts = { cursorline = false } } },
-    }
-  end, {
-    desc = 'West Grep Search',
-    nargs = '+',
-  })
+  require('vimrc_lsp.dts').config({ topdir = M.topdir, relative_zephyr_base = M.zephyr_base }, {})
 
   vim.api.nvim_create_user_command('Wg', function()
     require('fzf-lua').live_grep {
@@ -39,6 +21,11 @@ M.setup = function()
     }
   end, { desc = 'Live Grep west workspace' })
 
+  vim.api.nvim_create_user_command('Wz', function()
+    require('fzf-lua').files {
+      cwd = M.zephyr_base or vim.fn.getcwd(),
+    }
+  end, { desc = 'Files west workspace' })
   vim.api.nvim_create_user_command('Wf', function()
     require('fzf-lua').files {
       cwd = H.exec 'topdir' or vim.fn.getcwd(),
@@ -49,19 +36,18 @@ end
 ---
 ---@param subcmd string
 ---@param args? string[]
+---@param opts? {quiet:boolean,check:boolean}
 ---@return string?
-H.exec = function(subcmd, args)
+H.exec = function(subcmd, args, opts)
   vim.validate('subcmd', subcmd, 'string')
-  vim.validate('kwargs', args, 'table', true)
+  vim.validate('args', args, vim.islist, true)
+  vim.validate('opts', opts, 'table', true)
   args = args or {}
-
-  local cmd = M.west .. ' ' .. subcmd .. ' '
-  vim.fn.join(args, ' ')
-  -- for k, v in vim.spairs(kwargs) do
-  --   cmd[#cmd + 1] = k .. '=' .. v
-  -- end
-  local sysobj = vim.system(vim.fn.split(cmd, ' ')):wait()
-  if sysobj.code ~= 0 then
+  opts = opts or {}
+  local west = (opts.quiet ~= nil) and { 'west', '-qqq' } or { 'west' }
+  local cmd = { unpack(west), subcmd, unpack(args) }
+  local sysobj = vim.system(cmd, { text = true }):wait()
+  if opts.check and sysobj.code ~= 0 then
     VimRc.err('West cmd failed with err: ', sysobj.stderr)
     return
   end
@@ -74,7 +60,7 @@ end
 
 ---@param dir integer|string|nil
 ---@return string?
-H.west_workspace = function(dir)
+M.get_topdir = function(dir)
   local topdir
   if not dir then
     topdir = vim.fs.root(0, { '.west' })
@@ -83,11 +69,20 @@ H.west_workspace = function(dir)
   elseif type(dir) == 'integer' then
     topdir = vim.fs.root(vim.uri_from_bufnr(dir), { '.west' })
   end
-  return topdir
+  return topdir or H.exec('topdir', nil, { quiet = true, check = false })
 end
 
-H.get_projects = function()
-  local projects = H.exec('list', { '-f', '"{name}:{posixpath}"' })
+M.get_config = function(config)
+  local val = H.exec('config', { config }, { quiet = true })
+  if not val then
+    VimRc.warn('No config with key  ' .. config .. ' could be found')
+    return
+  end
+  return val
+end
+---@return table<string,string>?
+M.get_projects = function()
+  local projects = H.exec('list', { '-f', vim.fn.shellescape '"{name}:{posixpath}"' })
   if not projects then
     VimRc.warn 'No projects could be found'
     return

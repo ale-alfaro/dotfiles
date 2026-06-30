@@ -1,31 +1,58 @@
-
-[nrf-flash]
-tools = { "ncs:nrfutil" = "latest" }
+["_artifacts:mergehex"]
+description = "Merge mcuboot and app hex"
+hide = true
+dir = "{{cwd}}"
+usage = 'arg "<build>" help="build dir"'
+run = '''
+uv run {{env.ZEPHYR_BASE | default(value='zephyr')}}/scripts/build/mergehex.py {{usage.build}}/**/zephyr/zephyr.signed.hex {{usage.build}}/mcuboot/zephyr/zephyr.hex -o merged.hex
+if [[ -d {{usage.build}}/hci_ipc ]]; then
+  cp {{usage.build}}/hci_ipc/zephyr/zephyr.hex merged_CPUNET.hex
+fi
+'''
+["nrf5340:flash:net"]
+description = "Flash Network Core FW"
 dir = "{{cwd}}"
 usage = '''
-arg "<hex_file>"
-flag "--family [family]" help="Nordic MCU Family"{
-  choices "nrf52" "nrf53" "nrf54"
-}
-flag "--core [core]" help="Core to flash (only applicable to nRF5340 and other multicore MCUs)" {
-  choices "Application" "Network"
-}
+arg "<hex>"
 '''
 run = '''
-local -a additional_flags
-additional_flags=()
-if [[ -n "${usage_family:-}" ]]; then
-  additional_flags+=('--family' "$usage_family")
-  [[ $usage_family == nrf53 ]] additional_flags+=('--core' "${usage_core:-Application}")
+if [[ -f {{usage.hex}} ]]; then
+  nrfutil device program --family nrf53 --core Network \
+    --options chip_erase_mode=ERASE_ALL  \
+    --firmware {{usage.hex}}
 fi
-nrfutil device program \
-  --firmware ${usage_hex_file?} \
-  --options chip_erase_mode=ERASE_ALL,reset=DEFAULT,verify=READ \
-  "${additional_flags[@]}"
-
 '''
 
-[nrf-list]
-tools = { "ncs:nrfutil" = "latest" }
+["nrf5340:flash:app"]
+description = "Flash Application Core FW"
 dir = "{{cwd}}"
-run = "nrfutil device list --json --skip-overhead | jq -r '.devices[].serialNumber"
+usage = '''
+arg "<mergedhex>" default="merged.hex"
+'''
+run = '''
+nrfutil device program --family nrf53 --core Application \
+  --options chip_erase_mode=ERASE_ALL,reset=RESET_DEFAULT,verify=VERIFY_READ \
+  --firmware {{usage.mergedhex}}
+sleep 2
+nrfutil device reset
+'''
+
+
+["nrf5340:flash"]
+description = "Flash both Network and Application Core FW"
+dir = "{{cwd}}"
+usage = '''
+flag "-d --build-dir <build_dir>"
+flag "--board-id [board]"
+'''
+run = [
+  { task = 'artifacts:mergehex', args = [
+    '{{usage.build_dir}}',
+  ] },
+  { task = 'nrf5340:flash:net', args = [
+    'merged_CPUNET.hex',
+  ] },
+  { task = 'nrf5340:flash:app', args = [
+    'merged.hex',
+  ] },
+]

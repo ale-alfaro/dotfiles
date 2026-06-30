@@ -13,12 +13,6 @@ diff.setup {
     signs = { add = '+', change = '~', delete = '-' },
   },
 }
-require('octo').setup {
-  -- or "fzf-lua" or "snacks" or "default"
-  picker = 'fzf-lua',
-  -- bare Octo command opens picker of commands
-  enable_builtin = true,
-}
 VimRc.keymap_clues[#VimRc.keymap_clues + 1] = { mode = 'n', keys = '<Leader>g', desc = '+Git' }
 VimRc.keymap_clues[#VimRc.keymap_clues + 1] = { mode = 'x', keys = '<Leader>g', desc = '+Git' }
 local diff_keys = {

@@ -23,26 +23,23 @@ end)
 
 VimRc.later(function()
   require 'extras.overseer'
+  local run_mise_template = function()
+    local ovr = require 'overseer'
+    ovr.run_task({ name = 'mise' }, function(task)
+      if task then
+        ovr.run_action(task)
+      end
+    end)
+  end
+
   local overseer_keys = {
     {
       'r',
-      '<cmd>OverseerRun<cr>',
+      run_mise_template,
       'OverseerRun',
     },
-    {
-      'v',
-      function()
-        local overseer = require 'overseer'
-        overseer.run({ name = 'mise build' }, function(task)
-          if task then
-            overseer.run_action(task, 'open quickfix')
-          end
-        end)
-      end,
-      'OverseerRun (Custom)',
-    },
     { 't', '<cmd>OverseerToggle<cr>', 'OverseerToggle' },
-    { 'b', '<cmd>OverseerBuild<cr>', 'OverseerBuild' },
+    { 'b', '<cmd>Build<cr>', 'Build Task' },
     { 'q', '<cmd>OverseerRestartLast<cr>', 'Action recent task' },
   }
   for _, key in ipairs(overseer_keys) do

@@ -82,8 +82,7 @@ EOF
   -ex='target remote :2331' \
   -ex='mon reset' \
   -ex='c' \
-  --se=${elf} \
-  C-m
+  --se=${elf}
 EOF
   )
   local current_dir="${PWD}"

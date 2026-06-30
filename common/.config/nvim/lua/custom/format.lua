@@ -10,6 +10,7 @@ local H = {}
 ---@field cmd string
 ---@field args string[]
 ---@field envs? table<string,string>
+---@field mise_tool? string
 
 ---@alias FormatList FormatDef|FormatDef[]
 
@@ -20,29 +21,34 @@ local dprint = {
   envs = { DPRINT_CONFIG_DIR = vim.fn.expand '~/.config/dprint', DPRINT_CONFIG_DISCOVERY = 'global' },
 }
 local shfmt = { cmd = 'shfmt', args = { '-i', '2', '-ci', '-filename', '$FILENAME' } }
+local ruff = {
+  cmd = 'ruff',
+  args = { 'check', '--fix', '--force-exclude', '--exit-zero', '--no-cache', '--unsafe-fixes', '--select=I001', '--stdin-filename', '$FILENAME', '-' },
+}
+local stylua = { cmd = 'stylua', args = { '--stdin-filepath', '$FILENAME', '-' } }
+local clang_format = { cmd = 'clang-format', args = { '-i', '$FILENAME' } }
+local kconfigsyle = { cmd = 'kconfigsyle', args = { '-w', '--preset', 'Zephyr', '$FILENAME' }, mise_tool = 'pipx:kconfigsyle' }
+local dtslinter = { cmd = 'dts-linter', args = { '--formatFixAll', '--file', '$FILENAME' }, mise_tool = 'npm:dts-linter' }
 
 Fmt.config = {
   timeout_ms = 1000,
-
   ---@type table<string, FormatList>
   formatters_by_ft = {
-    sh = shfmt,
-    cmake = { cmd = 'gersemi', args = { '-' } },
+    c = clang_format,
+    cpp = clang_format,
+    cmake = { cmd = 'gersemi', args = { '-' }, mise_tool = 'pipx:gersemi' },
     css = prettier,
+    dts = dtslinter,
     html = prettier,
-    json = { dprint, prettier },
-    jsonc = { dprint, prettier },
+    kconfig = kconfigsyle,
     javascript = { dprint, prettier },
     javascriptreact = { dprint, prettier },
-    lua = { cmd = 'stylua', args = { '--stdin-filepath', '$FILENAME', '-' } },
+    json = { dprint, prettier },
+    jsonc = { dprint, prettier },
+    lua = stylua,
     markdown = prettier,
-    python = {
-      {
-        cmd = 'ruff',
-        args = { 'check', '--fix', '--force-exclude', '--exit-zero', '--no-cache', '--unsafe-fixes', '--select=I001', '--stdin-filename', '$FILENAME', '-' },
-      },
-      { cmd = 'ruff', args = { 'format', '--force-exclude', '--stdin-filename', '$FILENAME', '-' } },
-    },
+    sh = shfmt,
+    python = ruff,
     rust = { cmd = 'rustfmt', args = { '$FILENAME' } },
     scss = prettier,
     typescript = { dprint, prettier },
@@ -54,9 +60,6 @@ Fmt.config = {
   -- Filetypes that use LSP formatting exclusively when a client is attached.
   ---@type table<string, true>
   lsp_prefer = {
-    c = true,
-    cpp = true,
-    dts = true,
     rust = true,
     toml = true,
   },
@@ -108,7 +111,15 @@ end
 ---@param bufnr integer
 ---@return string|nil
 function H.run(fmt, text, bufnr)
-  local cmd = { fmt.cmd, unpack(H.expand_args(fmt.args, bufnr)) }
+  local cmd = {}
+  if vim.fn.exepath(fmt.cmd) == '' then
+    cmd = { 'mise', 'exec' }
+    if fmt.mise_tool then
+      cmd[#cmd + 1] = fmt.mise_tool
+    end
+    cmd[#cmd + 1] = '--'
+    cmd = { fmt.cmd, unpack(H.expand_args(fmt.args, bufnr)) }
+  end
   local result = vim.system(cmd, { stdin = text, text = true, env = fmt.envs }):wait(Fmt.config.timeout_ms)
   if result.code ~= 0 then
     vim.notify(string.format('[format] %s failed (%s): %s', fmt.cmd, result.code, result.stderr or ''), vim.log.levels.WARN)

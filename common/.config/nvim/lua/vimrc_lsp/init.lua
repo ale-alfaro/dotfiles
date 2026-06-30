@@ -71,18 +71,18 @@ local lsp_on_attach = function(client, bufnr)
     require('vimrc_lsp.code_action').on_attach(bufnr, client)
   end
   -- Enable auto-completion. Note: Use CTRL-Y to select an item. |complete_CTRL-Y|
-  if client:supports_method 'textDocument/completion' then
-    -- Optional: trigger autocompletion on EVERY keypress. May be slow!
-    -- local chars = {}
-    -- for i = 32, 126 do
-    --   table.insert(chars, string.char(i))
-    -- end
-    -- client.server_capabilities.completionProvider.triggerCharacters = chars
-
-    -- vim.cmd [[setlocal completeopt+=menuone,noselect,popup]]
-    -- vim.bo[bufnr].omnifunc = 'v:lua.MiniCompletion.completefunc_lsp'
-    -- vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = true })
-  end
+  -- if client:supports_method 'textDocument/completion' then
+  --   -- Optional: trigger autocompletion on EVERY keypress. May be slow!
+  --   -- local chars = {}
+  --   -- for i = 32, 126 do
+  --   --   table.insert(chars, string.char(i))
+  --   -- end
+  --   -- client.server_capabilities.completionProvider.triggerCharacters = chars
+  --
+  --   -- vim.cmd [[setlocal completeopt+=menuone,noselect,popup]]
+  --   -- vim.bo[bufnr].omnifunc = 'v:lua.MiniCompletion.completefunc_lsp'
+  --   -- vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = true })
+  -- end
 
   if client:supports_method 'textDocument/foldingRange' then
     local win = vim.api.nvim_get_current_win()
@@ -121,10 +121,6 @@ M.setup = function()
       return overridden_register_caps(err, res, ctx)
     end
   end)(vim.lsp.handlers['client/registerCapability'])
-  local sstore = require 'vimrc_lsp.schemastore'
-  VimRc.on_filetype('json', sstore.json_ls)
-  VimRc.on_filetype('yaml', sstore.yaml_ls)
-
   --
   -- Extend neovim's client capabilities with the completion ones.
   require('vimrc_lsp.code_action').setup()
@@ -132,6 +128,13 @@ M.setup = function()
   local servers = lsp_configs_get()
   servers = vim.list_extend(servers, { 'taplo', 'lua_ls', 'yamlls', 'jsonls' })
   vim.lsp.enable(servers)
+  local sstore = require 'vimrc_lsp.schemastore'
+  VimRc.on_filetype('json', sstore.json_ls)
+  VimRc.on_filetype('yaml', sstore.yaml_ls)
+
+  VimRc.on_filetype('pkl', function ( )
+    require('vimrc_lsp.pkl')
+  end)
 
   -- HACK: Override buf_request to ignore notifications from LSP servers that don't implement a method.
   local buf_request = vim.lsp.buf_request

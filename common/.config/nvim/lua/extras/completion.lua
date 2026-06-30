@@ -15,12 +15,9 @@ return {
       vim.fn.setenv('LD_LIBRARY_PATH', lib_path .. blink_dylib)
     end
     VimRc.on_packchanged('blink.cmp', { 'update', 'install' }, blink_build, 'Build  Blink')
-    require('blink.cmp').setup {
+    require('blink-cmp').setup {
       -- Enables keymaps, completions and signature help when true (doesn't apply to cmdline or term)
       --
-      sources = {
-        default = { 'lsp', 'path', 'snippets', 'buffer' },
-      },
       -- If the function returns 'force', the default conditions for disabling the plugin will be ignored
       -- Default conditions: (vim.bo.buftype ~= 'prompt' and vim.b.completion ~= false)
       -- Note that the default conditions are ignored when `vim.b.completion` is explicitly set to `true`
@@ -30,7 +27,17 @@ return {
         return true
       end,
       keymap = {
-        preset = 'super-tab',
+        preset = 'default',
+
+        ['<Up>'] = {},
+        ['<Down>'] = {},
+        ['<C-space>'] = {},
+        ['<M-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+        ['<C-j>'] = {
+          function(cmp)
+            return cmp.show { providers = { 'snippets' } }
+          end,
+        },
       },
       cmdline = { enabled = true, keymap = { preset = 'cmdline' } },
       fuzzy = {
@@ -42,7 +49,6 @@ return {
 
       -- Experimental signature help support
       signature = { enabled = true },
-      cmdline = { enabled = true },
     }
 
     local capabilities = require('blink.cmp').get_lsp_capabilities(vim.lsp.protocol.make_client_capabilities(), false)

@@ -109,13 +109,6 @@ end)
 VimRc.later(function()
   require('mini.indentscope').setup()
 end)
-VimRc.later(function()
-  vim.keymap.set('n', 'o', '<nop>')
-  require('mini.operators').setup { replace = { prefix = '' } }
-
-  vim.keymap.set('n', 'g(', 'gxiagxila', { remap = true, desc = 'Swap arg left' })
-  vim.keymap.set('n', 'g)', 'gxiagxina', { remap = true, desc = 'Swap arg right' })
-end)
 
 VimRc.later(function()
   require('mini.move').setup {
@@ -125,10 +118,10 @@ VimRc.later(function()
       down = '<M-down>',
       up = '<M-up>',
 
-      line_left = '<M-left>',
-      line_right = '<M-right>',
-      line_down = '<M-down>',
-      line_up = '<M-up>',
+      line_left = '<M-S-left>',
+      line_right = '<M-S-right>',
+      line_down = '<M-S-down>',
+      line_up = '<M-S-up>',
     },
   }
 end)
@@ -137,33 +130,6 @@ VimRc.later(function()
   require('mini.jump').setup()
 end)
 
-VimRc.later(function()
-  -- Custom mapping
-  vim.keymap.set({ 'n', 'i', 'x' }, 'J', '<Cmd>lua MiniJump2d.start(MiniJump2d.builtin_opts.line_start)<CR>')
-
-  -- Inside `MiniJump2d.setup()` (make sure to use all defined options)
-  local jump2d = require 'mini.jump2d'
-  local jump_line_start = jump2d.builtin_opts.line_start
-  jump2d.setup {
-    spotter = jump_line_start.spotter,
-    hooks = { after_jump = jump_line_start.hooks.after_jump },
-
-    -- Which lines are used for computing spots
-    allowed_lines = {
-      blank = false, -- Blank line (not sent to spotter even if `true`)
-      cursor_before = false, -- Lines before cursor line
-      cursor_at = true, -- Cursor line
-      cursor_after = true, -- Lines after cursor line
-      fold = false, -- Start of fold (not sent to spotter even if `true`)
-    },
-
-    -- Which windows from current tabpage are used for visible lines
-    allowed_windows = {
-      current = true,
-      not_current = false,
-    },
-  }
-end)
 
 -- Split and join arguments (regions inside brackets between allowed separators).
 -- It uses Lua patterns to find arguments, which means it works in comments and

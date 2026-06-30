@@ -20,3 +20,44 @@ if [[ "${usage_in_place:-}" ]]; then
   eval "${cmd[@]} -m $file"
 fi
 '''
+["preproc:search"]
+description = "Search preprocessor definitions"
+dir = "{{cwd}}"
+usage = '''
+arg "<sym>" help="Symbol"
+flag "-d --dir [dir]" help="Dir" {
+  default "."
+}
+flag "-i --in-place" help="In place"
+flag "-u --undef" help="Symbols are undefined"
+'''
+run = '''
+{% if usage.undef %}
+  {% set prefix = "-U" %}
+{% else %}
+  {% set prefix = "-D" %}
+{% endif %}
+{% set unifdef_flag = "" %}
+{% if usage.in_place %}
+  rg '{{usage.sym}}' {{ usage.dir }} -tc -tcpp -th --line-buffered --files-with-matches | xargs -I '{}' unifdef -x1 -m '{{prefix ~ usage.sym}}' '{}'
+{% else %}
+  rg '{{usage.sym}}' {{ usage.dir }} -tc -tcpp -th --line-buffered --files-with-matches | xargs -I '{}' --max-args=1 sh -c "unifdef '{{prefix ~ usage.sym}}' '{}' | difft '{}' - "
+{% endif %}
+'''
+
+
+["preproc:stats"]
+description = "Stats on usage of macros"
+dir = "{{cwd}}"
+usage = '''
+arg "<dir>"
+'''
+run = '''
+fd . {{usage.dir}} -e cpp -e h -e c -x sh -c 'unifdef -s "$1" | sed "s|^|$1\t|"' _ '{}' \
+  | grep -P '\tCONFIG_' \
+  | sort -t$'\t' -k2,2 -k1,1 > macro-usage.tsv
+cut -f2 macro-usage.tsv | uniq -c | sort -rn | while read -r count macro; do
+  printf '%s  (%d uses)\n' "$macro" "$count"
+  awk -F'\t' -v m="$macro" '$2==m {print "    "$1}' macro-usage.tsv | sort -u
+done
+'''
