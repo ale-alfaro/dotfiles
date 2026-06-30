@@ -1049,3 +1049,14 @@ mon reset
 c
 c
 q
+mon reset
+c
+quit
+mon reset
+c
+q
+mon reset
+c
+mon reset
+c
+quit

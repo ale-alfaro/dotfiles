@@ -215,3 +215,17 @@ cat\040-A\040&lp5813
 help
 ?
 \011\011\011q
+ls
+tree
+find\040-h
+cat\040&flash-controller\040-A\040--pager
+cat\040&flash_controller\040-A\040--pager
+cat\040&flash-controller@0\040-A\040--pager
+cat\040flash-controller@0\040-A\040--pager
+>\040tree\040&flash_controller\040--format\040NrC\040--pager
+>\040tree\040flash-controller\040--format\040NrC\040--pager
+tree\040flash-controller\040--format\040NrC\040--pager
+tree\040&flash-controller\040--format\040NrC\040--pager
+tree\040flash-controller@0\040--format\040NrC\040--pager
+find\040--with-label\040*\040-l\040--pager
+q

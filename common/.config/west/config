@@ -18,5 +18,8 @@ initlevels = build -p=never -t initlevels -d
 build_resume = build -p=never -t all -d
 find-board = boards --format "{name:30} | {qualifiers:30} | {dir}" --fuzzy-match
 run = build -p=never -t run -d
+test = twister -vv --inline-logs --no-clean
+up = update -k
+ls = list -f '{name:20} {path:30} {groups}'
 
-# vim: ft=ini
+goto = forall -c 'nvim .'

@@ -1,0 +1,124 @@
+{
+  "bool": {
+    "prefix": "bool",
+    "body": [
+      "config ${1:MODULE}",
+      "\tbool \"${2:Module description}\"",
+      "\t${0}",
+      "\thelp",
+      "\t  This option is enables $1"
+    ],
+    "description": "Bool symbol"
+  },
+  "int": {
+    "prefix": "int",
+    "body": [
+      "config ${1:MODULE}",
+      "\tint \"${2:Module description}\"",
+      "\tdefault ${3:1}",
+      "\t${0}",
+      "\thelp",
+      "\t  This option is enables $1"
+    ],
+    "description": "Int symbol"
+  },
+  "string": {
+    "prefix": "str",
+    "body": [
+      "config ${1:MODULE}",
+      "\tint \"${2:Module description}\"",
+      "\tdefault \"${3:Hello}\"",
+      "\t${0}",
+      "\thelp",
+      "\t  This option is enables $1"
+    ],
+    "description": "Int symbol"
+  },
+  "menu": {
+    "prefix": "menu",
+    "body": [
+      "menuconfig ${1:MODULE}",
+      "\tbool \"${2:Module description}\"",
+      "\tdefault y",
+      "\thelp",
+      "\t  This option is enables $1",
+      "",
+      "if $1",
+      "\t${0}",
+      "endif\t# $1"
+    ],
+    "description": "menu"
+  },
+  "property": {
+    "prefix": "prop",
+    "body": ["\t${1:|imply,select,depends|} ${0}"],
+    "description": "Property"
+  },
+  "default": {
+    "prefix": "def",
+    "body": ["\tdefault ${1:|y,\"string\",1|}"],
+    "description": "Default"
+  },
+  "type": {
+    "prefix": "ty",
+    "body": ["\t${1:|bool,int,str,hex|} ${0}"],
+    "description": "Type"
+  },
+  "module": {
+    "prefix": "mod",
+    "body": [
+      "# Copyright (c) ${CURRENT_DATE} ",
+      "#",
+      "# SPDX-License-Identifier: Apache-2.0",
+      "",
+      "menuconfig ${1:MODULE}",
+      "\tbool \"${2:Module description}\"",
+      "\tdefault y",
+      "\t${3:|imply,select,depends|} ${4:NAME}",
+      "\thelp",
+      "\t  This option is enables $1",
+      "",
+      "if $1",
+      "",
+      "config $1_THREAD_PRIORITY",
+      "\tint \"Own thread priority\"",
+      "\tdefault 10",
+      "\thelp",
+      "\t  The priority of the thread used for $1.",
+      "",
+      "config $1_THREAD_STACK_SIZE",
+      "\tint \"Own thread stack size\"",
+      "\tdefault 1024",
+      "\thelp",
+      "\t  The thread stack size for $1.",
+      "",
+      "${0}",
+      "",
+      "endif # $1"
+    ],
+    "description": "Module"
+  },
+  "choice": {
+    "prefix": "choice",
+    "body": [
+      "choice ${1:CHOICE}",
+      "\tprompt \"${2:prompt}\"",
+      "\tdefault $1_${2:DEFAULT}",
+      "\thelp",
+      "\t  Specify the type of triggering to be used by the driver",
+      "",
+      "config $1_$2",
+      "\tbool \"Option 1\"",
+      "",
+      "config $1_OPTION2",
+      "\tbool \"Option 2\"",
+      "",
+      "config $1_TRIGGER_OWN_THREAD",
+      "bool \"Use own thread\"",
+      "select $1_TRIGGER",
+      "",
+      "endchoice\t# $1"
+    ],
+    "description": "Choice"
+  }
+}

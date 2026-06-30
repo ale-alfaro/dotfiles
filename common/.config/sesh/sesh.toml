@@ -30,3 +30,9 @@ startup_command = "mise deactivate"
 name = "Aria Legacy (v1)"
 path = "~/sibel/eng/fw/aria-legacy-workspace"
 startup_command = "tdl claude"
+
+
+[[session]]
+name = "Tools"
+path = "~/sibel/eng/tools"
+startup_command = "eza --absolute | fzf |  xargs -ro nvim"
