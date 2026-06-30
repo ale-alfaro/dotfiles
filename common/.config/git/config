@@ -62,5 +62,3 @@
 [delta]
 	navigate = true
 	dark = true
-[commit]
-	template = /home/alealfaro/.config/git/commit.template
