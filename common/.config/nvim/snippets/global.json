@@ -24,7 +24,7 @@
   "uuid": {
     "prefix": "cz",
     "body": [
-"# ${1:|fix,feat,tests,refactor,chore,ci,build|}(${3:scope}): ${2:description}",
+"${1:|fix,feat,tests,refactor,chore,ci,build|}(${3:scope}): ${2:description}",
       "",
  "$0",
       "",

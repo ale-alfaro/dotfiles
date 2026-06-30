@@ -283,7 +283,7 @@ git:
   # Config relating to committing
   commit:
     # If true, pass '--signoff' flag when committing
-    signOff: false
+    signOff: true 
 
     # Automatic WYSIWYG wrapping of the commit message as you type
     autoWrapCommitMessage: true
@@ -399,13 +399,13 @@ git:
     # passing the `--all` argument to `git log`)
     showWholeGraph: false
 customCommands:
-  - key: "C"
+  - key: "c"
     command: "git commit"
     description: "commit with nvim (use ctrl-J for snippet!)"
     loadingText: "opening commit with nvim"
     context: "global"
     output: terminal
-  - key: "<c-d>"
+  - key: "C"
     command: "mise x pipx:commitizen -- cz c"
     description: "commit with commitizen"
     context: "files"
