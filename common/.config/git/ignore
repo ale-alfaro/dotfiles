@@ -93,4 +93,7 @@ mise.ignore.toml
 mise.*.local.toml
 .miserc.toml
 .miserc.*.toml
+mise.ai.toml
 
+.claude
+.cache/clangd
