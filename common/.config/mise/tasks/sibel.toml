@@ -1,0 +1,6 @@
+
+["sibel:shrd:export"]
+description = "export shrd to csv"
+usage = 'arg "<file>" help="File"'
+dir = "{{cwd}}"
+run = "mkdir {{usage.file | file_stem }} && rshrd export --format=csv {{usage.file}} {{usage.file | file_stem}}"

@@ -1,67 +1,37 @@
 
 
 
-[_stow_dotfiles]
+["_stow:dotfiles"]
 hide = true
 dir = "{{env.HOME}}/dotfiles"
-env = { VERBOSE_LVL = 2, STOW_TARGET_DIR = "{{xdg_config_home}}", STOW_PKG_DIR = "{{config_root}}/common" }
 usage = '''
 arg "<pkg>" help="Package types to stow" {
-  choices "config" "home" "bin"
-  default "config"
+  choices "common" "linux"
+  default "commoh"
 }
-flag "--sim" help="Perform simulated operation instead of doing it"
+flag "-y --yes" help="Perform simulated operation instead of doing it" {
+  global #true
+  env "STOW_NO_SIM"
+}
 '''
 run = '''
+# common_flags=('-d' "common/.config" '-t' "${target?}" "${(z)${usage_sim:+-vv --simulate}:-}" "-R" '.')
+stow \
+  {% if usage.yes %}-v{% else %}--simulate -vv{% endif %} \
+  -d {{ env.HOME }}/dotfiles/{{usage.pkg}}/.config \
+  -t {{ xdg_config_home }} \
+  -R .
 
-case ${usage_pkg?} in
-  config) target="${XDG_CONFIG_HOME:-$HOME/.config}" ;;
-  home) target="${HOME}" ;;
-  bin) target="${HOME}/.local/bin" ;;
-  *) echo "Invalid operation!" && exit 1 ;;
-esac
-
-common_flags=('-d' "common/${usage_pkg?}" '-t' "${target?}" "${(z)${usage_sim:+-vv --simulate}:-}" "-R" '.')
-stow "${common_flags[@]}"
-platform_flags=('-d' "linux/${usage_pkg?}" '-t' "${target?}" "${(z)${usage_sim:+-vv --simulate}:-}" "-R" '.')
-stow "${platform_flags[@]}"
+# platform_flags=('-d' "linux/.config" '-t'${xdg_config_home "${(z)${usage_sim:+-vv --simulate}:-}" "-R" '.')
+# stow "${platform_flags[@]}"
 '''
-
-["stow:dry_run"]
-description = "Stow dotfiles"
-hide = true
-usage = '''
-arg "<pkg>" help="Package types to stow" {
-  choices "config" "home" "bin"
-  default "config"
-}
-'''
-run = [
-  { task = "_stow_dotfiles", args = [
-    '{{usage.pkg}}',
-    "--sim",
-  ] },
-  { task = "_stow_dotfiles", args = [
-    '{{usage.pkg}}',
-    "--sim",
-  ], env = { STOW_PKG_DIR = "{{config_root}}/{{os()}}" } },
-]
-
 
 ["stow:doftiles"]
 description = "Stow dotfiles"
-hide = true
-usage = '''
-arg "<pkg>" help="Package types to stow" {
-  choices "config" "home" "bin"
-  default "config"
-}
+depends = ["_stow:dotfiles common", "_stow:dotfiles linux"]
+run = '''
+echo "XDG_CONFIG_HOME: "
+eza --icons=always --oneline \
+    --no-git --all \
+    {{ xdg_config_home }}
 '''
-run = [
-  { task = "_stow_dotfiles", args = [
-    '{{usage.pkg}}',
-  ] },
-  { task = "_stow_dotfiles", args = [
-    '{{usage.pkg}}',
-  ], env = { STOW_PKG_DIR = "{{config_root}}/{{os()}}" } },
-]

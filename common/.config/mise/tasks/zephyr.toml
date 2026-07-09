@@ -1,0 +1,72 @@
+
+["zephyr:mcuboot:keygen"]
+hide = true
+env = { MCUBOOT_SCRIPTS = "{{config_root}}/external/bootloader/mcuboot/scripts" }
+usage = '''
+arg "<keyname>" help="Name of key" default="test"
+'''
+run = '''
+#!/usr/bin/env zsh
+set -euo pipefail
+
+typeset -a _imgtool
+_imgtool=(uv run '--with-requirements' "${MCUBOOT_SCRIPTS}/requirements.txt" "${MCUBOOT_SCRIPTS}/imgtool.py")
+$_imgtool keygen -k "${usage_keyname?}_key.pem" -t ecdsa-p256
+'''
+["zephyr:dts-lsp:genconf"]
+description = "Find DTS node with dtsh"
+tools = { 'yq' = 'latest' }
+usage = '''
+arg "build_info" help="Build info to convert"
+flag "-o --out [output]" help="output" default=".dts-lsp.lua"
+'''
+run = '''
+yq e -o=lua '.cmake.devicetree as $dt | { "board": .cmake.board.name,"dtsFile": ($dt.files[] | select(. == "*.dts")), "overlays": ($dt.files[] | select(. == "*.overlay")),"includePaths": $dt.include-dirs, "zephyrBindings": $dt.bindings-dirs } ' {{usage.build_info}} > {{usage.out}}
+'''
+
+["zephyr:dts:find"]
+description = "Find DTS node with dtsh"
+interactive = true
+tools = { 'pipx:dtsh' = 'latest' }
+alias = "dtsf"
+usage = '''
+arg "<regex>" help="Regex to find dts nodes with"
+arg "[attribute]" help="Attribute to find dts nodes with" {
+    choices "compatible"  "alias" "dts-ord" "chosen" "label" "bus"
+    default "dts-ord"
+}
+flag "-d --build-dir [build_dir]" help="Build directory to do post action on" default="build"
+'''
+run = '''
+cmd="find --with-${usage_attribute?} ${usage_regex?}"
+
+if [[ ! -d "${usage_build_dir?}" ]]; then
+  echo "Build directory '${build_dir}' does not exist. Run a build first."
+  exit 1
+fi
+if [[ -f "${usage_build_dir}/domains.yaml" ]]; then
+    domain=$(cat "${build_dir:?}/domains.yaml" | yq e -r '.domains[].name' | fzf)
+    dts_file="${usage_build_dir}/${domain?}/zephyr/zephyr.dts"
+else
+    dts_file="${usage_build_dir}/zephyr/zephyr.dts"
+fi
+dtsh -c ${(q)cmd}  ${dts_file}
+'''
+
+["zephyr:kconfig:diffconfig"]
+description = "Diffconfig after menucfg"
+dir = "{{cwd}}"
+usage = '''
+arg "[app]" help="Application" default="app" env="ZEPHYR_APP"
+flag "-d --domain [domain]" help="Domain"
+flag "-m --merge" help="Merge style"
+flag "-o --out <out>" help="Output to file"
+'''
+run = '''
+#!/usr/bin/env zsh
+
+build_dir="build_${usage_app?}/${usage_domain:-$usage_app}"
+diffconfig.py "${build_dir}/zephyr/.config.old" "${build_dir}/zephyr/.config" \
+    ${usage_merge:+-m} \
+    ${(z)${usage_out:+-o $usage_out}}
+'''

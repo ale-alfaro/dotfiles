@@ -1,0 +1,147 @@
+
+["sca:codechecker:filegen"]
+description = "Check Zephyr project with Codechecker SCA"
+dir = "{{cwd}}"
+usage = '''
+arg "<include>" help="Projects to include" {
+  var #true
+  var_min 1
+}
+flag "-o --out [out]" help="Output directory" {
+  default "{{cwd}}"
+}
+'''
+run = '''
+cat <<-EOF -> "{{usage.out}}/codechecker.skip"
+{% for dir in usage.include %} +{{dir}}/*{% endfor %}
+$(west list -f '{name:20} {posixpath}' | \
+  rg -v "^({{['manifest'] | concat(with=usage.include) | join(sep='|')}})" | \
+  sd '^[[:alnum:]_-]+\s+' '' | \
+  xargs printf '-%q/*\n')
+EOF
+cat <<EOF > "{{usage.out}}/codechecker.yml"
+analyzer:
+  # Baseline: start disabled, turn on curated groups.
+  - --disable-all
+  - --enable=profile:sensitive
+  - --enable=profile:security
+  - --enable=guideline:sei-cert-c
+  - --enable=guideline:sei-cert-cpp
+
+  # Ecosystems unrelated to embedded firmware
+  - --disable=boost
+  - --disable=mpi
+
+  # Zephyr/NCS public APIs use reserved-style identifiers (covers both
+  # identifier and macro-identifier reservation warnings)
+  - --disable=bugprone-reserved-identifier
+
+  # Dominated by macro-expansion false positives on vendor code
+  - --disable=misc-redundant-expression
+
+  # Callback-heavy (work queues, kernel hooks) → high noise, low signal
+  - --disable=misc-unused-parameters
+  - --disable=bugprone-easily-swappable-parameters
+
+  # Driver code is full of register offsets — magic-numbers lint is useless here
+  - --disable=readability-magic-numbers
+  - --disable=cppcoreguidelines-avoid-magic-numbers
+
+  # Clean stale plists between runs
+  - --clean
+EOF
+'''
+["sca:codechecker:run"]
+description = "Check Zephyr project with Codechecker SCA"
+dir = "{{cwd}}"
+usage = '''
+arg "<app>" help="Application"
+arg "[config]" help="Config files directory" default="."
+flag "-b --board [board]" help="Board"
+flag "--store" help="Store"
+'''
+run = '''
+typeset -a cmake_args
+cmake_args=(
+  -DZEPHYR_SCA_VARIANT=codechecker
+  -DCODECHECKER_CONFIG_FILE="{{usage.config}}/codechecker.yml"
+  -DCODECHECKER_ANALYZE_OPTS="--skip;{{usage.config}}/codechecker.skip"
+  -DCODECHECKER_EXPORT="html,json"
+{% if usage.store %}-DCODECHECKER_STORE=1 -DCODECHECKER_STORE_OPTS="--url=http://localhost:8001/Default" {% endif %}
+)
+
+west build -p{% if usage.board %} -b {{usage.board}} {% endif %}\
+  {{usage.app}} \
+  -- "${cmake_args[@]}"
+'''
+
+["sca:codechecker:serve"]
+description = "Start a local CodeChecker web server on :8001"
+dir = "{{cwd}}"
+usage = '''
+arg "<dir>" help="codechecker_workspace dir"
+'''
+run = '''
+workspace="{{usage.dir}}"
+mkdir -p "$workspace"
+exec CodeChecker server -w "$workspace" --port 8001
+'''
+
+
+["sca:codechecker:report_parse"]
+usage = '''
+arg "<out>" help="Location to parsed output report" default="codechecker.json"
+'''
+run = '''
+#!/usr/bin/env zsh
+mkdir -p {{usage.out}}
+{% for jquery in task_source_files() %}
+  {% set query_name = jquery | file_stem %}
+  {% if not query_name == "codechecker" %}
+    printf "Running %s report" "$query_name"
+    jq -L scripts/jq \
+        -f "{{jquery}}" \
+        "{{usage.out}}/codechecker.json" \
+        | tee "report/{{query_name}}.json"
+  {% endif %}
+{% endfor %}
+'''
+
+["sca:cppcheck:zephyr"]
+description = "Check Zephyr project with Cppcheck SCA"
+dir = "{{cwd}}"
+raw = true
+hide = true
+usage = '''
+arg "<file>" help="Compile_commands.json"
+arg "[file_filter]" help="File filter" {
+  long_help """
+    Analyze only those files matching the given filter str.
+    Can be used multiple times. When str is -, the file
+    filter will be read from standard input. When str is +,
+    given files on CLI will be treated as file filters.
+    Example: --file-filter=*bar.cpp analyzes only files
+    that end with bar.cpp.
+  """
+}
+'''
+run = '''
+#!/usr/bin/env zsh
+file="{{cwd}}/${usage_file?}"
+topdir="$(west -qqq topdir 2>/dev/null)"
+zephyr_base="${topdir?}/$(west -qqq config zephyr.base 2>/dev/null)"
+# header_includes="${$(which arm-zephyr-eabi-gcc):h:h}/arm-zephyr-eabi/include/"
+cmd=$(cat <<-EOF
+  cppcheck --quiet --enable=warning,style,performance,portability,information,missingInclude \
+      --template='{file}:{line}:{column}: {severity}: [{id}] {message} {callstack}' \
+      --language=c \
+      --project=${file} \
+      --suppress=missingIncludeSystem \
+      -i {{cwd}}/build \
+      -i ${zephyr_base} \
+      --output-file=cppcheck-report.txt
+EOF
+)
+print -rl "Running:" "${(s: :)cmd[@]}"
+# eval "$cmd"
+'''

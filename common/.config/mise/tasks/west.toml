@@ -1,3 +1,94 @@
+
+["west:build"]
+dir = "{{cwd}}"
+description = "Build a zephyr app with west"
+interactive = true
+usage = '''
+arg "<app>" help="App to build" {
+  default "."
+}
+flag "-b --board [board]"  {
+    help "Board to build for"
+    env "BOARD"
+}
+flag "-T --testcase [testcase]" {
+    help "Select a testcase configuration to build"
+}
+flag "--agent" help="Flag for agents" {
+  long_help """
+    Turns off any interactiveness
+  """
+}
+'''
+run = '''
+#!/usr/bin/env zsh
+if [[ -n ${usage_board:-} ]]; then
+    board="${usage_board:?}"
+else
+  board="$(west config build.board 2>/dev/null)"
+  ret="$?"
+  if [[ $ret != 0 ]]; then echo "No board as input nor set in config"; fi
+fi
+
+if [[ -n ${usage_testcase:-} ]]; then
+    testcase="${usage_testcase}"
+    west build -p=always -b "${board}" "${usage_app?}" -T "${testcase}"
+elif [[ -z ${usage_agent:-} ]]; then
+  sample_test=$(fd --strip-cwd-prefix -e yaml -tf '(testcase|sample)\.yaml' | fzf)
+  app_dir="${sample_test:h}"
+  app_name="${sample_test:t}"
+  echo "app selected: ${app_dir}";
+  testcase=$(cat "$sample_test" | yq e '.testcase = "\(.tests | keys | .[] | to_string)" | .testcase' | fzf)
+  echo "testcase selected: ${testcase}";
+  west build -p=always -b "${board?}" "${app_dir?}" -T "${testcase?}"
+  echo "app build: ${app_name}";
+  if [[ -f build/compile_commands.json ]]; then
+    ln -sf "$(realpath build/compile_commands.json)" "$(west topdir)"
+  elif [[ -f "build/${app_name}/compile_commands.json" ]]; then
+    ln -sf "$(realpath build/${app_name}/compile_commands.json)" "$(west topdir)"
+  else
+    echo "Couldn' find compile_commands.json. Not symlinking to west topdir"
+  fi
+else
+  west build -p=always -b "${board}" "${usage_app?}"
+fi
+'''
+["west:boards"]
+description = "Find boards registered in the workspace"
+interactive = true
+dir = "{{cwd}}"
+usage = '''
+arg "[regex]" help="Regex for search"
+flag "--agent" help="Flag for agents" {
+  long_help """
+    Turns off any interactiveness. This task uses a catch all
+    double_dash variadic argument the west find output will be piped
+    to. If none is given task just print the results
+  """
+}
+arg "[pipe_cmd]" help="Cmd to pipe the output to. Anything after '--' will be piped" {
+  var #true
+  double_dash "required"
+}
+'''
+run = '''
+{% if usage.agent %}
+  default_pipe_cmd="cat"
+{% else  %}
+  default_pipe_cmd="fzf \
+            --ansi \
+            --preview='tree -C {2}' \
+            --preview-window='45%,border-sharp' \
+            --prompt='Boards > ' \
+            --with-nth 1 \
+            --bind='enter:become(nvim {2})'"
+
+{% endif  %}
+eval "pipe_cmd=(${usage_pipe_cmd:-$default_pipe_cmd})"
+west boards ${(z)${usage_regex:+-n $usage_regex}} -f "{name} {dir}" | "${pipe_cmd[@]}"
+
+'''
+
 ["west:menuconfig"]
 description = "Run menuconfig"
 dir = "{{cwd}}"
@@ -30,10 +121,14 @@ usage = '''
 arg "[build_dir]" help="build directory"
 '''
 run = '''
-west attach -d "${usage_build_dir:-build}" --gdb=/opt/zephyr-sdk-custom/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb-py
+west attach \
+  --no-rebuild \
+  -d "${usage_build_dir:-build}" \
+  --gdb=/opt/zephyr-sdk-custom/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb-py
+
 '''
 
-["build:post_action"]
+["west:build:post_action"]
 description = "Post build actions for zephyr app with Ninja"
 usage = '''
 arg "[build_dir]" help="Build directory to do post action on" {
@@ -63,3 +158,67 @@ echo "Running build cmd $cmd"
 eval "$cmd"
 '''
 
+["west:rg"]
+description = "Use ripgrep at the top of the workspace"
+interactive = true
+alias = "wrg"
+dir = "{{cwd}}"
+usage = '''
+arg "<regex>" help="Regex"
+flag "--agent" help="Flag for agents" {
+  long_help """
+    Turns off any interactiveness. This task uses a catch all
+    double_dash variadic argument the west find output will be piped
+    to. If none is given task just print the results
+  """
+}
+arg "[varopts]" help="Catch all for args and flags after the regex and path" {
+  var #true
+  double_dash "required"
+}
+'''
+run = '''
+eval "varopts=('-N' ${usage_varopts:---context=1})"
+topdir="$(west topdir 2>/dev/null)"
+rg {% if usage.agent %}--color=never{% endif %} '{{usage.regex}}' "${topdir:?}" "${varopts[@]}"
+'''
+
+["west:fd"]
+description = "Find file across west workspace and open it with neovim"
+interactive = true
+alias = "wfd"
+dir = "{{cwd}}"
+usage = '''
+arg "<regex>" help="Regex to find file with fd"
+flag "-e --ext [extensions]" help="File extensions, if multiple must be given with ',' separated values"
+flag "--rg" help="Use ripgrep --files-with-matches instead of fd"
+flag "--agent" help="Flag for agents" {
+  long_help """
+    Turns off any interactiveness. This task uses a catch all
+    double_dash variadic argument the west find output will be piped
+    to. If none is given task just print the results
+  """
+}
+arg "[pipe_cmd]" help="Cmd to pipe the output to. Anything after '--' will be piped" {
+  var #true
+  double_dash "required"
+}
+'''
+run = '''
+{% if usage.agent %}
+  default_pipe_cmd="cat"
+{% else  %}
+  default_pipe_cmd="fzf --bind 'enter:become(nvim {})'"
+{% endif  %}
+if [[ -n "${usage_extensions:-}" ]]; then
+  extensions=(${(j:,:)usage_extensions})
+fi
+eval "pipe_cmd=(${usage_pipe_cmd:-$default_pipe_cmd})"
+{% if usage.rg %}
+  topdir="$(west topdir 2>/dev/null)"
+  rg '{{usage.regex}}' "${topdir:?}" --files-with-matches | "${pipe_cmd[@]}"
+{% else  %}
+  west -q forall -c "fd '{{usage.regex}}' . --absolute-path ${extensions:+${extensions[@]/#/-e}}" | "${pipe_cmd[@]}"
+{% endif  %}
+
+'''

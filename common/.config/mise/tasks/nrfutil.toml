@@ -43,10 +43,10 @@ description = "Flash both Network and Application Core FW"
 dir = "{{cwd}}"
 usage = '''
 flag "-d --build-dir <build_dir>"
-flag "--board-id [board]"
+flag "--sysbuild" help="Sysbuild"
 '''
 run = [
-  { task = 'artifacts:mergehex', args = [
+  { task = '_artifacts:mergehex', args = [
     '{{usage.build_dir}}',
   ] },
   { task = 'nrf5340:flash:net', args = [
