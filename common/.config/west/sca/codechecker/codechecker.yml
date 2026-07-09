@@ -1,0 +1,29 @@
+analyzer:
+  # Baseline: start disabled, turn on curated groups.
+  - --disable-all
+  - --enable=profile:sensitive
+  - --enable=profile:security
+  - --enable=guideline:sei-cert-c
+  - --enable=guideline:sei-cert-cpp
+
+  # Ecosystems unrelated to embedded firmware
+  - --disable=boost
+  - --disable=mpi
+
+  # Zephyr/NCS public APIs use reserved-style identifiers (covers both
+  # identifier and macro-identifier reservation warnings)
+  - --disable=bugprone-reserved-identifier
+
+  # Dominated by macro-expansion false positives on vendor code
+  - --disable=misc-redundant-expression
+
+  # Callback-heavy (work queues, kernel hooks) → high noise, low signal
+  - --disable=misc-unused-parameters
+  - --disable=bugprone-easily-swappable-parameters
+
+  # Driver code is full of register offsets — magic-numbers lint is useless here
+  - --disable=readability-magic-numbers
+  - --disable=cppcoreguidelines-avoid-magic-numbers
+
+  # Clean stale plists between runs
+  - --clean
