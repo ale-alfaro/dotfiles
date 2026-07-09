@@ -1,9 +1,9 @@
 # Copied from https://github.com/folke/tokyonight.nvim/blob/main/extras/lazygit/tokyonight_night.conf
 os:
-  edit: "mise x  -- nvim  -- {{filename}}"
-  editAtLine: "mise x  -- nvim  +{{line}} -- {{filename}}"
-  editAtLineAndWait: "mise x  -- nvim  +{{line}} -- {{filename}}"
-  openDirInEditor: "mise x  -- nvim  -- {{dir}}"
+  edit: "nvim -c 'LazyGitEdit' -- {{filename}}"
+  editAtLine: "nvim -c 'LazyGitEdit' +{{line}} -- {{filename}}"
+  editAtLineAndWait: "nvim -c 'LazyGitEdit' +{{line}} -- {{filename}}"
+  openDirInEditor: "nvim  -- {{dir}}"
   editInTerminal: true
 # to skip without creating a new repo
 notARepository: "skip"
@@ -15,9 +15,8 @@ gui:
 
   # See https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#custom-branch-color
   branchColorPatterns:
-    "^(feature|proto|wip)": "#7fb4ca" # use a light blue for branches beginning with 'docs/'
-    "(BEDR|CWP)-\\d+": "#dcd7ba" # use a light blue for branches beginning with 'docs/'
-    "(bug|fix)\\w+-\\d+": "#e82424" # use a bright orange for branches containing starting with 'bug'
+    "^(feat|proto|refactor)": "#7fb4ca" # use a light blue for branches beginning with 'docs/'
+    "(bug|fix)": "#e82424" # use a bright orange for branches containing starting with 'bug'
 
   # Custom icons for filenames and file extensions
   # See https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#custom-files-icon--color
@@ -113,18 +112,6 @@ gui:
   # staging view.
   useHunkModeInStagingView: true
 
-  # One of 'auto' (default) | 'en' | 'zh-CN' | 'zh-TW' | 'pl' | 'nl' | 'ja' | 'ko'
-  # | 'ru' | 'pt'
-  language: "en"
-
-  # Format used when displaying time e.g. commit time.
-  # Uses Go's time format syntax: https://pkg.go.dev/time#Time.Format
-  timeFormat: 02 Jan 06
-
-  # Format used when displaying time if the time is less than 24 hours ago.
-  # Uses Go's time format syntax: https://pkg.go.dev/time#Time.Format
-  shortTimeFormat: 3:04PM
-
   # Config relating to colors and styles.
   # See https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#color-attributes
   nerdFontsVersion: "3"
@@ -132,21 +119,6 @@ gui:
     activeBorderColor:
       - "#ff9e64"
       - "bold"
-    inactiveBorderColor:
-      - "#27a1b9"
-    searchingActiveBorderColor:
-      - "#ff9e64"
-      - "bold"
-    optionsTextColor:
-      - "#7aa2f7"
-    selectedLineBgColor:
-      - "#283457"
-    cherryPickedCommitFgColor:
-      - "#7aa2f7"
-    cherryPickedCommitBgColor:
-      - "#bb9af7"
-    markedBaseCommitFgColor:
-      - "#7aa2f7"
     markedBaseCommitBgColor:
       - "#e0af68"
     unstagedChangesColor:
@@ -255,8 +227,9 @@ gui:
 # Config relating to git
 git:
   pagers:
-    - pager: delta --dark --paging=never
     - externalDiffCommand: difft --color=always
+    - pager: delta --paging=never -n --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}" --file-style="omit"
+    - pager: delta --paging=never -n -s --file-style="omit"
   # Array of pagers. Each entry has the following format:
   #
   #   # Value of the --color arg in the git diff command. Some pagers want
@@ -283,7 +256,7 @@ git:
   # Config relating to committing
   commit:
     # If true, pass '--signoff' flag when committing
-    signOff: true 
+    signOff: true
 
     # Automatic WYSIWYG wrapping of the commit message as you type
     autoWrapCommitMessage: true
@@ -398,189 +371,33 @@ git:
     # displays the whole git graph by default in the commits view (equivalent to
     # passing the `--all` argument to `git log`)
     showWholeGraph: false
+keybinding:
+  files:
+    commitChangesWithoutHook: <disabled>
 customCommands:
-  - key: "c"
+  - key: w
+    prompts:
+      - type: input
+        title: Commit summary
+        initialValue: ""
+    description: Commit changes without pre-commit hook
+    command: git commit -n -m '{{index .PromptResponses 0}}'
+    context: files
+  - key: "C"
     command: "git commit"
     description: "commit with nvim (use ctrl-J for snippet!)"
     loadingText: "opening commit with nvim"
     context: "global"
     output: terminal
-  - key: "C"
-    command: "mise x pipx:commitizen -- cz c"
+  - key: "Z"
+    command: "mise x pipx:commitizen -- cz c -e"
     description: "commit with commitizen"
     context: "files"
     loadingText: "opening commitizen commit tool"
     output: terminal
-  - key: "U"
-    description: "Log: author + date range (pretty)"
-    context: global
+  - key: "<c-a>"
+    command: "uv run --with=commitizen --with=cz-ai cz --name cz_ai commit -e"
+    description: "commit with commitizen (and AI!)"
+    context: "files"
+    loadingText: "opening commitizen commit tool"
     output: terminal
-    prompts:
-      - type: input
-        title: "Author (name/email/regex):"
-        key: Author
-        suggestions:
-          preset: authors
-      - type: input
-        title: "Since (blank = no lower bound):"
-        key: Since
-        initialValue: "2 weeks ago"
-      - type: input
-        title: "Until (blank = now):"
-        key: Until
-        initialValue: ""
-    command: |
-      #!/usr/bin/env bash
-      set -euo pipefail
-
-      author="{{ .Form.Author }}"
-      since="{{ .Form.Since }}"
-      until="{{ .Form.Until }}"
-
-      args=()
-      [[ -n "$since" ]] && args+=(--since="$since")
-      [[ -n "$until" ]] && args+=(--until="$until")
-
-      git log --author="$author" "${args[@]}" \
-        --graph --decorate --date=short \
-        --pretty=format:'%C(auto)%h%d%Creset %C(blue)%ad%Creset %C(green)%an%Creset %s' \
-      | less -FRX
-  # 4) Selected file history with --follow + optional date range (run from files panel)
-  - key: "H"
-    description: "File history: --follow + date range (selected file)"
-    context: files
-    output: terminal
-    prompts:
-      - type: input
-        title: "Since (blank = no lower bound):"
-        key: Since
-        initialValue: "1 month ago"
-      - type: input
-        title: "Until (blank = now):"
-        key: Until
-        initialValue: ""
-    command: |
-      #!/usr/bin/env bash
-      set -euo pipefail
-
-      file="{{ .SelectedFile.Name }}"
-      since="{{ .Form.Since }}"
-      until="{{ .Form.Until }}"
-
-      if [[ -z "$file" ]]; then
-        echo "Error: no selected file"
-        exit 1
-      fi
-
-      args=()
-      [[ -n "$since" ]] && args+=(--since="$since")
-      [[ -n "$until" ]] && args+=(--until="$until")
-
-      git log --follow "${args[@]}" \
-        --graph --decorate --oneline \
-        -- "$file" \
-      | less -FRX
-  # 5) Pickaxe (-S) diff-content search + optional path + optional dates
-  - key: "S"
-    description: "Search diffs: pickaxe (-S exact string), optional path"
-    context: global
-    output: terminal
-    prompts:
-      - type: input
-        title: "Exact string to search in diffs (-S):"
-        key: Needle
-        initialValue: ""
-      - type: input
-        title: "Limit to path (blank = whole repo):"
-        key: Path
-        initialValue: ""
-      - type: input
-        title: "Since (blank = no lower bound):"
-        key: Since
-        initialValue: ""
-      - type: input
-        title: "Until (blank = now):"
-        key: Until
-        initialValue: ""
-    command: |
-      #!/usr/bin/env bash
-      set -euo pipefail
-
-      needle="{{ .Form.Needle }}"
-      path="{{ .Form.Path }}"
-      since="{{ .Form.Since }}"
-      until="{{ .Form.Until }}"
-
-      if [[ -z "$needle" ]]; then
-        echo "Error: needle is empty"
-        exit 1
-      fi
-
-      args=()
-      [[ -n "$since" ]] && args+=(--since="$since")
-      [[ -n "$until" ]] && args+=(--until="$until")
-
-      if [[ -n "$path" ]]; then
-        git log -S"$needle" "${args[@]}" \
-          --graph --decorate --date=short \
-          --pretty=format:'%C(auto)%h%d%Creset %C(blue)%ad%Creset %C(green)%an%Creset %s' \
-          -- "$path" \
-        | less -FRX
-      else
-        git log -S"$needle" "${args[@]}" \
-          --graph --decorate --date=short \
-          --pretty=format:'%C(auto)%h%d%Creset %C(blue)%ad%Creset %C(green)%an%Creset %s' \
-        | less -FRX
-      fi
-  # 6) Regex-in-diff search (-G) + optional path + optional dates
-  - key: "R"
-    description: "Search diffs: regex (-G), optional path"
-    context: global
-    output: terminal
-    prompts:
-      - type: input
-        title: "Regex to search in diffs (-G):"
-        key: Regex
-        initialValue: ""
-      - type: input
-        title: "Limit to path (blank = whole repo):"
-        key: Path
-        initialValue: ""
-      - type: input
-        title: "Since (blank = no lower bound):"
-        key: Since
-        initialValue: ""
-      - type: input
-        title: "Until (blank = now):"
-        key: Until
-        initialValue: ""
-    command: |
-      #!/usr/bin/env bash
-      set -euo pipefail
-
-      regex="{{ .Form.Regex }}"
-      path="{{ .Form.Path }}"
-      since="{{ .Form.Since }}"
-      until="{{ .Form.Until }}"
-
-      if [[ -z "$regex" ]]; then
-        echo "Error: regex is empty"
-        exit 1
-      fi
-
-      args=()
-      [[ -n "$since" ]] && args+=(--since="$since")
-      [[ -n "$until" ]] && args+=(--until="$until")
-
-      if [[ -n "$path" ]]; then
-        git log -G"$regex" "${args[@]}" \
-          --graph --decorate --date=short \
-          --pretty=format:'%C(auto)%h%d%Creset %C(blue)%ad%Creset %C(green)%an%Creset %s' \
-          -- "$path" \
-        | less -FRX
-      else
-        git log -G"$regex" "${args[@]}" \
-          --graph --decorate --date=short \
-          --pretty=format:'%C(auto)%h%d%Creset %C(blue)%ad%Creset %C(green)%an%Creset %s' \
-        | less -FRX
-      fi

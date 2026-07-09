@@ -22,7 +22,6 @@ always_keep_install = false  # deleted on failure by default
 # this is updated whenever a new runtime is installed
 # (note: this isn't currently implemented but there are plans to add it: https://github.com/jdx/mise/discussions/6735)
 plugin_autoupdate_last_check_duration = '1 week'                                               # set to 0 to disable updates
-shorthands_file = "~/.config/mise/shorthands.toml"
 status = { missing_tools = "if_other_versions_installed", show_env = true, show_tools = true }
 task = { output = "interleave", run_auto_install = true, timings = true }
 npm.package_manager = "bun"
@@ -33,7 +32,6 @@ disable_tools = ["pipx:west"]
 [settings.cargo]
 
 [tools]
-go = "latest"
 jqp = "latest"
 lua = "5.5"
 dprint = "latest"
@@ -58,7 +56,8 @@ uv = "latest"
 "pipx:pyrefly" = "latest"
 "pipx:ruff" = "latest"
 "pipx:ty" = "latest"
-"pipx:commitizen" = "latest"
+"pipx:ptpython" = "latest"
+"pipx:kconfigstyle" = "latest"
 
 bun = "latest"
 "npm:prettier" = "latest"
@@ -66,19 +65,26 @@ bun = "latest"
 "npm:yaml-language-server" = "latest"
 "npm:vscode-langservers-extracted" = "latest"
 "npm:defuddle" = "latest"
+"npm:typescript-language-server" = "latest"
+"npm:devicetree-language-server" = "latest"
 
 gh = "latest"
+git-lfs = "3.7.1"
 "github:clangd/clangd" = "latest"
 "github:joshmedeski/sesh" = "latest"
 "github:dlvhdr/diffnav" = "latest"
 "github:dandavison/delta" = "latest"
+"github:apple/pkl-lsp" = "latest"
+
+go = "latest"
+"go:github.com/coolamit/mermaid-cli/cmd/mmd-cli" = "0.1.1"
 
 rust = "latest"
 rust-analyzer = "latest"
 "cargo:taplo-cli" = "latest"
 "cargo:neocmakelsp" = "latest"
 "cargo:tlrc" = "latest"
-git-lfs = "3.7.1"
+
 "http:nrfutil" = { version = "1.4.0", url = "https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/{{arch(x64='x86_64')}}-{{os(linux='unknown-linux-gnu')}}/nrfutil" }
 rg = "latest"
 "vfox-zephyr:west" = "1.5.0"
@@ -87,15 +93,16 @@ yq = "latest"
 hk = "latest"
 actionlint = "1.7.12"
 node = "latest"
-"npm:typescript-language-server" = "latest"
-"go:github.com/coolamit/mermaid-cli/cmd/mmd-cli" = "0.1.1"
-"pipx:ptpython" = "latest"
 sd = "latest"
 opam = { version = "latest", asset_pattern = "opam-*-{gnu_arch}-{os}" }
 pkl = "latest"
-"github:apple/pkl-lsp" = "latest"
-"npm:devicetree-language-server" = "latest"
+ninja = "latest"
 
+[plugins]
+"vfox:zephyr" = "https://github.com/ale-alfaro/vfox-zephyr-sdk.git"
+
+[env]
+'_'.file = ".env"
 
 [tool_alias]
 "python@3.12" = "python"

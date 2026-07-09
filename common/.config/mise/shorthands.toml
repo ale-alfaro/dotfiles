@@ -1,9 +1,0 @@
-# shorthands_file
-# Type: string(optional)
-# Env: MISE_SHORTHANDS_FILE
-# Default: None
-# Use a custom file for the shorthand aliases. This is useful if you want to share plugins within an organization.
-# Shorthands make it so when a user runs something like mise install elixir mise will automatically install the asdf-elixir plugin. By default, it uses the shorthands in registry/.
-# The file should be in this toml format:
-#clang = "https://github.com/mise-plugins/vfox-clang.git"
-vfox-zephyr = "https://github.com/ale-alfaro/vfox-zephyr-sdk.git"

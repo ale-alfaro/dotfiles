@@ -43,9 +43,7 @@ defaults:
   prsLimit: 20
   issuesLimit: 20
 repoPaths:
-  ale-alfaro/ale-alfaro.github.io: ~/Documents/Obsidian/blog
-  ale-alfaro/vfox-zephyr-sdk: ~/sibel/eng/tools/mise-zephyr-sdk-plugin
-  ale-alfaro/vfox-ncs: ~/sibel/eng/tools/mise-ncs-plugin
+  ale-alfaro/*: ~/sibel/eng/tools/*
   sibelhealth/DragonFly-Zephyr: ~/sibel/eng/fw/anne_sensors_workspace/dragonfly
   sibelhealth/BengalTiger-Zephyr: ~/sibel/eng/fw/anne_sensors_workspace/bengal
   sibelhealth/framework: ~/sibel/eng/fw/anne_sensors_workspace/framework
@@ -57,23 +55,9 @@ keybindings:
       name: lazygit
       command: >
         cd {{.RepoPath}} && lazygit
-    - key: c
-      name: Config
-      command: >
-        nvim ~/.config/gh-dash/config.yml
   prs:
-    - key: C
-      builtin: checkout
-    - key: m
-      command: gh pr edit -R {{.RepoName}} --add-reviewer sibelhealth/Firmware
-        {{.PrNumber}}
     - key: O
       name: code review
-      command: >
-        tmux new-window -c {{.RepoPath}} -n "octo" ' nvim -c ":silent Octo pr
-        edit {{.PrNumber}}"
-         '
-    - key: T
       command: >-
         tmux new-window -n "enhance" '
           gh enhance -R {{.RepoName}} {{.PrNumber}}

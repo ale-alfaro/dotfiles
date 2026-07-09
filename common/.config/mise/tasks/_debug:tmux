@@ -1,0 +1,86 @@
+#!/usr/bin/env zsh
+#MISE description = "Spawn a fresh tmux window: west debugserver + pygdb + (telnet RTT | minicom UART)"
+#MISE dir = "{{cwd}}"
+#USAGE arg "<elf>" help="Elf file"
+#USAGE arg "<device>" help="Device" {
+#USAGE  choices "nRF5340xx" "nRF52840xx"
+#USAGE }
+#USAGE flag "--serial [serial]" help="Use serial port instead of telnet RTT on :19021"
+
+
+elf="${usage_elf?}"
+local device="${usage_device:?}"
+local -r gdbserver_cmd=$(
+    cat <<-EOF
+JLinkGDBServer \
+  -select usb \
+  -if swd \
+  -speed auto \
+  -device ${device} \
+  -silent \
+  -endian little \
+  -singlerun \
+  -nogui
+EOF
+  )
+local -r gdbclient_cmd=$(
+    cat <<-EOF
+  arm-zephyr-eabi-gdb-py \
+  -ex='target remote :2331' \
+  -ex='mon reset' \
+  -ex='c' \
+  --se=${elf}
+EOF
+# Must be run from inside a tmux session so we can carve up the screen.
+session="$(tmux display-message -p '#S' 2>/dev/null)"
+if [[ -z "${session}" ]]; then
+  echo "ERROR: not inside a tmux session — debug_session needs tmux to lay out the 3 panes." >&2
+  exit 1
+fi
+
+# Reset state #1: kill processes that would hold the resources we need.
+# Without this, a stale debugserver elsewhere keeps port 2331, a stale
+# telnet keeps the RTT viewer slot (single-client), and we fail silently.
+#
+# We use `pkill -x` (exact program-name match against /proc/<pid>/comm)
+# instead of `pkill -f` because -f scans /proc/<pid>/cmdline and matches
+# against this very script's argv (which contains the patterns as
+# literals), suicidally killing the shell mid-script.
+echo "Resetting debug state..."
+pkill -x JLinkGDBServer            2>/dev/null || true
+pkill -x arm-zephyr-eabi-gdb-py    2>/dev/null || true
+# Telnet is generic — confirm it's the RTT one via /proc/<pid>/cmdline.
+# Reading cmdline only for pids returned by pgrep -x telnet excludes this
+# shell (whose comm is "zsh"), so we still don't self-match.
+for telnet_pid in $(pgrep -x telnet 2>/dev/null); do
+  case "$(tr '\0' ' ' < /proc/${telnet_pid}/cmdline 2>/dev/null)" in
+    *19021*) kill "${telnet_pid}" 2>/dev/null || true ;;
+  esac
+done
+sleep 1
+
+# Reset state #2: kill any prior tmux window of the same name so the
+# stacked-pane layout is rebuilt clean.
+window="dbg-${domain}"
+tmux kill-window -t "${session}:${window}" 2>/dev/null || true
+
+# Pane 1 (top): west debugserver. Holds the J-Link GDB RPC server on :2331.
+tmux split-window -v -l 15% -t "$gdbclient_pane" -c "$current_dir" "$gdbserver_cmd"
+
+# Give the GDB server time to come up before pygdb tries to connect.
+sleep 3
+
+# Right pane: extra command if given, otherwise a plain shell
+# Pane 3 (bottom): live console — RTT via telnet by default, UART via
+# minicom on --minicom (J-Link's CDC port at /dev/ttyACM0).
+tmux split-window -v -t "${session}:${window}" -c "$(pwd)"
+if [[ -n "${usage_minicom:-}" ]]; then
+  tmux send-keys -t "${session}:${window}" "minicom -D /dev/ttyACM0 -b 115200" Enter
+else
+  tmux send-keys -t "${session}:${window}" "telnet localhost 19021" Enter
+fi
+
+tmux send-keys -t "$gdbclient_pane" "$gdbclient_cmd" C-m
+tmux select-pane -t "$gdbclient_pane"
+
+'''
