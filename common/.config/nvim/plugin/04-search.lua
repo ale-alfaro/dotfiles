@@ -138,6 +138,7 @@ VimRc.later(function()
 
     return FzfLua.fzf_exec(contents, opts)
   end, vim.tbl_extend('force', FzfLua.defaults.files, { sort_by = 'recency' }))
+
   local nonprefix_keys = {
     { '<Space><Space>', '<cmd>FzfLua builtin<cr>', 'Find Fzf pickers' },
     { '<C-b>', '<cmd>FzfLua buffers<cr>', 'Buffers' },

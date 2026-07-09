@@ -233,7 +233,7 @@ end
 M.show_in_split = function(lines, name)
   -- Create a target window split
   local win_source = vim.api.nvim_get_current_win()
-  vim.cmd 'vertical split'
+  vim.cmd 'vertical split '
   local win_stdout = vim.api.nvim_get_current_win()
 
   -- Prepare buffer

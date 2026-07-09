@@ -28,6 +28,21 @@ end, 'Close with <q> (unlisted buffers)')
 --  Spelling for prose filetypes (enable spell + <C-l> quick-fix)
 -- ──────────────────────────────────────────────────────────────
 
+ft_autocmd({ 'qf' }, function(args)
+  local map = function(key, mapping)
+    vim.api.nvim_buf_set_keymap(args.buf, 'n', key, mapping, { silent = true })
+  end
+  map('<CR>', '<CR><C-w>p')
+  map('o', '<CR><C-w>p')
+  map('q', ':cclose<CR>')
+  vim.keymap.set('n', 'dd', function()
+    local line = vim.fn.line '.'
+    local qf_list = vim.fn.getqflist()
+    table.remove(qf_list, line)
+    vim.fn.setqflist(qf_list, 'r')
+    VimRc.info 'Removed qflist entry'
+  end, { buf = args.buf, silent = true })
+end, 'Keymaps for quickfix', 'vimrc/bigfile')
 ft_autocmd({ 'bigfile' }, function(args)
   vim.schedule(function()
     vim.bo[args.buf].syntax = vim.filetype.match { buf = args.buf } or ''
@@ -41,7 +56,6 @@ ft_autocmd({
   'notify',
   'git',
   'diff',
-  'qf',
   'vimrc',
 }, function(args)
   if args.match ~= 'help' or not vim.bo[args.buf].modifiable then

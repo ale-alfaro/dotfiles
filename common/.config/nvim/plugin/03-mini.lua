@@ -9,10 +9,47 @@ end)
 -- - `<Leader>sd` - delete previously started session
 VimRc.now(function()
   require('mini.sessions').setup()
+  VimRc.map({ lhs = '<M-r>', rhs = '<Cmd>lua MiniSessions.restart()<CR>' }, 'Restart')
 end)
 
 VimRc.later(function()
   require('mini.visits').setup()
+  -- v is for 'Visits'. Common usage:
+  -- - `<Leader>vv` - add    "core" label to current file.
+  -- - `<Leader>vV` - remove "core" label to current file.
+  -- - `<Leader>vc` - pick among all files with "core" label.
+  local make_pick_core = function(cwd, desc)
+    return function()
+      local sort_latest = MiniVisits.gen_sort.default { recency_weight = 1 }
+      local local_opts = { cwd = cwd, filter = 'core', sort = sort_latest }
+      require('mini.extras').pickers.visit_paths(local_opts, { source = { name = desc } })
+    end
+  end
+  -- VimRc.later(function()
+  --   require('mini.visits').setup()
+  -- end)
+  -- s is for 'Session'. Common usage:
+  -- - `<Leader>sn` - start new session
+  -- - `<Leader>sr` - read previously started session
+  -- - `<Leader>sR` - restart Neovim preserving current session
+  local session_new = 'vim.ui.input({ prompt = "Session name: " }, MiniSessions.write)'
+
+  local persist_keys = {
+    { 'n', '<Cmd>lua ' .. session_new .. '<CR>', 'New Sesh' },
+    { 'd', '<Cmd>lua MiniSessions.select("delete")<CR>', 'Delete Sesh' },
+    { 's', '<Cmd>lua MiniSessions.write()<CR>', 'Write Sesh' },
+    { 'r', '<Cmd>lua MiniSessions.select("read")<CR>', 'Read Sesh' },
+    { 'c', make_pick_core('', 'Core visits (all)'), 'Core visits (all)' },
+    { 'C', make_pick_core(nil, 'Core visits (cwd)'), 'Core visits (cwd)' },
+    { 'v', '<Cmd>lua MiniVisits.add_label("core")<CR>', 'Add "core" label' },
+    { 'V', '<Cmd>lua MiniVisits.remove_label("core")<CR>', 'Remove "core" label' },
+    { 'l', '<Cmd>lua MiniVisits.add_label()<CR>', 'Add label' },
+    { 'L', '<Cmd>lua MiniVisits.remove_label()<CR>', 'Remove label' },
+  }
+  for _, key in ipairs(persist_keys) do
+    vim.keymap.set('n', '<leader>p' .. key[1], key[2], { desc = key[3] })
+  end
+  VimRc.keymap_clues[#VimRc.keymap_clues + 1] = { mode = 'n', keys = '<Leader>p', desc = '+Persist' }
 end)
 -- local builtin_textobjects = {
 --   -- Use balanced pair for brackets. Use opening ones to possibly remove edge
@@ -130,7 +167,6 @@ VimRc.later(function()
   require('mini.jump').setup()
 end)
 
-
 -- Split and join arguments (regions inside brackets between allowed separators).
 -- It uses Lua patterns to find arguments, which means it works in comments and
 -- strings but can be not as accurate as tree-sitter based solutions.
@@ -243,15 +279,15 @@ end)
 
 --
 VimRc.later(function()
-  local surround = require 'mini.surround'
-  local ts_input = surround.gen_spec.input.treesitter
-  surround.setup {
-    custom_surroundings = {
-      f = {
-        input = ts_input({ outer = '@call.outer', inner = '@calll.inner' }, { use_nvim_treesitter = true }),
-      },
-    },
-  }
+  -- local surround = require 'mini.surround'
+  -- local ts_input = surround.gen_spec.input.treesitter
+  require('mini.surround').setup()
+  --   custom_surroundings = {
+  --     f = {
+  --       input = ts_input({ outer = '@call.outer', inner = '@calll.inner' }, { use_nvim_treesitter = true }),
+  --     },
+  --   },
+  -- }
 end)
 
 -- Highlight and remove trailspace. Temporarily stops highlighting in Insert mode
@@ -259,6 +295,16 @@ end)
 -- - `<Leader>ot` - trim all trailing whitespace in a buffer
 VimRc.later(function()
   require('mini.trailspace').setup()
+  require('mini.operators').setup {
+
+    replace = {
+      -- NOTE: Default `gr*` LSP mappings are removed
+      prefix = 'go',
+
+      -- Whether to reindent new text to match previous indent
+      reindent_linewise = true,
+    },
+  }
 end)
 
 VimRc.later(function()

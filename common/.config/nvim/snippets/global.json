@@ -24,12 +24,12 @@
   "uuid": {
     "prefix": "cz",
     "body": [
-"${1:|fix,feat,tests,refactor,chore,ci,build|}(${3:scope}): ${2:description}",
+      "${1|fix,feat,tests,refactor,chore,ci,build|}(${3:scope}): ${2:description}",
       "",
- "$0",
+      "$0",
       "",
-"${4:# Optional <footer>}"
-  ],
+      "${4:# Optional <footer>}"
+    ],
     "description": "Conventional Commit Message"
   }
 }

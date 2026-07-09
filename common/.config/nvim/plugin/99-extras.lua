@@ -1,24 +1,5 @@
-if vim.o.diff then
-  return
-end
 VimRc.later(function()
   require 'extras.quicker-trouble'
-  local trouble_keys = {
-    { 'q', '<cmd>lua require("quicker").toggle()<cr>', 'Quickfix' },
-    { 'Q', '<cmd>lua require("quicker").toggle({loclist = true})<cr>', 'Loclist' },
-    { 'D', '<cmd>Trouble diagnostics <cr>', 'Diagnostics (Everything)' },
-    { 'd', '<cmd>Trouble diagnostics filter = { severity=vim.diagnostic.severity.ERROR }<cr>', 'Diagnostics (Error-only)' },
-    { 's', '<cmd>Trouble symbols toggle<cr>', 'Symbols (Trouble)' },
-    {
-      'l',
-      '<cmd>Trouble lsp toggle<cr>',
-      'LSP references/definitions  (Trouble)',
-    },
-  }
-  for _, key in ipairs(trouble_keys) do
-    vim.keymap.set('n', '<leader>q' .. key[1], key[2], { desc = key[3] })
-  end
-  VimRc.keymap_clues[#VimRc.keymap_clues + 1] = { mode = 'n', keys = '<Leader>q', desc = '+QuickFix' }
 end)
 
 VimRc.later(function()

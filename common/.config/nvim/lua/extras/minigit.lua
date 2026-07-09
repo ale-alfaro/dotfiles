@@ -1,42 +1,4 @@
 return {
-  setup = function()
-    local git = require 'mini.git'
-
-    git.setup {
-
-      -- General CLI execution
-      job = {
-        -- Path to Git executable
-        git_executable = 'git',
-
-        -- Timeout (in ms) for each job before force quit
-        timeout = 30000,
-      },
-
-      -- Options for `:Git` command
-      command = {
-        -- Default split direction
-        split = 'vertical',
-      },
-    }
-    local git_keys = {
-      { 'a', '<cmd>FzfLua git_status<cr>', 'Add/Status' },
-      { 'd', '<cmd>FzfLua git_diff<cr>', 'Diff' },
-      { 'h', '<Cmd>FzfLua git_hunks<CR>', 'Hunks' },
-      { 'b', '<cmd>FzfLua git_blame<cr>', 'Blame' },
-      { 'B', '<cmd>Git blame --porcelain -- %<cr>', 'Blame (MiniGit)' },
-      { 'l', '<cmd>Git log --oneline<cr>', 'Log (MiniGit)' },
-      { 's', '<cmd>Git status<cr>', 'Status (MiniGit)' },
-      { 'c', '<cmd>Git commit<cr>', 'Commit (MiniGit)' },
-      { 'D', '<cmd>Git diff<cr>', 'Diff (MiniGit)' },
-      { 'b', '<cmd>FzfLua git_bcommits<cr>', 'Buf Commits' },
-      { 'C', '<cmd>FzfLua git_commits<cr>', 'Commits' },
-    }
-
-    for _, k in ipairs(git_keys) do
-      vim.keymap.set('n', '<leader>g' .. k[1], k[2], { desc = k[3] })
-    end
-  end,
   setup_git_blame = function()
     local group = vim.api.nvim_create_augroup('mini_git', { clear = true })
 

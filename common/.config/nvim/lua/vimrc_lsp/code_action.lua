@@ -84,7 +84,31 @@ local function update(bufnr, client)
     end)
   end)
 end
+M.refactor = function()
+  require('tiny-code-action').code_action {
+    context = { only = 'refactor' },
+  }
+end
+M.run_sorted = function()
+  require('tiny-code-action').code_action {
+    sort = function(a, b)
+      local function get_priority(kind)
+        if string.match(kind or '', '^quickfix') then
+          return 1
+        end
+        if string.match(kind or '', '^refactor') then
+          return 2
+        end
+        return 3
+      end
 
+      local a_priority = get_priority(a.action.kind)
+      local b_priority = get_priority(b.action.kind)
+
+      return a_priority < b_priority
+    end,
+  }
+end
 --- Configures autocommands to update the code action lightbulb.
 ---@param bufnr integer
 ---@param client vim.lsp.Client
@@ -94,6 +118,40 @@ function M.on_attach(bufnr, client)
     return
   end
 
+  require('tiny-code-action').setup {
+
+    backend = 'difftastic',
+    picker = 'fzf-lua',
+    format_title = nil,
+    backend_opts = {
+      difftastic = {
+        header_lines_to_remove = 1,
+        args = {
+          '--color=always',
+          '--display=inline',
+          '--syntax-highlight=on',
+        },
+      },
+    },
+    resolve_timeout = 500,
+    sort = nil,
+    notify = {
+      enabled = true,
+      on_empty = true,
+    },
+    signs = {
+      quickfix = { '', { link = 'DiagnosticWarning' } },
+      others = { '', { link = 'DiagnosticWarning' } },
+      refactor = { '', { link = 'DiagnosticInfo' } },
+      ['refactor.move'] = { '󰪹', { link = 'DiagnosticInfo' } },
+      ['refactor.extract'] = { '', { link = 'DiagnosticError' } },
+      ['source.organizeImports'] = { '', { link = 'DiagnosticWarning' } },
+      ['source.fixAll'] = { '󰃢', { link = 'DiagnosticError' } },
+      ['source'] = { '', { link = 'DiagnosticError' } },
+      ['rename'] = { '󰑕', { link = 'DiagnosticWarning' } },
+      ['codeAction'] = { '', { link = 'DiagnosticWarning' } },
+    },
+  }
   local lb_buf_group = vim.api.nvim_create_augroup(buf_group_name, { clear = true })
   vim.api.nvim_create_autocmd('CursorMoved', {
     group = lb_buf_group,
@@ -121,46 +179,5 @@ function M.on_attach(bufnr, client)
       pcall(vim.api.nvim_del_augroup_by_name, lb_name .. tostring(bufnr))
     end,
   })
-
-  -- Add "Fix all" command for linters.
-  if client.name == 'eslint' or client.name == 'stylelint_lsp' then
-    vim.keymap.set('n', '<leader>cl', function()
-      if not client then
-        return
-      end
-
-      client:request('workspace/executeCommand', {
-        command = client.name == 'eslint' and 'eslint.applyAllFixes' or 'stylelint.applyAutoFixes',
-        arguments = {
-          {
-            uri = vim.uri_from_bufnr(bufnr),
-            version = vim.lsp.util.buf_versions[bufnr],
-          },
-        },
-      }, nil, bufnr)
-    end, {
-      desc = string.format('Fix all %s errors', client.name == 'eslint' and 'ESLint' or 'Stylelint'),
-      buffer = bufnr,
-    })
-  end
-end
-M.setup = function()
-  require('tiny-code-action').setup {
-    picker = {
-      'buffer',
-      opts = {
-        hotkeys = true,
-        -- Use numeric labels.
-        hotkeys_mode = function(titles)
-          return vim
-            .iter(ipairs(titles))
-            :map(function(i)
-              return tostring(i)
-            end)
-            :totable()
-        end,
-      },
-    },
-  }
 end
 return M

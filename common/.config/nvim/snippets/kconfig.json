@@ -26,7 +26,7 @@
     "prefix": "str",
     "body": [
       "config ${1:MODULE}",
-      "\tint \"${2:Module description}\"",
+      "\tstring \"${2:Module description}\"",
       "\tdefault \"${3:Hello}\"",
       "\t${0}",
       "\thelp",
@@ -49,19 +49,34 @@
     ],
     "description": "menu"
   },
+  "if": {
+    "prefix": "if",
+    "body": [
+      "if $1",
+      "\t${0}",
+      "endif\t# $1"
+    ],
+    "description": "If"
+  },
   "property": {
     "prefix": "prop",
-    "body": ["\t${1:|imply,select,depends|} ${0}"],
+    "body": [
+      "\t${1:|imply,select,depends|} ${0}"
+    ],
     "description": "Property"
   },
   "default": {
     "prefix": "def",
-    "body": ["\tdefault ${1:|y,\"string\",1|}"],
+    "body": [
+      "\tdefault ${1|y,\"string\",1|}"
+    ],
     "description": "Default"
   },
   "type": {
     "prefix": "ty",
-    "body": ["\t${1:|bool,int,str,hex|} ${0}"],
+    "body": [
+      "\t${1|bool,int,str,hex|} ${0}"
+    ],
     "description": "Type"
   },
   "module": {
@@ -74,7 +89,7 @@
       "menuconfig ${1:MODULE}",
       "\tbool \"${2:Module description}\"",
       "\tdefault y",
-      "\t${3:|imply,select,depends|} ${4:NAME}",
+      "\t${3|imply,select,depends|} ${4:NAME}",
       "\thelp",
       "\t  This option is enables $1",
       "",

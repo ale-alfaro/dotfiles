@@ -1,57 +1,4 @@
 --[[
---
-
-Completion behavior ~
-				*:command-completion* *E179* *E180* *E181*
-				*:command-complete*
-By default, the arguments of user defined commands do not undergo completion.
-However, by specifying one or the other of the following attributes, argument
-completion can be enabled:
-
-	-complete=arglist	file names in argument list
-	-complete=augroup	autocmd groups
-	-complete=breakpoint	|:breakadd| suboptions
-	-complete=buffer	buffer names
-	-complete=color		color schemes
-	-complete=command	Ex command (and arguments)
-	-complete=compiler	compilers
-	-complete=diff_buffer	diff buffer names
-	-complete=dir		directory names
-	-complete=dir_in_path	directory names in 'cdpath'
-	-complete=environment	environment variable names
-	-complete=event		autocommand events
-	-complete=expression	Vim expression
-	-complete=file		file and directory names
-	-complete=file_in_path	file and directory names in 'path'
-	-complete=filetype	filetype names 'filetype'
-	-complete=function	function name
-	-complete=help		help subjects
-	-complete=highlight	highlight groups
-	-complete=history	|:history| suboptions
-	-complete=keymap	keyboard mappings
-	-complete=locale	locale names (as output of locale -a)
-	-complete=lua		Lua expression |:lua|
-	-complete=mapclear	buffer argument
-	-complete=mapping	mapping name
-	-complete=menu		menus
-	-complete=messages	|:messages| suboptions
-	-complete=option	options
-	-complete=packadd	optional package |pack-add| names
-	-complete=retab		|:retab| suboptions
-	-complete=runtime	file and directory names in 'runtimepath'
-	-complete=scriptnames	sourced script names
-	-complete=shellcmd	Shell command
-	-complete=shellcmdline	First is a shell command and subsequent ones
-				are filenames.  The same behavior as |:!cmd|
-	-complete=sign		|:sign| suboptions
-	-complete=syntax	syntax file names 'syntax'
-	-complete=syntime	|:syntime| suboptions
-	-complete=tag		tags
-	-complete=tag_listfiles	tags, file names are shown when CTRL-D is hit
-	-complete=user		user names
-	-complete=var		user variables
-	-complete=custom,{func} custom completion, defined via {func}
-	-complete=customlist,{func} custom completion, defined via {func}
 Lua functions are called with a single table argument containing arguments and
 modifiers. The most important are:
 • `name`: a string with the command name
@@ -282,7 +229,23 @@ usercmd_args_comp('Pack', function(args)
     end)
     :totable()
 
-  if arg == 'clean' then
+  if arg == 'open' then
+    vim.ui.select(vim.pack.get(), {
+      prompt = 'Plugin:',
+      format_item = function(item)
+        return item.path
+      end,
+      preview_item = function(item)
+        local lines = { 'This is ' .. vim.inspect(item) }
+        local buf = vim.api.nvim_create_buf(false, true)
+        vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+        vim.bo[buf].bufhidden = 'wipe'
+        return { buf = buf }
+      end,
+    }, function(sel)
+      vim.cmd.edit(sel)
+    end)
+  elseif arg == 'clean' then
     vim.pack.del(inactive)
   elseif string.find(arg, '^up') then
     vim.pack.update()
@@ -298,13 +261,27 @@ usercmd_args_comp('Pack', function(args)
   else
     VimRc.err('Unknown Pack arg: ' .. arg)
   end
-end, 'vim.pack Interface', 1, { 'list', 'update', 'clean' })
+end, 'vim.pack Interface', 1, { 'open', 'list', 'update', 'clean' })
+
 usercmd('SwapDel', function()
-  vim.fn.system('rm ' .. vim.fn.swapname(vim.api.nvim_get_current_buf()))
+  local swapdir = vim.fn.expand '$XDG_STATE_HOME/nvim/swap/'
+  if vim.uv.fs_stat(swapdir) then
+    vim.fs.rm(swapdir, { recursive = true })
+    VimRc.info 'Deleted swap dir'
+  end
 end, 'Delete current buffer swapfile')
 usercmd_args_comp('Lsp', function(args)
   local arg = (args.fargs or {})[1]
-  if arg == 'log' then
+  if arg == 'actions' then
+    require('tiny-code-action').code_action {
+      filter = function(action, client)
+        local client_name = client.name
+        local kind = action.kind
+        local title = action.title
+        VimRc.info(string.format('Client: %q, Kind: %q, CodeAction: %q', client_name, kind, title))
+      end,
+    }
+  elseif arg == 'log' then
     local log = vim.lsp.log.get_filename()
     vim.api.nvim_cmd({
       cmd = 'edit',
@@ -317,9 +294,7 @@ usercmd_args_comp('Lsp', function(args)
   elseif arg == 'info' then
     vim.cmd ':checkhealth vim.lsp'
   end
-end, 'Lsp Commands', 1, { 'log', 'clean', 'info' })
-
-usercmd('DocGen', require('custom.docgen').generate_doc, 'Generate documentation comments')
+end, 'Lsp Commands', 1, { 'actions', 'log', 'clean', 'info' })
 
 usercmd('RstToMd', function()
   local steps = {
@@ -332,3 +307,9 @@ usercmd('RstToMd', function()
     pcall(vim.cmd, cmd) -- a "Pattern not found" (E486) won't abort the rest
   end
 end, 'Convert Current Buffer from ReStructured Text to Markdown')
+usercmd('LazyGitEdit', function()
+  vim.g.autoformat = false
+  if MiniDiff then
+    MiniDiff.toggle_overlay(0)
+  end
+end, 'Edit cmd for LazyGit')

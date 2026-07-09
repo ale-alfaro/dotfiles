@@ -75,9 +75,10 @@ return {
   },
   filetypes = { 'c', 'cpp' },
   root_markers = {
-    '.clangd',
+    '.west',
     'compile_commands.json',
     'build',
+    '.clangd',
   },
   capabilities = {
     textDocument = {
@@ -98,11 +99,11 @@ return {
     vim.api.nvim_buf_create_user_command(bufnr, 'LspClangdSwitchSourceHeader', function()
       switch_source_header(bufnr, client)
     end, { desc = 'Switch between source/header' })
-    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>ch', 'LspClangdSwitchSourceHeader', { desc = 'Switch between header/source' })
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>ch', '<Cmd>LspClangdSwitchSourceHeader<CR>', { desc = 'Switch between header/source' })
 
     vim.api.nvim_buf_create_user_command(bufnr, 'LspClangdShowSymbolInfo', function()
       symbol_info(bufnr, client)
     end, { desc = 'Show symbol info' })
-    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>ci', 'LspClangdShowSymbolInfo', { desc = 'Show symbol info' })
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>ci', '<Cmd>LspClangdShowSymbolInfo<CR>', { desc = 'Show symbol info' })
   end,
 }

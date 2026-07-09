@@ -13,7 +13,8 @@ M.setup = function()
     M.zephyr_base = vim.fs.joinpath(M.topdir, M.zephyr_base)
   end
 
-  require('vimrc_lsp.dts').config({ topdir = M.topdir, relative_zephyr_base = M.zephyr_base }, {})
+  require('vimrc_lsp.dts').config { topdir = M.topdir, relative_zephyr_base = M.zephyr_base }
+  require('vimrc_lsp.clangd').setup(M.topdir)
 
   vim.api.nvim_create_user_command('Wg', function()
     require('fzf-lua').live_grep {

@@ -189,7 +189,9 @@ VimRc.keymap_clues = {
   { mode = 'n', keys = '<Leader>b', desc = '+Buffer' },
   { mode = 'n', keys = '<Leader>e', desc = '+Explore/Edit' },
   { mode = 'n', keys = '<Leader>f', desc = '+Find ' },
+  { mode = 'n', keys = '<Leader>l', desc = '+Lang' },
   { mode = 'n', keys = '<Leader>n', desc = '+Notifications' },
+  { mode = 'n', keys = '<Leader>n', desc = '+Quickfix' },
   { mode = 'n', keys = '<Leader>s', desc = '+Search (Codebase)' },
   { mode = 'n', keys = '<Leader>t', desc = '+Terminal' },
   { mode = 'n', keys = '<Leader>v', desc = '+Visits' },
@@ -202,32 +204,23 @@ VimRc.map({ mode = { 'n', 'x' }, lhs = '<Up>', rhs = 'gk' }, 'Navigate down (vis
 VimRc.map({ mode = { 'n', 'x' }, lhs = '<Down>', rhs = [[v:count == 0 ? 'gj' : 'j']] }, { expr = true })
 VimRc.map({ mode = { 'n', 'x' }, lhs = '<Up>', rhs = [[v:count == 0 ? 'gk' : 'k']] }, { expr = true })
 
--- Add empty lines before and after cursor line supporting dot-repeat
-VimRc.put_empty_line = function(put_above)
-  -- This has a typical workflow for enabling dot-repeat:
-  -- - On first call it sets `operatorfunc`, caches data, and calls
-  --   `operatorfunc` on current cursor position.
-  -- - On second call it performs task: puts `v:count1` empty lines
-  --   above/below current line.
-  if type(put_above) == 'boolean' then
-    vim.o.operatorfunc = 'v:lua.VimRc.put_empty_line'
-    VimRc.cache_empty_line = { put_above = put_above }
-    return 'g@l'
-  end
-
-  local target_line = vim.fn.line '.' - (VimRc.cache_empty_line.put_above and 1 or 0)
-  vim.fn.append(target_line, vim.fn['repeat']({ '' }, vim.v.count1))
-end
-
-VimRc.map({ lhs = 'gO', rhs = 'v:lua.MiniBasics.put_empty_line(v:true)' }, { expr = true, desc = 'Put empty line above' })
-VimRc.map({ lhs = 'go', rhs = 'v:lua.MiniBasics.put_empty_line(v:false)' }, { expr = true, desc = 'Put empty line below' })
 -- Reselect latest changed, put, or yanked text
 VimRc.map({ lhs = 'gV', rhs = '"g`[" . strpart(getregtype(), 0, 1) . "g`]"' }, { expr = true, replace_keycodes = false, desc = 'Visually select changed text' })
 -- Search inside visually highlighted text. Use `silent = false` for it to
 -- make effect immediately.
-VimRc.map({ mode = 'x', lhs = 'g/', rhs = '<esc>/\\%V' }, { silent = false, desc = 'Search inside visual selection' })
-VimRc.map({ lhs = '<C-s>', rhs = '<Cmd>silent! update | redraw<CR>' }, { noremap = true })
-VimRc.map({ mode = { 'x', 'i' }, lhs = '<C-s>', rhs = '<Esc><Cmd>silent! update | redraw<CR>' }, { noremap = true })
+VimRc.map({ mode = { 'n', 'i', 'v', 's' }, lhs = '<C-s>', rhs = '<esc>:update | redraw<CR>' }, { desc = 'Save', noremap = true })
+
+VimRc.map({
+  mode = { 's', 'i', 'n', 'v' },
+  lhs = '<C-S-s>',
+  rhs = function()
+    vim.g.skip_formatting = true
+    return '<esc>:w<cr>'
+  end,
+}, { desc = 'Save (without formatting)', expr = true })
+
+-- Quickly go to the end of the line while in insert mode.
+vim.keymap.set({ 'i', 'c' }, '<C-l>', '<C-o>A', { desc = 'Go to the end of the line' })
 VimRc.map({ lhs = '<C-q>', rhs = '<Cmd>qall<CR>' }, { noremap = true })
 
 ---@param key string
@@ -243,31 +236,12 @@ nmap_leader('bs', '<Cmd>lua VimRc.new_scratch_buffer()<Cr>', 'Scratch')
 nmap_leader('bw', '<Cmd>lua MiniBufremove.wipeout()<CR>', 'Wipeout')
 nmap_leader('bW', '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', 'Wipeout!')
 
-local explore_quickfix = function()
-  vim.cmd(vim.fn.getqflist({ winid = true }).winid ~= 0 and 'cclose' or 'copen')
-end
-local explore_locations = function()
-  vim.cmd(vim.fn.getloclist(0, { winid = true }).winid ~= 0 and 'lclose' or 'lopen')
-end
-nmap_leader('eq', explore_quickfix, 'Quickfix list')
-nmap_leader('eQ', explore_locations, 'Location list')
--- s is for 'Session'. Common usage:
--- - `<Leader>sn` - start new session
--- - `<Leader>sr` - read previously started session
--- - `<Leader>sR` - restart Neovim preserving current session
-local session_new = 'vim.ui.input({ prompt = "Session name: " }, MiniSessions.write)'
-
-VimRc.map({ lhs = '<M-d>', rhs = '<Cmd>lua MiniSessions.select("delete")<CR>' }, 'Delete Sesh')
-VimRc.map({ lhs = '<M-s>', rhs = 'sn', '<Cmd>lua ' .. session_new .. '<CR>' }, 'New Sesh')
-VimRc.map({ lhs = '<M-r>', rhs = '<Cmd>lua MiniSessions.restart()<CR>' }, 'Restart')
--- nmap_leader('sr', '<Cmd>lua MiniSessions.select("read")<CR>', 'Read')
--- nmap_leader('ss', '<Cmd>lua MiniSessions.write()<CR>', 'Write current')
-
-nmap_leader('tT', '<Cmd>horizontal term<CR>', 'Terminal (horizontal)')
-nmap_leader('tt', '<Cmd>vertical term<CR>', 'Terminal (vertical)')
+nmap_leader('tT', '<Cmd>horizontal term<CR>', 'horizontal')
+nmap_leader('tt', '<Cmd>vertical term<CR>', 'vertical')
 
 vim.cmd [[
     :tnoremap <F2> <C-\><C-N><C-\><C-N> 
+    :tnoremap <C-d> <C-\><C-N><C-\><C-N> 
     :tnoremap <C-Left>  <C-\><C-N><C-w>h
     :tnoremap <C-Down>  <C-\><C-N><C-w>j
     :tnoremap <C-Up>    <C-\><C-N><C-w>k
@@ -282,23 +256,29 @@ vim.cmd [[
     :nnoremap <C-Right> <C-w>l
 
 ]]
--- v is for 'Visits'. Common usage:
--- - `<Leader>vv` - add    "core" label to current file.
--- - `<Leader>vV` - remove "core" label to current file.
--- - `<Leader>vc` - pick among all files with "core" label.
-local make_pick_core = function(cwd, desc)
-  return function()
-    local sort_latest = MiniVisits.gen_sort.default { recency_weight = 1 }
-    local local_opts = { cwd = cwd, filter = 'core', sort = sort_latest }
-    require('mini.extras').pickers.visit_paths(local_opts, { source = { name = desc } })
-  end
+
+local function on_list(options)
+  vim.fn.setqflist({}, ' ', options)
+  vim.cmd.cfirst()
 end
--- VimRc.later(function()
---   require('mini.visits').setup()
--- end)
-nmap_leader('vc', make_pick_core('', 'Core visits (all)'), 'Core visits (all)')
-nmap_leader('vC', make_pick_core(nil, 'Core visits (cwd)'), 'Core visits (cwd)')
-nmap_leader('vv', '<Cmd>lua MiniVisits.add_label("core")<CR>', 'Add "core" label')
-nmap_leader('vV', '<Cmd>lua MiniVisits.remove_label("core")<CR>', 'Remove "core" label')
-nmap_leader('vl', '<Cmd>lua MiniVisits.add_label()<CR>', 'Add label')
-nmap_leader('vL', '<Cmd>lua MiniVisits.remove_label()<CR>', 'Remove label')
+
+nmap_leader('qo', '<Cmd>copen<CR>', 'Open')
+nmap_leader('qc', '<Cmd>cclose<CR>', 'Close')
+nmap_leader('qh', '<Cmd>chistory<CR>', 'History')
+nmap_leader('qn', '<Cmd>cnewer<CR>', 'Newer List')
+nmap_leader('qp', '<Cmd>colder<CR>', 'Older List')
+nmap_leader('qd', '<cmd>Trouble diagnostics filter = { severity=vim.diagnostic.severity.ERROR }<cr>', 'Diagnostics (Error-only)')
+nmap_leader('qD', '<cmd>Trouble diagnostics <cr>', 'Diagnostics (Everything)')
+nmap_leader('qs', '<cmd>Trouble symbols toggle<cr>', 'Symbols (Trouble)')
+VimRc.map({
+  lhs = 'grr',
+  rhs = function()
+    vim.lsp.buf.references(nil, { on_list = on_list })
+  end,
+}, { noremap = true })
+VimRc.map({
+  lhs = 'grd',
+  rhs = function()
+    vim.lsp.buf.definition { on_list = on_list }
+  end,
+}, { noremap = true })
