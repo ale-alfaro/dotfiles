@@ -3,33 +3,5 @@
     "prefix": "copyright",
     "body": ["Copyright (c) ${CURRENT_YEAR} ${0:Author}. All Rights Reserved."],
     "description": "Snippet to put copyright"
-  },
-  "date": {
-    "prefix": "date",
-    "body": ["${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DATE}"],
-    "description": "Put the date in (Y-m-D) format"
-  },
-  "time": {
-    "prefix": "time",
-    "body": ["${CURRENT_HOUR}:${CURRENT_MINUTE}"],
-    "description": "I give you back the time (H:M)"
-  },
-  "datetime": {
-    "prefix": "datetime",
-    "body": [
-      "${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DATE} ${CURRENT_HOUR}:${CURRENT_MINUTE}"
-    ],
-    "description": "I give you back the time and date (Y-m-d H:M)"
-  },
-  "uuid": {
-    "prefix": "cz",
-    "body": [
-      "${1|fix,feat,tests,refactor,chore,ci,build|}(${3:scope}): ${2:description}",
-      "",
-      "$0",
-      "",
-      "${4:# Optional <footer>}"
-    ],
-    "description": "Conventional Commit Message"
   }
 }

@@ -29,7 +29,11 @@
 --
 -- It also works with snippet candidates provided by LSP server. Best experience
 -- when paired with 'mini.snippets' (which is set up in this file).
-
+local minifiles_toggle = function()
+  if not MiniFiles.close() then
+    MiniFiles.open(vim.api.nvim_buf_get_name(0), false)
+  end
+end
 ---@class ExplorerPlugin
 ---@field setup fun()
 ---@field open_curr_buf fun()|string
@@ -61,7 +65,7 @@ if not vim.o.diff then
       vim.keymap.set('n', '<leader>e' .. k[1], k[2], { desc = k[3] })
     end
     local non_prefix_keys = {
-      { '\\', '<Cmd>lua MiniFiles.open(vim.api.nvim_buf_get_name(0), false)<cr>', 'Open Explorer (Cwd)' },
+      { '\\', minifiles_toggle, 'Open Explorer (Cwd)' },
       { '<localleader>l', '<Cmd>lua MiniFiles.open(MiniFiles.get_latest_path())<cr>', 'Open Explorer (Last Path)' },
     }
     for _, k in ipairs(non_prefix_keys) do

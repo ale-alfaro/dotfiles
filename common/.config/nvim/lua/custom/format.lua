@@ -5,13 +5,7 @@
 ---@field format fun(bufnr:integer)
 local Fmt = {}
 local H = {}
-
----@class FormatDef
----@field cmd string
----@field args string[]
----@field envs? table<string,string>
----@field mise_tool? string
----@field no_stdout? boolean
+local uv = vim.uv
 ---
 ---A text edit applicable to a text document.
 ---@alias FormatTextEdit lsp.TextEdit
@@ -20,22 +14,22 @@ local H = {}
 ---@class FormatLine : lsp.Position
 ---@field content string Content of lien
 
----@alias FormatList FormatDef|FormatDef[]
-
-local prettier = { cmd = 'prettier', args = { '--stdin-filepath', '$FILENAME' }, mise_tool = 'npm:prettier' }
+---@alias FormatList fmt.JobFormatterConfig|fmt.JobFormatterConfig[]
+local prettier = { command = 'prettier', args = { '--stdin-filepath', '$FILENAME' }, mise_tool = 'npm:prettier' }
 local dprint = {
-  cmd = 'dprint',
+  command = 'dprint',
   args = { 'fmt', '--stdin', '$FILENAME' },
   envs = { DPRINT_CONFIG_DIR = vim.fn.expand '~/.config/dprint', DPRINT_CONFIG_DISCOVERY = 'global' },
 }
-local shfmt = { cmd = 'shfmt', args = { '-i', '2', '-ci', '-filename', '$FILENAME' } }
+local shfmt = { command = 'shfmt', args = { '-i', '2', '-ci', '-filename', '$FILENAME' } }
 local ruff = {
-  cmd = 'ruff',
+  command = 'ruff',
   args = { 'check', '--fix', '--force-exclude', '--exit-zero', '--no-cache', '--unsafe-fixes', '--select=I001', '--stdin-filename', '$FILENAME', '-' },
 }
-local stylua = { cmd = 'stylua', args = { '--stdin-filepath', '$FILENAME', '-' } }
-local clang_format = { cmd = 'clang-format', args = {} }
-local kconfigsyle = { no_stdout = true, cmd = 'uvx kconfigstyle -w --preset zephyr %' }
+local stylua = { command = 'stylua', args = { '--stdin-filepath', '$FILENAME', '-' } }
+local clang_format = { command = 'clang-format', args = {} }
+local kconfigsyle = { command = 'kconfigstyle', args = { '-z', 'zephyr', '-w', '$FILENAME' } , no_stdin = true}
+
 -- local dtslinter = { cmd = 'dts-linter', args = { '--formatFixAll', '--file', '$FILENAME' }, mise_tool = 'npm:dts-linter' }
 
 Fmt.config = {
@@ -109,10 +103,39 @@ Fmt.format = function(bufnr)
       VimRc.warn('No formatters for ft=' .. ft)
       return
     end
+
     if formatter.no_stdout then
       H.with_preserved_view('!' .. formatter.cmd)
     else
-      Fmt.format_range(formatter, bufnr)
+      local input_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
+      local done = false
+      local result = nil
+      local start = uv.hrtime() / 1e6
+      local pid = require('custom.docgen').run_formatter(bufnr, ft, formatter, input_lines, function(output)
+        done = true
+        result = output
+      end)
+      local remaining = Fmt.config.timeout_ms - (uv.hrtime() / 1e6 - start)
+      local wait_result, wait_reason = vim.wait(remaining, function()
+        return done
+      end, 5)
+      if not wait_result then
+        if pid then
+          uv.kill(pid)
+        end
+        if wait_reason == -1 then
+          VimRc.err {
+            message = string.format("Formatter '%s' timeout", formatter.name),
+          }
+        else
+          VimRc.err {
+            message = string.format("Formatter '%s' was interrupted", formatter.name),
+          }
+        end
+        return
+      end
+      require('custom.docgen').apply_format(bufnr, input_lines, result or input_lines)
+      -- Fmt.format_range(formatter, bufnr)
     end
   end
 end
@@ -264,32 +287,32 @@ function Fmt.format_range(fmt, bufnr, start_pos, end_pos)
   H.apply_diff(original, modified, bufnr)
 end
 
----@param fmt FormatDef  Formatter definition
----@param bufnr integer  buffer id
----@param original string? buffer content
----@return string? modified
-H.run_formatter = function(fmt, bufnr, original)
-  local exe = vim.fn.exepath(fmt.cmd)
-  if exe == '' and not fmt.mise_tool then
-    VimRc.warn('Formatter %s not found in path!', fmt.cmd)
-  end
-  ---@type string[]
-  local cmd = H.expand_args(fmt.args, bufnr)
-  table.insert(cmd, 1, fmt.cmd)
-  if not exe then
-    cmd = vim.list_extend({ 'mise', 'exec', vim.fn.shellescape(fmt.mise_tool), '--' }, cmd)
-  end
-  local opts = (original ~= nil) and { stdin = original, envs = fmt.envs } or { envs = fmt.envs }
-  local ret, modified = H.run(cmd, opts)
-  if not ret then
-    VimRc.warn('[format] error while formatting. stderr' .. modified)
-    return
-  elseif modified:match '^%s*$' then
-    VimRc.warn '[format] empty output, format did not run'
-    return
-  end
-  return modified
-end
+-- ---@param fmt FormatDef  Formatter definition
+-- ---@param bufnr integer  buffer id
+-- ---@param original string? buffer content
+-- ---@return string? modified
+-- H.run_formatter = function(fmt, bufnr, original)
+--   local exe = vim.fn.exepath(fmt.cmd)
+--   if exe == '' and not fmt.mise_tool then
+--     VimRc.warn('Formatter %s not found in path!', fmt.cmd)
+--   end
+--   ---@type string[]
+--   local cmd = H.expand_args(fmt.args, bufnr)
+--   table.insert(cmd, 1, fmt.cmd)
+--   if not exe then
+--     cmd = vim.list_extend({ 'mise', 'exec', vim.fn.shellescape(fmt.mise_tool), '--' }, cmd)
+--   end
+--   local opts = (original ~= nil) and { stdin = original, envs = fmt.envs } or { envs = fmt.envs }
+--   local ret, modified = H.run(cmd, opts)
+--   if not ret then
+--     VimRc.warn('[format] error while formatting. stderr' .. modified)
+--     return
+--   elseif modified:match '^%s*$' then
+--     VimRc.warn '[format] empty output, format did not run'
+--     return
+--   end
+--   return modified
+-- end
 
 ---Apply a formatter's output to the buffer by replacing only the changed line
 ---ranges, so cursor, marks, folds and undo granularity survive.

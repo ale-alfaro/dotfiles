@@ -1,0 +1,11 @@
+{
+  "commit": {
+    "prefix": "cz",
+    "body": [
+      "${1|fix,feat,tests,refactor,chore,ci,build|} ${2:scope}: ${3:description}",
+      "",
+      "$0"
+    ],
+    "description": "Conventional Commit Message"
+  }
+}

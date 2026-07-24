@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+
 tdl() {
   [[ -z $1 ]] && {
     echo "Usage: tdl <cmd> <[vsplit_pane_height]> <[bottom_pane_height>]"

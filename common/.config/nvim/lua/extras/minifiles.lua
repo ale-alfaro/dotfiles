@@ -19,26 +19,6 @@ local prefix = function(fs_entry)
     end
   end
 end
----@param id string
----@param path string
----@param desc string
----@param opts? {save?:boolean}
-local set_mark = function(id, path, desc, opts)
-  opts = opts or {}
-  MiniFiles.set_bookmark(id, path, { desc = desc })
-  if opts.save then
-    MiniVisits.add_label(id, path)
-  end
-  ---   local map_branch = function(keys, action, desc)
-  ---     local rhs = function()
-  ---       local branch = vim.fn.system('git rev-parse --abbrev-ref HEAD')
-  ---       if vim.v.shell_error ~= 0 then return nil end
-  ---       branch = vim.trim(branch)
-  ---       require('mini.visits')[action](branch)
-  ---     end
-  ---     vim.keymap.set('n', '<Leader>' .. keys, rhs, { desc = desc })
-  ---   end
-end
 return {
   setup = function()
     ---
@@ -50,7 +30,7 @@ return {
         -- Whether to show preview of file/directory under cursor
         preview = true,
         -- Width of focused window
-        width_focus = 50,
+        width_focus = 80,
         -- Width of non-focused window
         width_nofocus = 15,
         --
@@ -65,6 +45,7 @@ return {
         prefix = prefix,
       },
       mappings = {
+        close = 'q',
         go_in = '<CR>',
         go_in_plus = '<Right>',
         go_out = '<BS>',
@@ -84,8 +65,7 @@ return {
       vim.b.minisurround_disable = false
       vim.b.minioperators_disable = false
       local b = args.data.buf_id
-      vim.api.nvim_buf_set_keymap(b, 'n', 'q', '<cmd>lua MiniFiles.close()<cr>', { desc = 'close' })
-      vim.keymap.set('n', 'Search', function()
+      vim.keymap.set('n', '<C-g>', function()
         -- works only if cursor is on the valid file system entry
         local cur_entry_path = (MiniFiles.get_fs_entry() or {}).path
         local prefills = { paths = vim.fs.dirname(cur_entry_path) }
@@ -105,16 +85,14 @@ return {
           grug_far.get_instance('explorer'):update_input_values(prefills, false)
         end
       end, { buf = b, desc = 'Search' })
-      ---@param lhs string
-      ---@param rhs string
-      ---@param desc string
-      local buf_map = function(lhs, rhs, desc)
-        vim.keymap.set('n', '<localleader>' .. lhs, rhs, { buf = b, desc = desc })
-      end
-      buf_map('s', '<cmd>Search<cr>', 'Search in directory')
-      buf_map('~', '<Cmd>lua vim.fn.chdir(vim.fs.dirname((MiniFiles.get_fs_entry() or {path = vim.api.nvim_buf_get_name(0)}).path))<CR>', 'Set cwd')
-      buf_map('y', '<Cmd>lua vim.fn.setreg(vim.v.register, (MiniFiles.get_fs_entry() or {path = vim.fn.getcwd()}).path)<CR>', 'Yank path')
-      buf_map('x', '<Cmd>lua vim.ui.open(MiniFiles.get_fs_entry().path)<cr>', 'OS open')
+      vim.keymap.set('n', 'q', '<Cmd>lua MiniFiles.close()<CR>', { buf = b, desc = 'close' })
+      vim.keymap.set(
+        'n',
+        'gy',
+        '<Cmd>lua vim.fn.setreg(vim.v.register, (MiniFiles.get_fs_entry() or {path = vim.fn.getcwd()}).path)<CR>',
+        { buf = b, desc = 'Yank Path' }
+      )
+      vim.keymap.set('n', 'gx', '<Cmd>lua vim.ui.open(MiniFiles.get_fs_entry().path)<cr>', { buf = b, desc = 'OS open' })
       MiniClue.ensure_buf_triggers(b)
     end, 'Mappings')
 
@@ -128,37 +106,31 @@ return {
       end
     end, '')
     minifiles_autocmd('ExplorerOpen', function()
+      ---@type string[]
       local visits = MiniVisits.list_paths(nil, {
-        filter = function()
-          return function(path_data)
-            return path_data.labels['mini.files'] ~= nil
-          end
-        end,
         sort = MiniVisits.gen_sort.default { recency_weight = 1.0 },
       })
-      if #visits > 0 then
-        local paths = vim
-          .iter(visits)
-          :map(function(p)
-            return vim.fs.dirname(p)
-          end)
-          :unique()
-          :totable()
-        local n = math.min(5, #paths) + 1
-        for i = 1, n do
-          set_mark(tostring(i), paths[i], 'Prev path ' .. paths[i]) -- callable
+      local n = math.min(5, #visits)
+      for i = 1, n do
+        if not type(visits[i]) == 'string' then
+          VimRc.warn('Not a string ', { visits = visits[i] })
+        elseif vim.uv.fs_stat(visits[i]) == nil then
+          VimRc.warn('Not a valid path', { visits = visits[i] })
+        else
+          MiniFiles.set_bookmark(string.format('%d', i), vim.fs.dirname(visits[i]), { desc = string.format('%d: %s', i, vim.fs.dirname(visits[i])) }) -- callable
         end
       end
-      set_mark('w', vim.fn.getcwd(), 'Working directory') -- callable
     end, 'Bookmarks')
     minifiles_autocmd('ActionRename', function(event)
       local from = event.data.from
       local to = event.data.to
       local changes = {
-        files = { {
-          oldUri = vim.uri_from_fname(from),
-          newUri = vim.uri_from_fname(to),
-        } },
+        files = {
+          {
+            oldUri = vim.uri_from_fname(from),
+            newUri = vim.uri_from_fname(to),
+          },
+        },
       }
 
       local clients = vim.lsp.get_clients()

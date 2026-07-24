@@ -27,6 +27,8 @@ alias jlink-gdbserver='JLinkGDBServer  -if SWD -speed 4000 -port 2331 -silent -s
 alias mx='mise x'
 alias mr='mise run'
 alias mt='mise tasks'
+#include jq modules
+alias jq='jq -L~/.config/jq'
 
 # -------------------------------------------
 # 5. Suffix Aliases - Open Files by Extension

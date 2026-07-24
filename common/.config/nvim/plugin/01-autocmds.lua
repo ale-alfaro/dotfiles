@@ -25,6 +25,21 @@ autocmd('BufEnter', function(args)
   end
 end, 'Close with <q> (unlisted buffers)')
 -- ──────────────────────────────────────────────────────────────
+--  Zephyr/west workspaces: `:compiler west` for any buffer under the
+--  nearest ancestor directory containing `.west/` (fires after
+--  after/ftplugin/*.lua, so it wins over e.g. c.lua's `:compiler gcc`)
+-- ──────────────────────────────────────────────────────────────
+autocmd({ 'BufReadPost', 'BufNewFile' }, function(args)
+  if vim.bo[args.buf].buftype ~= '' then
+    return
+  end
+  if vim.fs.root(args.buf, { '.west' }) then
+    vim.api.nvim_buf_call(args.buf, function()
+      vim.cmd.compiler 'west'
+    end)
+  end
+end, 'Set compiler=west inside west workspaces', { group = vim.api.nvim_create_augroup('vimrc/west_compiler', { clear = true }) })
+-- ──────────────────────────────────────────────────────────────
 --  Spelling for prose filetypes (enable spell + <C-l> quick-fix)
 -- ──────────────────────────────────────────────────────────────
 
@@ -80,5 +95,5 @@ end, 'MiniClue Ensure buf triggers ', 'miniclue/ensure_buf_triggers')
 ft_autocmd({ 'tex', 'markdown', 'norg', 'text', 'gitcommit' }, function(ev)
   vim.opt_local.spell = true
   vim.opt_local.wrap = false
-  vim.keymap.set('i', '<c-l>', '<c-g>u<Esc>[s1z=`]a<c-g>u', { buffer = ev.buf, silent = true, desc = 'Spelling' })
+  vim.keymap.set('i', '<C-g>', '<c-g>u<Esc>[s1z=`]a<c-g>u', { buffer = ev.buf, silent = true, desc = 'Spelling' })
 end, 'No Wrap and Spelling', 'nowrap')

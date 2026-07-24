@@ -44,6 +44,11 @@ M.info = make_print_fn(vim.log.levels.INFO)
 M.warn = make_print_fn(vim.log.levels.WARN)
 M.err = make_print_fn(vim.log.levels.ERROR)
 
+---@param value any
+---@return boolean
+M.is_truthy = function(value)
+  return value ~= nil and value ~= false
+end
 -- Paths --------------------------------------------------------------------
 ---@param path string
 ---@param cwd string?
@@ -155,23 +160,24 @@ unlisted	The buffer is not in the buffer list.  It is not used for
 
 --
 --]]
---
--- M.create_scratch_buf = function(name)
---   local buf_id = vim.api.nvim_create_buf(true, true)
---   if name then
---     vim.api.nvim_buf_set_name(buf_id, name)
---   end
---   for optname, value in pairs {
---     filetype = 'scratch',
---     buftype = 'nofile',
---     bufhidden = 'wipe',
---     swapfile = false,
---     modifiable = true,
---   } do
---     vim.api.nvim_set_option_value(optname, value, { buf = buf_id })
---   end
---   return buf_id
--- end
+---@generic T : any
+---@param tbl T[]
+---@param start_idx? number
+---@param end_idx? number
+---@return T[]
+M.tbl_slice = function(tbl, start_idx, end_idx)
+  local ret = {}
+  if not start_idx then
+    start_idx = 1
+  end
+  if not end_idx then
+    end_idx = #tbl
+  end
+  for i = start_idx, end_idx do
+    table.insert(ret, tbl[i])
+  end
+  return ret
+end
 M.new_scratch_buffer = function()
   vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(true, true))
 end
@@ -242,4 +248,46 @@ M.show_in_split = function(lines, name)
   return win_source, win_stdout
 end
 
+---@param cmd string
+---@return string[]
+M.shell_build_argv = function(cmd)
+  local argv = {}
+
+  -- If the shell starts with a quote, it contains spaces (from :help 'shell').
+  -- The shell may also have additional arguments in it, separated by spaces.
+  if vim.startswith(vim.o.shell, '"') then
+    local quoted = vim.o.shell:match '^"([^"]+)"'
+    table.insert(argv, quoted)
+    vim.list_extend(argv, vim.split(vim.o.shell:sub(quoted:len() + 3), '%s+', { trimempty = true }))
+  else
+    vim.list_extend(argv, vim.split(vim.o.shell, '%s+'))
+  end
+
+  vim.list_extend(argv, vim.split(vim.o.shellcmdflag, '%s+', { trimempty = true }))
+
+  if vim.o.shellxquote ~= '' then
+    -- When shellxquote is "(", we should escape the shellxescape characters with '^'
+    -- See :help 'shellxescape'
+    if vim.o.shellxquote == '(' and vim.o.shellxescape ~= '' then
+      cmd = cmd:gsub('.', function(char)
+        if string.find(vim.o.shellxescape, char, 1, true) then
+          return '^' .. char
+        else
+          return char
+        end
+      end)
+    end
+
+    if vim.o.shellxquote == '(' then
+      cmd = '(' .. cmd .. ')'
+    elseif vim.o.shellxquote == '"(' then
+      cmd = '"(' .. cmd .. ')"'
+    else
+      cmd = vim.o.shellxquote .. cmd .. vim.o.shellxquote
+    end
+  end
+
+  table.insert(argv, cmd)
+  return argv
+end
 return M

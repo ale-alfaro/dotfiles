@@ -42,7 +42,3 @@ vim.b.minisurround_config = {
     },
   },
 }
-vim.cmd [[
- set nowrap
- set foldmethod=expr foldexpr=v:lua.vim.treesitter.foldexpr() foldlevelstart=4
-]]

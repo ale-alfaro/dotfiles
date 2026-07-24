@@ -1,11 +1,5 @@
 {
-  "comment": {
-    "prefix": "/",
-    "body": ["/*$0 */"],
-    "description": "Convenient comment block"
-  },
-
-  "comment_long": {
+  "long_comment": {
     "prefix": "/**",
     "body": [
       "/**",
@@ -23,7 +17,7 @@
     ],
     "description": "A C comment block for functions, including short summary, details, param, return, and example."
   },
-  "comment_simple": {
+  "comment": {
     "prefix": "/*",
     "body": [
       "/**",
@@ -53,36 +47,6 @@
     ],
     "description": "Example that demostrates how to use a function. It can be used several times."
   },
-  "@note": {
-    "prefix": "@note",
-    "body": ["@note ${1:Text.}$0"],
-    "description": "Anything worth mentioning that wouldn't fit in the description, or other documentation tags."
-  },
-  "@warning": {
-    "prefix": "@warning",
-    "body": ["@warning ${1:Text.}$0"],
-    "description": "Indicates special considerations when using the function."
-  },
-  "@see": {
-    "prefix": "@see",
-    "body": ["@see ${1:Text.}$0"],
-    "description": "References another function, or piece of documentation."
-  },
-  "@deprecated": {
-    "prefix": "@deprecated",
-    "body": ["@deprecated ${1:Text.}$0"],
-    "description": "Marks the function as deprecated, and no longer recommended for use."
-  },
-  "@todo": {
-    "prefix": "@todo",
-    "body": ["@todo ${1:Text.}$0"],
-    "description": "Used to mark areas of the code that require improvement."
-  },
-  "@fixme": {
-    "prefix": "@fixme",
-    "body": ["@fixme ${1:Text.}$0"],
-    "description": "Used to mark areas of the code that require fixing."
-  },
   "doxygen": {
     "prefix": "/**",
     "body": [
@@ -97,7 +61,7 @@
     "description": "Convenient multiline comment"
   },
   "zephyr-starter": {
-    "prefix": "<ze",
+    "prefix": "<z",
     "body": [
       "#include <zephyr/kernel.h>",
       "#include <zephyr/sys/util.h>",
@@ -106,17 +70,17 @@
     "description": "starter for a Zephyr project"
   },
   "#include <...>": {
-    "prefix": "#inc",
+    "prefix": "<i",
     "body": ["#include <$0>"],
     "description": "#include <...> snippet"
   },
   "#include \"...\"": {
-    "prefix": "#incl",
+    "prefix": "#i\"",
     "body": ["#include \"$0\""],
     "description": "#include \"...\" snippet"
   },
   "#define macro()": {
-    "prefix": "#deff",
+    "prefix": "#d",
     "body": ["#define ${1:MACRO}($2) ($3)"],
     "description": "Function-like macro snippet"
   },
@@ -125,18 +89,8 @@
     "body": ["#if ${1:0}", "$0", "#endif /* if $1 */"],
     "description": "#if snippet"
   },
-  "#ifdef": {
-    "prefix": "#ifdef",
-    "body": ["#ifdef ${1:MACRO}", "$0", "#endif /* ifdef $1 */"],
-    "description": "#ifdef snippet"
-  },
-  "#ifndef": {
-    "prefix": "#ifndef",
-    "body": ["#ifndef ${1:MACRO}", "$0", "#endif /* ifndef $1 */"],
-    "description": "#ifndef snippet"
-  },
   "header": {
-    "prefix": "#header",
+    "prefix": "#ifn",
     "body": [
       "#ifndef ${1:FILE}_H",
       "#define $1_H",
@@ -155,18 +109,8 @@
     ],
     "description": "Header include guard"
   },
-  "#error": {
-    "prefix": "#err",
-    "body": ["#error \"$0\""],
-    "description": "#error snippet"
-  },
-  "#warning": {
-    "prefix": "#warn",
-    "body": ["#warning \"$0\""],
-    "description": "#warning snippet"
-  },
   "switch": {
-    "prefix": "switch",
+    "prefix": "sw",
     "body": [
       "switch (${1:expression}) {",
       "case ${2}: {",
@@ -179,57 +123,21 @@
     ],
     "description": "'switch' snippet"
   },
-  "while": {
-    "prefix": "while",
-    "body": ["while (${1:true}) {$0", "}"],
-    "description": "'while' loop snippet"
-  },
-  "do...while": {
-    "prefix": "do",
-    "body": ["do {$0", "} while (${1:false});"],
-    "description": "do...while loop snippet"
-  },
-  "return": {
-    "prefix": "return",
-    "body": ["return ${1:0};"],
-    "description": "'return' snippet"
-  },
   "for": {
     "prefix": "for",
     "body": ["for (int i = 0; i < ${1:count}; i++) {", "\t$0", "}"],
     "description": "'for' loop focusing on iteration times"
   },
-  "for range": {
-    "prefix": "forg",
-    "body": [
-      "for (${1:size_t} ${2:i} = ${3:1}; $2 <= ${4:last}; $2${5:++}) {$0",
-      "}"
-    ],
-    "description": "'for' loop focusing on inclusive range"
-  },
-  "Function ...": {
-    "prefix": "fun",
-    "body": ["${2:void} ${1:fun}(${3:void})$0"],
+  "decl":{
+    "prefix": "fdcl",
+    "body": ["${1:static} ${2:int} $0(${3:int arg0, int arg1, int arg3});"],
     "description": "Make a function declaration/definition/pointer"
   },
-  "Function definition": {
-    "prefix": "func",
-    "body": ["${2:void} ${1:fun}(${3:void})", "{$0", "}"],
-    "description": "Define a function"
-  },
-  "typedef": {
-    "prefix": "typedef",
-    "body": ["typedef ${1:void} ${2:Emptiness};"],
-    "description": "'typedef' snippet"
-  },
   "struct": {
-    "prefix": "struct",
-    "body": ["struct ${1:MyStruct} {$0", "};"],
+    "prefix": "st",
+    "body": ["struct ${1:my_struct} {",
+      "\t\t$0",
+      "};"],
     "description": "'struct' snippet"
-  },
-  "union": {
-    "prefix": "union",
-    "body": ["union ${1:MyUnion} {$0", "};"],
-    "description": "'union' snippet"
   }
 }

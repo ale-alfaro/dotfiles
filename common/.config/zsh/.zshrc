@@ -47,7 +47,7 @@ if [[ $- == *i* ]] && [[ ${TERM:-} != "dumb" ]]; then
   eval "$(starship init zsh)"
 fi
 
-if [[ -f "$HOME/.local/state/dots/toggles/mise_activate" ]]; then
+if [[ -z "${NO_MISE_ACTIVATE:-}" && -f "$HOME/.local/state/dots/toggles/mise_activate" ]]; then
   source <(mise activate zsh)
 fi
 
