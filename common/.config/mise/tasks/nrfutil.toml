@@ -31,7 +31,7 @@ arg "<mergedhex>" default="merged.hex"
 '''
 run = '''
 nrfutil device program --family nrf53 --core Application \
-  --options chip_erase_mode=ERASE_ALL,reset=RESET_DEFAULT,verify=VERIFY_READ \
+  --options chip_erase_mode=ERASE_ALL,reset=RESET_NONE,verify=VERIFY_READ \
   --firmware {{usage.mergedhex}}
 sleep 2
 nrfutil device reset
@@ -55,4 +55,19 @@ run = [
   { task = 'nrf5340:flash:app', args = [
     'merged.hex',
   ] },
+]
+
+
+["west:flash:reset"]
+description = "Flash both Network and Application Core FW"
+dir = "{{cwd}}"
+usage = '''
+arg "<build_dir>" help="Build Dir"
+flag "-s --serial [port]" help="Serial"
+'''
+run = [
+  'west flash -d {{usage.build_dir}}',
+  'sleep 2',
+  'nrfutil device reset',
+  '{%if usage.serial %} scope serial {{usage.serial}} 115200 {% else %}echo "done"{% endif %}',
 ]

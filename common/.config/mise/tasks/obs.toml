@@ -1,0 +1,14 @@
+["mdtohtml"]
+description = "Markdown to HTML"
+dir = "{{cwd}}"
+interactive = true
+usage = '''
+arg "<regex>" help="Regex to use for HTML finding"
+arg "[dir]" help="Path where to search" default="."
+flag "-a --all" help="Do not filter files by gitignore or hidden files"
+'''
+run = '''
+fd -t file --extension html {{usage.regex}} {{usage.dir}} \
+  {% if usage.all %}--no-ignore --no-hidden{% endif %} | \
+  fzf --bind "enter:become(sh -c 'defuddle parse --md {} | nvim')"
+'''

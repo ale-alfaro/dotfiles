@@ -12,3 +12,26 @@ run = 'uvx ruff check "${(z)usage_flags:-.}"'
 dir = "{{cwd}}"
 usage = 'arg "[flags]" help="Flags" var=#true'
 run = 'uvx ty check "${(z)usage_flags:-}"'
+
+["python:requirements:merge"]
+description = "Merge multiple requirements.txt into one"
+dir = "{{cwd}}"
+usage = '''
+arg "[glob]" {
+  help "Glob to use to include files. Recursive glob is prefixed to this value"
+  default "requirements.txt"
+}
+flag "-o --output [output]" {
+  help "Output to file"
+  default "requirements.txt"
+}
+'''
+run = '''
+
+rg --files-without-match \
+  -g '**/{{usage.glob}}' \
+  -e '\-(r|hash)' | \
+    xargs rg \
+      -N --no-filename -e '^\w+' | \
+      sort -u > '{{usage.output}}'
+'''

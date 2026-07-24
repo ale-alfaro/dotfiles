@@ -29,7 +29,9 @@ pipx.uvx = true
 python.uv_venv_auto = "source"
 disable_tools = ["pipx:west"]
 
-[settings.cargo]
+
+[settings.github]
+gh_cli_tokens = true
 
 [tools]
 jqp = "latest"
@@ -97,12 +99,11 @@ sd = "latest"
 opam = { version = "latest", asset_pattern = "opam-*-{gnu_arch}-{os}" }
 pkl = "latest"
 ninja = "latest"
+"cargo:scope-monitor" = "latest"
 
 [plugins]
 "vfox:zephyr" = "https://github.com/ale-alfaro/vfox-zephyr-sdk.git"
 
-[env]
-'_'.file = ".env"
 
 [tool_alias]
 "python@3.12" = "python"

@@ -1,4 +1,13 @@
 
+["preproc:list"]
+description = "List preprocessor definitions in file"
+dir = "{{cwd}}"
+usage = '''
+arg "<file>" help="File"
+'''
+run = '''
+unifdef -s {{usage.file}}
+'''
 ["preproc:remove:diff"]
 description = "Remove preprocessor definitions"
 dir = "{{cwd}}"

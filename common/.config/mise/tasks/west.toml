@@ -1,3 +1,12 @@
+["west:alias"]
+dir = "{{cwd}}"
+description = "Get west aliases in global config"
+run = '''
+echo "GLOBAL ALIASES: "
+yq e --input-format=ini '.alias' ~/.config/west/config
+echo "LOCAL ALIASES: "
+yq e --input-format=ini '.alias' "$(west topdir)/.west/config"
+'''
 
 ["west:build"]
 dir = "{{cwd}}"

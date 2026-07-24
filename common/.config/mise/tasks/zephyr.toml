@@ -1,7 +1,20 @@
 
+["kconfigstyle:format:stdout"]
+hide = true
+alias = "kconfigfmt"
+dir = "{{cwd}}"
+usage = '''
+arg "<file>" help="Name of file to format"
+'''
+run = '''
+#!/usr/bin/env zsh
+set -euo pipefail
+kconfigstyle --preset zephyr {{usage.file}} --print-formatted | tail -n +5 | head -n -2
+'''
 ["zephyr:mcuboot:keygen"]
 hide = true
 env = { MCUBOOT_SCRIPTS = "{{config_root}}/external/bootloader/mcuboot/scripts" }
+dir = "{{cwd}}"
 usage = '''
 arg "<keyname>" help="Name of key" default="test"
 '''
@@ -13,9 +26,12 @@ typeset -a _imgtool
 _imgtool=(uv run '--with-requirements' "${MCUBOOT_SCRIPTS}/requirements.txt" "${MCUBOOT_SCRIPTS}/imgtool.py")
 $_imgtool keygen -k "${usage_keyname?}_key.pem" -t ecdsa-p256
 '''
+
+
 ["zephyr:dts-lsp:genconf"]
 description = "Find DTS node with dtsh"
 tools = { 'yq' = 'latest' }
+dir = "{{cwd}}"
 usage = '''
 arg "build_info" help="Build info to convert"
 flag "-o --out [output]" help="output" default=".dts-lsp.lua"
@@ -23,12 +39,33 @@ flag "-o --out [output]" help="output" default=".dts-lsp.lua"
 run = '''
 yq e -o=lua '.cmake.devicetree as $dt | { "board": .cmake.board.name,"dtsFile": ($dt.files[] | select(. == "*.dts")), "overlays": ($dt.files[] | select(. == "*.overlay")),"includePaths": $dt.include-dirs, "zephyrBindings": $dt.bindings-dirs } ' {{usage.build_info}} > {{usage.out}}
 '''
+["zephyr:renode:dts2repl"]
+description = "Convert dts to repl file"
+dir = "{{cwd}}"
+usage = '''
+arg "<board_file>" help="Regex to find dts nodes with"
+arg "[includes]" help="Add additional include paths" var=#true
+'''
+run = '''
+{% set board = usage.board_file | basename %}
+gcc -H -E -P -x assembler-with-cpp \
+  -I "$ZEPHYR_BASE/include" \
+  -I "$ZEPHYR_BASE/dts" \
+  -I "$ZEPHYR_BASE/dts/arm" \
+  -I "$ZEPHYR_BASE/dts/common" \
+  -I "$ZEPHYR_BASE/dts/vendor" \
+  {% for incl in usage.includes %}-I {{incl}} \{% else %} \{% endfor %}
+  {{usage.board_file}} \
+  1>flattened_out.dts 2>includes.txt
 
+mise exec pipx:git+https://github.com/antmicro/dts2repl.git -- dts2repl flattened_out.dts -o {{board}}.repl
+'''
 ["zephyr:dts:find"]
 description = "Find DTS node with dtsh"
 interactive = true
 tools = { 'pipx:dtsh' = 'latest' }
 alias = "dtsf"
+dir = "{{cwd}}"
 usage = '''
 arg "<regex>" help="Regex to find dts nodes with"
 arg "[attribute]" help="Attribute to find dts nodes with" {
