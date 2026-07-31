@@ -30,12 +30,14 @@ overseer.setup {
         nowait = true,
         desc = 'Dispose all tasks',
       },
-      ['<C-e>'] = { 'keymap.run_action', opts = { action = 'edit' }, desc = 'Edit task' },
+      ['<localleader>e'] = { 'keymap.run_action', opts = { action = 'edit' }, desc = 'Edit task' },
+      ['<localleader>r'] = { 'keymap.run_action', opts = { action = 'restart' }, desc = 'Restart task' },
+      ['<localleader>d'] = { 'keymap.run_action', opts = { action = 'dispose' }, desc = 'Restart task' },
       ['o'] = 'keymap.open',
       ['<C-v>'] = { 'keymap.open', opts = { dir = 'vsplit' }, desc = 'Open task output in vsplit' },
       ['<C-s>'] = { 'keymap.open', opts = { dir = 'split' }, desc = 'Open task output in split' },
       ['<C-f>'] = { 'keymap.open', opts = { dir = 'float' }, desc = 'Open task output in float' },
-      ['<C-q>'] = {
+      ['<localleader>q'] = {
         'keymap.run_action',
         opts = { action = 'open output in quickfix' },
         desc = 'Open task output in the quickfix',
@@ -86,6 +88,86 @@ local west_errorformat = {
   '%f:%l: %m',
   '%-G%.%#',
 }
+---@param dir? string
+---@return string?
+local function get_west_topdir(dir)
+  local west = require 'custom.west'
+  if west.topdir then
+    return west.topdir
+  end
+  return west.get_topdir(dir)
+end
+---@param selected string[]
+---@param opts? {cwd?:string,flags?:string[]}
+local west_build_select_app = function(selected, opts)
+  if not selected[1] then
+    return
+  end
+  opts = opts or {}
+  local app = selected[1]
+  local cwd = get_west_topdir(vim.fs.dirname(app))
+  app = vim.fs.joinpath(cwd, app)
+  local raw_flags = opts.flags or vim.g.west_build_app_flags
+  VimRc.info(("app set to '%s'"):format(app))
+  if vim.uv.fs_stat(app) then
+    local cmd = string.format('west build.app %s', app)
+    if raw_flags then
+      local flags = vim.fn.split(raw_flags, ' ', false)
+      if #flags > 0 then
+        cmd = cmd .. ' ' .. vim.fn.join(flags, ' ')
+      end
+    end
+    local task = require('overseer').new_task {
+      cmd = cmd,
+      name = 'west build',
+      cwd = cwd,
+      components = {
+        'default',
+
+        {
+          'open_output',
+          focus = true,
+          on_start = 'always',
+        },
+        {
+          'on_output_quickfix',
+          set_diagnostics = true,
+          open_on_exit = 'never',
+          errorformat = vim.fn.join(west_errorformat, ','),
+        },
+        {
+          'on_result_diagnostics_trouble',
+          close = true,
+        },
+      },
+    }
+    task:start()
+  else
+    VimRc.warn(("Unable to find path to '%s', directory is not accessible"):format(app))
+  end
+end
+vim.api.nvim_create_user_command('Build', function()
+  -- local cwd = vim.fs.root(0, { 'mise.toml', 'mise.local.toml', '.git' })
+  local cwd = get_west_topdir()
+  require('fzf-lua').fzf_exec([[fd -t file --extension yaml '^(sample|testcase)' --strip-cwd-prefix]], {
+    cwd = cwd,
+    -- can also be set to "mini" for "mini.icons"
+    fn_transform = function(x)
+      return vim.fs.dirname(x:match '[^\t]+$' or x)
+    end,
+    actions = {
+      ['default'] = west_build_select_app,
+      ['ctrl-i'] = {
+        fn = function(selected, opts)
+          vim.ui.input({ prompt = 'Enter flags: ', default = '-p' }, function(ans)
+            local flags = vim.fn.shellescape(ans)
+            west_build_select_app(selected, { flags = flags })
+          end)
+        end,
+      },
+    },
+  })
+end, { desc = 'Build', nargs = '*' })
 local overseer_make = function(params)
   -- Insert args at the '$*' in the makeprg
   local cmd
@@ -116,71 +198,6 @@ local overseer_make = function(params)
 end
 vim.api.nvim_create_user_command('Make', overseer_make, { desc = 'Make', nargs = '*', bang = true })
 vim.keymap.set('n', '<localleader>b', overseer_make, { desc = 'Build' })
----@param selected string[]
----@param opts fzf-lua.config.Zoxide|{}
-local west_build_select_app = function(selected, opts)
-  if not selected[1] then
-    return
-  end
-  local app = selected[1]
-  if opts.cwd then
-    app = vim.fs.joinpath(opts.cwd, app)
-  end
-  VimRc.info(("app set to '%s'"):format(app))
-  if vim.uv.fs_stat(app) then
-    local ov = require 'overseer'
-    local cmd = 'west build_sample ' .. vim.fn.shellescape(app)
-    local task = ov.new_task {
-      cmd = cmd,
-      name = 'west build',
-      components = {
-        {
-          'on_output_quickfix',
-          set_diagnostics = true,
-          open = true,
-          open_on_exit = 'failure',
-          errorformat = vim.fn.join(west_errorformat, ','),
-        },
-        'default',
-      },
-    }
-    task:start()
-  else
-    VimRc.warn(("Unable to find path to '%s', directory is not accessible"):format(app))
-  end
-end
-vim.api.nvim_create_user_command('Build', function()
-  -- local cwd = vim.fs.root(0, { 'mise.toml', 'mise.local.toml', '.git' })
-  require('fzf-lua').fzf_exec([[fd -t file --extension yaml '^(sample|testcase)' --strip-cwd-prefix]], {
-    -- can also be set to "mini" for "mini.icons"
-    fn_transform = function(x)
-      return vim.fs.dirname(x:match '[^\t]+$' or x)
-    end,
-    actions = {
-      ['default'] = west_build_select_app,
-    },
-  })
-end, { desc = 'Build', nargs = '*' })
--- Always show the output from the most recent Neotest task in this window.
--- Close it automatically when all test tasks are disposed.
-
-overseer.add_template_hook({ name = '^.*build$' }, function(task_defn, util)
-  util.add_component(task_defn, {
-    {
-      on_result = function(self, task, result)
-        local diagnostics = result.diagnostics or {}
-        local is_empty = vim.tbl_isempty(diagnostics)
-        local trouble = require 'trouble'
-
-        if is_empty then
-          trouble.close { mode = 'diagnostics' }
-        else
-          trouble.open { mode = 'diagnostics' }
-        end
-      end,
-    },
-  })
-end)
 
 vim.api.nvim_create_user_command('OverseerRestartLast', function()
   local ovr = require 'overseer'

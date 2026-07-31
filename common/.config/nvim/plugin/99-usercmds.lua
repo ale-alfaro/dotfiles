@@ -264,11 +264,8 @@ usercmd_args_comp('Pack', function(args)
 end, 'vim.pack Interface', 1, { 'open', 'list', 'update', 'clean' })
 
 usercmd('SwapDel', function()
-  local swapdir = vim.fn.expand '$XDG_STATE_HOME/nvim/swap/'
-  if vim.uv.fs_stat(swapdir) then
-    vim.fs.rm(swapdir, { recursive = true })
-    VimRc.info 'Deleted swap dir'
-  end
+  vim.cmd [[!rm $XDG_STATE_HOME/nvim/swap/*.swp ]]
+  VimRc.info 'Deleted swap dir'
 end, 'Delete current buffer swapfile')
 usercmd_args_comp('Lsp', function(args)
   local arg = (args.fargs or {})[1]

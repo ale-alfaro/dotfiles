@@ -290,4 +290,18 @@ M.shell_build_argv = function(cmd)
   table.insert(argv, cmd)
   return argv
 end
+M.with_preserved_view = function(op)
+  local view = vim.fn.winsaveview()
+  local ok, err = pcall(function()
+    if type(op) == 'function' then
+      op()
+    else
+      vim.cmd(('keepjumps keeppatterns %s'):format(op))
+    end
+  end)
+  vim.fn.winrestview(view)
+  if not ok then
+    VimRc.err('[with_preserved_view]: ' .. (err or 'Unknown error'), vim.log.levels.ERROR)
+  end
+end
 return M

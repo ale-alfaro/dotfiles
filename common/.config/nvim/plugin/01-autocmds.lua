@@ -92,8 +92,3 @@ ft_autocmd({
     miniclue.ensure_buf_triggers(args.buf)
   end
 end, 'MiniClue Ensure buf triggers ', 'miniclue/ensure_buf_triggers')
-ft_autocmd({ 'tex', 'markdown', 'norg', 'text', 'gitcommit' }, function(ev)
-  vim.opt_local.spell = true
-  vim.opt_local.wrap = false
-  vim.keymap.set('i', '<C-g>', '<c-g>u<Esc>[s1z=`]a<c-g>u', { buffer = ev.buf, silent = true, desc = 'Spelling' })
-end, 'No Wrap and Spelling', 'nowrap')

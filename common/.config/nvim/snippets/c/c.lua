@@ -34,12 +34,9 @@ local hdr_tp = [[
  *
  *  This is the header file for the definition of ${TM_FILENAME_BASE}
  */
-#ifndef ${TM_FILEPATH}
-#define ${RELATIVE_FILEPATH}
+#ifndef ${HEADER_FILE_GUARD}
+#define ${HEADER_FILE_GUARD}
 
-/******************************************************************************
-* Includes
-*******************************************************************************/
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -47,18 +44,6 @@ local hdr_tp = [[
 extern "C"{
 #endif
 
-#define HELLO
-
-enum
-{
-	TEST_TEST1,			/** Test Type 1 */
-	TEST_TEST2,			/** Test Type 2 */
-};
-
-
-/******************************************************************************
-* Function Prototypes
-*******************************************************************************/
 
 void ${TM_FILENAME_BASE}_init(void);
 
@@ -66,7 +51,7 @@ void ${TM_FILENAME_BASE}_init(void);
 } // extern "C"
 #endif
 
-#endif /* ${RELATIVE_FILEPATH} */
+#endif /* ${HEADER_FILE_GUARD} */
 ]]
 
 local src_tp = [[

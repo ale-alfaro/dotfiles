@@ -16,6 +16,8 @@ local uv = vim.uv
 ---@field no_stdin? boolean Send buffer contents to stdin (default false)
 ---@field tmpfile_format? string When stdin=false, use this format for temporary files (default ".fmt.$RANDOM.$FILENAME")
 ---@field env? table<string, any>|fun(self: fmt.JobFormatterConfig, ctx: fmt.Context): table<string, any>
+---@field lsp_prefer? boolean
+---@field post? boolean
 ---
 ---@class (exact) fmt.LuaFormatterConfig
 ---@field format fun(self: fmt.LuaFormatterConfig, ctx: fmt.Context, lines: string[], callback: fun(err: nil|string, new_lines: nil|string[]))

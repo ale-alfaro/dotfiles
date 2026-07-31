@@ -4,15 +4,17 @@ local H = {}
 M.west = { 'west' }
 M.setup = function()
   M.topdir = M.topdir or M.get_topdir(vim.api.nvim_get_current_buf())
-  M.zephyr_base = vim.env['ZEPHYR_BASE'] or M.get_config ('zephyr.base')
+  M.zephyr_base = vim.env['ZEPHYR_BASE'] or M.get_config 'zephyr.base'
   if not M.topdir or not M.zephyr_base then
     VimRc.warn 'no west workspace found'
     return
+  else
+    vim.g.west_topdir = M.topdir
   end
   if not vim.uv.fs_stat(M.zephyr_base) then
     M.zephyr_base = vim.fs.joinpath(M.topdir, M.zephyr_base)
   end
-
+  vim.g.zephyr_base = M.zephyr_base
   require('vimrc_lsp.dts').config { topdir = M.topdir, relative_zephyr_base = M.zephyr_base }
   require('vimrc_lsp.clangd').setup(M.topdir)
 

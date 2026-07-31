@@ -5,6 +5,7 @@ vim.filetype.add {
     h = 'c',
   },
   pattern = {
+    ['.*/Kconfig.*'] = 'kconfig',
     ['.*'] = {
       function(path, bufnr)
         return vim.bo[bufnr]
