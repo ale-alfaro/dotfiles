@@ -18,7 +18,7 @@ prSections:
   - title: Sibel Subscribed
     filters: >-
       is:open repo:sibelhealth/sh_sdk_2.0 repo:sibelhealth/sensors-app
-      repo:sibelhealth/BengalFly-Zephyr repo:sibelhealth/BengalTiger-Zephyr
+      repo:sibelhealth/BengalFly-Zephyr repo:sibelhealth/DragonFly-Zephyr
 issuesSections:
   - title: Creator
     filters: author:@me
