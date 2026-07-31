@@ -2,11 +2,21 @@
 dir = "{{cwd}}"
 description = "Get west aliases in global config"
 run = '''
-echo "GLOBAL ALIASES: "
-yq e --input-format=ini '.alias' ~/.config/west/config
-echo "LOCAL ALIASES: "
-yq e --input-format=ini '.alias' "$(west topdir)/.west/config"
+echo "Global Aliases: "
+yq e --input-format=ini '.alias' ~/.config/west/config 2>/dev/null
+echo "Local Aliases: "
+yq e --input-format=ini '.alias' "$(west topdir)/.west/config" 2>/dev/null
 '''
+["west:info"]
+dir = "{{cwd}}"
+description = "Get west workspace info"
+run = '''
+echo "Projects: "
+west ls
+echo 'Workspace status: "
+west status -s
+'''
+depends_post = ["west:alias"]
 
 ["west:build"]
 dir = "{{cwd}}"

@@ -38,25 +38,65 @@ nrfutil device reset
 '''
 
 
-["nrf5340:flash"]
+["nrf5340:flash:mergehex"]
 description = "Flash both Network and Application Core FW"
 dir = "{{cwd}}"
 usage = '''
-flag "-d --build-dir <build_dir>"
-flag "--sysbuild" help="Sysbuild"
+arg "<build_dir>"
+flag "-b --board [board]" help="Board" default="aria"
+flag "-s --serial [port]" help="Serial"
 '''
-run = [
-  { task = '_artifacts:mergehex', args = [
-    '{{usage.build_dir}}',
-  ] },
-  { task = 'nrf5340:flash:net', args = [
-    'merged_CPUNET.hex',
-  ] },
-  { task = 'nrf5340:flash:app', args = [
-    'merged.hex',
-  ] },
-]
+run = '''
+net_hex="${usage_build_dir}/merged_${usage_board}_nrf5340_cpunet.hex"
+app_hex="${usage_build_dir}/merged_${usage_board}_nrf5340_cpuapp.hex"
+[[ ! -f $app_hex || ! -f $net_hex ]] && {
+  echo "Hex file(s) not found!"
+  echo "$app_hex"
+  echo "$net_hex"
+  exit 1
+}
+nrfutil device program --family nrf53 --core Network \
+  --options chip_erase_mode=ERASE_ALL  \
+  --firmware "${net_hex?}"
 
+sleep 0.5
+nrfutil device program --family nrf53 --core Application \
+  --options chip_erase_mode=ERASE_ALL,reset=RESET_NONE,verify=VERIFY_READ \
+  --firmware "${app_hex?}"
+sleep 2
+nrfutil device reset
+[[ -n "${usage_serial}" ]] && scope serial "${usage_serial}" 115200
+'''
+
+["nrf5340:flash:sysbuild"]
+description = "Flash both Network and Application Core FW"
+dir = "{{cwd}}"
+usage = '''
+arg "<build_dir>" help="Build Dir"
+flag "-s --serial [port]" help="Serial"
+'''
+run = '''
+build_dir="${usage_build_dir?}"
+domains="${build_dir}/domains.yaml"
+[[ -f "${domains?}" ]] || {
+  echo "No domains.yaml. Is this a sysbuild app?"
+  exit 1
+}
+local -a flash_order_arr
+flash_order_arr=(${(f)"$(yq e '.flash_order[]' $domains)"})
+echo "${flash_order_arr[@]}"
+for img in "$flash_order_arr[@]"; do
+  hex="${build_dir}/${img}/zephyr/zephyr.hex"
+  core="Application"
+  if [[ $img == hci_ipc || $img == ipc_radio ]]; then 
+    core="Network"
+  fi
+  [[ -f "${hex?}" ]] && nrfutil device program --core "${core?}" --firmware "${hex}"
+done
+sleep 2
+nrfutil device reset
+[[ -n "${usage_serial}" ]] && scope serial "${usage_serial}" 115200
+'''
 
 ["west:flash:reset"]
 description = "Flash both Network and Application Core FW"

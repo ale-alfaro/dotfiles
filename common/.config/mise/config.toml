@@ -100,6 +100,7 @@ opam = { version = "latest", asset_pattern = "opam-*-{gnu_arch}-{os}" }
 pkl = "latest"
 ninja = "latest"
 "cargo:scope-monitor" = "latest"
+"pipx:gersemi" = "latest"
 
 [plugins]
 "vfox:zephyr" = "https://github.com/ale-alfaro/vfox-zephyr-sdk.git"

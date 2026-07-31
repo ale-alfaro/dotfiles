@@ -1,4 +1,6 @@
-
+["sysadmin:xdg-apps:refresh"]
+description = "Refresh XDG applications"
+run = 'update-desktop-database ~/.local/share/applications'
 
 
 ["_stow:dotfiles"]
@@ -26,7 +28,7 @@ stow \
 # stow "${platform_flags[@]}"
 '''
 
-["stow:doftiles"]
+["sysadmin:stow:doftiles"]
 description = "Stow dotfiles"
 depends = ["_stow:dotfiles common", "_stow:dotfiles linux"]
 run = '''

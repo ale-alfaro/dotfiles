@@ -1,5 +1,5 @@
 
-["kconfigstyle:format:stdout"]
+["kconfigstyle:fmt"]
 hide = true
 alias = "kconfigfmt"
 dir = "{{cwd}}"
@@ -10,6 +10,24 @@ run = '''
 #!/usr/bin/env zsh
 set -euo pipefail
 kconfigstyle --preset zephyr {{usage.file}} --print-formatted | tail -n +5 | head -n -2
+'''
+
+["kconfig:diffconfig"]
+description = "Diffconfig after menucfg"
+dir = "{{cwd}}"
+usage = '''
+arg "<build_dir>" help="Build dir"
+flag "-o --out <out>" help="Output to file"
+'''
+run = '''
+#!/usr/bin/env zsh
+
+build_dir="${usage_build_dir?}/zephyr"
+[[ ! -d $build_dir ]] && {
+  echo "Couldn't find build directory with zephyr folder!"
+}
+diffconfig.py "${build_dir}/.config.old" "${build_dir}/.config" -m \
+    ${(z)${usage_out:+-o $usage_out}}
 '''
 ["zephyr:mcuboot:keygen"]
 hide = true
@@ -90,20 +108,3 @@ fi
 dtsh -c ${(q)cmd}  ${dts_file}
 '''
 
-["zephyr:kconfig:diffconfig"]
-description = "Diffconfig after menucfg"
-dir = "{{cwd}}"
-usage = '''
-arg "[app]" help="Application" default="app" env="ZEPHYR_APP"
-flag "-d --domain [domain]" help="Domain"
-flag "-m --merge" help="Merge style"
-flag "-o --out <out>" help="Output to file"
-'''
-run = '''
-#!/usr/bin/env zsh
-
-build_dir="build_${usage_app?}/${usage_domain:-$usage_app}"
-diffconfig.py "${build_dir}/zephyr/.config.old" "${build_dir}/zephyr/.config" \
-    ${usage_merge:+-m} \
-    ${(z)${usage_out:+-o $usage_out}}
-'''
