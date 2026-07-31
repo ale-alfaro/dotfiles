@@ -1,4 +1,4 @@
-#import "modern-cv/lib.typ": *
+#import "lib.typ": *
 
 // #let accent-color = rgb("#83a598")
 #let accent-color = rgb("#076678")
