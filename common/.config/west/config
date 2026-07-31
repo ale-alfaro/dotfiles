@@ -11,17 +11,24 @@ auto-cache = /home/alealfaro/.cache/west
 base-prefer = configfile
 
 [alias]
-target = build -p=never -t
-menuconfig = build -p=never -t menuconfig -d
-partitions = build -p=never -t partition_manager_report -d
-initlevels = build -p=never -t initlevels -d
-build_resume = build -p=never -t all -d
-find-board = boards --format '{name:30} | {qualifiers:30} | {dir}' -n
-run = build -p=never -t run -d
-test = twister -vv --inline-logs --clobber-output --no-detailed-test-id
-sim-test = twister -vv --inline-logs --clobber-output --no-detailed-test-id -p native_sim -T
 up = update -k
 ls = list -f '{name:20} {path:30} {groups}'
+st = status -s
+fb = boards --format '{name:30} | {qualifiers:30} | {dir}' -n
+tgt = build -p=never -t
+tgt.run = tgt run -d
+tgt.partitions = tgt partition_manager_report -d
+tgt.initlevels = tgt initlevels -d
+tgt.resume = tgt all -d
+tgt.dash = tgt dashboard -d
+gdb = attach -d
+pygdb = attach --gdb=arm-zephyr-gdb-py -d
+test = twister -vv --inline-logs --clobber-output --no-detailed-test-id
+test.sim = test -p native_sim -T
+test.renode = simulate -r renode -d
 goto = forall -c 'nvim .'
-renode = simulate -r renode -d
-# vim: ft=ini
+lg = forall -c 'lazygit'
+tgt.traceconf = tgt traceconfig -d
+tgt.menuconf = tgt menuconfig -d
+tgt.sys_menuconf = tgt sysbuild_menuconfig -d
+
