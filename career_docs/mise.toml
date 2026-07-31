@@ -1,0 +1,8 @@
+[tools]
+typst = "latest"
+tinymist = "latest"
+typstyle = "latest"
+
+[tasks."typst:resume"]
+description = "Make resume and open it"
+run = 'typst compile {{config_root}}/CVs/resume.typ && open {{config_root}}/CVs/resume.pdf'
