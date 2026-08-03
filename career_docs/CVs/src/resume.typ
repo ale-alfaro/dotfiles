@@ -1,7 +1,6 @@
 #import "lib.typ": *
 
 
-// #let accent-color = rgb("#83a598")
 #let accent-color = rgb("#076678")
 #show: resume.with(
     author: (
@@ -11,7 +10,7 @@
         github: "ale-alfaro",
         phone: "(650) 483-6627",
         linkedin: "ale-alfaro-867801134",
-        address: "Bay Area",
+        address: "San Francisco, Bay Area",
         positions: (
             "Senior Firmware Engineer with 5+ years building IEC 62304-compliant embedded systems for medical wearables — Zephyr RTOS, BLE, and bootloader/OTA architecture from prototype to production.",
         ),
@@ -55,19 +54,33 @@
 #resume-skill-grid(
     categories-with-values: (
         "Firmware Experiences": (
-            strong("Zephyr Modular Architecture"),
-            strong("Bootloader Design"),
-            "BLE and IoT",
+            strong("Zephyr RTOS"),
+            strong("ARM Cortex-M"),
+            strong("MCUBoot Bootloader"),
+            "BLE",
+            "I2C",
+            "SPI",
+            "UART",
+            "PDM",
+            "ADC",
         ),
         "Tech Proficiencies": (
-            strong("Modern C Design Patterns"),
-            strong("IPC & Concurrency"),
-            "Build/Test Pipelines",
+            strong("C/C++"),
+            strong("Wireless IoT"),
+            strong("IPC in Single/Multi-Core SoCs"),
+            "Real-time IO",
         ),
         "Domain Knowledge": (
             strong("Medical IoT Wearables Development"),
-            strong("IEC 62304"),
+            "IEC 62304",
             "CE Mark/FDA 510(k) submissions",
+        ),
+        "Tools": (
+            strong("ARM Embedded Toolchain (GNU/Clang)"),
+            strong("GDB"),
+            "Logic Analyzer",
+            "Git",
+            "CMake",
         ),
         "Higher Education": (
             strong("Bachelor's and Master's in Mechanical Engineering"),
@@ -76,13 +89,6 @@
     ),
 )
 
-#block(above: 0.3em, below: 0em)[
-    #text(size: 7.5pt, fill: color-gray)[
-        Also: RTOS, C, C++, I2C, SPI, UART, PDM, ADC, Git, CMake, ARM GCC/Clang,
-        GDB, JTAG/SWD, Logic Analyzer
-    ]
-]
-#v(-1.1em)
 
 // #block(below: 0.65em)
 = Relevant Experience
@@ -141,11 +147,11 @@
 )
 
 #resume-item[
-    - Optimized Apple's CoreHaptics framework, achieving 20% less CPU usage
-        across haptic and audio playback scenarios.
-    - Fixed a fundamental sound wave interpolation bug in Apple's haptic
-        synthesizer, eliminating Taptic Engine motion glitches during sustained
-        haptic playback.
+    - Optimized CoreHaptics framework, achieving 20% less CPU usage across
+        haptic and audio playback scenarios.
+    - Fixed an sound wave interpolation bug in iOS haptic synthesizer, whose
+        mantainer and creator had left, resolving a long-standing bug affecting
+        all iPhones with a Taptic Engine
     - Improved iOS 16 haptic keyboard quality by validating behavior across all
         audio routes (wireless/wired headphones, CarPlay, AirPlay, HDMI) and
         expanded CI/CD test coverage for the CoreHaptics framework.
@@ -153,7 +159,7 @@
 
 #resume-entry(
     title: "Firmware Engineer",
-    location: "Chicago, IL and Remote",
+    location: "Chicago, IL",
     date: "June 2020 – March 2022",
     description: "Sibel Health",
 )
@@ -179,7 +185,7 @@
 
 
 #block(sticky: true, above: 1em)[
-    #text(size: 12pt, weight: "regular")[#strong[#text(
+    #text(size: 16pt, weight: "regular")[#strong[#text(
         color-darkgray,
     )[Interests]]]
     #box(width: 1fr, line(length: 100%))

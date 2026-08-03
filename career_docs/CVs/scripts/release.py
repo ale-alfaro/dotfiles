@@ -25,9 +25,8 @@ from pathlib import Path
 from pypdf import PdfReader
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "src" / "resume.typ"
 ARTIFACTS = ROOT / "artifacts"
-TMP_PDF = ARTIFACTS / ".release-tmp.pdf"
+DRAFT_PDF = ROOT / "build" / f"DRAFT-Alejandro-Alfaro-CV-{date.today().isoformat()}.pdf"
 
 REQUIRED_LINK_PREFIXES = (
     "mailto:",
@@ -90,10 +89,9 @@ def run_checks(reader):
 
 
 def main():
-    reader = PdfReader(str(TMP_PDF))
+    reader = PdfReader(str(DRAFT_PDF))
     errors, author = run_checks(reader)
 
-    TMP_PDF.unlink(missing_ok=True)
     if errors:
         errs = [ f"  - {e}" for e in errors ]
         SystemExit("Release aborted — failed checks:" + "\n".join(errs))
