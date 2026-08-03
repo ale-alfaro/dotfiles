@@ -1,0 +1,31 @@
+[tools]
+typst = "latest"
+tinymist = "latest"
+typstyle = "latest"
+
+[tasks."cv:compile"]
+description = "Compile"
+run = 'typst compile src/resume.typ "build/DRAFT-Alejandro-Alfaro-CV-$(date +%Y-%m-%d).pdf"'
+
+[tasks."cv:update"]
+description = "Update resume and open it"
+depends = ["cv:compile"]
+run = '''
+typst watch src/resume.typ "build/DRAFT-Alejandro-Alfaro-CV-$(date +%Y-%m-%d).pdf" &
+xdg-open "build/DRAFT-Alejandro-Alfaro-CV-$(date +%Y-%M-%D).pdf"
+'''
+
+[tasks."cv:watch"]
+description = "Watch for changes and update"
+run = '''
+'''
+
+[tasks."cv:check"]
+description = "verify (single page, metadata, links, text layer)"
+run = "uv run --script scripts/release.py"
+
+[tasks."cv:release"]
+description = "verify (single page, metadata, links, text layer)"
+run = [
+"cv:update", "cv:check", '"mv build/DRAFT-Alejandro-Alfaro-CV-$(date +%Y-%m-%d).pdf" artifacts/DRAFT-Alejandro-Alfaro-CV-$(date +%Y-%m-%d).pdf' 
+]

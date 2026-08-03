@@ -1,21 +1,39 @@
 #import "lib.typ": *
 
+
 // #let accent-color = rgb("#83a598")
 #let accent-color = rgb("#076678")
 #show: resume.with(
     author: (
         firstname: "Alejandro",
         lastname: "Alfaro",
-        email: "ale16aflaro@gmail.com",
+        email: "ale16alfaro@gmail.com",
         github: "ale-alfaro",
         phone: "(650) 483-6627",
         linkedin: "ale-alfaro-867801134",
         address: "Bay Area",
         positions: (
-            "Senior Firmware Engineer",
+            "Senior Firmware Engineer with 5+ years building IEC 62304-compliant embedded systems for medical wearables — Zephyr RTOS, BLE, and bootloader/OTA architecture from prototype to production.",
         ),
     ),
-    keywords: ("Embedded", "Firmware", "Engineer"),
+    keywords: (
+        "Embedded",
+        "Firmware",
+        "Engineer",
+        "Zephyr RTOS",
+        "RTOS",
+        "C",
+        "C++",
+        "BLE",
+        "IoT",
+        "Bootloader",
+        "IEC 62304",
+        "Medical Device",
+        "FDA 510(k)",
+        "ZBus",
+        "IPC",
+        "Embedded Systems",
+    ),
     description: "Ale Alfaro Resume",
     date: datetime.today().display(),
     language: "en",
@@ -23,6 +41,7 @@
     accent-color: accent-color,
     show-footer: false,
     use-smallcaps: true,
+    positions-smallcaps: false,
     font: "Fira Sans",
     show-address-icon: false,
     paper-size: "a4",
@@ -36,9 +55,9 @@
 #resume-skill-grid(
     categories-with-values: (
         "Firmware Experiences": (
-            strong("Zephyr RTOS Architecture"),
+            strong("Zephyr Modular Architecture"),
             strong("Bootloader Design"),
-            strong("Wireless Medical Wearables Development"),
+            "BLE and IoT",
         ),
         "Tech Proficiencies": (
             strong("Modern C Design Patterns"),
@@ -46,22 +65,31 @@
             "Build/Test Pipelines",
         ),
         "Domain Knowledge": (
+            strong("Medical IoT Wearables Development"),
             strong("IEC 62304"),
-            strong("CE Mark/FDA 510(k)"),
+            "CE Mark/FDA 510(k) submissions",
         ),
         "Higher Education": (
-            strong("Bachelors and Masters in Mechanical Engineering"),
+            strong("Bachelor's and Master's in Mechanical Engineering"),
             "Northwestern Class of 2020",
         ),
     ),
 )
+
+#block(above: 0.3em, below: 0em)[
+    #text(size: 7.5pt, fill: color-gray)[
+        Also: RTOS, C, C++, I2C, SPI, UART, PDM, ADC, Git, CMake, ARM GCC/Clang,
+        GDB, JTAG/SWD, Logic Analyzer
+    ]
+]
+#v(-1.1em)
 
 // #block(below: 0.65em)
 = Relevant Experience
 
 #resume-entry(
     title: "Senior Firmware Engineer",
-    location: "Remote",
+    location: "Remote from San Francisco, CA",
     date: "January 2025 – Present",
     description: "Sibel Health",
 )
@@ -82,40 +110,17 @@
         loader) that doubled available ROM from 400KB to 800KB on
         memory-constrained platforms, added OTA recovery mode, and isolated BLE
         image downloads from the application for improved security.
-    - Driving huge refactor of a legacy fragile platform built by offshore
-        consultants with only on developer (me) and AI agents following IEC
-        62304 practices and using latest tools/harnesses.
-    - Managing small team unit test initiative to increase our test coverage in
-        our SDK from 0 to 30% in our most mission critical software with a focus
-        on testing failure paths using simulation platforms such as Renode's
-        emulation and Native Sim technologies
+    - Driving a huge refactor of a legacy fragile platform built by offshore
+        consultants with only one developer (me) and AI agents following IEC
+        62304 practices and using the latest tools/harnesses.
+    // - Managing small team unit test initiative to increase our test coverage in
+    //     our SDK from 0 to 30% in our most mission critical software with a focus
+    //     on testing failure paths using simulation platforms such as Renode's
+    //     emulation and Native Sim technologies
 ])
-#set block(below: 0.7em)
-#justified-header("Firmware Engineer", "June 2020 - March 2022")
-#let link_max = link(
-    "https://www.analog.com/en/resources/reference-designs/maxrefdes282.html#rd-overview",
-    "MAXREFDES282",
-)
-#resume-item[
-    - #text(
-            "Led firmware development for the Maxim Integrated Health Patch Platform ",
-        ) #link_max #text(
-            ", a reference design showcasing the MAX816178 PPG, ECG, and BIOZ all-in-one AFE",
-        )
-    - Built a fleet management system to verify quality of medical sensors
-        manufactured abroad, reducing defective shipments by 21%. Developed
-        diagnostic firmware routines for PCB integrity validation and life-cycle
-        stress testing
-    - Implemented low-level drivers for sensing components (digital mics,
-        multi-lead ECG AFE) and critical peripherals (NAND flash,
-        wireless-charging PMICs).
-    .
-]
-#resume-entry(
-    title: "Technical Project Manager",
-    location: "Chicago, IL and Remote",
-    date: "September 2023 – January 2025",
-    description: "Sibel Health",
+#bold-secondary-justified-header(
+    "Technical Project Manager",
+    "September 2023 – January 2025",
 )
 #resume-item[
     - Managed the Design History File (DHF) for two next-gen platforms through
@@ -146,7 +151,41 @@
         expanded CI/CD test coverage for the CoreHaptics framework.
 ]
 
+#resume-entry(
+    title: "Firmware Engineer",
+    location: "Chicago, IL and Remote",
+    date: "June 2020 – March 2022",
+    description: "Sibel Health",
+)
 
-= Interests
+#let link_max = link(
+    "https://www.analog.com/en/resources/reference-designs/maxrefdes282.html#rd-overview",
+    "MAXREFDES282",
+)
+#resume-item[
+    - #text(
+            "Led firmware development for the Maxim Integrated Health Patch Platform",
+        ) #link_max#text(
+            ", a reference design showcasing the MAX816178 PPG, ECG, and BIOZ all-in-one AFE.",
+        )
+    - Built a fleet management system to verify quality of medical sensors
+        manufactured abroad, reducing defective shipments by 21%. Developed
+        diagnostic firmware routines for PCB integrity validation and life-cycle
+        stress testing.
+    - Implemented low-level drivers for sensing components (digital mics,
+        multi-lead ECG AFE) and critical peripherals (NAND flash,
+        wireless-charging PMICs).
+]
 
-Outdoors, The Sopranos, Foraging, and electronic music production
+
+#block(sticky: true, above: 1em)[
+    #text(size: 12pt, weight: "regular")[#strong[#text(
+        color-darkgray,
+    )[Interests]]]
+    #box(width: 1fr, line(length: 100%))
+]
+
+#text(size: 9pt)[
+    Backpacking and outdoor living, The Sopranos, Seafood Foraging, and
+    electronic music production
+]
