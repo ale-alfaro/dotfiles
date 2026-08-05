@@ -25,6 +25,7 @@ plugin_autoupdate_last_check_duration = '1 week'                                
 status = { missing_tools = "if_other_versions_installed", show_env = true, show_tools = true }
 task = { output = "interleave", run_auto_install = true, timings = true }
 npm.package_manager = "bun"
+npm.bun = true
 pipx.uvx = true
 python.uv_venv_auto = "source"
 disable_tools = ["pipx:west"]
@@ -32,6 +33,10 @@ disable_tools = ["pipx:west"]
 
 [settings.github]
 gh_cli_tokens = true
+
+[settings.cargo]
+binstall_native = true
+binstall = true
 
 [tools]
 jqp = "latest"
@@ -101,6 +106,7 @@ pkl = "latest"
 ninja = "latest"
 "cargo:scope-monitor" = "latest"
 "pipx:gersemi" = "latest"
+worktrunk = "latest"
 
 [plugins]
 "vfox:zephyr" = "https://github.com/ale-alfaro/vfox-zephyr-sdk.git"

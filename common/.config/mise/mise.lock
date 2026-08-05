@@ -1682,7 +1682,7 @@ version = "0.16.1"
 backend = "pipx:ruff"
 
 [[tools."pipx:ty"]]
-version = "0.0.65"
+version = "0.0.66"
 backend = "pipx:ty"
 
 [[tools.pkl]]
@@ -2348,6 +2348,65 @@ provenance = "github-attestations"
 [[tools."vfox-zephyr:west"]]
 version = "1.5.0"
 backend = "vfox-zephyr:west"
+
+[[tools.worktrunk]]
+version = "0.71.0"
+backend = "aqua:max-sixty/worktrunk"
+
+[tools.worktrunk."platforms.linux-arm64"]
+checksum = "sha256:22df8f74a708a21cd51774a4b963684788ae6fe4681758b0a3b3dca3218cee83"
+url = "https://github.com/max-sixty/worktrunk/releases/download/v0.71.0/worktrunk-aarch64-unknown-linux-musl.tar.xz"
+url_api = "https://api.github.com/repos/max-sixty/worktrunk/releases/assets/495845672"
+
+[tools.worktrunk."platforms.linux-arm64-musl"]
+checksum = "sha256:22df8f74a708a21cd51774a4b963684788ae6fe4681758b0a3b3dca3218cee83"
+url = "https://github.com/max-sixty/worktrunk/releases/download/v0.71.0/worktrunk-aarch64-unknown-linux-musl.tar.xz"
+url_api = "https://api.github.com/repos/max-sixty/worktrunk/releases/assets/495845672"
+
+[tools.worktrunk."platforms.linux-x64"]
+checksum = "sha256:287f0de1bc5dec271dd5546895c73a085bc090f0eb862946062d7cb18effbdd2"
+url = "https://github.com/max-sixty/worktrunk/releases/download/v0.71.0/worktrunk-x86_64-unknown-linux-musl.tar.xz"
+url_api = "https://api.github.com/repos/max-sixty/worktrunk/releases/assets/495845692"
+
+[tools.worktrunk."platforms.linux-x64-baseline"]
+checksum = "sha256:287f0de1bc5dec271dd5546895c73a085bc090f0eb862946062d7cb18effbdd2"
+url = "https://github.com/max-sixty/worktrunk/releases/download/v0.71.0/worktrunk-x86_64-unknown-linux-musl.tar.xz"
+url_api = "https://api.github.com/repos/max-sixty/worktrunk/releases/assets/495845692"
+
+[tools.worktrunk."platforms.linux-x64-musl"]
+checksum = "sha256:287f0de1bc5dec271dd5546895c73a085bc090f0eb862946062d7cb18effbdd2"
+url = "https://github.com/max-sixty/worktrunk/releases/download/v0.71.0/worktrunk-x86_64-unknown-linux-musl.tar.xz"
+url_api = "https://api.github.com/repos/max-sixty/worktrunk/releases/assets/495845692"
+
+[tools.worktrunk."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:287f0de1bc5dec271dd5546895c73a085bc090f0eb862946062d7cb18effbdd2"
+url = "https://github.com/max-sixty/worktrunk/releases/download/v0.71.0/worktrunk-x86_64-unknown-linux-musl.tar.xz"
+url_api = "https://api.github.com/repos/max-sixty/worktrunk/releases/assets/495845692"
+
+[tools.worktrunk."platforms.macos-arm64"]
+checksum = "sha256:429b31306f50e39d2c90de5da293aa14e6983ffe28a49a4fcedaa3632d28b94c"
+url = "https://github.com/max-sixty/worktrunk/releases/download/v0.71.0/worktrunk-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/max-sixty/worktrunk/releases/assets/495845661"
+
+[tools.worktrunk."platforms.macos-x64"]
+checksum = "sha256:84e3f45e6ddfd0b1f3b2d7be41b0bcfc6c1711f6369b3e19c6eb8646d72d3e02"
+url = "https://github.com/max-sixty/worktrunk/releases/download/v0.71.0/worktrunk-x86_64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/max-sixty/worktrunk/releases/assets/495845682"
+
+[tools.worktrunk."platforms.macos-x64-baseline"]
+checksum = "sha256:84e3f45e6ddfd0b1f3b2d7be41b0bcfc6c1711f6369b3e19c6eb8646d72d3e02"
+url = "https://github.com/max-sixty/worktrunk/releases/download/v0.71.0/worktrunk-x86_64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/max-sixty/worktrunk/releases/assets/495845682"
+
+[tools.worktrunk."platforms.windows-x64"]
+checksum = "sha256:3af1357199574a13852931eee5b2b11f5027c6c3bd7cf99d9d4cd36cd838a6e3"
+url = "https://github.com/max-sixty/worktrunk/releases/download/v0.71.0/worktrunk-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/max-sixty/worktrunk/releases/assets/495845685"
+
+[tools.worktrunk."platforms.windows-x64-baseline"]
+checksum = "sha256:3af1357199574a13852931eee5b2b11f5027c6c3bd7cf99d9d4cd36cd838a6e3"
+url = "https://github.com/max-sixty/worktrunk/releases/download/v0.71.0/worktrunk-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/max-sixty/worktrunk/releases/assets/495845685"
 
 [[tools.yq]]
 version = "4.53.3"

@@ -74,3 +74,6 @@ alias v="fvim"
 # This section can be safely removed at any time if needed.
 # [[ ! -r '/home/alealfaro/.opam/opam-init/init.zsh' ]] || source '/home/alealfaro/.opam/opam-init/init.zsh' > /dev/null 2> /dev/null
 # END opam configuration
+
+# Worktrunk for working with git-worktrees
+if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi

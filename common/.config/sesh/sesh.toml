@@ -2,6 +2,18 @@
 blacklist = ["build"]
 sort_order = ["tmux", "config", "zoxide"]
 
+[tui]
+prompt = "> "
+placeholder = "Filter sessions... "
+show_icons =  true
+show_windows = true
+alias_auto_connect_delay = "150ms"
+alias_filter_prefix = "/"
+preview = true
+preview_width = 60
+preview_min_width = 100
+preview_border = "line"
+
 [default_session]
 preview_command = "eza --all --git --icons --color=always {}"
 startup_command = "nvim ."
