@@ -32,4 +32,5 @@ lg = forall -c 'lazygit'
 tgt.traceconf = tgt traceconfig -d
 tgt.menuconf = tgt menuconfig -d
 tgt.sys_menuconf = tgt sysbuild_menuconfig -d
+up.shallow = up -o=--depth=1
 

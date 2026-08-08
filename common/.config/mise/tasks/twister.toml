@@ -10,76 +10,23 @@ fd --strip-cwd-prefix -e yaml -tf '(testcase|sample)\.yaml' \
     -x yq e -o tsv '(.tests | with_entries(.key |= "{//}/\(.)") | keys)' '{}'
 
 '''
-["twister:list"]
-description = "List every twister-discoverable test."
-dir = "{{cwd}}"
-usage = 'arg "[dir]" help="test directory" default="."'
-run = '''
-west twister \
-  -T {{usage.dir}} \
-  --list-tests \
-  {{ vars.COMMON_TWISTER_FLAGS | default(value=['-v','-i','--no-clean']) | join(sep=' ') }}
-'''
+["twister:testplan:save"]
+extends = "twister:testplan"
 
-["twister:tree"]
-description = "Print the twister test tree (suites + their cases)."
-dir = "{{cwd}}"
-usage = 'arg "[dir]" help="test directory" default="."'
-run = '''
-west twister \
-  -T {{usage.dir}} \
-  --test-tree 
-  {{ vars.COMMON_TWISTER_FLAGS | default(value=['-v','-i','--no-clean']) | join(sep=' ') }}
-'''
+["twister:testplan:load"]
+extends = "twister:testplan"
+description = "Load test plan"
+vars.testplan_flag = "--load-tests"
+
+["twister:info:list"]
+extends = "twister:info"
+
+["twister:info:tree"]
+vars.info_flag = '--test-tree'
+extends = "twister:info"
+
 
 # Available log levels for twister: NOTSET,DEBUG,INFO,WARNING,ERROR,CRITICAL
-
-["twister:test:sim"]
-description = "Run test with native sim"
-dir = "{{cwd}}"
-usage = '''
-arg "<test>" help="Twister test to run"
-flag "-v --verbose" help="Verbosity" {
-  count #true
-}
-arg "[varopts]"  help="Options to pass to twister" {
-  var #true
-}
-'''
-run = '''
-local -a verbose_flags
-local -a flags
-verbose_flags=('-ll WARNING -v' '-ll INFO -vv' '-ll DEBUG -vvv')
-eval "varopts=(${usage_varopts:-})"
-flags=('--no-clean')
-if (( usage_verbose >= 1 && usage_verbose < 4 )); then
-  flags+=("${verbose_flags[$usage_verbose]}" '-i')
-fi
-if [[ ${#varopts} > 0 ]]; then
-  flags+=("${varopts[@]}")
-fi
-west twister \
-  -T "${usage_test?}" \
-  -p native_sim/sim \
-  "$flags"
-'''
-
-
-["twister:debug:logs"]
-description = "Run tests with debug logs"
-dir = "{{cwd}}"
-usage = '''
-arg "<dir>" help="test directory"
-arg "<platform>" help="test platform"
-'''
-run = '''
-west twister \
-    -T {{usage.dir }} \
-    -p {{usage.platform}} \
-    -ll DEBUG \
-    -vv -i \
-    --no-clean
-'''
 
 ["twister:test:cov"]
 description = "Run tests on with coverage (gcovr)."

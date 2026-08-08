@@ -107,6 +107,8 @@ ninja = "latest"
 "cargo:scope-monitor" = "latest"
 "pipx:gersemi" = "latest"
 worktrunk = "latest"
+"vfox-zephyr:arm" = "latest"
+"github:renode/renode" = "latest"
 
 [plugins]
 "vfox:zephyr" = "https://github.com/ale-alfaro/vfox-zephyr-sdk.git"
@@ -114,3 +116,52 @@ worktrunk = "latest"
 
 [tool_alias]
 "python@3.12" = "python"
+
+[task_templates."twister:testplan"]
+description = "Save a testplan to a json file"
+dir = "{{cwd}}"
+vars.testplan_flag = "--save-tests"
+usage = '''
+arg "<platform>" {
+  help "Platform"
+  env "TWISTER_PLATFORM"
+}
+arg "<dir>" {
+  help "Testsuite root"
+  env "TWISTER_TESTSUITE_ROOT"
+  default "."
+}
+flag "-t --testplan <testplan>" {
+  help "Test plan json file"
+  default "testplan.json"
+}
+arg "[extra_args]" {
+  help "Extra args for twister"
+  var #true
+}
+'''
+run = '''
+west twister -c --detailed-test-id {{ usage.extra_args | join(sep=" ") }} -p {{usage.platform}} -T {{usage.dir}} {{vars.testplan_flag}} {{usage.testplan}}
+'''
+
+[task_templates."twister:info"]
+vars.info_flag = "--list-tests"
+description = "Get info on twister-discoverable test using {{vars.info_flag}}"
+dir = "{{cwd}}"
+usage = '''
+arg "<platform>" {
+  help "Platform"
+  env "TWISTER_PLATFORM"
+}
+arg "<dir>" {
+  help "Testsuite root"
+  env "TWISTER_TESTSUITE_ROOT"
+  default "."
+}
+'''
+run = '''
+west twister -v -c \
+  -p {{usage.platform}} \
+  -T {{usage.dir}} \
+  {{vars.info_flag}}
+'''

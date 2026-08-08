@@ -897,6 +897,65 @@ checksum = "sha256:3a5bbb54935c14d03b5e98c6f81728cff3367eb294423ae831ae12ec94a12
 url = "https://github.com/joshmedeski/sesh/releases/download/v2.28.0/sesh_Windows_x86_64.zip"
 url_api = "https://api.github.com/repos/joshmedeski/sesh/releases/assets/490857147"
 
+[[tools."github:renode/renode"]]
+version = "1.16.1"
+backend = "github:renode/renode"
+
+[tools."github:renode/renode"."platforms.linux-arm64"]
+checksum = "sha256:fff3a098c96ed0a4ffbdff3f028c9c5fde432db09587c7bd7c99406180f90007"
+url = "https://github.com/renode/renode/releases/download/v1.16.1/renode-1.16.1.linux-arm64-portable-dotnet.tar.gz"
+url_api = "https://api.github.com/repos/renode/renode/releases/assets/356851252"
+
+[tools."github:renode/renode"."platforms.linux-arm64-musl"]
+checksum = "sha256:fff3a098c96ed0a4ffbdff3f028c9c5fde432db09587c7bd7c99406180f90007"
+url = "https://github.com/renode/renode/releases/download/v1.16.1/renode-1.16.1.linux-arm64-portable-dotnet.tar.gz"
+url_api = "https://api.github.com/repos/renode/renode/releases/assets/356851252"
+
+[tools."github:renode/renode"."platforms.linux-x64"]
+checksum = "sha256:62629caa331ed4bd4eb7abe13ee2e4834fbcaa70de492db3965fafa4edc5694f"
+url = "https://github.com/renode/renode/releases/download/v1.16.1/renode-1.16.1.linux-dotnet.tar.gz"
+url_api = "https://api.github.com/repos/renode/renode/releases/assets/356830371"
+
+[tools."github:renode/renode"."platforms.linux-x64-baseline"]
+checksum = "sha256:62629caa331ed4bd4eb7abe13ee2e4834fbcaa70de492db3965fafa4edc5694f"
+url = "https://github.com/renode/renode/releases/download/v1.16.1/renode-1.16.1.linux-dotnet.tar.gz"
+url_api = "https://api.github.com/repos/renode/renode/releases/assets/356830371"
+
+[tools."github:renode/renode"."platforms.linux-x64-musl"]
+checksum = "sha256:62629caa331ed4bd4eb7abe13ee2e4834fbcaa70de492db3965fafa4edc5694f"
+url = "https://github.com/renode/renode/releases/download/v1.16.1/renode-1.16.1.linux-dotnet.tar.gz"
+url_api = "https://api.github.com/repos/renode/renode/releases/assets/356830371"
+
+[tools."github:renode/renode"."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:62629caa331ed4bd4eb7abe13ee2e4834fbcaa70de492db3965fafa4edc5694f"
+url = "https://github.com/renode/renode/releases/download/v1.16.1/renode-1.16.1.linux-dotnet.tar.gz"
+url_api = "https://api.github.com/repos/renode/renode/releases/assets/356830371"
+
+[tools."github:renode/renode"."platforms.macos-arm64"]
+checksum = "sha256:fefe9a495cb54af09f13a93a863b6cad027f7ddc8854921efa6e42d9fbcd9888"
+url = "https://github.com/renode/renode/releases/download/v1.16.1/renode_1.16.1_source.tar.xz"
+url_api = "https://api.github.com/repos/renode/renode/releases/assets/356830431"
+
+[tools."github:renode/renode"."platforms.macos-x64"]
+checksum = "sha256:fefe9a495cb54af09f13a93a863b6cad027f7ddc8854921efa6e42d9fbcd9888"
+url = "https://github.com/renode/renode/releases/download/v1.16.1/renode_1.16.1_source.tar.xz"
+url_api = "https://api.github.com/repos/renode/renode/releases/assets/356830431"
+
+[tools."github:renode/renode"."platforms.macos-x64-baseline"]
+checksum = "sha256:fefe9a495cb54af09f13a93a863b6cad027f7ddc8854921efa6e42d9fbcd9888"
+url = "https://github.com/renode/renode/releases/download/v1.16.1/renode_1.16.1_source.tar.xz"
+url_api = "https://api.github.com/repos/renode/renode/releases/assets/356830431"
+
+[tools."github:renode/renode"."platforms.windows-x64"]
+checksum = "sha256:d09b7934cfd560cd06bde8f131ef78f521f10d423d5aac6096f2a583224aeb3e"
+url = "https://github.com/renode/renode/releases/download/v1.16.1/renode-1.16.1.windows-portable-dotnet.zip"
+url_api = "https://api.github.com/repos/renode/renode/releases/assets/356851734"
+
+[tools."github:renode/renode"."platforms.windows-x64-baseline"]
+checksum = "sha256:d09b7934cfd560cd06bde8f131ef78f521f10d423d5aac6096f2a583224aeb3e"
+url = "https://github.com/renode/renode/releases/download/v1.16.1/renode-1.16.1.windows-portable-dotnet.zip"
+url_api = "https://api.github.com/repos/renode/renode/releases/assets/356851734"
+
 [[tools.go]]
 version = "1.26.5"
 backend = "core:go"
@@ -1744,6 +1803,65 @@ checksum = "sha256:8550a00fcf027335e42c5e2cd553b88e98845408cb1880b3e3d1860caf46d
 url = "https://github.com/apple/pkl/releases/download/0.32.1/pkl-windows-amd64.exe"
 url_api = "https://api.github.com/repos/apple/pkl/releases/assets/487426668"
 
+[[tools.python]]
+version = "3.12.13"
+backend = "core:python"
+
+[tools.python."platforms.linux-arm64"]
+checksum = "sha256:f3510827b61e7a2aa89a1bb7bac73d45521939c489cf43f4699618efaead0611"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260805/cpython-3.12.13+20260805-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
+[tools.python."platforms.linux-arm64-musl"]
+checksum = "sha256:6834de136880a89d8dce81214b064dfdc7f019460b00888bba24b9982e1ed298"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260805/cpython-3.12.13+20260805-aarch64-unknown-linux-musl-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
+[tools.python."platforms.linux-x64"]
+checksum = "blake3:c3c37ee06a7f386e2bdba22b70dc9c1a5beec5facb86874b3ba7ed0a50e3db0d"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260805/cpython-3.12.13+20260805-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
+[tools.python."platforms.linux-x64-baseline"]
+checksum = "sha256:f04a55ae95e8bd352cdff8da11c344fe609ec84795d106fa91b6620366d786fe"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260805/cpython-3.12.13+20260805-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
+[tools.python."platforms.linux-x64-musl"]
+checksum = "sha256:b0a88847d60e93609e37e61e42c4bde0cdce19815cfa1ee00ed52d7cc13f9796"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260805/cpython-3.12.13+20260805-x86_64-unknown-linux-musl-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
+[tools.python."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:b0a88847d60e93609e37e61e42c4bde0cdce19815cfa1ee00ed52d7cc13f9796"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260805/cpython-3.12.13+20260805-x86_64-unknown-linux-musl-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
+[tools.python."platforms.macos-arm64"]
+checksum = "sha256:a4b36035915038104aabee94d6f02827161da444296881fe4493cb98f70304b2"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260805/cpython-3.12.13+20260805-aarch64-apple-darwin-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
+[tools.python."platforms.macos-x64"]
+checksum = "sha256:0d232711501680a619ea6113046603567d93be3218e326e4357557e771d1aec7"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260805/cpython-3.12.13+20260805-x86_64-apple-darwin-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
+[tools.python."platforms.macos-x64-baseline"]
+checksum = "sha256:0d232711501680a619ea6113046603567d93be3218e326e4357557e771d1aec7"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260805/cpython-3.12.13+20260805-x86_64-apple-darwin-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
+[tools.python."platforms.windows-x64"]
+checksum = "sha256:b304536477587bbb729322b77ac1c59bdb95706651ab2ef38cae0fec77ede00f"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260805/cpython-3.12.13+20260805-x86_64-pc-windows-msvc-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
+[tools.python."platforms.windows-x64-baseline"]
+checksum = "sha256:b304536477587bbb729322b77ac1c59bdb95706651ab2ef38cae0fec77ede00f"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260805/cpython-3.12.13+20260805-x86_64-pc-windows-msvc-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
 [[tools.rg]]
 version = "15.2.0"
 backend = "aqua:BurntSushi/ripgrep"
@@ -2344,6 +2462,10 @@ checksum = "sha256:8fcb0cb46e1229065e344758980924e569bef5882ef45f46fada8fb24e06b
 url = "https://github.com/astral-sh/uv/releases/download/0.12.1/uv-x86_64-pc-windows-msvc.zip"
 url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/497097149"
 provenance = "github-attestations"
+
+[[tools."vfox-zephyr:arm"]]
+version = "1.0.1"
+backend = "vfox-zephyr:arm"
 
 [[tools."vfox-zephyr:west"]]
 version = "1.5.0"
