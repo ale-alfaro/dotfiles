@@ -1,14 +1,16 @@
--- vim.api.nvim_create_autocmd('FileType', {
---   group = vim.api.nvim_create_augroup('grug-far-keybindings', { clear = true }),
---   pattern = { 'grug-far' },
---   callback = function()
---     vim.keymap.set('n', '<C-enter>', function()
---       local inst = require('grug-far').get_instance(0)
---       inst:open_location()
---       inst:close()
---     end, { buffer = true })
---   end,
--- })
+vim.api.nvim_create_autocmd('FileType', {
+  group = vim.api.nvim_create_augroup('grug-far-keybindings', { clear = true }),
+  pattern = { 'grug-far' },
+  callback = function()
+    vim.keymap.set('n', 'q', function()
+      local grug = require 'grug-far'
+      local inst = grug.get_instance()
+      if inst then
+        inst:hide()
+      end
+    end, { buffer = true })
+  end,
+})
 require('grug-far').setup {
   folding = { enabled = true },
   resultLocation = { showNumberLabel = true },
@@ -106,7 +108,6 @@ require('grug-far').setup {
       --
       -- Example:
       -- ```
-      -- languageGlobs = { tsx = { "*.ts", ".js", "*.jsx", "*.tsx" } }
       -- ```
       --
       -- This will make then input pre-fill `language: tsx` if the
@@ -120,7 +121,7 @@ require('grug-far').setup {
       --
       -- ast-grep docs:
       -- https://ast-grep.github.io/reference/sgconfig.html#languageglobs
-      languageGlobs = {},
+      languageGlobs = { zephyr = { '*.c', '*.dts', '*.dtsi' }, c = { '*.cpp', '*.hpp' } },
 
       -- placeholders to show in input areas when they are empty
       -- set individual ones to '' to disable, or set enabled = false for complete disable
@@ -139,9 +140,18 @@ require('grug-far').setup {
       -- defaults to fill into the inputs when loading or switching to this engine
       -- they only apply when non-nil
       defaults = {
-        rules = nil,
+        rules = [[
+id: my_rule_1
+language: c
+rule:
+  pattern: |
+    #if defined(CONFIG_SHRD_HEADER)
+      $$$A
+    #endif
+fix: $$$A
+]],
         filesFilter = nil,
-        flags = nil,
+        flags = '--strictness=smart',
         paths = nil,
       },
     },
@@ -160,34 +170,34 @@ require('grug-far').setup {
     syncLine = '<localleader>l',
     refresh = '<localleader>R',
     swapEngine = '<localleader>e',
-    historyOpen = '<localleader>h',
+    historyOpen = 'gho',
     openLocation = '<localleader>x',
     syncFile = '<localleader>f',
-    close = '<localleader>q',
-    historyAdd = '<M-a>',
+    close = '<localleader>Q',
+    historyAdd = 'gha',
     syncNext = '<M-n>',
     syncPrev = '<M-p>',
     applyNext = '<C-n>',
     applyPrev = '<C-p>',
-    help = '<F1>',
-    qflist = '<F4>',
+    help = '<localleader>?',
+    qflist = '<localleader>q',
     toggleShowCommand = '<F5>',
     abort = '<F7>',
     previewLocation = '<F8>',
-    swapReplacementInterpreter = '<F9>',
+    swapReplacementInterpreter = '<localleader>i',
     openNextLocation = { n = '<down>' },
     openPrevLocation = { n = '<up>' },
     gotoLocation = { n = '<enter>' },
     pickHistoryEntry = { n = '<enter>' },
-    nextInput = { n = '<tab>' },
-    prevInput = { n = '<s-tab>' },
+    nextInput = { n = '<enter>' },
+    prevInput = { n = '<s-enter>' },
   },
 }
 local map = function(key, cb, desc)
   vim.keymap.set('n', '<leader>c' .. key, cb, { desc = 'GrugFar ' .. desc })
 end
 map('g', function()
-  require('grug-far').open()
+  require('grug-far').open { transient = true }
 end, 'Rg')
 map('a', function()
   require('grug-far').open { engine = 'astgrep' }

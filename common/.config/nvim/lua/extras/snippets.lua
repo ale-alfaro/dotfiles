@@ -32,7 +32,7 @@ end
 require('mini.snippets').setup {
   snippets = {
     -- Always load 'snippets/global.json' from config directory
-    -- snippets.gen_loader.from_file(config_path .. '/snippets/markdown.lua'),
+    gen_loader.from_runtime 'global/*.lua',
     -- Load from 'snippets/' directory of plugins, like 'friendly-snippets'
     gen_loader.from_file(vim.fs.joinpath(topdir, '.nvim', 'snippets.lua')),
     gen_loader.from_file(vim.fs.joinpath(vim.fn.getcwd(), '.nvim', 'snippets.lua')),

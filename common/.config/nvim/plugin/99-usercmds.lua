@@ -304,9 +304,9 @@ usercmd('RstToMd', function()
     pcall(vim.cmd, cmd) -- a "Pattern not found" (E486) won't abort the rest
   end
 end, 'Convert Current Buffer from ReStructured Text to Markdown')
-usercmd('LazyGitEdit', function()
-  vim.g.autoformat = false
-  if MiniDiff then
-    MiniDiff.toggle_overlay(0)
-  end
-end, 'Edit cmd for LazyGit')
+
+vim.api.nvim_create_user_command('GitBlameLine', function()
+  local line_number = vim.fn.line '.' -- Get the current line number. See `:h line()`
+  local filename = vim.api.nvim_buf_get_name(0)
+  print(vim.system({ 'git', 'blame', '-L', line_number .. ',+1', filename }):wait().stdout)
+end, { desc = 'Print the git blame for the current line' })
