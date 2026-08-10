@@ -1060,3 +1060,389 @@ c
 mon reset
 c
 quit
+bt
+info threads
+br z_fatal_error
+restart
+apropos reset
+apropos restart
+refresh
+run
+quit
+quit
+run
+bt
+l
+info locals
+info args
+up
+q
+c
+bt
+q
+quit
+bt
+up 11
+l
+q
+bt
+q
+bt
+up 10
+l
+info locals
+p *config
+quit
+bt
+up
+up 8
+l
+info locals
+info
+info args
+p *spec
+p *spec->bus
+q
+q
+up 9
+l
+info args
+p *spec
+p *spec->bus
+q
+bt
+up 10
+l
+quit
+bt
+up 8
+l
+info locals
+q
+help mon
+help loadbin
+monitor help loadbin
+mon loadbin build/streaming/zephyr/zephyr.hex
+help load
+monitor help
+help flash-erase
+help flash
+flash download
+flash download help
+flash 
+loadbin build/streaming/zephyr/zephyr.hex
+load build/streaming/zephyr/zephyr.hex
+b z_arm_fault
+mon reset
+c
+bt
+q
+mon halt
+load
+bt
+load build/streaming/zephyr/zephyr.hex
+mon reset
+c
+load build/streaming/zephyr/zephyr.hex
+mon reset
+c
+q
+mon reset
+c
+q
+load build/streaming/zephyr/merged.hex
+load build/streaming/zephyr/zephyr.hex
+mon reset
+c
+q
+aria-flash build/streaming no-sysbuild
+quit
+quit
+shell west build -p -b aria/nrf5340/cpuapp/sample sh_sdk/samples/drivers/sensor/sh_bmi323/streaming
+shell west build -p -b aria/nrf5340/cpuapp/sample sh_sdk/samples/drivers/sensor/sh_bmi323/streaming --no-sysbuild
+aria-flash build/streaming no-sysbuild
+quit
+load
+run
+bt
+up 2
+l
+quit
+mon reset
+c
+quit
+dump binary memory ram_tracing.bin ram_tracing ram_tracing+262144
+q
+up 8
+l
+q
+up 7
+l
+q
+up 7
+l
+q
+help
+apropos br
+info br
+br z_arm_fault
+mon reset
+c
+bt
+up 3
+l
+p codec
+p sensors
+p sensors[0]
+p *(struct shrd_iodev_sensor_ctx*)sensors[0]
+p *(struct shrd_page_codec[2])sensors[0]->codecs
+p *(struct shrd_page_codec[])sensors[0]->codecs
+p *(struct shrd_page_codec[])sensors[1]->codecs
+q
+bt
+up 7
+l
+info args
+quit
+info threads
+info stack 
+info
+info os
+up 7
+l
+info locals
+info args
+p buf_len
+p/x buf_len
+p/a buf_len
+p/i buf_len
+print
+help print
+quit
+mon reset
+c
+quit
+up 9
+l
+quit
+l
+br z_fatal_error 
+mon reset
+c
+bt
+q
+up 10
+l
+q
+generate-core-file aria1.dump
+q
+continue
+bt
+p/x $msp
+p/x $psp
+l
+p/x $esf
+q
+up 7
+l
+generate-core-file aria.dump
+q
+q
+bt
+frame 7
+down
+up
+l
+info locals
+q
+q
+c
+bt
+up 3
+l
+info locals
+p *data
+q
+mon reset
+c
+l
+p *dev
+p *(dev->config)
+p *(const struct sh_bmi323_config*)(dev->config)
+q
+mon reset
+c
+bt
+up 2
+l
+q
+mon reset
+c
+up 14
+l
+q
+mon
+load
+mon reset
+c
+q
+q
+info threads
+mon reset
+c
+up 3
+up
+frame 15
+info locals
+l
+info args
+q
+c
+l
+bt
+q
+c
+bt
+l
+info registers
+p 0x2aa3
+p *0x2aa3
+info symbol 0x2aa3
+p/x 0x2aa3
+p/x *0x2aa3
+generate-core-file ptx30.dump
+q
+bt
+info threads
+info registers
+quit
+frame 2
+frame 1
+info threads
+quitn
+quit
+mon reset
+c
+bt
+info stack 
+stack view 3
+info threads
+generate-core-file shell.dump
+info registers
+help print
+help p
+p/32wx 
+help x
+p/x $msp
+p/wx $msp
+x/32w $msp
+x/32w $psp
+info symbol 0x2887
+l *0x2887
+q
+file build/factory_fw/mcuboot/zephyr/zephyr.elf 
+l
+mon reset
+c
+bt
+quit
+bt
+q
+stack
+info registers
+a
+q
+file build/factory_fw/mcuboot/zephyr/zephyr.elf
+mon reset
+c
+bt
+info registers
+dump stack
+help dump
+stack
+help stack
+help status
+help
+help aliases
+help running
+info threads
+help info
+info local
+info sources
+info main
+info functions flash_.*
+p $sp
+p $pc
+p $mso
+p $msp
+p $lr
+info symbol $lr
+p *($lr)
+l *($lr)
+info function create_free_list 
+search 
+help search
+search create_free_list
+l
+source 
+help list
+help data
+python
+quit
+q
+b __assert_no_args 
+info args
+p *state
+b boot_go
+mon reset
+c
+bt
+up
+down
+info locals
+p boot_data
+l
+info symbol boot_data
+l boot_data
+help list
+source
+info source
+q
+p/n __devstate_dts_ord_13.init_res
+help print
+help x
+p/d __devstate_dts_ord_13.init_res
+p/u __devstate_dts_ord_13.init_res
+p/8wx __devstate_dts_ord_13
+x/8w __devstate_dts_ord_13
+q
+bt
+help breakpoints 
+cl
+b z_arm_fault
+br
+delete 4
+help
+help breakpoints
+info breakpoints 
+delete 3
+mon reset
+c
+q
+info registers
+up 8
+l
+p *api
+info locals
+info args
+p *dev
+q
+p *msp
+p *$msp
+p $msp
+p *esf_copy.basic.pc 
+info symbol *esf_copy.basic.pc 
+info symbol esf_copy.basic.pc 
+p *esf_copy.extra_info.msp 
+info threads
+q

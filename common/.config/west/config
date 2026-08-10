@@ -25,7 +25,7 @@ gdb = attach -d
 pygdb = attach --gdb=arm-zephyr-gdb-py -d
 test = twister -vv --inline-logs --clobber-output --no-detailed-test-id
 test.sim = test -p native_sim
-test.hw = test --device-testing --enable-slow --device-serial
+test.hw = test --device-testing --enable-slow --filter runnable --device-serial
 test.renode = simulate -r renode -d
 goto = forall -c 'nvim .'
 lg = forall -c 'lazygit'

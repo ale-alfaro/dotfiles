@@ -30,18 +30,67 @@ VimRc.later(function()
 end)
 
 VimRc.later(function()
-  require 'extras.git'
+  require('mini.git').setup()
+  require('mini.diff').setup()
+  local git_keys = {
+    { 'a', '<cmd>FzfLua git_status<cr>', 'Add/Status' },
+    { 'd', '<cmd>FzfLua git_diff<cr>', 'Diff' },
+    { 'h', '<Cmd>FzfLua git_hunks<CR>', 'Hunks' },
+    { 'b', '<cmd>FzfLua git_blame<cr>', 'Blame' },
+    { 'B', '<cmd>Git blame --porcelain -- %<cr>', 'Blame (MiniGit)' },
+    { 'l', '<cmd>Git log --oneline<cr>', 'Log (MiniGit)' },
+    { 's', '<cmd>Git status<cr>', 'Status (MiniGit)' },
+    { 'c', '<cmd>Git commit<cr>', 'Commit (MiniGit)' },
+    { 'D', '<cmd>Git diff<cr>', 'Diff (MiniGit)' },
+    { 'b', '<cmd>FzfLua git_bcommits<cr>', 'Buf Commits' },
+    { 'C', '<cmd>FzfLua git_commits<cr>', 'Commits' },
+  }
+
+  for _, k in ipairs(git_keys) do
+    vim.keymap.set('n', '<leader>g' .. k[1], k[2], { desc = k[3] })
+  end
+  local diff_keys = {
+    { 't', '<cmd>lua MiniDiff.toggle_overlay()<cr>', 'Toggle overlay' },
+  }
+
+  for _, k in ipairs(diff_keys) do
+    vim.keymap.set('n', '<leader>d' .. k[1], k[2], { desc = k[3] })
+  end
+  VimRc.keymap_clues = vim.list_extend(VimRc.keymap_clues, {
+    { mode = 'n', keys = '<Leader>g', desc = '+Git' },
+    { mode = 'x', keys = '<Leader>g', desc = '+Git' },
+    { mode = 'n', keys = '<Leader>d', desc = '+Diff' },
+  })
 end)
 VimRc.later(function()
-  require 'extras.obsidian'
+  require('render-markdown').setup(
+    ---@type render.md.Settings
+    {
+      preset = 'obsidian',
+      completions = {
+        lsp = {
+          enabled = true,
+        },
+      },
+      pipe_table = {
+        preset = 'round',
+      },
+      latex = { enabled = false },
+    }
+  )
+  vim.api.nvim_set_hl(0, '@markup.heading.1.markdown', { fg = '#e46876' })
+  vim.api.nvim_set_hl(0, '@markup.heading.2.markdown', { fg = '#ff9e3b' })
+  vim.api.nvim_set_hl(0, '@markup.heading.3.markdown', { fg = '#e6c384' })
+  vim.api.nvim_set_hl(0, '@markup.heading.4.markdown', { fg = '#7fb4ca' })
+  require('custom.obsidian').setup()
 end)
 VimRc.later(function()
   require('custom.west').setup()
 end)
 
-VimRc.later(function()
-  require 'extras.codecompanion'
-end)
+-- VimRc.later(function()
+--   require 'extras.codecompanion'
+-- end)
 
 -- Show next key clues in a bottom right window. Requires explicit opt-in for
 -- keys that act as clue trigger. Example usage:

@@ -121,7 +121,7 @@ vim.o.expandtab = true -- Convert tabs to spaces
 vim.o.iskeyword = '@,48-57,_,192-255,-' -- Treat dash as `word` textobject part
 vim.o.incsearch = true -- Show search matches while typing
 vim.o.infercase = true -- Infer case in built-in completion
-vim.o.shiftwidth = 2 -- Use this number of spaces for indentation
+vim.o.shiftwidth = 4 -- Use this number of spaces for indentation
 
 vim.o.smartcase = true -- Respect case if search pattern has upper case
 vim.o.smartindent = true -- Make indenting smart

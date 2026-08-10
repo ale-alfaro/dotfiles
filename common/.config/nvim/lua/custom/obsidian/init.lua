@@ -1,3 +1,4 @@
+local M = {}
 ---@class obsidian.ObsidianCli
 ---@field cmds table<string,boolean|string[]>
 ---@field args table<string,string[]>
@@ -6,10 +7,9 @@
 ---@field check_obsidian_open fun():boolean
 ---@field handle_command fun(data:vim.api.keyset.create_user_command.command_args)
 
----@param path string
-local function obsfiles(path)
+function M.obsfiles()
   require('fzf-lua').files {
-    cwd = path,
+    cwd = vim.fn.expand '$OBSIDIAN_HOME',
     cwd_only = true,
     file_icons = false,
     color_icons = false,
@@ -60,65 +60,23 @@ local function obsfiles(path)
     prompt = 'Notes',
   }
 end
----@param path string
-local function obsgrep(path)
+function M.obsgrep()
   require('fzf-lua').live_grep {
-    cwd = path,
+    cwd = vim.fn.expand '$OBSIDIAN_HOME',
     cwd_only = true,
     rg_opts = '--glob *.md',
     prompt = 'Live Grep',
   }
 end
 
----@param path string
-local function obscleanup(path)
-  local orphans = ObsidianCli.exec 'orphans'
-  local deadends = ObsidianCli.exec 'deadends'
-  local unresolved = ObsidianCli.exec 'unresolved'
-  require('fzf-lua').exec {
-    prompt = 'Live Grep',
+M.setup = function()
+  local search_keys = {
+    { 'o', M.obsfiles, 'Search Obsidian Files' },
+    { 'O', M.obsgrep, 'Grep Obsidian Files' },
   }
-end
-local function obs_vault_usercmd()
-  local obs_vault_cmd = function(name, cb)
-    vim.api.nvim_create_user_command('Obs' .. name, function(ev)
-      local name = (ev.fargs or {})[1]
-      local vaults = ObsidianCli.get_vaults()
-
-      local path = vaults[name]
-      if not path then
-        error('Vault not found in `obsidian vaults`: ' .. name, 2)
-      end
-      cb(path)
-    end, { desc = 'Obsidian Vault' .. name, nargs = 1, complete = ObsidianCli.get_vaults })
+  for _, k in ipairs(search_keys) do
+    vim.keymap.set('n', '<leader>s' .. k[1], k[2], { desc = k[3] })
   end
-  -- obs_vault_cmd('Health', require('custom.obsidian.health').open)
-  obs_vault_cmd('Files', obsfiles)
-  obs_vault_cmd('Grep', obsgrep)
-  obs_vault_cmd('Cleanup', obscleanup)
 end
 
--- ---------------------------------------------------------------------------
--- Dispatch
--- ---------------------------------------------------------------------------
-
--- ---------------------------------------------------------------------------
--- Setup
--- ---------------------------------------------------------------------------
-
-return {
-  setup = function()
-    ObsidianCli = ObsidianCli or require 'custom.obsidian.cli'
-    ObsidianCli.setup()
-    vim.api.nvim_create_autocmd('BufRead', {
-      pattern = '	BufRead $OBSIDIAN_HOME/**/*.md',
-      callback = function(ev)
-        local obsidian_vault_root = vim.fs.root(ev.buf, { '.obsidian' })
-        local obsidian_conf = vim.fs.joinpath(obsidian_vault_root, '.obsidian', 'app.json')
-        if obsidian_vault_root and vim.uv.fs_stat(obsidian_conf) then
-          obs_vault_usercmd()
-        end
-      end,
-    })
-  end,
-}
+return M

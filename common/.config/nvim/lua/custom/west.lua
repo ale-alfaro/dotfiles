@@ -6,7 +6,6 @@ M.setup = function()
   M.topdir = M.topdir or M.get_topdir(vim.api.nvim_get_current_buf())
   M.zephyr_base = vim.env['ZEPHYR_BASE'] or M.get_config 'zephyr.base'
   if not M.topdir or not M.zephyr_base then
-    VimRc.warn 'no west workspace found'
     return
   else
     vim.g.west_topdir = M.topdir
@@ -34,6 +33,14 @@ M.setup = function()
       cwd = H.exec 'topdir' or vim.fn.getcwd(),
     }
   end, { desc = 'Files west workspace' })
+
+  local search_keys = {
+    { 'w', '<cmd>Wf<cr>', 'Search West Workspace (Files)' },
+    { 'g', '<cmd>Wg<cr>', 'Search West Workspace (Live Grep)' },
+  }
+  for _, k in ipairs(search_keys) do
+    vim.keymap.set('n', '<leader>s' .. k[1], k[2], { desc = k[3] })
+  end
 end
 
 ---

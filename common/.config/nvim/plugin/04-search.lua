@@ -170,10 +170,7 @@ for _, k in ipairs(prefix_keys) do
   vim.keymap.set('n', '<leader>f' .. k[1], k[2], { desc = k[3] })
 end
 local search_keys = {
-  { 'o', '<cmd>FzfLua files cwd=$OBSIDIAN_HOME fd_opts=-e=md<cr>', 'Search Obsidian' },
-  { 'w', '<cmd>Wf<cr>', 'Search West Workspace (Files)' },
-
-  { 'g', '<cmd>Wg<cr>', 'Search West Workspace (Live Grep)' },
+  -- { 'o', '<cmd>FzfLua files cwd=$OBSIDIAN_HOME fd_opts=-e=md<cr>', 'Search Obsidian' },
   { 'v', '<cmd>FzfLua visits<cr>', 'Search Recent Visits' },
   { 'f', "<cmd>FzfLua visits sort_by='frequency'<cr>", 'Search Frequent Visits' },
 }
