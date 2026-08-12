@@ -109,6 +109,7 @@ ninja = "latest"
 worktrunk = "latest"
 "vfox-zephyr:arm" = "latest"
 "github:renode/renode" = "latest"
+clang-format = "latest"
 
 [plugins]
 "vfox:zephyr" = "https://github.com/ale-alfaro/vfox-zephyr-sdk.git"

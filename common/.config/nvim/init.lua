@@ -26,11 +26,7 @@ vim.pack.add {
   gh 'MeanderingProgrammer/render-markdown.nvim',
   gh 'MagicDuck/grug-far.nvim',
   gh 'nvim-lua/plenary.nvim',
-  gh 'olimorris/codecompanion.nvim',
-  gh 'rebelot/kanagawa.nvim',
   gh 'saghen/blink.lib',
-  gh 'ellisonleao/gruvbox.nvim',
-  gh 'esmuellert/codediff.nvim',
   gh_rev('saghen/blink.cmp', 'main'),
 }
 local misc = require 'mini.misc'

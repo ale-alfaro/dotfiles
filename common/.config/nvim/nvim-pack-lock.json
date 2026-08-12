@@ -9,14 +9,6 @@
       "rev": "5876dd95deeb70aadbe9f1c0b7117a135061cdac",
       "src": "https://github.com/saghen/blink.lib"
     },
-    "codecompanion.nvim": {
-      "rev": "edf049c3d36e86d067efce9c901eb4229110d749",
-      "src": "https://github.com/olimorris/codecompanion.nvim"
-    },
-    "codediff.nvim": {
-      "rev": "7608f3b436ce1f84a4888f75e53079caa981a2e9",
-      "src": "https://github.com/esmuellert/codediff.nvim"
-    },
     "fzf-lua": {
       "rev": "532d463f5c83595192fe740572d8fd6902b2217a",
       "src": "https://github.com/ibhagwan/fzf-lua"
@@ -25,16 +17,8 @@
       "rev": "1cc080f55706b38aabfa97d40acb6adf59ac4a5a",
       "src": "https://github.com/MagicDuck/grug-far.nvim"
     },
-    "gruvbox.nvim": {
-      "rev": "154eb5ff5b96d0641307113fa385eaf0d36d9796",
-      "src": "https://github.com/ellisonleao/gruvbox.nvim"
-    },
-    "kanagawa.nvim": {
-      "rev": "bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3",
-      "src": "https://github.com/rebelot/kanagawa.nvim"
-    },
     "mini.nvim": {
-      "rev": "05a80b0340a92136a93ab04346cf97de3f165948",
+      "rev": "629bf6792187e11b4829411c1648f86f28df3963",
       "src": "https://github.com/nvim-mini/mini.nvim"
     },
     "nvim-lspconfig": {

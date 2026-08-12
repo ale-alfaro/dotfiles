@@ -33,10 +33,9 @@ if has_osc52 and not has_native_clipboard then
       ['*'] = osc52.paste '*',
     },
   }
-else
-  vim.opt.clipboard = 'unnamedplus' -- Sync with system clipboard
 end
 
+vim.opt.clipboard = 'unnamedplus' -- Sync with system clipboard
 vim.o.dict = '/home/alealfaro/.config/obsidian/Custom Dictionary.txt'
 vim.o.gdefault = true -- g is on by default when substituting with s/pattern/replace
 vim.o.grepformat = '%f:%l:%c:%m'
@@ -164,5 +163,3 @@ local f = function()
   vim.cmd 'setlocal formatoptions-=c formatoptions-=o'
 end
 VimRc.new_autocmd('FileType', f, nil, "Proper 'formatoptions'")
-
--- There are other autocommands created by 'mini.basics'. See 'plugin/30_mini.lua'.

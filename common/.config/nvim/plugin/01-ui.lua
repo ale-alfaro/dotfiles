@@ -1,35 +1,5 @@
 VimRc.now(function()
   ---
-  --- WARNING: This is an experimental feature intended to replace the builtin message + cmdline
-  --- presentation layer.
-  ---
-  --- To enable this feature (default opts shown):
-  --- ```lua
-  --- require('vim._core.ui2').enable({
-  ---   enable = true, -- Whether to enable or disable the UI.
-  ---   msg = { -- Options related to the message module.
-  ---     ---@type 'cmd'|'msg' Default message target, either in the
-  ---     ---cmdline or in a separate ephemeral message window.
-  ---     ---@type string|table<string, 'cmd'|'msg'|'pager'> Default message target
-  ---     ---or table mapping |ui-messages| kinds and triggers to a target.
-  ---     targets = 'cmd',
-  ---     cmd = { -- Options related to messages in the cmdline window.
-  ---       height = 0.5 -- Maximum height while expanded for messages beyond 'cmdheight'.
-  ---     },
-  ---     dialog = { -- Options related to dialog window.
-  ---       height = 0.5, -- Maximum height.
-  ---     },
-  ---     msg = { -- Options related to msg window.
-  ---       height = 0.5, -- Maximum height.
-  ---       timeout = 4000, -- Time a message is visible in the message window.
-  ---     },
-  ---     pager = { -- Options related to message window.
-  ---       height = 1, -- Maximum height.
-  ---     },
-  ---   },
-  --- })
-  --- ```
-  ---
   --- There are four special windows/buffers for presenting messages and cmdline:
   --- - "cmd": Cmdline. Also used for 'showcmd', 'showmode', 'ruler', and messages by default.
   --- - "msg": Message window, shows ephemeral messages useful for 'cmdheight' == 0.
@@ -48,9 +18,9 @@ VimRc.now(function()
   require('vim._core.ui2').enable {
     enable = true,
     msg = { -- Options related to the message module.
-      targets = 'cmd', ---@type 'cmd'|'msg' Default message target if not present in targets.
+      targets = 'msg', ---@type 'cmd'|'msg' Default message target if not present in targets.
       cmd = { -- Options related to messages in the cmdline window.
-        height = 0.5, -- Maximum height while expanded for messages beyond 'cmdheight'.
+        height = 0, -- Maximum height while expanded for messages beyond 'cmdheight'.
       },
       dialog = { -- Options related to dialog window.
         height = 0.5, -- Maximum height.
@@ -69,7 +39,8 @@ end)
 VimRc.icons = require 'custom.icons'
 VimRc.now(function()
   -- vim.cmd 'colorscheme kanagawa'
-  vim.cmd 'colorscheme gruvbox'
+  -- vim.cmd 'colorscheme gruvbox'
+  vim.cmd 'colorscheme miniwinter'
 end)
 VimRc.now(function()
   -- Set up to not prefer extension-based icon for some extensions
@@ -89,7 +60,7 @@ VimRc.now(function()
     items = {
       { action = 'FzfLua files', name = 'Files', section = 'Fzf' },
       { action = 'FzfLua oldfiles', name = 'Old files', section = 'Fzf' },
-      { action = 'FzfLua helptags', name = 'Help tags', section = 'Fzf' },
+      { action = 'FzfLua visits', name = 'Visits', section = 'Fzf' },
       { action = 'FzfLua live_grep', name = 'Live grep', section = 'Fzf' },
     },
     content_hooks = {

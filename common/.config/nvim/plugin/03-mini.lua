@@ -1,7 +1,3 @@
-VimRc.later(function()
-  require('mini.extra').setup()
-end)
-
 -- Session management. A thin wrapper around `:h mksession` that consistently
 -- manages session files. Example usage:
 -- - `<Leader>sn` - start new session
@@ -100,8 +96,6 @@ VimRc.later(function()
   local ai = require 'mini.ai'
   ai.setup {
     custom_textobjects = {
-      D = MiniExtra.gen_ai_spec.diagnostic(),
-      L = MiniExtra.gen_ai_spec.line(),
       F = ai.gen_spec.treesitter { a = '@function.outer', i = '@function.inner' },
       c = ai.gen_spec.treesitter {
         a = { '@conditional.outer', '@loop.outer' },
@@ -145,26 +139,6 @@ VimRc.later(function()
 end)
 VimRc.later(function()
   require('mini.indentscope').setup()
-end)
-
-VimRc.later(function()
-  require('mini.move').setup {
-    mappings = {
-      left = '<M-left>',
-      right = '<M-right>',
-      down = '<M-down>',
-      up = '<M-up>',
-
-      line_left = '<M-S-left>',
-      line_right = '<M-S-right>',
-      line_down = '<M-S-down>',
-      line_up = '<M-S-up>',
-    },
-  }
-end)
-
-VimRc.later(function()
-  require('mini.jump').setup()
 end)
 
 -- Split and join arguments (regions inside brackets between allowed separators).
@@ -294,7 +268,6 @@ end)
 -- to reduce noise when typing. Example usage:
 -- - `<Leader>ot` - trim all trailing whitespace in a buffer
 VimRc.later(function()
-  require('mini.trailspace').setup()
   require('mini.operators').setup {
 
     replace = {
