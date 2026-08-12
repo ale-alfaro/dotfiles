@@ -92,3 +92,7 @@ ft_autocmd({
     miniclue.ensure_buf_triggers(args.buf)
   end
 end, 'MiniClue Ensure buf triggers ', 'miniclue/ensure_buf_triggers')
+
+autocmd('BufRead', function(args)
+  vim.b.autoformat = false
+end, 'Disable formatting for Claude conversations', { pattern = '/tmp/claude-*/**/*.md' })

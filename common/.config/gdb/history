@@ -1446,3 +1446,13 @@ info symbol esf_copy.basic.pc
 p *esf_copy.extra_info.msp 
 info threads
 q
+bt
+mon reset
+c
+q
+mon reset
+c
+info registers 
+q
+c
+q

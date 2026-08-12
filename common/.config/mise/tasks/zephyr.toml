@@ -55,7 +55,9 @@ arg "build_info" help="Build info to convert"
 flag "-o --out [output]" help="output" default=".dts-lsp.lua"
 '''
 run = '''
-yq e -o=lua '.cmake.devicetree as $dt | { "board": .cmake.board.name,"dtsFile": ($dt.files[] | select(. == "*.dts")), "overlays": ($dt.files[] | select(. == "*.overlay")),"includePaths": $dt.include-dirs, "zephyrBindings": $dt.bindings-dirs } ' {{usage.build_info}} > {{usage.out}}
+yq e -o=lua \
+    '.cmake.devicetree as $dt | { "board": .cmake.board.name,"dtsFile": ($dt.files[] | select(. == "*.dts")), "overlays": ($dt.files[] | select(. == "*.overlay")),"includePaths": $dt.include-dirs, "zephyrBindings": $dt.bindings-dirs } ' \
+    {{usage.build_info}} > {{usage.out}}
 '''
 ["zephyr:renode:dts2repl"]
 description = "Convert dts to repl file"

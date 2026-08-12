@@ -128,7 +128,6 @@ VimRc.now_if_args(function()
       },
     },
   }
-  require('extras.completion').setup_blink()
   -- or equivalently
 
   VimRc.new_autocmd('LspAttach', function(ev)
@@ -157,5 +156,4 @@ VimRc.now_if_args(function()
     end
   end)(vim.lsp.handlers['client/registerCapability'])
   require('vimrc_lsp').setup()
-  require('custom.format').setup()
 end)

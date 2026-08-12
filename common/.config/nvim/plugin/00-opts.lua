@@ -34,6 +34,7 @@ if has_osc52 and not has_native_clipboard then
     },
   }
 end
+vim.opt.clipboard = 'unnamedplus' -- Sync with system clipboard
 
 vim.opt.clipboard = 'unnamedplus' -- Sync with system clipboard
 vim.o.dict = '/home/alealfaro/.config/obsidian/Custom Dictionary.txt'
@@ -121,6 +122,8 @@ vim.o.iskeyword = '@,48-57,_,192-255,-' -- Treat dash as `word` textobject part
 vim.o.incsearch = true -- Show search matches while typing
 vim.o.infercase = true -- Infer case in built-in completion
 vim.o.shiftwidth = 4 -- Use this number of spaces for indentation
+
+vim.o.textwidth = 0
 
 vim.o.smartcase = true -- Respect case if search pattern has upper case
 vim.o.smartindent = true -- Make indenting smart

@@ -3,6 +3,7 @@
 ---@field lhs string
 ---@field rhs string|function
 ---
+
 local gh = function(repo)
   return 'https://github.com/' .. repo
 end

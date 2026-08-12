@@ -32,6 +32,7 @@ vim.b.miniai_config = vim.tbl_deep_extend('force', vim.b.miniai_config or {}, {
     s = { '%[%[().-()%]%]' },
   },
 })
+vim.o.shiftwidth = 2
 if MiniMisc then
   -- For setting the project root automatically
   MiniMisc.setup_auto_root { '.luarc.json' }

@@ -89,7 +89,7 @@ function Fmt.setup()
         return
       end
 
-      if not vim.g.autoformat then
+      if not vim.g.autoformat or not vim.b[ev.buf].autoformat then
         return
       end
       local ft = vim.bo[ev.buf].filetype
@@ -106,7 +106,7 @@ function Fmt.setup()
     pattern = '*',
     group = aug,
     callback = function(args)
-      if not vim.api.nvim_buf_is_valid(args.buf) or vim.b[args.buf].applying_formatting or vim.bo[args.buf].buftype ~= '' then
+      if not vim.api.nvim_buf_is_valid(args.buf) or vim.b[args.buf].autoformat or vim.bo[args.buf].buftype ~= '' then
         return
       end
       local ft = vim.bo[args.buf].filetype
