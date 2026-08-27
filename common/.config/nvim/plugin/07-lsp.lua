@@ -1,12 +1,14 @@
 
-local bufgr = vim.api.nvim_create_augroup('vimrc.lsp', { clear = false })
+local augrp_lsp = vim.api.nvim_create_augroup('vimrc.lsp', { clear = false })
+
+local augrp_fmt = vim.api.nvim_create_augroup('vimrc.fmt', { clear = false })
 --- Buflocal autocmd
 ---@param event string|string[]
 ---@param bufnr integer
 ---@param callback function
 ---@param desc string?
 local new_buf_autocmd = function(event, bufnr, callback, desc)
-  local opts = { group = bufgr, callback = callback, buffer = bufnr, desc = desc or '' }
+  local opts = { group = augrp_lsp, callback = callback, buffer = bufnr, desc = desc or '' }
   vim.api.nvim_create_autocmd(event, opts)
 end
 ---@description Function that handles LspAttach events.
@@ -55,15 +57,19 @@ VimRc.lsp_on_attach = function(client, bufnr)
     lsp_keys = vim.list_extend(lsp_keys, {
       {
         lhs = 'd',
-        rhs = '<cmd>FzfLua lsp_definitions jump1=false<cr>',
-        opts = { desc = 'Peek Definition' },
-      },
-      {
-        lhs = 'D',
-        rhs = '<cmd>FzfLua lsp_definitions jump1=true<cr>',
+        rhs = '<cmd>FzfLua lsp_definitioncr>',
         opts = { desc = 'Goto Definition' },
+      },})
+      if client.name == 'clangd' then
+        lsp_keys = vim.list_extend(lsp_keys, {
+        {
+        lhs = 'D',
+        rhs = '<cmd>FzfLua lsp_declaration<cr>',
+        opts = { desc = 'Goto Declaration' },
       },
     })
+
+    end
   end
   if client:supports_method 'textDocument/references' then
     lsp_keys = vim.list_extend(lsp_keys, {
@@ -87,9 +93,32 @@ VimRc.lsp_on_attach = function(client, bufnr)
       { lhs = 'f', rhs = '<cmd>lua vim.lsp.buf.format({async=false})<cr>', opts = { desc = 'Lsp Format' } },
     })
     vim.api.nvim_buf_set_var(bufnr, 'lspformat', 1)
+    vim.api.nvim_create_autocmd('BufWritePre', { 
+      buf = bufnr, 
+      group = augrp_fmt,
+      callback = function ( )
+        vim.lsp.buf.format({ async = false})
+      end })
   else
-    -- vim.bo[bufnr].formatexpr = 'v:lua.vim.lsp.formatexpr(#{timeout_ms:1000})'
-    vim.api.nvim_buf_set_var(bufnr, 'lspformat', 0)
+    vim.bo[bufnr].formatexpr = 'v:lua.vim.lsp.formatexpr(#{timeout_ms:1000})'
+      vim.api.nvim_create_autocmd('BufWritePre', {
+          group = augrp_fmt,
+        desc = 'Format on save',
+        callback = function(ev)
+          if vim.g.minifiles_active then
+            return
+          end
+          if vim.g.skip_formatting then
+            vim.g.skip_formatting = false
+            return
+          end
+
+          if not vim.g.autoformat and not vim.b[ev.buf].autoformat then
+            return
+          end
+          Fmt.format(ev.buf)
+        end,
+      })
   end
 
   if client:supports_method 'textDocument/foldingRange' then
@@ -97,10 +126,12 @@ VimRc.lsp_on_attach = function(client, bufnr)
     vim.wo[win][0].foldexpr = 'v:lua.vim.lsp.foldexpr()'
   end
   for _, key in ipairs(lsp_keys) do
+    local opts = vim.tbl_extend('force', key.opts , { buf = bufnr})
+
     if lsp_keys.mode and type(lsp_keys.mode) == 'i' then
-      vim.api.nvim_buf_set_keymap(bufnr, 'i', key.lhs, key.rhs, key.opts)
+      vim.keymap.set( 'i', key.lhs, key.rhs, opts)
     else
-      vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>l' .. key.lhs, key.rhs, key.opts)
+      vim.keymap.set( 'n', '<leader>l' .. key.lhs, key.rhs, opts)
     end
   end
 end

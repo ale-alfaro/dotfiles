@@ -12,25 +12,25 @@ base-prefer = configfile
 
 [alias]
 up = update -k
+up.shallow = up -o=--depth=1
 ls = list -f '{name:20} {path:30} {groups}'
 st = status -s
 fb = boards --format '{name:30} | {qualifiers:30} | {dir}' -n
 tgt = build -p=never -t
-tgt.run = tgt run -d
-tgt.partitions = tgt partition_manager_report -d
-tgt.initlevels = tgt initlevels -d
-tgt.resume = tgt all -d
-tgt.dash = tgt dashboard -d
-gdb = attach -d
-pygdb = attach --gdb=arm-zephyr-gdb-py -d
-test = twister -vv --inline-logs --clobber-output --no-detailed-test-id
+run = tgt run -d
+initlevels = tgt initlevels -d
+resume = tgt all -d
+dashboard = tgt dashboard -d
+menuconf = tgt menuconfig -d
+mem-footprint = tgt footprint -d
+traceconfig = tgt traceconfig -d
+
+test = twister -vv --inline-logs --clobber-output --no-detailed-test-id --short-build-paths --ll=DEBUG
 test.sim = test -p native_sim
-test.hw = test --device-testing --enable-slow --filter runnable --device-serial
-test.renode = simulate -r renode -d
+test.hw = test --device-testing --enable-slow --filter runnable --device-serial=/dev/ttyACM0
+
 goto = forall -c 'nvim .'
 lg = forall -c 'lazygit'
-tgt.traceconf = tgt traceconfig -d
-tgt.menuconf = tgt menuconfig -d
-tgt.sys_menuconf = tgt sysbuild_menuconfig -d
-up.shallow = up -o=--depth=1
 
+
+# vim: ft=ini

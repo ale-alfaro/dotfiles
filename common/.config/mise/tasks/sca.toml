@@ -1,5 +1,5 @@
 
-["sca:codechecker:filegen"]
+["global:sca:codechecker:filegen"]
 description = "Check Zephyr project with Codechecker SCA"
 dir = "{{cwd}}"
 usage = '''
@@ -51,7 +51,7 @@ analyzer:
   - --clean
 EOF
 '''
-["sca:codechecker:run"]
+["global:sca:codechecker:run"]
 description = "Check Zephyr project with Codechecker SCA"
 dir = "{{cwd}}"
 usage = '''
@@ -75,7 +75,7 @@ west build -p{% if usage.board %} -b {{usage.board}} {% endif %}\
   -- "${cmake_args[@]}"
 '''
 
-["sca:codechecker:serve"]
+["global:sca:codechecker:serve"]
 description = "Start a local CodeChecker web server on :8001"
 dir = "{{cwd}}"
 usage = '''
@@ -88,7 +88,7 @@ exec CodeChecker server -w "$workspace" --port 8001
 '''
 
 
-["sca:codechecker:report_parse"]
+["global:sca:codechecker:report_parse"]
 usage = '''
 arg "<out>" help="Location to parsed output report" default="codechecker.json"
 '''
@@ -107,7 +107,7 @@ mkdir -p {{usage.out}}
 {% endfor %}
 '''
 
-["sca:cppcheck:zephyr"]
+["global:sca:cppcheck:zephyr"]
 description = "Check Zephyr project with Cppcheck SCA"
 dir = "{{cwd}}"
 raw = true

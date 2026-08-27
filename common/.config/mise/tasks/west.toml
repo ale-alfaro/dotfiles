@@ -1,24 +1,51 @@
-["west:alias"]
-dir = "{{cwd}}"
-description = "Get west aliases in global config"
-run = '''
-echo "Global Aliases: "
-yq e --input-format=ini '.alias' ~/.config/west/config 2>/dev/null
-echo "Local Aliases: "
-yq e --input-format=ini '.alias' "$(west topdir)/.west/config" 2>/dev/null
+
+["global:build:app"]
+description = "Build app from workspace "
+usage = '''
+arg "<app>" help="App"
+arg "[varargs]" var=#true help="Any other arguments to after the application dir arg"
 '''
-["west:info"]
+run = '''
+{% if usage.app is exists %}
+west build.app {{usage.app}} {{usage.varargs | join(sep=" ")}}
+{% else %}
+app=$(fd . 'CMakeLists.txt' --format '{\\}' | fzf)
+west build.app "${app?}" {{usage.varargs | join(sep=" ")}}
+{% endif %}
+mise run //:_postbuild:symlink:compdb {{config_root}}/build/{{usage.app | basename }}
+'''
+
+["global:build:sample"]
+description = "Build from Sample workspace "
+usage = '''
+arg "<sample>" help="Sample"
+arg "[varargs]" var=#true help="Any other arguments to after the application dir arg"
+'''
+run = '''
+{% if usage.sample is exists %}
+west build.sample {{usage.sample}} {{usage.varargs | join(sep=" ")}}
+{% else %}
+sample=$(fd . 'CMakeLists.txt' --format '{\\}' | fzf)
+west build.sample"${sample?}" {{usage.varargs | join(sep=" ")}}
+{% endif %}
+{% if [config_root, 'build', usage.sample | basename] | join_path is exists %}//:_postbuild:symlink:compdb {{config_root}}/build/{{usage.sample| basename }}{% endif %}
+'''
+
+["global:west:info"]
 dir = "{{cwd}}"
 description = "Get west workspace info"
 run = '''
 echo "Projects: "
 west ls
-echo 'Workspace status: "
-west status -s
+echo "Workspace status: "
+west st
+echo "Global Aliases: "
+yq e --input-format=ini '.alias' ~/.config/west/config 2>/dev/null
+echo "Local Aliases: "
+yq e --input-format=ini '.alias' "$(west topdir)/.west/config" 2>/dev/null
 '''
-depends_post = ["west:alias"]
 
-["west:build"]
+["global:west:build"]
 dir = "{{cwd}}"
 description = "Build a zephyr app with west"
 interactive = true
@@ -72,112 +99,8 @@ else
   west build -p=always -b "${board}" "${usage_app?}"
 fi
 '''
-["west:boards"]
-description = "Find boards registered in the workspace"
-interactive = true
-dir = "{{cwd}}"
-usage = '''
-arg "[regex]" help="Regex for search"
-flag "--agent" help="Flag for agents" {
-  long_help """
-    Turns off any interactiveness. This task uses a catch all
-    double_dash variadic argument the west find output will be piped
-    to. If none is given task just print the results
-  """
-}
-arg "[pipe_cmd]" help="Cmd to pipe the output to. Anything after '--' will be piped" {
-  var #true
-  double_dash "required"
-}
-'''
-run = '''
-{% if usage.agent %}
-  default_pipe_cmd="cat"
-{% else  %}
-  default_pipe_cmd="fzf \
-            --ansi \
-            --preview='tree -C {2}' \
-            --preview-window='45%,border-sharp' \
-            --prompt='Boards > ' \
-            --with-nth 1 \
-            --bind='enter:become(nvim {2})'"
 
-{% endif  %}
-eval "pipe_cmd=(${usage_pipe_cmd:-$default_pipe_cmd})"
-west boards ${(z)${usage_regex:+-n $usage_regex}} -f "{name} {dir}" | "${pipe_cmd[@]}"
-
-'''
-
-["west:menuconfig"]
-description = "Run menuconfig"
-dir = "{{cwd}}"
-interactive = true
-usage = '''
-arg "[build_dir]" help="build directory"
-flag "--domain [domain]" help="Domain (only needed for sysbuild)"
-flag "--resume" help="Flag to resume build with the configuration change"
-'''
-run = '''
-west build -p=never -d "${usage_build_dir:-build}" -t menuconfig "${(z)${usage_domain:+--domain $domain}}"
-{% if usage.resume is defined %}
-  west build -p=never -d "${usage_build_dir:-build}" -t all
-{% endif %}
-'''
-["west:resume"]
-description = "Resume west build after menuconfig"
-dir = "{{cwd}}"
-usage = '''
-arg "[build_dir]" help="build directory"
-'''
-run = '''
-west build -p=never -d "${usage_build_dir:-build}" -t all
-'''
-["west:attach"]
-description = "Run west attach with arm-zephyr-eabi-gdb-py"
-dir = "{{cwd}}"
-interactive = true
-usage = '''
-arg "[build_dir]" help="build directory"
-'''
-run = '''
-west attach \
-  --no-rebuild \
-  -d "${usage_build_dir:-build}" \
-  --gdb=/opt/zephyr-sdk-custom/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb-py
-
-'''
-
-["west:build:post_action"]
-description = "Post build actions for zephyr app with Ninja"
-usage = '''
-arg "[build_dir]" help="Build directory to do post action on" {
-    default "build"
-}
-arg "<run>" help="Run west post-action" {
-    choices "flash" "debug" "debugserver" "attach" "rtt"
-    default "flash"
-}
-'''
-run = '''
-#!/usr/bin/env zsh
-set -euxo pipefail
-
-bdir=${usage_build_dir?}
-app_name=${bdir?:t}
-domain="${app_name}"
-print -v cmd "ninja -C ${build_dir:?} ${usage_target:?}"
-if [[ -f "${build_dir:?}/domains.yaml" ]]; then
-domain=$(cat "${bdir:?}/domains.yaml" | yq e -r '.domains[].name' | fzf)
-print -v cmd "ninja -C ${bdir:?}/${domain:?} ${usage_run:?}"
-else
-
-print -v cmd "ninja -C ${bdir:?} ${usage_run:?}"
-fi
-echo "Running build cmd $cmd"
-eval "$cmd"
-'''
-
-["west:rg"]
+["global:west:rg"]
 description = "Use ripgrep at the top of the workspace"
 interactive = true
 alias = "wrg"
@@ -202,7 +125,7 @@ topdir="$(west topdir 2>/dev/null)"
 rg {% if usage.agent %}--color=never{% endif %} '{{usage.regex}}' "${topdir:?}" "${varopts[@]}"
 '''
 
-["west:fd"]
+["global:west:fd"]
 description = "Find file across west workspace and open it with neovim"
 interactive = true
 alias = "wfd"

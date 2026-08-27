@@ -46,9 +46,11 @@ local oil_setup = function()
     keymaps = {
       ['g?'] = { 'actions.show_help', mode = 'n' },
       ['<CR>'] = 'actions.select',
+      ['<localleader>o'] = 'actions.open_external',
+      ['<localleader>t'] = 'actions.open_terminal',
 
       -- create a new mapping, gs, to search and replace in the current directory
-      gs = {
+       ['<localleader>s'] = {
         callback = function()
           -- get the current directory
           local prefills = { paths = oil.get_current_dir() }
@@ -71,7 +73,7 @@ local oil_setup = function()
         desc = 'oil: Search in directory',
       },
       ['<Right>'] = { 'actions.select', mode = 'n' },
-      ['q'] = { 'actions.close', mode = 'n' },
+      ['<localleader>q'] = { 'actions.close', mode = 'n' },
       ['<Left>'] = { 'actions.parent', mode = 'n' },
     },
     -- Set to false to disable all of the above keymaps

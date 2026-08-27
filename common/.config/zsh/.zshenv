@@ -45,7 +45,7 @@ export FZF_DEFAULT_OPTS="--height 60% \
 --prompt '∷ ' \
 --pointer ▶ \
 --marker ⇒"
-
+export FZF_CTRL_T_COMMAND="fd -t file"
 export FZF_CTRL_T_OPTS="
       $FZF_DEFAULT_OPTS
       --preview '$FZF_FILE_EXPLORER_PREVIEW'

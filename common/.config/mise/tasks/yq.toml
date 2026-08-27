@@ -1,4 +1,4 @@
-["yq:schema"]
+["global:yq:schema"]
 description = "Use yq to get schema of supported file"
 dir = '{{cwd}}'
 usage = 'arg "<file>"'
@@ -6,7 +6,7 @@ run = '''
 yq eval '.. | path | join("/")' {{usage.file}}
 '''
 
-["yq:to_dict"]
+["global:yq:to_dict"]
 description = "Use yq to get a dictionary of all nested data of supported file"
 dir = '{{cwd}}'
 usage = 'arg "<file>"'

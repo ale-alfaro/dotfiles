@@ -137,7 +137,6 @@ VimRc.later(function()
 
     return FzfLua.fzf_exec(contents, opts)
   end, vim.tbl_extend('force', FzfLua.defaults.files, { sort_by = 'recency' }))
-  FzfLua.register_ui_select()
 end)
 local nonprefix_keys = {
   { '<Space><Space>', '<cmd>FzfLua builtin<cr>', 'Find Fzf pickers' },
@@ -180,4 +179,8 @@ end
 
 VimRc.later(function()
   require 'extras.grug'
+end)
+
+VimRc.later(function()
+  require('custom.format').setup()
 end)

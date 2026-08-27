@@ -2,9 +2,7 @@
 VimRc.later(function ( )
   require('extras.completion').setup_blink()
 end)
-VimRc.later(function()
-  require('custom.format').setup()
-end)
+
 VimRc.later(function()
   require 'extras.quicker-trouble'
 end)

@@ -110,7 +110,12 @@ local west_build_select_app = function(selected, opts)
   local raw_flags = opts.flags or vim.g.west_build_app_flags
   VimRc.info(("app set to '%s'"):format(app))
   if vim.uv.fs_stat(app) then
-    local cmd = string.format('west build.app %s', app)
+    local cmd
+    if vim.g.west_build_alias then
+      cmd = string.format('west %s %s', vim.g.west_build_alias, app)
+    else
+      cmd = string.format('west build.app %s', app)
+    end
     if raw_flags then
       local flags = vim.fn.split(raw_flags, ' ', false)
       if #flags > 0 then

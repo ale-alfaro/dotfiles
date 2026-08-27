@@ -37,3 +37,4 @@ log
 /common/llm/ts/state
 *hosts.yml
 resume.pdf
+*tokens.toml

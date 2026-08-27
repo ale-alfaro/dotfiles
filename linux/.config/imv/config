@@ -3,8 +3,8 @@
 # Print the current image file
 <Ctrl+p> = exec lp "$imv_current_file"
 
-# Delete the current image and quit the viewer
-<Ctrl+x> = exec rm "$imv_current_file"; quit
+# Trash the current image and quit the viewer
+<Ctrl+x> = exec gio trash "$imv_current_file"; quit
 
 # Delete the current image and move to the next one
 <Ctrl+Shift+X> = exec rm "$imv_current_file"; close

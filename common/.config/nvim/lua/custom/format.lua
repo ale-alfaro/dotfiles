@@ -76,71 +76,49 @@ end
 function Fmt.setup()
   vim.g.autoformat = true
   _G.Fmt = Fmt
-  local aug = vim.api.nvim_create_augroup('CustomFormat', { clear = true })
-  vim.api.nvim_create_autocmd('BufWritePre', {
-    group = aug,
-    desc = 'Format on save',
-    callback = function(ev)
-      if vim.g.minifiles_active then
-        return
-      end
-      if vim.g.skip_formatting then
-        vim.g.skip_formatting = false
-        return
-      end
-
-      if not vim.g.autoformat or not vim.b[ev.buf].autoformat then
-        return
-      end
-      local ft = vim.bo[ev.buf].filetype
-
-      local formatter = Fmt.config.formatters_by_ft[ft]
-      if not formatter or formatter.post then
-        return
-      end
-      Fmt.format(ev.buf, formatter)
-    end,
-  })
-  vim.api.nvim_create_autocmd('BufWritePost', {
-    desc = 'Format after save',
-    pattern = '*',
-    group = aug,
-    callback = function(args)
-      if not vim.api.nvim_buf_is_valid(args.buf) or vim.b[args.buf].autoformat or vim.bo[args.buf].buftype ~= '' then
-        return
-      end
-      local ft = vim.bo[args.buf].filetype
-
-      local formatter = Fmt.config.formatters_by_ft[ft]
-      if not formatter or not formatter.post then
-        return
-      end
-      local callback = function(err)
-        if not err and vim.api.nvim_buf_is_valid(args.buf) then
-          vim.api.nvim_buf_call(args.buf, function()
-            vim.b[args.buf].conform_applying_formatting = true
-            vim.cmd.update()
-            vim.b[args.buf].conform_applying_formatting = false
-          end)
-        end
-      end
-      Fmt.format(args.buf, formatter, { async_cb = callback })
-    end,
-  })
+  -- local aug = vim.api.nvim_create_augroup('CustomFormat', { clear = true })
+  -- vim.api.nvim_create_autocmd('BufWritePost', {
+  --   desc = 'Format after save',
+  --   pattern = '*',
+  --   group = aug,
+  --   callback = function(args)
+  --     if not vim.api.nvim_buf_is_valid(args.buf) or vim.b[args.buf].autoformat or vim.bo[args.buf].buftype ~= '' then
+  --       return
+  --     end
+  --     local ft = vim.bo[args.buf].filetype
+  --
+  --     local formatter = Fmt.config.formatters_by_ft[ft]
+  --     if not formatter or not formatter.post then
+  --       return
+  --     end
+  --     local callback = function(err)
+  --       if not err and vim.api.nvim_buf_is_valid(args.buf) then
+  --         vim.api.nvim_buf_call(args.buf, function()
+  --           vim.b[args.buf].conform_applying_formatting = true
+  --           vim.cmd.update()
+  --           vim.b[args.buf].conform_applying_formatting = false
+  --         end)
+  --       end
+  --     end
+  --     Fmt.format(args.buf, { async_cb = callback })
+  --   end,
+  -- })
 end
 --- Format buffer
 ---@param bufnr integer buf id
----@param formatter fmt.FormatterConfig
 ---@param opts? {async_cb:fun(err?:string)}
-Fmt.format = function(bufnr, formatter, opts)
+Fmt.format = function(bufnr, opts)
+
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   opts = opts or {}
   local ft = vim.bo[bufnr].filetype
+---@type fmt.FormatterConfig
+    local formatter = Fmt.config.formatters_by_ft[ft]
+    if not formatter or formatter.post then
+      return
+    end
   -- vim.b[] returns nil for unset vars; nvim_buf_get_var would throw.
-  local buf_lsp_formatters = get_format_clients { bufnr = bufnr }
-  if formatter.lsp_prefer and #buf_lsp_formatters > 0 then
-    vim.lsp.buf.format { async = false }
-  elseif formatter.post and opts.async_cb then
+  if   opts.async_cb then
     local input_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
     require('custom.docgen').run_formatter(bufnr, ft, formatter, input_lines, function(output)
       local err = nil

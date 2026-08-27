@@ -12,7 +12,22 @@ vim.api.nvim_create_autocmd('FileType', {
   end,
 })
 require('grug-far').setup {
-  folding = { enabled = true },
+  folding = { 
+  enabled = true,
+    -- sets foldlevel, folds with higher level will be closed.
+    -- result matche lines for each file have fold level 1
+    -- set it to 0 if you would like to have the results initially collapsed
+    -- See :h foldlevel
+    foldlevel = 3,
+
+    -- visual indicator of folds, see :h foldcolumn
+    -- set to '0' to disable
+    foldcolumn = '0',
+
+    -- whether to include file path in the fold, by default, only lines under the file path are included
+    include_file_path = false,
+
+},
   resultLocation = { showNumberLabel = true },
 
   -- engines that are enabled to use
@@ -48,13 +63,6 @@ require('grug-far').setup {
       },
       -- defaults to fill into the inputs when loading or switching to this engine
       -- they only apply when non-nil
-      defaults = {
-        search = nil,
-        replacement = nil,
-        filesFilter = nil,
-        flags = '--ignore-case',
-        paths = nil,
-      },
     },
     -- see https://ast-grep.github.io
     astgrep = {
@@ -166,31 +174,30 @@ fix: $$$A
   -- see https://learnvimscriptthehardway.stevelosh.com/chapters/11.html#local-leader
   keymaps = {
     replace = '<localleader>r',
-    syncLocations = '<localleader>L',
-    syncLine = '<localleader>l',
-    refresh = '<localleader>R',
+    syncLocations = { n = '<localleader>s' },
+    syncLine = { n = '<localleader>l' },
+    close = { n = '<localleader>c' },
+    historyOpen = { n = '<localleader>t' },
+    historyAdd = { n = '<localleader>a' },
+    refresh = { n = '<localleader>f' },
     swapEngine = '<localleader>e',
-    historyOpen = 'gho',
     openLocation = '<localleader>x',
     syncFile = '<localleader>f',
-    close = '<localleader>Q',
-    historyAdd = 'gha',
-    syncNext = '<M-n>',
-    syncPrev = '<M-p>',
-    applyNext = '<C-n>',
-    applyPrev = '<C-p>',
-    help = '<localleader>?',
-    qflist = '<localleader>q',
-    toggleShowCommand = '<F5>',
-    abort = '<F7>',
-    previewLocation = '<F8>',
-    swapReplacementInterpreter = '<localleader>i',
     openNextLocation = { n = '<down>' },
     openPrevLocation = { n = '<up>' },
     gotoLocation = { n = '<enter>' },
     pickHistoryEntry = { n = '<enter>' },
-    nextInput = { n = '<enter>' },
-    prevInput = { n = '<s-enter>' },
+    abort = { n = '<localleader>b' },
+    help = { n = 'g?' },
+    qflist = { n = '<localleader>q' },
+    previewLocation = { n = '<localleader>i' },
+    swapReplacementInterpreter = { n = '<localleader>x' },
+    applyNext = { n = '<localleader>j' },
+    applyPrev = { n = '<localleader>k' },
+    syncNext = { n = '<localleader>n' },
+    syncPrev = { n = '<localleader>p' },
+    nextInput = { n = '<tab>' },
+    prevInput = { n = '<s-tab>' },
   },
 }
 local map = function(key, cb, desc)
@@ -200,8 +207,35 @@ map('g', function()
   require('grug-far').open { transient = true }
 end, 'Rg')
 map('a', function()
-  require('grug-far').open { engine = 'astgrep' }
+  require('grug-far').open { engine = 'astgrep-rules' }
 end, 'Ast-grep')
+  -- prefills = {
+  --   search = nil,
+  --   replacement = nil,
+  --   filesFilter = nil,
+  --   flags = nil,
+  --   paths = nil,
+  -- },
 map('l', function()
   require('grug-far').open { prefills = { paths = vim.fn.expand '%' } }
 end, 'Local')
+map('c', function()
+  require('grug-far').open({ prefills = { search = vim.fn.expand("<cword>") } })
+end, 'Local')
+  --
+vim.keymap.set('n', '<localleader>r', function()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local ft = vim.bo[bufnr].filetype
+  local language_glob = nil
+  if string.match(ft, 'c') then
+    language_glob = '*.{c,h}'
+  elseif string.match(ft, 'python') then
+      language_glob = '*.py'
+  end
+  require('grug-far').open({ prefills = {{
+        search = nil,
+        replacement = nil,
+        filesFilter = language_glob,
+        paths = nil,
+      }} })
+end, {desc = 'Grug'})

@@ -1,5 +1,4 @@
 local snippets = require 'mini.snippets'
-local topdir = vim.g.west_topdir or ''
 local gen_loader = snippets.gen_loader
 -- snippets.setup {
 --   expand = {
@@ -28,27 +27,14 @@ local insert_with_lookup = function(snippet)
   }
   return MiniSnippets.default_insert(snippet, { lookup = lookup })
 end
-
 require('mini.snippets').setup {
   snippets = {
     -- Always load 'snippets/global.json' from config directory
-    gen_loader.from_runtime 'global/*.lua',
+  gen_loader.from_runtime 'snippets/*.lua',
+  gen_loader.from_runtime 'snippets.lua',
+   gen_loader.from_file('~/.config/nvim/snippets/global.lua'),
     -- Load from 'snippets/' directory of plugins, like 'friendly-snippets'
-    gen_loader.from_file(vim.fs.joinpath(topdir, '.nvim', 'snippets.lua')),
-    gen_loader.from_file(vim.fs.joinpath(vim.fn.getcwd(), '.nvim', 'snippets.lua')),
-    gen_loader.from_lang {
-      lang_patterns = {
-        -- Recognize special injected language of markdown tree-sitter parser
-        markdown_inline = { 'markdown.lua' },
-        c = { 'c/**/*.lua', 'c/**/*.json', '**/c.lua', '**/c.json' },
-        cpp = { 'cpp/**/*.json', '**/cpp.json', '**/cppdoc.json' },
-        cmake = { 'cmake/**/*.json', '**/cmake.json' },
-        python = { 'python/**/*.json', '**/python.json' },
-        bash = { 'bash/**/*.json', '**/bash.json' },
-        sh = { 'sh/**/*.json', '**/sh.json', 'shell/**/*.json', '**/shell.json' },
-        zsh = { 'zsh/**/*.json', '**/zsh.json' },
-      },
-    },
+    gen_loader.from_lang(),
   },
   -- ... Set up snippets ...
   expand = { insert = insert_with_lookup },

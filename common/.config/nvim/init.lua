@@ -4,6 +4,27 @@
 ---@field rhs string|function
 ---
 
+vim.o.exrc = true
+--- Load given exrc file
+---@param exrc_path string
+local function exrc_trust(exrc_path)
+  -- Ensure we trust the file before loading
+  exrc_path = exrc_path or '.nvim.lua'
+  local ok, result = vim.secure.trust { action = 'allow', path = exrc_path }
+  if not ok then
+    VimRc.err('Failed to load exrc "%s"', exrc_path)
+    error(result)
+  end
+end
+local exrc_au = vim.api.nvim_create_augroup('exrc', {clear = true})
+vim.api.nvim_create_autocmd('BufWrite', { pattern = '**/.nvim.lua', callback = function (ev)
+  local buf = ev.buf
+  exrc_trust(vim.api.nvim_buf_get_name(buf))
+end, desc = "Trust .nvim", group = exrc_au })
+
+local function exrc_database()
+  vim.cmd('e ' .. vim.fs.joinpath(vim.fn.expand '$XDG_STATE_HOME', 'nvim', 'trust'))
+end
 local gh = function(repo)
   return 'https://github.com/' .. repo
 end
@@ -200,22 +221,6 @@ function FeatureFlags:set(name, enable)
   self.entries[name] = fflag
 end
 
-vim.o.exrc = true
---- Load given exrc file
----@param exrc_path? string
-function VimRc.exrc_trust(exrc_path)
-  -- Ensure we trust the file before loading
-  exrc_path = exrc_path or '.nvim.lua'
-  local ok, result = vim.secure.trust { action = 'allow', path = exrc_path }
-  if not ok then
-    VimRc.err('Failed to load exrc "%s"', exrc_path)
-    error(result)
-  end
-end
-
-function VimRc.exrc_database()
-  vim.cmd('e ' .. vim.fs.joinpath(vim.fn.expand '$XDG_STATE_HOME', 'nvim', 'trust'))
-end
 
 vim.env.PATH = vim.env.HOME .. '/.local/share/mise/shims:' .. vim.env.PATH
 VimRc.env = vim.fn.environ() or {}

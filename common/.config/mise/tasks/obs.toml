@@ -1,4 +1,4 @@
-["mdtohtml"]
+["global:mdtohtml"]
 description = "Markdown to HTML"
 dir = "{{cwd}}"
 interactive = true
@@ -12,3 +12,9 @@ fd -t file --extension html {{usage.regex}} {{usage.dir}} \
   {% if usage.all %}--no-ignore --no-hidden{% endif %} | \
   fzf --bind "enter:become(sh -c 'defuddle parse --md {} | nvim')"
 '''
+
+["global:gendoc_diagrams"]
+tools = { "npm:mmdc" = "latest" }
+dir = "{{cwd}}"
+usage = 'arg "<mdfile>"'
+run = 'mmdc -i {{usage.mdfile}} -a docs/assets --pdfFit --outputFormat "pdf"'

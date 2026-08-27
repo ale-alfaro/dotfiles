@@ -6,14 +6,15 @@ color_theme = "dracula"
 unix_default_file_shell_args = 'zsh -eu'
 unix_default_inline_shell_args = "zsh -eu -c"
 trusted_config_paths = [
-  '~/sibel/eng/fw/anne-workspace',
-  "~/sibel/Documents/Obsidian",
-  "~/dotfiles/",
+    '~/sibel/eng/fw/anne-workspace',
+    "~/sibel/Documents/Obsidian",
+    "~/dotfiles/",
 ]
 # tools can read the versions files used by other version managers
 # for example, .nvmrc in the case of node's nvm
 idiomatic_version_file_enable_tools = ['python']
 disable_backends = ["asdf"]
+disable_tools = ["pipx:west"]
 # configure `mise install` to always keep the downloaded archive
 always_keep_download = false # deleted after install by default
 always_keep_install = false  # deleted on failure by default
@@ -28,15 +29,13 @@ npm.package_manager = "bun"
 npm.bun = true
 pipx.uvx = true
 python.uv_venv_auto = "source"
-disable_tools = ["pipx:west"]
+github.gh_cli_tokens = true
+cargo.binstall_native = true
+cargo.binstall = true
 
-
-[settings.github]
-gh_cli_tokens = true
-
-[settings.cargo]
-binstall_native = true
-binstall = true
+[shell_alias]
+arm-none-eabi-gdb = "arm-zephyr-eabi-gdb-py"
+arm-zephyr-eabi-gdb = "arm-zephyr-eabi-gdb-py"
 
 [tools]
 jqp = "latest"
@@ -65,6 +64,7 @@ uv = "latest"
 "pipx:ty" = "latest"
 "pipx:ptpython" = "latest"
 "pipx:kconfigstyle" = "latest"
+"pipx:gersemi" = "latest"
 
 bun = "latest"
 "npm:prettier" = "latest"
@@ -82,6 +82,7 @@ git-lfs = "3.7.1"
 "github:dlvhdr/diffnav" = "latest"
 "github:dandavison/delta" = "latest"
 "github:apple/pkl-lsp" = "latest"
+"github:renode/renode" = { version = "latest", asset_pattern = "*-linux-portable.tar.gz" }
 
 go = "latest"
 "go:github.com/coolamit/mermaid-cli/cmd/mmd-cli" = "0.1.1"
@@ -91,8 +92,10 @@ rust-analyzer = "latest"
 "cargo:taplo-cli" = "latest"
 "cargo:neocmakelsp" = "latest"
 "cargo:tlrc" = "latest"
+"cargo:probe-rs-tools" = "latest"
+"cargo:scope-monitor" = "latest"
 
-"http:nrfutil" = { version = "1.4.0", url = "https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/{{arch(x64='x86_64')}}-{{os(linux='unknown-linux-gnu')}}/nrfutil" }
+"http:nrfutil" = { version = "1.4.0", url = "https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil" }
 rg = "latest"
 "vfox-zephyr:west" = "1.5.0"
 difftastic = "latest"
@@ -101,15 +104,13 @@ hk = "latest"
 actionlint = "1.7.12"
 node = "latest"
 sd = "latest"
-opam = { version = "latest", asset_pattern = "opam-*-{gnu_arch}-{os}" }
 pkl = "latest"
 ninja = "latest"
-"cargo:scope-monitor" = "latest"
-"pipx:gersemi" = "latest"
 worktrunk = "latest"
 "vfox-zephyr:arm" = "latest"
-"github:renode/renode" = "latest"
 clang-format = "latest"
+fzf = "latest"
+codex = "latest"
 
 [plugins]
 "vfox:zephyr" = "https://github.com/ale-alfaro/vfox-zephyr-sdk.git"
@@ -145,24 +146,61 @@ run = '''
 west twister -c --detailed-test-id {{ usage.extra_args | join(sep=" ") }} -p {{usage.platform}} -T {{usage.dir}} {{vars.testplan_flag}} {{usage.testplan}}
 '''
 
-[task_templates."twister:info"]
-vars.info_flag = "--list-tests"
-description = "Get info on twister-discoverable test using {{vars.info_flag}}"
+[task_templates."twister:run"]
+description = "Run twister"
 dir = "{{cwd}}"
-usage = '''
-arg "<platform>" {
-  help "Platform"
-  env "TWISTER_PLATFORM"
-}
+usage = ''' 
 arg "<dir>" {
-  help "Testsuite root"
-  env "TWISTER_TESTSUITE_ROOT"
-  default "."
+    help "Twister testsuite"
 }
+arg "[varargs]" {
+    help "Arguments and flags to pass to twister with or without '--'"
+    double_dash "automatic"
+    var #true
+}
+flag "-b --board [board]" {
+    help "Twister platform (board) to run. Set also by TWISTER_BOARD"
+    env "TWISTER_BOARD"
+}
+flag "--flash-script [flash_script]" {
+    long_help """
+        Flash script to be used instead of `west flash`
+        HIGHLY recommended for sysbuild multi-image builds
+        west flash does a poor job flashing multiple images
+        and will leave the device halted on boot-up
+    """
+}
+flag "-s --serial-port [port]" {
+    help "Twister serial port"
+    default "/dev/ttyACM0"
+    env "TWISTER_SERIAL_PORT"
+}
+flag "-o --outdir [outdir]" {
+    help "Output dir. twister-out is the default"
+}
+flag "-n --no-clean" {
+    long_help """
+    Do not clean the twister-out dir and re-compile the build artifacts
+    Default behavior is to clobber the directories every run
+    """
+} 
 '''
+
+[tasks."_postbuild:symlink:compdb"]
+hide = true
+dir = "{{cwd}}"
+usage = 'arg "<build>"'
 run = '''
-west twister -v -c \
-  -p {{usage.platform}} \
-  -T {{usage.dir}} \
-  {{vars.info_flag}}
+
+if [[ -f "${usage_build?}/compile_commands.json" ]]; then
+  compdb="${usage_build}/compile_commands.json"
+elif [[ -f "${usage_build?}/domains.yaml" ]]; then
+  compdb="${usage_build}/$(yq e '.default' $usage_build/domains.yaml)/compile_commands.json"
+else
+  echo "No compile_commands.json found in ${usage_build}"
+  exit 1
+fi
+topdir="$(west topdir)"
+echo "Linking compdb $compdb to $topdir"
+ln -sf "$compdb" "$topdir"
 '''

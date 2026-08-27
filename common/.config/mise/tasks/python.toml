@@ -1,20 +1,6 @@
-["python:format"]
-dir = "{{cwd}}"
-run = "uv format"
-
-["python:lint"]
-depends = ["python:format"]
-dir = "{{cwd}}"
-usage = 'arg "[flags]" help="Flags" var=#true'
-run = 'uvx ruff check "${(z)usage_flags:-.}"'
-
-["python:typecheck"]
-dir = "{{cwd}}"
-usage = 'arg "[flags]" help="Flags" var=#true'
-run = 'uvx ty check "${(z)usage_flags:-}"'
-
-["python:requirements:merge"]
+["global:python:requirements:merge"]
 description = "Merge multiple requirements.txt into one"
+hide = true
 dir = "{{cwd}}"
 usage = '''
 arg "[glob]" {

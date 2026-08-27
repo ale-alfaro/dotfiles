@@ -1456,3 +1456,222 @@ info registers
 q
 c
 q
+mon reset
+c
+q
+c
+q
+l
+info registers 
+continue
+bt 3
+mon halt
+mon reset
+c
+bt
+info threads
+q
+up 7
+p *out_hdr
+info locals
+info args
+x/4w out
+x/8w out
+up
+l
+p imu_decoded 
+q
+bt
+info threads 
+info registers
+quit
+bt
+mon reset
+c
+q
+c
+info threads
+info registers 
+q
+c
+q
+x/256w &z_interrupt_stacks 
+q
+info threads 
+info symbol 0x0004f84c
+b assert_post_action
+mon reset
+c
+bt
+up
+l
+info locals
+info args
+p err
+q
+up 31
+q
+generate-core-file bmi323.dump
+q
+up 3
+p line
+up
+l
+p *args
+q
+up 12
+down
+p ret
+info args
+p *ctx
+up 2
+mon reset
+c
+up 8
+info locals
+p *sqe_arr
+up
+l
+q
+up 8
+l
+info locals
+q
+p ($lr & 0x3)
+source ~/.config/gdb/gdbinit 
+mon reset
+c
+p/256wx $sp
+x/256w $sp
+info regs
+info registers 
+info threads
+thread apply bt 8
+thread apply all bt 8
+q
+p sh_bmi323_rtio_0
+p sh_bmi323_stream_state
+p sh_bmi323_stream
+p sh_bmi323_stream_state 
+info symbol sh_bmi323_stream_state 
+p sh_bmi323_data
+p sh_bmi323_data_0
+q
+mon reset
+c
+p readout_len 
+x/w readout_len 
+p buf
+info locals 
+p *config
+help print
+help x
+x/d config->fifo_watermark 
+x/d *config
+x/d (*config).fifo_watermark 
+x/u (*config).fifo_watermark 
+p/d (*config).fifo_watermark 
+p/d readout_len 
+p/d required_len 
+p/d buf_leb
+p/d buf_len
+x/w buf
+l 20
+bt
+down
+up
+l
+info locals
+p *data
+q
+up 3
+up
+l
+info locals
+q
+mon reset
+c
+up 3
+l
+info registers
+p/10x $psp
+x/10x $psp
+x/10w $psp
+x/50w $psp
+x/512w $psp
+q
+info threads
+thread apply all bt 8
+info registers
+info registers 
+info stack
+mon reset
+c
+q
+thread apply all bt 4
+q
+mon reset
+c
+info threads
+info registers 
+q
+info registers 
+info threads
+q
+generate-core-file app1.coredump
+mon reset
+c
+mon halt
+bt
+info threads
+q
+info registers
+info locals
+l
+info threads
+p total_memory_stack 
+x/512w total_memory_stack 
+x/512w (total_memory_stack + 2048) 
+x/512w (total_memory_stack +4096) 
+x/512w (total_memory_stack + 8192) 
+x/512w (total_memory_stack + 16834) 
+source ~/.config/gdb/pygdb/cortex_m.py 
+cortex-fault
+cortex-frame
+cortex-mpu
+cortex-stac
+cortex-stack
+cortex-scb
+cortex-nvic 
+cortex-cpuid 
+p/d static_total_memory_size 
+p/d static_memory_allocation_failures 
+frame 0
+p *self
+help c
+p ((aria_scratch_model *)0x20007a90)->macro_count
+p *(uint16_t*)0xE000E2DA
+p *(uint16_t*)0xE000ED2A
+p *(uint32_t*)0xE000ED28
+print/x *(uint16_t *)0xE000ED2A
+print/x *(uint16_t *)0xE000ED28
+print/x *(uint8_t *)0xE000ED29
+print/x *(uint8_t *)0xE000ED28
+print/x *(uint32_t *) 0xE000ED28
+mon reset
+c
+q
+q
+bt
+info registers
+x/4w $sp
+x/16w $sp
+q
+q
+bt
+info thread
+quit
+info threads
+q
+c
+q

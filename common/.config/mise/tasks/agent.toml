@@ -1,0 +1,15 @@
+
+["global:claude:review"]
+description = "Review with claude"
+usage = '''
+arg "<repo>" default="."
+'''
+dir = "{{cwd}}"
+interactive = true
+run = '''
+claude --model opus --effort medium "$(cat <<EOF
+Review the following files:
+$(git -C {{usage.repo}} diff --cached --stat)
+EOF
+)"
+'''

@@ -1,11 +1,19 @@
 
 
-["github:gen-key"]
+["global:github:secret:key-set"]
+description = "Set a Github Secret"
+dir = "{{cwd}}"
+usage = '''
+arg "<pem>"  help="Key PEM file"
+'''
+run = 'gh secret set --app codespaces --app actions {{usage.pem | file_stem | shoutysnakecase }} < {{usage.pem}}'
+
+["global:github:gen-key"]
 usage = 'arg "<repo>"'
 hide = true
 run = 'ssh-keygen -t ed25519 -C "git@github.com:sibelhealth/{{usage.repo}}.git"  -f ~/sibel-ci-keys/{{usage.repo}} -N ""'
 
-["github:add-key-secret"]
+["global:github:add-key-secret"]
 dir = "{{cwd}}"
 hide = true
 usage = '''
@@ -20,27 +28,30 @@ fi
 gh secret set SSH_DEPLOY_KEY_{{usage.repo | shoutysnakecase}} < {{usage.keyfile}}
 '''
 
-["github:upload-key"]
+# GitHub CLI api
+# https://cli.github.com/manual/gh_api
+["global:github:upload-key"]
 usage = '''
-arg "<pubkey>" help="Public Key"
-flag "--title <title>" help="Title"
-flag "--repo <repo>"  help="Repo"
+flag "-R --remote <remote>"  {
+    help "Repo in the format user/repo"
+}
+flag "--title [title]" {
+    help "Title for deploy keys"
+}
 '''
 hide = true
 run = '''
-# GitHub CLI api
-# https://cli.github.com/manual/gh_api
-
 gh api \
   --method POST \
   -H "Accept: application/vnd.github+json" \
   -H "X-GitHub-Api-Version: 2026-03-10" \
-  /repos/{{usage.repo}}/keys \
-   -f 'title={{usage.title}}' -f 'key={{usage.pubkey}}' -F "read_only=true"
+  '/repos/{{usage.remote}}/keys' \
+   -f 'title={{usage.title}}' -f 'key={{ read_file(path=env.PUBKEY) | trim }}' \
+    -F "read_only=true"
 '''
 
 
-["github:cs-pick-machine"]
+["global:github:cs-pick-machine"]
 description = "Pick default machine for codespaces for this repo"
 dir = "{{cwd}}"
 hide = true
@@ -55,7 +66,7 @@ machine=$(gh api \
 mise set CODESPACES_MACHINE="$machine"
 '''
 
-["github:cs-create"]
+["global:github:cs-create"]
 description = "Create codespaces for this repo and with the current branch"
 usage = 'arg "<name>" help="display name"'
 dir = "{{cwd}}"

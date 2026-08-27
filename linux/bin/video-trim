@@ -1,0 +1,19 @@
+#!/usr/bin/env zsh
+set -eu
+#MISE description="Trim the start/end off a video with omacut"
+#MISE dir="{{cwd}}"
+#USAGE arg "[path]" help="Video to trim (default: newest video under ~/Videos)"
+#USAGE flag "-i --interactive" help="Interactively pick a video from the current tree"
+#USAGE flag "-c --clipboard" help="Use the clipboard content as the path"
+
+if [[ -n ${usage_clipboard:-} ]]; then
+    video=$(wl-paste -n | tr --delete "[:space:]")
+elif [[ -n ${usage_interactive:-} ]]; then
+    video=$(fd --type f --extension mp4 --extension mkv --extension webm --extension mov | fzf)
+else
+    video="${usage_path:-$(fd --type f --extension mp4 --extension mkv --extension webm --extension mov . ~/Videos | sort | tail -1)}"
+fi
+
+[[ -f $video ]] || { print -u2 "ERROR: no video at '${video:-}'"; exit 1 }
+
+exec setsid uwsm-app -- omacut "$video"

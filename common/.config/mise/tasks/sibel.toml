@@ -1,5 +1,5 @@
 
-["sibel:shrd:export"]
+["global:shrd:export"]
 description = "export shrd to csv"
 usage = 'arg "<file>" help="File"'
 dir = "{{cwd}}"

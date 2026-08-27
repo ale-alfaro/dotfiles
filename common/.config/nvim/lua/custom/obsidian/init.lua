@@ -21,7 +21,7 @@ function M.obsfiles()
           VimRc.info('Sel: ' .. s)
         end
       end,
-      ['ctrl-x'] = {
+      ['alt-x'] = {
         fn = function(selected, opts)
           for _, s in ipairs(selected) do
             ObsidianCli.obsplit { 'delete', 'path=' .. s }
@@ -31,7 +31,7 @@ function M.obsfiles()
         header = 'rm',
         reload = true,
       },
-      ['ctrl-m'] = {
+      ['alt-m'] = {
         fn = function(selected, opts)
           for _, s in ipairs(selected) do
             vim.ui.input({ prompt = 'New path?' }, function(n)
@@ -43,7 +43,7 @@ function M.obsfiles()
         header = 'mv',
         reload = true,
       },
-      ['ctrl-r'] = {
+      ['alt-r'] = {
         fn = function(selected, opts)
           for _, s in ipairs(selected) do
             vim.ui.input({ prompt = 'Name?' }, function(n)

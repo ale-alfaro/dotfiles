@@ -1,5 +1,5 @@
 
-["kconfigstyle:fmt"]
+["global:kconfigstyle:fmt"]
 hide = true
 alias = "kconfigfmt"
 dir = "{{cwd}}"
@@ -12,7 +12,7 @@ set -euo pipefail
 kconfigstyle --preset zephyr {{usage.file}} --print-formatted | tail -n +5 | head -n -2
 '''
 
-["kconfig:diffconfig"]
+["global:kconfig:diffconfig"]
 description = "Diffconfig after menucfg"
 dir = "{{cwd}}"
 usage = '''
@@ -29,7 +29,7 @@ build_dir="${usage_build_dir?}/zephyr"
 diffconfig.py "${build_dir}/.config.old" "${build_dir}/.config" -m \
     ${(z)${usage_out:+-o $usage_out}}
 '''
-["zephyr:mcuboot:keygen"]
+["global:zephyr:mcuboot:keygen"]
 hide = true
 env = { MCUBOOT_SCRIPTS = "{{config_root}}/external/bootloader/mcuboot/scripts" }
 dir = "{{cwd}}"
@@ -46,7 +46,7 @@ $_imgtool keygen -k "${usage_keyname?}_key.pem" -t ecdsa-p256
 '''
 
 
-["zephyr:dts-lsp:genconf"]
+["global:zephyr:dts-lsp:genconf"]
 description = "Find DTS node with dtsh"
 tools = { 'yq' = 'latest' }
 dir = "{{cwd}}"
@@ -59,7 +59,7 @@ yq e -o=lua \
     '.cmake.devicetree as $dt | { "board": .cmake.board.name,"dtsFile": ($dt.files[] | select(. == "*.dts")), "overlays": ($dt.files[] | select(. == "*.overlay")),"includePaths": $dt.include-dirs, "zephyrBindings": $dt.bindings-dirs } ' \
     {{usage.build_info}} > {{usage.out}}
 '''
-["zephyr:renode:dts2repl"]
+["global:zephyr:renode:dts2repl"]
 description = "Convert dts to repl file"
 dir = "{{cwd}}"
 usage = '''
@@ -80,7 +80,7 @@ gcc -H -E -P -x assembler-with-cpp \
 
 mise exec pipx:git+https://github.com/antmicro/dts2repl.git -- dts2repl flattened_out.dts -o {{board}}.repl
 '''
-["zephyr:dts:find"]
+["global:zephyr:dts:find"]
 description = "Find DTS node with dtsh"
 interactive = true
 tools = { 'pipx:dtsh' = 'latest' }
@@ -109,4 +109,3 @@ else
 fi
 dtsh -c ${(q)cmd}  ${dts_file}
 '''
-

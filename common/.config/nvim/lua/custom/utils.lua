@@ -290,6 +290,49 @@ M.shell_build_argv = function(cmd)
   table.insert(argv, cmd)
   return argv
 end
+function M.run_command_async(cmd)
+  local co = assert(coroutine.running())
+
+  local stdout = {}
+  local stderr = {}
+  local exit_code = nil
+
+  local jobid = vim.system(cmd, {
+    text = true,
+    stdout = function(_, data)
+      if data then
+        stdout[#stdout + 1] = data
+      end
+    end,
+    stderr = function(_, data)
+      stderr[#stderr + 1] = data
+    end,
+    function(_, code, _)
+      exit_code = code
+      coroutine.resume(co)
+    end,
+  })
+
+  if jobid <= 0 then
+    vim.notify(('[lspconfig] unable to run cmd: %s'):format(cmd), vim.log.levels.WARN)
+    return nil
+  end
+
+  coroutine.yield()
+
+  if exit_code ~= 0 then
+    vim.notify(
+      ('[lspconfig] cmd failed with code %d: %s\n%s'):format(exit_code, cmd, table.concat(stderr, '')),
+      vim.log.levels.WARN
+    )
+    return nil
+  end
+
+  if next(stdout) == nil then
+    return nil
+  end
+  return stdout and stdout or nil
+end
 M.with_preserved_view = function(op)
   local view = vim.fn.winsaveview()
   local ok, err = pcall(function()

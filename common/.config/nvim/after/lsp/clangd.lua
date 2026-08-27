@@ -96,14 +96,12 @@ return {
     end
   end,
   on_attach = function(client, bufnr)
-    vim.api.nvim_buf_create_user_command(bufnr, 'LspClangdSwitchSourceHeader', function()
+    vim.keymap.set( 'n', '<leader>lh', function()
       switch_source_header(bufnr, client)
-    end, { desc = 'Switch between source/header' })
-    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>ch', '<Cmd>LspClangdSwitchSourceHeader<CR>', { desc = 'Switch between header/source' })
+    end ,{ desc = 'Switch between header/source' , buf = bufnr})
 
-    vim.api.nvim_buf_create_user_command(bufnr, 'LspClangdShowSymbolInfo', function()
+    vim.keymap.set( 'n', '<leader>ls', function()
       symbol_info(bufnr, client)
-    end, { desc = 'Show symbol info' })
-    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>ci', '<Cmd>LspClangdShowSymbolInfo<CR>', { desc = 'Show symbol info' })
+    end, { desc = 'Show symbol info' , buf = bufnr})
   end,
 }

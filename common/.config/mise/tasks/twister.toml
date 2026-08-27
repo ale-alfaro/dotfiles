@@ -1,5 +1,5 @@
 
-["twister:find_tests"]
+["global:twister:find_tests"]
 description = "List samples"
 tools = { 'yq' = 'latest' }
 dir = "{{cwd}}"
@@ -10,25 +10,18 @@ fd --strip-cwd-prefix -e yaml -tf '(testcase|sample)\.yaml' \
     -x yq e -o tsv '(.tests | with_entries(.key |= "{//}/\(.)") | keys)' '{}'
 
 '''
-["twister:testplan:save"]
+["global:twister:testplan:save"]
 extends = "twister:testplan"
 
-["twister:testplan:load"]
+["global:twister:testplan:load"]
 extends = "twister:testplan"
 description = "Load test plan"
 vars.testplan_flag = "--load-tests"
 
-["twister:info:list"]
-extends = "twister:info"
-
-["twister:info:tree"]
-vars.info_flag = '--test-tree'
-extends = "twister:info"
-
 
 # Available log levels for twister: NOTSET,DEBUG,INFO,WARNING,ERROR,CRITICAL
 
-["twister:test:cov"]
+["global:twister:test:cov"]
 description = "Run tests on with coverage (gcovr)."
 dir = "{{cwd}}"
 usage = '''
@@ -47,24 +40,34 @@ west twister \
 # ============================================================================
 # On-hardware (target board)
 # ============================================================================
-["twister:test:hw"]
+["global:twister:run:hw"]
 description = "Run tests on HW"
-dir = "{{cwd}}"
-usage = '''
-arg "<dir>" help="test directory"
-arg "<platform>" help="test platform"
-'''
+extends = 'twister:run'
 run = '''
-west twister \
-{{vars.twister_common_flags | default(value=['-v', '-i', '--no-clean']) | join(sep=' ') }} \
+west twister -v \
+--inline-logs \
+{% if usage.no_clean %} --no-clean {% else %} --clobber-output {% endif %}\
+--no-detailed-test-id \
 -T {{usage.dir}} \
--p {{usage.platform}} \
+-p {{usage.board}} \
+--enable-slow \
 --device-testing \
---west-runner="nrfutil" \
---device-serial="{{vars.SERIAL_PORT | default(value='/dev/ttyACM0') }}" \
---device-flash-with-test --device-flash-timeout=15
+--device-serial={{usage.serial_port}}{% if usage.flash_script %}--flash-command={{usage.flash_script}}{% endif %} \
+{% if usage.outdir %}--outdir={{usage.outdir}}{% endif %} {{ usage.varargs | join(sep=' ') }}
 '''
-["twister:test:size_report"]
+
+["global:twister:run:sim"]
+description = "Run tests on native_sim or othr simulator"
+extends = 'twister:run'
+run = '''
+west twister -v --inline-logs --no-detailed-test-id{% if usage.no_clean %}--no-clean {% else %}--clobber-output{% endif %} \
+-T {{usage.dir}} \
+-p {{usage.board | default(value='native_sim/native') }} \
+{% if usage.outdir %}--outdir={{usage.outdir}} {% endif %}\
+{{ usage.varargs | join(sep=' ') }}
+'''
+
+["global:twister:test:size_report"]
 description = "Build sh_sdk tests for the aria board and produce ROM/RAM + footprint reports."
 dir = "{{cwd}}"
 usage = '''
@@ -78,5 +81,13 @@ west twister \
     -p {{usage.platform}} \
     --create-rom-ram-report --enable-size-report
 '''
-
-
+["global:twister:pytest"]
+vars.opts = " --strict-markers --strict-config -ra --twister-harness"
+vars.debug_opts = " -v -s --log-cli-level='DEBUG' "
+usage = '''
+arg "<bdir>"
+arg "[varargs]" var=#true
+'''
+run = '''
+pytest {{ vars.opts }} --rootdir=pytest  --build-dir={{usage.bdir}}  --device-type=hardware {{ usage.varargs | join(sep=' ') }}
+'''

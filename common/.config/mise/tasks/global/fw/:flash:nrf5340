@@ -1,0 +1,76 @@
+#!/usr/bin/env zsh
+#MISE description="Flash nrf5340 board"
+#MISE dir="{{cwd}}"
+#MISE tools={ "http:nrfutil" = { version = "1.4.0", url = "https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/{{arch(x64='x86_64')}}-{{os(linux='unknown-linux-gnu')}}/nrfutil" }
+#USAGE flag "--build-dir <build_dir>" {
+#USAGE  help "Build directory with artifacts"
+#USAGE }
+#USAGE flag "--board-id [board_id]" {
+#USAGE  help "Board ID of device to flash"
+#USAGE }
+set -euG
+exec_with_recover_and_retry() {
+  "$@" 2>1 || let "retcode=$?"
+  if (($retcode != 0)); then
+    nrfutil device recover --core Network
+    nrfutil device recover --core Application
+    "$@"
+  fi
+}
+
+
+build_dir="${usage_build_dir?}"
+cpuapp_hex=$(print ${build_dir}/*_cpuapp.hex)
+cpunet_hex=$(print ${build_dir}/*_cpunet.hex)
+domains="${build_dir}/domains.yaml"
+zephyr_hex="${build_dir}/zephyr/zephyr.hex"
+if [[ -n "${cpuapp_hex:-}" && -n "${cpunet_hex:-}" ]]; then
+    [[ -n "${cpunet_hex:-}" ]] && {
+      [[ ! -f "${cpunet_hex?}" ]] && echo "Not found ${cpunet_hex}" && exit 1
+      echo "Flashing CPUNET ${cpunet_hex} ...."
+      nrfutil device program --family nrf53 --core Network \
+        --options chip_erase_mode=ERASE_ALL,reset=RESET_NONE,verify=VERIFY_READ \
+        --firmware "${cpunet_hex?}"
+
+      sleep 0.5
+    }
+    [[ ! -f "${cpuapp_hex?}" ]] && echo "Not found ${cpuapp_hex}" && exit 1
+    echo "Flashing CPUAPP ${cpuapp_hex} ...."
+    nrfutil device program --family nrf53 --core Application \
+      --options chip_erase_mode=ERASE_ALL,reset=RESET_DEFAULT,verify=VERIFY_READ \
+      --firmware "${cpuapp_hex?}"
+elif [[ -f "${domains?}" ]]; then
+    local -a flash_order_arr
+    flash_order_arr=(${(f)"$(yq e '.flash_order[]' $domains)"})
+    echo "${flash_order_arr[@]}"
+    for img in "$flash_order_arr[@]"; do
+        hex="${build_dir}/${img}/zephyr/zephyr.hex"
+        [[ -f "${hex?}" ]] && {
+            if [[ $img == hci_ipc || $img == ipc_radio ]]; then
+                echo "Flashing CPUNET ${hex} ...."
+                nrfutil device program --family nrf53 --core Network \
+                    --options chip_erase_mode=ERASE_ALL,reset=RESET_NONE,verify=VERIFY_READ \
+                    --firmware "${hex}"
+            elif [[ $img != mcuboot ]]; then
+                echo "Flashing CPUAPP ${hex} ...."
+                nrfutil device program --family nrf53 --core Application \
+                  --options chip_erase_mode=ERASE_ALL,reset=RESET_DEFAULT,verify=VERIFY_READ \
+                  --firmware "${hex}"
+            else
+                echo "Flashing ${img} ${hex} ...."
+                 nrfutil device program --core Application --firmware "${hex}"
+
+            fi
+        }
+    done
+elif [[ -f "${zephyr_hex?}" ]]; then
+    echo "Flashing CPUAPP ${zephyr_hex} ...."
+    nrfutil device program --family nrf53 --core Application \
+      --options chip_erase_mode=ERASE_ALL,reset=RESET_DEFAULT,verify=VERIFY_READ \
+      --firmware "${zephyr_hex?}"
+else
+  echo "ERROR - Build dir with hex file not found"
+  exit 1
+fi
+
+# vim: ft=zsh

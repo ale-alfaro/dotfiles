@@ -64,21 +64,3 @@ run_hw test_root *args: (run test_root dut_board hw_flags + args)
 [group('run')]
 [no-cd]
 run_sim test_root *args: (run test_root "native_sim" args)
-
-pytest_base_opts := " --strict-markers --strict-config -ra "
-pytest_debug_opts := " -v -s --log-cli-level='DEBUG' "
-pytest_zephyr_opts := " --twister-harness "
-pytest_opts := pytest_base_opts + pytest_debug_opts + pytest_zephyr_opts
-pytest := require('uvx') + " pytest"
-
-_pytest_run *args:
-    {{ pytest }} {{ pytest_base_opts }} {{ args }}
-
-[group('pytest')]
-[no-cd]
-pytest_run platform build-dir *args:
-    {{ pytest }} {{ pytest_opts }} {{ " --rootdir=pytest " + append(file_stem(build-dir), " --build-dir=") + " " + append(platform, " --device-type=") }} {{ args }}
-
-[group('pytest')]
-[no-cd]
-pytest_run_hw build-dir *args: (pytest_run "hardware" build-dir args)

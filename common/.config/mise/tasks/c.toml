@@ -1,14 +1,4 @@
-
-["preproc:list"]
-description = "List preprocessor definitions in file"
-dir = "{{cwd}}"
-usage = '''
-arg "<file>" help="File"
-'''
-run = '''
-unifdef -s {{usage.file}}
-'''
-["preproc:remove:diff"]
+["global:c:unifdef"]
 description = "Remove preprocessor definitions"
 dir = "{{cwd}}"
 usage = '''
@@ -30,7 +20,8 @@ if [[ "${usage_in_place:-}" ]]; then
   eval "${cmd[@]} -m $file"
 fi
 '''
-["preproc:search"]
+["global:c:prepoc:search"]
+hide = true
 description = "Search preprocessor definitions"
 dir = "{{cwd}}"
 usage = '''
@@ -56,7 +47,7 @@ run = '''
 '''
 
 
-["preproc:stats"]
+["global:c:preproc:stats"]
 description = "Stats on usage of macros"
 dir = "{{cwd}}"
 usage = '''
