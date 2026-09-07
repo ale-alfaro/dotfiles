@@ -16,6 +16,7 @@ return {
     end
     VimRc.on_packchanged('blink.cmp', { 'update', 'install' }, blink_build, 'Build  Blink')
     require('blink-cmp').setup {
+
       -- Enables keymaps, completions and signature help when true (doesn't apply to cmdline or term)
       --
       -- If the function returns 'force', the default conditions for disabling the plugin will be ignored
@@ -24,7 +25,7 @@ return {
       --
       -- Exceptions: vim.bo.filetype == 'dap-repl'
       enabled = function()
-        return true
+        return not vim.tbl_contains({ 'fzf-lua', 'markdown' }, vim.bo.filetype)
       end,
       keymap = {
         preset = 'default',
@@ -38,10 +39,39 @@ return {
             return cmp.show { providers = { 'snippets' } }
           end,
         },
+
+        ['<Tab>'] = {
+          function(cmp)
+            if cmp.snippet_active() then
+              return cmp.accept()
+            else
+              return cmp.select_and_accept()
+            end
+          end,
+          'snippet_forward',
+          'fallback',
+        },
+        ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
       },
-      cmdline = { enabled = true, keymap = { preset = 'cmdline' } },
-      fuzzy = {
-        implementation = 'prefer_rust',
+      completion = {
+      -- 'prefix' will fuzzy match on the text before the cursor
+      -- 'full' will fuzzy match on the text before _and_ after the cursor
+      -- example: 'foo_|_bar' will match 'foo_' for 'prefix' and 'foo__bar' for 'full'
+          keyword = { range = 'full' },
+        -- 'prefix' will fuzzy match on the text
+      }, -- completion
+        cmdline = { enabled = true },
+        fuzzy = {
+          implementation = 'prefer_rust',
+          sorts = {
+            'score', -- Primary sort: by fuzzy matching score
+            'sort_text', -- Secondary sort: by sortText field if scores are equal
+            'label', -- Tertiary sort: by label if still tied
+          },
+        },
+      sources = {
+        -- Remove 'buffer' if you don't want text completions, by default it's only enabled when LSP returns no items
+        default = { 'lsp', 'path', 'snippets', 'buffer' },
       },
 
       -- Use a preset for snippets, check the snippets documentation for more information
@@ -50,7 +80,6 @@ return {
       -- Experimental signature help support
       signature = { enabled = true },
     }
-
     local capabilities = require('blink.cmp').get_lsp_capabilities(vim.lsp.protocol.make_client_capabilities(), false)
     vim.lsp.config('*', { capabilities = capabilities })
   end,

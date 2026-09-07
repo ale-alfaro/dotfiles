@@ -3,11 +3,13 @@
 description = "Review with claude"
 usage = '''
 arg "<repo>" default="."
+flag "-e --effort [effort]" default="high"
+flag "-m --model [model]" default="opus"
 '''
 dir = "{{cwd}}"
 interactive = true
 run = '''
-claude --model opus --effort medium "$(cat <<EOF
+claude --model {{usage.model}} --effort {{usage.effort}} "$(cat <<EOF
 Review the following files:
 $(git -C {{usage.repo}} diff --cached --stat)
 EOF

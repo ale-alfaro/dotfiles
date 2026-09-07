@@ -9,29 +9,6 @@ end)
 
 VimRc.later(function()
   require 'extras.overseer'
-  local run_mise_template = function()
-    local ovr = require 'overseer'
-    ovr.run_task({ name = 'mise' }, function(task)
-      if task then
-        ovr.run_action(task)
-      end
-    end)
-  end
-
-  local overseer_keys = {
-    {
-      'r',
-      run_mise_template,
-      'OverseerRun',
-    },
-    { 't', '<cmd>OverseerToggle<cr>', 'OverseerToggle' },
-    { 'b', '<cmd>Build<cr>', 'Build Task' },
-    { 'q', '<cmd>OverseerRestartLast<cr>', 'Action recent task' },
-  }
-  for _, key in ipairs(overseer_keys) do
-    vim.keymap.set('n', '<leader>x' .. key[1], key[2], { desc = key[3] })
-  end
-  VimRc.keymap_clues[#VimRc.keymap_clues + 1] = { mode = 'n', keys = '<Leader>x', desc = '+Exec' }
 end)
 
 VimRc.later(function()

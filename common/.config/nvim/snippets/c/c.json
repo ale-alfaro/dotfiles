@@ -28,25 +28,6 @@
     ],
     "description": "A simple C comment block for functions, including short summary, and details. Useful when you prefer to add the other documentation tags manually."
   },
-  "@param": {
-    "prefix": "@param",
-    "body": ["@param ${1:name} ${2:Type and description of the parameter.}$0"],
-    "description": "Type and description of a function parameter."
-  },
-  "@return": {
-    "prefix": "@return",
-    "body": ["@return ${1:Type and description of the returned value.}$0"],
-    "description": "Type and description of the returned value."
-  },
-  "@example": {
-    "prefix": "@example",
-    "body": [
-      "* @example",
-      "* // ${1:Description of my example.}$0",
-      "* ${2:Write me later}"
-    ],
-    "description": "Example that demostrates how to use a function. It can be used several times."
-  },
   "doxygen": {
     "prefix": "/**",
     "body": [
@@ -69,46 +50,6 @@
     ],
     "description": "starter for a Zephyr project"
   },
-  "#include <...>": {
-    "prefix": "<i",
-    "body": ["#include <$0>"],
-    "description": "#include <...> snippet"
-  },
-  "#include \"...\"": {
-    "prefix": "#i\"",
-    "body": ["#include \"$0\""],
-    "description": "#include \"...\" snippet"
-  },
-  "#define macro()": {
-    "prefix": "#d",
-    "body": ["#define ${1:MACRO}($2) ($3)"],
-    "description": "Function-like macro snippet"
-  },
-  "#if": {
-    "prefix": "#if",
-    "body": ["#if ${1:0}", "$0", "#endif /* if $1 */"],
-    "description": "#if snippet"
-  },
-  "header": {
-    "prefix": "#ifn",
-    "body": [
-      "#ifndef ${1:FILE}_H",
-      "#define $1_H",
-      "",
-      "#ifdef __cplusplus",
-      "extern \"C\" {",
-      "#endif",
-      "",
-      "$0",
-      "",
-      "#ifdef __cplusplus",
-      "} /* extern \"C\" */",
-      "#endif",
-      "",
-      "#endif /* end of include guard: $1_H */"
-    ],
-    "description": "Header include guard"
-  },
   "switch": {
     "prefix": "sw",
     "body": [
@@ -122,22 +63,5 @@
       "}"
     ],
     "description": "'switch' snippet"
-  },
-  "for": {
-    "prefix": "for",
-    "body": ["for (int i = 0; i < ${1:count}; i++) {", "\t$0", "}"],
-    "description": "'for' loop focusing on iteration times"
-  },
-  "decl":{
-    "prefix": "fdcl",
-    "body": ["${1:static} ${2:int} $0(${3:int arg0, int arg1, int arg3});"],
-    "description": "Make a function declaration/definition/pointer"
-  },
-  "struct": {
-    "prefix": "st",
-    "body": ["struct ${1:my_struct} {",
-      "\t\t$0",
-      "};"],
-    "description": "'struct' snippet"
   }
 }

@@ -1675,3 +1675,11 @@ info threads
 q
 c
 q
+quit
+mon c
+c
+bt
+up 8
+up
+l
+p *scratch

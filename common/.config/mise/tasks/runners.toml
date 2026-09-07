@@ -1,34 +1,51 @@
 
 
-["global:nrf5340:flash:sysbuild"]
-description = "Flash both Network and Application Core FW"
+
+["global:flash:nrf5340"]
+description = "Flash a sysbuild app onto BOTH cores from its merged hexes (net core first), then reset. probe-rs routes each hex by address: app flash at 0x0, net flash at 0x01000000."
 dir = "{{cwd}}"
 usage = '''
-arg "<build_dir>" help="Build Dir"
-flag "-s --serial [port]" help="Serial"
+flag "--app <cpuapp_hex>" 
+flag "--net <cpunet_hex>"
+flag "-s --serial [port]" {
+    help "Attach to serial port after flashing"
+    env "SERIAL_PORT"
+}
 '''
 run = '''
-build_dir="${usage_build_dir?}"
-domains="${build_dir}/domains.yaml"
-[[ -f "${domains?}" ]] || {
-  echo "No domains.yaml. Is this a sysbuild app?"
-  exit 1
-}
-local -a flash_order_arr
-flash_order_arr=(${(f)"$(yq e '.flash_order[]' $domains)"})
-echo "${flash_order_arr[@]}"
-for img in "$flash_order_arr[@]"; do
-  hex="${build_dir}/${img}/zephyr/zephyr.hex"
-  core="Application"
-  if [[ $img == hci_ipc || $img == ipc_radio ]]; then 
-    core="Network"
+#!/usr/bin/env zsh
+exec_with_recover_and_retry() {
+  if ! "$@" 2>&1; then
+    echo "Retrying after recovering both cores ..."
+    nrfutil device recover --core Network
+    nrfutil device recover --core Application
+    "$@" 2>&1
   fi
-  [[ -f "${hex?}" ]] && nrfutil device program --core "${core?}" --firmware "${hex}"
-done
-sleep 2
-nrfutil device reset
-[[ -n "${usage_serial}" ]] && scope serial "${usage_serial}" 115200
+}
+program_net() {
+  echo "Flashing CPUNET ${usage_net?} ...."
+  exec_with_recover_and_retry nrfutil device program --family nrf53 --core Network \
+    --options chip_erase_mode=ERASE_ALL,reset=RESET_NONE,verify=VERIFY_READ \
+    --firmware ${usage_net?}
+}
+
+program_app() {
+  echo "Flashing CPUAPP ${usage_app?} ...."
+  exec_with_recover_and_retry nrfutil device program --family nrf53 --core Application \
+    --options chip_erase_mode=ERASE_ALL,reset=RESET_DEFAULT,verify=VERIFY_READ \
+    --firmware ${usage_app}
+}
+[[ ! -f "${usage_net?}" ]] && { echo "Not found ${usage_net}" >&2; exit 1 }
+[[ ! -f "${usage_app?}" ]] && { echo "Not found ${usage_app}" >&2; exit 1 }
+program_net
+sleep 0.5
+program_app
+{% if usage.serial %}
+sleep 0.5
+picocom -g '{{now() | date(format="%R-%m-%d") }}.log' -b 115200 {{usage.serial}} 
+{% endif %}
 '''
+
 # --- probe-rs: flash/attach/debug over the on-board SWD probe -----------------
 # The chip name targets the nRF5340 APP core; probe-rs auto-unlocks a locked
 # net core (Core 1) by erasing it when needed. With more than one probe on the
@@ -44,32 +61,6 @@ description = "Flash a NON-sysbuild sample ELF (links at 0x0, e.g. dual_stream) 
 dir = "{{cwd}}"
 usage = 'arg "<elf>" help="e.g. build/dual_stream/zephyr/zephyr.elf"'
 run = 'probe-rs run --chip nRF5340_xxAA --protocol swd --speed 4000 --allow-erase-all {{usage.elf}}'
-
-
-["global:probe-rs:flash:sysbuild:nrf5340"]
-description = "Flash a sysbuild app onto BOTH cores from its merged hexes (net core first), then reset. probe-rs routes each hex by address: app flash at 0x0, net flash at 0x01000000."
-usage = 'arg "<build_dir>" help="Sysbuild build dir, e.g. build/datalogger_fw (holds merged_aria_nrf5340_cpuapp.hex + merged_aria_nrf5340_cpunet.hex)"'
-run = '''
-
-{% set merged_cpunet_hex = [usage.build_dir, 'merged_aria_nrf5340_cpunet.hex'] | join_path %}
-{% set merged_cpuapp_hex = [usage.build_dir, 'merged_aria_nrf5340_cpuapp.hex'] | join_path %}
-{% set domains = [usage.build_dir, 'domains.yaml'] | join_path %}
-{% if merged_cpuapp_hex is exists and merged_cpunet_hex is exists %}
-probe-rs download {{usage.build_dir}}/merged_aria_nrf5340_cpunet.hex --binary-format hex --allow-erase-all
-probe-rs download {{usage.build_dir}}/merged_aria_nrf5340_cpuapp.hex --binary-format hex --allow-erase-all
-probe-rs reset
-{% elif domains is exists %}
-local -a flash_order_arr
-flash_order_arr=(${(f)"$(yq e '.flash_order[]' {{domains}})"})
-echo "${flash_order_arr[@]}"
-for img in "$flash_order_arr[@]"; do
-    probe-rs download "{{usage.build_dir}}/${img?}/zephyr/zephyr.elf" --allow-erase-all
-done
-{% else %}
-    probe-rs download {{usage.build_dir}}/zephyr/zephyr.elf --allow-erase-all
-{% endif %}
-'''
-
 
 ["global:probe:reset:nrf5340"]
 description = "Hardware-reset the target and detach"

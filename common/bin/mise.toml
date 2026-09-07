@@ -1,0 +1,23 @@
+
+[tasks.lint]
+description = "Check python scripts with ruff"
+usage = 'arg "[file_re]" help="File regex"'
+run = "ruff check --fix --unsafe-fixes  {{usage.file_re|default(value='*.py')}}"
+
+[tasks.typecheck]
+description = "Check python scripts with ty"
+usage = 'arg "[file_re]" help="File regex"'
+run = "ty check --fix {{usage.file_re|default(value='*.py')}}"
+
+[tasks.pycheck]
+alias = 'check'
+description = "Check python scripts with ruff and ty"
+usage = 'arg "<file_re>" help="File regex"'
+run = [
+    { task = 'lint', args = [
+        '{{usage.file_re}}',
+    ] },
+    { task = 'typecheck', args = [
+        '{{usage.file_re}}',
+    ] },
+]

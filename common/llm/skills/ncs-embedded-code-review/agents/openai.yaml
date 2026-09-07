@@ -1,0 +1,3 @@
+interface:
+  display_name: "Review NCS/Zephyr Code"
+  short_description: "Reviewing code in a NCS/Zephyr project"

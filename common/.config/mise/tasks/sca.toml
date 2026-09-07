@@ -145,3 +145,158 @@ EOF
 print -rl "Running:" "${(s: :)cmd[@]}"
 # eval "$cmd"
 '''
+# ---------------------------------------------------------------------------
+# Static analysis
+#
+# The analysers are wired into the build, not driven beside it: Zephyr's SCA
+# hook (ZEPHYR_SCA_VARIANT) runs them over the compile_commands.json the build
+# just produced, so they see the same flags, the same generated headers and the
+# same Kconfig as the image. Standalone invocations drift from all three.
+#
+# CodeChecker's tuning lives in scripts/codechecker/{codechecker.yml,.skip} and
+# is selected by SB_CONFIG_CODECHECKER_SCA_CONFIG_FILE. Do not restate those
+# flags here -- Kconfig.codechecker already carries the defaults.
+# ---------------------------------------------------------------------------
+
+# Named sca:app rather than sca:codechecker to stay clear of the generic
+# sca:codechecker:{run,serve,filegen,report_parse} tasks in ~/.config/mise.
+# Those drive -DZEPHYR_SCA_VARIANT=codechecker directly, which is the per-image
+# hook; everything under applications/ here is a sysbuild, so the entry point
+# is SB_CONFIG_CODECHECKER_SCA and cmake/sysbuild/codechecker.cmake, which
+# scopes the analysis to the application image and leaves mcuboot/b0n/ipc_radio
+
+["global:sca:clang"]
+description = "Build with the Clang Static Analyzer only (analyze-build) -- far quicker than CodeChecker"
+dir = "{{config_root}}"
+usage = '''
+arg "<app>" {
+    help "Application directory to analyse"
+}
+'''
+run = '''
+#!/usr/bin/env zsh
+set -uo pipefail
+
+# Zephyr's clang SCA variant shells out to analyze-build, which is scan-build-py
+# rather than part of the ATfE toolchain. ATfE ships no analyzer driver at all,
+# so this uses whichever analyze-build is on PATH.
+#
+# Checked by running it, not by command -v: the distro ships a wrapper script
+# whose libscanbuild package is packaged separately, so the executable exists
+# and every invocation dies on ModuleNotFoundError. Finding that out 30 targets
+# into a sysbuild is worse than finding it out here.
+if ! analyze-build --help >/dev/null 2>&1; then
+    print -u2 "sca:clang: analyze-build is present but not runnable (scan-build-py/libscanbuild)"
+    print -u2 "  check: analyze-build --help"
+    print -u2 "  CodeChecker bundles its own analyzer driver -- use //sh_sdk:sca:app instead"
+    exit 1
+fi
+
+image="{{ usage.app | basename }}"
+build="build/sca-clang-$image"
+
+# Image-scoped, not bare. Everything under applications/ is a sysbuild, so a
+# plain -DZEPHYR_SCA_VARIANT sets it on the sysbuild image and the application
+# never sees it -- the same reason cmake/sysbuild/codechecker.cmake assigns
+# ${DEFAULT_IMAGE}_ZEPHYR_SCA_VARIANT rather than the unprefixed name. Scoping
+# it to the app image also keeps mcuboot, b0n and ipc_radio out of the report.
+west build.app {{ usage.app }} -d "$build" -- -D${image}_ZEPHYR_SCA_VARIANT=clang
+rc=$?
+
+print "sca:clang: reports under $build/$image/sca/clang/"
+exit $rc
+'''
+
+["global:sca:report"]
+description = "Summarise an exported CodeChecker json with the scripts/codechecker reporters"
+dir = "{{config_root}}"
+usage = '''
+arg "<build_dir>" {
+    help "Build directory a CodeChecker run wrote into"
+}
+arg "[reporter]" {
+    help "Which reporter to run"
+    choices "summary" "triage" "high-findings" "hotspots" "top-checkers"
+    default "summary"
+}
+'''
+run = '''
+#!/usr/bin/env zsh
+set -uo pipefail
+
+# codechecker.jq is the shared include the others pull in with `include
+# "codechecker"`, not a reporter, so it is never a valid choice.
+avail=(${${avail:t:r}:#codechecker})
+
+reporter="scripts/codechecker/{{ usage.reporter }}.jq"
+if [[ ! -f $reporter || {{ usage.reporter }} == codechecker ]]; then
+    print -u2 "sca:report: no reporter '{{ usage.reporter }}'"
+    print -u2 "  available: ${(j:, :)avail}"
+    exit 1
+fi
+
+# The parse pass writes its export beneath the image's sca directory. Search
+# rather than hardcode: the image name is the app name, and a sysbuild lays it
+# out one level down.
+reports=({{ usage.build_dir }}/**/sca/codechecker/**/*.json(.N))
+if (( $#reports == 0 )); then
+    print -u2 "sca:report: no exported json under {{ usage.build_dir }}"
+    print -u2 "  the parse pass writes it; re-run with SB_CONFIG_CODECHECKER_SCA_PARSE_SKIP=n"
+    exit 1
+fi
+
+for r in $reports; do
+    print -r -- "--- $r ---"
+    jq -L scripts/codechecker -f $reporter $r
+done
+'''
+["global:codechecker:analyze"]
+description = "Analyze build with codechecker"
+dir = "{{cwd}}"
+usage = '''
+arg "<build_dir>" {
+    help "Build directory"
+}
+flag "-t --timeout [timeout_sec]" {
+    help "Timeout seconds"
+    default "180"
+}
+flag "-n --name [name]" {
+    help "Name of codechecker run"
+    default "app"
+}
+'''
+run = '''
+
+CodeChecker analyze \
+--keep-gcc-include-fixed \
+--keep-gcc-intrin \
+--output={{usage.build_dir}}/sca/codechecker/codechecker.plist \
+--analyzer-config \
+cppcheck:cc-verbatim-args-file={{usage.build_dir}}/sca/cppcheck/cc-verbatim-args.txt \
+--name={{ usage.name  }} \
+--enable=profile:shallow\
+--drop-reports-from-skipped-files \
+--disable=boost \ 
+--disable=mpi \
+--disable=cppcheck
+--disable=clang-diagnostic-reserved-identifier \
+--disable=clang-diagnostic-reserved-macro-identifier \
+--disable=bugprone-reserved-identifier \
+--disable=clang-diagnostic-tentative-definition-compat \
+--disable=clang-diagnostic-variadic-macro-arguments-omitted \
+--disable=clang-diagnostic-c++-keyword \
+--disable=misc-misplaced-const \
+--disable=misc-redundant-expression \
+--disable=misc-unused-parameters \
+--disable=clang-diagnostic-unused-parameter \
+--disable=bugprone-easily-swappable-parameters \
+--disable=readability-magic-numbers \
+--disable=cppcoreguidelines-avoid-magic-numbers \
+--clean \
+--jobs {{ vars.codechecker_jobs }} \
+--skip {{vars.codechecker_skipfile}} \
+--timeout {{ usage.timeout }} \
+{{usage.build_dir}}/compile_commands.json
+
+'''

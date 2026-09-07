@@ -24,13 +24,13 @@ dashboard = tgt dashboard -d
 menuconf = tgt menuconfig -d
 mem-footprint = tgt footprint -d
 traceconfig = tgt traceconfig -d
-
-test = twister -vv --inline-logs --clobber-output --no-detailed-test-id --short-build-paths --ll=DEBUG
-test.sim = test -p native_sim
-test.hw = test --device-testing --enable-slow --filter runnable --device-serial=/dev/ttyACM0
-
 goto = forall -c 'nvim .'
 lg = forall -c 'lazygit'
+
+test = twister -vv --inline-logs --clobber-output --no-detailed-test-id --short-build-paths --ll=DEBUG
+test.sim = test -p native_sim --enable-asan --enable-lsan --enable-usan
+test.hw = test --device-testing --enable-slow --filter runnable --device-serial=/dev/ttyACM0
+
 
 
 # vim: ft=ini

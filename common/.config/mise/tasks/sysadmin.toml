@@ -30,3 +30,27 @@ eza --icons=always --oneline \
     --no-git --all \
     {{ xdg_config_home }}
 '''
+
+
+["global:pacman:orphans"]
+hide = true
+usage = '''
+flag "-d --delete"
+'''
+run = '''
+echo 'Orphans:'
+pacman -Qdttq
+{% if usage.delete %}
+pacman -Qdttq | sudo pacman -Rns -
+{% endif %}
+'''
+
+["global:udev-rules:install"]
+hide = true
+usage = '''
+arg "<rules_file>"
+'''
+run = '''
+sudo cp {{ usage.rules_file }} /etc/udev/rules.d/
+sudo udevadm control --reload
+'''

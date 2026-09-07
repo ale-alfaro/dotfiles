@@ -89,43 +89,28 @@ local west_errorformat = {
   '%-G%.%#',
 }
 ---@param dir? string
----@return string?
+---@return string
 local function get_west_topdir(dir)
   local west = require 'custom.west'
   if west.topdir then
     return west.topdir
   end
-  return west.get_topdir(dir)
+  return west.get_topdir(dir) or vim.fn.getcwd()
 end
----@param selected string[]
----@param opts? {cwd?:string,flags?:string[]}
-local west_build_select_app = function(selected, opts)
-  if not selected[1] then
-    return
-  end
-  opts = opts or {}
-  local app = selected[1]
-  local cwd = get_west_topdir(vim.fs.dirname(app))
-  app = vim.fs.joinpath(cwd, app)
-  local raw_flags = opts.flags or vim.g.west_build_app_flags
+---@param app string
+---@param opts {flags:string[]?,cwd:string?}
+VimRc.run_west_build = function(app, opts)
   VimRc.info(("app set to '%s'"):format(app))
+  opts = opts or {}
   if vim.uv.fs_stat(app) then
-    local cmd
-    if vim.g.west_build_alias then
-      cmd = string.format('west %s %s', vim.g.west_build_alias, app)
-    else
-      cmd = string.format('west build.app %s', app)
-    end
-    if raw_flags then
-      local flags = vim.fn.split(raw_flags, ' ', false)
-      if #flags > 0 then
-        cmd = cmd .. ' ' .. vim.fn.join(flags, ' ')
-      end
-    end
+    local build_cmd = vim.g.west_build_alias or 'build.app.clean'
+    local build_flags = vim.g.west_build_flags or opts.flags
+    local build_app = app or vim.g.west_build_app
+    local cmd = string.format('west %s %s %s', build_cmd, build_flags or '', build_app)
     local task = require('overseer').new_task {
       cmd = cmd,
       name = 'west build',
-      cwd = cwd,
+      cwd = opts.cwd or get_west_topdir(),
       components = {
         'default',
 
@@ -151,60 +136,9 @@ local west_build_select_app = function(selected, opts)
     VimRc.warn(("Unable to find path to '%s', directory is not accessible"):format(app))
   end
 end
-vim.api.nvim_create_user_command('Build', function()
-  -- local cwd = vim.fs.root(0, { 'mise.toml', 'mise.local.toml', '.git' })
-  local cwd = get_west_topdir()
-  require('fzf-lua').fzf_exec([[fd -t file --extension yaml '^(sample|testcase)' --strip-cwd-prefix]], {
-    cwd = cwd,
-    -- can also be set to "mini" for "mini.icons"
-    fn_transform = function(x)
-      return vim.fs.dirname(x:match '[^\t]+$' or x)
-    end,
-    actions = {
-      ['default'] = west_build_select_app,
-      ['ctrl-i'] = {
-        fn = function(selected, opts)
-          vim.ui.input({ prompt = 'Enter flags: ', default = '-p' }, function(ans)
-            local flags = vim.fn.shellescape(ans)
-            west_build_select_app(selected, { flags = flags })
-          end)
-        end,
-      },
-    },
-  })
-end, { desc = 'Build', nargs = '*' })
-local overseer_make = function(params)
-  -- Insert args at the '$*' in the makeprg
-  local cmd
-  if params then
-    local make, num_subs = vim.o.makeprg:gsub('%$%*', params.args)
-    if num_subs == 0 then
-      cmd = make .. ' ' .. params.args
-    else
-      cmd = make
-    end
-  else
-    cmd = vim.o.makeprg
-  end
-  local task = require('overseer').new_task {
-    name = 'make build',
-    cmd = vim.fn.expandcmd(cmd),
-    components = {
-      {
-        'on_output_quickfix',
-        open = not params.bang,
-        open_height = 8,
-        errorformat = west_errorformat,
-      },
-      'default',
-    },
-  }
-  task:start()
-end
-vim.api.nvim_create_user_command('Make', overseer_make, { desc = 'Make', nargs = '*', bang = true })
-vim.keymap.set('n', '<localleader>b', overseer_make, { desc = 'Build' })
 
-vim.api.nvim_create_user_command('OverseerRestartLast', function()
+
+vim.keymap.set('n', '<leader>xl', function()
   local ovr = require 'overseer'
   local task_list = require 'overseer.task_list'
   local tasks = ovr.list_tasks {
@@ -223,4 +157,112 @@ vim.api.nvim_create_user_command('OverseerRestartLast', function()
     local opts = { focus = true, focus_task_id = most_recent.id } ---@type overseer.WindowOpts
     ovr.open(opts)
   end
-end, {})
+end, {desc = "Overseer run last"})
+
+---@param opts overseer.SearchParams
+---@return nil|string
+local function get_mise_file(opts)
+  local function is_mise_file(name)
+    name = name:lower()
+    -- mise.toml, mise.<env>.toml, or .local.toml, or dot-prefixed
+    return name:match '^%.?mise%.toml$' ~= nil
+      or name:match '^%.?mise%.local%.toml$' ~= nil
+      or name:match '^%.?mise%.%w+%.toml$' ~= nil
+      or name:match '^%.?mise%.%w+%.local%.toml$' ~= nil
+  end
+
+  local function is_mise_dir(name)
+    name = name:lower()
+    -- (.)mise, (.)mise-tasks, or .config dir
+    return name:match '^%.?mise$' ~= nil or name:match '^%.?mise%-tasks$' ~= nil or name == '.config'
+  end
+
+  return vim.fs.find(is_mise_file, { type = 'file', upward = true, path = opts.dir[1] })[1]
+    or vim.fs.find(is_mise_dir, { type = 'directory', upward = true, path = opts.dir[1] })[1]
+end
+
+---@type overseer.TemplateProvider
+overseer.register_template {
+  name = 'mise local',
+  cache_key = function(opts)
+    return get_mise_file(opts)
+  end,
+  generator = function(opts, cb)
+    if vim.fn.executable 'mise' == 0 then
+      return 'Command "mise" not found'
+    end
+    local mise_file = get_mise_file(opts)
+    if not mise_file then
+      return 'No mise file or directory found'
+    end
+
+    local ret = {}
+    local cwd = vim.fs.dirname(mise_file)
+    overseer.builtin.system(
+      { 'mise', 'tasks', '--json', '--local' },
+      { cwd = cwd, text = true },
+      vim.schedule_wrap(function(out)
+        local ok, data = pcall(vim.json.decode, out.stdout, { luanil = { object = true } })
+        if not ok then
+          cb(data)
+          return
+        end
+        for _, value in pairs(data) do
+          if not value.usage or value.usage == '' then
+            table.insert(ret, {
+              name = string.format('mise %s', value.name),
+              desc = value.description ~= '' and value.description or nil,
+              builder = function()
+                return {
+                  cmd = { 'mise', 'run', value.name },
+                  cwd = cwd,
+                }
+              end,
+            })
+          end
+        end
+        cb(ret)
+      end)
+    )
+  end,
+}
+
+vim.keymap.set('n', '<leader>xb',function()
+  -- local cwd = vim.fs.root(0, { 'mise.toml', 'mise.local.toml', '.git' })
+  -- local cwd = get_west_topdir()
+  require('fzf-lua').fzf_exec([[fd -t file --extension yaml '^(sample|testcase)' --strip-cwd-prefix]], {
+    -- cwd = cwd,
+    -- can also be set to "mini" for "mini.icons"
+    fn_transform = function(x)
+      return vim.fs.dirname(x:match '[^\t]+$' or x)
+    end,
+    actions = {
+      ['default'] = function(selected, opts)
+        if not selected[1] then
+          return
+        end
+        local app = selected[1]
+        VimRc.run_west_build(app, opts)
+      end,
+      ['alt-x'] = {
+        desc = 'Exec with flags',
+        fn = function(selected, opts)
+          vim.ui.input({ prompt = 'Enter flags: ', default = '-p' }, function(ans)
+            local flags = vim.fn.shellescape(ans)
+            VimRc.run_west_build(selected, vim.tbl_extend('force', opts, { flags = vim.fn.split(flags, ' ', false) }))
+          end)
+        end,
+      },
+    },
+  })
+end, { desc = 'Build' })
+vim.keymap.set('n', '<leader>xr', function()
+  overseer.new_task({ name = 'mise local' }, function(task)
+    if task then
+      overseer.run_action(task)
+    end
+  end)
+end, {desc = 'OverseerRun'})
+
+vim.keymap.set('n', '<leader>xt','<cmd>OverseerToggle<cr>', { desc = 'OverseerToggle' })
+VimRc.keymap_clues[#VimRc.keymap_clues + 1] = { mode = 'n', keys = '<Leader>x', desc = '+Exec' }

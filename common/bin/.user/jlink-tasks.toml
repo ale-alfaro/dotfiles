@@ -10,7 +10,7 @@ jlink_vcom_command = '''
 '''
 
 
-[jlink_run]
+["global:jlink:run"]
 description = "JLink Tasks"
 usage = '''
 arg "[script]" help="JLink script"
@@ -25,8 +25,29 @@ JLinkExe \
         -nogui 1 \
         -ExitOnError 1
 '''
-
-
+["global:binutils:addr2line"]
+description = "JLink Tasks"
+vars.awk_script = '''
+  {
+      file_line = $NF
+      if (match(file_line, /:[0-9]+$/)) {
+          line = substr(file_line, RSTART + 1)
+          file = substr(file_line, 1, RSTART - 1)
+          start = line - 10
+          if (start < 1)
+              start = 1
+          end = line + 10
+          system("bat --line-range " start ":" end " --highlight-line " line " " file)
+      }
+  }
+'''
+usage = '''
+arg "<elf>" help="ELF"
+arg "<addr>" help="Address in hex"
+'''
+run = '''
+arm-zephyr-eabi-addr2line -p -e {{ usage.elf }} {{ usage.addr }} | awk -- '{{ vars.awk_script }}'
+'''
 # verify-flash device:
 #     @echo "r\nh\nmem32 0x10000200 4\nq" > {{ jlink_verify_script_tmp_path }}
 #     @echo "INFO: Verifying flash on {{ device }}"...

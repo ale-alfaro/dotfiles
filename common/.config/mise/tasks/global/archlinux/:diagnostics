@@ -1,0 +1,10 @@
+
+#!/usr/bin/env zsh
+set -e
+#MISE description="Control brightness, volume and playback on Arch Linux"
+#MISE dir="{{cwd}}"
+#MISE hide=true
+systemctl status --full --no-pager > systemd-status.log
+systemctl --failed --no-pager > systemd-failed.log
+awk 'NR==2 {print $2}' systemd-status.log | xargs systemctl status --full --no-pager
+awk 'NR==2 {print $2}' systemd-status.log | xargs journalctl --no-pager
