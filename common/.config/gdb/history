@@ -1683,3 +1683,154 @@ up 8
 up
 l
 p *scratch
+c
+bt
+q
+up 22
+up
+down
+l
+q
+q
+q
+up 3
+up
+l
+q
+down 3
+print locals
+x/4u frame_count 
+x/4d frame_count 
+x/d frame_count 
+aria-flash build
+up 3
+l
+info locals
+info args
+q
+bt
+mon reset
+c
+q
+q
+c
+q
+thread help
+help thread
+help thread apply
+thread apply -c bt
+thread apply bt
+help thread apply all
+thread apply all -c bt
+thread 2
+bt
+up 15
+up 19
+frame 19
+l
+info registers 
+info stack 
+x/16w $pc
+x/16w $sp
+x/16w ($sp - 4)
+x/32w ($sp - 4)
+x/48w ($sp - 4)
+x/48w ($sp - 16)
+generate-core-file core.dump
+q
+help mon
+q
+twim1
+q
+twim1
+set *(unsigned int*)0x50009500 = 0
+set *(unsigned int*)0x50842a08 = 0x0c         # P1.02 SCL: input, buffer on, internal pull-up
+set *(unsigned int*)0x50842a0c = 0x0c         # P1.03 SDA: same
+i2c1_pins
+set *(unsigned int*)0x50842a08 = 0x0c
+set *(unsigned int*)0x50842a0c = 0x0c
+set *(unsigned int*)0x50842a08 = 0x301
+set *(unsigned int*)0x50842d08 = 4
+i2c1_pins 
+q
+q
+info threads
+thread apply all bt
+info registers 
+q
+bt
+f 8
+l
+p g_backend 
+p/u g_backend 
+q
+c
+bt
+f 8
+l
+info locals
+info static-tracepm
+p g_cb 
+q
+b 0x22cc0
+mon reset
+c
+q
+bt
+f 8
+l
+info locals
+info args
+p len
+q
+mon reset
+c
+bt
+info threads
+q
+mon reset
+c
+bt
+q
+bt
+q
+f 190
+p
+up
+f 187
+info threads 
+p entry 
+f 0
+p line
+p/d line
+aria-flash build/debug
+info b
+p callee
+p callee_regs 
+l
+bt
+info args
+x/4w $msp
+x/16w $msp
+x/32w $msp
+x/32w $psp
+help x
+x/32w ($psp - 4)
+x/32 ($psp - 4)
+x/32a ($psp - 4)
+x/32aw ($psp - 4)
+mon reset
+c
+info threads
+q
+aria-flash build/debug
+q
+info threads
+thread apply all bt
+info registers 
+x/4w $psp
+x/32w $psp
+x/32w ($psp -16)
+x/32w ($psp - 32)
+x/32a ($psp - 32)
+q

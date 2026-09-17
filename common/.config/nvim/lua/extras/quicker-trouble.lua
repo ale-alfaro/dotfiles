@@ -114,3 +114,22 @@ require('quicker').setup {
     },
   },
 }
+
+  local qf_keys = {
+      {'o', '<Cmd>copen<CR>', 'Open'},
+      {'c', '<Cmd>cclose<CR>', 'Close'},
+      {'h', '<Cmd>chistory<CR>', 'History'},
+      {'n', '<Cmd>cnewer<CR>', 'Newer List'},
+      {'p', '<Cmd>colder<CR>', 'Older List'},
+      {'d', '<cmd>Trouble diagnostics filter = { severity=vim.diagnostic.severity.ERROR }<cr>', 'Diagnostics (Error-only)'},
+      {'D', '<cmd>Trouble diagnostics <cr>', 'Diagnostics (Everything)'},
+  }
+
+
+  for _, k in ipairs(qf_keys) do
+    vim.keymap.set('n', '<leader>q' .. k[1], k[2], { desc = k[3] })
+  end
+  VimRc.keymap_clues = vim.list_extend(VimRc.keymap_clues, {
+    { mode = 'n', keys = '<Leader>q', desc = '+Qf' },
+    { mode = 'x', keys = '<Leader>q', desc = '+Qf' },
+  })

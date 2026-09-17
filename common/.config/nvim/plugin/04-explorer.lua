@@ -48,17 +48,8 @@ if not vim.o.diff then
     minifiles.setup()
 
     -- stylua:ignore
-    local dots = vim.fs.joinpath(vim.fn.getenv 'HOME', 'dotfiles')
-    local work = vim.fs.joinpath(vim.fn.getenv 'HOME', 'sibel', 'eng')
-    local obs = (vim.fn.getenv 'OBSIDIAN_HOME' == vim.NIL) and vim.fs.joinpath(vim.fn.getenv 'HOME', 'Documents', 'Obsidian') or vim.fn.getenv 'OBSIDIAN_HOME'
     local prefix_keys = {
       { 'v', '<cmd>Oil ' .. vim.fs.dirname(vim.fn.expand '$MYVIMRC') .. '<cr>', 'VimRc' },
-      { 'z', '<cmd>Oil ' .. vim.fn.getenv 'ZDOTDIR' .. '<cr>', 'ZshRc' },
-      { 'o', '<cmd>Oil ' .. obs .. '<cr>', 'Obsidian' },
-      { 'c', '<cmd>Oil ' .. vim.fn.getenv 'XDG_CONFIG_HOME' .. '<cr>', 'Config' },
-      { 'd', '<cmd>Oil ' .. dots .. '<cr>', 'Dotfiles' },
-      { 'f', '<cmd>Oil ' .. vim.fs.joinpath(work, 'fw') .. '<cr>', 'Fw' },
-      { 't', '<cmd>Oil ' .. vim.fs.joinpath(work, 'tools') .. '<cr>', 'Tools' },
     }
 
     for _, k in ipairs(prefix_keys) do

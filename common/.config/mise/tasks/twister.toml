@@ -1,15 +1,4 @@
 
-["global:twister:find_tests"]
-description = "List samples"
-tools = { 'yq' = 'latest' }
-dir = "{{cwd}}"
-run = '''
-#!/bin/zsh
-fd --strip-cwd-prefix -e yaml -tf '(testcase|sample)\.yaml' \
-    -x echo -e \; \
-    -x yq e -o tsv '(.tests | with_entries(.key |= "{//}/\(.)") | keys)' '{}'
-
-'''
 ["global:twister:testplan:save"]
 extends = "twister:testplan"
 

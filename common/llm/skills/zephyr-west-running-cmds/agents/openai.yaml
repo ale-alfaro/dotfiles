@@ -1,0 +1,3 @@
+interface:
+  display_name: "Run commands with Zephyr's metat-tool west"
+  short_description: "Running commands with west in a workspace to build, search, debug"

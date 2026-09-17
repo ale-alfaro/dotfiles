@@ -20,7 +20,7 @@ VimRc.now(function()
     msg = { -- Options related to the message module.
       targets = 'msg', ---@type 'cmd'|'msg' Default message target if not present in targets.
       cmd = { -- Options related to messages in the cmdline window.
-        height = 0, -- Maximum height while expanded for messages beyond 'cmdheight'.
+        height = 0.5, -- Maximum height while expanded for messages beyond 'cmdheight'.
       },
       dialog = { -- Options related to dialog window.
         height = 0.5, -- Maximum height.
@@ -40,7 +40,8 @@ VimRc.icons = require 'custom.icons'
 VimRc.now(function()
   -- vim.cmd 'colorscheme kanagawa'
   -- vim.cmd 'colorscheme gruvbox'
-  vim.cmd 'colorscheme miniwinter'
+vim.o.termguicolors = false
+vim.cmd 'colorscheme catppuccin'
 end)
 VimRc.now(function()
   -- Set up to not prefer extension-based icon for some extensions
@@ -56,12 +57,19 @@ VimRc.now(function()
 end)
 VimRc.now(function()
   local starter = require 'mini.starter'
+
+    local dots = vim.fs.joinpath(vim.fn.getenv 'HOME', 'dotfiles')
+    local work = vim.fs.joinpath(vim.fn.getenv 'HOME', 'sibel', 'eng', 'fw')
+    local obs = (vim.fn.getenv 'OBSIDIAN_HOME' == vim.NIL) and vim.fs.joinpath(vim.fn.getenv 'HOME', 'Documents', 'Obsidian') or vim.fn.getenv 'OBSIDIAN_HOME'
   starter.setup {
     items = {
-      { action = 'FzfLua files', name = 'Files', section = 'Fzf' },
-      { action = 'FzfLua oldfiles', name = 'Old files', section = 'Fzf' },
-      { action = 'FzfLua visits', name = 'Visits', section = 'Fzf' },
-      { action = 'FzfLua live_grep', name = 'Live grep', section = 'Fzf' },
+      { action = 'FzfLua oldfiles', name = "Oldfiles", section  = 'Back to ...' },
+      { action = 'FzfLua visits', name = "Recent", section  =  'Back to ...'},
+      { action = 'Oil', name = 'CWD', section = 'Jump to ...' },
+      { action = 'Oil ' .. vim.fs.dirname(vim.fn.expand '$MYVIMRC') , name = 'Vim RC', section = 'Jump to ...' },
+      { action = 'FzfLua files', name = 'Files', section = 'Search' },
+      { action = 'FzfLua live_grep', name = 'Live grep', section = 'Search' },
+      { action = 'OverseerRun' , name = 'Run', section = 'Tasks' },
     },
     content_hooks = {
       starter.gen_hook.adding_bullet(),

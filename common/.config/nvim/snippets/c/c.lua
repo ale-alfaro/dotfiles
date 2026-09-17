@@ -77,4 +77,36 @@ K_THREAD_DEFINE($1_tid, CONFIG_APP_$2_THREAD_STACK_SIZE,
 		K_LOWEST_APPLICATION_THREAD_PRIO, 0, 0);
 ]],
   },
+{
+    prefix = "/*",
+    body = [[
+/**
+ * @brief ${1:my_func}
+ *
+ * $0
+ *
+ * @param ${2:val Value passed}
+ *
+ * @retval 0 Success.
+ */
+]],
+    desc = "Function doxygen comments",
+},
+{
+    prefix = "/**",
+    body = [[
+/**
+ * @brief ${1:my_func}
+ *
+ * @param[in] ${2:val} The value's reference.
+ * @param[in] timeout Waiting period, K_NO_WAIT and K_FOREVER are valid.
+ *
+ * @retval 0 Success.
+ * @retval -EINVAL Invalid args passed.
+ * @retval -EAGAIN Waiting period timed out.
+ */
+int $1(${3:const struct zbus_channel *} $2, k_timeout_t timeout);
+]],
+    desc = "Declare function with doxygen comments",
+}
 }

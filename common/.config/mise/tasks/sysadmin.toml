@@ -4,11 +4,12 @@
 hide = true
 dir = "{{env.HOME}}/dotfiles"
 usage = '''
-arg "<pkg>" help="Package types to stow" {
-  choices "common" "linux"
-  default "commoh"
+arg "[target]" {
+  help "Target"
+  default "{{xdg_config_home}}"
 }
-flag "-y --yes" help="Perform simulated operation instead of doing it" {
+flag "-y --yes" {
+  help "Perform simulated operation instead of doing it"
   global #true
   env "STOW_NO_SIM"
 }
@@ -16,15 +17,23 @@ flag "-y --yes" help="Perform simulated operation instead of doing it" {
 run = '''
 stow \
   {% if usage.yes %}-v{% else %}--simulate -vv{% endif %} \
-  -d {{ env.HOME }}/dotfiles/{{usage.pkg}}/.config \
-  -t {{ xdg_config_home }} \
+  --target {{ usage.target }} \
   -R .
 '''
 
 ["global:stow:doftiles"]
 description = "Stow dotfiles"
-depends = ["_stow:dotfiles common", "_stow:dotfiles linux"]
+dir = '{{ env.HOME }}/dotfiles'
+env = { STOW_NO_SIM = "1" }
 run = '''
+pushd common/.config || true
+mise run _stow:dotfiles
+popd
+
+pushd common/.config || true
+mise run _stow:dotfiles
+popd
+
 echo "XDG_CONFIG_HOME: "
 eza --icons=always --oneline \
     --no-git --all \

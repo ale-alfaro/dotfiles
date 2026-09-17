@@ -187,14 +187,10 @@ out about, ^D is CTRL-D).
 --]]
 VimRc.keymap_clues = {
   { mode = 'n', keys = '<Leader>b', desc = '+Buffer' },
-  { mode = 'n', keys = '<Leader>e', desc = '+Explore/Edit' },
   { mode = 'n', keys = '<Leader>f', desc = '+Find ' },
-  { mode = 'n', keys = '<Leader>l', desc = '+Lang' },
   { mode = 'n', keys = '<Leader>n', desc = '+Notifications' },
-  { mode = 'n', keys = '<Leader>n', desc = '+Quickfix' },
   { mode = 'n', keys = '<Leader>s', desc = '+Search (Codebase)' },
   { mode = 'n', keys = '<Leader>t', desc = '+Terminal' },
-  { mode = 'n', keys = '<Leader>v', desc = '+Visits' },
 }
 VimRc.map({ lhs = 'q', rhs = '<nop>' }, { noremap = true })
 VimRc.map({ mode = 'v', lhs = '<', rhs = '<gv' }, { noremap = true })
@@ -211,8 +207,8 @@ VimRc.map({ lhs = 'gV', rhs = '"g`[" . strpart(getregtype(), 0, 1) . "g`]"' }, {
 VimRc.map({ mode = { 'n', 'i', 'v', 's' }, lhs = '<C-s>', rhs = '<esc>:update | redraw<CR>' }, { desc = 'Save', noremap = true })
 
 VimRc.map({
-  mode = { 's', 'i', 'n', 'v' },
-  lhs = '<C-S-s>',
+  mode = {  'n', 'v' },
+  lhs = 'ZZ',
   rhs = function()
     vim.g.skip_formatting = true
     return '<esc>:w<cr>'
@@ -220,8 +216,11 @@ VimRc.map({
 }, { desc = 'Save (without formatting)', expr = true })
 
 -- Quickly go to the end of the line while in insert mode.
+local map = function(key, keycmd, desc)
+  VimRc.map({ mode = 'n', lhs = key, rhs = keycmd }, { desc = desc, noremap = true })
+end
 vim.keymap.set({ 'i', 'c' }, '<C-l>', '<C-o>A', { desc = 'Go to the end of the line' })
-VimRc.map({ lhs = '<C-q>', rhs = '<Cmd>qall<CR>' }, { noremap = true })
+map( '<C-q>','<Cmd>qall<CR>', 'Quit All')
 
 ---@param key string
 ---@param keycmd string|fun()
@@ -231,12 +230,9 @@ local nmap_leader = function(key, keycmd, desc)
 end
 nmap_leader('ba', '<Cmd>b#<CR>', 'Alternate')
 nmap_leader('bd', '<Cmd>lua MiniBufremove.delete()<CR>', 'Delete')
-nmap_leader('bD', '<Cmd>lua MiniBufremove.delete(0, true)<CR>', 'Delete!')
 nmap_leader('bs', '<Cmd>lua VimRc.new_scratch_buffer()<Cr>', 'Scratch')
-nmap_leader('bw', '<Cmd>lua MiniBufremove.wipeout()<CR>', 'Wipeout')
-nmap_leader('bW', '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', 'Wipeout!')
+nmap_leader('bw', '<Cmd>lua MiniBufremove.delete(0, true)<CR>', 'Delete!')
 
-nmap_leader('tT', '<Cmd>horizontal term<CR>', 'horizontal')
 nmap_leader('tt', '<Cmd>vertical term<CR>', 'vertical')
 
 vim.keymap.set('t', '<Esc>', '<C-\\><C-n>')
@@ -267,28 +263,3 @@ vim.cmd [[
 
 ]]
 
-local function on_list(options)
-  vim.fn.setqflist({}, ' ', options)
-  vim.cmd.cfirst()
-end
-
-nmap_leader('qo', '<Cmd>copen<CR>', 'Open')
-nmap_leader('qc', '<Cmd>cclose<CR>', 'Close')
-nmap_leader('qh', '<Cmd>chistory<CR>', 'History')
-nmap_leader('qn', '<Cmd>cnewer<CR>', 'Newer List')
-nmap_leader('qp', '<Cmd>colder<CR>', 'Older List')
-nmap_leader('qd', '<cmd>Trouble diagnostics filter = { severity=vim.diagnostic.severity.ERROR }<cr>', 'Diagnostics (Error-only)')
-nmap_leader('qD', '<cmd>Trouble diagnostics <cr>', 'Diagnostics (Everything)')
-nmap_leader('qs', '<cmd>Trouble symbols toggle<cr>', 'Symbols (Trouble)')
-VimRc.map({
-  lhs = 'grr',
-  rhs = function()
-    vim.lsp.buf.references(nil, { on_list = on_list })
-  end,
-}, { noremap = true })
-VimRc.map({
-  lhs = 'grd',
-  rhs = function()
-    vim.lsp.buf.definition { on_list = on_list }
-  end,
-}, { noremap = true })

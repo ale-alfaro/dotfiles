@@ -6,9 +6,9 @@ color_theme = "dracula"
 unix_default_file_shell_args = 'zsh -eu'
 unix_default_inline_shell_args = "zsh -eu -c"
 trusted_config_paths = [
-    '~/sibel/eng/fw/anne-workspace',
-    "~/sibel/Documents/Obsidian",
-    "~/dotfiles/",
+        '~/sibel/eng/fw/anne-workspace',
+        "~/sibel/Documents/Obsidian",
+        "~/dotfiles/",
 ]
 # tools can read the versions files used by other version managers
 # for example, .nvmrc in the case of node's nvm
@@ -44,7 +44,6 @@ dprint = "latest"
 lua-language-server = "latest"
 stylua = "latest"
 lazygit = "latest"
-usage = "latest"
 claude-code = "latest"
 cmake = "4.3.3"
 tree-sitter = "latest"
@@ -100,7 +99,6 @@ rg = "latest"
 "vfox-zephyr:west" = "1.5.0"
 difftastic = "latest"
 yq = "latest"
-hk = "latest"
 actionlint = "1.7.12"
 node = "latest"
 sd = "latest"
@@ -111,6 +109,8 @@ worktrunk = "latest"
 clang-format = "latest"
 fzf = "latest"
 codex = "latest"
+"packslip:jdx/hk" = "latest"
+"packslip:jdx/usage" = "latest"
 
 [plugins]
 "vfox:zephyr" = "https://github.com/ale-alfaro/vfox-zephyr-sdk.git"

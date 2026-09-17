@@ -1,7 +1,7 @@
 [grep]
 tool = ripgrep
 ripgrep.tool-path = /bin/rg
-ripgrep.tool-args = '--max-count=10'
+ripgrep.tool-args = '--max-count=10 --no-messages'
 
 [update]
 narrow = true
@@ -30,7 +30,6 @@ lg = forall -c 'lazygit'
 test = twister -vv --inline-logs --clobber-output --no-detailed-test-id --short-build-paths --ll=DEBUG
 test.sim = test -p native_sim --enable-asan --enable-lsan --enable-usan
 test.hw = test --device-testing --enable-slow --filter runnable --device-serial=/dev/ttyACM0
-
 
 
 # vim: ft=ini

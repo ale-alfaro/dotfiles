@@ -24,7 +24,7 @@ gui:
     # Map of file extensions (including the dot) to icon properties (icon and color)
     extensions: {}
   # The number of lines you scroll by when scrolling the main window
-  scrollHeight: 2
+  scrollHeight: 4
   # If true, allow scrolling past the bottom of the content in the main window
   scrollPastBottom: true
   # See https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#scroll-off-margin
@@ -35,7 +35,7 @@ gui:
   # view, but probably mostly relevant for diffs.
   # Note that when using a pager, the pager has its own tab width setting, so you
   # need to pass it separately in the pager command.
-  tabWidth: 4
+  tabWidth: 8
   # If true, capture mouse events.
   # When mouse events are captured, it's a little harder to select text: e.g.
   # requiring you to hold the option key when on macOS.
@@ -58,7 +58,7 @@ gui:
   # want to pick a small number (e.g. 0.2) if you're using a narrow screen, so
   # that you can see more of the main section.
   # Number from 0 to 1.0.
-  sidePanelWidth: 0.3333
+  sidePanelWidth: 0.2
   # If true, increase the height of the focused side window; creating an accordion
   # effect.
   expandFocusedSidePanel: true
@@ -74,14 +74,14 @@ gui:
   # - 'vertical': split the window vertically
   # - 'flexible': (default) split the window horizontally if the window is wide
   # enough, otherwise split vertically
-  mainPanelSplitMode: "flexible"
+  mainPanelSplitMode: "vertical"
   # How the window is split when in half screen mode (i.e. after hitting '+'
   # once).
   # Possible values:
   # - 'left': split the window horizontally (side panel on the left, main view on
   # the right)
   # - 'top': split the window vertically (side panel on top, main view below)
-  enlargedSideViewLocation: top
+  enlargedSideViewLocation: left
   # If true, wrap lines in the staging view to the width of the view. This makes
   # it much easier to work with diffs that have long lines, e.g. paragraphs of
   # markdown text.
@@ -94,14 +94,14 @@ gui:
   nerdFontsVersion: "3"
   theme:
     activeBorderColor:
-      - "#ff9e64"
+      - "#485f67"
       - "bold"
     markedBaseCommitBgColor:
       - "#e0af68"
     unstagedChangesColor:
-      - "#db4b4b"
+      - "#edc7e7"
     defaultFgColor:
-      - "#c0caf5"
+      - "#d8d4cd"
   # Config relating to the commit length indicator
   commitLength:
     # If true, show an indicator of commit message length
@@ -221,7 +221,7 @@ git:
     # If true, run merges in a subprocess so that if a commit message is required,
     # Lazygit will not hang
     # Only applicable to unix users.
-    manualCommit: false
+    manualCommit: true
     # Extra args passed to `git merge`, e.g. --no-ff
     args: ""
     # The commit message to use for a squash merge commit. Can contain
@@ -230,14 +230,13 @@ git:
   # list of branches that are considered 'main' branches, used when displaying
   # commits
   mainBranches:
-    - master
     - main
     - develop
   # Prefix to use when skipping hooks. E.g. if set to 'WIP', then pre-commit hooks
   # will be skipped when the commit message starts with 'WIP'
   skipHookPrefix: WIP
   # If true, periodically fetch from remote
-  autoFetch: true
+  autoFetch: false
   # If true, periodically refresh files and submodules
   autoRefresh: true
   # If not "none", lazygit will automatically fast-forward local branches to match
@@ -247,7 +246,7 @@ git:
   # Possible values: 'none' | 'onlyMainBranches' | 'allBranches'
   autoForwardBranches: onlyMainBranches
   # If true, pass the --all arg to git fetch
-  fetchAll: true
+  fetchAll: false
   # If true, lazygit will automatically stage files that used to have merge
   # conflicts but no longer do; and it will also ask you if you want to continue a
   # merge or rebase if you've resolved all conflicts. If false, it won't do either
@@ -316,16 +315,4 @@ customCommands:
     description: "commit with nvim (use ctrl-J for snippet!)"
     loadingText: "opening commit with nvim"
     context: "global"
-    output: terminal
-  - key: "Z"
-    command: "mise x pipx:commitizen -- cz c -e"
-    description: "commit with commitizen"
-    context: "files"
-    loadingText: "opening commitizen commit tool"
-    output: terminal
-  - key: "<c-a>"
-    command: "uv run --with=commitizen --with=cz-ai cz --name cz_ai commit -e"
-    description: "commit with commitizen (and AI!)"
-    context: "files"
-    loadingText: "opening commitizen commit tool"
     output: terminal

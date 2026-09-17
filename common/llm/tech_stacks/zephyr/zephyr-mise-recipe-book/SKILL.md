@@ -25,13 +25,13 @@ The recipe file is owned by the user. It encodes their conventions — board, bu
 
 ## Quick reference
 
-| Situation | Wrong | Right |
-|-----------|-------|-------|
-| First build of a test/sample | `mise x ... -- west build -b BOARD ...` ad-hoc | New `[tasks."<group>:<verb>"]` in `mise.ai.toml`, then `mise -E ai run ...` |
-| Selecting a testcase | 8× `-D<CONFIG>=y` inline | `-T <testcase_name>` (configs come from `testcase.yaml`) |
-| Sysbuild dragging in netcore | `--no-sysbuild` on every call | `west config build.sysbuild false` once |
-| Source tree path | `/abs/path/to/sh_sdk/...` | `../sh_sdk/...` (relative to recipe file) |
-| Different cwd needed | `cd subdir && mise ...` | Just use relative paths in the task `run` — mise resolves from `config_root` |
+| Situation                    | Wrong                                          | Right                                                                        |
+| ---------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------- |
+| First build of a test/sample | `mise x ... -- west build -b BOARD ...` ad-hoc | New `[tasks."<group>:<verb>"]` in `mise.ai.toml`, then `mise -E ai run ...`  |
+| Selecting a testcase         | 8× `-D<CONFIG>=y` inline                       | `-T <testcase_name>` (configs come from `testcase.yaml`)                     |
+| Sysbuild dragging in netcore | `--no-sysbuild` on every call                  | `west config build.sysbuild false` once                                      |
+| Source tree path             | `/abs/path/to/sh_sdk/...`                      | `../sh_sdk/...` (relative to recipe file)                                    |
+| Different cwd needed         | `cd subdir && mise ...`                        | Just use relative paths in the task `run` — mise resolves from `config_root` |
 
 ## Adding a new recipe
 
@@ -59,12 +59,12 @@ Naming: `<group>:<artifact>:<board>:<verb>` — e.g. `ftl:test:aria:build`, `ftl
 
 ## Common rationalizations (closed loopholes)
 
-| Excuse | Reality |
-|--------|---------|
-| "I know which `-D` flags I need." | They belong in `testcase.yaml`/`sample.yaml`. `-T` selects them reproducibly. |
-| "Each Bash call is fresh — I need `cd` or absolute paths." | mise resolves `config_root` from `mise.toml`. Relative paths in `run = '''...'''` work. |
+| Excuse                                                        | Reality                                                                                     |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| "I know which `-D` flags I need."                             | They belong in `testcase.yaml`/`sample.yaml`. `-T` selects them reproducibly.               |
+| "Each Bash call is fresh — I need `cd` or absolute paths."    | mise resolves `config_root` from `mise.toml`. Relative paths in `run = '''...'''` work.     |
 | "`--no-sysbuild` per call is faster than fixing west config." | It's how the netcore kept getting dragged in. One line of west config fixes it permanently. |
-| "It's a one-off." | The first reinvention is always a "one-off." Add it now. |
+| "It's a one-off."                                             | The first reinvention is always a "one-off." Add it now.                                    |
 
 ## Red flags — STOP
 

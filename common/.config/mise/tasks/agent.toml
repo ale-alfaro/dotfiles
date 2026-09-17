@@ -10,8 +10,25 @@ dir = "{{cwd}}"
 interactive = true
 run = '''
 claude --model {{usage.model}} --effort {{usage.effort}} "$(cat <<EOF
-Review the following files:
+/ncs-embedded-code-review review the following files and do not edit or run tests:
 $(git -C {{usage.repo}} diff --cached --stat)
+EOF
+)"
+'''
+
+
+["global:claude:skills-create"]
+description = "Skills Creator with claude"
+usage = '''
+arg "<name>" 
+arg "<files>" var=#true 
+'''
+dir = "{{cwd}}"
+interactive = true
+run = '''
+claude --model opus --effort medium "$(cat <<EOF
+/mattpocock-skills:writing-for-agents create a new skill called {{usage.name}} based on the following files with relevant info:
+{{ usage.files | join(sep='\n- ') }}
 EOF
 )"
 '''

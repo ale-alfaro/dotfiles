@@ -7,10 +7,6 @@ dir = "{{cwd}}"
 usage = '''
 flag "--app <cpuapp_hex>" 
 flag "--net <cpunet_hex>"
-flag "-s --serial [port]" {
-    help "Attach to serial port after flashing"
-    env "SERIAL_PORT"
-}
 '''
 run = '''
 #!/usr/bin/env zsh
@@ -35,17 +31,39 @@ program_app() {
     --options chip_erase_mode=ERASE_ALL,reset=RESET_DEFAULT,verify=VERIFY_READ \
     --firmware ${usage_app}
 }
+
 [[ ! -f "${usage_net?}" ]] && { echo "Not found ${usage_net}" >&2; exit 1 }
 [[ ! -f "${usage_app?}" ]] && { echo "Not found ${usage_app}" >&2; exit 1 }
 program_net
 sleep 0.5
 program_app
-{% if usage.serial %}
+'''
+
+["global:flash:app"]
+description = "Flash app from workspace for nrf5340"
+dir = "{{cwd}}"
+usage = '''
+arg "<build_dir>" {
+    help "Build directory"
+}
+flag "--rtt" {
+    help "Attach to serial port after flashing"
+}
+flag "-s --serial [port]" {
+    help "Attach to serial port after flashing"
+}
+'''
+run = '''
+cpuapp_hex=$(print ${usage_build_dir?}/*_cpuapp.hex)
+cpunet_hex=$(print ${usage_build_dir?}/*_cpunet.hex)
+mise run global:flash:nrf5340 --app "${cpuapp_hex?}" --net "${cpunet_hex?}" 
+{% if usage.rtt %}
+scope rtt NRF5340_xxAA
+{% elif usage.serial %}
 sleep 0.5
 picocom -g '{{now() | date(format="%R-%m-%d") }}.log' -b 115200 {{usage.serial}} 
 {% endif %}
 '''
-
 # --- probe-rs: flash/attach/debug over the on-board SWD probe -----------------
 # The chip name targets the nRF5340 APP core; probe-rs auto-unlocks a locked
 # net core (Core 1) by erasing it when needed. With more than one probe on the

@@ -99,3 +99,5 @@ mise.ai.toml
 .cache/clangd
 .codex
 .agents
+
+.config/wt.toml

@@ -23,25 +23,18 @@ VimRc.later(function()
     { 'l', '<cmd>Git log --oneline<cr>', 'Log (MiniGit)' },
     { 's', '<cmd>Git status<cr>', 'Status (MiniGit)' },
     { 'c', '<cmd>Git commit<cr>', 'Commit (MiniGit)' },
-    { 'D', '<cmd>Git diff<cr>', 'Diff (MiniGit)' },
+    { 'D', '<cmd>lua MiniDiff.toggle_overlay()<cr>', 'Toggle overlay' },
     { 'b', '<cmd>FzfLua git_bcommits<cr>', 'Buf Commits' },
     { 'C', '<cmd>FzfLua git_commits<cr>', 'Commits' },
   }
 
-  for _, k in ipairs(git_keys) do
-    vim.keymap.set('n', '<leader>g' .. k[1], k[2], { desc = k[3] })
-  end
-  local diff_keys = {
-    { 't', '<cmd>lua MiniDiff.toggle_overlay()<cr>', 'Toggle overlay' },
-  }
 
-  for _, k in ipairs(diff_keys) do
-    vim.keymap.set('n', '<leader>d' .. k[1], k[2], { desc = k[3] })
+  for _, k in ipairs(git_keys) do
+    vim.keymap.set('n', '<leader>v' .. k[1], k[2], { desc = k[3] })
   end
   VimRc.keymap_clues = vim.list_extend(VimRc.keymap_clues, {
-    { mode = 'n', keys = '<Leader>g', desc = '+Git' },
-    { mode = 'x', keys = '<Leader>g', desc = '+Git' },
-    { mode = 'n', keys = '<Leader>d', desc = '+Diff' },
+    { mode = 'n', keys = '<Leader>v', desc = '+VCS' },
+    { mode = 'x', keys = '<Leader>v', desc = '+VCS' },
   })
 end)
 VimRc.later(function()

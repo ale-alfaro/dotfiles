@@ -13,11 +13,16 @@ M.json_ls = function()
   vim.lsp.enable 'json_ls'
 end
 M.yaml_ls = function()
-  local yaml_schemas = require('schemastore').yaml.schemas()
   vim.lsp.config('yamlls', {
     settings = {
       yaml = {
-        schemas = yaml_schemas,
+        schemas = require('schemastore').json.schemas {
+          select = {
+            'GitHub Action',
+            'GitHub Workflow',
+
+          },
+        },
         validate = { enable = true },
         format = { enable = true },
       },
@@ -25,6 +30,7 @@ M.yaml_ls = function()
   })
   vim.lsp.enable 'yaml_ls'
 end
+
 M.toml_ls = function()
   local catalogs = require('schemastore').json.load()
   vim.lsp.config('taplo', {

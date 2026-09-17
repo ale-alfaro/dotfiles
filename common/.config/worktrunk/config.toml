@@ -1,0 +1,11 @@
+skip-commit-generation-prompt = true
+[list]
+summary = false # Enable LLM branch summaries (requires [commit.generation])
+
+full = false     # Show CI status and LLM summaries (--full)
+branches = false # Include branches without worktrees (--branches)
+remotes = false  # Include remote-only branches (--remotes)
+
+json-schema = 2 # JSON output schema: 2 (envelope, default) or 1 (bare array)
+
+columns = ["branch", "path", "status"]

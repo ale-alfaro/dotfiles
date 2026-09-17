@@ -1,65 +1,24 @@
 {
-  "long_comment": {
-    "prefix": "/**",
-    "body": [
-      "/**",
-      " * @brief ${1:A one-line summary.}",
-      " *",
-      " * ${2:Description.}$0",
-      " *",
-      " * @param ${4:name} ${5:Type and description of the parameter.}",
-      " * @return ${3:Type and description of the returned value.}",
-      " *",
-      " * @example",
-      " * // ${6:Description of my example.}",
-      " * ${7:Write me later}",
-      " */"
-    ],
-    "description": "A C comment block for functions, including short summary, details, param, return, and example."
-  },
-  "comment": {
-    "prefix": "/*",
-    "body": [
-      "/**",
-      " * ${1:A one-line summary.}",
-      " *",
-      " * ${2:Description.}$0",
-      " */"
-    ],
-    "description": "A simple C comment block for functions, including short summary, and details. Useful when you prefer to add the other documentation tags manually."
-  },
-  "doxygen": {
-    "prefix": "/**",
-    "body": [
-      "/**",
-      " * @brief ${1:Description} ",
-      " *",
-      " * @param ${2:arg} ${3:Parameter Description}",
-      " *",
-      " * @retval 0 for success",
-      " */"
-    ],
-    "description": "Convenient multiline comment"
-  },
   "zephyr-starter": {
     "prefix": "<z",
     "body": [
       "#include <zephyr/kernel.h>",
       "#include <zephyr/sys/util.h>",
-      "#include <zephyr/sys/check.h>"
+      "${1:#include <zephyr/sys/check.h>}",
+      "$0"
     ],
     "description": "starter for a Zephyr project"
   },
   "switch": {
     "prefix": "sw",
     "body": [
-      "switch (${1:expression}) {",
-      "case ${2}: {",
-      "\t${0}",
-      "\tbreak;",
-      "}",
-      "default:",
-      "\tbreak;",
+      "switch (${1:rc}) {",
+      "\tcase ${3:-EIO}:",
+      "\t\t$0",
+      "\t\tbreak;",
+      "${2:\tcase 0:\n\t\tbreak;}",
+      "\tdefault:",
+      "\t\tbreak;",
       "}"
     ],
     "description": "'switch' snippet"

@@ -168,20 +168,13 @@ def render_diff(
 
 @app.default
 def cmp(
-    prev: Annotated[
+    build: Annotated[
         Path,
         cyclopts.Parameter(
             "*",
-            help="Baseline .config file (defaults to .config.old when omitted)",
+            help="Domain build dir where .config file (defaults to build when omitted)",
         ),
-    ] = ".config.old",
-    curr: Annotated[
-        Path,
-        cyclopts.Parameter(
-            "*",
-            help="Baseline .config file (defaults to .config.old when omitted)",
-        ),
-    ] = ".config",
+    ] = Path("build"),
     *,
     output: Annotated[
         Path | None,
@@ -201,6 +194,8 @@ def cmp(
     ] = False,
 ) -> None:
     """Compare .config files and show sorted differences."""
+    prev = build / "zephyr" / ".config.old"
+    curr = build / "zephyr" / ".config"
     prev_config_map: dict[str, str] = read_config(prev)
     curr_config_map: dict[str, str] = read_config(curr)
     diff = diff_configs(prev_config_map, curr_config_map)
