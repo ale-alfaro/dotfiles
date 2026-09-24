@@ -101,3 +101,4 @@ mise.ai.toml
 .agents
 
 .config/wt.toml
+.gdbinit

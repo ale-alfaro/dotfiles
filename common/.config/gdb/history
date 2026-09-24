@@ -1834,3 +1834,17 @@ x/32w ($psp -16)
 x/32w ($psp - 32)
 x/32a ($psp - 32)
 q
+aria-flash aria-sense/app/build/debug
+aria-flash aria-sense/build/debug
+mon reset
+c
+info threads
+q
+mon reset
+c
+aria-flash build/release
+q
+q
+q
+c
+q
