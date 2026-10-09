@@ -1,0 +1,9 @@
+#!/bin/sh
+# Run clangd from the west workspace top (the directory holding .west/),
+# using the compile_commands.json symlinked there.
+dir=${CLAUDE_PROJECT_DIR:-$PWD}
+while [ "$dir" != / ] && [ ! -d "$dir/.west" ]; do
+	dir=$(dirname "$dir")
+done
+[ -d "$dir/.west" ] || exec clangd "$@"
+cd "$dir" && exec clangd --compile-commands-dir="$dir" "$@"
