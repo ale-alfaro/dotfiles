@@ -1,44 +1,10 @@
-
-local augrp_lsp = vim.api.nvim_create_augroup('vimrc.lsp', { clear = false })
-
-local augrp_fmt = vim.api.nvim_create_augroup('vimrc.fmt', { clear = false })
-local add_fmt = function(client, bufnr)
-
-  if client:supports_method 'textDocument/formatting' then
-      vim.bo[bufnr].formatexpr = 'v:lua.vim.lsp.formatexpr(#{timeout_ms:1000})'
-      vim.api.nvim_buf_set_var(bufnr, 'lspformat', 1)
-      local ft = vim.bo[bufnr].ft
-      vim.cmd [[autocmd BufWritePre <buffer> lua vim.lsp.buf.format({ async = false}) ]]
-  else
-      vim.bo[bufnr].formatexpr = 'v:lua.vim.lsp.formatexpr(#{timeout_ms:1000})'
-        vim.api.nvim_create_autocmd('BufWritePre', {
-            group = augrp_fmt,
-          desc = 'Format on save',
-          callback = function(ev)
-            if vim.g.minifiles_active then
-              return
-            end
-            if vim.g.skip_formatting then
-              vim.g.skip_formatting = false
-              return
-            end
-
-            if not vim.g.autoformat and not vim.b[ev.buf].autoformat then
-              return
-            end
-            Fmt.format(ev.buf)
-          end,
-        })
-  end
-
-end
 --- Buflocal autocmd
 ---@param event string|string[]
 ---@param bufnr integer
 ---@param callback function
 ---@param desc string?
 local new_buf_autocmd = function(event, bufnr, callback, desc)
-  local opts = { group = augrp_lsp, callback = callback, buffer = bufnr, desc = desc or '' }
+  local opts = {  callback = callback, buffer = bufnr, desc = desc or '' }
   vim.api.nvim_create_autocmd(event, opts)
 end
 ---@description Function that handles LspAttach events.
@@ -61,8 +27,13 @@ VimRc.lsp_on_attach = function(client, bufnr)
   end, '✨lsp show diagnostics on Cursorhold')
   -- Don't check for the capability here to allow dynamic registration of the request.
   vim.lsp.document_color.enable(true, { bufnr = bufnr, style = 'virtual' })
-  add_fmt(client, bufnr)
 
+  if client:supports_method 'textDocument/formatting' then
+      vim.bo[bufnr].formatexpr = 'v:lua.vim.lsp.formatexpr(#{timeout_ms:1000})'
+      vim.b[bufnr].noformat = 1
+      new_buf_autocmd('BufWritePre', bufnr, function() vim.lsp.buf.format({ async = false })end, 'format')
+
+  end
   --- Global lsp keymaps redefined to use Fzf-lua functions
   -- Code Action
   if client:supports_method 'textDocument/codeAction' then
@@ -95,55 +66,68 @@ VimRc.lsp_on_attach = function(client, bufnr)
 
 end
 -- Set up LSP servers.
-VimRc.now_if_args(function()
-  vim.diagnostic.config {
-    severity_sort = true,
-    float = {
-      border = 'rounded',
-      source = 'if_many',
-      underline = true,
-    },
-    virtual_text = {
-      spacing = 2,
-      source = 'if_many',
-      prefix = 'o',
-    },
-    -- Disable signs in the gutter.
-    signs = {
-      text = {
-        [vim.diagnostic.severity.ERROR] = 'E',
-        [vim.diagnostic.severity.WARN] = 'W',
-        [vim.diagnostic.severity.INFO] = 'I',
-        [vim.diagnostic.severity.HINT] = 'H',
-      },
-    },
-  }
-  -- or equivalently
+vim.g.autoformat = true
 
-  VimRc.new_autocmd('LspAttach', function(ev)
+local capabilities = require('blink.cmp').get_lsp_capabilities(vim.lsp.protocol.make_client_capabilities(), false)
+vim.lsp.config('*', { capabilities = capabilities })
+local augrp_lsp = vim.api.nvim_create_augroup('vimrc.lsp', { clear = false })
+local augrp_fmt = vim.api.nvim_create_augroup('vimrc.fmt', { clear = false })
+
+vim.api.nvim_create_autocmd('BufWritePost', {
+  group = augrp_fmt,
+  desc = 'Format on save',
+  callback = function(ev)
+    local buf = ev.buf
+    if vim.g.minifiles_active then
+      return
+    end
+    if vim.g.skip_formatting then
+      vim.g.skip_formatting = false
+      return
+    end
+
+    if not vim.g.autoformat or vim.b[buf].noformat then
+      return
+    end
+    local callback = function(err)
+      if not err and vim.api.nvim_buf_is_valid(buf) then
+        vim.api.nvim_buf_call(buf, function()
+          vim.cmd.update()
+        end)
+      end
+    end
+    require('custom.format').format(buf, { async_cb = callback })
+  end,
+})
+
+vim.api.nvim_create_autocmd('LspAttach', { 
+  callback = function(ev)
     local bufnr = ev.buf
     local client = assert(vim.lsp.get_client_by_id(ev.data.client_id))
 
     VimRc.debug('[LspAttach autocmd] - ', { client = client.name, buf = bufnr })
     VimRc.lsp_on_attach(client, bufnr)
-  end, '*', 'LspAttach Configure Lsps')
+  end, 
+  pattern = '*', 
+  desc = 'LspAttach Configure Lsps',
+  group = augrp_lsp,
+})
 
-  --- Lsp Configuration happens on a different paths sometimes when Lsp Servers are expected
-  --- to register dynamic capabilities. Current the same on_attach handler is used so
-  --- is not being leveraged but kept as "just in case"
-  vim.lsp.handlers['client/registerCapability'] = (function(overridden_register_caps)
-    return function(err, res, ctx)
-      local client = vim.lsp.get_client_by_id(ctx.client_id)
-      if not client then
-        return
-      end
-
-      VimRc.debug(string.format('[registerCapability] - Client %s', client.name))
-      VimRc.debug(client.capabilities)
-      -- Update mappings when registering dynamic capabilities.
-      VimRc.lsp_on_attach(client, vim.api.nvim_get_current_buf()) -- end
-      return overridden_register_caps(err, res, ctx)
+--- Lsp Configuration happens on a different paths sometimes when Lsp Servers are expected
+--- to register dynamic capabilities. Current the same on_attach handler is used so
+--- is not being leveraged but kept as "just in case"
+vim.lsp.handlers['client/registerCapability'] = (function(overridden_register_caps)
+  return function(err, res, ctx)
+    local client = vim.lsp.get_client_by_id(ctx.client_id)
+    if not client then
+      return
     end
-  end)(vim.lsp.handlers['client/registerCapability'])
-  require('vimrc_lsp').setup()
-end)
+
+    VimRc.debug(string.format('[registerCapability] - Client %s', client.name))
+    VimRc.debug(client.capabilities)
+    -- Update mappings when registering dynamic capabilities.
+    VimRc.lsp_on_attach(client, vim.api.nvim_get_current_buf()) -- end
+    return overridden_register_caps(err, res, ctx)
+  end
+end)(vim.lsp.handlers['client/registerCapability'])
+require('vimrc_lsp').setup()

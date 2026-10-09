@@ -34,17 +34,15 @@ VimRc.now(function()
       },
     },
   }
-end)
 
-VimRc.icons = require 'custom.icons'
-VimRc.now(function()
+    VimRc.icons = require 'custom.icons'
   -- vim.cmd 'colorscheme kanagawa'
   -- vim.cmd 'colorscheme gruvbox'
-vim.o.termguicolors = false
-vim.cmd 'colorscheme catppuccin'
-end)
-VimRc.now(function()
+    vim.o.termguicolors = false
+    vim.cmd 'colorscheme catppuccin'
   -- Set up to not prefer extension-based icon for some extensions
+end)
+VimRc.later(function()
   local ext3_blocklist = { scm = true, txt = true, yml = true }
   local ext4_blocklist = { json = true, yaml = true }
   local mini_icons = require 'mini.icons'
@@ -55,37 +53,37 @@ VimRc.now(function()
   }
   mini_icons.mock_nvim_web_devicons()
 end)
-VimRc.now(function()
-  local starter = require 'mini.starter'
+-- VimRc.never_if_args(function()
+--   local starter = require 'mini.starter'
+--
+--     local dots = vim.fs.joinpath(vim.fn.getenv 'HOME', 'dotfiles')
+--     local work = vim.fs.joinpath(vim.fn.getenv 'HOME', 'sibel', 'eng', 'fw')
+--     local obs = (vim.fn.getenv 'OBSIDIAN_HOME' == vim.NIL) and vim.fs.joinpath(vim.fn.getenv 'HOME', 'Documents', 'Obsidian') or vim.fn.getenv 'OBSIDIAN_HOME'
+--   starter.setup {
+--     items = {
+--       { action = 'FzfLua oldfiles', name = "Oldfiles", section  = 'Back to ...' },
+--       { action = 'FzfLua visits', name = "Recent", section  =  'Back to ...'},
+--       { action = 'Oil', name = 'CWD', section = 'Jump to ...' },
+--       { action = 'Oil ' .. vim.fs.dirname(vim.fn.expand '$MYVIMRC') , name = 'Vim RC', section = 'Jump to ...' },
+--       { action = 'FzfLua files', name = 'Files', section = 'Search' },
+--       { action = 'FzfLua live_grep', name = 'Live grep', section = 'Search' },
+--       { action = 'OverseerRun' , name = 'Run', section = 'Tasks' },
+--     },
+--     content_hooks = {
+--       starter.gen_hook.adding_bullet(),
+--       starter.gen_hook.aligning('center', 'center'),
+--     },
+--   }
+-- end)
 
-    local dots = vim.fs.joinpath(vim.fn.getenv 'HOME', 'dotfiles')
-    local work = vim.fs.joinpath(vim.fn.getenv 'HOME', 'sibel', 'eng', 'fw')
-    local obs = (vim.fn.getenv 'OBSIDIAN_HOME' == vim.NIL) and vim.fs.joinpath(vim.fn.getenv 'HOME', 'Documents', 'Obsidian') or vim.fn.getenv 'OBSIDIAN_HOME'
-  starter.setup {
-    items = {
-      { action = 'FzfLua oldfiles', name = "Oldfiles", section  = 'Back to ...' },
-      { action = 'FzfLua visits', name = "Recent", section  =  'Back to ...'},
-      { action = 'Oil', name = 'CWD', section = 'Jump to ...' },
-      { action = 'Oil ' .. vim.fs.dirname(vim.fn.expand '$MYVIMRC') , name = 'Vim RC', section = 'Jump to ...' },
-      { action = 'FzfLua files', name = 'Files', section = 'Search' },
-      { action = 'FzfLua live_grep', name = 'Live grep', section = 'Search' },
-      { action = 'OverseerRun' , name = 'Run', section = 'Tasks' },
-    },
-    content_hooks = {
-      starter.gen_hook.adding_bullet(),
-      starter.gen_hook.aligning('center', 'center'),
-    },
-  }
-end)
-
-VimRc.now(function()
+VimRc.later(function()
   require('extras.image').setup_image_snacks()
 end)
 VimRc.now(function()
   require('mini.statusline').setup()
 end)
 
-VimRc.now(function()
+VimRc.now_if_args(function()
   require('mini.git').setup()
   require('mini.diff').setup()
 end)

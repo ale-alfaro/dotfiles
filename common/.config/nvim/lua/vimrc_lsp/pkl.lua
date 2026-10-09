@@ -54,9 +54,7 @@ local function download_package(packageUri, ctx)
   client:request_sync('pkl/downloadPackage', { uri = packageUri }, 1000, ctx.bufnr)
 end
 ---@type vim.lsp.Config
-vim.lsp.config['pkl'] = {
-  -- name = 'pkl',
-  filetypes = { 'pkl' },
+return {
   settings = {
     ['pkl.cli.path'] = bin_path,
     -- ['pkl.formatter.grammarVersion'] = config.pkl_formatter_grammar_version,
@@ -117,4 +115,3 @@ vim.lsp.config['pkl'] = {
     },
   },
 }
-vim.lsp.enable 'pkl'

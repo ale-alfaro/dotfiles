@@ -137,50 +137,46 @@ VimRc.later(function()
 
     return FzfLua.fzf_exec(contents, opts)
   end, vim.tbl_extend('force', FzfLua.defaults.files, { sort_by = 'recency' }))
-end)
-local nonprefix_keys = {
-  { '<Space><Space>', '<cmd>FzfLua builtin<cr>', 'Find Fzf pickers' },
-  { '<C-b>', '<cmd>FzfLua buffers<cr>', 'Buffers' },
-  { '<C-f>', '<cmd>FzfLua files<cr>', 'Files' },
-  { '<C-g>', '<cmd>FzfLua live_grep<cr>', 'Grep (cwd)' },
-  { '<C-e>', '<cmd>FzfLua global<cr>', 'Global' },
-  { '<C-/>', '<cmd>FzfLua blines<cr>', 'Buffer Lines' },
-  { '<C-c>', '<cmd>FzfLua resume<cr>', 'Continue' },
-}
-for _, k in ipairs(nonprefix_keys) do
-  vim.keymap.set('n', k[1], k[2], { desc = k[3], noremap = true })
-end
-local prefix_keys = {
-  { 'o', '<cmd>FzfLua oldfiles<cr>', 'Old Files' },
-  { 'm', '<cmd>FzfLua manpages<cr>', 'Find Man' },
-  { 'h', '<cmd>FzfLua help_tags<cr>', 'Help' },
-  { 'k', '<Cmd>FzfLua keymaps<CR>', 'Keymaps' },
-  { 'z', '<cmd>FzfLua zoxide<cr>', 'Zoxide' },
-  { 'H', '<cmd>FzfLua command_history<cr>', 'History' },
-  {
-    's',
-    '<cmd>FzfLua lsp_document_symbols<cr>',
-    'Live Document Symbols',
-  },
-  { 'd', '<cmd>FzfLua lsp_document_diagnostics<cr>', 'Document diagnostics' },
-}
 
-for _, k in ipairs(prefix_keys) do
-  vim.keymap.set('n', '<leader>f' .. k[1], k[2], { desc = k[3] })
-end
-local search_keys = {
-  -- { 'o', '<cmd>FzfLua files cwd=$OBSIDIAN_HOME fd_opts=-e=md<cr>', 'Search Obsidian' },
-  { 'v', '<cmd>FzfLua visits<cr>', 'Search Recent Visits' },
-  { 'f', "<cmd>FzfLua visits sort_by='frequency'<cr>", 'Search Frequent Visits' },
-}
-for _, k in ipairs(search_keys) do
-  vim.keymap.set('n', '<leader>s' .. k[1], k[2], { desc = k[3] })
-end
 
-VimRc.later(function()
+  ---@class fzf-lua.config.West: fzf-lua.config.Files|{}?
+  ---@field sort_by 'recency'|'frequency'|'custom'
+---Global multi-picker, combines files, buffers and symbols.
+---@diagnostic disable-next-line: param-type-mismatch
+---@class fzf-lua.config.West: fzf-lua.config.Files
+FzfLua.register_extension('west', function(opts) 
+    opts = FzfLua.config.normalize_opts(opts, 'visits')
+    if not opts then
+      return
+    end
+
+
+    local contents = function(cb)
+      for _, s in
+        ipairs(vim.fs.find({'sample.yaml', 'testcase.yaml'}, {
+          type = 'file',
+          path = opts.cwd or '.',
+        }))
+      do
+        local st = vim.uv.fs_stat(s)
+        if st and st.type == 'file' then
+
+      local obj = vim.system({'yq','eval', '-o=lua','--lua-unquoted', "'[.tests[] | key]'" ,s}, {text = true}):wait(1000)
+
+        if obj.code ~= 0 then
+          return
+        end
+        local samples =  VimRc.evaluate(obj.stdout)
+        for _, sample in ipairs(vim._ensure_list(samples)) do
+          s = assert(string.format('%q/%q',s, sample))
+          cb(s)
+        end
+        end
+      end
+      cb(nil)
+    end
+    return FzfLua.fzf_exec(contents, opts)
+  end, {})
   require 'extras.grug'
 end)
 
-VimRc.later(function()
-  require('custom.format').setup()
-end)

@@ -7,33 +7,18 @@ vim.opt.number = true
 vim.o.switchbuf = 'usetab' -- Use already opened buffers when switching
 vim.o.undofile = true -- Enable persistent undo
 
--- Fall back to OSC 52 clipboard for the + and * registers when no functional
--- native clipboard tool is found. Requires Neovim 0.10+ and a terminal that
--- supports OSC 52 (WezTerm, iTerm2, Kitty, Ghostty, etc.).
--- We check not only whether clipboard tools are installed, but also whether
--- their display server is available ($DISPLAY for X11, $WAYLAND_DISPLAY for
--- Wayland). This ensures that tools like xclip or wl-copy on a headless server
--- or in an SSH session without display forwarding correctly fall through to
--- OSC 52. Fixes clipboard issues when running Neovim on a remote server from a
--- local tmux session.
-local has_osc52, osc52 = pcall(require, 'vim.ui.clipboard.osc52')
-local has_native_clipboard = (vim.fn.executable 'pbcopy' == 1)
-  or (vim.fn.executable 'xclip' == 1 and vim.env.DISPLAY)
-  or (vim.fn.executable 'xsel' == 1 and vim.env.DISPLAY)
-  or (vim.fn.executable 'wl-copy' == 1 and vim.env.WAYLAND_DISPLAY)
-if has_osc52 and not has_native_clipboard then
+-- wl-copy only works with a reachable Wayland socket. Over SSH, or in a tmux
+-- pane started without one, use OSC 52 so the terminal owns the clipboard.
+if not (vim.env.WAYLAND_DISPLAY and vim.env.XDG_RUNTIME_DIR) then
+  local osc52 = require 'vim.ui.clipboard.osc52'
   vim.g.clipboard = {
     name = 'OSC 52',
-    copy = {
-      ['+'] = osc52.copy '+',
-      ['*'] = osc52.copy '*',
-    },
-    paste = {
-      ['+'] = osc52.paste '+',
-      ['*'] = osc52.paste '*',
-    },
+    copy = { ['+'] = osc52.copy '+', ['*'] = osc52.copy '*' },
+    paste = { ['+'] = osc52.paste '+', ['*'] = osc52.paste '*' },
   }
 end
+--- Shortmess controls the message display
+vim.o.shortmess = 'atI' -- default is 'ltToOCF'
 vim.opt.clipboard = 'unnamedplus' -- Sync with system clipboard
 -- Search and replace (substitute) opts on default
 vim.o.gdefault = true -- g is on 
@@ -72,10 +57,14 @@ vim.o.softtabstop = 8 -- Show tab as this number of spacesA
 -- vim.o.pumborder = 'rounded' -- 'rounded'|'single'
 
 vim.o.ruler = false -- Don't show cursor coordinates
--- vim.opt.shortmess:append {
---   w = true,
---   s = true,
--- }
+vim.o.formatoptions = 'croq'
+-- Pattern for a start of numbered list (used in `gw`). This reads as
+-- "Start of list item is: at least one special character (digit, -, +, *)
+-- possibly followed by punctuation (. or `)`) followed by at least one space".
+vim.o.formatlistpat = [[^\s*[0-9\-\+\*]\+\([\.\)]\)*\s\+]]
+
+vim.o.comments = [[sr:/***,m:**,ex:*/]]
+
 vim.o.showmode = false -- Don't show mode in command line
 vim.o.signcolumn = 'yes' -- Always show signcolumn (less flicker)
 vim.o.splitkeep = 'screen' -- Reduce scroll during window split
@@ -125,10 +114,6 @@ vim.o.smartindent = true -- Make indenting smart
 -- vim.o.iskeyword = '@,48-57,_,192-255,-' -- Treat dash as `word` textobject part
 vim.o.virtualedit = 'block' -- Allow going past end of line in blockwise mode
 --
--- -- Pattern for a start of numbered list (used in `gw`). This reads as
--- -- "Start of list item is: at least one special character (digit, -, +, *)
--- -- possibly followed by punctuation (. or `)`) followed by at least one space".
-vim.o.formatlistpat = [[^\s*[0-9\-\+\*]\+\([\.\)]\)*\s\+]]
 --
 -- -- Built-in completion
 -- Built-in completion
@@ -156,7 +141,25 @@ vim.o.updatetime = 300
 
 -- Don't auto-wrap comments and don't insert comment leader after hitting 'o'.
 -- Do on `FileType` to always override these changes from filetype plugins.
--- local f = function()
---   vim.cmd 'setlocal formatoptions-=c formatoptions-=o'
--- end
--- VimRc.new_autocmd('FileType', f, nil, "Proper 'formatoptions'")
+vim.diagnostic.config {
+  severity_sort = true,
+  float = {
+    border = 'rounded',
+    source = 'if_many',
+    underline = true,
+  },
+  virtual_text = {
+    spacing = 2,
+    source = 'if_many',
+    prefix = 'o',
+  },
+  -- Disable signs in the gutter.
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = 'E',
+      [vim.diagnostic.severity.WARN] = 'W',
+      [vim.diagnostic.severity.INFO] = 'I',
+      [vim.diagnostic.severity.HINT] = 'H',
+    },
+  },
+}

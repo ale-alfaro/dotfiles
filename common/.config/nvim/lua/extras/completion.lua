@@ -1,20 +1,6 @@
 return {
   setup_blink = function()
     require 'extras.snippets'
-    local blink_build = function(plugin, path)
-      VimRc.info('Running blink build after plugin install', { plugin = plugin, path = path })
-      vim.system({ 'mise', 'exec', '--', 'cargo', 'build', '--release' }, { cwd = path })
-    end
-
-    local blink_plug_path = vim.pack.get({ 'blink.cmp' })[1].path
-    local blink_dylib = vim.fs.joinpath(blink_plug_path, 'target', 'release')
-    if blink_plug_path and vim.uv.fs_stat(blink_dylib) ~= nil then
-      local lib_path = vim.env['LD_LIBRARY_PATH']
-      lib_path = lib_path and lib_path .. ':' or ''
-      VimRc.debug('Blink lib already installed at ' .. blink_dylib .. '. Adding to LD_LIBRARY_PATH=' .. lib_path)
-      vim.fn.setenv('LD_LIBRARY_PATH', lib_path .. blink_dylib)
-    end
-    VimRc.on_packchanged('blink.cmp', { 'update', 'install' }, blink_build, 'Build  Blink')
     require('blink-cmp').setup {
 
       -- Enables keymaps, completions and signature help when true (doesn't apply to cmdline or term)
@@ -80,8 +66,6 @@ return {
       -- Experimental signature help support
       signature = { enabled = true },
     }
-    local capabilities = require('blink.cmp').get_lsp_capabilities(vim.lsp.protocol.make_client_capabilities(), false)
-    vim.lsp.config('*', { capabilities = capabilities })
   end,
   setup_mini_cmdline = function()
     ---@class CmdLineState

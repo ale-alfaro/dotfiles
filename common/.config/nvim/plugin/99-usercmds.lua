@@ -78,20 +78,6 @@ usercmd('BufInfo', function()
   end
 end, 'Print current buffer Ft')
 usercmd('Scratch', VimRc.scratch_split, 'Open a scratch buffer')
-
-  vim.api.nvim_create_user_command('Diff', function(o)
-  
-    local p = vim.fs.abspath(vim.fs.normalize(o.fargs[1] or '.'))
-    local st = vim.uv.fs_stat(p)
-    if st and st.type == 'file' then
-      local bufnr = vim.fn.bufadd(p)
-      vim.fn.bufload(bufnr)
-      vim.api.nvim_open_win(bufnr, true, {})
-      MiniDiff.toggle_overlay(bufnr)
-    else
-      vim.notify('Cannot open ' .. p, vim.log.levels.ERROR)
-    end
-  end, { nargs = 1, desc = 'Diff viewer' ,complete = 'file'})
 ---@param name string
 ---@param cb string|fun(args: vim.api.keyset.create_user_command.command_args) Replacement command to execute when this user command is executed. When called
 ---@param desc string

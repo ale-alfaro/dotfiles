@@ -1,6 +1,7 @@
 ---@class vimrc.Utils
 ---@field log_level_names table<integer,string>
 local M = {}
+local H = {}
 -- Utilities ------------------------------------------------------------------
 
 ---@param ... string|number|boolean|table
@@ -38,12 +39,49 @@ local make_print_fn = function(lvl)
     return ...
   end
 end
-
 M.debug = make_print_fn(vim.log.levels.DEBUG)
 M.info = make_print_fn(vim.log.levels.INFO)
 M.warn = make_print_fn(vim.log.levels.WARN)
 M.err = make_print_fn(vim.log.levels.ERROR)
 
+-- Evaluate -------------------------------------------------------------------
+H.eval_lua_lines = function(lines)
+  -- Copy to not modify input
+  local lines_copy, n = vim.deepcopy(lines), #lines
+  lines_copy[n] = (lines_copy[n]:find('^%s*return%s+') == nil and 'return ' or '') .. lines_copy[n]
+
+  local str_to_eval = table.concat(lines_copy, '\n')
+
+  -- Allow returning tuple with any value(s) being `nil`
+  return H.inspect_objects(assert(loadstring(str_to_eval))())
+end
+
+H.inspect_objects = function(...)
+  local objects = {}
+  -- Not using `{...}` because it removes `nil` input
+  for i = 1, select('#', ...) do
+    local v = select(i, ...)
+    table.insert(objects, vim.inspect(v))
+  end
+
+  return vim.split(table.concat(objects, '\n'), '\n')
+end
+
+H.line_content = function(x)
+  if type(x) == 'string' then
+    return vim.split(x,'\n', {trimempty = true})
+  end
+  return type(x) == 'table' and vim._ensure_list(x) or nil
+end
+
+--- Default evaluate function
+---@param content string|string[] 
+M.evaluate = function(content)
+  local  lines = H.line_content(content)
+  if not lines then M.err('`content` should be a content table.') end
+  return H.eval_lua_lines(lines)
+
+end
 ---@param value any
 ---@return boolean
 M.is_truthy = function(value)

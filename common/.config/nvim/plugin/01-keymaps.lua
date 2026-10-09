@@ -187,9 +187,11 @@ out about, ^D is CTRL-D).
 --]]
 VimRc.keymap_clues = {
   { mode = 'n', keys = '<Leader>b', desc = '+Buffer' },
+  { mode = 'n', keys = '<Leader>e', desc = '+Explore' },
   { mode = 'n', keys = '<Leader>f', desc = '+Find ' },
   { mode = 'n', keys = '<Leader>n', desc = '+Notifications' },
   { mode = 'n', keys = '<Leader>s', desc = '+Search (Codebase)' },
+   { mode = 'n', keys = '<Leader>m', desc = '+Mark' },
   { mode = 'n', keys = '<Leader>t', desc = '+Terminal' },
   { mode = 'n', keys = '<Leader>v', desc = '+VCS' },
   { mode = 'x', keys = '<Leader>v', desc = '+VCS' },
@@ -265,16 +267,67 @@ vim.cmd [[
 
 ]]
 
+
+local nonprefix_keys = {
+  { '<Space><Space>', '<cmd>FzfLua builtin<cr>', 'Find Fzf pickers' },
+  { '<C-b>', '<cmd>FzfLua buffers<cr>', 'Buffers' },
+  { '<C-f>', '<cmd>FzfLua files<cr>', 'Files' },
+  { '<C-g>', '<cmd>FzfLua live_grep<cr>', 'Grep (cwd)' },
+  { '<C-e>', '<cmd>FzfLua grep_cword<cr>', 'Global' },
+  { '<C-c>', '<cmd>FzfLua resume<cr>', 'Continue' },
+}
+for _, k in ipairs(nonprefix_keys) do
+  vim.keymap.set('n', k[1], k[2], { desc = k[3], noremap = true })
+end
+local prefix_keys = {
+  { 'o', '<cmd>FzfLua oldfiles<cr>', 'Old Files' },
+  { 'm', '<cmd>FzfLua manpages<cr>', 'Find Man' },
+  { 'h', '<cmd>FzfLua help_tags<cr>', 'Help' },
+  { 'k', '<Cmd>FzfLua keymaps<CR>', 'Keymaps' },
+  { 'z', '<cmd>FzfLua zoxide<cr>', 'Zoxide' },
+  { 'H', '<cmd>FzfLua command_history<cr>', 'History' },
+  {
+    's',
+    '<cmd>FzfLua lsp_document_symbols<cr>',
+    'Live Document Symbols',
+  },
+  { 'd', '<cmd>FzfLua lsp_document_diagnostics<cr>', 'Document diagnostics' },
+}
+
+for _, k in ipairs(prefix_keys) do
+  vim.keymap.set('n', '<leader>f' .. k[1], k[2], { desc = k[3] })
+end
+local search_keys = {
+  { 'v', '<cmd>Oil ' .. vim.fs.dirname(vim.fn.expand '$MYVIMRC') .. '<cr>', 'VimRc' },
+  { 'o', '<cmd>FzfLua files cwd=$OBSIDIAN_HOME fd_opts=-e=md<cr>', 'Search Obsidian' },
+  { 'l', '<Cmd>lua MiniFiles.open(MiniFiles.get_latest_path())<cr>', 'Open Explorer (Last Path)' },
+    { 'w', '<cmd>Wf<cr>', 'Search West Workspace (Files)' },
+    { 'g', '<cmd>Wg<cr>', 'Search West Workspace (Live Grep)' },
+}
+for _, k in ipairs(search_keys) do
+  vim.keymap.set('n', '<leader>e' .. k[1], k[2], { desc = k[3] })
+end
+  local persist_keys = {
+  { 'f', "<cmd>FzfLua visits sort_by='frequency'<cr>", 'Search Frequent Visits' },
+    { 'v', '<Cmd>lua MiniVisits.add_label("core")<CR>', 'Add "core" label' },
+  { 'r', '<cmd>FzfLua visits<cr>', 'Search Recent Visits' },
+    { 'V', '<Cmd>lua MiniVisits.remove_label("core")<CR>', 'Remove "core" label' },
+    { 'l', '<Cmd>lua MiniVisits.add_label()<CR>', 'Add label' },
+    { 'L', '<Cmd>lua MiniVisits.remove_label()<CR>', 'Remove label' },
+  }
+  for _, key in ipairs(persist_keys) do
+    vim.keymap.set('n', '<leader>m' .. key[1], key[2], { desc = key[3] })
+  end
   local git_keys = {
     { 'a', '<cmd>FzfLua git_status<cr>', 'Add/Status' },
-    { 'd', '<cmd>FzfLua git_diff<cr>', 'Diff' },
+    { 'd', '<cmd>lua MiniDiff.toggle_overlay()<cr>', 'Diff Toggle overlay' },
+    { 'D', '<cmd>FzfLua git_diff<cr>', 'Diff Hunks' },
     { 'h', '<Cmd>FzfLua git_hunks<CR>', 'Hunks' },
     { 'b', '<cmd>FzfLua git_blame<cr>', 'Blame' },
     { 'B', '<cmd>Git blame --porcelain -- %<cr>', 'Blame (MiniGit)' },
     { 'l', '<cmd>Git log --oneline<cr>', 'Log (MiniGit)' },
     { 's', '<cmd>Git status<cr>', 'Status (MiniGit)' },
     { 'c', '<cmd>Git commit<cr>', 'Commit (MiniGit)' },
-    { 'D', '<cmd>lua MiniDiff.toggle_overlay()<cr>', 'Toggle overlay' },
     { 'b', '<cmd>FzfLua git_bcommits<cr>', 'Buf Commits' },
     { 'C', '<cmd>FzfLua git_commits<cr>', 'Commits' },
   }
@@ -282,3 +335,78 @@ vim.cmd [[
   for _, k in ipairs(git_keys) do
     vim.keymap.set('n', '<leader>v' .. k[1], k[2], { desc = k[3] })
   end
+
+-- Show next key clues in a bottom right window. Requires explicit opt-in for
+-- keys that act as clue trigger. Example usage:
+-- - Press `<Leader>` and wait for 1 second. A window with information about
+--   next available keys should appear.
+-- - Press one of the listed keys. Window updates immediately to show information
+--   about new next available keys. You can press `<BS>` to go back in key sequence.
+-- - Press keys until they resolve into some mapping.
+--
+-- Note: it is designed to work in buffers for normal files. It doesn't work in
+-- special buffers (like for 'mini.starter' or 'mini.files') to not conflict
+-- with its local mappings.
+--
+-- See also:
+-- - `:h MiniClue-examples` - examples of common setups
+-- - `:h MiniClue.ensure_buf_triggers()` - use it to enable triggers in buffer
+-- - `:h MiniClue.set_mapping_desc()` - change mapping description not from config
+VimRc.later(function()
+  local miniclue = require 'mini.clue'
+  -- stylua: ignore
+  miniclue.setup({
+    -- Define which clues to show. By default shows only clues for custom mappings
+    -- (uses `desc` field from the mapping; takes precedence over custom clue).
+    clues = {
+      -- This is defined in 'plugin/20_keymaps.lua' with Leader group descriptions
+      VimRc.keymap_clues,
+      miniclue.gen_clues.builtin_completion(),
+      miniclue.gen_clues.g(),
+      miniclue.gen_clues.marks(),
+      miniclue.gen_clues.registers(),
+      miniclue.gen_clues.square_brackets(),
+      -- This creates a submode for window resize mappings. Try the following:
+      -- - Press `<C-w>s` to make a window split.
+      -- - Press `<C-w>+` to increase height. Clue window still shows clues as if
+      --   `<C-w>` is pressed again. Keep pressing just `+` to increase height.
+      --   Try pressing `-` to decrease height.
+      -- - Stop submode either by `<Esc>` or by any key that is not in submode.
+      miniclue.gen_clues.windows({ submode_resize = true }),
+      miniclue.gen_clues.z(),
+    },
+    -- Explicitly opt-in for set of common keys to trigger clue window
+    triggers = {
+      { mode = { 'n', 'x' }, keys = '<Leader>' }, -- Leader triggers
+      { mode =   'n',        keys = '\\' },       -- mini.basics
+      { mode = { 'n', 'x' }, keys = '[' },        -- mini.bracketed
+      { mode = { 'n', 'x' }, keys = ']' },
+      { mode =   'i',        keys = '<C-x>' },    -- Built-in completion
+      { mode = { 'n', 'x' }, keys = 'g' },        -- `g` key
+      { mode = { 'n', 'x' }, keys = 'q' },        -- `g` key
+      { mode = { 'n', 'x' }, keys = "'" },        -- Marks
+      { mode = { 'n', 'x' }, keys = '`' },
+      { mode = { 'n', 'x' }, keys = '"' },        -- Registers
+      { mode = { 'i', 'c' }, keys = '<C-r>' },
+      { mode =   'n',        keys = '<C-w>' },    -- Window commands
+      { mode = { 'n', 'x' }, keys = 's' },        -- `s` key (mini.surround, etc.)
+      { mode = { 'n', 'x' }, keys = 'z' },        -- `z` key
+    },
+
+    window = {
+      -- Show window immediately
+      delay = 0,
+
+      config = {
+        -- Compute window width automatically
+        width = 'auto',
+
+        -- Use double-line border
+        border = 'double',
+      },
+    },
+  })
+end)
+
+
+

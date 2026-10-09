@@ -2,16 +2,6 @@
 VimRc.later(function()
   require('mini.visits').setup()
 
-  local persist_keys = {
-    { 'v', '<Cmd>lua MiniVisits.add_label("core")<CR>', 'Add "core" label' },
-    { 'V', '<Cmd>lua MiniVisits.remove_label("core")<CR>', 'Remove "core" label' },
-    { 'l', '<Cmd>lua MiniVisits.add_label()<CR>', 'Add label' },
-    { 'L', '<Cmd>lua MiniVisits.remove_label()<CR>', 'Remove label' },
-  }
-  for _, key in ipairs(persist_keys) do
-    vim.keymap.set('n', '<leader>m' .. key[1], key[2], { desc = key[3] })
-  end
-  VimRc.keymap_clues[#VimRc.keymap_clues + 1] = { mode = 'n', keys = '<Leader>m', desc = '+Mark' }
 end)
 -- local builtin_textobjects = {
 --   -- Use balanced pair for brackets. Use opening ones to possibly remove edge
@@ -74,12 +64,6 @@ VimRc.later(function()
   }
 end)
 
-VimRc.later(function()
-  require('mini.misc').setup()
-  MiniMisc.setup_auto_root()
-  MiniMisc.setup_termbg_sync()
-  MiniMisc.setup_restore_cursor()
-end)
 -- Common configuration presets. Example usage:
 -- - `<C-s>` in Insert mode - save and go to Normal mode
 -- - `go` / `gO` - insert empty line before/after in Normal mode

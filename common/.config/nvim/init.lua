@@ -17,7 +17,7 @@ local function exrc_trust(exrc_path)
   end
 end
 local exrc_au = vim.api.nvim_create_augroup('exrc', {clear = true})
-vim.api.nvim_create_autocmd('BufWrite', { pattern = '**/.nvim.lua', callback = function (ev)
+vim.api.nvim_create_autocmd('BufWrite', { pattern = '.nvim.lua', callback = function (ev)
   local buf = ev.buf
   exrc_trust(vim.api.nvim_buf_get_name(buf))
 end, desc = "Trust .nvim", group = exrc_au })
@@ -51,16 +51,24 @@ vim.pack.add {
   gh 'saghen/blink.lib',
   gh_rev('saghen/blink.cmp', 'main'),
 }
+vim.cmd [[
+  packadd nvim.undotree
+  packadd nvim.difftool
+]]
 local misc = require 'mini.misc'
+
+  misc.setup()
+  misc.setup_auto_root()
+  misc.setup_termbg_sync()
+  misc.setup_restore_cursor()
 ---@class VimRc : vimrc.Utils
 ---@field map fun(mapping:vimrc.KeyMapping,opts:vim.keymap.set.Opts|string)
 ---@field now fun(func:function)
 ---@field later fun(func:function)
 ---@field now_if_args fun(func:function)
----@field on_filetype fun(ft:string,func:function)
+---@field on_filetype fun(ft:string|string[],func:function)
 ---@field on_event fun(evt:string,func:function)
----@field new_autocmd fun(event:string|string[],callback:function,pattern:string|string[]?,desc:string?)
----@field on_packchanged fun(plugin_name:string,kinds:string[],callback:fun(plugin_spec:vim.pack.Spec,plugin_path:string),desc:string?)
+---@field on_packchanged fun(plugin_name:string,callback:fun())
 ---@field notify? fun(msg:string,lvl:string)
 ---@field env table<string,string>
 ---@field getenv fun(name:string,fallback?:string):string?
@@ -87,7 +95,8 @@ function VimRc.map(mapping, opts)
 
   vim.keymap.set(mode, mapping.lhs, mapping.rhs, keymap_opts)
 end
-
+VimRc.never = function(_f)
+end
 VimRc.now = function(f)
   misc.safely('now', f)
 end
@@ -95,68 +104,105 @@ VimRc.later = function(f)
   misc.safely('later', f)
 end
 VimRc.now_if_args = vim.fn.argc(-1) > 0 and VimRc.now or VimRc.later
+VimRc.never_if_args = vim.fn.argc(-1) > 0 and VimRc.never or VimRc.later
+
+
+
+
+VimRc.new_autocmd = function(event, pattern, f)
+  if type(pattern) == 'table' and #pattern == 0 then pattern = nil end
+
+  local function cb()
+    -- Execute exactly once, not once per event or pattern match
+    -- Delete before executing `f` to account for nested events
+  local ok, err = xpcall(f, function(e) return debug.traceback(e .. '\n', 2) end)
+  if not ok then
+  local init_trace = '\n\nTraceback of `MiniMisc.safely()` call:\n'
+  vim.notify('Error during safe execution: ' .. err .. init_trace, vim.log.levels.WARN)
+end
+  end
+
+  local group = vim.api.nvim_create_augroup('VimRc', { clear = true })
+  local opts = { group = group, pattern = pattern, callback = cb}
+  vim.api.nvim_create_autocmd(event, opts)
+end
+---@param ev string When to execute a function. One of:
+---   - `'now'` - immediately.
+---   - `'later'` - queue to be executed soon without blocking the execution of next
+---     code in file. Queued functions are executed in order they are added.
+---   - `'delay:<number>'` - after a specified delay with |vim.defer_fn()|.
+---   - `'event:<events>'` - on whichever specified event is triggered first.
+---   - `'event:<events>~<patterns>` - same as above, but events must match
+---     specified |autocmd-pattern|.
+---   - `'filetype:<filetypes>'` - same as `'event:FileType~<filetypes>'`, but follow
+---     successful function execution with |filetype-detect| for all normal buffers
+---     (if new |ftdetect| scripts were added) and sourcing |ftplugin| (for buffers
+---     matching `<filetypes>`). Intended to be used for loading "language plugins".
+---@param f function Function to execute (without arguments).
+---
+---@usage >lua
+---   MiniMisc.safely('later', function()
+---     vim.notify('This will be executed after the next "now" call')
+---   end)
+---   MiniMisc.safely('now', function() error('This will be a warning') end)
+---
+---   MiniMisc.safely('event:InsertEnter', function()
+---     require('mini.completion').setup()
+---   end)
+---   MiniMisc.safely('event:CmdlineEnter~/', function()
+---     vim.notify('Start searching for the first time')
+---   end)
+---
+---   MiniMisc.safely('filetype:tex,plaintex', function()
+---     -- Load plugin to improve writing LaTeX
+---   end)
 VimRc.on_event = function(ev, f)
   misc.safely('event:' .. ev, f)
 end
 VimRc.on_filetype = function(ft, f)
+  if type(ft) == 'table' and vim.islist(ft) then 
+    local pat = table.concat(ft,",")
+  misc.safely('filetype:' .. pat, f)
+elseif type(ft) == 'string' then
   misc.safely('filetype:' .. ft, f)
+else
+  vim.notify("Bad pattern", vim.log.levels.ERROR)
+  end
 end
 
-local gr = vim.api.nvim_create_augroup('vimrc', {})
----@param event string|string[]
----@param callback function
----@param pattern string|string[]?
----@param desc string?
-VimRc.new_autocmd = function(event, callback, pattern, desc)
-  pattern = pattern or '*'
-  local opts = { group = gr, pattern = pattern, callback = callback, desc = desc }
-  vim.api.nvim_create_autocmd(event, opts)
-end
--- Define custom `vim.pack.add()` hook helper. See `:h vim.pack-events`.
--- Example usage: see 'plugin/40_plugins.lua'.
-VimRc.on_packchanged = function(plugin_name, kinds, callback, desc)
-  local f = function(ev)
+VimRc.on_event('PackChanged', function(ev)
+
     local name, kind = ev.data.spec.name, ev.data.kind
-    if not (name == plugin_name and vim.tbl_contains(kinds, kind)) then
+    if not vim.tbl_contains({ 'update' }, kind) then
       return
     end
     if not ev.data.active then
-      vim.cmd.packadd(plugin_name)
+      vim.cmd.packadd(name)
     end
-    callback(ev.data.spec, ev.data.path)
+    vim.api.nvim_exec_autocmds('User', {pattern = name})
+end)
+VimRc.on_packchanged = function(plugin_name, callback)
+  misc.safely('event:User:' .. plugin_name, callback)
+end
+-- VimRc.on_packchanged('nvim-treesitter', function()
+--   vim.cmd 'TSUpdate'
+-- end)
+
+local blink_plug = vim.pack.get({ 'blink.cmp' })[1]
+if blink_plug then
+  -- VimRc.on_packchanged('blink.cmp', function()
+  --   VimRc.info('Running blink build after plugin install', { plugin = blink_plug.path })
+  --   vim.system({ 'mise', 'exec', '--', 'cargo', 'build', '--release' }, { cwd = blink_plug.path })
+  -- end)
+
+  local blink_dylib = vim.fs.joinpath(blink_plug.path, 'target', 'release')
+  if blink_plug.path and vim.uv.fs_stat(blink_dylib) ~= nil then
+    local lib_path = vim.env['LD_LIBRARY_PATH']
+    lib_path = lib_path and lib_path .. ':' or ''
+    VimRc.debug('Blink lib already installed at ' .. blink_dylib .. '. Adding to LD_LIBRARY_PATH=' .. lib_path)
+    vim.fn.setenv('LD_LIBRARY_PATH', lib_path .. blink_dylib)
   end
-  VimRc.new_autocmd('PackChanged', f, '*', desc)
 end
----@param plugin vim.pack.Spec
----@param path string
-local ts_update = function(plugin, path)
-  vim.cmd 'TSUpdate'
-end
-VimRc.on_packchanged('nvim-treesitter', { 'update' }, ts_update, ':TSUpdate')
--- local hooks = function(ev)
---   -- Use available |event-data|
---   local name, kind = ev.data.spec.name, ev.data.kind
---
---   -- Run build script after plugin's code has changed
---   if name == 'plug-1' and (kind == 'install' or kind == 'update') then
---     -- Append `:wait()` if you need synchronous execution
---     vim.system({ 'make' }, { cwd = ev.data.path })
---   end
---
---   -- If action relies on code from the plugin (like user command or
---   -- Lua code), make sure to explicitly load it first
---   if name == 'plug-2' and kind == 'update' then
---     if not ev.data.active then
---       vim.cmd.packadd('plug-2')
---     end
---     vim.cmd('PlugTwoUpdate')
---     require('plug2').after_update()
---   end
--- end
---
--- -- If hooks need to run on install, run this before `vim.pack.add()`
--- -- To act on install from lockfile, run before very first `vim.pack.add()`
--- vim.api.nvim_create_autocmd('PackChanged', { callback = hooks })
 ---
 ---
 ---@class FeatureFlag

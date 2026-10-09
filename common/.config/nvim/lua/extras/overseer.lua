@@ -1,5 +1,26 @@
 local overseer = require 'overseer'
 
+local west_errorformat = {
+  '%-G%f:%l:%c: note:%.%#',
+  '%-G%f:%l: note:%.%#',
+  '%-G%f:%l: %trror: (Each undeclared identifier is reported only once',
+  '%-G%f:%l: %trror: for each function it appears in.)',
+  'devicetree %trror: %f:%l (column %c): %m',
+  'devicetree %trror: %f:%l: %m',
+  '%f:%l:%c: %trror: %m',
+  '%f:%l:%c: %tarning: %m',
+  '%f:%l: %trror: %m',
+  '%f:%l: %tarning: %m',
+  'CMake %tarning%.%# at %f:%l %m',
+  'CMake %trror at %f:%l %m',
+  'CMake %trror: %m',
+  'CMake %tarning: %m',
+  'FATAL ERROR: %m',
+  '%tarning: %m',
+  '%f:%l:%c: %m',
+  '%f:%l: %m',
+  '%-G%.%#',
+}
 overseer.setup {
   output = {
     -- Use a terminal buffer to display output. If false, a normal buffer is used
@@ -64,30 +85,41 @@ overseer.setup {
     -- Set any window options here (e.g. winhighlight)
     win_opts = {},
   },
+  components_aliases = {
+
+        -- Tasks from tasks.json use these components
+        default_west = {
+          'default',
+          {
+            "open_output",
+            focus = true,
+            on_start = "if_no_on_output_quickfix",
+          },
+          {
+            "on_output_quickfix",
+            set_diagnostics = true,
+            -- open = false,
+            -- open_height = 8,
+            -- cwd=vim.env.TOPDIR or vim.fn.getcwd(),
+            errorformat = vim.fn.join(west_errorformat, ","),
+          },
+          -- {
+          --   "on_output_write_file",
+          --   filename = "build_diag.txt",
+          -- },
+        {
+          'on_output_parse',
+          errorformat = west_errorformat,
+        },
+        {
+          'on_result_diagnostics_trouble',
+          close = true,
+        },
+      },
+  },
 }
 
 vim.cmd.cnoreabbrev 'OS OverseerShell'
-local west_errorformat = {
-  '%-G%f:%l:%c: note:%.%#',
-  '%-G%f:%l: note:%.%#',
-  '%-G%f:%l: %trror: (Each undeclared identifier is reported only once',
-  '%-G%f:%l: %trror: for each function it appears in.)',
-  'devicetree %trror: %f:%l (column %c): %m',
-  'devicetree %trror: %f:%l: %m',
-  '%f:%l:%c: %trror: %m',
-  '%f:%l:%c: %tarning: %m',
-  '%f:%l: %trror: %m',
-  '%f:%l: %tarning: %m',
-  'CMake %tarning%.%# at %f:%l %m',
-  'CMake %trror at %f:%l %m',
-  'CMake %trror: %m',
-  'CMake %tarning: %m',
-  'FATAL ERROR: %m',
-  '%tarning: %m',
-  '%f:%l:%c: %m',
-  '%f:%l: %m',
-  '%-G%.%#',
-}
 ---@param dir? string
 ---@return string
 local function get_west_topdir(dir)
@@ -112,23 +144,7 @@ VimRc.run_west_build = function(app, opts)
       name = 'west build',
       cwd = opts.cwd or get_west_topdir(),
       components = {
-        'default',
-
-        {
-          'open_output',
-          focus = true,
-          on_start = 'always',
-        },
-        {
-          'on_output_quickfix',
-          set_diagnostics = true,
-          open_on_exit = 'never',
-          errorformat = vim.fn.join(west_errorformat, ','),
-        },
-        {
-          'on_result_diagnostics_trouble',
-          close = true,
-        },
+        'default_west',
       },
     }
     task:start()

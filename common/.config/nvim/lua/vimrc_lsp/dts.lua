@@ -26,35 +26,6 @@ local M = {}
 --- build at a time, re-point it with `:DtsUse`. Kept out of git via the name.
 M.marker = '.dts-lsp.build_info.yml'
 
---- Default Zephyr settings used when no build is pinned. Paths are absolute
---- (see `zephyr` note in M.config), so `cwd` is only a fallback anchor.
----@param zephyr string absolute zephyr base
----@param opts?  {topdir?:string,contexts?:table}
----@return table
-M.settings = function(zephyr, opts)
-  opts = opts or {}
-  local topdir = opts.topdir or (vim.fs.root(0, {'.west'}) or {})[0]
-  local contexts = opts.contexts or {}
-  return {
-    devicetree = {
-      cwd = topdir or vim.api.nvim_buf_get_name(0),
-      defaultBindingType = 'Zephyr',
-      defaultIncludePaths = {
-        vim.fs.joinpath(zephyr, 'dts'),
-        vim.fs.joinpath(zephyr, 'dts', 'arm'),
-        vim.fs.joinpath(zephyr, 'dts', 'arm64'),
-        vim.fs.joinpath(zephyr, 'dts', 'riscv'),
-        vim.fs.joinpath(zephyr, 'dts', 'common'),
-        vim.fs.joinpath(zephyr, 'dts', 'vendor'),
-        vim.fs.joinpath(zephyr, 'include'),
-      },
-      defaultZephyrBindings = { vim.fs.joinpath(zephyr, 'dts', 'bindings') },
-      autoChangeContext = true,
-      allowAdhocContexts = true,
-      contexts = contexts,
-    },
-  }
-end
 
 --- Translate a Zephyr `build_info.yml` into dts-lsp devicetree settings. The
 --- build's fully-resolved include/binding dirs become both the defaults and a

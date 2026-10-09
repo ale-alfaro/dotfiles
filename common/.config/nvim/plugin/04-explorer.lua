@@ -40,7 +40,6 @@ end
 ---@field open_at_loc  fun(loc:string)
 ---@field quickfix? fun()
 ---@field loc_list? fun()
-if not vim.o.diff then
   VimRc.now_if_args(function()
     local minifiles = require 'extras.minifiles' ---@as ExplorerPlugin
     local oil = require 'extras.oil' ---@as ExplorerPlugin
@@ -48,19 +47,10 @@ if not vim.o.diff then
     minifiles.setup()
 
     -- stylua:ignore
-    local prefix_keys = {
-      { 'v', '<cmd>Oil ' .. vim.fs.dirname(vim.fn.expand '$MYVIMRC') .. '<cr>', 'VimRc' },
-    }
-
-    for _, k in ipairs(prefix_keys) do
-      vim.keymap.set('n', '<leader>e' .. k[1], k[2], { desc = k[3] })
-    end
     local non_prefix_keys = {
       { '\\', minifiles_toggle, 'Open Explorer (Cwd)' },
-      { '<localleader>l', '<Cmd>lua MiniFiles.open(MiniFiles.get_latest_path())<cr>', 'Open Explorer (Last Path)' },
     }
     for _, k in ipairs(non_prefix_keys) do
       vim.keymap.set('n', k[1], k[2], { desc = k[3] })
     end
   end)
-end
