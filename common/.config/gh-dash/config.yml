@@ -1,38 +1,45 @@
 # $schema : https://gh-dash.dev/schema.json
+#
 prSections:
   - title: Sibel Subscribed
     filters: >-
       is:open repo:sibelhealth/sh_sdk_2.0
       is:open repo:sibelhealth/aria-sense-fw
+      updated:>={{ nowModify "-2.5w" }}
+    layout:
+      repo:
+        hidden: true
   - title: Mine
     filters: >-
       is:open author:@me
+      updated:>={{ nowModify "-3w" }} 
+      sort:updated-desc
     layout:
       author:
         hidden: true
   - title: Review
     filters: >-
       is:open review-requested:@me
-    layout:
-      repo:
-        width: 6
-  - title: Personal
-    filters: >-
-      is:open user:@me
+      updated:>={{ nowModify "-2.5w" }}
 issuesSections:
   - title: Creator
     filters: author:@me
-  - title: Commented
-    filters: is:open commenter:@me
   - title: Assigned
     filters: is:open assignee:@me
+
+pager:
+  diff: diffnav
+
+showAuthorIcons: true
+smartFilteringAtLaunch: false
+
 defaults:
   view: prs
   refetchIntervalMinutes: 10
   layout:
     prs:
       repoName:
-        grow: true,
+        grow: true
         width: 10
         hidden: false
       base:
@@ -40,8 +47,9 @@ defaults:
   preview:
     open: true
     width: 80
-  prsLimit: 20
-  issuesLimit: 20
+  prsLimit: 5
+  issuesLimit: 5
+
 repoPaths:
   ale-alfaro/*: ~/sibel/eng/tools/*
   sibelhealth/DragonFly-Zephyr: ~/sibel/eng/fw/anne_sensors_workspace/dragonfly
@@ -49,6 +57,7 @@ repoPaths:
   sibelhealth/framework: ~/sibel/eng/fw/anne_sensors_workspace/framework
   sibelhealth/sh_sdk_2.0: ~/sibel/eng/fw/aria_workspace/sh_sdk
   ale-alfaro/dotfiles: ~/dotfiles
+
 keybindings:
   universal:
     - key: g
@@ -60,6 +69,10 @@ keybindings:
       name: Add Reviewer
       command: >-
         gh pr edit --add-reviewer sibelhealth/Firmware
+    - key: T
+      name: runs watch
+      command: >-
+        tmux neww -n "enhance {{.PrNumber}}" 'gh enhance -R {{.RepoName}} {{.PrNumber}}'
     - key: O
       name: claude review
       command: >-
@@ -67,8 +80,7 @@ keybindings:
     - key: v
       name: approve
       command: >
-        gh pr review --repo {{.RepoName}} --approve --body "$(gum input
-        --prompt='Approval Comment: ')" {{.PrNumber}}
+        gh pr review --repo {{.RepoName}} --approve --body "$(gum input --prompt='Approval Comment: ')" {{.PrNumber}}
     - key: W
       name: Run Workflow
       command: >
@@ -102,10 +114,3 @@ theme:
       primary: "#383B5B"
       secondary: "#39386B"
       faint: "#2B2B40"
-pager:
-  diff: diffnav
-repo:
-  branchesRefetchIntervalSeconds: 30
-  prsRefetchIntervalSeconds: 60
-showAuthorIcons: true
-smartFilteringAtLaunch: false

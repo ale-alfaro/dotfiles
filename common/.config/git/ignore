@@ -101,3 +101,5 @@ mise.ai.toml
 
 .config/wt.toml
 .gdbinit
+#semcode database
+.semcode*
