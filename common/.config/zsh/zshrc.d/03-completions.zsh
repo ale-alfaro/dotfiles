@@ -47,7 +47,7 @@
 
 # Complete the alias when _expand_alias is used as a function
 fpath+=/usr/share/zsh/plugins/zsh-users/zsh-completions/src
-fpath+="$XDG_DATA_HOME}/zsh/generated_man_completions"
+fpath+="${XDG_DATA_HOME}/zsh/generated_man_completions"
 fpath+="$ZDOTDIR/completions/src"
 fpath+="$ZDOTDIR/functions"
 cache_directory="$XDG_CACHE_HOME/zsh"
@@ -56,7 +56,7 @@ autoload -Uz compinit && compinit -d $cache_directory
 autoload -Uz +X bashcompinit && bashcompinit
 zstyle ':completion:*' completer _complete _expand_alias _extensions _approximate _history
 
-# zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 ## Auto complete with case insenstivity and allowing some characters to be
 #forgotten at the start like a .
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
@@ -75,10 +75,10 @@ zstyle ':completion:*:*:(z|cd|zd):*' tag-order local-directories directory-stack
 
 #Select in a menu
 
-# zstyle ':completion:*' file-sort modification
+zstyle ':completion:*' file-sort modification
 # --- Completion styles ---
 ## disable sort when completing `git checkout`
-# zstyle ':completion:*:git-checkout:*' sort false
+zstyle ':completion:*:git-checkout:*' sort false
 # set descriptions format to enable group support
 # force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
 zstyle ':completion:*' menu select # can be no
@@ -89,22 +89,21 @@ zstyle ':completion:*:corrections' format '%d (errors: %e) %f'
 zstyle ':completion:*:warnings' format ' no matches found %f'
 zstyle ':completion:*:default' list-prompt '%S%M matches%s'
 
-source <(fzf --zsh)
 #
 plugins=(
   Aloxaf/fzf-tab
 )
 __init_plugins "${plugins[@]}"
 # fzf-tab
-zstyle ':fzf-tab:complete:(v|n|nvim):*' fzf-preview '[[ -d $realpath ]] && eza --tree --color=always $realpath | head -200 || bat -n --color=always --line-range :500 $realpath'
-zstyle ':fzf-tab:complete:(z|cd|zd):*' fzf-preview 'eza --tree --color=always $realpath | head -200'
+# zstyle ':fzf-tab:complete:(v|n|nvim):*' fzf-preview '[[ -d $realpath ]] && eza --tree --color=always $realpath | head -200 || bat -n --color=always --line-range :500 $realpath'
+# zstyle ':fzf-tab:complete:(z|cd|zd):*' fzf-preview 'eza --tree --color=always $realpath | head -200'
 # zstyle ':fzf-tab:complete:(z|cd|zd):*' fzf-preview 'eza --icons=always --oneline --no-git --all $realpath'
 # To make fzf-tab follow FZF_DEFAULT_OPTS.
 # NOTE: This may lead to unexpected behavior since some flags break this plugin. See Aloxaf/fzf-tab#455.
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
 
 # Enable multi select in tab completions using tab and shift tab
-# zstyle ':fzf-tab:complete:*' fzf-bindings 'tab:toggle+down,shift-tab:toggle+up'
+zstyle ':fzf-tab:complete:*' fzf-bindings 'tab:toggle+down,shift-tab:toggle+up'
 
 # switch group using `<` and `>`
 zstyle ':fzf-tab:*' switch-group ',' '.'

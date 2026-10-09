@@ -1,0 +1,31 @@
+#!/usr/bin/env zsh
+# tgdb <elf> <device> [extra-cmd...]: JLink GDB server bottom, gdb client here, extra cmd right.
+[[ -z $1 || -z $2 ]] && {
+  echo "Usage: tgdb <elf> <nRF5340_xxAA_APP> [cmd for right pane]"
+  return 1
+}
+[[ -z $TMUX ]] && {
+  echo "You must start tmux to use tgdb."
+  return 1
+}
+
+local elf="$1" device="$2"
+shift 2
+local cmd="$*"
+local gdbserver_cmd="JLinkGDBServer -select usb -if swd -speed auto -device $device -silent -endian little -singlerun -nogui"
+local gdbclient_cmd="arm-zephyr-eabi-gdb-py -ex='target remote :2331' -ex='mon reset' -ex='c' --se=$elf"
+local pane="$TMUX_PANE"
+
+tmux rename-window -t "$pane" "${PWD:t}"
+
+# Server runs directly in the pane so it never races against shell startup.
+tmux split-window -v -l 15% -t "$pane" -c "$PWD" "$gdbserver_cmd"
+
+if [[ -n $cmd ]]; then
+  tmux split-window -h -l 30% -t "$pane" -c "$PWD" "$cmd; exec $SHELL"
+else
+  tmux split-window -h -l 30% -t "$pane" -c "$PWD"
+fi
+
+tmux send-keys -t "$pane" "$gdbclient_cmd" C-m
+tmux select-pane -t "$pane"

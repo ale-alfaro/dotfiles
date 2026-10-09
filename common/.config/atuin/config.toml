@@ -6,7 +6,6 @@
 ## where to store your encryption key, default is your system data directory
 ## linux/mac: ~/.local/share/atuin/key
 ## windows: %USERPROFILE%/.local/share/atuin/key
-key_path = "~/.config/direnv/envs/ATUIN_KEY"
 
 ## where to store your auth session token, default is your system data directory
 ## linux/mac: ~/.local/share/atuin/session
@@ -38,7 +37,7 @@ key_path = "~/.config/direnv/envs/ATUIN_KEY"
 
 ## which search mode to use
 ## possible values: prefix, fulltext, fuzzy, skim
-search_mode = "prefix"
+search_mode = "daemon-fuzzy"
 
 ## which filter mode to use by default
 ## possible values: "global", "host", "session", "directory", "workspace"
@@ -72,7 +71,7 @@ style = "compact"
 # inline_height = 0
 
 ## Invert the UI - put the search bar at the top , Default to `false`
-# invert = false
+invert = true
 
 ## enable or disable showing a preview of the selected command
 ## useful when the command is longer than the terminal width and is cut off
@@ -93,7 +92,7 @@ exit_mode = "return-query"
 
 ## use ctrl instead of alt as the shortcut modifier key for numerical UI shortcuts
 ## alt-0 .. alt-9
-ctrl_n_shortcuts = true
+ctrl_n_shortcuts = false
 
 ## default history list format - can also be specified with the --format arg
 history_format = "{command}"
@@ -160,7 +159,7 @@ enter_accept = true
 ## Cursor style in each keymap mode.  If specified, the cursor style is changed
 ## in entering the cursor shape.  Available values are "default" and
 ## "{blink,steady}-{block,underline,bar}".
-# keymap_cursor = { emacs = "blink-block", vim_insert = "blink-block", vim_normal = "steady-block" }
+keymap_cursor = { emacs = "blink-block", vim_insert = "blink-block", vim_normal = "steady-block" }
 
 # network_connect_timeout = 5
 # network_timeout = 5
@@ -174,16 +173,10 @@ enter_accept = true
 
 [stats]
 ## Set commands where we should consider the subcommand for statistics. Eg, kubectl get vs just kubectl
-common_subcommands = [
-  "git",
-  "just",
-  "j",
-  "west",
-  "uv"
-]
+common_subcommands = ["git", "mise", "west", "uv"]
 
 ## Set commands that should be totally stripped and ignored from stats
-common_prefix = ["v", "nvim", "direnv"]
+common_prefix = ["v", "nvim", "mt", "mr"]
 # Set commands that will be completely ignored from stats
 ignored_commands = ["cd", "ls", "fg", "lg", "bat", "."]
 
@@ -214,6 +207,8 @@ records = true
 # strategy = "auto"
 
 [daemon]
+enabled = true
+autostart = true
 ## Enables using the daemon to sync. Requires the daemon to be running in the background. Start it with `atuin daemon`
 # enabled = false
 
@@ -243,7 +238,7 @@ records = true
 ##    https://ogeon.github.io/docs/palette/master/palette/named/index.html
 ## If you provide a custom theme file, it should be  called "NAME.toml" and the theme below
 ## should be the stem, i.e. `theme = "NAME"` for your chosen NAME.
-name = "catppuccin-mocha-maroon"
+name = "autumn"
 
 ## Whether the theme manager should output normal or extra information to help fix themes.
 ## Boolean, true or false. If unset, left up to the theme manager.
@@ -253,4 +248,7 @@ name = "catppuccin-mocha-maroon"
 ## The list of enabled filter modes, in order of priority.
 ## The "workspace" mode is skipped when not in a workspace or workspaces = false.
 ## Default filter mode can be overridden with the filter_mode setting.
-filters = [ "workspace","directory", "session", "global" ]
+filters = ["workspace", "directory", "session", "global"]
+
+[ai]
+enabled = true

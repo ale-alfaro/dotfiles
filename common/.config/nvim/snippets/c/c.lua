@@ -108,5 +108,57 @@ K_THREAD_DEFINE($1_tid, CONFIG_APP_$2_THREAD_STACK_SIZE,
 int $1(${3:const struct zbus_channel *} $2, k_timeout_t timeout);
 ]],
     desc = "Declare function with doxygen comments",
+},
+
+{
+prefix = "zbusc",
+body = [[
+/**
+ * @brief Zbus channel ${1:chan} containing msgs of type struct ${2:var}
+ *
+ */
+ZBUS_CHAN_DEFINE($1, struct $2, ${3:ZBUS_OBSERVERS_EMPTY}, NULL, NULL, ZBUS_MSG_INIT(0));
+${0}
+]],
+},
+{
+prefix = "zbush",
+body = [[
+/**
+ * Copyright (c) 2026 Sibel Health
+ *
+ * SPDX-License-Identifier:
+ */
+
+#ifndef ${2:MY_MODULE}_H_
+#define $2_H_
+
+#include <zephyr/kernel.h>
+#include <zephyr/zbus/zbus.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Channel provided by this module */
+ZBUS_CHAN_DECLARE(${1:my_module}_chan);
+
+/* Message types carried on $1_chan */
+enum $1_msg_type {
+	${3:MY_EVENT} = 0x1,
+};
+
+/* Message structure for $1_chan */
+struct $1_msg {
+	enum $1_msg_type type;
+	$0
+};
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* $2_H_ */
+]],
 }
 }

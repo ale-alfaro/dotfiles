@@ -127,6 +127,7 @@ M.setup = function()
   local sstore = require 'vimrc_lsp.schemastore'
   VimRc.on_filetype('json', sstore.json_ls)
   VimRc.on_filetype('yaml', sstore.yaml_ls)
+  VimRc.on_filetype('toml', sstore.toml_ls)
 
   VimRc.on_filetype('pkl', function()
     require 'vimrc_lsp.pkl'

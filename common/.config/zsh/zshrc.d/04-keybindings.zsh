@@ -5,7 +5,40 @@
 #
 bindkey -v
 export KEYTIMEOUT=5
-
+#
+#     key_backspace              kbs       kb  backspace key
+#     key_catab                  ktbc      ka  clear-all-tabs key
+#     key_clear                  kclr      kC  clear-screen or erase key
+#     key_ctab                   kctab     kt  clear-tab key
+#     key_dc                     kdch1     kD  delete-character key
+#     key_dl                     kdl1      kL  delete-line key
+#     key_eol                    kel       kE  clear-to-end-of-line key
+#     key_eos                    ked       kS  clear-to-end-of-screen key
+#     key_f0                     kf0       k0  F0 function key
+#     key_f1                     kf1       k1  F1 function key
+#     key_f10                    kf10      k;  F10 function key
+#     key_f2                     kf2       k2  F2 function key
+#     key_f3                     kf3       k3  F3 function key
+#     key_f4                     kf4       k4  F4 function key
+#     key_f5                     kf5       k5  F5 function key
+#     key_f6                     kf6       k6  F6 function key
+#     key_f7                     kf7       k7  F7 function key
+#     key_f8                     kf8       k8  F8 function key
+#     key_f9                     kf9       k9  F9 function key
+#     key_home                   khome     kh  home key
+#     key_ic                     kich1     kI  insert-character key
+#     key_il                     kil1      kA  insert-line key
+#     key_ll                     kll       kH  lower-left key (home down)
+#     key_npage                  knp       kN  next-page key
+#     key_ppage                  kpp       kP  previous-page key
+#     key_sf                     kind      kF  scroll-forward key
+#     key_sr                     kri       kR  scroll-backward key
+#     key_right                  kcuf1     kr  right-arrow key
+#     key_stab                   khts      kT  set-tab key
+#     key_left                   kcub1     kl  left-arrow key
+#     key_up                     kcuu1     ku  up-arrow key
+#     key_down                   kcud1     kd  down-arrow key
+ 
 # create a zkbd compatible hash;
 # to add other keys to this hash, see: man 5 terminfo
 typeset -g -A key
@@ -26,12 +59,8 @@ key[Control-Left]="${terminfo[kLFT5]}"
 key[Control-Right]="${terminfo[kRIT5]}"
 
 # setup key accordingly
-[[ -n "${key[Control-Left]}"  ]] && bindkey -- "${key[Control-Left]}"  beginning-of-line
-[[ -n "${key[Control-Right]}" ]] && bindkey -- "${key[Control-Right]}" end-of-line
 [[ -n "${key[Backspace]}" ]] && bindkey -- "${key[Backspace]}"  backward-delete-char
 [[ -n "${key[Delete]}"    ]] && bindkey -- "${key[Delete]}"     delete-char
-# [[ -n "${key[Up]}"        ]] && bindkey -- "${key[Up]}"         up-line-or-history
-# [[ -n "${key[Down]}"      ]] && bindkey -- "${key[Down]}"       down-line-or-history
 [[ -n "${key[Left]}"      ]] && bindkey -- "${key[Left]}"       backward-char
 [[ -n "${key[Right]}"     ]] && bindkey -- "${key[Right]}"      forward-char
 [[ -n "${key[PageUp]}"    ]] && bindkey -- "${key[PageUp]}"     beginning-of-buffer-or-history

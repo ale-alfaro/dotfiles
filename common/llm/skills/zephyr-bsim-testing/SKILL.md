@@ -222,6 +222,12 @@ wait_for_background_jobs
   and the staged name disagree, or twister ran without `BSIM_OUT_PATH` and
   silently skipped the copy. `ls $BSIM_OUT_PATH/bin` first.
 - **PHY hangs** — `-D=` mismatch, or a device died before registering.
+- **Passes once, fails on the next run** — the `zephyr,sim-flash` file kept the
+  previous run's data; the erase-at-boot default never applies. Pass
+  `-<node>_erase`. See [[running.md|Simulated flash]].
+- **A device dies at boot with `Incorrect option`, its peer "hangs"** — a
+  command-line option only some builds have (e.g. a sim-flash node on one
+  board). The peer waits out `EXECUTE_TIMEOUT`.
 - **A role fights the image it shares.** `-ENOMEM` from `bt_le_adv_start()` or
   `bt_conn_le_create()`, or `-EACCES` with HCI `0x2005 status 0x0c`, means an SDK
   layer in the shared image is already advertising. Split the roles into two

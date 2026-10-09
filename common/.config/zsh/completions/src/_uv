@@ -322,7 +322,6 @@ never\:"Disables colored output"))' \
 '--no-config[Avoid discovering configuration files (\`pyproject.toml\`, \`uv.toml\`)]' \
 '-h[Display the concise help for this command]' \
 '--help[Display the concise help for this command]' \
-'::service -- The domain or URL of the service to lookup:_urls' \
 && ret=0
 ;;
 (helper)
@@ -439,15 +438,16 @@ _arguments "${_arguments_options[@]}" : \
 '(--all-extras --only-group)*--extra=[Include optional dependencies from the specified extra name]:EXTRA:' \
 '*--no-extra=[Exclude the specified optional dependencies, if \`--all-extras\` is supplied]:NO_EXTRA:' \
 '(--only-group --only-dev)*--group=[Include dependencies from the specified dependency group]:GROUP:' \
-'*--no-group=[Disable the specified dependency group]:NO_GROUP:' \
+'*--no-group=[Disable the specified dependency group \[env\: \`UV_NO_GROUP\`=\]]:NO_GROUP:' \
 '(--group --dev --all-groups)*--only-group=[Only include dependencies from the specified dependency group]:ONLY_GROUP:' \
+'*--no-editable-package=[Install the specified editable packages as non-editable]:NO_EDITABLE_PACKAGE:' \
 '*--env-file=[Load environment variables from a \`.env\` file]:ENV_FILE:_files' \
 '*-w+[Run with the given packages installed]:WITH:' \
 '*--with=[Run with the given packages installed]:WITH:' \
 '*--with-editable=[Run with the given packages installed in editable mode]:WITH_EDITABLE:_files -/' \
 '*--with-requirements=[Run with the packages listed in the given files]:WITH_REQUIREMENTS:_files' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -467,9 +467,10 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:' \
@@ -482,9 +483,9 @@ requires-python\:"Optimize for selecting latest supported version of each packag
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
-'*--no-build-package=[Don'\''t build source distributions for a specific package]:NO_BUILD_PACKAGE:' \
-'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package]:NO_BINARY_PACKAGE:' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
+'*--no-build-package=[Don'\''t build source distributions for a specific package \[env\: \`UV_NO_BUILD_PACKAGE\`=\]]:NO_BUILD_PACKAGE:' \
+'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package \[env\: \`UV_NO_BINARY_PACKAGE\`=\]]:NO_BINARY_PACKAGE:' \
 '*--refresh-package=[Refresh cached data for a specific package]:REFRESH_PACKAGE:' \
 '(--all-packages)--package=[Run the command in a specific package in the workspace]:PACKAGE:' \
 '-p+[The Python interpreter to use for the run environment.]:PYTHON:' \
@@ -531,7 +532,8 @@ aarch64-manylinux_2_39\:"An ARM64 target for the \`manylinux_2_39\` platform"
 aarch64-manylinux_2_40\:"An ARM64 target for the \`manylinux_2_40\` platform"
 aarch64-linux-android\:"An ARM64 Android target"
 x86_64-linux-android\:"An \`x86_64\` Android target"
-wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12"
+wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12. See <https\://pyodide.org/en/stable/development/abi/312.html>"
+wasm32-pyodide2025\:"A wasm32 target using the Pyodide 2025 platform. Meant for use with Python 3.13. See <https\://pyodide.org/en/stable/development/abi/313.html>"
 arm64-apple-ios\:"An ARM64 target for iOS device"
 arm64-apple-ios-simulator\:"An ARM64 target for iOS simulator"
 x86_64-apple-ios-simulator\:"An \`x86_64\` target for iOS simulator"))' \
@@ -555,11 +557,11 @@ never\:"Disables colored output"))' \
 '--no-all-extras[]' \
 '--dev[Include the development dependency group \[env\: UV_DEV=\]]' \
 '--no-dev[Disable the development dependency group \[env\: UV_NO_DEV=\]]' \
+'(--group --all-groups --no-dev)--only-dev[Only include the development dependency group]' \
 '--no-default-groups[Ignore the default dependency groups]' \
 '(--only-group --only-dev)--all-groups[Include dependencies from all dependency groups]' \
 '(-s --script --gui-script)-m[Run a Python module]' \
 '(-s --script --gui-script)--module[Run a Python module]' \
-'(--group --all-groups --no-dev)--only-dev[Only include the development dependency group]' \
 '--editable[Install any non-editable dependencies, including the project and any workspace members, as editable]' \
 '--no-editable[Install any editable dependencies, including the project and any workspace members, as non-editable \[env\: UV_NO_EDITABLE=\]]' \
 '--inexact[Do not remove extraneous packages present in the environment]' \
@@ -570,7 +572,9 @@ never\:"Disables colored output"))' \
 '--no-active[Prefer project'\''s virtual environment over an active environment]' \
 '--no-sync[Avoid syncing the virtual environment \[env\: UV_NO_SYNC=\]]' \
 '(--frozen -U --upgrade)--locked[Assert that the \`uv.lock\` will remain unchanged \[env\: UV_LOCKED=\]]' \
+'--no-locked[Disable locked mode, overriding \`UV_LOCKED\`]' \
 '(--locked -U --upgrade --no-sources)--frozen[Run without updating the \`uv.lock\` file \[env\: UV_FROZEN=\]]' \
+'--no-frozen[Disable frozen mode, overriding \`UV_FROZEN\`]' \
 '(-m --module --gui-script)-s[Run the given path as a Python script]' \
 '(-m --module --gui-script)--script[Run the given path as a Python script]' \
 '(-s --script -m --module)--gui-script[Run the given path as a Python GUI script]' \
@@ -710,6 +714,7 @@ _arguments "${_arguments_options[@]}" : \
 '--marker=[Apply this marker to all added packages]:MARKER:' \
 '(--dev --group)--optional=[Add the requirements to the package'\''s optional dependencies for the specified extra]:OPTIONAL:' \
 '(--dev --optional --script)--group=[Add the requirements to the specified dependency group]:GROUP:' \
+'*--no-editable-package=[Don'\''t add the specified requirements as editable]:NO_EDITABLE_PACKAGE:' \
 '--bounds=[The kind of version specifier to use when adding dependencies]:BOUNDS:((lower\:"Only a lower bound, e.g., \`>=1.2.3\`"
 major\:"Allow the same major version, similar to the semver caret, e.g., \`>=1.2.3, <2.0.0\`"
 minor\:"Allow the same minor version, similar to the semver tilde, e.g., \`>=1.2.3, <1.3.0\`"
@@ -718,8 +723,8 @@ exact\:"Pin the exact version, e.g., \`==1.2.3\`"))' \
 '--tag=[Tag to use when adding a dependency from Git]:TAG:' \
 '--branch=[Branch to use when adding a dependency from Git]:BRANCH:' \
 '*--extra=[Extras to enable for the dependency]:EXTRA:' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -739,9 +744,10 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:' \
@@ -754,9 +760,9 @@ requires-python\:"Optimize for selecting latest supported version of each packag
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
-'*--no-build-package=[Don'\''t build source distributions for a specific package]:NO_BUILD_PACKAGE:' \
-'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package]:NO_BINARY_PACKAGE:' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
+'*--no-build-package=[Don'\''t build source distributions for a specific package \[env\: \`UV_NO_BUILD_PACKAGE\`=\]]:NO_BUILD_PACKAGE:' \
+'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package \[env\: \`UV_NO_BINARY_PACKAGE\`=\]]:NO_BINARY_PACKAGE:' \
 '*--refresh-package=[Refresh cached data for a specific package]:REFRESH_PACKAGE:' \
 '(--isolated)--package=[Add the dependency to a specific package in the workspace]:PACKAGE:' \
 '(--dev --optional --package --workspace)--script=[Add the dependency to the specified Python script, rather than to a project]:SCRIPT:_files' \
@@ -787,7 +793,9 @@ never\:"Disables colored output"))' \
 '--lfs[Whether to use Git LFS when adding a dependency from Git]' \
 '--no-sync[Avoid syncing the virtual environment \[env\: UV_NO_SYNC=\]]' \
 '(--frozen -U --upgrade)--locked[Assert that the \`uv.lock\` will remain unchanged \[env\: UV_LOCKED=\]]' \
+'--no-locked[Disable locked mode, overriding \`UV_LOCKED\`]' \
 '(--locked -U --upgrade --no-sources)--frozen[Add dependencies without re-locking the project \[env\: UV_FROZEN=\]]' \
+'--no-frozen[Disable frozen mode, overriding \`UV_FROZEN\`]' \
 '--active[Prefer the active virtual environment over the project'\''s virtual environment]' \
 '--no-active[Prefer project'\''s virtual environment over an active environment]' \
 '--no-index[Ignore the registry index (e.g., PyPI), instead relying on direct URL dependencies and those provided via \`--find-links\`]' \
@@ -810,11 +818,11 @@ never\:"Disables colored output"))' \
 '--no-refresh[]' \
 '--workspace[Add the dependency as a workspace member]' \
 '--no-workspace[Don'\''t add the dependency as a workspace member]' \
-'(--frozen --no-sync --only-install-project)--no-install-project[Do not install the current project]' \
+'(--frozen --no-sync --only-install-project)--no-install-project[Do not install the current project \[env\: UV_NO_INSTALL_PROJECT=\]]' \
 '(--frozen --no-sync --no-install-project)--only-install-project[Only install the current project]' \
-'(--frozen --no-sync --only-install-workspace)--no-install-workspace[Do not install any workspace members, including the current project]' \
+'(--frozen --no-sync --only-install-workspace)--no-install-workspace[Do not install any workspace members, including the current project \[env\: UV_NO_INSTALL_WORKSPACE=\]]' \
 '(--frozen --no-sync --no-install-workspace)--only-install-workspace[Only install workspace members, including the current project]' \
-'(--frozen --no-sync --only-install-local)--no-install-local[Do not install local path dependencies]' \
+'(--frozen --no-sync --only-install-local)--no-install-local[Do not install local path dependencies \[env\: UV_NO_INSTALL_LOCAL=\]]' \
 '(--frozen --no-sync --no-install-local)--only-install-local[Only install local path dependencies]' \
 '-n[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
 '--no-cache[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
@@ -849,8 +857,8 @@ never\:"Disables colored output"))' \
 _arguments "${_arguments_options[@]}" : \
 '(--dev --group --script)--optional=[Remove the packages from the project'\''s optional dependencies for the specified extra]:OPTIONAL:' \
 '(--dev --optional --script)--group=[Remove the packages from the specified dependency group]:GROUP:' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -870,9 +878,10 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:' \
@@ -885,9 +894,9 @@ requires-python\:"Optimize for selecting latest supported version of each packag
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
-'*--no-build-package=[Don'\''t build source distributions for a specific package]:NO_BUILD_PACKAGE:' \
-'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package]:NO_BINARY_PACKAGE:' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
+'*--no-build-package=[Don'\''t build source distributions for a specific package \[env\: \`UV_NO_BUILD_PACKAGE\`=\]]:NO_BUILD_PACKAGE:' \
+'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package \[env\: \`UV_NO_BINARY_PACKAGE\`=\]]:NO_BINARY_PACKAGE:' \
 '*--refresh-package=[Refresh cached data for a specific package]:REFRESH_PACKAGE:' \
 '(--isolated)--package=[Remove the dependencies from a specific package in the workspace]:PACKAGE:' \
 '--script=[Remove the dependency from the specified Python script, rather than from a project]:SCRIPT:_files' \
@@ -909,12 +918,14 @@ never\:"Disables colored output"))' \
 '--directory=[Change to the given directory prior to running the command]:DIRECTORY:_files -/' \
 '--project=[Discover a project in the given directory]:PROJECT:_files -/' \
 '--config-file=[The path to a \`uv.toml\` file to use for configuration]:CONFIG_FILE:_files' \
-'(--optional --group)--dev[Remove the packages from the development dependency group \[env\: UV_DEV=\]]' \
+'(--optional --group --script)--dev[Remove the packages from the development dependency group \[env\: UV_DEV=\]]' \
 '--no-sync[Avoid syncing the virtual environment after re-locking the project \[env\: UV_NO_SYNC=\]]' \
 '--active[Prefer the active virtual environment over the project'\''s virtual environment]' \
 '--no-active[Prefer project'\''s virtual environment over an active environment]' \
 '(--frozen -U --upgrade)--locked[Assert that the \`uv.lock\` will remain unchanged \[env\: UV_LOCKED=\]]' \
+'--no-locked[Disable locked mode, overriding \`UV_LOCKED\`]' \
 '(--locked -U --upgrade --no-sources)--frozen[Remove dependencies without re-locking the project \[env\: UV_FROZEN=\]]' \
+'--no-frozen[Disable frozen mode, overriding \`UV_FROZEN\`]' \
 '--no-index[Ignore the registry index (e.g., PyPI), instead relying on direct URL dependencies and those provided via \`--find-links\`]' \
 '-U[Allow package upgrades, ignoring pinned versions in any existing output file. Implies \`--refresh\`]' \
 '--upgrade[Allow package upgrades, ignoring pinned versions in any existing output file. Implies \`--refresh\`]' \
@@ -975,8 +986,8 @@ post\:"Increase the post version (e.g., 1.2.3.post5 => 1.2.3.post6)"
 dev\:"Increase the dev version (e.g., 1.2.3a4.dev6 => 1.2.3.dev7)"))' \
 '--output-format=[The format of the output]:OUTPUT_FORMAT:((text\:"Display the version as plain text"
 json\:"Display the version as JSON"))' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -996,9 +1007,10 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:' \
@@ -1011,9 +1023,9 @@ requires-python\:"Optimize for selecting latest supported version of each packag
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
-'*--no-build-package=[Don'\''t build source distributions for a specific package]:NO_BUILD_PACKAGE:' \
-'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package]:NO_BINARY_PACKAGE:' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
+'*--no-build-package=[Don'\''t build source distributions for a specific package \[env\: \`UV_NO_BUILD_PACKAGE\`=\]]:NO_BUILD_PACKAGE:' \
+'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package \[env\: \`UV_NO_BINARY_PACKAGE\`=\]]:NO_BINARY_PACKAGE:' \
 '*--refresh-package=[Refresh cached data for a specific package]:REFRESH_PACKAGE:' \
 '(--isolated)--package=[Update the version of a specific package in the workspace]:PACKAGE:' \
 '-p+[The Python interpreter to use for resolving and syncing.]:PYTHON:' \
@@ -1040,7 +1052,9 @@ never\:"Disables colored output"))' \
 '--active[Prefer the active virtual environment over the project'\''s virtual environment]' \
 '--no-active[Prefer project'\''s virtual environment over an active environment]' \
 '(--frozen -U --upgrade)--locked[Assert that the \`uv.lock\` will remain unchanged \[env\: UV_LOCKED=\]]' \
+'--no-locked[Disable locked mode, overriding \`UV_LOCKED\`]' \
 '(--locked -U --upgrade --no-sources)--frozen[Update the version without re-locking the project \[env\: UV_FROZEN=\]]' \
+'--no-frozen[Disable frozen mode, overriding \`UV_FROZEN\`]' \
 '--no-index[Ignore the registry index (e.g., PyPI), instead relying on direct URL dependencies and those provided via \`--find-links\`]' \
 '-U[Allow package upgrades, ignoring pinned versions in any existing output file. Implies \`--refresh\`]' \
 '--upgrade[Allow package upgrades, ignoring pinned versions in any existing output file. Implies \`--refresh\`]' \
@@ -1095,12 +1109,13 @@ _arguments "${_arguments_options[@]}" : \
 json\:"Display the result in JSON format"))' \
 '*--no-extra=[Exclude the specified optional dependencies, if \`--all-extras\` is supplied]:NO_EXTRA:' \
 '(--only-group --only-dev)*--group=[Include dependencies from the specified dependency group]:GROUP:' \
-'*--no-group=[Disable the specified dependency group]:NO_GROUP:' \
+'*--no-group=[Disable the specified dependency group \[env\: \`UV_NO_GROUP\`=\]]:NO_GROUP:' \
 '(--group --dev --all-groups)*--only-group=[Only include dependencies from the specified dependency group]:ONLY_GROUP:' \
+'*--no-editable-package=[Install the specified editable packages as non-editable]:NO_EDITABLE_PACKAGE:' \
 '(--only-install-package)*--no-install-package=[Do not install the given package(s)]:NO_INSTALL_PACKAGE:' \
 '(--no-install-package)*--only-install-package=[Only install the given package(s)]:ONLY_INSTALL_PACKAGE:' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -1120,9 +1135,10 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:' \
@@ -1135,9 +1151,9 @@ requires-python\:"Optimize for selecting latest supported version of each packag
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
-'*--no-build-package=[Don'\''t build source distributions for a specific package]:NO_BUILD_PACKAGE:' \
-'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package]:NO_BINARY_PACKAGE:' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
+'*--no-build-package=[Don'\''t build source distributions for a specific package \[env\: \`UV_NO_BUILD_PACKAGE\`=\]]:NO_BUILD_PACKAGE:' \
+'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package \[env\: \`UV_NO_BINARY_PACKAGE\`=\]]:NO_BINARY_PACKAGE:' \
 '*--refresh-package=[Refresh cached data for a specific package]:REFRESH_PACKAGE:' \
 '(--all-packages)*--package=[Sync for specific packages in the workspace]:PACKAGE:' \
 '(--all-packages --package --no-install-project --no-install-workspace --no-install-local --extra --all-extras --no-extra --no-all-extras --dev --no-dev --only-dev --group --no-group --no-default-groups --only-group --all-groups)--script=[Sync the environment for a Python script, rather than the current project]:SCRIPT:_files' \
@@ -1184,7 +1200,8 @@ aarch64-manylinux_2_39\:"An ARM64 target for the \`manylinux_2_39\` platform"
 aarch64-manylinux_2_40\:"An ARM64 target for the \`manylinux_2_40\` platform"
 aarch64-linux-android\:"An ARM64 Android target"
 x86_64-linux-android\:"An \`x86_64\` Android target"
-wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12"
+wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12. See <https\://pyodide.org/en/stable/development/abi/312.html>"
+wasm32-pyodide2025\:"A wasm32 target using the Pyodide 2025 platform. Meant for use with Python 3.13. See <https\://pyodide.org/en/stable/development/abi/313.html>"
 arm64-apple-ios\:"An ARM64 target for iOS device"
 arm64-apple-ios-simulator\:"An ARM64 target for iOS simulator"
 x86_64-apple-ios-simulator\:"An \`x86_64\` target for iOS simulator"))' \
@@ -1217,14 +1234,16 @@ never\:"Disables colored output"))' \
 '--exact[Perform an exact sync, removing extraneous packages]' \
 '--active[Sync dependencies to the active virtual environment]' \
 '--no-active[Prefer project'\''s virtual environment over an active environment]' \
-'(--only-install-project)--no-install-project[Do not install the current project]' \
+'(--only-install-project)--no-install-project[Do not install the current project \[env\: UV_NO_INSTALL_PROJECT=\]]' \
 '(--no-install-project)--only-install-project[Only install the current project]' \
-'(--only-install-workspace)--no-install-workspace[Do not install any workspace members, including the root project]' \
+'(--only-install-workspace)--no-install-workspace[Do not install any workspace members, including the root project \[env\: UV_NO_INSTALL_WORKSPACE=\]]' \
 '(--no-install-workspace)--only-install-workspace[Only install workspace members, including the root project]' \
-'(--only-install-local)--no-install-local[Do not install local path dependencies]' \
+'(--only-install-local)--no-install-local[Do not install local path dependencies \[env\: UV_NO_INSTALL_LOCAL=\]]' \
 '(--no-install-local)--only-install-local[Only install local path dependencies]' \
 '(--frozen -U --upgrade)--locked[Assert that the \`uv.lock\` will remain unchanged \[env\: UV_LOCKED=\]]' \
+'--no-locked[Disable locked mode, overriding \`UV_LOCKED\`]' \
 '(--locked -U --upgrade --no-sources)--frozen[Sync without updating the \`uv.lock\` file \[env\: UV_FROZEN=\]]' \
+'--no-frozen[Disable frozen mode, overriding \`UV_FROZEN\`]' \
 '--dry-run[Perform a dry run, without writing the lockfile or modifying the project environment]' \
 '--no-index[Ignore the registry index (e.g., PyPI), instead relying on direct URL dependencies and those provided via \`--find-links\`]' \
 '-U[Allow package upgrades, ignoring pinned versions in any existing output file. Implies \`--refresh\`]' \
@@ -1278,8 +1297,8 @@ never\:"Disables colored output"))' \
 (lock)
 _arguments "${_arguments_options[@]}" : \
 '--script=[Lock the specified Python script, rather than the current project]:SCRIPT:_files' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -1298,24 +1317,25 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-setting=[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-settings-package=[Settings to pass to the PEP 517 build backend for a specific package, specified as \`PACKAGE\:KEY=VALUE\` pairs]:CONFIG_SETTINGS_PACKAGE:_default' \
 '*--no-build-isolation-package=[Disable isolation when building source distributions for a specific package]:NO_BUILD_ISOLATION_PACKAGE:' \
-'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:_default' \
-'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:_default' \
+'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:' \
+'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:' \
 '--link-mode=[The method to use when installing packages from the global cache]:LINK_MODE:((clone\:"Clone (i.e., copy-on-write) packages from the source into the destination"
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
-'*--no-build-package=[Don'\''t build source distributions for a specific package]:NO_BUILD_PACKAGE:' \
-'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package]:NO_BINARY_PACKAGE:' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
+'*--no-build-package=[Don'\''t build source distributions for a specific package \[env\: \`UV_NO_BUILD_PACKAGE\`=\]]:NO_BUILD_PACKAGE:' \
+'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package \[env\: \`UV_NO_BINARY_PACKAGE\`=\]]:NO_BINARY_PACKAGE:' \
 '*--refresh-package=[Refresh cached data for a specific package]:REFRESH_PACKAGE:' \
 '-p+[The Python interpreter to use during resolution.]:PYTHON:' \
 '--python=[The Python interpreter to use during resolution.]:PYTHON:' \
@@ -1337,7 +1357,10 @@ never\:"Disables colored output"))' \
 '--config-file=[The path to a \`uv.toml\` file to use for configuration]:CONFIG_FILE:_files' \
 '(--check-exists -U --upgrade)--check[Check if the lockfile is up-to-date]' \
 '(--check-exists -U --upgrade)--locked[Check if the lockfile is up-to-date \[env\: UV_LOCKED=\]]' \
+'--no-locked[Disable locked mode, overriding \`UV_LOCKED\`]' \
 '(--check --locked)--check-exists[Assert that a \`uv.lock\` exists without checking if it is up-to-date \[env\: UV_FROZEN=\]]' \
+'(--check-exists --check --locked --dry-run)--frozen[Equivalent to \`--check-exists\`]' \
+'--no-frozen[Disable frozen mode, overriding \`UV_FROZEN\`]' \
 '(--check-exists --check --locked)--dry-run[Perform a dry run, without writing the lockfile]' \
 '--no-index[Ignore the registry index (e.g., PyPI), instead relying on direct URL dependencies and those provided via \`--find-links\`]' \
 '-U[Allow package upgrades, ignoring pinned versions in any existing output file. Implies \`--refresh\`]' \
@@ -1381,6 +1404,67 @@ never\:"Disables colored output"))' \
 '--help[Display the concise help for this command]' \
 && ret=0
 ;;
+(upgrade)
+_arguments "${_arguments_options[@]}" : \
+'*--exclude=[Exclude the named package from upgrades]:EXCLUDE:' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
+'--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
+'*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
+'*-f+[Locations to search for candidate distributions, in addition to those found in the registry indexes]:FIND_LINKS:_default' \
+'*--find-links=[Locations to search for candidate distributions, in addition to those found in the registry indexes]:FIND_LINKS:_default' \
+'--index-strategy=[The strategy to use when resolving against multiple index URLs]:INDEX_STRATEGY:((first-index\:"Only use results from the first index that returns a match for a given package name"
+unsafe-first-match\:"Search for every package name across all indexes, exhausting the versions from the first index before moving on to the next"
+unsafe-best-match\:"Search for every package name across all indexes, preferring the "best" version found. If a package version is in multiple indexes, only look at the entry for the first index"))' \
+'--keyring-provider=[Attempt to use \`keyring\` for authentication for index URLs]:KEYRING_PROVIDER:((disabled\:"Do not use keyring for credential lookup"
+subprocess\:"Use the \`keyring\` command for credential lookup"))' \
+'--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
+'--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
+managed\:"Prefer managed Python installations over system Python installations"
+system\:"Prefer system Python installations over managed Python installations"
+only-system\:"Only use system Python installations; never use managed Python installations"))' \
+'--python-fetch=[Deprecated version of \[\`Self\:\:python_downloads\`\]]:PYTHON_FETCH:((automatic\:"Automatically download managed Python installations when needed"
+manual\:"Do not automatically download managed Python installations; require explicit installation"
+never\:"Do not ever allow Python downloads"))' \
+'(--no-color)--color=[Control the use of color in output]:COLOR_CHOICE:((auto\:"Enables colored output only when the output is going to a terminal or TTY with support"
+always\:"Enables colored output regardless of the detected environment"
+never\:"Disables colored output"))' \
+'*--allow-insecure-host=[Allow insecure connections to a host]:ALLOW_INSECURE_HOST:_urls' \
+'*--preview-features=[Enable experimental preview features]:PREVIEW_FEATURES:_default' \
+'--directory=[Change to the given directory prior to running the command]:DIRECTORY:_files -/' \
+'--project=[Discover a project in the given directory]:PROJECT:_files -/' \
+'--config-file=[The path to a \`uv.toml\` file to use for configuration]:CONFIG_FILE:_files' \
+'--no-index[Ignore the registry index (e.g., PyPI), instead relying on direct URL dependencies and those provided via \`--find-links\`]' \
+'-n[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
+'--no-cache[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
+'--managed-python[Require use of uv-managed Python versions \[env\: UV_MANAGED_PYTHON=\]]' \
+'--no-managed-python[Disable use of uv-managed Python versions \[env\: UV_NO_MANAGED_PYTHON=\]]' \
+'--allow-python-downloads[Allow automatically downloading Python when required. \[env\: "UV_PYTHON_DOWNLOADS=auto"\]]' \
+'--no-python-downloads[Disable automatic downloads of Python. \[env\: "UV_PYTHON_DOWNLOADS=never"\]]' \
+'(-v --verbose)*-q[Use quiet output]' \
+'(-v --verbose)*--quiet[Use quiet output]' \
+'(-q --quiet)*-v[Use verbose output]' \
+'(-q --quiet)*--verbose[Use verbose output]' \
+'(--color)--no-color[Disable colors]' \
+'--native-tls[(Deprecated\: use \`--system-certs\` instead.) Whether to load TLS certificates from the platform'\''s native certificate store \[env\: UV_NATIVE_TLS=\]]' \
+'--no-native-tls[]' \
+'--system-certs[Whether to load TLS certificates from the platform'\''s native certificate store \[env\: UV_SYSTEM_CERTS=\]]' \
+'--no-system-certs[]' \
+'--offline[Disable network access \[env\: UV_OFFLINE=\]]' \
+'--no-offline[]' \
+'--preview[Whether to enable all experimental preview features \[env\: UV_PREVIEW=\]]' \
+'--no-preview[]' \
+'--isolated[Avoid discovering a \`pyproject.toml\` or \`uv.toml\` file \[env\: UV_ISOLATED=\]]' \
+'--show-settings[Show the resolved settings for the current command]' \
+'--no-progress[Hide all progress outputs \[env\: UV_NO_PROGRESS=\]]' \
+'--no-installer-metadata[Skip writing \`uv\` installer metadata files (e.g., \`INSTALLER\`, \`REQUESTED\`, and \`direct_url.json\`) to site-packages \`.dist-info\` directories \[env\: UV_NO_INSTALLER_METADATA=\]]' \
+'--no-config[Avoid discovering configuration files (\`pyproject.toml\`, \`uv.toml\`)]' \
+'-h[Display the concise help for this command]' \
+'--help[Display the concise help for this command]' \
+'*::packages -- The packages to upgrade:' \
+&& ret=0
+;;
 (export)
 _arguments "${_arguments_options[@]}" : \
 '--format=[The format to which \`uv.lock\` should be exported]:FORMAT:((requirements.txt\:"Export in \`requirements.txt\` format"
@@ -1390,15 +1474,17 @@ cyclonedx1.5\:"Export in \`CycloneDX\` v1.5 JSON format"))' \
 '(--all-packages)*--prune=[Prune the given package from the dependency tree]:PACKAGE:_default' \
 '(--all-extras --only-group)*--extra=[Include optional dependencies from the specified extra name]:EXTRA:_default' \
 '*--no-extra=[Exclude the specified optional dependencies, if \`--all-extras\` is supplied]:NO_EXTRA:_default' \
-'(--only-group --only-dev)*--group=[Include dependencies from the specified dependency group]:GROUP:_default' \
-'*--no-group=[Disable the specified dependency group]:NO_GROUP:_default' \
-'(--group --dev --all-groups)*--only-group=[Only include dependencies from the specified dependency group]:ONLY_GROUP:_default' \
+'(--only-group --only-dev)*--group=[Include dependencies from the specified dependency group]:GROUP:' \
+'*--no-group=[Disable the specified dependency group \[env\: \`UV_NO_GROUP\`=\]]:NO_GROUP:' \
+'(--group --dev --all-groups)*--only-group=[Only include dependencies from the specified dependency group]:ONLY_GROUP:' \
+'*--no-editable-package=[Export the specified editable packages as non-editable]:NO_EDITABLE_PACKAGE:' \
 '-o+[Write the exported requirements to the given file]:OUTPUT_FILE:_files' \
 '--output-file=[Write the exported requirements to the given file]:OUTPUT_FILE:_files' \
+'(-o --output-file --script --package --all-packages --extra --all-extras --no-extra --no-all-extras --group --no-group --only-group --all-groups --no-default-groups --dev --no-dev --only-dev)--batch=[Export multiple selections from a TOML manifest containing \`\[\[export\]\]\` entries]:BATCH:_files' \
 '(--only-emit-package)*--no-emit-package=[Do not emit the given package(s)]:NO_EMIT_PACKAGE:' \
 '(--no-emit-package)*--only-emit-package=[Only emit the given package(s)]:ONLY_EMIT_PACKAGE:' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -1417,24 +1503,25 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-setting=[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-settings-package=[Settings to pass to the PEP 517 build backend for a specific package, specified as \`PACKAGE\:KEY=VALUE\` pairs]:CONFIG_SETTINGS_PACKAGE:_default' \
 '*--no-build-isolation-package=[Disable isolation when building source distributions for a specific package]:NO_BUILD_ISOLATION_PACKAGE:' \
-'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:_default' \
-'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:_default' \
+'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:' \
+'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:' \
 '--link-mode=[The method to use when installing packages from the global cache]:LINK_MODE:((clone\:"Clone (i.e., copy-on-write) packages from the source into the destination"
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
-'*--no-build-package=[Don'\''t build source distributions for a specific package]:NO_BUILD_PACKAGE:' \
-'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package]:NO_BINARY_PACKAGE:' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
+'*--no-build-package=[Don'\''t build source distributions for a specific package \[env\: \`UV_NO_BUILD_PACKAGE\`=\]]:NO_BUILD_PACKAGE:' \
+'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package \[env\: \`UV_NO_BINARY_PACKAGE\`=\]]:NO_BINARY_PACKAGE:' \
 '*--refresh-package=[Refresh cached data for a specific package]:REFRESH_PACKAGE:' \
 '(--all-packages --package --no-emit-project --no-emit-workspace)--script=[Export the dependencies for the specified PEP 723 Python script, rather than the current project]:SCRIPT:_files' \
 '-p+[The Python interpreter to use during resolution.]:PYTHON:' \
@@ -1467,6 +1554,10 @@ never\:"Disables colored output"))' \
 '--annotate[]' \
 '--no-header[Exclude the comment header at the top of the generated output file]' \
 '--header[]' \
+'--emit-index-url[Include \`--index-url\` and \`--extra-index-url\` entries in the generated output file]' \
+'--no-emit-index-url[]' \
+'--emit-find-links[Include \`--find-links\` entries in the generated output file]' \
+'--no-emit-find-links[]' \
 '--editable[Export any non-editable dependencies, including the project and any workspace members, as editable]' \
 '--no-editable[Export any editable dependencies, including the project and any workspace members, as non-editable \[env\: UV_NO_EDITABLE=\]]' \
 '--hashes[Include hashes for all dependencies]' \
@@ -1478,7 +1569,9 @@ never\:"Disables colored output"))' \
 '(--only-emit-local)--no-emit-local[Do not include local path dependencies in the exported requirements]' \
 '(--no-emit-local)--only-emit-local[Only include local path dependencies in the exported requirements]' \
 '(--frozen -U --upgrade)--locked[Assert that the \`uv.lock\` will remain unchanged \[env\: UV_LOCKED=\]]' \
+'--no-locked[Disable locked mode, overriding \`UV_LOCKED\`]' \
 '(--locked -U --upgrade --no-sources)--frozen[Do not update the \`uv.lock\` before exporting \[env\: UV_FROZEN=\]]' \
+'--no-frozen[Disable frozen mode, overriding \`UV_FROZEN\`]' \
 '--no-index[Ignore the registry index (e.g., PyPI), instead relying on direct URL dependencies and those provided via \`--find-links\`]' \
 '-U[Allow package upgrades, ignoring pinned versions in any existing output file. Implies \`--refresh\`]' \
 '--upgrade[Allow package upgrades, ignoring pinned versions in any existing output file. Implies \`--refresh\`]' \
@@ -1523,17 +1616,19 @@ never\:"Disables colored output"))' \
 ;;
 (tree)
 _arguments "${_arguments_options[@]}" : \
+'--format=[The format in which to display the dependency graph]:FORMAT:((text\:"Display the dependency graph as a human-readable tree"
+json\:"Display the dependency graph as JSON"))' \
 '-d+[Maximum display depth of the dependency tree]:DEPTH:_default' \
 '--depth=[Maximum display depth of the dependency tree]:DEPTH:_default' \
 '*--prune=[Prune the given package from the display of the dependency tree]:PRUNE:' \
 '*--package=[Display only the specified packages]:PACKAGE:' \
-'(--only-group --only-dev)*--group=[Include dependencies from the specified dependency group]:GROUP:_default' \
-'*--no-group=[Disable the specified dependency group]:NO_GROUP:_default' \
-'(--group --dev --all-groups)*--only-group=[Only include dependencies from the specified dependency group]:ONLY_GROUP:_default' \
-'*--no-build-package=[Don'\''t build source distributions for a specific package]:NO_BUILD_PACKAGE:' \
-'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package]:NO_BINARY_PACKAGE:' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'(--only-group --only-dev)*--group=[Include dependencies from the specified dependency group]:GROUP:' \
+'*--no-group=[Disable the specified dependency group \[env\: \`UV_NO_GROUP\`=\]]:NO_GROUP:' \
+'(--group --dev --all-groups)*--only-group=[Only include dependencies from the specified dependency group]:ONLY_GROUP:' \
+'*--no-build-package=[Don'\''t build source distributions for a specific package \[env\: \`UV_NO_BUILD_PACKAGE\`=\]]:NO_BUILD_PACKAGE:' \
+'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package \[env\: \`UV_NO_BINARY_PACKAGE\`=\]]:NO_BINARY_PACKAGE:' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -1552,22 +1647,23 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-setting=[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-settings-package=[Settings to pass to the PEP 517 build backend for a specific package, specified as \`PACKAGE\:KEY=VALUE\` pairs]:CONFIG_SETTINGS_PACKAGE:_default' \
 '*--no-build-isolation-package=[Disable isolation when building source distributions for a specific package]:NO_BUILD_ISOLATION_PACKAGE:' \
-'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:_default' \
-'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:_default' \
+'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:' \
+'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:' \
 '--link-mode=[The method to use when installing packages from the global cache]:LINK_MODE:((clone\:"Clone (i.e., copy-on-write) packages from the source into the destination"
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
 '--script=[Show the dependency tree the specified PEP 723 Python script, rather than the current project]:SCRIPT:_files' \
 '(--universal)--python-version=[The Python version to use when filtering the tree]:PYTHON_VERSION:_default' \
 '(--universal)--python-platform=[The platform to use when filtering the tree]:PYTHON_PLATFORM:((windows\:"An alias for \`x86_64-pc-windows-msvc\`, the default target for Windows"
@@ -1611,7 +1707,8 @@ aarch64-manylinux_2_39\:"An ARM64 target for the \`manylinux_2_39\` platform"
 aarch64-manylinux_2_40\:"An ARM64 target for the \`manylinux_2_40\` platform"
 aarch64-linux-android\:"An ARM64 Android target"
 x86_64-linux-android\:"An \`x86_64\` Android target"
-wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12"
+wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12. See <https\://pyodide.org/en/stable/development/abi/312.html>"
+wasm32-pyodide2025\:"A wasm32 target using the Pyodide 2025 platform. Meant for use with Python 3.13. See <https\://pyodide.org/en/stable/development/abi/313.html>"
 arm64-apple-ios\:"An ARM64 target for iOS device"
 arm64-apple-ios-simulator\:"An ARM64 target for iOS simulator"
 x86_64-apple-ios-simulator\:"An \`x86_64\` target for iOS simulator"))' \
@@ -1639,12 +1736,14 @@ never\:"Disables colored output"))' \
 '--outdated[Show the latest available version of each package in the tree]' \
 '--show-sizes[Show compressed wheel sizes for packages in the tree]' \
 '--dev[Include the development dependency group \[env\: UV_DEV=\]]' \
-'(--group --all-groups --no-dev)--only-dev[Only include the development dependency group]' \
 '--no-dev[Disable the development dependency group \[env\: UV_NO_DEV=\]]' \
+'(--group --all-groups --no-dev)--only-dev[Only include the development dependency group]' \
 '--no-default-groups[Ignore the default dependency groups]' \
 '(--only-group --only-dev)--all-groups[Include dependencies from all dependency groups]' \
 '(--frozen -U --upgrade)--locked[Assert that the \`uv.lock\` will remain unchanged \[env\: UV_LOCKED=\]]' \
+'--no-locked[Disable locked mode, overriding \`UV_LOCKED\`]' \
 '(--locked -U --upgrade --no-sources)--frozen[Display the requirements without locking the project \[env\: UV_FROZEN=\]]' \
+'--no-frozen[Disable frozen mode, overriding \`UV_FROZEN\`]' \
 '--no-build[Don'\''t build source distributions]' \
 '--build[]' \
 '--no-binary[Don'\''t install pre-built wheels]' \
@@ -1688,7 +1787,7 @@ never\:"Disables colored output"))' \
 (format)
 _arguments "${_arguments_options[@]}" : \
 '--version=[The version of Ruff to use for formatting]:VERSION:' \
-'--exclude-newer=[Limit candidate Ruff versions to those released prior to the given date]:EXCLUDE_NEWER:_default' \
+'--exclude-newer=[Limit candidate Ruff versions to those released prior to the given date]:EXCLUDE_NEWER:' \
 '--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
 managed\:"Prefer managed Python installations over system Python installations"
@@ -1738,15 +1837,155 @@ never\:"Disables colored output"))' \
 '*::extra_args -- Additional arguments to pass to Ruff:' \
 && ret=0
 ;;
+(check)
+_arguments "${_arguments_options[@]}" : \
+'(--all-packages --script --no-project)*--package=[Check specific packages in the workspace]:PACKAGE:' \
+'(--extra --all-extras --no-extra --no-all-extras --dev --no-dev --only-dev --group --no-group --no-default-groups --only-group --all-groups --no-project --all-packages --package)--script=[Run checks for the specified PEP 723 Python script, rather than the current project]:SCRIPT:_files' \
+'(--all-extras --only-group)*--extra=[Include optional dependencies from the specified extra name]:EXTRA:' \
+'*--no-extra=[Exclude the specified optional dependencies, if \`--all-extras\` is supplied]:NO_EXTRA:' \
+'(--only-group --only-dev)*--group=[Include dependencies from the specified dependency group]:GROUP:' \
+'*--no-group=[Disable the specified dependency group \[env\: \`UV_NO_GROUP\`=\]]:NO_GROUP:' \
+'(--group --dev --all-groups)*--only-group=[Only include dependencies from the specified dependency group]:ONLY_GROUP:' \
+'-p+[The Python interpreter to use for the project environment]:PYTHON:' \
+'--python=[The Python interpreter to use for the project environment]:PYTHON:' \
+'--ty-version=[The version of ty to use for type checking]:TY_VERSION:' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
+'--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
+'*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
+'*-f+[Locations to search for candidate distributions, in addition to those found in the registry indexes]:FIND_LINKS:_default' \
+'*--find-links=[Locations to search for candidate distributions, in addition to those found in the registry indexes]:FIND_LINKS:_default' \
+'*-P+[Allow upgrades for a specific package, ignoring pinned versions in any existing output file. Implies \`--refresh-package\`]:UPGRADE_PACKAGE:' \
+'*--upgrade-package=[Allow upgrades for a specific package, ignoring pinned versions in any existing output file. Implies \`--refresh-package\`]:UPGRADE_PACKAGE:' \
+'*--upgrade-group=[Allow upgrades for all packages in a dependency group, ignoring pinned versions in any existing output file]:UPGRADE_GROUP:_default' \
+'*--reinstall-package=[Reinstall a specific package, regardless of whether it'\''s already installed. Implies \`--refresh-package\`]:REINSTALL_PACKAGE:' \
+'--index-strategy=[The strategy to use when resolving against multiple index URLs]:INDEX_STRATEGY:((first-index\:"Only use results from the first index that returns a match for a given package name"
+unsafe-first-match\:"Search for every package name across all indexes, exhausting the versions from the first index before moving on to the next"
+unsafe-best-match\:"Search for every package name across all indexes, preferring the "best" version found. If a package version is in multiple indexes, only look at the entry for the first index"))' \
+'--keyring-provider=[Attempt to use \`keyring\` for authentication for index URLs]:KEYRING_PROVIDER:((disabled\:"Do not use keyring for credential lookup"
+subprocess\:"Use the \`keyring\` command for credential lookup"))' \
+'--resolution=[The strategy to use when selecting between the different compatible versions for a given package requirement]:RESOLUTION:((highest\:"Resolve the highest compatible version of each package"
+lowest\:"Resolve the lowest compatible version of each package"
+lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
+'--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
+allow\:"Allow all pre-release versions"
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
+'--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
+requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
+'*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:' \
+'*--config-setting=[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:' \
+'*--config-settings-package=[Settings to pass to the PEP 517 build backend for a specific package, specified as \`PACKAGE\:KEY=VALUE\` pairs]:CONFIG_SETTINGS_PACKAGE:' \
+'*--no-build-isolation-package=[Disable isolation when building source distributions for a specific package]:NO_BUILD_ISOLATION_PACKAGE:' \
+'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:' \
+'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:' \
+'--link-mode=[The method to use when installing packages from the global cache]:LINK_MODE:((clone\:"Clone (i.e., copy-on-write) packages from the source into the destination"
+copy\:"Copy packages from the source into the destination"
+hardlink\:"Hard link packages from the source into the destination"
+symlink\:"Symbolically link packages from the source into the destination"))' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
+'*--no-build-package=[Don'\''t build source distributions for a specific package \[env\: \`UV_NO_BUILD_PACKAGE\`=\]]:NO_BUILD_PACKAGE:' \
+'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package \[env\: \`UV_NO_BINARY_PACKAGE\`=\]]:NO_BINARY_PACKAGE:' \
+'*--refresh-package=[Refresh cached data for a specific package]:REFRESH_PACKAGE:' \
+'--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
+'--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
+managed\:"Prefer managed Python installations over system Python installations"
+system\:"Prefer system Python installations over managed Python installations"
+only-system\:"Only use system Python installations; never use managed Python installations"))' \
+'--python-fetch=[Deprecated version of \[\`Self\:\:python_downloads\`\]]:PYTHON_FETCH:((automatic\:"Automatically download managed Python installations when needed"
+manual\:"Do not automatically download managed Python installations; require explicit installation"
+never\:"Do not ever allow Python downloads"))' \
+'(--no-color)--color=[Control the use of color in output]:COLOR_CHOICE:((auto\:"Enables colored output only when the output is going to a terminal or TTY with support"
+always\:"Enables colored output regardless of the detected environment"
+never\:"Disables colored output"))' \
+'*--allow-insecure-host=[Allow insecure connections to a host]:ALLOW_INSECURE_HOST:_urls' \
+'*--preview-features=[Enable experimental preview features]:PREVIEW_FEATURES:_default' \
+'--directory=[Change to the given directory prior to running the command]:DIRECTORY:_files -/' \
+'--project=[Discover a project in the given directory]:PROJECT:_files -/' \
+'--config-file=[The path to a \`uv.toml\` file to use for configuration]:CONFIG_FILE:_files' \
+'--fix[Apply safe fixes to resolve type-checking errors]' \
+'(--package --script --no-project)--all-packages[Check all packages in the workspace]' \
+'(--extra --only-group)--all-extras[Include all optional dependencies]' \
+'--no-all-extras[]' \
+'--dev[Include the development dependency group \[env\: UV_DEV=\]]' \
+'--no-dev[Disable the development dependency group \[env\: UV_NO_DEV=\]]' \
+'(--group --all-groups --no-dev)--only-dev[Only include the development dependency group]' \
+'--no-default-groups[Ignore the default dependency groups]' \
+'(--only-group --only-dev)--all-groups[Include dependencies from all dependency groups]' \
+'(--frozen -U --upgrade)--locked[Assert that the \`uv.lock\` will remain unchanged \[env\: UV_LOCKED=\]]' \
+'--no-locked[Disable locked mode, overriding \`UV_LOCKED\`]' \
+'(--locked -U --upgrade --no-sources)--frozen[Sync without updating the \`uv.lock\` file \[env\: UV_FROZEN=\]]' \
+'--no-frozen[Disable frozen mode, overriding \`UV_FROZEN\`]' \
+'--no-sync[Avoid syncing the virtual environment \[env\: UV_NO_SYNC=\]]' \
+'(--no-sync --script --no-project)--no-install-project[Do not install the current project \[env\: UV_NO_INSTALL_PROJECT=\]]' \
+'--isolated[Run checks without mutating project state \[env\: UV_ISOLATED=\]]' \
+'--show-version[Display the version of ty that will be used for type checking]' \
+'--show-command[Display the ty command that will be used for type checking]' \
+'--no-project[Avoid discovering a project or workspace]' \
+'--no-index[Ignore the registry index (e.g., PyPI), instead relying on direct URL dependencies and those provided via \`--find-links\`]' \
+'-U[Allow package upgrades, ignoring pinned versions in any existing output file. Implies \`--refresh\`]' \
+'--upgrade[Allow package upgrades, ignoring pinned versions in any existing output file. Implies \`--refresh\`]' \
+'--no-upgrade[]' \
+'--reinstall[Reinstall all packages, regardless of whether they'\''re already installed. Implies \`--refresh\`]' \
+'--no-reinstall[]' \
+'--pre[]' \
+'--no-build-isolation[Disable isolation when building source distributions]' \
+'--build-isolation[]' \
+'--compile-bytecode[Compile Python files to bytecode after installation]' \
+'--no-compile-bytecode[]' \
+'--no-sources[Ignore the \`tool.uv.sources\` table when resolving dependencies. Used to lock against the standards-compliant, publishable package metadata, as opposed to using any workspace, Git, URL, or local path sources]' \
+'--no-build[Don'\''t build source distributions]' \
+'--build[]' \
+'--no-binary[Don'\''t install pre-built wheels]' \
+'--binary[]' \
+'--refresh[Refresh all cached data]' \
+'--no-refresh[]' \
+'-n[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
+'--no-cache[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
+'--managed-python[Require use of uv-managed Python versions \[env\: UV_MANAGED_PYTHON=\]]' \
+'--no-managed-python[Disable use of uv-managed Python versions \[env\: UV_NO_MANAGED_PYTHON=\]]' \
+'--allow-python-downloads[Allow automatically downloading Python when required. \[env\: "UV_PYTHON_DOWNLOADS=auto"\]]' \
+'--no-python-downloads[Disable automatic downloads of Python. \[env\: "UV_PYTHON_DOWNLOADS=never"\]]' \
+'(-v --verbose)*-q[Use quiet output]' \
+'(-v --verbose)*--quiet[Use quiet output]' \
+'(-q --quiet)*-v[Use verbose output]' \
+'(-q --quiet)*--verbose[Use verbose output]' \
+'(--color)--no-color[Disable colors]' \
+'--native-tls[(Deprecated\: use \`--system-certs\` instead.) Whether to load TLS certificates from the platform'\''s native certificate store \[env\: UV_NATIVE_TLS=\]]' \
+'--no-native-tls[]' \
+'--system-certs[Whether to load TLS certificates from the platform'\''s native certificate store \[env\: UV_SYSTEM_CERTS=\]]' \
+'--no-system-certs[]' \
+'--offline[Disable network access \[env\: UV_OFFLINE=\]]' \
+'--no-offline[]' \
+'--preview[Whether to enable all experimental preview features \[env\: UV_PREVIEW=\]]' \
+'--no-preview[]' \
+'--show-settings[Show the resolved settings for the current command]' \
+'--no-progress[Hide all progress outputs \[env\: UV_NO_PROGRESS=\]]' \
+'--no-installer-metadata[Skip writing \`uv\` installer metadata files (e.g., \`INSTALLER\`, \`REQUESTED\`, and \`direct_url.json\`) to site-packages \`.dist-info\` directories \[env\: UV_NO_INSTALLER_METADATA=\]]' \
+'--no-config[Avoid discovering configuration files (\`pyproject.toml\`, \`uv.toml\`)]' \
+'-h[Display the concise help for this command]' \
+'--help[Display the concise help for this command]' \
+&& ret=0
+;;
 (audit)
 _arguments "${_arguments_options[@]}" : \
 '*--no-extra=[Don'\''t audit the specified optional dependencies]:NO_EXTRA:' \
-'*--no-group=[Don'\''t audit the specified dependency group]:NO_GROUP:' \
+'*--no-group=[Don'\''t audit the specified dependency group \[env\: \`UV_NO_GROUP\`=\]]:NO_GROUP:' \
 '*--only-group=[Only audit dependencies from the specified dependency group]:ONLY_GROUP:' \
-'*--no-build-package=[Don'\''t build source distributions for a specific package]:NO_BUILD_PACKAGE:' \
-'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package]:NO_BINARY_PACKAGE:' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'--output-format=[Select the output format]:OUTPUT_FORMAT:((text\:"Display the result in a human-readable format"
+json\:"Display the result in JSON format"
+sarif\:"Display the result in SARIF format"))' \
+'*--ignore=[Ignore a vulnerability by ID]:IGNORE:_default' \
+'*--ignore-until-fixed=[Ignore a vulnerability by ID, but only while no fix is available]:IGNORE_UNTIL_FIXED:_default' \
+'--service-format=[The service format to use for vulnerability lookups]:SERVICE_FORMAT:(osv)' \
+'--service-url=[The URL to vulnerability service API endpoint]:SERVICE_URL:_urls' \
+'*--no-build-package=[Don'\''t build source distributions for a specific package \[env\: \`UV_NO_BUILD_PACKAGE\`=\]]:NO_BUILD_PACKAGE:' \
+'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package \[env\: \`UV_NO_BINARY_PACKAGE\`=\]]:NO_BINARY_PACKAGE:' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -1765,22 +2004,23 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-setting=[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-settings-package=[Settings to pass to the PEP 517 build backend for a specific package, specified as \`PACKAGE\:KEY=VALUE\` pairs]:CONFIG_SETTINGS_PACKAGE:_default' \
 '*--no-build-isolation-package=[Disable isolation when building source distributions for a specific package]:NO_BUILD_ISOLATION_PACKAGE:' \
-'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:_default' \
-'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:_default' \
+'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:' \
+'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:' \
 '--link-mode=[The method to use when installing packages from the global cache]:LINK_MODE:((clone\:"Clone (i.e., copy-on-write) packages from the source into the destination"
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
 '--script=[Audit the specified PEP 723 Python script, rather than the current project]:SCRIPT:_files' \
 '--python-version=[The Python version to use when auditing]:PYTHON_VERSION:_default' \
 '--python-platform=[The platform to use when auditing]:PYTHON_PLATFORM:((windows\:"An alias for \`x86_64-pc-windows-msvc\`, the default target for Windows"
@@ -1824,14 +2064,11 @@ aarch64-manylinux_2_39\:"An ARM64 target for the \`manylinux_2_39\` platform"
 aarch64-manylinux_2_40\:"An ARM64 target for the \`manylinux_2_40\` platform"
 aarch64-linux-android\:"An ARM64 Android target"
 x86_64-linux-android\:"An \`x86_64\` Android target"
-wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12"
+wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12. See <https\://pyodide.org/en/stable/development/abi/312.html>"
+wasm32-pyodide2025\:"A wasm32 target using the Pyodide 2025 platform. Meant for use with Python 3.13. See <https\://pyodide.org/en/stable/development/abi/313.html>"
 arm64-apple-ios\:"An ARM64 target for iOS device"
 arm64-apple-ios-simulator\:"An ARM64 target for iOS simulator"
 x86_64-apple-ios-simulator\:"An \`x86_64\` target for iOS simulator"))' \
-'*--ignore=[Ignore a vulnerability by ID]:IGNORE:_default' \
-'*--ignore-until-fixed=[Ignore a vulnerability by ID, but only while no fix is available]:IGNORE_UNTIL_FIXED:_default' \
-'--service-format=[The service format to use for vulnerability lookups]:SERVICE_FORMAT:(osv)' \
-'--service-url=[The URL to vulnerability service API endpoint]:SERVICE_URL:_urls' \
 '--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
 managed\:"Prefer managed Python installations over system Python installations"
@@ -1852,7 +2089,9 @@ never\:"Disables colored output"))' \
 '--no-default-groups[Don'\''t audit the default dependency groups]' \
 '(--no-dev)--only-dev[Only audit the development dependency group]' \
 '(--frozen -U --upgrade)--locked[Assert that the \`uv.lock\` will remain unchanged \[env\: UV_LOCKED=\]]' \
+'--no-locked[Disable locked mode, overriding \`UV_LOCKED\`]' \
 '(--locked -U --upgrade --no-sources)--frozen[Audit the requirements without locking the project \[env\: UV_FROZEN=\]]' \
+'--no-frozen[Disable frozen mode, overriding \`UV_FROZEN\`]' \
 '--no-build[Don'\''t build source distributions]' \
 '--build[]' \
 '--no-binary[Don'\''t install pre-built wheels]' \
@@ -1960,8 +2199,8 @@ _arguments "${_arguments_options[@]}" : \
 '*--build-constraints=[Constrain build dependencies using the given requirements files when building source distributions]:BUILD_CONSTRAINTS:_files' \
 '*--overrides=[Override versions using the given requirements files]:OVERRIDES:_files' \
 '*--env-file=[Load environment variables from a \`.env\` file]:ENV_FILE:_files' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -1981,9 +2220,10 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:' \
@@ -1996,9 +2236,9 @@ requires-python\:"Optimize for selecting latest supported version of each packag
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
-'*--no-build-package=[Don'\''t build source distributions for a specific package]:NO_BUILD_PACKAGE:' \
-'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package]:NO_BINARY_PACKAGE:' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
+'*--no-build-package=[Don'\''t build source distributions for a specific package \[env\: \`UV_NO_BUILD_PACKAGE\`=\]]:NO_BUILD_PACKAGE:' \
+'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package \[env\: \`UV_NO_BINARY_PACKAGE\`=\]]:NO_BINARY_PACKAGE:' \
 '*--refresh-package=[Refresh cached data for a specific package]:REFRESH_PACKAGE:' \
 '-p+[The Python interpreter to use to build the run environment.]:PYTHON:' \
 '--python=[The Python interpreter to use to build the run environment.]:PYTHON:' \
@@ -2043,12 +2283,14 @@ aarch64-manylinux_2_39\:"An ARM64 target for the \`manylinux_2_39\` platform"
 aarch64-manylinux_2_40\:"An ARM64 target for the \`manylinux_2_40\` platform"
 aarch64-linux-android\:"An ARM64 Android target"
 x86_64-linux-android\:"An \`x86_64\` Android target"
-wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12"
+wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12. See <https\://pyodide.org/en/stable/development/abi/312.html>"
+wasm32-pyodide2025\:"A wasm32 target using the Pyodide 2025 platform. Meant for use with Python 3.13. See <https\://pyodide.org/en/stable/development/abi/313.html>"
 arm64-apple-ios\:"An ARM64 target for iOS device"
 arm64-apple-ios-simulator\:"An ARM64 target for iOS simulator"
 x86_64-apple-ios-simulator\:"An \`x86_64\` target for iOS simulator"))' \
 '--torch-backend=[The backend to use when fetching packages in the PyTorch ecosystem (e.g., \`cpu\`, \`cu126\`, or \`auto\`)]:TORCH_BACKEND:((auto\:"Select the appropriate PyTorch index based on the operating system and CUDA driver version"
 cpu\:"Use the CPU-only PyTorch index"
+cu132\:"Use the PyTorch index for CUDA 13.2"
 cu130\:"Use the PyTorch index for CUDA 13.0"
 cu129\:"Use the PyTorch index for CUDA 12.9"
 cu128\:"Use the PyTorch index for CUDA 12.8"
@@ -2176,8 +2418,8 @@ _arguments "${_arguments_options[@]}" : \
 '*--build-constraints=[Constrain build dependencies using the given requirements files when building source distributions]:BUILD_CONSTRAINTS:_files' \
 '*--overrides=[Override versions using the given requirements files]:OVERRIDES:_files' \
 '*--env-file=[Load environment variables from a \`.env\` file]:ENV_FILE:_files' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -2197,9 +2439,10 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:' \
@@ -2212,9 +2455,9 @@ requires-python\:"Optimize for selecting latest supported version of each packag
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
-'*--no-build-package=[Don'\''t build source distributions for a specific package]:NO_BUILD_PACKAGE:' \
-'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package]:NO_BINARY_PACKAGE:' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
+'*--no-build-package=[Don'\''t build source distributions for a specific package \[env\: \`UV_NO_BUILD_PACKAGE\`=\]]:NO_BUILD_PACKAGE:' \
+'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package \[env\: \`UV_NO_BINARY_PACKAGE\`=\]]:NO_BINARY_PACKAGE:' \
 '*--refresh-package=[Refresh cached data for a specific package]:REFRESH_PACKAGE:' \
 '-p+[The Python interpreter to use to build the run environment.]:PYTHON:' \
 '--python=[The Python interpreter to use to build the run environment.]:PYTHON:' \
@@ -2259,12 +2502,14 @@ aarch64-manylinux_2_39\:"An ARM64 target for the \`manylinux_2_39\` platform"
 aarch64-manylinux_2_40\:"An ARM64 target for the \`manylinux_2_40\` platform"
 aarch64-linux-android\:"An ARM64 Android target"
 x86_64-linux-android\:"An \`x86_64\` Android target"
-wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12"
+wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12. See <https\://pyodide.org/en/stable/development/abi/312.html>"
+wasm32-pyodide2025\:"A wasm32 target using the Pyodide 2025 platform. Meant for use with Python 3.13. See <https\://pyodide.org/en/stable/development/abi/313.html>"
 arm64-apple-ios\:"An ARM64 target for iOS device"
 arm64-apple-ios-simulator\:"An ARM64 target for iOS simulator"
 x86_64-apple-ios-simulator\:"An \`x86_64\` target for iOS simulator"))' \
 '--torch-backend=[The backend to use when fetching packages in the PyTorch ecosystem (e.g., \`cpu\`, \`cu126\`, or \`auto\`)]:TORCH_BACKEND:((auto\:"Select the appropriate PyTorch index based on the operating system and CUDA driver version"
 cpu\:"Use the CPU-only PyTorch index"
+cu132\:"Use the PyTorch index for CUDA 13.2"
 cu130\:"Use the PyTorch index for CUDA 13.0"
 cu129\:"Use the PyTorch index for CUDA 12.9"
 cu128\:"Use the PyTorch index for CUDA 12.8"
@@ -2395,8 +2640,8 @@ _arguments "${_arguments_options[@]}" : \
 '*--excludes=[Exclude packages from resolution using the given requirements files]:EXCLUDES:_files' \
 '*-b+[Constrain build dependencies using the given requirements files when building source distributions]:BUILD_CONSTRAINTS:_files' \
 '*--build-constraints=[Constrain build dependencies using the given requirements files when building source distributions]:BUILD_CONSTRAINTS:_files' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -2416,9 +2661,10 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:' \
@@ -2431,9 +2677,9 @@ requires-python\:"Optimize for selecting latest supported version of each packag
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
-'*--no-build-package=[Don'\''t build source distributions for a specific package]:NO_BUILD_PACKAGE:' \
-'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package]:NO_BINARY_PACKAGE:' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
+'*--no-build-package=[Don'\''t build source distributions for a specific package \[env\: \`UV_NO_BUILD_PACKAGE\`=\]]:NO_BUILD_PACKAGE:' \
+'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package \[env\: \`UV_NO_BINARY_PACKAGE\`=\]]:NO_BINARY_PACKAGE:' \
 '*--refresh-package=[Refresh cached data for a specific package]:REFRESH_PACKAGE:' \
 '-p+[The Python interpreter to use to build the tool environment.]:PYTHON:' \
 '--python=[The Python interpreter to use to build the tool environment.]:PYTHON:' \
@@ -2478,12 +2724,14 @@ aarch64-manylinux_2_39\:"An ARM64 target for the \`manylinux_2_39\` platform"
 aarch64-manylinux_2_40\:"An ARM64 target for the \`manylinux_2_40\` platform"
 aarch64-linux-android\:"An ARM64 Android target"
 x86_64-linux-android\:"An \`x86_64\` Android target"
-wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12"
+wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12. See <https\://pyodide.org/en/stable/development/abi/312.html>"
+wasm32-pyodide2025\:"A wasm32 target using the Pyodide 2025 platform. Meant for use with Python 3.13. See <https\://pyodide.org/en/stable/development/abi/313.html>"
 arm64-apple-ios\:"An ARM64 target for iOS device"
 arm64-apple-ios-simulator\:"An ARM64 target for iOS simulator"
 x86_64-apple-ios-simulator\:"An \`x86_64\` target for iOS simulator"))' \
 '--torch-backend=[The backend to use when fetching packages in the PyTorch ecosystem (e.g., \`cpu\`, \`cu126\`, or \`auto\`)]:TORCH_BACKEND:((auto\:"Select the appropriate PyTorch index based on the operating system and CUDA driver version"
 cpu\:"Use the CPU-only PyTorch index"
+cu132\:"Use the PyTorch index for CUDA 13.2"
 cu130\:"Use the PyTorch index for CUDA 13.0"
 cu129\:"Use the PyTorch index for CUDA 12.9"
 cu128\:"Use the PyTorch index for CUDA 12.8"
@@ -2643,15 +2891,16 @@ aarch64-manylinux_2_39\:"An ARM64 target for the \`manylinux_2_39\` platform"
 aarch64-manylinux_2_40\:"An ARM64 target for the \`manylinux_2_40\` platform"
 aarch64-linux-android\:"An ARM64 Android target"
 x86_64-linux-android\:"An \`x86_64\` Android target"
-wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12"
+wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12. See <https\://pyodide.org/en/stable/development/abi/312.html>"
+wasm32-pyodide2025\:"A wasm32 target using the Pyodide 2025 platform. Meant for use with Python 3.13. See <https\://pyodide.org/en/stable/development/abi/313.html>"
 arm64-apple-ios\:"An ARM64 target for iOS device"
 arm64-apple-ios-simulator\:"An ARM64 target for iOS simulator"
 x86_64-apple-ios-simulator\:"An \`x86_64\` target for iOS simulator"))' \
 '*-P+[Allow upgrades for a specific package, ignoring pinned versions in any existing output file. Implies \`--refresh-package\`]:UPGRADE_PACKAGE:_default' \
 '*--upgrade-package=[Allow upgrades for a specific package, ignoring pinned versions in any existing output file. Implies \`--refresh-package\`]:UPGRADE_PACKAGE:_default' \
 '*--upgrade-group=[Allow upgrades for all packages in a dependency group, ignoring pinned versions in any existing output file]:UPGRADE_GROUP:_default' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -2668,24 +2917,25 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-setting=[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-setting-package=[Settings to pass to the PEP 517 build backend for a specific package, specified as \`PACKAGE\:KEY=VALUE\` pairs]:CONFIG_SETTING_PACKAGE:_default' \
 '*--no-build-isolation-package=[Disable isolation when building source distributions for a specific package]:NO_BUILD_ISOLATION_PACKAGE:' \
-'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:_default' \
-'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:_default' \
+'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:' \
+'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:' \
 '--link-mode=[The method to use when installing packages from the global cache]:LINK_MODE:((clone\:"Clone (i.e., copy-on-write) packages from the source into the destination"
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
-'*--no-build-package=[Don'\''t build source distributions for a specific package]:NO_BUILD_PACKAGE:' \
-'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package]:NO_BINARY_PACKAGE:' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
+'*--no-build-package=[Don'\''t build source distributions for a specific package \[env\: \`UV_NO_BUILD_PACKAGE\`=\]]:NO_BUILD_PACKAGE:' \
+'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package \[env\: \`UV_NO_BINARY_PACKAGE\`=\]]:NO_BINARY_PACKAGE:' \
 '--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
 managed\:"Prefer managed Python installations over system Python installations"
@@ -2749,7 +2999,8 @@ never\:"Disables colored output"))' \
 ;;
 (list)
 _arguments "${_arguments_options[@]}" : \
-'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:_default' \
+'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:' \
+'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
 managed\:"Prefer managed Python installations over system Python installations"
 system\:"Prefer system Python installations over managed Python installations"
@@ -2799,6 +3050,61 @@ never\:"Disables colored output"))' \
 '--no-config[Avoid discovering configuration files (\`pyproject.toml\`, \`uv.toml\`)]' \
 '-h[Display the concise help for this command]' \
 '--help[Display the concise help for this command]' \
+&& ret=0
+;;
+(audit)
+_arguments "${_arguments_options[@]}" : \
+'--output-format=[Select the output format]:OUTPUT_FORMAT:((text\:"Display the result in a human-readable format"
+json\:"Display the result in JSON format"
+sarif\:"Display the result in SARIF format"))' \
+'*--ignore=[Ignore a vulnerability by ID]:IGNORE:_default' \
+'*--ignore-until-fixed=[Ignore a vulnerability by ID, but only while no fix is available]:IGNORE_UNTIL_FIXED:_default' \
+'--service-format=[The service format to use for vulnerability lookups]:SERVICE_FORMAT:(osv)' \
+'--service-url=[The URL to vulnerability service API endpoint]:SERVICE_URL:_urls' \
+'--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
+'--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
+managed\:"Prefer managed Python installations over system Python installations"
+system\:"Prefer system Python installations over managed Python installations"
+only-system\:"Only use system Python installations; never use managed Python installations"))' \
+'--python-fetch=[Deprecated version of \[\`Self\:\:python_downloads\`\]]:PYTHON_FETCH:((automatic\:"Automatically download managed Python installations when needed"
+manual\:"Do not automatically download managed Python installations; require explicit installation"
+never\:"Do not ever allow Python downloads"))' \
+'(--no-color)--color=[Control the use of color in output]:COLOR_CHOICE:((auto\:"Enables colored output only when the output is going to a terminal or TTY with support"
+always\:"Enables colored output regardless of the detected environment"
+never\:"Disables colored output"))' \
+'*--allow-insecure-host=[Allow insecure connections to a host]:ALLOW_INSECURE_HOST:_urls' \
+'*--preview-features=[Enable experimental preview features]:PREVIEW_FEATURES:_default' \
+'--directory=[Change to the given directory prior to running the command]:DIRECTORY:_files -/' \
+'--project=[Discover a project in the given directory]:PROJECT:_files -/' \
+'--config-file=[The path to a \`uv.toml\` file to use for configuration]:CONFIG_FILE:_files' \
+'()--all[Audit all installed tools]' \
+'-n[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
+'--no-cache[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
+'--managed-python[Require use of uv-managed Python versions \[env\: UV_MANAGED_PYTHON=\]]' \
+'--no-managed-python[Disable use of uv-managed Python versions \[env\: UV_NO_MANAGED_PYTHON=\]]' \
+'--allow-python-downloads[Allow automatically downloading Python when required. \[env\: "UV_PYTHON_DOWNLOADS=auto"\]]' \
+'--no-python-downloads[Disable automatic downloads of Python. \[env\: "UV_PYTHON_DOWNLOADS=never"\]]' \
+'(-v --verbose)*-q[Use quiet output]' \
+'(-v --verbose)*--quiet[Use quiet output]' \
+'(-q --quiet)*-v[Use verbose output]' \
+'(-q --quiet)*--verbose[Use verbose output]' \
+'(--color)--no-color[Disable colors]' \
+'--native-tls[(Deprecated\: use \`--system-certs\` instead.) Whether to load TLS certificates from the platform'\''s native certificate store \[env\: UV_NATIVE_TLS=\]]' \
+'--no-native-tls[]' \
+'--system-certs[Whether to load TLS certificates from the platform'\''s native certificate store \[env\: UV_SYSTEM_CERTS=\]]' \
+'--no-system-certs[]' \
+'--offline[Disable network access \[env\: UV_OFFLINE=\]]' \
+'--no-offline[]' \
+'--preview[Whether to enable all experimental preview features \[env\: UV_PREVIEW=\]]' \
+'--no-preview[]' \
+'--isolated[Avoid discovering a \`pyproject.toml\` or \`uv.toml\` file \[env\: UV_ISOLATED=\]]' \
+'--show-settings[Show the resolved settings for the current command]' \
+'--no-progress[Hide all progress outputs \[env\: UV_NO_PROGRESS=\]]' \
+'--no-installer-metadata[Skip writing \`uv\` installer metadata files (e.g., \`INSTALLER\`, \`REQUESTED\`, and \`direct_url.json\`) to site-packages \`.dist-info\` directories \[env\: UV_NO_INSTALLER_METADATA=\]]' \
+'--no-config[Avoid discovering configuration files (\`pyproject.toml\`, \`uv.toml\`)]' \
+'-h[Display the concise help for this command]' \
+'--help[Display the concise help for this command]' \
+'*::name -- The names of the installed tools to audit:' \
 && ret=0
 ;;
 (uninstall)
@@ -3433,6 +3739,7 @@ esac
 ;;
 (pip)
 _arguments "${_arguments_options[@]}" : \
+'--cert=[Path to a PEM-encoded CA certificate bundle]:FILE:_files' \
 '--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
 managed\:"Prefer managed Python installations over system Python installations"
@@ -3495,8 +3802,8 @@ _arguments "${_arguments_options[@]}" : \
 '*--build-constraints=[Constrain build dependencies using the given requirements files when building source distributions]:BUILD_CONSTRAINTS:_files' \
 '(--all-extras)*--extra=[Include optional dependencies from the specified extra name; may be provided more than once]:EXTRA:_default' \
 '*--group=[Install the specified dependency group from a \`pyproject.toml\`]:GROUP:_default' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -3515,22 +3822,23 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-setting=[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-settings-package=[Settings to pass to the PEP 517 build backend for a specific package, specified as \`PACKAGE\:KEY=VALUE\` pairs]:CONFIG_SETTINGS_PACKAGE:_default' \
 '*--no-build-isolation-package=[Disable isolation when building source distributions for a specific package]:NO_BUILD_ISOLATION_PACKAGE:' \
-'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:_default' \
-'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:_default' \
+'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:' \
+'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:' \
 '--link-mode=[The method to use when installing packages from the global cache]:LINK_MODE:((clone\:"Clone (i.e., copy-on-write) packages from the source into the destination"
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
 '*--refresh-package=[Refresh cached data for a specific package]:REFRESH_PACKAGE:' \
 '-o+[Write the compiled requirements to the given \`requirements.txt\` or \`pylock.toml\` file]:OUTPUT_FILE:_files' \
 '--output-file=[Write the compiled requirements to the given \`requirements.txt\` or \`pylock.toml\` file]:OUTPUT_FILE:_files' \
@@ -3585,13 +3893,15 @@ aarch64-manylinux_2_39\:"An ARM64 target for the \`manylinux_2_39\` platform"
 aarch64-manylinux_2_40\:"An ARM64 target for the \`manylinux_2_40\` platform"
 aarch64-linux-android\:"An ARM64 Android target"
 x86_64-linux-android\:"An \`x86_64\` Android target"
-wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12"
+wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12. See <https\://pyodide.org/en/stable/development/abi/312.html>"
+wasm32-pyodide2025\:"A wasm32 target using the Pyodide 2025 platform. Meant for use with Python 3.13. See <https\://pyodide.org/en/stable/development/abi/313.html>"
 arm64-apple-ios\:"An ARM64 target for iOS device"
 arm64-apple-ios-simulator\:"An ARM64 target for iOS simulator"
 x86_64-apple-ios-simulator\:"An \`x86_64\` target for iOS simulator"))' \
 '*--no-emit-package=[Specify a package to omit from the output resolution. Its dependencies will still be included in the resolution. Equivalent to pip-compile'\''s \`--unsafe-package\` option]:NO_EMIT_PACKAGE:' \
 '--torch-backend=[The backend to use when fetching packages in the PyTorch ecosystem (e.g., \`cpu\`, \`cu126\`, or \`auto\`)]:TORCH_BACKEND:((auto\:"Select the appropriate PyTorch index based on the operating system and CUDA driver version"
 cpu\:"Use the CPU-only PyTorch index"
+cu132\:"Use the PyTorch index for CUDA 13.2"
 cu130\:"Use the PyTorch index for CUDA 13.0"
 cu129\:"Use the PyTorch index for CUDA 12.9"
 cu128\:"Use the PyTorch index for CUDA 12.8"
@@ -3641,10 +3951,10 @@ rocm4.0.1\:"Use the PyTorch index for ROCm 4.0.1"
 xpu\:"Use the PyTorch index for Intel XPU"))' \
 '--resolver=[]:RESOLVER:(backtracking legacy)' \
 '--max-rounds=[]:MAX_ROUNDS:_default' \
-'--cert=[]:CERT:_default' \
 '--client-cert=[]:CLIENT_CERT:_default' \
 '--config=[]:CONFIG:_default' \
 '--pip-args=[]:PIP_ARGS:_default' \
+'--cert=[Path to a PEM-encoded CA certificate bundle]:FILE:_files' \
 '--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
 managed\:"Prefer managed Python installations over system Python installations"
@@ -3746,8 +4056,8 @@ _arguments "${_arguments_options[@]}" : \
 '*--build-constraints=[Constrain build dependencies using the given requirements files when building source distributions]:BUILD_CONSTRAINTS:_files' \
 '(--all-extras)*--extra=[Include optional dependencies from the specified extra name; may be provided more than once]:EXTRA:_default' \
 '*--group=[Install the specified dependency group from a \`pylock.toml\` or \`pyproject.toml\`]:GROUP:_default' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -3762,13 +4072,13 @@ subprocess\:"Use the \`keyring\` command for credential lookup"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-setting=[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-settings-package=[Settings to pass to the PEP 517 build backend for a specific package, specified as \`PACKAGE\:KEY=VALUE\` pairs]:CONFIG_SETTINGS_PACKAGE:_default' \
-'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:_default' \
-'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:_default' \
+'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:' \
+'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:' \
 '--link-mode=[The method to use when installing packages from the global cache]:LINK_MODE:((clone\:"Clone (i.e., copy-on-write) packages from the source into the destination"
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
 '*--refresh-package=[Refresh cached data for a specific package]:REFRESH_PACKAGE:' \
 '-p+[The Python interpreter into which packages should be installed.]:PYTHON:' \
 '--python=[The Python interpreter into which packages should be installed.]:PYTHON:' \
@@ -3819,12 +4129,16 @@ aarch64-manylinux_2_39\:"An ARM64 target for the \`manylinux_2_39\` platform"
 aarch64-manylinux_2_40\:"An ARM64 target for the \`manylinux_2_40\` platform"
 aarch64-linux-android\:"An ARM64 Android target"
 x86_64-linux-android\:"An \`x86_64\` Android target"
-wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12"
+wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12. See <https\://pyodide.org/en/stable/development/abi/312.html>"
+wasm32-pyodide2025\:"A wasm32 target using the Pyodide 2025 platform. Meant for use with Python 3.13. See <https\://pyodide.org/en/stable/development/abi/313.html>"
 arm64-apple-ios\:"An ARM64 target for iOS device"
 arm64-apple-ios-simulator\:"An ARM64 target for iOS simulator"
 x86_64-apple-ios-simulator\:"An \`x86_64\` target for iOS simulator"))' \
+'--output-format=[Select the output format]:OUTPUT_FORMAT:((text\:"Display the result in a human-readable format"
+json\:"Display the result in JSON format"))' \
 '--torch-backend=[The backend to use when fetching packages in the PyTorch ecosystem (e.g., \`cpu\`, \`cu126\`, or \`auto\`)]:TORCH_BACKEND:((auto\:"Select the appropriate PyTorch index based on the operating system and CUDA driver version"
 cpu\:"Use the CPU-only PyTorch index"
+cu132\:"Use the PyTorch index for CUDA 13.2"
 cu130\:"Use the PyTorch index for CUDA 13.0"
 cu129\:"Use the PyTorch index for CUDA 12.9"
 cu128\:"Use the PyTorch index for CUDA 12.8"
@@ -3873,10 +4187,10 @@ rocm4.1\:"Use the PyTorch index for ROCm 4.1"
 rocm4.0.1\:"Use the PyTorch index for ROCm 4.0.1"
 xpu\:"Use the PyTorch index for Intel XPU"))' \
 '--python-executable=[]:PYTHON_EXECUTABLE:_default' \
-'--cert=[]:CERT:_default' \
 '--client-cert=[]:CLIENT_CERT:_default' \
 '--config=[]:CONFIG:_default' \
 '--pip-args=[]:PIP_ARGS:_default' \
+'--cert=[Path to a PEM-encoded CA certificate bundle]:FILE:_files' \
 '--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
 managed\:"Prefer managed Python installations over system Python installations"
@@ -3920,6 +4234,7 @@ never\:"Disables colored output"))' \
 '--strict[Validate the Python environment after completing the installation, to detect packages with missing dependencies or other issues]' \
 '--no-strict[]' \
 '--dry-run[Perform a dry run, i.e., don'\''t actually install anything but resolve the dependencies and print the resulting plan]' \
+'(--dry-run)--check[Check whether the environment matches the requirements without modifying it]' \
 '-a[]' \
 '--ask[]' \
 '--user[]' \
@@ -3958,6 +4273,7 @@ _arguments "${_arguments_options[@]}" : \
 '*--requirements=[Install the packages listed in the given files]:REQUIREMENTS:_files' \
 '*-e+[Install the editable package based on the provided local file path]:EDITABLE:_default' \
 '*--editable=[Install the editable package based on the provided local file path]:EDITABLE:_default' \
+'*--no-editable-package=[Install the specified editable packages as non-editable]:NO_EDITABLE_PACKAGE:' \
 '*-c+[Constrain versions using the given requirements files]:CONSTRAINTS:_files' \
 '*--constraints=[Constrain versions using the given requirements files]:CONSTRAINTS:_files' \
 '*--overrides=[Override versions using the given requirements files]:OVERRIDES:_files' \
@@ -3966,8 +4282,8 @@ _arguments "${_arguments_options[@]}" : \
 '*--build-constraints=[Constrain build dependencies using the given requirements files when building source distributions]:BUILD_CONSTRAINTS:_files' \
 '(--all-extras)*--extra=[Include optional dependencies from the specified extra name; may be provided more than once]:EXTRA:_default' \
 '*--group=[Install the specified dependency group from a \`pylock.toml\` or \`pyproject.toml\`]:GROUP:_default' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -3987,9 +4303,10 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:' \
@@ -4002,7 +4319,7 @@ requires-python\:"Optimize for selecting latest supported version of each packag
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
 '*--refresh-package=[Refresh cached data for a specific package]:REFRESH_PACKAGE:' \
 '-p+[The Python interpreter into which packages should be installed.]:PYTHON:' \
 '--python=[The Python interpreter into which packages should be installed.]:PYTHON:' \
@@ -4053,12 +4370,16 @@ aarch64-manylinux_2_39\:"An ARM64 target for the \`manylinux_2_39\` platform"
 aarch64-manylinux_2_40\:"An ARM64 target for the \`manylinux_2_40\` platform"
 aarch64-linux-android\:"An ARM64 Android target"
 x86_64-linux-android\:"An \`x86_64\` Android target"
-wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12"
+wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12. See <https\://pyodide.org/en/stable/development/abi/312.html>"
+wasm32-pyodide2025\:"A wasm32 target using the Pyodide 2025 platform. Meant for use with Python 3.13. See <https\://pyodide.org/en/stable/development/abi/313.html>"
 arm64-apple-ios\:"An ARM64 target for iOS device"
 arm64-apple-ios-simulator\:"An ARM64 target for iOS simulator"
 x86_64-apple-ios-simulator\:"An \`x86_64\` target for iOS simulator"))' \
+'--output-format=[Select the output format]:OUTPUT_FORMAT:((text\:"Display the result in a human-readable format"
+json\:"Display the result in JSON format"))' \
 '--torch-backend=[The backend to use when fetching packages in the PyTorch ecosystem (e.g., \`cpu\`, \`cu126\`, or \`auto\`)]:TORCH_BACKEND:((auto\:"Select the appropriate PyTorch index based on the operating system and CUDA driver version"
 cpu\:"Use the CPU-only PyTorch index"
+cu132\:"Use the PyTorch index for CUDA 13.2"
 cu130\:"Use the PyTorch index for CUDA 13.0"
 cu129\:"Use the PyTorch index for CUDA 12.9"
 cu128\:"Use the PyTorch index for CUDA 12.8"
@@ -4106,6 +4427,7 @@ rocm4.2\:"Use the PyTorch index for ROCm 4.2"
 rocm4.1\:"Use the PyTorch index for ROCm 4.1"
 rocm4.0.1\:"Use the PyTorch index for ROCm 4.0.1"
 xpu\:"Use the PyTorch index for Intel XPU"))' \
+'--cert=[Path to a PEM-encoded CA certificate bundle]:FILE:_files' \
 '--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
 managed\:"Prefer managed Python installations over system Python installations"
@@ -4156,6 +4478,7 @@ never\:"Disables colored output"))' \
 '--strict[Validate the Python environment after completing the installation, to detect packages with missing dependencies or other issues]' \
 '--no-strict[]' \
 '--dry-run[Perform a dry run, i.e., don'\''t actually install anything but resolve the dependencies and print the resulting plan]' \
+'(--dry-run)--check[Check whether the environment satisfies the requirements without modifying it]' \
 '--disable-pip-version-check[]' \
 '--user[]' \
 '-n[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
@@ -4198,6 +4521,7 @@ subprocess\:"Use the \`keyring\` command for credential lookup"))' \
 '(--prefix)-t+[Uninstall packages from the specified \`--target\` directory]:TARGET:_files -/' \
 '(--prefix)--target=[Uninstall packages from the specified \`--target\` directory]:TARGET:_files -/' \
 '(-t --target)--prefix=[Uninstall packages from the specified \`--prefix\` directory]:PREFIX:_files -/' \
+'--cert=[Path to a PEM-encoded CA certificate bundle]:FILE:_files' \
 '--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
 managed\:"Prefer managed Python installations over system Python installations"
@@ -4260,6 +4584,7 @@ _arguments "${_arguments_options[@]}" : \
 '(--prefix --path)-t+[List packages from the specified \`--target\` directory]:TARGET:_files -/' \
 '(--prefix --path)--target=[List packages from the specified \`--target\` directory]:TARGET:_files -/' \
 '(-t --target --path)--prefix=[List packages from the specified \`--prefix\` directory]:PREFIX:_files -/' \
+'--cert=[Path to a PEM-encoded CA certificate bundle]:FILE:_files' \
 '--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
 managed\:"Prefer managed Python installations over system Python installations"
@@ -4316,8 +4641,8 @@ _arguments "${_arguments_options[@]}" : \
 '--format=[Select the output format]:FORMAT:((columns\:"Display the list of packages in a human-readable table"
 freeze\:"Display the list of packages in a \`pip freeze\`-like format, with one package per line alongside its version"
 json\:"Display the list of packages in a machine-readable JSON format"))' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -4328,12 +4653,14 @@ unsafe-first-match\:"Search for every package name across all indexes, exhaustin
 unsafe-best-match\:"Search for every package name across all indexes, preferring the "best" version found. If a package version is in multiple indexes, only look at the entry for the first index"))' \
 '--keyring-provider=[Attempt to use \`keyring\` for authentication for index URLs]:KEYRING_PROVIDER:((disabled\:"Do not use keyring for credential lookup"
 subprocess\:"Use the \`keyring\` command for credential lookup"))' \
-'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:_default' \
+'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:' \
+'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:' \
 '-p+[The Python interpreter for which packages should be listed.]:PYTHON:' \
 '--python=[The Python interpreter for which packages should be listed.]:PYTHON:' \
 '(--prefix)-t+[List packages from the specified \`--target\` directory]:TARGET:_files -/' \
 '(--prefix)--target=[List packages from the specified \`--target\` directory]:TARGET:_files -/' \
 '(-t --target)--prefix=[List packages from the specified \`--prefix\` directory]:PREFIX:_files -/' \
+'--cert=[Path to a PEM-encoded CA certificate bundle]:FILE:_files' \
 '--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
 managed\:"Prefer managed Python installations over system Python installations"
@@ -4396,6 +4723,7 @@ _arguments "${_arguments_options[@]}" : \
 '(--prefix)-t+[Show a package from the specified \`--target\` directory]:TARGET:_files -/' \
 '(--prefix)--target=[Show a package from the specified \`--target\` directory]:TARGET:_files -/' \
 '(-t --target)--prefix=[Show a package from the specified \`--prefix\` directory]:PREFIX:_files -/' \
+'--cert=[Path to a PEM-encoded CA certificate bundle]:FILE:_files' \
 '--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
 managed\:"Prefer managed Python installations over system Python installations"
@@ -4454,8 +4782,8 @@ _arguments "${_arguments_options[@]}" : \
 '--depth=[Maximum display depth of the dependency tree]:DEPTH:_default' \
 '*--prune=[Prune the given package from the display of the dependency tree]:PRUNE:' \
 '*--package=[Display only the specified packages]:PACKAGE:' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -4466,9 +4794,11 @@ unsafe-first-match\:"Search for every package name across all indexes, exhaustin
 unsafe-best-match\:"Search for every package name across all indexes, preferring the "best" version found. If a package version is in multiple indexes, only look at the entry for the first index"))' \
 '--keyring-provider=[Attempt to use \`keyring\` for authentication for index URLs]:KEYRING_PROVIDER:((disabled\:"Do not use keyring for credential lookup"
 subprocess\:"Use the \`keyring\` command for credential lookup"))' \
-'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:_default' \
+'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:' \
+'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:' \
 '-p+[The Python interpreter for which packages should be listed.]:PYTHON:' \
 '--python=[The Python interpreter for which packages should be listed.]:PYTHON:' \
+'--cert=[Path to a PEM-encoded CA certificate bundle]:FILE:_files' \
 '--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
 managed\:"Prefer managed Python installations over system Python installations"
@@ -4570,10 +4900,12 @@ aarch64-manylinux_2_39\:"An ARM64 target for the \`manylinux_2_39\` platform"
 aarch64-manylinux_2_40\:"An ARM64 target for the \`manylinux_2_40\` platform"
 aarch64-linux-android\:"An ARM64 Android target"
 x86_64-linux-android\:"An \`x86_64\` Android target"
-wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12"
+wasm32-pyodide2024\:"A wasm32 target using the Pyodide 2024 platform. Meant for use with Python 3.12. See <https\://pyodide.org/en/stable/development/abi/312.html>"
+wasm32-pyodide2025\:"A wasm32 target using the Pyodide 2025 platform. Meant for use with Python 3.13. See <https\://pyodide.org/en/stable/development/abi/313.html>"
 arm64-apple-ios\:"An ARM64 target for iOS device"
 arm64-apple-ios-simulator\:"An ARM64 target for iOS simulator"
 x86_64-apple-ios-simulator\:"An \`x86_64\` target for iOS simulator"))' \
+'--cert=[Path to a PEM-encoded CA certificate bundle]:FILE:_files' \
 '--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
 managed\:"Prefer managed Python installations over system Python installations"
@@ -4626,6 +4958,7 @@ _arguments "${_arguments_options[@]}" : \
 '--python-version=[]:PYTHON_VERSION:_default' \
 '--implementation=[]:IMPLEMENTATION:_default' \
 '--abi=[]:ABI:_default' \
+'--cert=[Path to a PEM-encoded CA certificate bundle]:FILE:_files' \
 '--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
 managed\:"Prefer managed Python installations over system Python installations"
@@ -4679,8 +5012,8 @@ _arguments "${_arguments_options[@]}" : \
 '-p+[The Python interpreter to use for the virtual environment.]:PYTHON:' \
 '--python=[The Python interpreter to use for the virtual environment.]:PYTHON:' \
 '--prompt=[Provide an alternative prompt prefix for the virtual environment.]:PROMPT:' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -4691,8 +5024,8 @@ unsafe-first-match\:"Search for every package name across all indexes, exhaustin
 unsafe-best-match\:"Search for every package name across all indexes, preferring the "best" version found. If a package version is in multiple indexes, only look at the entry for the first index"))' \
 '--keyring-provider=[Attempt to use \`keyring\` for authentication for index URLs]:KEYRING_PROVIDER:((disabled\:"Do not use keyring for credential lookup"
 subprocess\:"Use the \`keyring\` command for credential lookup"))' \
-'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:_default' \
-'*--exclude-newer-package=[Limit candidate packages for a specific package to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:_default' \
+'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:' \
+'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:' \
 '--link-mode=[The method to use when installing packages from the global cache]:LINK_MODE:((clone\:"Clone (i.e., copy-on-write) packages from the source into the destination"
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
@@ -4720,6 +5053,7 @@ never\:"Disables colored output"))' \
 '--seed[Install seed packages (one or more of\: \`pip\`, \`setuptools\`, and \`wheel\`) into the virtual environment \[env\: UV_VENV_SEED=\]]' \
 '-c[Remove any existing files or directories at the target path \[env\: UV_VENV_CLEAR=\]]' \
 '--clear[Remove any existing files or directories at the target path \[env\: UV_VENV_CLEAR=\]]' \
+'--force[Allow \`--clear\` to remove a non-virtual environment directory]' \
 '(--allow-existing)--no-clear[Fail without prompting if any existing files or directories are present at the target path]' \
 '--allow-existing[Preserve any existing files or directories at the target path]' \
 '--system-site-packages[Give the virtual environment access to the system site packages directory]' \
@@ -4770,8 +5104,8 @@ _arguments "${_arguments_options[@]}" : \
 '*--build-constraints=[Constrain build dependencies using the given requirements files when building distributions]:BUILD_CONSTRAINTS:_files' \
 '-p+[The Python interpreter to use for the build environment.]:PYTHON:' \
 '--python=[The Python interpreter to use for the build environment.]:PYTHON:' \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -4790,24 +5124,25 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-setting=[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-settings-package=[Settings to pass to the PEP 517 build backend for a specific package, specified as \`PACKAGE\:KEY=VALUE\` pairs]:CONFIG_SETTINGS_PACKAGE:_default' \
 '*--no-build-isolation-package=[Disable isolation when building source distributions for a specific package]:NO_BUILD_ISOLATION_PACKAGE:' \
-'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:_default' \
-'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:_default' \
+'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:' \
+'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:' \
 '--link-mode=[The method to use when installing packages from the global cache]:LINK_MODE:((clone\:"Clone (i.e., copy-on-write) packages from the source into the destination"
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
-'*--no-build-package=[Don'\''t build source distributions for a specific package]:NO_BUILD_PACKAGE:' \
-'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package]:NO_BINARY_PACKAGE:' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
+'*--no-build-package=[Don'\''t build source distributions for a specific package \[env\: \`UV_NO_BUILD_PACKAGE\`=\]]:NO_BUILD_PACKAGE:' \
+'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package \[env\: \`UV_NO_BINARY_PACKAGE\`=\]]:NO_BINARY_PACKAGE:' \
 '*--refresh-package=[Refresh cached data for a specific package]:REFRESH_PACKAGE:' \
 '--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
@@ -4825,6 +5160,7 @@ never\:"Disables colored output"))' \
 '--directory=[Change to the given directory prior to running the command]:DIRECTORY:_files -/' \
 '--project=[Discover a project in the given directory]:PROJECT:_files -/' \
 '--config-file=[The path to a \`uv.toml\` file to use for configuration]:CONFIG_FILE:_files' \
+'--skip-dependency-check[Skip checking if build dependencies are satisfied when building without isolation]' \
 '(--package)--all-packages[Builds all packages in the workspace]' \
 '--sdist[Build a source distribution ("sdist") from the given directory]' \
 '--wheel[Build a binary distribution ("wheel") from the given directory]' \
@@ -4917,7 +5253,6 @@ never\:"Disables colored output"))' \
 '--skip-existing[]' \
 '--dry-run[Perform a dry run without uploading files]' \
 '--no-attestations[Do not upload attestations for the published files]' \
-'--direct[Use direct upload to the registry]' \
 '-n[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
 '--no-cache[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
 '--managed-python[Require use of uv-managed Python versions \[env\: UV_MANAGED_PYTHON=\]]' \
@@ -5003,8 +5338,9 @@ never\:"Disables colored output"))' \
         case $line[1] in
             (metadata)
 _arguments "${_arguments_options[@]}" : \
-'*--index=[The URLs to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
-'--default-index=[The URL of the default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
+'--script=[View metadata for the specified PEP 723 Python script, rather than the current workspace]:SCRIPT:_files' \
+'*--index=[The indexes to use when resolving dependencies, in addition to the default index]:INDEX:_default' \
+'--default-index=[The default package index (by default\: <https\://pypi.org/simple>)]:DEFAULT_INDEX:_default' \
 '-i+[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '--index-url=[(Deprecated\: use \`--default-index\` instead) The URL of the Python package index (by default\: <https\://pypi.org/simple>)]:INDEX_URL:_default' \
 '*--extra-index-url=[(Deprecated\: use \`--index\` instead) Extra URLs of package indexes to use, in addition to \`--index-url\`]:EXTRA_INDEX_URL:_default' \
@@ -5023,24 +5359,25 @@ lowest\:"Resolve the lowest compatible version of each package"
 lowest-direct\:"Resolve the lowest compatible version of any direct dependencies, and the highest compatible version of any transitive dependencies"))' \
 '--prerelease=[The strategy to use when considering pre-release versions]:PRERELEASE:((disallow\:"Disallow all pre-release versions"
 allow\:"Allow all pre-release versions"
-if-necessary\:"Allow pre-release versions if all versions of a package are pre-release"
-explicit\:"Allow pre-release versions for first-party packages with explicit pre-release markers in their version requirements"
-if-necessary-or-explicit\:"Allow pre-release versions if all versions of a package are pre-release, or if the package has an explicit pre-release marker in its version requirements"))' \
+if-necessary\:"Prefer stable versions, falling back to pre-release versions when necessary"
+explicit\:"Prefer stable versions for first-party packages with explicit pre-release specifiers, falling back to pre-release versions when necessary. Disallow pre-release versions for all other packages"
+if-necessary-or-explicit\:"Deprecated alias for \`if-necessary\`"))' \
+'*--prerelease-package=[The strategy to use when considering pre-release versions for a specific package]:PRERELEASE_PACKAGE:' \
 '--fork-strategy=[The strategy to use when selecting multiple versions of a given package across Python versions and platforms]:FORK_STRATEGY:((fewest\:"Optimize for selecting the fewest number of versions for each package. Older versions may be preferred if they are compatible with a wider range of supported Python versions or platforms"
 requires-python\:"Optimize for selecting latest supported version of each package, for each supported Python version"))' \
 '*-C+[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-setting=[Settings to pass to the PEP 517 build backend, specified as \`KEY=VALUE\` pairs]:CONFIG_SETTING:_default' \
 '*--config-settings-package=[Settings to pass to the PEP 517 build backend for a specific package, specified as \`PACKAGE\:KEY=VALUE\` pairs]:CONFIG_SETTINGS_PACKAGE:_default' \
 '*--no-build-isolation-package=[Disable isolation when building source distributions for a specific package]:NO_BUILD_ISOLATION_PACKAGE:' \
-'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:_default' \
-'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:_default' \
+'--exclude-newer=[Limit candidate packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER:' \
+'*--exclude-newer-package=[Limit candidate packages for specific packages to those that were uploaded prior to the given date]:EXCLUDE_NEWER_PACKAGE:' \
 '--link-mode=[The method to use when installing packages from the global cache]:LINK_MODE:((clone\:"Clone (i.e., copy-on-write) packages from the source into the destination"
 copy\:"Copy packages from the source into the destination"
 hardlink\:"Hard link packages from the source into the destination"
 symlink\:"Symbolically link packages from the source into the destination"))' \
-'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages]:NO_SOURCES_PACKAGE:_default' \
-'*--no-build-package=[Don'\''t build source distributions for a specific package]:NO_BUILD_PACKAGE:' \
-'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package]:NO_BINARY_PACKAGE:' \
+'*--no-sources-package=[Don'\''t use sources from the \`tool.uv.sources\` table for the specified packages \[env\: \`UV_NO_SOURCES_PACKAGE\`=\]]:NO_SOURCES_PACKAGE:_default' \
+'*--no-build-package=[Don'\''t build source distributions for a specific package \[env\: \`UV_NO_BUILD_PACKAGE\`=\]]:NO_BUILD_PACKAGE:' \
+'*--no-binary-package=[Don'\''t install pre-built wheels for a specific package \[env\: \`UV_NO_BINARY_PACKAGE\`=\]]:NO_BINARY_PACKAGE:' \
 '*--refresh-package=[Refresh cached data for a specific package]:REFRESH_PACKAGE:' \
 '-p+[The Python interpreter to use during resolution.]:PYTHON:' \
 '--python=[The Python interpreter to use during resolution.]:PYTHON:' \
@@ -5061,8 +5398,9 @@ never\:"Disables colored output"))' \
 '--project=[Discover a project in the given directory]:PROJECT:_files -/' \
 '--config-file=[The path to a \`uv.toml\` file to use for configuration]:CONFIG_FILE:_files' \
 '(--frozen -U --upgrade)--locked[Check if the lockfile is up-to-date \[env\: UV_LOCKED=\]]' \
+'--no-locked[Disable locked mode, overriding \`UV_LOCKED\`]' \
 '(--locked)--frozen[Assert that a \`uv.lock\` exists without checking if it is up-to-date \[env\: UV_FROZEN=\]]' \
-'(--frozen --locked)--dry-run[Perform a dry run, without writing the lockfile]' \
+'--no-frozen[Disable frozen mode, overriding \`UV_FROZEN\`]' \
 '--no-index[Ignore the registry index (e.g., PyPI), instead relying on direct URL dependencies and those provided via \`--find-links\`]' \
 '-U[Allow package upgrades, ignoring pinned versions in any existing output file. Implies \`--refresh\`]' \
 '--upgrade[Allow package upgrades, ignoring pinned versions in any existing output file. Implies \`--refresh\`]' \
@@ -5077,6 +5415,9 @@ never\:"Disables colored output"))' \
 '--binary[]' \
 '--refresh[Refresh all cached data]' \
 '--no-refresh[]' \
+'--sync[Sync the environment to include module ownership metadata in the output]' \
+'--exact[Perform an exact sync, removing extraneous packages]' \
+'--active[Sync dependencies to the active virtual environment]' \
 '-n[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
 '--no-cache[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
 '--managed-python[Require use of uv-managed Python versions \[env\: UV_MANAGED_PYTHON=\]]' \
@@ -5171,6 +5512,7 @@ never\:"Disables colored output"))' \
 '--project=[Discover a project in the given directory]:PROJECT:_files -/' \
 '--config-file=[The path to a \`uv.toml\` file to use for configuration]:CONFIG_FILE:_files' \
 '--paths[Show paths instead of names]' \
+'--scripts[List all standalone scripts with inline metadata in the workspace]' \
 '-n[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
 '--no-cache[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
 '--managed-python[Require use of uv-managed Python versions \[env\: UV_MANAGED_PYTHON=\]]' \
@@ -5834,6 +6176,9 @@ never\:"Disables colored output"))' \
 ;;
 (size)
 _arguments "${_arguments_options[@]}" : \
+'--output-format=[Select the output format]:OUTPUT_FORMAT:((auto\:"Display a human-readable size in terminals and raw bytes otherwise"
+human\:"Display the cache size in a human-readable format"
+machine\:"Display the cache size in raw bytes"))' \
 '--cache-dir=[Path to the cache directory]:CACHE_DIR:_files -/' \
 '--python-preference=[]:PYTHON_PREFERENCE:((only-managed\:"Only use managed Python installations; never use system Python installations"
 managed\:"Prefer managed Python installations over system Python installations"
@@ -5850,8 +6195,8 @@ never\:"Disables colored output"))' \
 '--directory=[Change to the given directory prior to running the command]:DIRECTORY:_files -/' \
 '--project=[Discover a project in the given directory]:PROJECT:_files -/' \
 '--config-file=[The path to a \`uv.toml\` file to use for configuration]:CONFIG_FILE:_files' \
-'-H[Display the cache size in human-readable format (e.g., \`1.2 GiB\` instead of raw bytes)]' \
-'--human[Display the cache size in human-readable format (e.g., \`1.2 GiB\` instead of raw bytes)]' \
+'(--output-format)-H[Display the cache size in human-readable format (e.g., \`1.2GiB\` instead of raw bytes)]' \
+'(--output-format)--human[Display the cache size in human-readable format (e.g., \`1.2GiB\` instead of raw bytes)]' \
 '-n[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
 '--no-cache[Avoid reading from or writing to the cache, instead using a temporary directory for the duration of the operation]' \
 '--managed-python[Require use of uv-managed Python versions \[env\: UV_MANAGED_PYTHON=\]]' \
@@ -6201,9 +6546,11 @@ _uv_commands() {
 'version:Read or update the project'\''s version' \
 'sync:Update the project'\''s environment' \
 'lock:Update the project'\''s lockfile' \
+'upgrade:Upgrade a dependency in the project' \
 'export:Export the project'\''s lockfile to an alternate format' \
 'tree:Display the project'\''s dependency tree' \
 'format:Format Python code in the project' \
+'check:Run checks on the project' \
 'audit:Audit the project'\''s dependencies' \
 'tool:Run and install commands provided by Python packages' \
 'python:Manage Python versions and installations' \
@@ -6337,7 +6684,7 @@ _uv__build-backend__prepare-metadata-for-build-wheel_commands() {
 _uv__cache_commands() {
     local commands; commands=(
 'clean:Clear the cache, removing all entries or those linked to specific packages' \
-'prune:Prune all unreachable objects from the cache' \
+'prune:Prune dangling cache entries and cached environments' \
 'dir:Show the cache directory' \
 'size:Show the cache size' \
     )
@@ -6362,6 +6709,11 @@ _uv__cache__prune_commands() {
 _uv__cache__size_commands() {
     local commands; commands=()
     _describe -t commands 'uv cache size commands' commands "$@"
+}
+(( $+functions[_uv__check_commands] )) ||
+_uv__check_commands() {
+    local commands; commands=()
+    _describe -t commands 'uv check commands' commands "$@"
 }
 (( $+functions[_uv__clean_commands] )) ||
 _uv__clean_commands() {
@@ -6564,11 +6916,17 @@ _uv__tool_commands() {
 'install:Install commands provided by a Python package' \
 'upgrade:Upgrade installed tools' \
 'list:List installed tools' \
+'audit:Audit installed tools and their dependencies' \
 'uninstall:Uninstall a tool' \
 'update-shell:Ensure that the tool executable directory is on the \`PATH\`' \
 'dir:Show the path to the uv tools directory' \
     )
     _describe -t commands 'uv tool commands' commands "$@"
+}
+(( $+functions[_uv__tool__audit_commands] )) ||
+_uv__tool__audit_commands() {
+    local commands; commands=()
+    _describe -t commands 'uv tool audit commands' commands "$@"
 }
 (( $+functions[_uv__tool__dir_commands] )) ||
 _uv__tool__dir_commands() {
@@ -6614,6 +6972,11 @@ _uv__tool__uvx_commands() {
 _uv__tree_commands() {
     local commands; commands=()
     _describe -t commands 'uv tree commands' commands "$@"
+}
+(( $+functions[_uv__upgrade_commands] )) ||
+_uv__upgrade_commands() {
+    local commands; commands=()
+    _describe -t commands 'uv upgrade commands' commands "$@"
 }
 (( $+functions[_uv__venv_commands] )) ||
 _uv__venv_commands() {

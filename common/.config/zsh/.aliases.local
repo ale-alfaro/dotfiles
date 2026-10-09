@@ -1,0 +1,53 @@
+#!/usr/bin/env zsh
+# -------------------------------------------
+# 6. Global Aliases - Use Anywhere in Commands
+# -------------------------------------------
+# Redirect stderr to /dev/null
+alias -g NE='2>/dev/null'
+
+# Redirect stdout to /dev/null
+alias -g NO='>/dev/null'
+
+alias -g FZF='| fzf'
+
+# Redirect both stdout and stderr to /dev/null
+alias -g NUL='>/dev/null 2>&1'
+
+# Pipe to jq
+alias -g J='| jqp'
+
+alias -g P='| bat'
+
+if [[ "$OSTYPE" == "linux"* ]]; then
+  open() {
+    xdg-open "$@" >/dev/null 2>&1 &
+  }
+  alias -g CP='| wl-copy'
+elif [[ "$OSTYPE" == "macos"* ]]; then
+  alias -g CP='| pb-copy'
+fi
+
+# Helpful aliases for zmv
+alias mmv='noglob zmv -W'
+
+# Navigate back to directories easily using the zsh directory stack feature
+alias d='dirs -v'
+for index in {1..9}; do alias "$index"="builtin cd +${index}"; done
+# Enable the help command
+((${+aliases[run-help]})) && unalias run-help
+alias help=run-help
+
+
+zd() {
+  if [ $# -eq 0 ]; then
+    builtin cd ~ && return
+  elif [ -d "$1" ]; then
+    builtin cd "$1"
+  else
+    zi "$1"
+  fi
+}
+
+alias cd='zd'
+# ---- Editor -----
+alias v="fvim"

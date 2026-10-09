@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+typeset -a lines
+lines=("${(@f)"$(<favorites.txt)"}")
+for l in "$lines[@]"; do
+  val=("${(s:,:)l}")
+  label="$val[1]"
+  entry="$val[2]"
+  echo "$entry" | pass insert -m "$label"
+done
+# grepped=("${(s:,:)lines}")
+# echo "$grepped"

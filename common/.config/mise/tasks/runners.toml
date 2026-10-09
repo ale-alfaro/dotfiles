@@ -4,6 +4,7 @@
 ["global:flash:nrf5340"]
 description = "Flash a sysbuild app onto BOTH cores from its merged hexes (net core first), then reset. probe-rs routes each hex by address: app flash at 0x0, net flash at 0x01000000."
 dir = "{{cwd}}"
+interactive = true
 usage = '''
 flag "--app <cpuapp_hex>" 
 flag "--net <cpunet_hex>"

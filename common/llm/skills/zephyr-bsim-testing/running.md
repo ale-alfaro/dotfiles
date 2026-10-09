@@ -68,8 +68,66 @@ Execute "${tester_exe}" -s=${simulation_id} -d=1 -rs=69  -testid=tester
 - Leave `EXECUTE_TIMEOUT` at the default unless measured runtime exceeds 5 s,
   then ~5× that. Never below the default.
 - Keep output under ~100 lines; use `LOG_DBG` freely but do not ship `DBG` on.
-- Write nothing outside `${BSIM_OUT_PATH}/results/<simulation_id>/` or `/tmp`.
+- Write nothing outside `${BSIM_OUT_PATH}/results/<simulation_id>/`, `/tmp`, or
+  the folder of `${RESULTS_FILE}` (for flash files, see below).
 - A leading `_` makes a script undiscoverable — use it for local debug helpers.
+
+## Simulated flash (`zephyr,sim-flash`)
+
+On POSIX boards the flash simulator stores its contents in a file, and **that
+file survives between runs**. `flash_simulator.c` defaults
+`flash_erase_at_start = true`, but the native-sim argument parser
+(`nsi_cmd_args_set_defaults`) sets every on/off option to `false` before it
+parses. So the file is only erased when it is new or empty. A test that leaves
+data behind therefore fails its *next* run. In the boot log, storage then reports
+written pages before the test has written anything.
+
+The options take their prefix from the name of the `soc-nv-flash` child node
+(below, `nand@0`), and instance 0 also answers to plain `flash`. Do not rely on
+that alias: on nrf bsim boards `-flash…` already belongs to the NVMC model.
+
+| Option                 | Effect                                       |
+| ---------------------- | -------------------------------------------- |
+| `-nand@0=<path>`       | backing file (default `flash<n>.bin` in the cwd, which is `$BSIM_OUT_PATH/bin`) |
+| `-nand@0_erase`        | erase at boot                                |
+| `-nand@0_rm`           | delete the file on exit                      |
+| `-nand@0_in_ram`       | no file; always erased; the other three are ignored |
+
+The options only exist on a build that has the sim-flash node. Pass one to a
+board without it and the device dies at boot with `Incorrect option`, and its
+peer then waits out `EXECUTE_TIMEOUT`: it looks like a hang, not an error.
+
+Always pass `_erase` (or `_in_ram`) unless the test means to persist data. Give
+each script its own file, named after `simulation_id`, or parallel scripts share
+one medium. Keep the file next to the results rather than in `bin/`:
+
+```bash
+Execute "./bs_${BOARD_TS}_..._dut_prj_conf" ... \
+	-nand@0="$(dirname "${RESULTS_FILE}")/${simulation_id}.bin" -nand@0_erase
+```
+
+#### Making it behave like the real part
+
+The simulator follows the DT geometry and can be made stricter through Kconfig:
+
+- `write-block-size` = NAND page, `erase-block-size` = erase block. An FTL such
+  as Dhara reads these as its page and block, and reserves
+  `DHARA_MAX_RETRIES` (8) whole blocks plus a gc reserve: fewer than ~10 erase
+  blocks gives a disk with **zero sectors**. Keep the part's page and block
+  size and shrink only the block count.
+- `CONFIG_FLASH_SIMULATOR_SIMULATE_TIMING` + `MIN_{READ,WRITE,ERASE}_TIME_US`
+  busy-waits once per driver call, which advances simulated time. An FTL issues
+  one call per page read, page program and block erase, so the datasheet
+  figures map one to one.
+- Programming a page twice already fails (`DOUBLE_WRITES` off and
+  `EXPLICIT_ERASE` on by default).
+- `CONFIG_FLASH_SIMULATOR_EX_OP` satisfies `FLASH_EX_OP_ENABLED`, but its handler
+  returns `-ENOTSUP` for everything: an FTL sees every block as good. Bad-block
+  injection needs your own hook.
+
+`RESULTS_FILE` reaches the scripts only because the caller exports it.
+`run_parallel.sh` defaults the variable but does not export it, so with `set -u`
+a script run without it fails straight away, which is what you want.
 
 ## Running a batch
 

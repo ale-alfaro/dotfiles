@@ -1,5 +1,4 @@
-
-VimRc.later(function ( )
+VimRc.later(function()
   require('extras.completion').setup_blink()
 end)
 
@@ -11,32 +10,6 @@ VimRc.later(function()
   require 'extras.overseer'
 end)
 
-VimRc.later(function()
-  require('mini.git').setup()
-  require('mini.diff').setup()
-  local git_keys = {
-    { 'a', '<cmd>FzfLua git_status<cr>', 'Add/Status' },
-    { 'd', '<cmd>FzfLua git_diff<cr>', 'Diff' },
-    { 'h', '<Cmd>FzfLua git_hunks<CR>', 'Hunks' },
-    { 'b', '<cmd>FzfLua git_blame<cr>', 'Blame' },
-    { 'B', '<cmd>Git blame --porcelain -- %<cr>', 'Blame (MiniGit)' },
-    { 'l', '<cmd>Git log --oneline<cr>', 'Log (MiniGit)' },
-    { 's', '<cmd>Git status<cr>', 'Status (MiniGit)' },
-    { 'c', '<cmd>Git commit<cr>', 'Commit (MiniGit)' },
-    { 'D', '<cmd>lua MiniDiff.toggle_overlay()<cr>', 'Toggle overlay' },
-    { 'b', '<cmd>FzfLua git_bcommits<cr>', 'Buf Commits' },
-    { 'C', '<cmd>FzfLua git_commits<cr>', 'Commits' },
-  }
-
-
-  for _, k in ipairs(git_keys) do
-    vim.keymap.set('n', '<leader>v' .. k[1], k[2], { desc = k[3] })
-  end
-  VimRc.keymap_clues = vim.list_extend(VimRc.keymap_clues, {
-    { mode = 'n', keys = '<Leader>v', desc = '+VCS' },
-    { mode = 'x', keys = '<Leader>v', desc = '+VCS' },
-  })
-end)
 VimRc.later(function()
   require('render-markdown').setup(
     ---@type render.md.Settings
@@ -63,10 +36,11 @@ VimRc.later(function()
   vim.api.nvim_set_hl(0, 'RenderMarkdownH3Bg', { fg = '#fabd2f' })
   vim.api.nvim_set_hl(0, 'RenderMarkdownH4Bg', { fg = '#b8bb26' })
   vim.api.nvim_set_hl(0, 'RenderMarkdownH5Bg', { fg = '#8ec07c' })
-  require('custom.obsidian').setup()
 end)
 VimRc.later(function()
+  if vim.env.ZEPHYR_BASE or vim.fs.root(vim.fn.getcwd(0), ".west") then
   require('custom.west').setup()
+end
 end)
 
 -- VimRc.later(function()

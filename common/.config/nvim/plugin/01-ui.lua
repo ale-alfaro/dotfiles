@@ -84,9 +84,12 @@ end)
 VimRc.now(function()
   require('mini.statusline').setup()
 end)
----
 
-VimRc.now_if_args(function()
+VimRc.now(function()
+  require('mini.git').setup()
+  require('mini.diff').setup()
+end)
+VimRc.now(function()
   NOTIFY_WIDTH = 120
   --- to display progress when the server supports percentages
   ---@param notif_arr Notification[]

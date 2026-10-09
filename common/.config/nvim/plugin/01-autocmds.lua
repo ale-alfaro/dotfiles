@@ -24,6 +24,12 @@ autocmd('BufEnter', function(args)
     vim.keymap.set('n', 'q', '<cmd>quit<cr>', { buffer = args.buf })
   end
 end, 'Close with <q> (unlisted buffers)')
+if vim.g.diffview then
+  local aug = vim.api.nvim_create_augroup('diff', {clear = true})
+  autocmd('BufWinEnter', function (ev)
+    MiniDiff.toggle_overlay(ev.buf)
+  end,  'Open buffer with diff overlay',{group = aug, once = true})
+end
 -- ──────────────────────────────────────────────────────────────
 --  Zephyr/west workspaces: `:compiler west` for any buffer under the
 --  nearest ancestor directory containing `.west/` (fires after

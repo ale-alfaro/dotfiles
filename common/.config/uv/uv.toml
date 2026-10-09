@@ -1,5 +1,7 @@
+# $schema 
 python-preference = "only-managed"
 python-downloads = "automatic"
+
 preview = true
 
 [pip]

@@ -1848,3 +1848,27 @@ q
 q
 c
 q
+mon reset
+c
+bt
+l
+up 4
+q
+mon reset
+c
+bt
+quit
+c
+bt
+up 4
+up
+l
+quit
+mon reset
+c
+info threads
+info regs
+info registers 
+q
+thread apply all bt
+q

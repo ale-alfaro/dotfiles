@@ -16,6 +16,7 @@
   dl = -c diff.external=difft log -p --ext-diff
   # Show the most recent commit with difftastic.
   ds = -c diff.external=difft show --ext-diff
+	log1 = log -n 1 --format=%H
 
 [extensions]
   relativeWorktrees = true
@@ -47,7 +48,7 @@
 	conflictStyle = zdiff3
 	tool = codediff
 [web]
-  browser = ~/.local/bin/zen
+  browser = zen
 [worktree]
   useRelativePaths = true
   guessRemote = true
@@ -74,3 +75,10 @@
     # `-t difftastic` every time.
     tool = difftastic
 
+[hook "hk-pre-commit"]
+	command = test \"${HK:-1}\" = \"0\" || ~/.local/bin/mise x hk -- hk run pre-commit --from-hook --staged
+	event = pre-commit
+[url "https://github.com/"]
+	insteadOf = git@github.com:
+[url "https://github.com/sibelhealth/sh_sdk_2.0"]
+	insteadOf = "https://github.com/sibelhealth/sh-sdk"

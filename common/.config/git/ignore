@@ -42,7 +42,8 @@ docs/_build/
 profile_default/
 ipython_config.py
 
-
+# node
+node_modules/
 
 # Environments
 .env
@@ -90,9 +91,7 @@ compile_commands.json
 
 mise.local.toml
 mise.ignore.toml
-mise.*.local.toml
 .miserc.toml
-.miserc.*.toml
 mise.ai.toml
 
 .claude

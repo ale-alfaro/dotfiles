@@ -1,0 +1,49 @@
+#!/usr/bin/env zsh
+# Tool integrations and zle widgets. Sourced from .zshrc after plugins.
+
+autoload -Uz zmv run-help edit-command-line add-zsh-hook
+autoload -Uz $ZDOTDIR/functions/*(.:t) # every file in functions/ is a lazy-loaded function
+
+# ^D exits even when the command line is not empty.
+zle_exit_zsh() { exit; }
+zle -N zle_exit_zsh
+bindkey '^D' zle_exit_zsh
+
+# ^G edits the command line in $EDITOR.
+zle -N edit-command-line
+bindkey '^G' edit-command-line
+
+# ^Z backgrounds the current input, or foregrounds the last job when empty.
+# https://github.com/wincent/wincent/commit/30b502d811fbf4ca058db3a6f006aaecab68f6b7
+zle_fg_bg() {
+  if [[ $#BUFFER -eq 0 ]]; then
+    fg
+  else
+    zle push-input
+  fi
+}
+zle -N zle_fg_bg
+bindkey '^Z' zle_fg_bg
+
+# ^S opens the sesh picker (configured in sesh.toml [tui]). Widgets get no terminal on stdin, hence </dev/tty.
+zle_sesh() { sesh picker --hide-duplicates </dev/tty; zle reset-prompt }
+zle -N zle_sesh
+bindkey '^S' zle_sesh
+
+# Rehash commands after pacman installs something (needs pacman's zsh hook).
+zshcache_time="$(date +%s%N)"
+rehash_precmd() {
+  [[ -e /var/cache/zsh/pacman ]] || return
+  local paccache_time="$(date -r /var/cache/zsh/pacman +%s%N)"
+  if (( zshcache_time < paccache_time )); then
+    rehash
+    zshcache_time="$paccache_time"
+  fi
+}
+add-zsh-hook -Uz precmd rehash_precmd
+
+[[ ${TERM:-} != dumb ]] && eval "$(starship init zsh)"
+[[ -z ${NO_MISE_ACTIVATE:-} ]] && source <(mise activate zsh)
+safe_source zoxide init zsh
+safe_source atuin init zsh
+has wt && eval "$(command wt config shell init zsh)"

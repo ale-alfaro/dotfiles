@@ -1,6 +1,5 @@
 
 ["global:kconfigstyle:fmt"]
-hide = true
 alias = "kconfigfmt"
 dir = "{{cwd}}"
 usage = '''
@@ -9,7 +8,7 @@ arg "<file>" help="Name of file to format"
 run = '''
 #!/usr/bin/env zsh
 set -euo pipefail
-kconfigstyle --preset zephyr {{usage.file}} --print-formatted | tail -n +5 | head -n -2
+kconfigstyle --preset zephyr --min-prefix-length=0 {{usage.file}} --print-formatted | tail -n +5 | head -n -2
 '''
 
 ["global:kconfig:diffconfig"]

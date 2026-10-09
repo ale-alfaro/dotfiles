@@ -1,0 +1,17 @@
+#!/usr/bin/env zsh
+# shellcheck shell=bash
+fpath+="$ZDOTDIR/completions/src"
+fpath+="$ZDOTDIR/functions"
+export TERMINAL=xdg-terminal-exec
+export BROWSER=zen
+export BAT_THEME=ansi
+export PAGER="bat"
+export MANPAGER="nvim +Man!"
+# zsh options
+export HISTFILE="$XDG_DATA_HOME/zsh/history"
+export HISTSIZE=25001 # Maximum events for internal history
+export SAVEHIST=25001 # Maximum events in history file
+export KEYTIMEOUT=5
+
+export OBSIDIAN_HOME="$HOME/Documents/Obsidian"
+export OMARCHY_SCREENSHOT_DIR=$HOME/Pictures/Screenshots

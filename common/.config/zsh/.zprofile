@@ -11,11 +11,53 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   export BROWSER=arc
   export SDKROOT="$(xcrun --show-sdk-path)"
 fi
+# shellcheck shell=bash
 
-# eval "$(SHELL=/bin/zsh keychain --eval --quick --systemd --ssh-allow-forwarded id_ed25519_yubikey)"
-typeset -U path PATH
-path=($HOME/.local/bin $path)
-export PATH
-if [[ ! -n "${SSH_CONNECTION}" ]]; then
-  source <(mise activate --shims)
-fi
+# This file runs once at login.
+
+# shellcheck disable=SC1091
+# . "${XDG_CONFIG_HOME:-"${HOME}/.config"}/zsh/.xdg.local"
+
+# Add all local binaries to the system path and make sure they are first.
+export PATH="${HOME}/.local/bin:${HOME}/.local/bin/local:${PATH}"
+
+# Confiure Mise (programming language run-time manager).
+export PATH="${XDG_DATA_HOME}/mise/shims:${PATH}"
+
+# Default programs to run.
+export EDITOR="nvim"
+export DIFFPROG="nvim -d"
+
+# Add colors to the less command.
+export LESS="-R"
+export LESS_TERMCAP_mb=$'\e[1;31m'    # begin blinking
+export LESS_TERMCAP_md=$'\e[1;36m'    # begin bold
+export LESS_TERMCAP_us=$'\e[1;32m'    # begin underline
+export LESS_TERMCAP_so=$'\e[1;30;44m' # begin standout-mode - info box
+export LESS_TERMCAP_me=$'\e[0m'       # end mode
+export LESS_TERMCAP_ue=$'\e[0m'       # end underline
+export LESS_TERMCAP_se=$'\e[0m'       # end standout-mode
+
+# Use bat to color up the man pages.
+export MANROFFOPT="-c"
+export MANPAGER="sh -c 'col -bx | bat --language man --plain'"
+
+# Configure GPG.
+export GNUPGHOME="${XDG_CONFIG_HOME}/gnupg"
+
+# Configure pass, Docker Desktop on Linux uses this tool and while I have used
+# it for years in the past, I've moved to using KeePassXC.
+export PASSWORD_STORE_DIR="${XDG_CONFIG_HOME}/password-store"
+
+# Configure delta (diffs) defaults.
+# https://dandavison.github.io/delta/environment-variables.html
+export DELTA_FEATURES="diff-so-fancy"
+
+# Configure zsh-vi-mode.
+export ZVM_NORMAL_MODE_CURSOR="${ZVM_CURSOR_BLOCK:-}"
+export ZVM_INSERT_MODE_CURSOR="${ZVM_CURSOR_BEAM:-}"
+
+# Load local settings if they exist.
+# shellcheck disable=SC1091
+if [ -f "${XDG_CONFIG_HOME}/zsh/.zprofile.local" ]; then . "${XDG_CONFIG_HOME}/zsh/.zprofile.local"; fi
+

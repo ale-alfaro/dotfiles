@@ -2,13 +2,13 @@
 [settings]
 experimental = true
 lockfile = true
-color_theme = "dracula"
+color_theme = "auto"
 unix_default_file_shell_args = 'zsh -eu'
 unix_default_inline_shell_args = "zsh -eu -c"
 trusted_config_paths = [
-        '~/sibel/eng/fw/anne-workspace',
-        "~/sibel/Documents/Obsidian",
-        "~/dotfiles/",
+  '~/sibel/eng/fw/anne-workspace',
+  "~/sibel/Documents/Obsidian",
+  "~/dotfiles/",
 ]
 # tools can read the versions files used by other version managers
 # for example, .nvmrc in the case of node's nvm
@@ -17,14 +17,14 @@ disable_backends = ["asdf"]
 disable_tools = ["pipx:west"]
 # configure `mise install` to always keep the downloaded archive
 always_keep_download = false # deleted after install by default
-always_keep_install = false  # deleted on failure by default
+always_keep_install = false # deleted on failure by default
 
 # configure how frequently (in minutes) to fetch updated plugin repository changes
 # this is updated whenever a new runtime is installed
 # (note: this isn't currently implemented but there are plans to add it: https://github.com/jdx/mise/discussions/6735)
-plugin_autoupdate_last_check_duration = '1 week'                                               # set to 0 to disable updates
+plugin_autoupdate_last_check_duration = '1 week' # set to 0 to disable updates
 status = { missing_tools = "if_other_versions_installed", show_env = true, show_tools = true }
-task = { output = "interleave", run_auto_install = true, timings = true }
+task = { output = "interleave", run_auto_install = true, timings = true, show_full_cmd = true }
 npm.package_manager = "bun"
 npm.bun = true
 pipx.uvx = true
@@ -32,12 +32,14 @@ python.uv_venv_auto = "source"
 github.gh_cli_tokens = true
 cargo.binstall_native = true
 cargo.binstall = true
+color = true
 
 [shell_alias]
 arm-none-eabi-gdb = "arm-zephyr-eabi-gdb-py"
 arm-zephyr-eabi-gdb = "arm-zephyr-eabi-gdb-py"
 
 [tools]
+rg = "latest"
 jqp = "latest"
 lua = "5.5"
 dprint = "latest"
@@ -54,9 +56,23 @@ neovim = "latest"
 marksman = "latest"
 shfmt = "latest"
 shellcheck = "latest"
-acli = "latest"
-lazydocker = "latest"
 jq = "latest"
+difftastic = "latest"
+yq = "latest"
+actionlint = "latest"
+sd = "latest"
+pkl = "latest"
+ninja = "latest"
+clang-format = "latest"
+fzf = "latest"
+codex = "latest"
+opam = { version = "latest", asset_pattern = "opam-*-{gnu_arch}-{os}" }
+rumdl = "latest"
+
+"packslip:github.com/max-sixty/worktrunk" = "latest"
+"packslip:jdx/hk" = "latest"
+"packslip:jdx/usage" = "latest"
+
 uv = "latest"
 "pipx:pyrefly" = "latest"
 "pipx:ruff" = "latest"
@@ -66,13 +82,10 @@ uv = "latest"
 "pipx:gersemi" = "latest"
 
 bun = "latest"
-"npm:prettier" = "latest"
 "npm:bash-language-server" = "latest"
 "npm:yaml-language-server" = "latest"
 "npm:vscode-langservers-extracted" = "latest"
 "npm:defuddle" = "latest"
-"npm:typescript-language-server" = "latest"
-"npm:devicetree-language-server" = "latest"
 
 gh = "latest"
 git-lfs = "latest"
@@ -87,33 +100,19 @@ go = "latest"
 
 rust = "latest"
 rust-analyzer = "latest"
-"cargo:taplo-cli" = "latest"
+cargo-binstall = "latest"
 "cargo:neocmakelsp" = "latest"
-"cargo:tlrc" = "latest"
 "cargo:probe-rs-tools" = "latest"
 "cargo:scope-monitor" = "latest"
+"cargo:tuicr" = "latest"
+"cargo:atuin" = "latest"
 
 "http:nrfutil" = { version = "1.4.0", url = "https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil" }
-rg = "latest"
 "vfox-zephyr:west" = "latest"
-difftastic = "latest"
-yq = "latest"
-actionlint = "latest"
-node = "latest"
-sd = "latest"
-pkl = "latest"
-ninja = "latest"
-worktrunk = "latest"
 "vfox-zephyr:arm" = "latest"
-clang-format = "latest"
-fzf = "latest"
-codex = "latest"
-"packslip:jdx/hk" = "latest"
-"packslip:jdx/usage" = "latest"
 
 [plugins]
 "vfox:zephyr" = "https://github.com/ale-alfaro/vfox-zephyr-sdk.git"
-
 
 [tool_alias]
 "python@3.12" = "python"
@@ -183,23 +182,4 @@ flag "-n --no-clean" {
     Default behavior is to clobber the directories every run
     """
 } 
-'''
-
-[tasks."_postbuild:symlink:compdb"]
-hide = true
-dir = "{{cwd}}"
-usage = 'arg "<build>"'
-run = '''
-
-if [[ -f "${usage_build?}/compile_commands.json" ]]; then
-  compdb="${usage_build}/compile_commands.json"
-elif [[ -f "${usage_build?}/domains.yaml" ]]; then
-  compdb="${usage_build}/$(yq e '.default' $usage_build/domains.yaml)/compile_commands.json"
-else
-  echo "No compile_commands.json found in ${usage_build}"
-  exit 1
-fi
-topdir="$(west topdir)"
-echo "Linking compdb $compdb to $topdir"
-ln -sf "$compdb" "$topdir"
 '''

@@ -1,0 +1,31 @@
+#!/usr/bin/env zsh
+# tdl <cmd> [right-width%] [bottom-height%] [bottom-cmd...]: $EDITOR here, cmd right, optional pane below.
+[[ -z $1 ]] && {
+  echo "Usage: tdl <cmd> [right_width 20-50] [bottom_height 15-30] [bottom cmd]"
+  return 1
+}
+[[ -z $TMUX ]] && {
+  echo "You must start tmux to use tdl."
+  return 1
+}
+
+local cmd="$1" vwidth="${2:-30}" hheight="$3"
+(($# > 3)) && shift 3 || shift $#
+local cmd2="$*"
+local pane="$TMUX_PANE" cmd_pane
+
+((vwidth > 50)) && vwidth=50
+((vwidth < 20)) && vwidth=20
+
+tmux rename-window -t "$pane" "${PWD:t}"
+
+if [[ -n $hheight ]]; then
+  ((hheight > 30)) && hheight=30
+  ((hheight < 15)) && hheight=15
+  tmux split-window -v -l "$hheight%" -t "$pane" -c "$PWD" "${cmd2:-$SHELL}"
+fi
+
+cmd_pane=$(tmux split-window -h -l "$vwidth%" -t "$pane" -c "$PWD" -P -F '#{pane_id}')
+tmux send-keys -t "$cmd_pane" "$cmd" C-m
+tmux send-keys -t "$pane" "$EDITOR ." C-m
+tmux select-pane -t "$pane"

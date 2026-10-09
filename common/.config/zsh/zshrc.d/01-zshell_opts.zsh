@@ -19,60 +19,60 @@
 #       It is possible for options to be set within a function scope.  See the description of the option LOCAL_OPTIONS below.
 # General Options
 # ------------------------------------------------------------------------------
+
+#######################################################
+# Job Options 
+#######################################################
 ## Disable flow control and hence restore the ability to use C-s and C-q
 setopt no_flow_control
-
-#######################################################
-# ZSH Basic Options
-#######################################################
-
-# setopt autocd              # change directory just by typing its name
-setopt correct # auto correct mistakes
-# setopt interactivecomments # allow comments in interactive mode
-setopt magicequalsubst # enable filename expansion for arguments of the form ‘anything=expression’
-setopt nonomatch       # hide error message if there is no match for the pattern
 setopt notify          # report the status of background jobs immediately
 setopt monitor         # report the status of background jobs immediately
-setopt numericglobsort # sort filenames numerically when it makes sense
-setopt promptsubst     # enable command substitution in prompt
-setopt globdots
 #######################################################
 # History Configuration
 #######################################################
-#zsh sessions will append their history list to the history file, rather than replace it.
-setopt appendhistory
-#  If a new command line being added to the history list duplicates an older one, the older command is removed from the list (even if it is not the previous event).
-setopt hist_ignore_all_dups
-# When searching for history entries in the line editor, do not display duplicates of a line previously found, even if the duplicates are not contiguous.
-setopt hist_find_no_dups
-## Enable globally shared history (same history in every shell)
-setopt share_history
+setopt append_history         # Append history instead of replacing the history file.
+setopt extended_history       # Save timestamps and command durations.
+setopt hist_expire_dups_first # Expire duplicates first when trimming history.
+setopt hist_find_no_dups      # Do not display an entry already found in a search.
+setopt hist_ignore_all_dups   # Remove older duplicates when adding an entry.
+setopt hist_ignore_dups       # Do not record an entry identical to the previous one.
+setopt hist_ignore_space      # Do not record commands that start with a space.
+setopt hist_reduce_blanks     # Remove extra blanks from stored commands.
+setopt hist_save_no_dups      # Do not write duplicate entries to the history file.
+setopt hist_verify            # Load history expansions into the editor before running them.
 
-## When writing out the history file, older duplicate commands are omitted
-setopt hist_save_no_dups
-
-## Don't save commands prefixed with at least one space to history
-setopt hist_ignore_space
-
-## Don't directly execute commands when using history expansion
-setopt hist_verify
-
-## Max number of history lines in memory
-
-# Set up history file
-
-## Push and pop directories into a stack to go back to them quickly!
-setopt auto_pushd        # Push the current directory visited on the stack.
-setopt pushd_ignore_dups # Do not store duplicates in the stack.
-setopt pushd_silent      # Do not print the directory stack after pushd or popd
-#Used for chaining together glob operators
+# Choose one immediate-write mode:
+# setopt inc_append_history     # Write each command immediately for independent sessions.
+setopt share_history        # Import and append commands across active sessions.
+#######################################################
+# History Configuration
+#######################################################
+setopt auto_cd              # Change directory by entering a directory name.
+setopt auto_list            # List choices after an ambiguous completion.
+setopt auto_pushd           # Push the previous directory onto the directory stack.
+setopt bang_hist            # Enable csh-style history expansion with !.
+setopt correct # auto correct mistakes
+setopt interactive_comments # Allow comments in interactive shells.
+setopt multios              # Use implicit tees or cats for multiple redirections.
+setopt no_beep              # Do not beep on errors.
+setopt prompt_subst         # Expand parameters and substitutions when drawing the prompt.
+setopt pushd_ignore_dups    # Avoid duplicate entries in the directory stack.
+setopt pushd_minus          # Exchange the meanings of + and - in stack indices.
+#######################################################
+# Glob Configuration 
+#######################################################
 #Example:
 # `print -rC1 b*.pro(#q:s/pro/shmo/)(#q.:s/builtin/shmiltin/)`
 # This first those the glob 'b*.pro'
 # Then substitutes the substring 'pro' with 'shmo'
 # And lastly substitutes 'builtin' with 'shmiltin'
 
+setopt nonomatch       # hide error message if there is no match for the pattern
+setopt numericglobsort # sort filenames numerically when it makes sense
+setopt globdots
 setopt extended_glob
-setopt GLOB_COMPLETE    # Show autocompletion menu with globs
-setopt AUTO_LIST        # Automatically list choices on ambiguous completion.
-setopt COMPLETE_IN_WORD # Complete from both ends of a word.
+setopt null_glob 
+setopt glob_subst 
+setopt glob_complete    # Show autocompletion menu with globs
+setopt auto_list        # Automatically list choices on ambiguous completion.
+setopt complete_in_word # Complete from both ends of a word.

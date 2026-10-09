@@ -1,5 +1,9 @@
-# yaml-language-server: $schema=https://gh-dash.dev/schema.json
+# $schema : https://gh-dash.dev/schema.json
 prSections:
+  - title: Sibel Subscribed
+    filters: >-
+      is:open repo:sibelhealth/sh_sdk_2.0
+      is:open repo:sibelhealth/aria-sense-fw
   - title: Mine
     filters: >-
       is:open author:@me
@@ -15,10 +19,6 @@ prSections:
   - title: Personal
     filters: >-
       is:open user:@me
-  - title: Sibel Subscribed
-    filters: >-
-      is:open repo:sibelhealth/sh_sdk_2.0 repo:sibelhealth/sensors-app
-      repo:sibelhealth/BengalFly-Zephyr repo:sibelhealth/DragonFly-Zephyr
 issuesSections:
   - title: Creator
     filters: author:@me
@@ -47,7 +47,7 @@ repoPaths:
   sibelhealth/DragonFly-Zephyr: ~/sibel/eng/fw/anne_sensors_workspace/dragonfly
   sibelhealth/BengalTiger-Zephyr: ~/sibel/eng/fw/anne_sensors_workspace/bengal
   sibelhealth/framework: ~/sibel/eng/fw/anne_sensors_workspace/framework
-  sibelhealth/sh_sdk_2.0: ~/sibel/eng/fw/anne_sensors_workspace/sh_sdk_2_0
+  sibelhealth/sh_sdk_2.0: ~/sibel/eng/fw/aria_workspace/sh_sdk
   ale-alfaro/dotfiles: ~/dotfiles
 keybindings:
   universal:
@@ -56,18 +56,20 @@ keybindings:
       command: >
         cd {{.RepoPath}} && lazygit
   prs:
-    - key: O
-      name: code review
+    - key: a
+      name: Add Reviewer
       command: >-
-        tmux new-window -n "enhance" '
-          gh enhance -R {{.RepoName}} {{.PrNumber}}
-        '
+        gh pr edit --add-reviewer sibelhealth/Firmware
+    - key: O
+      name: claude review
+      command: >-
+        tmux neww -c {{.RepoPath}} 'claude "review pr#{{.PrNumber}}"'
     - key: v
       name: approve
       command: >
         gh pr review --repo {{.RepoName}} --approve --body "$(gum input
         --prompt='Approval Comment: ')" {{.PrNumber}}
-    - key: r
+    - key: W
       name: Run Workflow
       command: >
         gh workflow run "$(gh workflow list --json path --jq '.' | jq -r
