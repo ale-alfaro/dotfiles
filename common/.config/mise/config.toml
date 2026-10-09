@@ -1,4 +1,4 @@
-# $schema: https://mise.jdx.dev/schema/mise.json
+# :schema https://mise.jdx.dev/schema/mise.json
 [settings]
 experimental = true
 lockfile = true
@@ -6,10 +6,11 @@ color_theme = "auto"
 unix_default_file_shell_args = 'zsh -eu'
 unix_default_inline_shell_args = "zsh -eu -c"
 trusted_config_paths = [
-  '~/sibel/eng/fw/anne-workspace',
-  "~/sibel/Documents/Obsidian",
-  "~/dotfiles/",
+        '~/sibel/eng/fw/anne-workspace',
+        "~/sibel/Documents/Obsidian",
+        "~/dotfiles/",
 ]
+
 # tools can read the versions files used by other version managers
 # for example, .nvmrc in the case of node's nvm
 idiomatic_version_file_enable_tools = ['python']
@@ -17,14 +18,13 @@ disable_backends = ["asdf"]
 disable_tools = ["pipx:west"]
 # configure `mise install` to always keep the downloaded archive
 always_keep_download = false # deleted after install by default
-always_keep_install = false # deleted on failure by default
-
+always_keep_install = false  # deleted on failure by default
 # configure how frequently (in minutes) to fetch updated plugin repository changes
 # this is updated whenever a new runtime is installed
 # (note: this isn't currently implemented but there are plans to add it: https://github.com/jdx/mise/discussions/6735)
-plugin_autoupdate_last_check_duration = '1 week' # set to 0 to disable updates
+plugin_autoupdate_last_check_duration = '1 week'                                                # set to 0 to disable updates
 status = { missing_tools = "if_other_versions_installed", show_env = true, show_tools = true }
-task = { output = "interleave", run_auto_install = true, timings = true, show_full_cmd = true }
+task = { output = "interleave", run_auto_install = true, timings = true, show_full_cmd = true  , source_freshness_hash_contents = true }
 npm.package_manager = "bun"
 npm.bun = true
 pipx.uvx = true
@@ -110,6 +110,9 @@ cargo-binstall = "latest"
 "http:nrfutil" = { version = "1.4.0", url = "https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil" }
 "vfox-zephyr:west" = "latest"
 "vfox-zephyr:arm" = "latest"
+"cargo:taplo-cli" = { version = "latest", features = "lsp" }
+"cargo:tealdeer" = { version = "latest", fetures = "native-tls" }
+protoc = "latest"
 
 [plugins]
 "vfox:zephyr" = "https://github.com/ale-alfaro/vfox-zephyr-sdk.git"

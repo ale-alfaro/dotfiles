@@ -1,0 +1,50 @@
+#!/usr/bin/env zsh
+#MISE description="Flash an nRF5340 multi-image build, for use as twister's --flash-command."
+#MISE dir="{{cwd}}"
+#USAGE arg "<build_dir>" help="Build directory with artifacts"
+
+
+# -G is NULL_GLOB: an unmatched *_cpuapp.hex glob expands to nothing instead of
+# aborting the script.
+set -euG
+
+
+program_net() {
+  echo "Flashing CPUNET $1 ...."
+  nrfutil device program --family nrf53 --core Network \
+    "${device_sel[@]}" \
+    --options chip_erase_mode=ERASE_ALL,reset=RESET_NONE,verify=VERIFY_READ \
+    --firmware "$1"
+}
+
+program_app() {
+  echo "Flashing CPUAPP $1 ...."
+  nrfutil device program --family nrf53 --core Application \
+    "${device_sel[@]}" \
+    --options chip_erase_mode=ERASE_ALL,reset=RESET_DEFAULT,verify=VERIFY_READ \
+    --firmware "$1"
+}
+
+# --- act ---------------------------------------------------------------------
+build_dir="${usage_build_dir?}"
+cpuapp_hex=$(print ${build_dir}/*_cpuapp.hex)
+cpunet_hex=$(print ${build_dir}/*_cpunet.hex)
+zephyr_hex="${build_dir}/zephyr/zephyr.hex"
+
+
+flash_images() {
+  if [[ -n "${cpunet_hex:-}" ]]; then
+    program_net "${cpunet_hex}" || return
+    sleep 0.5
+  fi
+  program_app "${cpuapp_hex}"
+}
+
+if ! flash_images; then
+  echo "Retrying both images after recovering both cores ..."
+  nrfutil device recover --core Network "${device_sel[@]}"
+  nrfutil device recover --core Application "${device_sel[@]}"
+  flash_images
+fi
+
+# vim: ft=zsh
