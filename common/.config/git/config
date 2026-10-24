@@ -9,14 +9,14 @@
 	helper = !mise exec gh -- gh auth git-credential
 
 [alias]
-  st = status -s
+  st = status -s --untracked
   lol = log --oneline --graph --all
-  dft = -c diff.external=difft diff
-  # `git log` with patches shown with difftastic.
-  dl = -c diff.external=difft log -p --ext-diff
-  # Show the most recent commit with difftastic.
-  ds = -c diff.external=difft show --ext-diff
-	log1 = log -n 1 --format=%H
+  delta = -c diff.external=delta diff
+  # `git log` with patches.
+  dl = log -p 
+  # Show the most recent commit
+  ds = show 
+  log1 = log -n 1 --format=%H
 
 [extensions]
   relativeWorktrees = true
