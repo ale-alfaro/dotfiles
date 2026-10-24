@@ -1,16 +1,14 @@
 #!/usr/bin/env zsh
 # $ZDOTDIR/.zprofile: Gets loaded for login shells IN MACOS-only
 # ------------------------------------------------------------------------------
-#
+export BAT_THEME=ansi
+export MANPAGER="nvim +Man!"
+# zsh options
+export HISTFILE="$XDG_DATA_HOME/zsh/history"
+export HISTSIZE=25001 # Maximum events for internal history
+export SAVEHIST=25001 # Maximum events in history file
+export KEYTIMEOUT=5
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  [[ -e "/opt/homebrew/bin/brew" ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
-  typeset -U path PATH
-  path=($HOME/.local/bin $HOME/dotfiles/common/bin $HOME/dotfiles/linux/bin $path)
-  export PATH
-  export BROWSER=arc
-  export SDKROOT="$(xcrun --show-sdk-path)"
-fi
 # shellcheck shell=bash
 
 # This file runs once at login.
@@ -18,40 +16,9 @@ fi
 # shellcheck disable=SC1091
 # . "${XDG_CONFIG_HOME:-"${HOME}/.config"}/zsh/.xdg.local"
 
-# Add all local binaries to the system path and make sure they are first.
-export PATH="${HOME}/.local/bin:${HOME}/.local/bin/local:${PATH}"
 
-# Confiure Mise (programming language run-time manager).
-export PATH="${XDG_DATA_HOME}/mise/shims:${PATH}"
-
-# Default programs to run.
-export EDITOR="nvim"
-export DIFFPROG="nvim -d"
-
-# Add colors to the less command.
-export LESS="-R"
-export LESS_TERMCAP_mb=$'\e[1;31m'    # begin blinking
-export LESS_TERMCAP_md=$'\e[1;36m'    # begin bold
-export LESS_TERMCAP_us=$'\e[1;32m'    # begin underline
-export LESS_TERMCAP_so=$'\e[1;30;44m' # begin standout-mode - info box
-export LESS_TERMCAP_me=$'\e[0m'       # end mode
-export LESS_TERMCAP_ue=$'\e[0m'       # end underline
-export LESS_TERMCAP_se=$'\e[0m'       # end standout-mode
-
-# Use bat to color up the man pages.
-export MANROFFOPT="-c"
-export MANPAGER="sh -c 'col -bx | bat --language man --plain'"
 
 # Configure GPG.
-export GNUPGHOME="${XDG_CONFIG_HOME}/gnupg"
-
-# Configure pass, Docker Desktop on Linux uses this tool and while I have used
-# it for years in the past, I've moved to using KeePassXC.
-export PASSWORD_STORE_DIR="${XDG_CONFIG_HOME}/password-store"
-
-# Configure delta (diffs) defaults.
-# https://dandavison.github.io/delta/environment-variables.html
-export DELTA_FEATURES="diff-so-fancy"
 
 # Configure zsh-vi-mode.
 export ZVM_NORMAL_MODE_CURSOR="${ZVM_CURSOR_BLOCK:-}"

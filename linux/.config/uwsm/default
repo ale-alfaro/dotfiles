@@ -2,6 +2,11 @@
 
 
 export TERMINAL=xdg-terminal-exec
-export EDITOR=nvim
 export OMARCHY_SCREENSHOT_DIR=$HOME/Pictures/Screenshots
 export BROWSER=zen
+
+export EDITOR=nvim
+export VISUAL=nvim
+export SUDO_EDITOR=nvim
+export FCEDIT=nvim
+export PAGER=bat

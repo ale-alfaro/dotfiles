@@ -1,5 +1,29 @@
 #!/usr/bin/env zsh
 # Interactive shells. Reference: https://thevaluable.dev/zsh-install-configure-mouseless/
+#
+#
+# Fill in graphical session env if missing
+# for the case of starting a tmux started/attached over SSH.
+# This is a problem for iOS mobile ssh clients connecting or starting
+# a session in tmux
+: ${XDG_RUNTIME_DIR:=/run/user/$UID}
+export XDG_RUNTIME_DIR
+
+if [[ -z $WAYLAND_DISPLAY ]]; then
+  for s in $XDG_RUNTIME_DIR/wayland-*~*.lock(N=); do
+    export WAYLAND_DISPLAY=${s:t}; break
+  done
+fi
+
+if [[ -z $DISPLAY ]]; then
+  for s in /tmp/.X11-unix/X*(N=); do
+    export DISPLAY=:${${s:t}#X}; break
+  done
+fi
+
+if [[ -z $DBUS_SESSION_BUS_ADDRESS && -S $XDG_RUNTIME_DIR/bus ]]; then
+  export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
+fi
 
 source $ZDOTDIR/helpers/stdlib.zsh
 
@@ -26,7 +50,7 @@ export GPG_TTY="$(tty)"
 # Completion (man zshcompsys, _complete_help or ^X h in the shell)
 #   zstyle ':completion:<function>:<completer>:<command>:<argument>:<tag>' style value
 #######################################################
-fpath+=("$XDG_DATA_HOME/zsh/generated_man_completions" "$ZDOTDIR/completions/src" "$ZDOTDIR/functions")
+fpath+=("$ZDOTDIR/completions/src" "$ZDOTDIR/functions")
 [[ -r ~/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh ]] && source ~/.nrfutil/share/nrfutil-completion/scripts/zsh/setup.zsh
 
 autoload -Uz compinit && compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
@@ -58,7 +82,7 @@ zstyle ':completion:*:git-checkout:*' sort false
 ZVM_INIT_MODE=sourcing
 source $ZDOTDIR/plugins/zsh-vi-mode/zsh-vi-mode.plugin.zsh
 
-source $HOME/dotfiles/common/.config/fzf/config.sh # not stowed into ~/.config
+source $XDG_CONFIG_HOME/fzf/config.sh # not stowed into ~/.config
 source <(fzf --zsh)
 
 __init_plugins Aloxaf/fzf-tab
@@ -106,6 +130,8 @@ zle -N down-line-or-beginning-search
 [[ -n "${key[Shift-Tab]}" ]] && bindkey -- "${key[Shift-Tab]}" reverse-menu-complete
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
+bindkey '^a' beginning-of-line 
+bindkey '^e' end-of-line 
 
 # $terminfo values are only valid while the terminal is in application mode.
 if (( ${+terminfo[smkx]} && ${+terminfo[rmkx]} )); then
@@ -119,6 +145,7 @@ fi
 #######################################################
 # Aliases and local overrides
 #######################################################
+[[ -n "${SSH_CONNECTION}" ]] && source $XDG_CONFIG_HOME/uwsm/env
 [[ -f $ZDOTDIR/.aliases ]] && source $ZDOTDIR/.aliases
 [[ -f $ZDOTDIR/.zshrc.local ]] && source $ZDOTDIR/.zshrc.local
 [[ -f $ZDOTDIR/.aliases.local ]] && source $ZDOTDIR/.aliases.local

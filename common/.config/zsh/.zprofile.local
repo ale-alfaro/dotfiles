@@ -1,17 +1,23 @@
 #!/usr/bin/env zsh
 # shellcheck shell=bash
-fpath+="$ZDOTDIR/completions/src"
-fpath+="$ZDOTDIR/functions"
-export TERMINAL=xdg-terminal-exec
-export BROWSER=zen
-export BAT_THEME=ansi
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  [[ -e "/opt/homebrew/bin/brew" ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+  typeset -U path PATH
+  path=($HOME/.local/bin $HOME/dotfiles/common/bin $HOME/dotfiles/linux/bin $path)
+  export PATH
+  export BROWSER=arc
+  export SDKROOT="$(xcrun --show-sdk-path)"
+fi
 export PAGER="bat"
-export MANPAGER="nvim +Man!"
-# zsh options
-export HISTFILE="$XDG_DATA_HOME/zsh/history"
-export HISTSIZE=25001 # Maximum events for internal history
-export SAVEHIST=25001 # Maximum events in history file
-export KEYTIMEOUT=5
-
-export OBSIDIAN_HOME="$HOME/Documents/Obsidian"
+export MANWIDTH=999
+export OBSIDIAN_HOME="$HOME/Documents/Obsidian/techie"
 export OMARCHY_SCREENSHOT_DIR=$HOME/Pictures/Screenshots
+export GNUPGHOME="${HOME}/.gnupg"
+
+# Configure pass, Docker Desktop on Linux uses this tool and while I have used
+# it for years in the past, I've moved to using KeePassXC.
+export PASSWORD_STORE_DIR="${XDG_CONFIG_HOME}/password-store"
+
+# Configure delta (diffs) defaults.
+# https://dandavison.github.io/delta/environment-variables.html
+export DELTA_FEATURES="diff-so-fancy"

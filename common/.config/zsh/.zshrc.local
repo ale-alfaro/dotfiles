@@ -17,7 +17,18 @@ bindkey '^G' edit-command-line
 # https://github.com/wincent/wincent/commit/30b502d811fbf4ca058db3a6f006aaecab68f6b7
 zle_fg_bg() {
   if [[ $#BUFFER -eq 0 ]]; then
-    fg
+    local backgroundProgram="$(jobs | tail -n 1 | awk '{print $4}')"
+    case "$backgroundProgram" in
+      "nc" | "ncat" | "netcat" | "resize-netcat-listener" | "rnc")
+        # Make sure that /dev/tty is given to the stty command by doing </dev/tty
+        terminal-size-clip </dev/tty
+        stty raw -echo </dev/tty
+        fg
+        ;;
+      *)
+        fg
+        ;;
+    esac
   else
     zle push-input
   fi
@@ -25,11 +36,32 @@ zle_fg_bg() {
 zle -N zle_fg_bg
 bindkey '^Z' zle_fg_bg
 
-# ^S opens the sesh picker (configured in sesh.toml [tui]). Widgets get no terminal on stdin, hence </dev/tty.
-zle_sesh() { sesh picker --hide-duplicates </dev/tty; zle reset-prompt }
-zle -N zle_sesh
-bindkey '^S' zle_sesh
+function zle_sesh_sessions() {
+  {
+    exec </dev/tty
+    exec <&1
+    local -r session="$(
+      sesh list --hide-duplicates | fzf-tmux -p 80%,70% \
+        --no-sort --ansi --border-label ' sesh ' \
+        --header '  M^a all M^x zoxide M^d tmux kill M^f find' \
+        --bind 'tab:down,btab:up' \
+        --bind 'alt-a:change-prompt(All  )+reload(sesh list --hide-duplicates)' \
+        --bind 'alt-x:change-prompt(Zoxide  )+reload(sesh list --hide-duplicates -z)' \
+        --bind 'alt-f:change-prompt(Find  )+reload(fd -H -d 2 -t d -E .Trash . ~)' \
+        --bind 'alt-d:execute(tmux kill-session -t {2..})+change-prompt(⚡  )+reload(sesh list --hide-duplicates)' \
+        --preview-window 'right:55%' \
+        --preview 'sesh preview {}'
+    )"
+    zle reset-prompt >/dev/null 2>&1 || true
+    [[ -z "$session" ]] && return
+    sesh connect $session
+  }
+}
 
+zle -N zle_sesh_sessions
+bindkey "^S" zle_sesh_sessions
+ 
+ 
 # Rehash commands after pacman installs something (needs pacman's zsh hook).
 zshcache_time="$(date +%s%N)"
 rehash_precmd() {
@@ -43,7 +75,16 @@ rehash_precmd() {
 add-zsh-hook -Uz precmd rehash_precmd
 
 [[ ${TERM:-} != dumb ]] && eval "$(starship init zsh)"
-[[ -z ${NO_MISE_ACTIVATE:-} ]] && source <(mise activate zsh)
+safe_source mise activate zsh
+
+# _ZO_MAXAGE - Configures the aging algorithm, which limits the maximum number of entries in the database. By default, this is set to 10000.
+#
+#      AGING  zoxide  uses  a parameter called _ZO_MAXAGE to limit the number of entries in the database based on usage patterns. If the total FRECENCY of the directories in the database exceeds this value, we divide each directory's score by a factor k - such that the new total 
+#      becomes ~90% of _ZO_MAXAGE. Thereafter, if the new score of any directory falls below 1, it is removed from the database.
+#      Theoretically, the maximum number of directories in the database is 4 * _ZO_MAXAGE, although it is lower in practice.
+export _ZO_MAXAGE=5000
+#
+#
 safe_source zoxide init zsh
 safe_source atuin init zsh
 has wt && eval "$(command wt config shell init zsh)"

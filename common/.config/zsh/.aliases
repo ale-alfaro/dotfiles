@@ -5,7 +5,10 @@ compress() {
 }
 
 alias decompress="tar -xzf"
-
+_open() {
+  xdg-open "$@" >/dev/null 2>&1 &
+}
+alias open='_open'
 #######################################################
 # CLI Aliases
 #######################################################
@@ -22,8 +25,9 @@ alias lgp='lazygit -p'
 alias jlink-gdbserver='JLinkGDBServer  -if SWD -speed 4000 -port 2331 -silent -singlerun'
 alias mx='mise x'
 alias mr='mise run'
-alias mt='mise tasks --extended'
+alias mt='mise tasks'
 alias mtl='mt --local'
 alias mta='mt --all'
 #include jq modules
 alias jq='jq -L~/.config/jq'
+
