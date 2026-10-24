@@ -45,7 +45,28 @@ give them a shared `before` that resets all global state.
 
 ## Faking with FFF
 
-`#include <zephyr/fff.h>`, one `DEFINE_FFF_GLOBALS;` per binary.
+`#include <zephyr/fff.h>`, one `DEFINE_FFF_GLOBALS;` per binary. Zephyr vendors
+fff.h under `subsys/testsuite/include/zephyr/` with `fff_extensions.h` beside
+it (`RETURN_HANDLED_CONTEXT`, a per-call context struct for custom fakes). The
+upstream README is in `references/fff-README.md`; its cheat sheet is at the end.
+Two of its recommendations are house style: `FFF_FAKES_LIST(FAKE)` as the one list that
+both defines the fakes and resets them in `before` (`tests/drivers/mfd/ptx30`),
+and `DECLARE_FAKE_*` in a header with `DEFINE_FAKE_*` in one source when a fake
+is shared across files. `FAKE_VALUE_FUNC` is declare plus define, so it cannot
+follow a `DECLARE_` of the same fake.
+
+### No linker tricks
+
+Never `-Wl,--wrap`. It only redirects references the linker resolves, so a call
+from inside the object that defines the function is silently not faked, and a
+wrap that names a renamed function fails nothing. Upstream Zephyr uses it in
+two bsim tests and nowhere else. To fake a vendor library, do not build it in
+the test (`CONFIG_<LIB>=n` in `prj.conf`; the driver must `default y` the lib
+rather than `select` it) and define the entry points the driver calls with
+`FAKE_VALUE_FUNC` under their real names. The linker then has exactly one
+definition, and a vendor call the driver adds later fails the link instead of
+quietly running real code. Pure vendor helpers with no bus underneath are
+compiled for real. Never fake the driver's own functions.
 
 The pattern that works well here: **`custom_fake` is the pass-through, and a test
 overrides it only to misbehave.**

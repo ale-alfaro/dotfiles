@@ -14,12 +14,13 @@
 > You can use the catch-all `west forall -c '<cmd>'` with my permission
 
 - `mise` as a task runner using the mise MCP or the CLI
-  - And tool and env manager for me. You CANNOT update any mise.toml, mise.*.toml and any other variations EXCEPT FOR ADDING TASKS
+  - And tool and env manager for me. You **CANNOT** add tools to any mise.toml, mise.*.toml and any other variations. Envs and entries other than task need my permission.
   - `hk check` / `hk fix` as your main way to lint. `hk` and `mise` are powerful combo so can do about any linting or tasks execution pattern you can do with other tools
-  - Special provision given for a `mise.ai.toml` per project.
-    - Its active in your environment and not mine by default (your shell should have `MISE_ENV=ai`)
-    - It is yours to write into and it persists across sessions;
-    - It is gitignored globally and should only be for development use. Tasks can always be added to the git tracked mise.toml if proven to be useful
 
-> [!DANGER] I do check your commands and I am above average in bash and good zsh
-> So you better not hide anything for me... and also be proactive of setting permissions when none exist
+> [!DANGER] DO NOT RUN HARDWARE INTERFACING COMMANDS THAT OBFUSCATE THE EXACT COMMAND RAN
+> Example of what **NOT** to do:
+> ```sh
+> S=$TMPDIR/jl.cmd
+> printf 'connect\nh\nregs\ng\nsleep 500\nh\nregs\ng\nexit\n' > $S
+> JLinkExe -device nRF52840_xxAA -if SWD -speed 4000 -autoconnect 1 -CommandFile $S 2>&1
+> ```

@@ -1,29 +1,29 @@
 {
-  "name": "zephyr-rtos",
-  "version": "0.1.0",
-  "description": "Zephyr-aware clangd and semcode for deterministic C code navigation in west workspaces",
-  "keywords": ["zephyr", "rtos", "embedded", "c"],
-  "lspServers": {
-    "clangd": {
-      "command": "${CLAUDE_PLUGIN_ROOT}/scripts/clangd-west",
-      "args": [
-        "--background-index",
-        "--enable-config",
-        "--clang-tidy",
-        "--query-driver=**/*-zephyr-*-gcc,**/*-zephyr-*-g++",
-        "--log=error"
-      ],
-      "extensionToLanguage": {
-        ".c": "c",
-        ".h": "c"
-      },
-      "startupTimeout": 120000,
-      "maxRestarts": 3
-    }
-  },
-  "mcpServers": {
-    "semcode": {
-      "command": "semcode-mcp"
-    }
-  }
+        "name": "zephyr-rtos",
+        "version": "0.1.0",
+        "description": "Zephyr-aware clangd and semcode for deterministic C code navigation in west workspaces",
+        "keywords": [
+                "zephyr",
+                "rtos",
+                "embedded",
+                "c"
+        ],
+        "lspServers": {
+                "clangd": {
+                        "command": "${CLAUDE_PLUGIN_ROOT}/scripts/clangd-west",
+                        "args": [
+                                "--background-index",
+                                "--enable-config",
+                                "--clang-tidy",
+                                "--query-driver=**/*-zephyr-*-gcc,**/*-zephyr-*-g++",
+                                "--log=error"
+                        ],
+                        "extensionToLanguage": {
+                                ".c": "c",
+                                ".h": "c"
+                        },
+                        "startupTimeout": 120000,
+                        "maxRestarts": 3
+                }
+        }
 }

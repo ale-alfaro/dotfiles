@@ -1,0 +1,28 @@
+{
+        "name": "mise",
+        "version": "0.1.0",
+        "description": "Validation of Mise project tasks",
+        "keywords": [
+                "mise",
+                "dev-tools",
+                "task-runner",
+                "validation",
+                "env-manager",
+                "version-manager"
+        ],
+        "mcpServers": [
+                {
+                        "mise": {
+                                "command": "mise",
+                                "args": [
+                                        "--cd",
+                                        "${CLAUDE_PROJECT_DIR}",
+                                        "mcp"
+                                ],
+                                "env": {
+                                        "MISE_EXPERIMENTAL": "1"
+                                }
+                        }
+                }
+        ]
+}

@@ -1,0 +1,31 @@
+{
+        "name": "semcode",
+        "description": "Semantic code search for C/C++ codebases with git-aware lookups, call graph analysis, and vector search capabilities",
+        "version": "1.0.0",
+        "author": {
+                "name": "Semcode"
+        },
+        "mcpServers": {
+                "semcode": {
+                        "command": "semcode-mcp",
+                        "args": [],
+                        "env": {},
+                        "type": "stdio"
+                }
+        },
+        "lspServers": {
+                "semcode": {
+                        "command": "semcode-lsp",
+                        "args": [],
+                        "extensionToLanguage": {
+                                ".c": "c",
+                                ".h": "c",
+                                ".cpp": "cpp",
+                                ".cc": "cpp",
+                                ".cxx": "cpp",
+                                ".hpp": "cpp",
+                                ".hxx": "cpp"
+                        }
+                }
+        }
+}

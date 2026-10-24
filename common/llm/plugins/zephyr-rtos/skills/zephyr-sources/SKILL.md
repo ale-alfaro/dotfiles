@@ -3,21 +3,18 @@ name: zephyr-sources
 description: Where to get ground truth about Zephyr code in a west workspace — clangd LSP, semcode, and the build's generated Kconfig/devicetree — instead of memory. Use before answering what a Zephyr API, macro, CONFIG_* or DT_* resolves to, who calls a function, or why something is or isn't compiled in.
 ---
 
-Zephyr's APIs change between releases and NCS patches them. Answer from the tree
-that is checked out, not from memory.
 
-Sources, most trusted first:
+## Finding things
 
-1. **LSP (clangd)**: `goToDefinition`, `findReferences`, `hover`, `incomingCalls`,
-   `outgoingCalls`. Resolves macros, `CONFIG_*` and `DT_*` as the compiler sees
-   them for the current build.
-   - clangd runs from the west workspace top and reads the
-     `compile_commands.json` there. If LSP returns nothing or reports missing
-     headers, that build is stale or for another app: run `west build` first.
-2. **semcode MCP**: call graphs and symbol lookup across the whole workspace,
-   including code outside the current build.
-3. **Build outputs**: `zephyr/.config` (final Kconfig), `zephyr/zephyr.dts`
-   (final devicetree), `zephyr/include/generated/`.
-4. `west grep` / `rg` for plain text.
+- Subsystems: `subsys/`; drivers: `drivers/<class>/`; public API headers: `include/zephyr/` and
+  the APIs defined under `lib/` (a subsystem's own `include/zephyr/`, such as ztest's, is not
+  public API); kernel: `kernel/`; boards: `boards/<vendor>/`; SoCs: `soc/`; devicetree: `dts/`;
+  tests: `tests/`; samples: `samples/`; tooling: `scripts/`.
+- `MAINTAINERS.yml` maps paths to areas and people. The recent history of a path is the best
+  guide to its local conventions: `git log --oneline -20 -- <path>`.
+- The documentation source is `doc/`, published at https://docs.zephyrproject.org/latest/. The
+  published docs, the source tree and the last six months of issues and PRs are also searchable
+  through the project's MCP server, `https://zephyrproject.mcp.kapa.ai`
+  (`doc/develop/tools/kapa_ai.rst`); its answers are generated and must be verified against the
+  tree.
 
-Say which source an answer came from. If none confirm it, say so.
