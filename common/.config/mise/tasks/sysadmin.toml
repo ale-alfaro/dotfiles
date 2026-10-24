@@ -2,7 +2,7 @@
 
 ["_stow:dotfiles"]
 hide = true
-dir = "{{env.HOME}}/dotfiles"
+dir = "{{cwd}}"
 usage = '''
 arg "[target]" {
   help "Target"
@@ -23,17 +23,11 @@ stow \
 
 ["global:stow:doftiles"]
 description = "Stow dotfiles"
-dir = '{{ env.HOME }}/dotfiles'
+dir = '{{ env.HOME }}/dotfiles/common/.config'
 env = { STOW_NO_SIM = "1" }
+confirm = 'Do you want to stow {{exec(command="eza --oneline --all" ~ " ~/dotfiles/common/.config")}}'
 run = '''
-pushd common/.config || true
 mise run _stow:dotfiles
-popd
-
-pushd common/.config || true
-mise run _stow:dotfiles
-popd
-
 echo "XDG_CONFIG_HOME: "
 eza --icons=always --oneline \
     --no-git --all \
@@ -54,12 +48,19 @@ pacman -Qdttq | sudo pacman -Rns -
 {% endif %}
 '''
 
-["global:udev-rules:install"]
-hide = true
+["utils:defuddle"]
+description = "Markdown to HTML"
+dir = "{{cwd}}"
 usage = '''
-arg "<rules_file>"
+arg "<src>" help="Regex to use for HTML finding"
+arg "-o [out]" help="Path where to search" default="."
 '''
 run = '''
-sudo cp {{ usage.rules_file }} /etc/udev/rules.d/
-sudo udevadm control --reload
+defuddle parse --md {{usage.src}} {% if usage.out %}-o {{usage.out}}{% endif %}
 '''
+
+["utils:mermaid:export"]
+tools = { "go:github.com/coolamit/mermaid-cli/cmd/mmd-cli" = "latest" }
+dir = "{{cwd}}"
+usage = 'arg "<mdfile>"'
+run = 'mmdc -i {{usage.mdfile}} -a docs/assets --pdfFit --outputFormat "pdf"'

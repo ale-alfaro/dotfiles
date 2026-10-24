@@ -10,35 +10,25 @@ trusted_config_paths = [
         "~/sibel/Documents/Obsidian",
         "~/dotfiles/",
 ]
-
-# tools can read the versions files used by other version managers
-# for example, .nvmrc in the case of node's nvm
-idiomatic_version_file_enable_tools = ['python']
 disable_backends = ["asdf"]
 disable_tools = ["pipx:west"]
-# configure `mise install` to always keep the downloaded archive
 always_keep_download = false # deleted after install by default
-always_keep_install = false  # deleted on failure by default
-# configure how frequently (in minutes) to fetch updated plugin repository changes
-# this is updated whenever a new runtime is installed
-# (note: this isn't currently implemented but there are plans to add it: https://github.com/jdx/mise/discussions/6735)
-plugin_autoupdate_last_check_duration = '1 week'                                                # set to 0 to disable updates
+always_keep_install = false # deleted on failure by default
 status = { missing_tools = "if_other_versions_installed", show_env = true, show_tools = true }
-task = { output = "interleave", run_auto_install = true, timings = true, show_full_cmd = true  , source_freshness_hash_contents = true }
+task = { output = "interleave", run_auto_install = true, timings = true, show_full_cmd = true, source_freshness_hash_contents = true }
 npm.package_manager = "bun"
 npm.bun = true
 pipx.uvx = true
-python.uv_venv_auto = "source"
+python.uv_venv_auto = "create|source"
 github.gh_cli_tokens = true
 cargo.binstall_native = true
 cargo.binstall = true
 color = true
 
-[shell_alias]
-arm-none-eabi-gdb = "arm-zephyr-eabi-gdb-py"
-arm-zephyr-eabi-gdb = "arm-zephyr-eabi-gdb-py"
 
 [tools]
+uv = "latest"
+python = ["3.12.9", "3.10.22"]
 rg = "latest"
 jqp = "latest"
 lua = "5.5"
@@ -66,21 +56,15 @@ ninja = "latest"
 clang-format = "latest"
 fzf = "latest"
 codex = "latest"
-opam = { version = "latest", asset_pattern = "opam-*-{gnu_arch}-{os}" }
 rumdl = "latest"
+protoc = "latest"
+gitui = "latest"
 
 "packslip:github.com/max-sixty/worktrunk" = "latest"
 "packslip:jdx/hk" = "latest"
 "packslip:jdx/usage" = "latest"
 
-uv = "latest"
-"pipx:pyrefly" = "latest"
-"pipx:ruff" = "latest"
-"pipx:ty" = "latest"
-"pipx:ptpython" = "latest"
-"pipx:kconfigstyle" = "latest"
-"pipx:gersemi" = "latest"
-
+node = "lts"
 bun = "latest"
 "npm:bash-language-server" = "latest"
 "npm:yaml-language-server" = "latest"
@@ -96,93 +80,18 @@ git-lfs = "latest"
 "github:apple/pkl-lsp" = "latest"
 
 go = "latest"
-"go:github.com/coolamit/mermaid-cli/cmd/mmd-cli" = "0.1.2"
 
 rust = "latest"
 rust-analyzer = "latest"
 cargo-binstall = "latest"
 "cargo:neocmakelsp" = "latest"
-"cargo:probe-rs-tools" = "latest"
-"cargo:scope-monitor" = "latest"
-"cargo:tuicr" = "latest"
 "cargo:atuin" = "latest"
+"cargo:taplo-cli" = { version = "latest", features = "lsp" }
+"cargo:tealdeer" = { version = "latest", fetures = "native-tls" }
 
 "http:nrfutil" = { version = "1.4.0", url = "https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil" }
 "vfox-zephyr:west" = "latest"
 "vfox-zephyr:arm" = "latest"
-"cargo:taplo-cli" = { version = "latest", features = "lsp" }
-"cargo:tealdeer" = { version = "latest", fetures = "native-tls" }
-protoc = "latest"
 
 [plugins]
 "vfox:zephyr" = "https://github.com/ale-alfaro/vfox-zephyr-sdk.git"
-
-[tool_alias]
-"python@3.12" = "python"
-
-[task_templates."twister:testplan"]
-description = "Save a testplan to a json file"
-dir = "{{cwd}}"
-vars.testplan_flag = "--save-tests"
-usage = '''
-arg "<platform>" {
-  help "Platform"
-  env "TWISTER_PLATFORM"
-}
-arg "<dir>" {
-  help "Testsuite root"
-  env "TWISTER_TESTSUITE_ROOT"
-  default "."
-}
-flag "-t --testplan <testplan>" {
-  help "Test plan json file"
-  default "testplan.json"
-}
-arg "[extra_args]" {
-  help "Extra args for twister"
-  var #true
-}
-'''
-run = '''
-west twister -c --detailed-test-id {{ usage.extra_args | join(sep=" ") }} -p {{usage.platform}} -T {{usage.dir}} {{vars.testplan_flag}} {{usage.testplan}}
-'''
-
-[task_templates."twister:run"]
-description = "Run twister"
-dir = "{{cwd}}"
-usage = ''' 
-arg "<dir>" {
-    help "Twister testsuite"
-}
-arg "[varargs]" {
-    help "Arguments and flags to pass to twister with or without '--'"
-    double_dash "automatic"
-    var #true
-}
-flag "-b --board [board]" {
-    help "Twister platform (board) to run. Set also by TWISTER_BOARD"
-    env "TWISTER_BOARD"
-}
-flag "--flash-script [flash_script]" {
-    long_help """
-        Flash script to be used instead of `west flash`
-        HIGHLY recommended for sysbuild multi-image builds
-        west flash does a poor job flashing multiple images
-        and will leave the device halted on boot-up
-    """
-}
-flag "-s --serial-port [port]" {
-    help "Twister serial port"
-    default "/dev/ttyACM0"
-    env "TWISTER_SERIAL_PORT"
-}
-flag "-o --outdir [outdir]" {
-    help "Output dir. twister-out is the default"
-}
-flag "-n --no-clean" {
-    long_help """
-    Do not clean the twister-out dir and re-compile the build artifacts
-    Default behavior is to clobber the directories every run
-    """
-} 
-'''

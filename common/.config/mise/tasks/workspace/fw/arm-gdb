@@ -1,0 +1,14 @@
+#!/usr/bin/env zsh
+#MISE description = "Spawn a fresh tmux window: west debugserver + pygdb + (telnet RTT | minicom UART)"
+#MISE dir = "{{cwd}}"
+#MISE interactive = true
+#USAGE arg "<dir>" help="build dir"
+#USAGE flag "--gdb [client]" help="GDB client to use" default="arm-zephyr-eabi-gdb"
+#USAGE flag "--serial [port]" help="Serial port"
+
+
+local d="${usage_dir?}"
+
+w=$(sesh window connect dbg -b -c 'west rtt -d build/test.segno_reset/app --rtt-client=nc') 
+tmux split-window -h -t "$w" "until nc -z localhost 2331; do sleep 1; done; ${usage_gdb} -ex='target remote :2331' -ex='mon reset' -ex=c ${usage_dir}/zephyr/zephyr.elf"
+[[ -n "${usage_serial}" ]] && tmux split-window -t "$w" "picocom -b 115200  ${usage_serial}" \; select-layout -t "$w" tiled
