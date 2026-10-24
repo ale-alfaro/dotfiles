@@ -1,7 +1,7 @@
 return {
-  {
-    prefix = 'inc',
-    body = [=[
+    {
+        prefix = 'inc',
+        body = [=[
 /**
  * Copyright (c) 2026 Sibel Health
  *
@@ -17,11 +17,11 @@ return {
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER($1);
 ]=],
-    desc = 'Includes',
-  },
-  {
-    prefix = 'hdr',
-    body = [[
+        desc = 'Includes',
+    },
+    {
+        prefix = 'hdr',
+        body = [[
 
 /*
  * Copyright (c) 2026 Sibel Inc.
@@ -44,11 +44,11 @@ ${0}
 #endif
 
 #endif /* ${HEADER_FILE_GUARD} */]],
-    desc = 'Zephyr Header file',
-  },
-  {
-    prefix = 'init',
-    body = [[
+        desc = 'Zephyr Header file',
+    },
+    {
+        prefix = 'init',
+        body = [[
 static int $1_init(void)
 {
   int err;
@@ -61,10 +61,10 @@ static int $1_init(void)
 /* Initialize module at SYS_INIT() */
 SYS_INIT($1_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
 ]],
-  },
-  {
-    prefix = 'thr',
-    body = [[
+    },
+    {
+        prefix = 'thr',
+        body = [[
 static void $1_thread(void)
 {
 	int err;
@@ -76,10 +76,10 @@ K_THREAD_DEFINE($1_tid, CONFIG_APP_$2_THREAD_STACK_SIZE,
 		$1_thread, NULL, NULL, NULL,
 		K_LOWEST_APPLICATION_THREAD_PRIO, 0, 0);
 ]],
-  },
-{
-    prefix = "/*",
-    body = [[
+    },
+    {
+        prefix = "/*",
+        body = [[
 /**
  * @brief ${1:my_func}
  *
@@ -90,11 +90,11 @@ K_THREAD_DEFINE($1_tid, CONFIG_APP_$2_THREAD_STACK_SIZE,
  * @retval 0 Success.
  */
 ]],
-    desc = "Function doxygen comments",
-},
-{
-    prefix = "/**",
-    body = [[
+        desc = "Function doxygen comments",
+    },
+    {
+        prefix = "/**",
+        body = [[
 /**
  * @brief ${1:my_func}
  *
@@ -107,12 +107,12 @@ K_THREAD_DEFINE($1_tid, CONFIG_APP_$2_THREAD_STACK_SIZE,
  */
 int $1(${3:const struct zbus_channel *} $2, k_timeout_t timeout);
 ]],
-    desc = "Declare function with doxygen comments",
-},
+        desc = "Declare function with doxygen comments",
+    },
 
-{
-prefix = "zbusc",
-body = [[
+    {
+        prefix = "zbusc",
+        body = [[
 /**
  * @brief Zbus channel ${1:chan} containing msgs of type struct ${2:var}
  *
@@ -120,10 +120,10 @@ body = [[
 ZBUS_CHAN_DEFINE($1, struct $2, ${3:ZBUS_OBSERVERS_EMPTY}, NULL, NULL, ZBUS_MSG_INIT(0));
 ${0}
 ]],
-},
-{
-prefix = "zbush",
-body = [[
+    },
+    {
+        prefix = "zbush",
+        body = [[
 /**
  * Copyright (c) 2026 Sibel Health
  *
@@ -160,5 +160,5 @@ struct $1_msg {
 
 #endif /* $2_H_ */
 ]],
-}
+    },
 }

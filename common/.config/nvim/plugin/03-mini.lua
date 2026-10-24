@@ -1,7 +1,5 @@
-
 VimRc.later(function()
-  require('mini.visits').setup()
-
+    require('mini.visits').setup()
 end)
 -- local builtin_textobjects = {
 --   -- Use balanced pair for brackets. Use opening ones to possibly remove edge
@@ -32,6 +30,120 @@ end)
 --   ['q'] = { { "%b''", '%b""', '%b``' }, '^.().*().$' },
 --
 
+VimRc.later(function()
+    require('mini.git').setup()
+    require('mini.diff').setup()
+end)
+VimRc.now(function()
+    NOTIFY_WIDTH = 120
+    --- to display progress when the server supports percentages
+    ---@param notif_arr Notification[]
+    local show_notifications = function(notif_arr)
+        local ns_id = vim.api.nvim_create_namespace 'MiniNotifyHighlight'
+
+        local buf_id
+        for _, id in ipairs(vim.api.nvim_list_bufs()) do
+            if vim.bo[id].filetype == 'vimrc-notify' then
+                buf_id = id
+            end
+        end
+        -- Ensure clear buffer
+        -- vim.api.nvim_buf_clear_namespace(buf_id, ns_id, 0, -1)
+        -- vim.api.nvim_buf_set_lines(buf_id, 0, -1, true, {})
+
+        -- Compute lines and highlight regions
+        local lines, highlights = {}, {}
+        for _, notif in ipairs(notif_arr) do
+            local notif_lines = vim.split(notif.msg, '\n')
+            for _, l in ipairs(notif_lines) do
+                table.insert(lines, l)
+            end
+            table.insert(
+                highlights, { group = notif.hl_group, from_line = #lines - #notif_lines + 1, to_line = #lines }
+            )
+        end
+
+        if buf_id ~= nil then
+            vim.api.nvim_buf_set_lines(buf_id, 0, -1, false, lines)
+        else
+            buf_id = VimRc.show_in_split(lines, 'vimrc://notify')
+        end
+        -- Set lines and highlighting
+        local extmark_opts = { end_col = 0, hl_eol = true, hl_mode = 'combine' }
+        for _, hi_data in ipairs(highlights) do
+            extmark_opts.end_row, extmark_opts.hl_group = hi_data.to_line, hi_data.group
+            vim.api.nvim_buf_set_extmark(buf_id, ns_id, hi_data.from_line - 1, 0, extmark_opts)
+        end
+        vim.api.nvim_set_current_buf(buf_id)
+    end
+
+    ---@param pred   fun(Notification): boolean)?
+    ---@param format fun(Notification): string)?
+    local get_notif_arr = function(pred, format)
+        -- Get notifications based on predicate
+        local notif_arr = MiniNotify.get_all()
+        if pred then
+            notif_arr = vim.tbl_filter(function(notif)
+                return pred(notif)
+            end, notif_arr)
+        end
+        -- Prepare content
+        table.sort(notif_arr, function(a, b)
+            return a.ts_update < b.ts_update
+        end)
+        format = format or MiniNotify.default_format
+        for _, notif in ipairs(notif_arr) do
+            local res = format(notif)
+            if type(res) ~= 'string' then
+                VimRc.err 'Output of `content.format` should be string.'
+            end
+            notif.msg = res
+        end
+        return notif_arr
+    end
+
+    require('mini.notify').setup()
+    vim.notify = MiniNotify.make_notify()
+
+    local keymaps = {
+        {
+            'a',
+            function()
+                -- Get active notifications
+                local notifs = get_notif_arr(function(notif)
+                    return notif.ts_remove ~= nil
+                end)
+                show_notifications(notifs)
+            end,
+            'All',
+        },
+        {
+            'h',
+            '<Cmd>lua MiniNotify.show_history()<CR>',
+            'History',
+        },
+        {
+            'e',
+            function()
+                -- Get active notifications
+                local err_notifs = get_notif_arr(function(notif)
+                    return notif.level == 'ERROR'
+                end)
+                show_notifications(err_notifs)
+            end,
+            'Errors',
+        },
+        {
+            'd',
+            '<Cmd>lua MiniNotify.clear()<CR>',
+            'Dismiss',
+        },
+    }
+
+    for _, k in ipairs(keymaps) do
+        vim.keymap.set('n', '<leader>n' .. k[1], k[2], { desc = k[3] })
+    end
+end)
 -- Extend and create a/i textobjects, like `:h a(`, `:h a'`, and more).
 -- Contains not only `a` and `i` type of textobjects, but also their "next" and
 -- "last" variants that will explicitly search for textobjects after and before
@@ -49,19 +161,19 @@ end)
 -- - `:h MiniAi-builtin-textobjects` - list of all supported textobjects
 -- - `:h MiniAi-textobject-specification` - examples of custom textobjects
 VimRc.later(function()
-  local ai = require 'mini.ai'
-  ai.setup {
-    custom_textobjects = {
-      F = ai.gen_spec.treesitter { a = '@function.outer', i = '@function.inner' },
-      c = ai.gen_spec.treesitter {
-        a = { '@conditional.outer', '@loop.outer' },
-        i = { '@conditional.inner', '@loop.inner' },
-      },
-      f = ai.gen_spec.function_call { name_pattern = '[%w_%.%>%<]' },
-      p = ai.gen_spec.user_prompt(),
-      ['|'] = ai.gen_spec.pair('|', '|', { type = 'non-balanced' }),
-    },
-  }
+    local ai = require 'mini.ai'
+    ai.setup {
+        custom_textobjects = {
+            F = ai.gen_spec.treesitter { a = '@function.outer', i = '@function.inner' },
+            c = ai.gen_spec.treesitter {
+                a = { '@conditional.outer', '@loop.outer' },
+                i = { '@conditional.inner', '@loop.inner' },
+            },
+            f = ai.gen_spec.function_call { name_pattern = '[%w_%.%>%<]' },
+            p = ai.gen_spec.user_prompt(),
+            ['|'] = ai.gen_spec.pair('|', '|', { type = 'non-balanced' }),
+        },
+    }
 end)
 
 -- Common configuration presets. Example usage:
@@ -71,24 +183,21 @@ end)
 -- - `\` + key - toggle common options. Like `\h` toggles highlighting search.
 -- - `<C-hjkl>` (four combos) - navigate between windows.
 VimRc.later(function()
-  require('mini.bufremove').setup()
+    require('mini.bufremove').setup()
 end)
 VimRc.later(function()
-  require('mini.align').setup()
-end)
-
-VimRc.later(function()
-  require('mini.bracketed').setup {
-    comment = { suffix = '', options = {} },
-    conflict = { suffix = 'c', options = {} },
-  }
+    require('mini.align').setup()
 end)
 
 VimRc.later(function()
-  require('mini.comment').setup()
+    require('mini.bracketed').setup { comment = { suffix = '', options = {} }, conflict = { suffix = 'c', options = {} } }
+end)
+
+VimRc.later(function()
+    require('mini.comment').setup()
 end)
 VimRc.later(function()
-  require('mini.indentscope').setup()
+    require('mini.indentscope').setup()
 end)
 
 -- Split and join arguments (regions inside brackets between allowed separators).
@@ -102,7 +211,7 @@ end)
 -- See also:
 -- - `:h MiniSplitjoin.gen_hook` - list of available hooks
 VimRc.later(function()
-  require('mini.splitjoin').setup()
+    require('mini.splitjoin').setup()
 end)
 
 --
@@ -148,10 +257,10 @@ end)
 --  "output" surrounding which is also used in adding with `sa` (followed by
 --  textobject/motion or in Visual mode).
 --
---Example: typing `sd)` with cursor on `*` (covers `a` character) changes line
---`!( *a (bb) )!` into `! aa (bb) !`. Typing `sr!)` changes same initial line
---into `(( aa (bb) ))`.
--->
+-- Example: typing `sd)` with cursor on `*` (covers `a` character) changes line
+-- `!( *a (bb) )!` into `! aa (bb) !`. Typing `sr!)` changes same initial line
+-- into `(( aa (bb) ))`.
+-- >
 -- ┌───┬───────────────┬───────────────┬─────────────┬─────────────────┐
 -- │Key│     Name      │  Example line │    Delete   │     Replace     │
 -- ├───┴───────────────┴───────────────┴─────────────┴─────────────────┤
@@ -203,41 +312,41 @@ end)
 
 --
 VimRc.later(function()
-  -- local surround = require 'mini.surround'
-  -- local ts_input = surround.gen_spec.input.treesitter
-  require('mini.surround').setup()
-  --   custom_surroundings = {
-  --     f = {
-  --       input = ts_input({ outer = '@call.outer', inner = '@calll.inner' }, { use_nvim_treesitter = true }),
-  --     },
-  --   },
-  -- }
+    -- local surround = require 'mini.surround'
+    -- local ts_input = surround.gen_spec.input.treesitter
+    require('mini.surround').setup()
+    --   custom_surroundings = {
+    --     f = {
+    --       input = ts_input({ outer = '@call.outer', inner = '@calll.inner' }, { use_nvim_treesitter = true }),
+    --     },
+    --   },
+    -- }
 end)
 
 -- Highlight and remove trailspace. Temporarily stops highlighting in Insert mode
 -- to reduce noise when typing. Example usage:
 -- - `<Leader>ot` - trim all trailing whitespace in a buffer
 VimRc.later(function()
-  require('mini.operators').setup {
+    require('mini.operators').setup {
 
-    replace = {
-      -- NOTE: Default `gr*` LSP mappings are removed
-      prefix = 'go',
+        replace = {
+            -- NOTE: Default `gr*` LSP mappings are removed
+            prefix = 'go',
 
-      -- Whether to reindent new text to match previous indent
-      reindent_linewise = true,
-    },
-  }
+            -- Whether to reindent new text to match previous indent
+            reindent_linewise = true,
+        },
+    }
 end)
 
 VimRc.later(function()
-  require('mini.hipatterns').setup {
-    highlighters = {
-      fixme = require('mini.extra').gen_highlighter.words({ 'FIXME', 'Fixme', 'fixme' }, 'MiniHipatternsFixme'),
-      hack = require('mini.extra').gen_highlighter.words({ 'HACK', 'Hack', 'hack' }, 'MiniHipatternsHack'),
-      todo = require('mini.extra').gen_highlighter.words({ 'TODO', 'Todo', 'todo' }, 'MiniHipatternsTodo'),
-      note = require('mini.extra').gen_highlighter.words({ 'NOTE', 'Note', 'note' }, 'MiniHipatternsNote'),
-      hex_color = require('mini.hipatterns').gen_highlighter.hex_color(),
-    },
-  }
+    require('mini.hipatterns').setup {
+        highlighters = {
+            fixme = require('mini.extra').gen_highlighter.words({ 'FIXME', 'Fixme', 'fixme' }, 'MiniHipatternsFixme'),
+            hack = require('mini.extra').gen_highlighter.words({ 'HACK', 'Hack', 'hack' }, 'MiniHipatternsHack'),
+            todo = require('mini.extra').gen_highlighter.words({ 'TODO', 'Todo', 'todo' }, 'MiniHipatternsTodo'),
+            note = require('mini.extra').gen_highlighter.words({ 'NOTE', 'Note', 'note' }, 'MiniHipatternsNote'),
+            hex_color = require('mini.hipatterns').gen_highlighter.hex_color(),
+        },
+    }
 end)

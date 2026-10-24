@@ -1,6 +1,6 @@
 {
   "func": {
-    "prefix": "---",
+    "prefix": "dfunc",
     "body": [
       "--- ${1:A one-line summary.}",
       "--- ${2:Description.}$0",
@@ -10,7 +10,7 @@
     "description": "A lua comment with short summary, description, parameters, return, and example."
   },
   "class": {
-    "prefix": "--- @class",
+    "prefix": "--- @c",
     "body": [
       "--- @class ${1:Class name.}",
       "-- ${2:Description.}$0",
@@ -20,29 +20,22 @@
     ],
     "description": "A lua comment with short summary, description, parameters, return, and example."
   },
-  "comment_simple": {
-    "prefix": "--",
-    "body": ["--- ${1:A one-line summary.}", "-- ${2:Description.}$0"],
-    "description": "A simple lua comment with short summary and description. Useful when you prefer to add the tags manually on functions."
-  },
   "@field": {
-    "prefix": "@field",
-    "body": ["@field ${1:description.}$0"],
-    "description": "Describe a table field definition."
+    "prefix": "--- @f",
+    "body": [
+      "--- @field ${1:description.}$0"
+    ]
   },
   "@param": {
-    "prefix": "@param",
-    "body": ["@param ${1:name} ${2:type} ${3:Parameter description.}$0"],
-    "description": "Describe function parameters. It requires the name of the parameter and its description."
+    "prefix": "--- @p",
+    "body": [
+      "--- @param ${1:name} ${2:type} ${3:Parameter description.}$0"
+    ]
   },
   "@return": {
-    "prefix": "@return",
-    "body": ["@return ${1:type} ${2:Description of the returned object.}$0"],
-    "description": "Describe a returning value of the function. Since Lua can return multiple values, this tag should appear more than once."
-  },
-  "@class": {
-    "prefix": "@class",
-    "body": ["@class ${1:name}$0"],
-    "description": "If LuaDoc cannot infer the type of documentation (function, table or module definition), the programmer can specify it explicitly."
+    "prefix": "--- @r",
+    "body": [
+      "--- @return ${1:type} ${2:Description of the returned object.}$0"
+    ]
   }
 }

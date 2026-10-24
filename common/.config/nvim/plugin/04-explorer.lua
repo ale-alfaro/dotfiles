@@ -30,27 +30,25 @@
 -- It also works with snippet candidates provided by LSP server. Best experience
 -- when paired with 'mini.snippets' (which is set up in this file).
 local minifiles_toggle = function()
-  if not MiniFiles.close() then
-    MiniFiles.open(vim.api.nvim_buf_get_name(0), false)
-  end
+    if not MiniFiles.close() then
+        MiniFiles.open(vim.api.nvim_buf_get_name(0), false)
+    end
 end
 ---@class ExplorerPlugin
----@field setup fun()
----@field open_curr_buf fun()|string
----@field open_at_loc  fun(loc:string)
----@field quickfix? fun()
----@field loc_list? fun()
-  VimRc.now_if_args(function()
+---@field setup         fun()
+---@field open_curr_buf fun() | string
+---@field open_at_loc   fun(loc: string)
+---@field quickfix?     fun()
+---@field loc_list?     fun()
+VimRc.now_if_args(function()
     local minifiles = require 'extras.minifiles' ---@as ExplorerPlugin
     local oil = require 'extras.oil' ---@as ExplorerPlugin
     oil.setup()
     minifiles.setup()
 
     -- stylua:ignore
-    local non_prefix_keys = {
-      { '\\', minifiles_toggle, 'Open Explorer (Cwd)' },
-    }
+    local non_prefix_keys = { { '\\', minifiles_toggle, 'Open Explorer (Cwd)' } }
     for _, k in ipairs(non_prefix_keys) do
-      vim.keymap.set('n', k[1], k[2], { desc = k[3] })
+        vim.keymap.set('n', k[1], k[2], { desc = k[3] })
     end
-  end)
+end)

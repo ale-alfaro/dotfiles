@@ -18,24 +18,24 @@ local gen_loader = snippets.gen_loader
 --   },
 -- }
 local header_guard = function()
-  return { string.upper(string.gsub(vim.fn.expand '%:p:.', '[/%-%.]', '_')) }
+    return { string.upper(string.gsub(vim.fn.expand '%:p:.', '[/%-%.]', '_')) }
 end
 local insert_with_lookup = function(snippet)
-  local lookup = {
-    TM_SELECTED_TEXT = table.concat(vim.fn.getreg('a', true, true), '\n'),
-    HEADER_FILE_GUARD = table.concat(header_guard(), '\n'),
-  }
-  return MiniSnippets.default_insert(snippet, { lookup = lookup })
+    local lookup = {
+        TM_SELECTED_TEXT = table.concat(vim.fn.getreg('a', true, true), '\n'),
+        HEADER_FILE_GUARD = table.concat(header_guard(), '\n'),
+    }
+    return MiniSnippets.default_insert(snippet, { lookup = lookup })
 end
 require('mini.snippets').setup {
-  snippets = {
-    -- Always load 'snippets/global.json' from config directory
-  gen_loader.from_runtime 'snippets/*.lua',
-  gen_loader.from_runtime 'snippets.lua',
-   gen_loader.from_file('~/.config/nvim/snippets/global.lua'),
-    -- Load from 'snippets/' directory of plugins, like 'friendly-snippets'
-    gen_loader.from_lang(),
-  },
-  -- ... Set up snippets ...
-  expand = { insert = insert_with_lookup },
+    snippets = {
+        -- Always load 'snippets/global.json' from config directory
+        gen_loader.from_runtime 'snippets/*.lua',
+        gen_loader.from_runtime 'snippets.lua',
+        gen_loader.from_file('~/.config/nvim/snippets/global.lua'),
+        -- Load from 'snippets/' directory of plugins, like 'friendly-snippets'
+        gen_loader.from_lang(),
+    },
+    -- ... Set up snippets ...
+    expand = { insert = insert_with_lookup },
 }

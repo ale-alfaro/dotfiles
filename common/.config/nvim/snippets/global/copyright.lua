@@ -1,7 +1,7 @@
 return {
-  {
-    prefix = '/**sibcopy',
-    body = [[/** SIBEL INC ("SIBEL HEALTH") CONFIDENTIAL
+    {
+        prefix = '/**sibcopy',
+        body = [[/** SIBEL INC ("SIBEL HEALTH") CONFIDENTIAL
  *
  * Copyright 2018-$CURRENT_YEAR [Sibel Inc.], All Rights Reserved.
  *
@@ -23,11 +23,11 @@ return {
  * OR DISTRIBUTE ITS CONTENTS, OR TO MANUFACTURE, USE, OR SELL ANYTHING THAT IT MAY DESCRIBE, IN
  * WHOLE OR IN PART.
  */]],
-    desc = '/**Sibel copyright',
-  },
-  {
-    prefix = '#sibcopy',
-    body = [[# SIBEL INC ("SIBEL HEALTH") CONFIDENTIAL
+        desc = '/**Sibel copyright',
+    },
+    {
+        prefix = '#sibcopy',
+        body = [[# SIBEL INC ("SIBEL HEALTH") CONFIDENTIAL
 #
 # Copyright 2018-$CURRENT_YEAR [Sibel Inc.], All Rights Reserved.
 #
@@ -48,6 +48,6 @@ return {
 # SOURCE CODE AND/OR RELATED INFORMATION DOES NOT CONVEY OR IMPLY ANY RIGHTS TO REPRODUCE, DISCLOSE
 # OR DISTRIBUTE ITS CONTENTS, OR TO MANUFACTURE, USE, OR SELL ANYTHING THAT IT MAY DESCRIBE, IN
 # WHOLE OR IN PART.]],
-    desc = '#Sibel copyright',
-  },
+        desc = '#Sibel copyright',
+    },
 }

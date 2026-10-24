@@ -9,15 +9,15 @@
 --- })
 ---@type vim.lsp.Config
 return {
-  cmd = { 'neocmakelsp', 'stdio' },
-  filetypes = { 'cmake' },
-  root_markers = { '.neocmakelsp' },
-  init_options = {
-    format = {
-      enable = false,
+    cmd = { 'neocmakelsp', 'stdio' },
+    filetypes = { 'cmake' },
+    root_markers = { '.neocmakelsp' },
+    init_options = {
+        format = {
+            enable = false,
+        },
+        lint = {
+            enable = false,
+        },
     },
-    lint = {
-      enable = false,
-    },
-  },
 }
