@@ -14,17 +14,11 @@ base-prefer = configfile
 up = update -k
 up.shallow = up -o=--depth=1
 ls = list -f '{name:20} {path:30} {groups}'
-st = status -s
-fb = boards --format '{name:30} | {qualifiers:30} | {dir}' -n
+st = status -s --untracked 
 tgt = build -p=never -t
-run = tgt run -d
-initlevels = tgt initlevels -d
-resume = tgt all -d
-dashboard = tgt dashboard -d
-menuconf = tgt menuconfig -d
-mem-footprint = tgt footprint -d
-traceconfig = tgt traceconfig -d
-goto = forall -c 'nvim .'
+conf = tgt menuconfig -d
+goto = forall -c 'nvim -c "FzfLua files"'
+runto = forall -c 'nvim -c "OverseerRun"'
 lg = forall -c 'lazygit'
 
 test = twister -vv --inline-logs --clobber-output --no-detailed-test-id --short-build-paths --ll=DEBUG
