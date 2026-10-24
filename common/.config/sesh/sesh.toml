@@ -1,11 +1,11 @@
 #:schema https://github.com/joshmedeski/sesh/raw/main/sesh.schema.json
-blacklist = ["build"]
+blacklist = [".config", "build", "scratch"]
 sort_order = ["tmux", "config", "zoxide"]
 
 [tui]
 prompt = "> "
 placeholder = "Filter sessions... "
-show_icons =  true
+show_icons = true
 show_windows = true
 alias_auto_connect_delay = "150ms"
 alias_filter_prefix = "/"
@@ -16,7 +16,10 @@ preview_border = "line"
 
 [default_session]
 preview_command = "eza --all --git --icons --color=always {}"
-startup_command = "nvim ."
+startup_command = '''
+nvim -c ":lua require('fzf-lua').oldfiles({ cwd_only = function() return vim.api.nvim_command('pwd') ~= vim.env.HOME end })"
+'''
+tmuxp = ""
 
 [[session]]
 name = "Common Config"
@@ -25,26 +28,16 @@ path = "~/dotfiles/common/.config"
 [[session]]
 name = "Obsidian"
 path = "~/Documents/Obsidian"
-startup_command = "tdl claude"
 
 [[session]]
-name = "Aria (v2)"
-path = "~/sibel/eng/fw/aria_workspace"
-startup_command = "tdl claude"
+name = 'aria'
+path = "~/sibel/eng/fw/aria-workspace-releases"
+preview_command = "west -q list -f '{name}': '{path}'"
+startup_command = 'tdl claude'
 
-[[session]]
-name = "Vfox Plugin"
-path = "~/sibel/eng/tools/vfox-zephyr-sdk"
-startup_command = "mise deactivate"
+[[window]]
+name = "claude"
+startup_script = "claude --resume"
 
-
-[[session]]
-name = "Aria Legacy (v1)"
-path = "~/sibel/eng/fw/aria-legacy-workspace"
-startup_command = "tdl claude"
-
-
-[[session]]
-name = "Tools"
-path = "~/sibel/eng/tools"
-startup_command = "eza --absolute | fzf |  xargs -ro nvim"
+[browser]
+application = "zen"
