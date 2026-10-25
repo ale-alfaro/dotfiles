@@ -18,7 +18,6 @@ set history filename ~/.config/gdb/history
 set history save on
 set history size 10000
 set history remove-duplicates unlimited
-set data-directory /opt/zephyr-sdk-custom/arm-zephyr-eabi/share/gdb
 # --- Safer auto-loading (project-local .gdbinit/.gdb scripts) ---
 # Add trusted directories explicitly instead of disabling protection globally.
 # Example: add-auto-load-safe-path ~/src
@@ -70,3 +69,31 @@ define z_esf_dump
     end
   end
 
+define z_arm_fault_handler_dump
+    printf "\n=== bengal error_handler context ===\n"
+    if $arg0
+      printf "reason=%d\n", $arg0
+    end
+    if $arg1
+      printf "esf=0x%x\n", $arg1
+      printf "r0=0x%x r1=0x%x r2=0x%x r3=0x%x r12=0x%x lr=0x%x pc=0x%x xpsr=0x%x\n", \
+        $arg1->basic.r0, $arg1->basic.r1, $arg1->basic.r2, $arg1->basic.r3, \
+        $arg1->basic.r12, $arg1->basic.lr, $arg1->basic.pc, $arg1->basic.xpsr
+      printf "extra: msp=0x%x exc_return=0x%x\n", $arg1->extra_info.msp, $arg1->extra_info.exc_return
+      if $arg1->extra_info.callee
+        printf "callee: r4=0x%x r5=0x%x r6=0x%x r7=0x%x r8=0x%x r9=0x%x r10=0x%x r11=0x%x psp=0x%x\n", \
+          $arg1->extra_info.callee->v1, $arg1->extra_info.callee->v2, \
+          $arg1->extra_info.callee->v3, $arg1->extra_info.callee->v4, \
+          $arg1->extra_info.callee->v5, $arg1->extra_info.callee->v6, \
+          $arg1->extra_info.callee->v7, $arg1->extra_info.callee->v8, \
+          $arg1->extra_info.callee->psp
+      end
+    end
+  end
+break z_arm_fault
+commands
+  silent
+  info locals
+  z_arm_fault_handler_dump $reason $esf
+  bt
+end

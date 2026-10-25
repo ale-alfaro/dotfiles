@@ -1,0 +1,54 @@
+{
+  "$schema": "https://raw.githubusercontent.com/EmmyLuaLs/emmylua-analyzer-rust/refs/heads/main/crates/emmylua_code_analysis/resources/schema.json",
+  "completion": {
+    "autoRequire": true,
+    "callSnippet": false,
+    "postfix": "@"
+  },
+  "diagnostics": {
+    "globals": [
+      "vim",
+      "VimRc",
+      "MiniIcons",
+      "MiniFiles",
+      "MiniDiff",
+      "MiniClue",
+      "MiniMisc",
+      "MiniCompletion"
+    ]
+  },
+  "doc": {
+    "syntax": "md"
+  },
+  "runtime": {
+    "version": "LuaJIT",
+    "requirePattern": [
+      "?.lua",
+      "?/init.lua"
+    ]
+  },
+  "workspace": {
+    "workspaceRoots": [
+      "$XDG_CONFIG_HOME/nvim"
+    ],
+    "library": [
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/nvim-treesitter",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/blink.cmp",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/fzf-lua",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/overseer.nvim",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/render-markdown.nvim",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/mini.nvim",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/oil.nvim",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/grug-far.nvim",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/plenary.nvim",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/trouble.nvim",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/nvim/after",
+      "$XDG_DATA_HOME/nvim/site/pack/core/opt/tiny-code-action.nvim"
+    ],
+    "ignoreDir": [
+      "scratch",
+      "help",
+      "doc"
+    ]
+  }
+}

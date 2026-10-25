@@ -1,4 +1,5 @@
 [tools]
+"cargo:emmylua_check" = "latest"
 "cargo:emmylua_formatter" = "latest"
 "cargo:emmylua_ls" = "latest"
 stylua = "latest"

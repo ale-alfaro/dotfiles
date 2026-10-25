@@ -1872,3 +1872,66 @@ info registers
 q
 thread apply all bt
 q
+q
+c
+q
+file build/app.debug/app/zephyr/zephyr.elf
+bt
+info b
+b assert_post_action 
+mon reset
+c
+thread apply all bt
+info threads
+q
+info threads
+info registers 
+help thread
+thread find 
+thread find ''
+thread find 'main
+mon 
+mon reg
+mon reg  0x50005400
+x/wx 0x50005400
+mon halt
+mon reset
+mon go
+c
+q
+c
+info treads
+info threads
+q
+mon
+remote
+target remote :2331
+bt
+info threads
+mon reset
+c
+q
+c
+file build/bengal/mcuboot/zephyr/zephyr.elf
+bt
+q
+info thread
+info symbol  0x00078fd6
+info symbol 0x00078fd6
+p *0x00078fd6
+p 0x00078fd6
+x/4w 0x00078fd6
+x/16w 0x00078fd6
+q
+p static_memory_allocation_failures 
+q
+q
+mon reset
+c
+q
+x/d static_total_memory_size 
+x/u static_total_memory_size 
+p/u static_total_memory_size 
+q
+c
+q

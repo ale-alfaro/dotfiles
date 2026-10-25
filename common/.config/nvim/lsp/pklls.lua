@@ -48,6 +48,8 @@ local function download_package(packageUri, ctx)
 end
 ---@type vim.lsp.Config
 return {
+    name = 'pklls',
+    filetypes = { 'pkl' },
     settings = {
         ['pkl.cli.path'] = bin_path,
     },

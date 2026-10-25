@@ -2,6 +2,11 @@
 
 lockfile_version = 3
 
+[[tools."cargo:emmylua_check"]]
+version = "0.25.1"
+backend = "cargo:emmylua_check"
+specifiers = ["latest"]
+
 [[tools."cargo:emmylua_formatter"]]
 version = "0.25.1"
 backend = "cargo:emmylua_formatter"
