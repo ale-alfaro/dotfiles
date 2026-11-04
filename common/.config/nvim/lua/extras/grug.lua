@@ -1,5 +1,8 @@
 vim.api.nvim_create_autocmd('FileType', {
-    group = vim.api.nvim_create_augroup('grug-far-keybindings', { clear = true }),
+    group = vim.api.nvim_create_augroup(
+        'grug-far-keybindings',
+        { clear = true }
+    ),
     pattern = { 'grug-far' },
     callback = function()
         vim.keymap.set('n', 'q', function()
@@ -201,7 +204,12 @@ fix: $$$A
     },
 }
 local map = function(key, cb, desc)
-    vim.keymap.set('n', '<leader>c' .. key, cb, { desc = 'GrugFar ' .. desc })
+    vim.keymap.set(
+        'n',
+        '<leader>c' .. key,
+        cb,
+        { desc = 'GrugFar ' .. desc }
+    )
 end
 map('g', function()
     require('grug-far').open { transient = true }
@@ -223,7 +231,13 @@ map('l', function()
 end, 'Local'
 )
 map('c', function()
-    require('grug-far').open({ prefills = { search = vim.fn.expand("<cword>") } })
+    require('grug-far').open({
+        prefills = {
+            search = vim.fn.expand(
+                "<cword>"
+            ),
+        },
+    })
 end, 'Local'
 )
 --
@@ -231,9 +245,15 @@ vim.keymap.set('n', '<localleader>r', function()
     local bufnr = vim.api.nvim_get_current_buf()
     local ft = vim.bo[bufnr].filetype
     local language_glob = nil
-    if string.match(ft, 'c') then
+    if string.match(
+        ft,
+        'c'
+    ) then
         language_glob = '*.{c,h}'
-    elseif string.match(ft, 'python') then
+    elseif string.match(
+        ft,
+        'python'
+    ) then
         language_glob = '*.py'
     end
     require('grug-far').open({

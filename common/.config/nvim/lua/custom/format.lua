@@ -21,8 +21,16 @@ local shfmt = { command = 'shfmt', args = { '-i', '2', '-ci', '-filename', '$FIL
 local ruff = {
     command = 'ruff',
     args = {
-        'check', '--fix', '--force-exclude', '--exit-zero', '--no-cache', '--unsafe-fixes', '--select=I001',
-        '--stdin-filename', '$FILENAME', '-',
+        'check',
+        '--fix',
+        '--force-exclude',
+        '--exit-zero',
+        '--no-cache',
+        '--unsafe-fixes',
+        '--select=I001',
+        '--stdin-filename',
+        '$FILENAME',
+        '-',
     },
 }
 local stylua = { command = 'stylua', args = { '--stdin-filepath', '$FILENAME', '-' } }
@@ -66,22 +74,39 @@ M.format = function(bufnr)
         return
     end
     -- vim.b[] returns nil for unset vars; nvim_buf_get_var would throw.
-    local input_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
+    local input_lines = vim.api.nvim_buf_get_lines(
+        bufnr,
+        0,
+        -1,
+        true
+    )
     require('custom.docgen').run_formatter(bufnr, ft, formatter, input_lines, function(output)
         local err = nil
         if not output then
             err = 'Failed to format'
-            VimRc.err(err)
+            VimRc.err(
+                err
+            )
         end
         input_lines = output or input_lines
         -- discard formatting if buffer has changed
-        if not vim.api.nvim_buf_is_valid(bufnr) then
-            err = string.format('Async formatter discarding changes for %d: concurrent modification', bufnr)
-            VimRc.err(err)
+        if not vim.api.nvim_buf_is_valid(
+            bufnr
+        ) then
+            err = string.format(
+                'Async formatter discarding changes for %d: concurrent modification',
+                bufnr
+            )
+            VimRc.err(
+                err
+            )
         else
             require('custom.docgen').apply_format(bufnr, input_lines, output or input_lines)
         end
-        if not err and vim.api.nvim_buf_is_valid(bufnr) then
+        if not err
+            and vim.api.nvim_buf_is_valid(
+                bufnr
+            ) then
             vim.api.nvim_buf_call(bufnr, function()
                 vim.cmd.update()
             end)
@@ -120,7 +145,10 @@ M.formatexpr = function(opts)
     })
     -- Force async = false
     opts.async = false
-    if vim.tbl_contains({ 'i', 'R', 'ic', 'ix' }, vim.fn.mode()) then
+    if vim.tbl_contains(
+        { 'i', 'R', 'ic', 'ix' },
+        vim.fn.mode()
+    ) then
         -- `formatexpr` is also called when exceeding `textwidth` in insert mode
         -- fall back to internal formatting
         return 1
@@ -132,7 +160,9 @@ M.formatexpr = function(opts)
     if start_lnum <= 0 or end_lnum <= 0 then
         return 0
     end
-    local end_line = vim.fn.getline(end_lnum)
+    local end_line = vim.fn.getline(
+        end_lnum
+    )
     local end_col = end_line:len()
 
     if vim.v.count == vim.fn.line '$' then
@@ -147,10 +177,15 @@ M.formatexpr = function(opts)
 
     local fmt = M.config.formatters_by_ft[ft]
     if not fmt then
-        VimRc.warn('No formatters for ft=' .. ft)
+        VimRc.warn(
+            'No formatters for ft=' .. ft
+        )
         return
     end
-    H.format_range(fmt, bufnr)
+    H.format_range(
+        fmt,
+        bufnr
+    )
     return 0
 end
 --- Run formatter on a range
@@ -159,20 +194,44 @@ end
 ---@param start_pos? [integer, integer]     Tuple of start position
 ---@param end_pos?   [integer, integer]     Tuple of end position
 H.format_range = function(fmt, bufnr, start_pos, end_pos)
-    local start_l, _ = start_pos ~= nil and unpack(start_pos) or 0, 0
-    local end_l, _ = end_pos ~= nil and unpack(end_pos) or -1, -1
-    local lines = vim.api.nvim_buf_get_lines(bufnr, start_l, end_l, true)
+    local start_l, _ = start_pos ~= nil
+            and unpack(
+                start_pos
+            ) or 0, 0
+    local end_l, _ = end_pos ~= nil
+            and unpack(
+                end_pos
+            )
+            or -1, -1
+    local lines = vim.api.nvim_buf_get_lines(
+        bufnr,
+        start_l,
+        end_l,
+        true
+    )
     if #lines == 0 or lines[1] == '' then
         VimRc.warn 'File lines are empty'
         return
     end
-    local original = table.concat(lines, '\n') .. (vim.bo[bufnr].eol and '\n' or '')
-    local modified = H.run_formatter(fmt, bufnr, original)
+    local original = table.concat(
+        lines,
+        '\n'
+    )
+        .. (vim.bo[bufnr].eol and '\n' or '')
+    local modified = H.run_formatter(
+        fmt,
+        bufnr,
+        original
+    )
     if not modified then
         VimRc.err 'Failed to run formatter'
         return
     end
-    H.apply_diff(original, modified, bufnr)
+    H.apply_diff(
+        original,
+        modified,
+        bufnr
+    )
 end
 
 --- Apply a formatter's output to the buffer by replacing only the changed line
@@ -181,11 +240,21 @@ end
 ---@param modified string  formatted text
 ---@param bufnr    integer buffer number
 H.apply_diff = function(original, modified, bufnr)
-    local hunks = vim.text.diff(original, modified, { result_type = 'indices' })
-    if type(hunks) ~= 'table' then
+    local hunks = vim.text.diff(
+        original,
+        modified,
+        { result_type = 'indices' }
+    )
+    if type(
+        hunks
+    ) ~= 'table' then
         return
     end
-    local new_lines = vim.split(modified, '\n', { plain = true })
+    local new_lines = vim.split(
+        modified,
+        '\n',
+        { plain = true }
+    )
     -- Apply bottom-up so earlier line numbers stay valid as the buffer mutates.
     for i = #hunks, 1, -1 do
         local h = hunks[i]
@@ -197,7 +266,13 @@ H.apply_diff = function(original, modified, bufnr)
         for j = start_b, start_b + count_b - 1 do
             repl[#repl + 1] = new_lines[j]
         end
-        vim.api.nvim_buf_set_lines(bufnr, first, last, true, repl)
+        vim.api.nvim_buf_set_lines(
+            bufnr,
+            first,
+            last,
+            true,
+            repl
+        )
     end
 end
 
@@ -208,7 +283,10 @@ H.get_format_clients = function(options)
 
     local clients = vim.lsp.get_clients { id = options.id, bufnr = options.bufnr, name = options.name, method = method }
     if options.filter then
-        clients = vim.tbl_filter(options.filter, clients)
+        clients = vim.tbl_filter(
+            options.filter,
+            clients
+        )
     end
     return clients
 end

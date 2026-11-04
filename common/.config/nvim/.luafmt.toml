@@ -1,7 +1,7 @@
 #
 #  https://github.com/EmmyLuaLs/emmylua-analyzer-rust/blob/main/docs/emmylua_formatter/options_EN.md
 #
-level = "Lua51"
+level = "LuaJIT"
 
 [indent]
 # Use spaces instead of tabs for indentation.
@@ -19,7 +19,7 @@ max_blank_lines = 1
 table_expand = "Auto"
 # Never auto-expand call arguments into multiple lines.
 # Matches .editorconfig call_arg_parentheses = which keeps them as-is).
-call_args_expand = "Auto"
+call_args_expand = "Always"
 
 [spacing]
 # Do NOT add a space before function definition parentheses.

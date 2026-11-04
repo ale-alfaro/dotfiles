@@ -1,17 +1,41 @@
--- Install with
--- mac: brew install lua-language-server
--- Arch: pacman -S lua-language-server
-
 ---@type vim.lsp.Config
 return {
   cmd = { 'emmylua_ls' },
   filetypes = { 'lua' },
-  root_markers = { '.emmyrc.json', '.emmyrc.lua', '.luarc.json' },
+
+  -- Sets the workspace "root" to the directory where any of these files is found.
+  -- Files sharing a root will reuse the LSP client/connection.
+  -- Nested lists indicate equal priority, see |vim.lsp.Config|.
+  root_markers = { { '.emmyrc.json', '.luarc.json' }, '.git' },
   workspace_required = false,
   ---@type lspconfig.settings.emmylua_ls
   settings = {
     emmylua = {
+      runtime = {
+        version = "LuaJIT",
+        requirePattern = {
+          "lua/?.lua",
+          "lua/?/init.lua",
+          "?/lua/?.lua",
+          "?/lua/?/init.lua",
+        },
+      },
       codeLens = { enable = true },
+
+      diagnostics = {
+        globals = {
+          "vim",
+          "VimRc",
+        },
+      },
+      completion = {
+        autoRequire = true,
+        callSnippet = false,
+        postfix = "@",
+      },
+      doc = {
+        syntax = "md",
+      },
       hint = { enable = true },
       workspace = {
         library = {

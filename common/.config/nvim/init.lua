@@ -21,12 +21,12 @@ vim.o.undofile = true -- Enable persistent undo
 -- wl-copy only works with a reachable Wayland socket. Over SSH, or in a tmux
 -- pane started without one, use OSC 52 so the terminal owns the clipboard.
 if not (vim.env.WAYLAND_DISPLAY and vim.env.XDG_RUNTIME_DIR) then
-  local osc52 = require 'vim.ui.clipboard.osc52'
-  vim.g.clipboard = {
-    name = 'OSC 52',
-    copy = { ['+'] = osc52.copy '+', ['*'] = osc52.copy '*' },
-    paste = { ['+'] = osc52.paste '+', ['*'] = osc52.paste '*' },
-  }
+    local osc52 = require 'vim.ui.clipboard.osc52'
+    vim.g.clipboard = {
+        name = 'OSC 52',
+        copy = { ['+'] = osc52.copy '+', ['*'] = osc52.copy '*' },
+        paste = { ['+'] = osc52.paste '+', ['*'] = osc52.paste '*' },
+    }
 end
 --- Shortmess controls the message display
 vim.o.shortmess = 'atI' -- default is 'ltToOCF'
@@ -44,7 +44,7 @@ vim.o.shada = "'100,<50,s10,:1000,/100,@100,h" -- Limit ShaDa file (for startup)
 
 vim.cmd 'filetype plugin indent on'
 if vim.fn.exists 'syntax_on' ~= 1 then
-  vim.cmd 'syntax enable'
+    vim.cmd 'syntax enable'
 end
 -- UI =========================================================================
 vim.o.breakindent = true -- Indent wrapped lines to match line start
@@ -139,18 +139,34 @@ vim.o.updatetime = 300
 vim.o.termguicolors = true
 
 local gh = function(repo)
-  return 'https://github.com/' .. repo
+    return 'https://github.com/' .. repo
 end
 local gh_rev = function(repo, rev)
-  return { src = 'https://github.com/' .. repo, version = rev }
+    return { src = 'https://github.com/' .. repo, version = rev }
 end
 
 vim.pack.add {
-  gh 'nvim-mini/mini.nvim', gh 'folke/snacks.nvim', gh 'stevearc/oil.nvim', gh 'stevearc/quicker.nvim',
-  gh 'stevearc/overseer.nvim', gh 'folke/trouble.nvim', gh 'ibhagwan/fzf-lua', gh 'nvim-treesitter/nvim-treesitter',
-  gh 'nvim-treesitter/nvim-treesitter-textobjects', gh 'neovim/nvim-lspconfig', gh 'b0o/schemastore.nvim',
-  gh 'rachartier/tiny-code-action.nvim', gh 'MeanderingProgrammer/render-markdown.nvim', gh 'MagicDuck/grug-far.nvim',
-  gh 'nvim-lua/plenary.nvim', gh 'saghen/blink.lib', gh_rev('saghen/blink.cmp', 'main'), gh 'rebelot/kanagawa.nvim',
+    gh 'nvim-mini/mini.nvim',
+    gh 'folke/snacks.nvim',
+    gh 'stevearc/oil.nvim',
+    gh 'stevearc/quicker.nvim',
+    gh 'stevearc/overseer.nvim',
+    gh 'folke/trouble.nvim',
+    gh 'ibhagwan/fzf-lua',
+    gh 'nvim-treesitter/nvim-treesitter',
+    gh 'nvim-treesitter/nvim-treesitter-textobjects',
+    gh 'neovim/nvim-lspconfig',
+    gh 'b0o/schemastore.nvim',
+    gh 'rachartier/tiny-code-action.nvim',
+    gh 'MeanderingProgrammer/render-markdown.nvim',
+    gh 'MagicDuck/grug-far.nvim',
+    gh 'nvim-lua/plenary.nvim',
+    gh 'saghen/blink.lib',
+    gh_rev(
+        'saghen/blink.cmp',
+        'main'
+    ),
+    gh 'rebelot/kanagawa.nvim',
 }
 vim.cmd [[
   packadd nvim.undotree
@@ -168,214 +184,405 @@ _G.VimRc = _G.VimRc or require 'custom.utils'
 ---
 
 vim.api.nvim_create_autocmd('PackChanged', {
-  callback = function(ev)
-    local name, kind = ev.data.spec.name, ev.data.kind
-    if not vim.tbl_contains({ 'update' }, kind) then
-      return
-    end
-    if not ev.data.active then
-      vim.cmd.packadd(name)
-    end
-  end,
-  desc = "Pack changed",
+    callback = function(ev)
+        local name, kind = ev.data.spec.name, ev.data.kind
+        if not vim.tbl_contains(
+            { 'update' },
+            kind
+        ) then
+            return
+        end
+        if not ev.data.active then
+            vim.cmd.packadd(
+                name
+            )
+        end
+    end,
+    desc = "Pack changed",
 })
 
 VimRc.now(function()
-  vim.cmd([[colorscheme kanagawa-dragon]])
-  require('vim._core.ui2').enable {
-    enable = true,
-    msg = { -- Options related to the message module.
-      targets = 'msg', ---@type 'cmd' | 'msg' Default message target if not present in targets.
-      cmd = { -- Options related to messages in the cmdline window.
-        height = 0.5, -- Maximum height while expanded for messages beyond 'cmdheight'.
-      },
-      dialog = { -- Options related to dialog window.
-        height = 0.5, -- Maximum height.
-      },
-      msg = { -- Options related to msg window.
-        height = 0.5,   -- Maximum height.
-        timeout = 4000, -- Time a message is visible in the message window.
-      },
-      pager = { -- Options related to message window.
-        height = 1, -- Maximum height.
-      },
-    },
-  }
+    vim.cmd(
+        [[colorscheme kanagawa-dragon]]
+    )
+    require('vim._core.ui2').enable {
+        enable = true,
+        msg = { -- Options related to the message module.
+            targets = 'msg', ---@type 'cmd' | 'msg' Default message target if not present in targets.
+            cmd = { -- Options related to messages in the cmdline window.
+                height = 0.5, -- Maximum height while expanded for messages beyond 'cmdheight'.
+            },
+            dialog = { -- Options related to dialog window.
+                height = 0.5, -- Maximum height.
+            },
+            msg = { -- Options related to msg window.
+                height = 0.5,   -- Maximum height.
+                timeout = 4000, -- Time a message is visible in the message window.
+            },
+            pager = { -- Options related to message window.
+                height = 1, -- Maximum height.
+            },
+        },
+    }
 
-  local ext3_blocklist = { scm = true, txt = true, yml = true }
-  local ext4_blocklist = { json = true, yaml = true }
-  local mini_icons = require 'mini.icons'
-  mini_icons.setup {
-    use_file_extension = function(ext, _)
-      return not (ext3_blocklist[ext:sub(-3)] or ext4_blocklist[ext:sub(-4)])
-    end,
-  }
-  mini_icons.mock_nvim_web_devicons()
-  -- vim.cmd 'colorscheme gruvbox'
-  -- vim.cmd 'colorscheme catppuccin'
-  -- Set up to not prefer extension-based icon for some extensions
+    local ext3_blocklist = { scm = true, txt = true, yml = true }
+    local ext4_blocklist = { json = true, yaml = true }
+    local mini_icons = require 'mini.icons'
+    mini_icons.setup {
+        use_file_extension = function(ext, _)
+            return not (ext3_blocklist[ext:sub(
+                -3
+            )]
+                or ext4_blocklist[ext:sub(
+                    -4
+                )])
+        end,
+    }
+    mini_icons.mock_nvim_web_devicons()
+    -- vim.cmd 'colorscheme gruvbox'
+    -- vim.cmd 'colorscheme catppuccin'
+    -- Set up to not prefer extension-based icon for some extensions
 
-  -- require('extras.image').setup_image_snacks()
-  require('mini.statusline').setup()
+    -- require('extras.image').setup_image_snacks()
+    require('mini.statusline').setup()
 end)
 
 VimRc.now(function()
-  -- No-prefix
-  vim.keymap.set('n', 'q', '<nop>', { noremap = true })
-  vim.keymap.set('v', '<', '<gv', { noremap = true })
-  vim.keymap.set('v', '>', '>gv', { noremap = true })
-  vim.keymap.set({ 'n', 'x' }, '<Down>', 'gj', { desc = 'Navigate down (visual line)' })
-  vim.keymap.set({ 'n', 'x' }, '<Up>', 'gk', { desc = 'Navigate down (visual line)' })
-  vim.keymap.set({ 'n', 'x' }, '<Down>', [[v:count == 0 ? 'gj' : 'j']], { expr = true })
-  vim.keymap.set({ 'n', 'x' }, '<Up>', [[v:count == 0 ? 'gk' : 'k']], { expr = true })
+    -- No-prefix
+    vim.keymap.set(
+        'n',
+        'q',
+        '<nop>',
+        { noremap = true }
+    )
+    vim.keymap.set(
+        'v',
+        '<',
+        '<gv',
+        { noremap = true }
+    )
+    vim.keymap.set(
+        'v',
+        '>',
+        '>gv',
+        { noremap = true }
+    )
+    vim.keymap.set(
+        { 'n', 'x' },
+        '<Down>',
+        'gj',
+        { desc = 'Navigate down (visual line)' }
+    )
+    vim.keymap.set(
+        { 'n', 'x' },
+        '<Up>',
+        'gk',
+        { desc = 'Navigate down (visual line)' }
+    )
+    vim.keymap.set(
+        { 'n', 'x' },
+        '<Down>',
+        [[v:count == 0 ? 'gj' : 'j']],
+        { expr = true }
+    )
+    vim.keymap.set(
+        { 'n', 'x' },
+        '<Up>',
+        [[v:count == 0 ? 'gk' : 'k']],
+        { expr = true }
+    )
 
-  -- Reselect latest changed, put, or yanked text
-  vim.keymap.set('n', 'gV', '"g`[" . strpart(getregtype(), 0, 1) . "g`]"', {
-    expr = true,
-    replace_keycodes = false,
-    desc = 'Visually select changed text',
-  })
-  -- Search inside visually highlighted text. Use `silent = false` for it to
-  -- make effect immediately.
-  vim.keymap.set({ 'n', 'i', 'v', 's' }, '<C-s>', '<esc>:update | redraw<CR>', { desc = 'Save', noremap = true })
-
-  vim.keymap.set({ 'i', 'n', 'v' }, '<C-S>s', function()
-    vim.g.skip_formatting = true
-    return '<esc>:update | redraw<CR>'
-  end, { desc = 'Save (without formatting)', expr = true }
-  )
-
-  -- Quickly go to the end of the line while in insert mode.
-  local map = function(key, keycmd, desc)
-    vim.keymap.set('n', key, keycmd, { desc = desc, noremap = true })
-  end
-  vim.keymap.set({ 'i', 'c' }, '<C-e>', '<C-o>A', { desc = 'Go to the end of the line' })
-  vim.keymap.set({ 'i', 'c' }, '<C-a>', '<C-o>I', { desc = 'Go to the start of the line' })
-  map('<C-q>', '<Cmd>qall<CR>', 'Quit All')
-
-  local nmap_leader = function(key, keycmd, desc)
-    vim.keymap.set('n', '<leader>' .. key, keycmd, { desc = desc })
-  end
-  nmap_leader('ba', '<Cmd>b#<CR>', 'Alternate')
-  nmap_leader('bd', '<Cmd>lua MiniBufremove.delete()<CR>', 'Delete')
-  nmap_leader('bs', '<Cmd>lua VimRc.new_scratch_buffer()<Cr>', 'Scratch')
-  nmap_leader('bw', '<Cmd>lua MiniBufremove.delete(0, true)<CR>', 'Delete!')
-
-  local nonprefix_keys = {
-    { '<Space><Space>', '<cmd>FzfLua builtin<cr>', 'Find Fzf pickers' },
-    { '<C-b>', '<cmd>FzfLua buffers<cr>', 'Buffers' }, { '<C-f>', '<cmd>FzfLua files<cr>', 'Files' },
-    { '<C-g>', '<cmd>FzfLua live_grep<cr>', 'Grep (cwd)' }, { '<C-e>', '<cmd>FzfLua grep_cword<cr>', 'Grep CWord' },
-    { '<C-c>', '<cmd>FzfLua resume<cr>', 'Continue' },
-  }
-  for _, k in ipairs(nonprefix_keys) do
-    vim.keymap.set('n', k[1], k[2], { desc = k[3], noremap = true })
-  end
-  -- +Find
-  local prefix_keys = {
-    { 'o', '<cmd>FzfLua combine pickers=oldfiles;zoxide;visits<cr>', 'Old Files' },
-    { 'm', '<cmd>FzfLua manpages<cr>', 'Find Man' },
-    { 'h', '<cmd>FzfLua help_tags<cr>', 'Help' },
-    { 'k', '<Cmd>FzfLua keymaps<CR>', 'Keymaps' },
-    { 'z', '<cmd>FzfLua zoxide<cr>', 'Zoxide' },
-    { 'w', '<cmd>Wf<cr>', 'Search West Workspace (Files)' },
-    { 'g', '<cmd>Wg<cr>', 'Search West Workspace (Live Grep)' },
-    {
-      's',
-      '<cmd>FzfLua lsp_document_symbols<cr>',
-      'Live Document Symbols',
-    },
-    { 'd', '<cmd>FzfLua lsp_document_diagnostics<cr>', 'Document diagnostics' },
-    { 'v', "<cmd>FzfLua visits sort_by='frequency'<cr>", 'Search Frequent Visits' },
-    { 'r', '<cmd>FzfLua visits<cr>', 'Search Recent Visits' },
-  }
-
-  for _, k in ipairs(prefix_keys) do
-    vim.keymap.set('n', '<leader>f' .. k[1], k[2], { desc = k[3] })
-  end
-  -- +Explore
-  local vimconf = vim.fn.stdpath("config")
-  local common_conf = vim.fn.expand('~/dotfiles/common/.config', nil, false)
-  local search_keys = {
-    { 'v', '<cmd>Oil ' .. vimconf .. '<cr>', 'VimRc' }, { 'v', '<cmd>Oil ' .. common_conf .. '<cr>', 'VimRc' },
-    { 'l', '<Cmd>lua MiniFiles.open(MiniFiles.get_latest_path())<cr>', 'Open Explorer (Last Path)' },
-  }
-  for _, k in ipairs(search_keys) do
-    vim.keymap.set('n', '<leader>e' .. k[1], k[2], { desc = k[3] })
-  end
-  --- +Git
-  local git_keys = {
-    { 'a', '<cmd>FzfLua git_status<cr>', 'Add/Status' },
-    { 'd', '<cmd>lua MiniDiff.toggle_overlay()<cr>', 'Diff Toggle overlay' },
-    { 'D', '<cmd>FzfLua git_diff<cr>', 'Diff Hunks' }, { 'h', '<Cmd>FzfLua git_hunks<CR>', 'Hunks' },
-    { 'b', '<cmd>FzfLua git_blame<cr>', 'Blame' }, { 'B', '<cmd>Git blame --porcelain -- %<cr>', 'Blame (MiniGit)' },
-    { 'l', '<cmd>Git log --oneline<cr>', 'Log (MiniGit)' }, { 's', '<cmd>Git status<cr>', 'Status (MiniGit)' },
-    { 'c', '<cmd>Git commit<cr>', 'Commit (MiniGit)' }, { 'b', '<cmd>FzfLua git_bcommits<cr>', 'Buf Commits' },
-    { 'C', '<cmd>FzfLua git_commits<cr>', 'Commits' },
-  }
-
-  for _, k in ipairs(git_keys) do
-    vim.keymap.set('n', '<leader>v' .. k[1], k[2], { desc = k[3] })
-  end
-
-  -- Undotree toggle
-  vim.keymap.set("n", "<leader>u", function()
-    ---@diagnostic disable-next-line: undefined-field
-    require("undotree").open({
-      command = math.floor(vim.api.nvim_win_get_width(0) / 3) .. "vnew",
+    -- Reselect latest changed, put, or yanked text
+    vim.keymap.set('n', 'gV', '"g`[" . strpart(getregtype(), 0, 1) . "g`]"', {
+        expr = true,
+        replace_keycodes = false,
+        desc = 'Visually select changed text',
     })
-  end, { desc = "[U]ndotree toggle" }
-  )
+    -- Search inside visually highlighted text. Use `silent = false` for it to
+    -- make effect immediately.
+    vim.keymap.set(
+        { 'n', 'i', 'v', 's' },
+        '<C-s>',
+        '<esc>:update | redraw<CR>',
+        { desc = 'Save', noremap = true }
+    )
 
-  -- incremental selection treesitter/lsp
-  vim.keymap.set({ "n", "x", "o" }, "<A-o>", function()
-    if vim.treesitter.get_parser(nil, nil, { error = false }) then
-      require("vim.treesitter._select").select_parent(vim.v.count1)
-    else
-      vim.lsp.buf.selection_range(vim.v.count1)
+    vim.keymap.set({ 'i', 'n', 'v' }, '<C-S>s', function()
+        vim.g.skip_formatting = true
+        return '<esc>:update | redraw<CR>'
+    end, { desc = 'Save (without formatting)', expr = true }
+    )
+
+    -- Quickly go to the end of the line while in insert mode.
+    local map = function(key, keycmd, desc)
+        vim.keymap.set(
+            'n',
+            key,
+            keycmd,
+            { desc = desc, noremap = true }
+        )
     end
-  end, { desc = "Select parent treesitter node or outer incremental lsp selections" }
-  )
+    vim.keymap.set(
+        { 'i', 'c' },
+        '<C-e>',
+        '<C-o>A',
+        { desc = 'Go to the end of the line' }
+    )
+    vim.keymap.set(
+        { 'i', 'c' },
+        '<C-a>',
+        '<C-o>I',
+        { desc = 'Go to the start of the line' }
+    )
+    map(
+        '<C-q>',
+        '<Cmd>qall<CR>',
+        'Quit All'
+    )
 
-  vim.keymap.set({ "n", "x", "o" }, "<A-i>", function()
-    if vim.treesitter.get_parser(nil, nil, { error = false }) then
-      require("vim.treesitter._select").select_child(vim.v.count1)
-    else
-      vim.lsp.buf.selection_range(-vim.v.count1)
+    local nmap_leader = function(key, keycmd, desc)
+        vim.keymap.set(
+            'n',
+            '<leader>' .. key,
+            keycmd,
+            { desc = desc }
+        )
     end
-  end, { desc = "Select child treesitter node or inner incremental lsp selections" }
-  )
-  --- +Qf
-  local qf_keys = {
-    { 'o', '<Cmd>copen<CR>', 'Open' },
-    { 'c', '<Cmd>cclose<CR>', 'Close' },
-    { 'h', '<Cmd>chistory<CR>', 'History' },
-    { 'n', '<Cmd>cnewer<CR>', 'Newer List' },
-    { 'p', '<Cmd>colder<CR>', 'Older List' },
-    {
-      'd',
-      '<cmd>Trouble diagnostics filter = { severity=vim.diagnostic.severity.ERROR }<cr>',
-      'Diagnostics (Error-only)',
-    },
-    { 'D', '<cmd>Trouble diagnostics <cr>', 'Diagnostics (Everything)' },
-  }
+    nmap_leader(
+        'ba',
+        '<Cmd>b#<CR>',
+        'Alternate'
+    )
+    nmap_leader(
+        'bd',
+        '<Cmd>lua MiniBufremove.delete()<CR>',
+        'Delete'
+    )
+    nmap_leader(
+        'bs',
+        '<Cmd>lua VimRc.new_scratch_buffer()<Cr>',
+        'Scratch'
+    )
+    nmap_leader(
+        'bw',
+        '<Cmd>lua MiniBufremove.delete(0, true)<CR>',
+        'Delete!'
+    )
 
-  for _, k in ipairs(qf_keys) do
-    vim.keymap.set('n', '<leader>q' .. k[1], k[2], { desc = k[3] })
-  end
+    local nonprefix_keys = {
+        { '<Space><Space>', '<cmd>FzfLua builtin<cr>', 'Find Fzf pickers' },
+        { '<C-b>', '<cmd>FzfLua buffers<cr>', 'Buffers' }, { '<C-f>', '<cmd>FzfLua files<cr>', 'Files' },
+        { '<C-g>', '<cmd>FzfLua live_grep<cr>', 'Grep (cwd)' }, { '<C-e>', '<cmd>FzfLua grep_cword<cr>', 'Grep CWord' },
+        { '<C-c>', '<cmd>FzfLua resume<cr>', 'Continue' },
+    }
+    for _, k in ipairs(
+        nonprefix_keys
+    ) do
+        vim.keymap.set(
+            'n',
+            k[1],
+            k[2],
+            { desc = k[3], noremap = true }
+        )
+    end
+    -- +Find
+    local prefix_keys = {
+        { 'o', '<cmd>FzfLua combine pickers=oldfiles;zoxide;visits<cr>', 'Old Files' },
+        { 'm', '<cmd>FzfLua manpages<cr>', 'Find Man' },
+        { 'h', '<cmd>FzfLua help_tags<cr>', 'Help' },
+        { 'k', '<Cmd>FzfLua keymaps<CR>', 'Keymaps' },
+        { 'z', '<cmd>FzfLua zoxide<cr>', 'Zoxide' },
+        { 'w', '<cmd>Wf<cr>', 'Search West Workspace (Files)' },
+        { 'g', '<cmd>Wg<cr>', 'Search West Workspace (Live Grep)' },
+        {
+            's',
+            '<cmd>FzfLua lsp_document_symbols<cr>',
+            'Live Document Symbols',
+        },
+        { 'd', '<cmd>FzfLua lsp_document_diagnostics<cr>', 'Document diagnostics' },
+        { 'v', "<cmd>FzfLua visits sort_by='frequency'<cr>", 'Search Frequent Visits' },
+        { 'r', '<cmd>FzfLua visits<cr>', 'Search Recent Visits' },
+    }
 
-  --- +Term
-  nmap_leader('tt', '<Cmd>vertical term<CR>', 'vertical')
-  vim.keymap.set('t', '<Esc>', '<C-\\><C-n>')
-  -- Map <A-j>, <A-k>, <A-h>, <A-l> to navigate between windows in any modes
-  vim.keymap.set({ 't', 'i' }, '<A-h>', '<C-\\><C-n><C-w>h')
-  vim.keymap.set({ 't', 'i' }, '<A-j>', '<C-\\><C-n><C-w>j')
-  vim.keymap.set({ 't', 'i' }, '<A-k>', '<C-\\><C-n><C-w>k')
-  vim.keymap.set({ 't', 'i' }, '<A-l>', '<C-\\><C-n><C-w>l')
-  vim.keymap.set({ 'n' }, '<A-h>', '<C-w>h')
-  vim.keymap.set({ 'n' }, '<A-j>', '<C-w>j')
-  vim.keymap.set({ 'n' }, '<A-k>', '<C-w>k')
-  vim.keymap.set({ 'n' }, '<A-l>', '<C-w>l')
-  vim.cmd [[
+    for _, k in ipairs(
+        prefix_keys
+    ) do
+        vim.keymap.set(
+            'n',
+            '<leader>f' .. k[1],
+            k[2],
+            { desc = k[3] }
+        )
+    end
+    -- +Explore
+    local vimconf = vim.fn.stdpath(
+        "config"
+    )
+    local common_conf = vim.fn.expand(
+        '~/dotfiles/common/.config',
+        nil,
+        false
+    )
+    local search_keys = {
+        { 'v', '<cmd>Oil ' .. vimconf .. '<cr>', 'VimRc' }, { 'v', '<cmd>Oil ' .. common_conf .. '<cr>', 'VimRc' },
+        { 'l', '<Cmd>lua MiniFiles.open(MiniFiles.get_latest_path())<cr>', 'Open Explorer (Last Path)' },
+    }
+    for _, k in ipairs(
+        search_keys
+    ) do
+        vim.keymap.set(
+            'n',
+            '<leader>e' .. k[1],
+            k[2],
+            { desc = k[3] }
+        )
+    end
+    --- +Git
+    local git_keys = {
+        { 'a', '<cmd>FzfLua git_status<cr>', 'Add/Status' },
+        { 'd', '<cmd>lua MiniDiff.toggle_overlay()<cr>', 'Diff Toggle overlay' },
+        { 'D', '<cmd>FzfLua git_diff<cr>', 'Diff Hunks' }, { 'h', '<Cmd>FzfLua git_hunks<CR>', 'Hunks' },
+        { 'b', '<cmd>FzfLua git_blame<cr>', 'Blame' }, { 'B', '<cmd>Git blame --porcelain -- %<cr>', 'Blame (MiniGit)' },
+        { 'l', '<cmd>Git log --oneline<cr>', 'Log (MiniGit)' }, { 's', '<cmd>Git status<cr>', 'Status (MiniGit)' },
+        { 'c', '<cmd>Git commit<cr>', 'Commit (MiniGit)' }, { 'b', '<cmd>FzfLua git_bcommits<cr>', 'Buf Commits' },
+        { 'C', '<cmd>FzfLua git_commits<cr>', 'Commits' },
+    }
+
+    for _, k in ipairs(
+        git_keys
+    ) do
+        vim.keymap.set(
+            'n',
+            '<leader>v' .. k[1],
+            k[2],
+            { desc = k[3] }
+        )
+    end
+
+    -- Undotree toggle
+    vim.keymap.set("n", "<leader>u", function()
+        ---@diagnostic disable-next-line: undefined-field
+        require("undotree").open({
+            command = math.floor(
+                vim.api.nvim_win_get_width(
+                    0
+                )
+                    / 3
+            )
+                .. "vnew",
+        })
+    end, { desc = "[U]ndotree toggle" }
+    )
+
+    -- incremental selection treesitter/lsp
+    vim.keymap.set({ "n", "x", "o" }, "<A-o>", function()
+        if vim.treesitter.get_parser(
+            nil,
+            nil,
+            { error = false }
+        ) then
+            require("vim.treesitter._select").select_parent(vim.v.count1)
+        else
+            vim.lsp.buf.selection_range(
+                vim.v.count1
+            )
+        end
+    end, { desc = "Select parent treesitter node or outer incremental lsp selections" }
+    )
+
+    vim.keymap.set({ "n", "x", "o" }, "<A-i>", function()
+        if vim.treesitter.get_parser(
+            nil,
+            nil,
+            { error = false }
+        ) then
+            require("vim.treesitter._select").select_child(vim.v.count1)
+        else
+            vim.lsp.buf.selection_range(
+                -vim.v.count1
+            )
+        end
+    end, { desc = "Select child treesitter node or inner incremental lsp selections" }
+    )
+    --- +Qf
+    local qf_keys = {
+        { 'o', '<Cmd>copen<CR>', 'Open' },
+        { 'c', '<Cmd>cclose<CR>', 'Close' },
+        { 'h', '<Cmd>chistory<CR>', 'History' },
+        { 'n', '<Cmd>cnewer<CR>', 'Newer List' },
+        { 'p', '<Cmd>colder<CR>', 'Older List' },
+        {
+            'd',
+            '<cmd>Trouble diagnostics filter = { severity=vim.diagnostic.severity.ERROR }<cr>',
+            'Diagnostics (Error-only)',
+        },
+        { 'D', '<cmd>Trouble diagnostics <cr>', 'Diagnostics (Everything)' },
+    }
+
+    for _, k in ipairs(
+        qf_keys
+    ) do
+        vim.keymap.set(
+            'n',
+            '<leader>q' .. k[1],
+            k[2],
+            { desc = k[3] }
+        )
+    end
+
+    --- +Term
+    nmap_leader(
+        'tt',
+        '<Cmd>vertical term<CR>',
+        'vertical'
+    )
+    vim.keymap.set(
+        't',
+        '<Esc>',
+        '<C-\\><C-n>'
+    )
+    -- Map <A-j>, <A-k>, <A-h>, <A-l> to navigate between windows in any modes
+    vim.keymap.set(
+        { 't', 'i' },
+        '<A-h>',
+        '<C-\\><C-n><C-w>h'
+    )
+    vim.keymap.set(
+        { 't', 'i' },
+        '<A-j>',
+        '<C-\\><C-n><C-w>j'
+    )
+    vim.keymap.set(
+        { 't', 'i' },
+        '<A-k>',
+        '<C-\\><C-n><C-w>k'
+    )
+    vim.keymap.set(
+        { 't', 'i' },
+        '<A-l>',
+        '<C-\\><C-n><C-w>l'
+    )
+    vim.keymap.set(
+        { 'n' },
+        '<A-h>',
+        '<C-w>h'
+    )
+    vim.keymap.set(
+        { 'n' },
+        '<A-j>',
+        '<C-w>j'
+    )
+    vim.keymap.set(
+        { 'n' },
+        '<A-k>',
+        '<C-w>k'
+    )
+    vim.keymap.set(
+        { 'n' },
+        '<A-l>',
+        '<C-w>l'
+    )
+    vim.cmd [[
       :tnoremap <F2> <C-\><C-N><C-\><C-N> 
       :tnoremap <C-d> <C-\><C-N><C-\><C-N> 
       :tnoremap <C-Left>  <C-\><C-N><C-w>h
@@ -392,70 +599,77 @@ VimRc.now(function()
       :nnoremap <C-Right> <C-w>l
 
   ]]
-  --- +Exec
-  vim.keymap.set('n', '<leader>xt', '<cmd>OverseerToggle<cr>', { desc = 'OverseerToggle' })
-  local miniclue = require 'mini.clue'
-  -- stylua: ignore
-  miniclue.setup({
-    -- Define which clues to show. By default shows only clues for custom mappings
+    --- +Exec
+    vim.keymap.set(
+        'n',
+        '<leader>xt',
+        '<cmd>OverseerToggle<cr>',
+        { desc = 'OverseerToggle' }
+    )
+    local miniclue = require 'mini.clue'
+    -- stylua: ignore
+    miniclue.setup({
+        -- Define which clues to show. By default shows only clues for custom mappings
     -- (uses `desc` field from the mapping; takes precedence over custom clue).
-    clues = {
-      -- This is defined in 'plugin/20_keymaps.lua' with Leader group descriptions
-      {
-        { mode = 'n', keys = '<Leader>b', desc = '+Buffer' },
-        { mode = 'n', keys = '<Leader>e', desc = '+Explore' },
-        { mode = 'n', keys = '<Leader>f', desc = '+Find ' },
-        { mode = 'n', keys = '<Leader>n', desc = '+Notifications' },
-        { mode = 'n', keys = '<Leader>q', desc = '+Qf' },
-        { mode = 'x', keys = '<Leader>q', desc = '+Qf' },
-        { mode = 'n', keys = '<Leader>t', desc = '+Terminal' },
-        { mode = 'n', keys = '<Leader>v', desc = '+VCS' },
-        { mode = 'x', keys = '<Leader>v', desc = '+VCS' },
-        { mode = 'n', keys = '<Leader>x', desc = '+Exec' },
-      },
-      miniclue.gen_clues.builtin_completion(),
-      miniclue.gen_clues.g(),
-      miniclue.gen_clues.marks(),
-      miniclue.gen_clues.registers(),
-      miniclue.gen_clues.square_brackets(),
-      -- This creates a submode for window resize mappings. Try the following:
+        clues = {
+            -- This is defined in 'plugin/20_keymaps.lua' with Leader group descriptions
+            {
+                { mode = 'n', keys = '<Leader>b', desc = '+Buffer' },
+                { mode = 'n', keys = '<Leader>e', desc = '+Explore' },
+                { mode = 'n', keys = '<Leader>f', desc = '+Find ' },
+                { mode = 'n', keys = '<Leader>n', desc = '+Notifications' },
+                { mode = 'n', keys = '<Leader>q', desc = '+Qf' },
+                { mode = 'x', keys = '<Leader>q', desc = '+Qf' },
+                { mode = 'n', keys = '<Leader>t', desc = '+Terminal' },
+                { mode = 'n', keys = '<Leader>v', desc = '+VCS' },
+                { mode = 'x', keys = '<Leader>v', desc = '+VCS' },
+                { mode = 'n', keys = '<Leader>x', desc = '+Exec' },
+            },
+            miniclue.gen_clues.builtin_completion(),
+            miniclue.gen_clues.g(),
+            miniclue.gen_clues.marks(),
+            miniclue.gen_clues.registers(),
+            miniclue.gen_clues.square_brackets(),
+            -- This creates a submode for window resize mappings. Try the following:
       -- - Press `<C-w>s` to make a window split.
       -- - Press `<C-w>+` to increase height. Clue window still shows clues as if
       --   `<C-w>` is pressed again. Keep pressing just `+` to increase height.
       --   Try pressing `-` to decrease height.
       -- - Stop submode either by `<Esc>` or by any key that is not in submode.
-      miniclue.gen_clues.windows({ submode_resize = true }),
-      miniclue.gen_clues.z(),
-    },
-    -- Explicitly opt-in for set of common keys to trigger clue window
-    triggers = {
-      { mode = { 'n', 'x' }, keys = '<Leader>' }, -- Leader triggers
-      { mode = 'n', keys = '\\' },                -- mini.basics
-      { mode = { 'n', 'x' }, keys = '[' },        -- mini.bracketed
-      { mode = { 'n', 'x' }, keys = ']' },
-      { mode = 'i', keys = '<C-x>' },             -- Built-in completion
-      { mode = { 'n', 'x' }, keys = 'g' },        -- `g` key
-      { mode = { 'n', 'x' }, keys = 'q' },        -- `g` key
-      { mode = { 'n', 'x' }, keys = "'" },        -- Marks
-      { mode = { 'n', 'x' }, keys = '`' },
-      { mode = { 'n', 'x' }, keys = '"' },        -- Registers
-      { mode = { 'i', 'c' }, keys = '<C-r>' },
-      { mode = 'n', keys = '<C-w>' },             -- Window commands
-      { mode = { 'n', 'x' }, keys = 's' },        -- `s` key (mini.surround, etc.)
-      { mode = { 'n', 'x' }, keys = 'z' },        -- `z` key
-    },
+            miniclue.gen_clues.windows(
+                { submode_resize = true }
+            ),
+            miniclue.gen_clues.z(),
+        },
+        -- Explicitly opt-in for set of common keys to trigger clue window
+        triggers = {
+            { mode = { 'n', 'x' }, keys = '<Leader>' }, -- Leader triggers
+            { mode = 'n', keys = '\\' },                -- mini.basics
+            { mode = { 'n', 'x' }, keys = '[' },        -- mini.bracketed
+            { mode = { 'n', 'x' }, keys = ']' },
+            { mode = 'i', keys = '<C-x>' },             -- Built-in completion
+            { mode = { 'n', 'x' }, keys = 'g' },        -- `g` key
+            { mode = { 'n', 'x' }, keys = 'q' },        -- `g` key
+            { mode = { 'n', 'x' }, keys = "'" },        -- Marks
+            { mode = { 'n', 'x' }, keys = '`' },
+            { mode = { 'n', 'x' }, keys = '"' },        -- Registers
+            { mode = { 'i', 'c' }, keys = '<C-r>' },
+            { mode = 'n', keys = '<C-w>' },             -- Window commands
+            { mode = { 'n', 'x' }, keys = 's' },        -- `s` key (mini.surround, etc.)
+            { mode = { 'n', 'x' }, keys = 'z' },        -- `z` key
+        },
 
-    window = {
-      -- Show window immediately
-      delay = 0,
+        window = {
+            -- Show window immediately
+            delay = 0,
 
-      config = {
-        -- Compute window width automatically
-        width = 'auto',
+            config = {
+                -- Compute window width automatically
+                width = 'auto',
 
-        -- Use double-line border
-        border = 'double',
-      },
-    },
-  })
+                -- Use double-line border
+                border = 'double',
+            },
+        },
+    })
 end)

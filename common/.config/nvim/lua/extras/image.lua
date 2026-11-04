@@ -1,6 +1,9 @@
 local term = vim.fn.getenv 'TERM' or ''
 if not term:find 'tmux-.*' and not term:find '.*ghostty' and not term:find '.*kitty' then
-    vim.notify('TERM not supported for image rendering!', vim.log.levels.ERROR)
+    vim.notify(
+        'TERM not supported for image rendering!',
+        vim.log.levels.ERROR
+    )
     return
 end
 
@@ -8,17 +11,38 @@ end
 ---@param image_src string Embedded image by name of relative path that needs to be resolved
 ---@return string absolute path of image
 local resolve_image = function(file, image_src)
-    local working_dir = vim.api.nvim_buf_get_name(0)
+    local working_dir = vim.api.nvim_buf_get_name(
+        0
+    )
 
-    local obsidian_vault_root = vim.fs.root(0, { '.obsidian' }) or vim.fs.root(file, { '.obsidian' })
-    local obsidian_conf = vim.fs.joinpath(obsidian_vault_root, '.obsidian', 'app.json')
-    if obsidian_vault_root and vim.uv.fs_stat(obsidian_conf) then
-        local fh = io.open(obsidian_conf, 'r')
+    local obsidian_vault_root = vim.fs.root(
+        0,
+        { '.obsidian' }
+    )
+        or vim.fs.root(
+            file,
+            { '.obsidian' }
+        )
+    local obsidian_conf = vim.fs.joinpath(
+        obsidian_vault_root,
+        '.obsidian',
+        'app.json'
+    )
+    if obsidian_vault_root
+        and vim.uv.fs_stat(
+            obsidian_conf
+        ) then
+        local fh = io.open(
+            obsidian_conf,
+            'r'
+        )
         local json = nil
         if fh then
             json = fh:read 'a'
             fh:close()
-            json = vim.json.decode(json)
+            json = vim.json.decode(
+                json
+            )
         end
         if json and json.attachmentFolderPath then
             path = obsidian_vault_root .. '/' .. json.attachmentFolderPath .. '/' .. image_src
@@ -71,8 +95,14 @@ return {
                     filetypes = { 'markdown', 'vimwiki' }, -- markdown extensions (ie. quarto) can go here
                     -- Custom function to resolve image paths
                     resolve_image_path = function(document_path, image_path, fallback)
-                        local path = fallback(document_path, image_path)
-                        return resolve_image(document_path, image_path) or path
+                        local path = fallback(
+                            document_path,
+                            image_path
+                        )
+                        return resolve_image(
+                            document_path,
+                            image_path
+                        ) or path
                     end,
                 },
             },

@@ -1,7 +1,11 @@
 local function create_tinymist_command(command_name, client, bufnr)
     local cmd_display = command_name:match 'tinymist%.export(%w+)'
     local function run_tinymist_command()
-        local arguments = { vim.api.nvim_buf_get_name(bufnr) }
+        local arguments = {
+            vim.api.nvim_buf_get_name(
+                bufnr
+            ),
+        }
         return client:exec_cmd({
             title = 'Export ' .. cmd_display,
             command = command_name,
@@ -39,8 +43,17 @@ return {
       -- 'tinymist.exportQuery',
       -- 'tinymist.exportAnsiHighlight',
         } do
-            local cmd_func, cmd_name, cmd_desc = create_tinymist_command(command, client, bufnr)
-            vim.api.nvim_buf_create_user_command(bufnr, cmd_name, cmd_func, { nargs = 0, desc = cmd_desc })
+            local cmd_func, cmd_name, cmd_desc = create_tinymist_command(
+                command,
+                client,
+                bufnr
+            )
+            vim.api.nvim_buf_create_user_command(
+                bufnr,
+                cmd_name,
+                cmd_func,
+                { nargs = 0, desc = cmd_desc }
+            )
         end
     end,
 }

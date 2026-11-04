@@ -15,22 +15,37 @@
 local function switch_source_header(bufnr, client)
     local method_name = 'textDocument/switchSourceHeader'
     ---@diagnostic disable-next-line: param-type-mismatch
-    if not client or not client:supports_method(method_name) then
+    if not client
+        or not client:supports_method(
+            method_name
+        ) then
         return vim.notify(
-            ('method %s is not supported by any servers active on the current buffer'):format(method_name)
+            ('method %s is not supported by any servers active on the current buffer'):format(
+                method_name
+            )
         )
     end
-    local params = vim.lsp.util.make_text_document_params(bufnr)
+    local params = vim.lsp.util.make_text_document_params(
+        bufnr
+    )
     ---@diagnostic disable-next-line: param-type-mismatch
     client:request(method_name, params, function(err, result)
         if err then
-            error(tostring(err))
+            error(
+                tostring(
+                    err
+                )
+            )
         end
         if not result then
             vim.notify 'corresponding file cannot be determined'
             return
         end
-        vim.cmd.edit(vim.uri_to_fname(result))
+        vim.cmd.edit(
+            vim.uri_to_fname(
+                result
+            )
+        )
     end, bufnr
     )
 end
@@ -38,22 +53,44 @@ end
 local function symbol_info(bufnr, client)
     local method_name = 'textDocument/symbolInfo'
     ---@diagnostic disable-next-line: param-type-mismatch
-    if not client or not client:supports_method(method_name) then
-        return vim.notify('Clangd client not found', vim.log.levels.ERROR)
+    if not client
+        or not client:supports_method(
+            method_name
+        ) then
+        return vim.notify(
+            'Clangd client not found',
+            vim.log.levels.ERROR
+        )
     end
     local win = vim.api.nvim_get_current_win()
-    local params = vim.lsp.util.make_position_params(win, client.offset_encoding)
+    local params = vim.lsp.util.make_position_params(
+        win,
+        client.offset_encoding
+    )
     ---@diagnostic disable-next-line: param-type-mismatch
     client:request(method_name, params, function(err, res)
         if err or #res == 0 then
             -- Clangd always returns an error, there is no reason to parse it
             return
         end
-        local container = string.format('container: %s', res[1].containerName) ---@type string
-        local name = string.format('name: %s', res[1].name) ---@type string
+        local container = string.format(
+            'container: %s',
+            res[1].containerName
+        ) ---@type string
+        local name = string.format(
+            'name: %s',
+            res[1].name
+        ) ---@type string
         vim.lsp.util.open_floating_preview({ name, container }, '', {
             height = 2,
-            width = math.max(string.len(name), string.len(container)),
+            width = math.max(
+                string.len(
+                    name
+                ),
+                string.len(
+                    container
+                )
+            ),
             focusable = false,
             focus = false,
             title = 'Symbol Info',
@@ -101,12 +138,18 @@ return {
     end,
     on_attach = function(client, bufnr)
         vim.keymap.set('n', '<leader>lh', function()
-            switch_source_header(bufnr, client)
+            switch_source_header(
+                bufnr,
+                client
+            )
         end, { desc = 'Switch between header/source', buf = bufnr }
         )
 
         vim.keymap.set('n', '<leader>ls', function()
-            symbol_info(bufnr, client)
+            symbol_info(
+                bufnr,
+                client
+            )
         end, { desc = 'Show symbol info', buf = bufnr }
         )
     end,
