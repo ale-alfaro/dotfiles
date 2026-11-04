@@ -34,6 +34,15 @@ eza --icons=always --oneline \
     {{ xdg_config_home }}
 '''
 
+["sysadmin:backup:hard-drive"]
+description = "Backup system to hard drive"
+confirm = "Is the hard drive plugged in and visible through `lsblk`?"
+run = '''
+sudo mount /mnt/backup 
+sudo btrbk run 
+sudo umount /mnt/backup
+'''
+
 
 ["global:pacman:orphans"]
 hide = true
@@ -60,7 +69,20 @@ defuddle parse --md {{usage.src}} {% if usage.out %}-o {{usage.out}}{% endif %}
 '''
 
 ["utils:mermaid:export"]
-tools = { "go:github.com/coolamit/mermaid-cli/cmd/mmd-cli" = "latest" }
+tools = { "go:github.com/coolamit/mermaid-cli/cmd/mmd-cli" = "latest", "npm:puppeteer" = { version = "latest", postinstall = "puppeteer browsers install chrome-headless-shell" } }
 dir = "{{cwd}}"
-usage = 'arg "<mdfile>"'
-run = 'mmdc -i {{usage.mdfile}} -a docs/assets --pdfFit --outputFormat "pdf"'
+usage = '''
+arg "<file>" {
+        help "Markdown file"
+}
+flag "-f --format [format]" {
+        help "output format"
+        choices "svg" "png" "pdf"
+        default "pdf"
+}
+flag "-o --out [dir]" {
+        help "Output dir"
+        default "assets"
+}
+'''
+run = 'mmd-cli -i {{usage.file}} -a ./{{usage.assets}} {% if usage.format is matching "pdf" %}--pdfFit{% endif %} --outputFormat {{usage.format}}'

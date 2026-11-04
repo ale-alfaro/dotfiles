@@ -1,0 +1,6 @@
+["git:log:find-by-author"]
+description = "Find by author the latest commits in remote"
+usage = 'arg "<author>"'
+run = '''
+git log --remotes --author="{{usage.author}}" --oneline -n 5
+'''

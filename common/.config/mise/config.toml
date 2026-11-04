@@ -24,22 +24,19 @@ github.gh_cli_tokens = true
 cargo.binstall_native = true
 cargo.binstall = true
 color = true
-
+minimum_release_age_excludes = ["vfox-zephyr-sdk:*"]
 
 [tools]
 uv = "latest"
 python = ["3.12.9", "3.10.22"]
 rg = "latest"
 jqp = "latest"
-lua = "5.5"
+lua = "5.1"
 dprint = "latest"
-lua-language-server = "latest"
-stylua = "latest"
 lazygit = "latest"
 claude-code = "latest"
 cmake = "latest"
 tree-sitter = "latest"
-ast-grep = "latest"
 tmux = "latest"
 ccache = "latest"
 neovim = "latest"
@@ -49,14 +46,11 @@ shellcheck = "latest"
 jq = "latest"
 difftastic = "latest"
 yq = "latest"
-actionlint = "latest"
 sd = "latest"
 pkl = "latest"
 ninja = "latest"
 clang-format = "latest"
 fzf = "latest"
-codex = "latest"
-rumdl = "latest"
 protoc = "latest"
 gitui = "latest"
 
@@ -69,6 +63,7 @@ bun = "latest"
 "npm:bash-language-server" = "latest"
 "npm:yaml-language-server" = "latest"
 "npm:vscode-langservers-extracted" = "latest"
+"npm:obsidian-headless" = "latest"
 "npm:defuddle" = "latest"
 
 gh = "latest"
@@ -87,11 +82,19 @@ cargo-binstall = "latest"
 "cargo:neocmakelsp" = "latest"
 "cargo:atuin" = "latest"
 "cargo:taplo-cli" = { version = "latest", features = "lsp" }
-"cargo:tealdeer" = { version = "latest", fetures = "native-tls" }
+"cargo:tealdeer" = { version = "latest", features = "native-tls" }
+"cargo:emmylua_ls" = "latest"
+"cargo:emmylua_formatter" = "latest"
 
 "http:nrfutil" = { version = "1.4.0", url = "https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil" }
-"vfox-zephyr:west" = "latest"
-"vfox-zephyr:arm" = "latest"
+
+"vfox-zephyr-sdk:arm" = "latest"
+"vfox-zephyr-sdk:gdb-py" = "latest"
+"vfox-zephyr-sdk:west" = "latest"
+acli = "latest"
+"pypi:ty" = "latest"
+"pypi:ruff" = "latest"
+"pypi:pyrefly" = "latest"
 
 [plugins]
-"vfox:zephyr" = "https://github.com/ale-alfaro/vfox-zephyr-sdk.git"
+"vfox:zephyr-sdk" = "https://github.com/ale-alfaro/vfox-zephyr-sdk.git"

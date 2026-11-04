@@ -1,0 +1,46 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+#MISE description="Build with interactive picker"
+#MISE interactive=true
+#MISE alias="west-build"
+#MISE dir="{{cwd}}"
+#USAGE arg "<dir>" {
+#USAGE  help "Dir in the workspace where to look for files"
+#USAGE }
+#USAGE flag "-p --pristine"  {
+#USAGE  help "Pristine build" 
+#USAGE }
+#USAGE flag "-b --board <board>" {
+#USAGE  help "Override the testcase's first integration_platforms/platform_allow entry"
+#USAGE }
+#
+#
+if west -q config build.board 2>/dev/null; then 
+        BOARD="$(west config build.board 2>/dev/null)"
+fi
+fd -tf -e yaml '(testcase|sample)\.yaml' "${usage_dir?}" \
+        -x yq e '.common as $c | .tests | select(.) | to_entries | .[] 
+| "{//} {} " + .key + " " + ([.value.integration_platforms // .value.platform_allow // $c.integration_platforms // $c.platform_allow // env(BOARD) ] 
+                | flatten | .[0] | split(" ") | .[0])' '{}' \
+        | fzf --with-nth='{1}/{3} [{4}]' --accept-nth='{1} {3} {4}' --preview="yq e '.tests[\"{3}\"]' {2}" \
+        | read app_dir test board
+
+pristine_flag="${usage_pristine:+-p=always}"
+board_flag="-b=${usage_board:-$BOARD}"
+build_dir="./build/${test?}"
+[[ -z "${pristine_flag:-}" && -d $build_dir ]] && {
+        echo "Incremental build on $build_dir"
+        west build -p=auto -d "$build_dir"
+        exit 0
+}
+app_flag="$pristine_flag -b ${usage_board:-$board} -d $build_dir $app_dir -T $test"
+
+cat <<EOF
+Running command:
+west build ${(z)app_flag}
+EOF
+
+west build "${(z)app_flag}"
+
+
+

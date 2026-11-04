@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+#MISE description = "Review with agent"
+#MISE dir = "{{cwd}}"
+#MISE interactive = true
+#USAGE arg "<repo>" help="Repository root"
+#USAGE flag "--pr <number>" help="PR Number"
+
+prnum="${usage_pr:-$(gh pr list --author '@me' --json createdAt,number --jq '.[0].number')}"
+w=$(sesh window connect --path {{usage.dir}} "pr-${prnum}" -c "claude 'review pr ${prnum}'") 
+tmux split-window -h -t "$w" lazygit 
