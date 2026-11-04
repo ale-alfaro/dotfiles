@@ -14,12 +14,7 @@ alias open='_open'
 #######################################################
 # Alias For bat
 alias lt='eza --tree --level=3 --long --icons --git'
-alias lta='lt -a'
 alias ls="eza  -1 -l -a --header --no-permissions --group-directories-first --sort=time -r"
-# Link: https://github.com/sharkdp/bat
-alias wman='wikiman'
-# Alias for lazygit
-# Link: https://github.com/jesseduffield/lazygit
 alias lg='lazygit'
 alias lgp='lazygit -p'
 alias jlink-gdbserver='JLinkGDBServer  -if SWD -speed 4000 -port 2331 -silent -singlerun'
@@ -30,4 +25,4 @@ alias mtl='mt --local'
 alias mta='mt --all'
 #include jq modules
 alias jq='jq -L~/.config/jq'
-
+alias jira='acli jira'

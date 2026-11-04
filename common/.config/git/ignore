@@ -1,9 +1,10 @@
 ### General ###
 .cache
 help.txt
-build/
-out/
-twister-out*/
+/build*
+/out
+/artifacts
+/twister-out*
 
 *.*db
 
@@ -87,12 +88,11 @@ pyrightconfig.json
 .nvim.lua
 .nvim/*
 
-compile_commands.json
+/compile_commands.json
 
 mise.local.toml
-mise.ignore.toml
-.miserc.toml
-mise.ai.toml
+mise.local.lock
+.miserc.*.toml
 
 .claude
 .cache/clangd
