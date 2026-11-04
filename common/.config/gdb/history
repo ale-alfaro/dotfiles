@@ -1935,3 +1935,17 @@ p/u static_total_memory_size
 q
 c
 q
+files
+help files
+q
+shell west build -p=auto -d build/crn120
+load build/crn120/merged.hex
+mon reset
+c
+q
+mon reset
+c
+q
+mon reset
+c
+q

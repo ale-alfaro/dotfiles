@@ -196,6 +196,32 @@ EXC_RETURN_TAG = 0xFF000000
 V7_MIN_SIZE_EXP = 4
 MAX_IRQS = 496
 
+def BIT(i):
+    return (1 << i)
+
+def BIT_MASK(i, shift = 0):
+    return (BIT(i) - 1) << shift
+
+# In order to obtain the two complement (TC) of a number N:
+# This is the formula
+
+# So in order to obtain back the number N
+# having the TC number we shuold invert that formula.
+# N = 255 + 1 + TC
+# and multiply the result * -1
+def LSB_GET(val):
+    '''Use two's complement to get the LSB (rightmost set bit)
+        TC = (255  - N) + 1      where N < 128
+        1. (255 - N) negate (flip) all bits
+        2. +1 add one to the obtained number
+    '''
+    return val & ~(BIT_MASK(32) - val + 1) 
+
+def BIT_FIELD_GET(val, mask):
+    return (val & mask) // LSB_GET(val)
+
+def BIT_FIELD_PREP(val, mask):
+    return (val * LSB_GET(val)) & mask
 
 # =============================================================================
 # Low-level access
@@ -208,7 +234,7 @@ def _read_reg32(addr):
 
 
 def _write_reg32(addr, val):
-    gdb.selected_inferior().write_memory(addr, pack("<I", val & 0xFFFFFFFF))
+    gdb.selected_inferior().write_memory(addr, pack("<I", val & BIT_MASK(32)))
 
 
 def _read_words(addr, count):
@@ -220,7 +246,7 @@ def _read_words(addr, count):
 def _cpu_reg(name):
     """Read a CPU register by GDB name. Returns None if unavailable."""
     try:
-        return int(gdb.parse_and_eval(f"${name}")) & 0xFFFFFFFF
+        return int(gdb.parse_and_eval(f"${name}")) & BIT_MASK(32) 
     except (gdb.error, ValueError):
         return None
 
@@ -245,7 +271,7 @@ def _symbolize(addr, *, thumb=False):
     the same number twice, which is what made the old output look broken.
     """
     if thumb:
-        addr &= ~1
+        addr &= ~1 # Set the MSB
     name = ""
     with contextlib.suppress(gdb.error):
         out = gdb.execute(f"info symbol 0x{addr:08X}", to_string=True).strip()
@@ -285,6 +311,28 @@ def _current_exception():
     xpsr = _cpu_reg("xpsr")
     return None if xpsr is None else xpsr & 0x1FF
 
+def _verdict(part, rev, ipsr, cfsr, hfsr, shcsr, *, has_cfsr):
+    """Print the one-thing-you-need-to-know line."""
+    pending = [
+        name for bit, name in SHCSR_PEND_BITS.items() if shcsr & (1 << bit)
+    ]
+
+    if ipsr in FAULT_EXCEPTIONS:
+        state = f"IN {_exception_name(ipsr)} HANDLER"
+    elif cfsr or hfsr:
+        state = "no active fault, but sticky fault bits are set from an earlier fault"
+    elif pending:
+        state = f"fault pending (not yet taken): {', '.join(pending)}"
+    else:
+        state = "NO FAULT"
+
+    mode = "unknown mode" if ipsr is None else _exception_name(ipsr)
+    print(f"\n{state}")
+    print(f"  {part} {rev}, currently in {mode}")
+    if not has_cfsr:
+        print("  ARMv6-M: no CFSR/MMFAR/BFAR on this core")
+    if not (cfsr or hfsr) and ipsr not in FAULT_EXCEPTIONS:
+        print(f"  CFSR = 0x{cfsr:08X}, HFSR = 0x{hfsr:08X}")
 
 # =============================================================================
 # cortex-fault
@@ -454,29 +502,6 @@ class CortexMFault(gdb.Command):
 
         self._frame_section(args, arch, ipsr, dfsr)
 
-    @staticmethod
-    def _verdict(part, rev, ipsr, cfsr, hfsr, shcsr, *, has_cfsr):
-        """Print the one-thing-you-need-to-know line."""
-        pending = [
-            name for bit, name in SHCSR_PEND_BITS.items() if shcsr & (1 << bit)
-        ]
-
-        if ipsr in FAULT_EXCEPTIONS:
-            state = f"IN {_exception_name(ipsr)} HANDLER"
-        elif cfsr or hfsr:
-            state = "no active fault, but sticky fault bits are set from an earlier fault"
-        elif pending:
-            state = f"fault pending (not yet taken): {', '.join(pending)}"
-        else:
-            state = "NO FAULT"
-
-        mode = "unknown mode" if ipsr is None else _exception_name(ipsr)
-        print(f"\n{state}")
-        print(f"  {part} {rev}, currently in {mode}")
-        if not has_cfsr:
-            print("  ARMv6-M: no CFSR/MMFAR/BFAR on this core")
-        if not (cfsr or hfsr) and ipsr not in FAULT_EXCEPTIONS:
-            print(f"  CFSR = 0x{cfsr:08X}, HFSR = 0x{hfsr:08X}")
 
     def _frame_section(self, args, arch, ipsr, dfsr):
         """Decode an exception frame only when one demonstrably exists."""
