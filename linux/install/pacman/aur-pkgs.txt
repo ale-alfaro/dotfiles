@@ -1,0 +1,11 @@
+localsend-bin
+jlink-software-and-documentation
+slack-desktop
+ttf-hanken
+ttf-ia-writer
+tzupdate
+ufw-docker
+voxtype-bin
+walker
+wayfreeze
+yaru-icon-theme

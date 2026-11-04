@@ -40,13 +40,15 @@ install)
     print "run '${0:t} enable' to switch, '${0:t} disable' to switch back."
     ;;
 enable)
+    [[ -f $entry ]] && { print -u2 "ERROR: already enabled: $entry"; exit 1 }
     [[ -f $entry.off ]] || { print -u2 "ERROR: $entry.off not found; run install first"; exit 1 }
-    mv --verbose "$entry.off" "$entry"
+    mv --no-clobber --verbose "$entry.off" "$entry"
     reload
     ;;
 disable)
     [[ -f $entry ]] || { print -u2 "ERROR: $entry not found; nothing to disable"; exit 1 }
-    mv --verbose "$entry" "$entry.off"
+    [[ -f $entry.off ]] && { print -u2 "ERROR: $entry.off exists; resolve it by hand"; exit 1 }
+    mv --no-clobber --verbose "$entry" "$entry.off"
     reload
     ;;
 status)
